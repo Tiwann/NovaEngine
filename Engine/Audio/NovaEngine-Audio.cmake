@@ -2,7 +2,7 @@
 set(FMOD_CORE_LIB_DIR "${MODULE_DIR}/Library/FMOD Core")
 set(FMOD_STUDIO_LIB_DIR "${MODULE_DIR}/Library/FMOD Studio")
 set(FMOD_CORE_BIN_DIR "${FMOD_CORE_LIB_DIR}/Binaries")
-set(FMOD_STUDIO_BIN_DIR "${FMOD_CORE_LIB_DIR}io/Binaries")
+set(FMOD_STUDIO_BIN_DIR "${FMOD_STUDIO_LIB_DIR}/Binaries")
 file(GLOB_RECURSE SOURCES ${MODULE_DIR}/Source/*.cpp ${MODULE_DIR}/Source/*.h)
 
 include(FetchContent)

@@ -1,4 +1,3 @@
-#pragma once
 #include "Formula.h"
 
 unsigned int Factorial(unsigned int Number)

@@ -1,4 +1,4 @@
 ﻿#pragma once
-#include "Defines.h"
+#include "PhysicsExport.h"
 
-unsigned int NOVAENGINE_PHYSICS_API Factorial(unsigned int Number);
+unsigned int PHYSICS_API Factorial(unsigned int Number);

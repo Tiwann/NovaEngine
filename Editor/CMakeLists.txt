@@ -6,9 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(NovaEditor ${SOURCES})
 
-target_link_libraries(NovaEditor INTERFACE NovaEngine-Core)
-target_link_libraries(NovaEditor INTERFACE NovaEngine-Physics)
-target_link_libraries(NovaEditor INTERFACE NovaEngine-Audio)
+target_link_libraries(NovaEditor PUBLIC NovaEngine-Core NovaEngine-Physics NovaEngine-Audio)
 
 
 

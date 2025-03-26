@@ -1,7 +1,8 @@
 set(NOVAENGINE_MODULES Audio Core Physics)
 
 foreach(MODULE ${NOVAENGINE_MODULES})
-    include(${CMAKE_CURRENT_LIST_DIR}/${MODULE}/NovaEngine-${MODULE}.cmake)
+
+    add_subdirectory(${MODULE})
 
     # Configure template export header
     set(HEADER_TEMPLATE "${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h")
@@ -11,5 +12,10 @@ foreach(MODULE ${NOVAENGINE_MODULES})
     string(REPLACE "@MODULE_NAME@" "${MODULE_UPPER}" HEADER_CONTENTS "${HEADER_CONTENTS}")
     file(WRITE "${HEADER_FILE}" "${HEADER_CONTENTS}")
 
-    target_include_directories(NovaEngine-${MODULE} PRIVATE "${CMAKE_BINARY_DIR}/Include")
+    target_compile_definitions(NovaEngine-${MODULE}
+            INTERFACE ${MODULE_UPPER}_SHARED
+            INTERFACE ${MODULE_UPPER}_BUILD)
+
+    target_include_directories(NovaEngine-${MODULE} PUBLIC "${CMAKE_BINARY_DIR}/Include")
+
 endforeach()

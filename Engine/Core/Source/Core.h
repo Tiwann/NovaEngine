@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "../Defines.h"
+#include "CoreExport.h"
 
-class NOVAENGINE_CORE_API Core
+class CORE_API Core
 {
 public:
     bool Initialize();

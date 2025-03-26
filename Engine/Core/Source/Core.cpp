@@ -1,8 +1,10 @@
 ﻿#include "Core.h"
 #include <GLFW/glfw3.h>
+#include <assimp/Importer.hpp>
 
 bool Core::Initialize()
 {
+    Assimp::Importer importer;
     return glfwInit();
 }
 

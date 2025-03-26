@@ -1,6 +1,6 @@
-Intermediate
-Build
-Binaries
-.idea
-.vs
-.vscode
+/Intermediate
+/Build
+/Binaries
+/.idea
+/.vs
+/.vscode

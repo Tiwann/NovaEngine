@@ -2,7 +2,7 @@
 set(FMOD_STUDIO_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Library/FMOD-Studio)
 set(FMOD_CORE_BIN_DIR ${FMOD_CORE_LIB_DIR}/Binaries)
 set(FMOD_STUDIO_BIN_DIR ${FMOD_STUDIO_LIB_DIR}/Binaries)
-file(GLOB_RECURSE SOURCES $*.cpp *.h)
+file(GLOB_RECURSE SOURCES *.cpp *.h)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -24,8 +24,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		target_link_libraries(NovaEngine-Audio PRIVATE ${FMOD_CORE_BIN_DIR}/Linux/libfmod.so)
 		target_link_libraries(NovaEngine-Audio PRIVATE ${FMOD_STUDIO_BIN_DIR}/Linux/libfmodstudio.so)
 	endif ()
+else()
+	message(SEND_ERROR "FMOD API not yet available for MacOS")
 endif ()
 
 target_include_directories(NovaEngine-Audio PRIVATE ${FMOD_CORE_LIB_DIR}/Include)
-target_include_directories(NovaEngine-Audio PUBLIC ${MODULE_DIR}/Source)
+target_include_directories(NovaEngine-Audio PRIVATE ${FMOD_STUDIO_LIB_DIR}/Include)
+
 target_link_libraries(NovaEngine-Audio PRIVATE NovaEngine-Core)

@@ -1,8 +1,9 @@
 ﻿#pragma once
 
-#ifdef @MODULE_NAME@_SHARED
+#ifndef @MODULE_NAME@_API
+#ifdef MODULE_SHARED
     #if defined(_WIN32) || defined(__CYGWIN__)
-        #if defined(@MODULE_NAME@_BUILD)
+        #if defined(MODULE_BUILD)
             #define @MODULE_NAME@_API __declspec(dllexport)
         #else
             #define @MODULE_NAME@_API __declspec(dllimport)
@@ -19,4 +20,5 @@
 #else
     #define @MODULE_NAME@_API
     #define @MODULE_NAME@_HIDDEN
+#endif
 #endif

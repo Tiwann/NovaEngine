@@ -1,8 +1,8 @@
 #pragma once
-#include <cstdio>
+#include <AudioExport.h>
 
 
-class Sound
+class AUDIO_API Sound
 {
 public:
     bool LoadSound(const char* fileName);

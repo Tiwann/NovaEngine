@@ -18,6 +18,7 @@ FetchContent_Declare(
         Jolt
         GIT_REPOSITORY https://github.com/jrouwe/JoltPhysics.git
         GIT_BRANCH master
+        SOURCE_SUBDIR Build
 )
 
 FetchContent_MakeAvailable(box2d Jolt)
@@ -29,7 +30,8 @@ add_library(NovaEngine-Physics SHARED ${SOURCES})
 
 target_link_libraries(NovaEngine-Physics
         PRIVATE NovaEngine-Core
-        PRIVATE box2d)
+        PRIVATE box2d
+        PRIVATE Jolt)
 
 
 

@@ -11,13 +11,13 @@ option(GLFW_INSTALL OFF)
 FetchContent_Declare(
         glfw
         GIT_REPOSITORY https://github.com/glfw/glfw.git
-        GIT_TAG 3.4
+        GIT_BRANCH master
 )
 
 FetchContent_Declare(
         VulkanMemoryAllocator
         GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-        GIT_TAG v3.2.1
+        GIT_BRANCH master
 )
 
 #[[option(YAML_CPP_BUILD_TOOLS OFF)
@@ -54,7 +54,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(NovaEngine-Core SHARED ${SOURCES})
 
 target_link_libraries(NovaEngine-Core PUBLIC glfw VulkanMemoryAllocator #[[yaml-cpp]] assimp #[[msdfgen]])
-
+target_include_directories(NovaEngine-Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 

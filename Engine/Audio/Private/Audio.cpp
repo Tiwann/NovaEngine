@@ -1,11 +1,12 @@
 ﻿#include "Audio.h"
 #include <fmod/fmod.hpp>
+#include <stdio.h>
 
 bool Sound::LoadSound(const char* fileName)
 {
     FMOD::Sound* LoadedSound = nullptr;
     FMOD::System* System = nullptr;
-    if (FMOD::System_Create(&System) != FMOD_OK)
+    if (System_Create(&System) != FMOD_OK)
     {
         printf("FMOD::System_Create() failed\n");
         return false;

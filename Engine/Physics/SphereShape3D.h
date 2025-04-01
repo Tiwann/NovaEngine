@@ -1,9 +1,10 @@
 ﻿#pragma once
 #include "PhysicsShape3D.h"
+#include <PhysicsExport.h>
 
 namespace Nova
 {
-    class SphereShape3D : public PhysicsShape3D
+    class PHYSICS_HIDDEN SphereShape3D : public PhysicsShape3D
     {
     public:
         explicit SphereShape3D(f32 Radius);

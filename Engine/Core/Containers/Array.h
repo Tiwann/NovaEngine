@@ -2,6 +2,7 @@
 #pragma warning(disable:4146)
 #include "Runtime/Iterator.h"
 #include "Runtime/Memory.h"
+#include "Runtime/Assertion.h"
 #include "Math/Functions.h"
 #include "Function.h"
 #include <initializer_list>

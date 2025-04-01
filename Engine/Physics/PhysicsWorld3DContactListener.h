@@ -1,13 +1,14 @@
 ﻿#pragma once
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/ContactListener.h>
+#include <PhysicsExport.h>
 
 namespace Nova
 {
     class PhysicsWorld3D;
     class PhysicsBody3D;
     
-    class PhysicsWorld3DContactListener : public JPH::ContactListener
+    class PHYSICS_HIDDEN PhysicsWorld3DContactListener : public JPH::ContactListener
     {
     public:
         PhysicsWorld3DContactListener(PhysicsWorld3D* World);

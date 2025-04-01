@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include <box2d/b2_world_callbacks.h>
+#include <PhysicsExport.h>
 
 namespace Nova
 {
     class PhysicsWorld2D;
-    class PhysicsBody2D;
     
-    class PhysicsWorld2DContactListener : public b2ContactListener
+    class PHYSICS_HIDDEN PhysicsWorld2DContactListener : public b2ContactListener
     {
     public:
         PhysicsWorld2DContactListener(PhysicsWorld2D* World);

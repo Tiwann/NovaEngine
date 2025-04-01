@@ -21,7 +21,7 @@ namespace Nova
         template<typename Out>
         using Selector = typename ArrayType::template Selector<Out>;
         
-        static constexpr u32 UninitializedValue = HYDRO_UNINITIALIZED;
+        static constexpr u32 UninitializedValue = NOVA_UNINITIALIZED;
 
         BumpAllocator()
         {

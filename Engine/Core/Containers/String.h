@@ -420,8 +420,13 @@ namespace Nova
         CharacterType* m_Data = nullptr;
         size_t m_Count = 0;
     };
-    
+
+#if defined(NOVA_WIDE_STRINGS_BY_DEFAULT)
+    using String = StringBase<wchar_t>;
+#else
     using String = StringBase<char>;
+#endif
+    using String8 = StringBase<char>;
     using String16 = StringBase<char16_t>;
     using String32 = StringBase<char32_t>;
     using WideString = StringBase<wchar_t>;

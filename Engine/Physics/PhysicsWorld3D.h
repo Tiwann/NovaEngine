@@ -1,10 +1,11 @@
 ﻿#pragma once
-#include "Core/Physics/PhysicsWorld.h"
+#include "PhysicsWorld.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>
 #include <Jolt/Physics/PhysicsSystem.h>
+#include <PhysicsExport.h>
 
 namespace Nova
 {
@@ -13,26 +14,26 @@ namespace Nova
     struct PhysicsContact3D;
     class PhysicsWorld3DContactListener;
 
-    class PhysicsWorld3DBroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface
+    class PHYSICS_HIDDEN PhysicsWorld3DBroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface
     {
     public:
         JPH::uint GetNumBroadPhaseLayers() const override;
         JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override;
     };
 
-    class PhysicsWorld3DObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter
+    class PHYSICS_HIDDEN PhysicsWorld3DObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter
     {
     public:
         bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override;
     };
 
-    class PhysicsWorld3DObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
+    class PHYSICS_HIDDEN PhysicsWorld3DObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
     {
     public:
         bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::ObjectLayer inLayer2) const override;
     };
     
-    class PhysicsWorld3D : public PhysicsWorld<PhysicsBody3D, PhysicsShape3D, PhysicsContact3D>
+    class PHYSICS_API PhysicsWorld3D : public PhysicsWorld<PhysicsBody3D, PhysicsShape3D, PhysicsContact3D>
     {
     public:
         PhysicsWorld3D();
@@ -59,5 +60,9 @@ namespace Nova
         PhysicsWorld3DObjectVsBroadPhaseLayerFilter m_LayerFilter;
         PhysicsWorld3DObjectLayerPairFilter m_LayerPairFilter;
         PhysicsWorld3DContactListener* m_ContactListener = nullptr;
+
+        static constexpr u32 MaxBodies = 0xFFFFui32;
+        static constexpr u32 MaxBodyPairs = 0xFFFFui32;
+        static constexpr u32 MaxContactConstraints = 10240;
     };
 }

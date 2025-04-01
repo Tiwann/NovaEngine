@@ -1,4 +1,14 @@
-﻿file(GLOB_RECURSE SOURCES *.cpp *.h)
+﻿file(GLOB_RECURSE SOURCES *.cpp *.h REMOVE_RECURSE Platform/*.cpp Platform/*.h)
+
+
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    file(GLOB Platform/Windows/*.cpp Platform/Windows/*.h)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    file(GLOB Platform/Linux/*.cpp Platform/Linux/*.h)
+else (CMAKE_SYSTEM_NAME STREQUAL "MacOS")
+    file(GLOB Platform/MacOS/*.cpp Platform/MacOS/*.h)
+endif ()
 
 include(FetchContent)
 
@@ -47,13 +57,26 @@ FetchContent_Declare(
         GIT_BRANCH master
 )]]
 
-FetchContent_MakeAvailable(glfw VulkanMemoryAllocator assimp #[[msdfgen]])
+option(SLANG_ENABLE_SLANGC OFF)
+option(SLANG_ENABLE_TESTS OFF)
+option(SLANG_LIB_TYPE STATIC)
+option(SLANG_ENABLE_EXAMPLES OFF)
+
+FetchContent_Declare(
+        slang
+        GIT_REPOSITORY https://github.com/shader-slang/slang.git
+        GIT_BRANCH master
+)
+
+FetchContent_MakeAvailable(glfw VulkanMemoryAllocator assimp slang)
+
+##add_subdirectory(External/stb)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(NovaEngine-Core SHARED ${SOURCES})
 
-target_link_libraries(NovaEngine-Core PUBLIC glfw VulkanMemoryAllocator #[[yaml-cpp]] assimp #[[msdfgen]])
+target_link_libraries(NovaEngine-Core PUBLIC glfw VulkanMemoryAllocator assimp stb)
 target_include_directories(NovaEngine-Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 

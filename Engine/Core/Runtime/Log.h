@@ -6,7 +6,7 @@
     #if defined(NOVA_DEBUG)
         #define NOVA_LOG(CategoryName, InVerbosity, ...) \
         do { \
-            Hydro::Logger& _Logger = Hydro::Log::GetCoreLogger(); \
+            Nova::Logger& _Logger = Nova::Log::GetCoreLogger(); \
             _Logger.SetCurrentCategory(CategoryName##LogCategory::s_CategoryName);\
             _Logger.Log(InVerbosity, __VA_ARGS__);\
         } \
@@ -18,7 +18,7 @@
     #if defined(NOVA_DEBUG)
         #define NOVA_LOG(CategoryName, InVerbosity, ...) \
         do { \
-        Hydro::Logger& _Logger = Hydro::Log::GetClientLogger(); \
+        Nova::Logger& _Logger = Nova::Log::GetClientLogger(); \
         _Logger.SetCurrentCategory(CategoryName##LogCategory::s_CategoryName);\
         _Logger.Log(InVerbosity, __VA_ARGS__);\
         } \

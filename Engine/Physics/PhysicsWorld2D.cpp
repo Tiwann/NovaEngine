@@ -1,23 +1,23 @@
 ﻿#include "PhysicsWorld2D.h"
 #include "PhysicsBody2D.h"
-#include "Physics2D.h"
 #include "PhysicsWorld2DContactListener.h"
 #include "PhysicsContact2D.h"
+#include "PhysicsContactInfo2D.h"
 #include "Math/Functions.h"
-#include "Core/Log.h"
+#include "Runtime/Log.h"
+#include "MathConversions.h"
 
 #include <box2d/b2_world.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_contact.h>
 
-#include "PhysicsContactInfo2D.h"
 #include "Core/Application.h"
 
 namespace Nova
 {
     void PhysicsWorld2D::OnInit()
     {
-        m_World = new b2World(Physics2D::Gravity);
+        m_World = new b2World(ToB2Vec2(m_Gravity));
         m_ContactListener = new PhysicsWorld2DContactListener(this);
         m_World->SetContactListener(m_ContactListener);
     }
@@ -43,15 +43,15 @@ namespace Nova
         Contact->Handle->GetWorldManifold(&WorldManifold);
 
         PhysicsContactInfo2D ContactInfoA;
-        ContactInfoA.Point = (Vector2)WorldManifold.points[0];
-        ContactInfoA.Normal = (Vector2)-WorldManifold.normal;
+        ContactInfoA.Point = ToVector2(WorldManifold.points[0]);
+        ContactInfoA.Normal = ToVector2(-WorldManifold.normal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = true;
         BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo2D ContactInfoB;
-        ContactInfoB.Point = (Vector2)WorldManifold.points[1];
-        ContactInfoB.Normal = (Vector2)WorldManifold.normal;
+        ContactInfoB.Point = ToVector2(WorldManifold.points[1]);
+        ContactInfoB.Normal = ToVector2(WorldManifold.normal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = true;
         BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
@@ -67,15 +67,15 @@ namespace Nova
         Contact->Handle->GetWorldManifold(&WorldManifold);
 
         PhysicsContactInfo2D ContactInfoA;
-        ContactInfoA.Point = (Vector2)WorldManifold.points[0];
-        ContactInfoA.Normal = (Vector2)-WorldManifold.normal;
+        ContactInfoA.Point = ToVector2(WorldManifold.points[0]);
+        ContactInfoA.Normal = ToVector2(WorldManifold.normal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = true;
         BodyA->OnContactStayEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo2D ContactInfoB;
-        ContactInfoB.Point = (Vector2)WorldManifold.points[1];
-        ContactInfoB.Normal = (Vector2)WorldManifold.normal;
+        ContactInfoB.Point = ToVector2(WorldManifold.points[1]);
+        ContactInfoB.Normal = ToVector2(WorldManifold.normal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = true;
         BodyB->OnContactStayEvent.Broadcast(ContactInfoB);
@@ -91,15 +91,15 @@ namespace Nova
         Contact->Handle->GetWorldManifold(&WorldManifold);
                 
         PhysicsContactInfo2D ContactInfoA;
-        ContactInfoA.Point = (Vector2)WorldManifold.points[0];
-        ContactInfoA.Normal = (Vector2)-WorldManifold.normal;
+        ContactInfoA.Point = ToVector2(WorldManifold.points[0]);
+        ContactInfoA.Normal = ToVector2(-WorldManifold.normal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = false;
         BodyA->OnContactEndEvent.Broadcast(ContactInfoA);
 
         PhysicsContactInfo2D ContactInfoB;
-        ContactInfoB.Point = (Vector2)WorldManifold.points[1];
-        ContactInfoB.Normal = (Vector2)WorldManifold.normal;
+        ContactInfoB.Point = ToVector2(WorldManifold.points[1]);
+        ContactInfoB.Normal = ToVector2(WorldManifold.normal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = false;
         BodyB->OnContactEndEvent.Broadcast(ContactInfoB);
@@ -109,7 +109,7 @@ namespace Nova
     PhysicsBody2D* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& Definition, const PhysicsMaterial& Material, PhysicsShape2D* Shape)
     {
         b2BodyDef BodyDefinition = {};
-        BodyDefinition.position = (Vector2)Definition.Position;
+        BodyDefinition.position = ToB2Vec2(Definition.Position);
         BodyDefinition.angle = Math::Radians(Definition.Rotation.z);
         BodyDefinition.type = (b2BodyType)Definition.Type;
         

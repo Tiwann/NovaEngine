@@ -5,10 +5,11 @@
 #include "Color.h"
 #include "LogVerbosity.h"
 #include "Scene.h"
+#include "ArgumentParser.h"
+#include "Containers/ScopedPointer.h"
 
 #include <GLFW/glfw3.h>
 
-#include "Containers/ScopedPointer.h"
 
 #define NOVA_LOG_WINDOW_CALLBACKS
 
@@ -25,6 +26,9 @@ namespace Nova
         m_ApplicationDirectory = Directory::GetCurrentWorkingDirectory();
         m_EngineAssetsDirectory = m_EngineDirectory / "Assets";
         m_ApplicationAssetsDirectory = m_ApplicationDirectory / "Assets";
+
+        ArgumentParser Parser(Arguments, ArgumentParserSettings::WindowsStyle);
+        Parser.Parse();
     }
 
     bool Application::PreInitialize()

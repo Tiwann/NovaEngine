@@ -392,7 +392,7 @@ namespace Nova
             return *this;
         }
 
-        StringBase& TrimStart(CharacterType Character)
+        StringBase TrimStart(CharacterType Character)
         {
             SizeType Count = 0;
             for (size_t Index = 0; Index < m_Count; ++Index)
@@ -409,6 +409,7 @@ namespace Nova
             m_Data[m_Count] = 0;
             return *this;
         }
+
 
         friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringBase& Str)
         {

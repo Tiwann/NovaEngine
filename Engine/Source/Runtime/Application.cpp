@@ -27,7 +27,11 @@ namespace Nova
         m_EngineAssetsDirectory = m_EngineDirectory / "Assets";
         m_ApplicationAssetsDirectory = m_ApplicationDirectory / "Assets";
 
-        ArgumentParser Parser(Arguments, ArgumentParserSettings::WindowsStyle);
+
+        ArgumentParser Parser("NovaEditor", Arguments, ArgumentParserSettings::WindowsStyle);
+        Parser.AddOption({'h', "help", false, false, "Show help text"});
+        Parser.AddOption({'p', "project", true, false, "Open Nova Editor with specified project"});
+        Parser.AddOption({'i', "init", false, false, "Show help text"});
         Parser.Parse();
     }
 

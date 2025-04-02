@@ -25,17 +25,17 @@ namespace Nova
     {
     public:
         using Arguments = Array<const char*>;
-        explicit ArgumentParser(const Arguments& Arguments, const ArgumentParserSettings& Settings);
+        explicit ArgumentParser(const String& Name, const Arguments& Arguments, const ArgumentParserSettings& Settings);
 
 
         void SetSettings(const ArgumentParserSettings& Settings);
+        void AddOption(const CommandLineOption& Option);
         void Parse();
         bool GetBool(const CommandLineOption& Option);
         String GetString(const CommandLineOption& Option);
         Array<String> GetValues(const CommandLineOption& Option);
 
-
-        template <typename T>
+        /*template <typename T>
         std::any GetValue<T>(CommandLineOption Option)
         {
             try
@@ -54,7 +54,7 @@ namespace Nova
             }
 
             return {false};
-        }
+        }*/
 
     private:
         bool IsArgumentValid(const String& Argument);
@@ -63,7 +63,10 @@ namespace Nova
         size_t GetDescMaxLength(const Array<CommandLineOption>& TheOptions) const;
         size_t GetDescLength(const CommandLineOption& Option) const;
         String GetHelpText();
+
+
     private:
+        String m_Name;
         Arguments m_Args;
         ArgumentParserSettings m_Settings;
         Map<CommandLineOption*, Array<std::any>> m_ParsedArguments;

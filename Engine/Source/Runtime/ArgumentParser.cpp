@@ -1,5 +1,6 @@
 #include "ArgumentParser.h"
 #include "Containers/StringFormat.h"
+#include "Runtime/Types.h"
 
 namespace Nova
 {
@@ -12,8 +13,8 @@ namespace Nova
         return std::regex(*RegexString);
     }
 
-    ArgumentParser::ArgumentParser(const Arguments& Arguments, const ArgumentParserSettings& Settings)
-        : m_Args(Arguments), m_Settings(Settings)
+    ArgumentParser::ArgumentParser(const String& Name, const Arguments& Arguments, const ArgumentParserSettings& Settings)
+        : m_Name(Name), m_Args(Arguments), m_Settings(Settings)
     {
     }
 
@@ -49,38 +50,56 @@ namespace Nova
 
     String ArgumentParser::GetHelpText()
     {
-        StringBuilder Builder = new();
-        Builder.AppendLine($"Usage: {Assembly.GetExecutingAssembly().GetName().Name} [options]");
-        Builder.AppendLine("options:");
+        String HelpText;
+        HelpText.Append(Format("Usage: {} [options]\n", m_Name));
+        HelpText.Append("options:\n");
 
+        i32 MaxDescLength = GetDescMaxLength(m_Options);
 
-        int MaxDescLength = GetDescMaxLength(Options);
-
-        foreach (CommandLineOption Option in Options)
+        for(const CommandLineOption& Option : m_Options)
         {
-            string Values = Option.PossibleValues != null ? $"[{Option.PossibleValues.Name}]" : string.Empty;
-            string Space = string.Empty;
-            int SpaceLength = MaxDescLength - GetDescLength(Option) + 1;
-            for (int i = 0; i < SpaceLength; i++) Space += " ";
-            string Required = Option.Required ? "(Required)" : string.Empty;
-            Builder.AppendLine($"    {Settings.ShortFormatPrefix}{Option.ShortName} {Settings.LongFormatPrefix}{Option.LongName} {Values}{Space}\t{Option.HelpText} {Required}");
+            String Values = Format("[{}]", Option.PossibleValues.Name);
+            String Space;
+            const i32 SpaceLength = MaxDescLength - GetDescLength(Option) + 1;
+            for (i32 i = 0; i < SpaceLength; ++i)
+                Space.Append(" ");
+            String Required = Option.Required ? "(Required)" : "";
+            String Formatted = Format("    {}{} {}{} {}{Space}\t{} {}\n",
+                m_Settings.ShortFormatPrefix,
+                Option.ShortName,
+                m_Settings.
+                LongFormatPrefix,
+                Option.LongName,
+                Values,
+                Option.HelpText,
+                Required);
+            HelpText.Append(Formatted);
         }
 
-        foreach (CommandLineOption Option in Options)
+        for (const CommandLineOption& Option : m_Options)
         {
             if (Option.PossibleValues == null) continue;
-            Builder.AppendLine($"{Option.PossibleValues.Name}:");
-            foreach (CommandLineOptionPossibleValue PossibleValue in Option.PossibleValues.PossibleValues)
+            HelpText.Append(Format("{}:", Option.PossibleValues.Name));
+
+            for(const CommandLineOptionPossibleValue& PossibleValue : Option.PossibleValues.Values)
             {
-                string Space = string.Empty;
-                int SpaceLength = MaxDescLength - PossibleValue.Name.Length + 1;
-                for (int i = 0; i < SpaceLength; i++) Space += " ";
-                Builder.AppendLine($"    {PossibleValue.Name}{Space}\t{PossibleValue.HelpText}");
+                String Space;
+                const i32 SpaceLength = MaxDescLength - PossibleValue.Name.Count() + 1;
+                for (i32 i = 0; i < SpaceLength; i++)
+                    Space.Append(" ");
+                HelpText.Append(Format("    {}{}\t{}\n",
+                    PossibleValue.Name,
+                    Space,
+                    PossibleValue.HelpText));
             }
         }
-        return Builder.ToString();
+        return HelpText;
     }
 
+    void ArgumentParser::AddOption(const CommandLineOption& Option)
+    {
+        m_Options.Add(Option);
+    }
 
 
     void ArgumentParser::Parse()
@@ -97,42 +116,38 @@ namespace Nova
                 return;
             }
 
-            const auto Split = SplitArgument(Argument);
-            CommandLineOption Option = Options.Single(O =>
-                    (O.ShortName == SplittedArgument.Item1[0] && SplittedArgument.Item1.Length <= 1) ||
-                    O.LongName == SplittedArgument.Item1);
-            try
+            const Pair<String, std::any> Split = SplitArgument(Argument);
+
+            CommandLineOption* Option = m_Options.Single([&Split](const CommandLineOption& Option)
             {
+                return Option.ShortName == Split.Key[0] && Split.Key.Count() <= 1 ||
+                    Option.LongName == Split.Key;
+            });
 
-
-                if (ParsedArguments.ContainsKey(Option) && !Option.AllowMultiple)
-                    throw new InvalidCommandLineArgumentException($"Cannot use argument \"{Argument}\" multiple times.");
-
-                if(!ParsedArguments.ContainsKey(Option))
-                    ParsedArguments[Option] = [];
-                ParsedArguments[Option].Add(SplittedArgument.Item2);
-
-            }
-            catch (InvalidOperationException)
+            if (m_ParsedArguments.Contains(Option) && !Option->AllowMultiple)
             {
-                throw new InvalidCommandLineArgumentException($"Argument \"{Argument}\" is not valid.");
+                /*throw new InvalidCommandLineArgumentException($"Cannot use argument \"{Argument}\" multiple times.");*/
             }
 
+            if(!m_ParsedArguments.Contains(Option))
+                m_ParsedArguments[Option] = {};
+
+            m_ParsedArguments[Option].Add(Split.Value);
 
         }
 
-        bool AllRequiredOptionsFound = Arguments.Any(A =>
+        const bool AllRequiredOptionsFound = m_Args.Any([this](const char* CurrentArg)
         {
-            string OptionName = GetOptionNameFromArgument(A);
-            var ShortNames = Options.Where(O => O.Required).Select(O => O.ShortName).ToList();
-            var LongNames = Options.Where(O => O.Required).Select(O => O.LongName).ToList();
-            if (ShortNames.Count == 0 && LongNames.Count == 0) return true;
+            String OptionName = GetOptionNameFromArgument({CurrentArg});
+            Array<String*> ShortNames = m_Options.Where([](const CommandLineOption& O) { return O.Required; }).Select<String>([](const CommandLineOption* O){ return O->ShortName; });
+            Array<String*> LongNames = m_Options.Where([](const CommandLineOption& O) { return O.Required; }).Select<String>([](const CommandLineOption* O){ return O->LongName; });
+            if (ShortNames.Count() == 0 && LongNames.Count() == 0) return true;
             return (ShortNames.Contains(OptionName[0]) && OptionName.Length <= 1) || LongNames.Contains(OptionName);
         });
 
         if (!AllRequiredOptionsFound)
         {
-            throw new InvalidCommandLineArgumentException("A required option was not found.");
+            //throw new InvalidCommandLineArgumentException("A required option was not found.");
         }
     }
 
@@ -142,7 +157,7 @@ namespace Nova
         {
             var Value = Argument[0];
             if (Value is bool BVal) return BVal;
-            if (Value is string SVal) return !string.IsNullOrEmpty(SVal);
+            if (Value is String SVal) return !String.IsNullOrEmpty(SVal);
         }
         return false;
     }
@@ -153,14 +168,14 @@ namespace Nova
         {
             var Value = Argument[0];
             if (Value is bool BVal) return BVal.ToString();
-            if (Value is string SVal) return SVal;
+            if (Value is String SVal) return SVal;
         }
-        return string.Empty;
+        return String.Empty;
     }
 
     Array<String> ArgumentParser::GetValues(CommandLineOption Option)
     {
-        List<string> Result = new List<string>();
+        List<String> Result = new List<String>();
         if (ParsedArguments.TryGetValue(Option, out var Argument))
         {
             Argument.ForEach(S => Result.Add(S));
@@ -173,7 +188,7 @@ namespace Nova
     {
         const String::SizeType AssignmentPosition = Argument.Find(m_Settings.AssigmentCharacter);
         String TrimmedArgument = Argument.TrimStart(PrefixCharacters.ToArray());
-        return AssignmentPosition == -1 ? TrimmedArgument : TrimmedArgument.Substring(0, AssignmentPosition - 1);
+        return AssignmentPosition == -1 ? TrimmedArgument : TrimmedArgument.SubString(0, AssignmentPosition - 1);
     }
 
     Pair<String, std::any> ArgumentParser::SplitArgument(const String& Argument)

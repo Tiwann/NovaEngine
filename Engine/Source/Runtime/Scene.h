@@ -6,8 +6,8 @@
 #include "Containers/Function.h"
 #include "Containers/String.h"
 
-#include "Core/Physics/PhysicsWorld2D.h"
-#include "Core/Physics/PhysicsWorld3D.h"
+#include "Runtime/Physics/PhysicsWorld2D.h"
+#include "Runtime/Physics/PhysicsWorld3D.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Scene, "SCENE");
 
@@ -46,7 +46,7 @@ namespace Nova
         EntityHandle CreateEntity(const String& Name);
         bool DestroyEntity(EntityHandle& Handle);
         
-        GUID GetGuid() const { return m_Guid; }
+        UUID GetGuid() const { return m_UUID; }
         const String& GetName() const { return m_Name; }
         void SetName(const String& Name);
 
@@ -64,7 +64,7 @@ namespace Nova
 
         Array<Entity*> GetEntities();
     private:
-        GUID m_Guid;
+        UUID m_UUID;
         String m_Name;
         BumpAllocator<Entity, 8192> m_EntityPool;
         Array<Entity*> m_Entities;

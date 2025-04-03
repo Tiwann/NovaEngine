@@ -11,8 +11,8 @@
 [submodule "assimp"]
 	path = Engine/Dependencies/assimp
 	url = git@github.com:assimp/assimp.git
-[submodule "vma"]
-	path = Engine/Dependencies/vma
+[submodule "VulkanMemoryAllocator"]
+	path = Engine/Dependencies/VulkanMemoryAllocator
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
 [submodule "imgui"]
 	path = Engine/Dependencies/imgui

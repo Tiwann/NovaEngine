@@ -1,6 +1,7 @@
 ﻿#include "PhysicsBody2D.h"
 #include "PhysicsMaterial.h"
 #include "PhysicsWorld2D.h"
+#include "PhysicsShape2D.h"
 #include "Math/Functions.h"
 #include "Math/Vector2.h"
 #include "MathConversions.h"

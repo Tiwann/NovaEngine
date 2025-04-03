@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "StaticArray.h"
+#include "Containers/Array.h"
 #include "Runtime/Iterator.h"
 #include "Runtime/Assertion.h"
 #include "Runtime/TypeTraits.h"
@@ -108,12 +108,6 @@ namespace Nova
             m_Count = 0;
         }
 
-        template<size_t N>
-        StaticArray<CharacterType, N> AsArray()
-        {
-            return {m_Data, m_Count};
-        }
-
         CharacterType& operator[](SizeType Index)
         {
             Assert(Index <= m_Count, "Index out of bounds");
@@ -151,7 +145,7 @@ namespace Nova
         
         StringBase& Append(StringLiteralType Data)
         {
-            Assert(Data, "Cannot apped string with nullptr string literal!");
+            Assert(Data, "Cannot append string with nullptr string literal!");
             const SizeType DataCount = StringLength(Data);
             const SizeType NewCount = m_Count + DataCount;
             CharacterType* NewData = new CharacterType[NewCount + 1]{};
@@ -198,7 +192,7 @@ namespace Nova
             return {NewData, NewCount};
         }
 
-        StringBase Substring(SizeType Begin) const
+        StringBase Substring(const SizeType Begin) const
         {
             return Substring(Begin, m_Count);
         }
@@ -392,22 +386,41 @@ namespace Nova
             return *this;
         }
 
-        StringBase TrimStart(CharacterType Character)
+        StringBase TrimStart(CharacterType Character) const
         {
+            StringBase Copy(*this);
             SizeType Count = 0;
-            for (size_t Index = 0; Index < m_Count; ++Index)
-            {
-                if (m_Data[Index] != Character)
-                    break;
-                Count++;
-            }
+            while (Count < Copy.m_Count && Copy.m_Data[Count] == Character)
+                ++Count;
+
+            if (Count == 0)
+                return Copy;
+
+            memmove(Copy.m_Data, Copy.m_Data + Count, (Copy.m_Count - Count) * CharacterSize);
+            Copy.m_Count -= Count;
+            Copy.m_Data[m_Count] = 0;
+            return Copy;
+        }
+
+        StringBase TrimStart(const Array<CharacterType>& Characters) const
+        {
+            StringBase Copy(*this);
+            SizeType Count = 0;
+            while (Count < Copy.m_Count && Characters.Contains(Copy.m_Data[Count]))
+                ++Count;
 
             if (Count == 0)
                 return *this;
 
-            m_Count -= Count;
-            m_Data[m_Count] = 0;
-            return *this;
+            ::memmove(Copy.m_Data, Copy.m_Data + Count, (Copy.m_Count - Count) * CharacterSize);
+            Copy.m_Count -= Count;
+            Copy.m_Data[m_Count] = 0;
+            return Copy;
+        }
+
+        ArrayType ToArray() const
+        {
+            return ArrayType(m_Data, m_Count);
         }
 
 
@@ -417,6 +430,7 @@ namespace Nova
             os.flush();
             return os;
         }
+
     private:
         CharacterType* m_Data = nullptr;
         size_t m_Count = 0;

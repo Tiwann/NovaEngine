@@ -4,6 +4,7 @@
 #include "Containers/Map.h"
 #include "CommandLineOption.h"
 #include <CoreExport.h>
+
 #include <regex>
 #include <any>
 
@@ -30,6 +31,7 @@ namespace Nova
 
         void SetSettings(const ArgumentParserSettings& Settings);
         void AddOption(const CommandLineOption& Option);
+        void AddOptions(const Array<CommandLineOption>& Options);
         void Parse();
         bool GetBool(const CommandLineOption& Option);
         String GetString(const CommandLineOption& Option);
@@ -57,23 +59,21 @@ namespace Nova
         }*/
 
     private:
-        bool IsArgumentValid(const String& Argument);
-        String GetOptionNameFromArgument(const String& Argument);
-        Pair<String, std::any> SplitArgument(const String& Argument);
+        bool IsArgumentValid(const String& Argument) const;
+        String GetOptionNameFromArgument(const String& Argument) const;
+        Pair<String, std::any> SplitArgument(const String& Argument) const;
         size_t GetDescMaxLength(const Array<CommandLineOption>& TheOptions) const;
         size_t GetDescLength(const CommandLineOption& Option) const;
         String GetHelpText();
 
+        Array<String::CharacterType> GetPrefixCharacters() const;
 
     private:
         String m_Name;
-        Arguments m_Args;
+        Arguments m_Arguments;
         ArgumentParserSettings m_Settings;
-        Map<CommandLineOption*, Array<std::any>> m_ParsedArguments;
+        Map<CommandLineOption, Array<std::any>> m_ParsedArguments;
         Array<CommandLineOption> m_Options;
-
-        //private readonly IEnumerable<char> PrefixCharacters = Settings.ShortFormatPrefix.ToCharArray().Union(Settings.LongFormatPrefix.ToCharArray());
+        Array<String::CharacterType> m_PrefixCharacters;
     };
-
-
 }

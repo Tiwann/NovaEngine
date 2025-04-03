@@ -5,9 +5,8 @@
 #include "Entity.h"
 #include "Containers/Function.h"
 #include "Containers/String.h"
-
-#include "Runtime/Physics/PhysicsWorld2D.h"
-#include "Runtime/Physics/PhysicsWorld3D.h"
+#include "Physics/PhysicsWorld2D.h"
+#include "Physics/PhysicsWorld3D.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Scene, "SCENE");
 

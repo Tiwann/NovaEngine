@@ -124,7 +124,7 @@ namespace Nova
     Vector3 PhysicsBody2D::GetLinearVelocity() const
     {
         const b2Body* BodyHandle = GetHandle();
-        return ToVector3(BodyHandle->GetLinearVelocity());
+        return ToVector2(BodyHandle->GetLinearVelocity());
     }
 
     Vector3 PhysicsBody2D::GetLinearVelocityPoint(const Vector3& Point) const

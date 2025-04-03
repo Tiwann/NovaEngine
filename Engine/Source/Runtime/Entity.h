@@ -5,9 +5,9 @@
 #include "Log.h"
 #include "LogCategory.h"
 #include "LogVerbosity.h"
-#include "Runtime/Containers/Function.h"
-#include "Runtime/Containers/String.h"
-#include "Runtime/Containers/StringFormat.h"
+#include "Containers/Function.h"
+#include "Containers/String.h"
+#include "Containers/StringFormat.h"
 #include "Runtime/Flags.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Entity, "Entity")

@@ -5,6 +5,7 @@
 #include "PhysicsWorld3DContactListener.h"
 #include "Math/Functions.h"
 
+#include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
 #include <Jolt/Core/Factory.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
@@ -46,8 +47,9 @@ namespace Nova
         
     }
 
-    void PhysicsWorld3D::OnInit()
+    void PhysicsWorld3D::OnInit(Scene* Owner)
     {
+        Base::OnInit(Owner);
         JPH::RegisterDefaultAllocator();
         JPH::Factory::sInstance = new JPH::Factory();
         JPH::RegisterTypes();

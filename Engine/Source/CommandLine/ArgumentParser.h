@@ -75,5 +75,6 @@ namespace Nova
         Map<CommandLineOption, Array<std::any>> m_ParsedArguments;
         Array<CommandLineOption> m_Options;
         Array<String::CharacterType> m_PrefixCharacters;
+        std::regex m_Regex;
     };
 }

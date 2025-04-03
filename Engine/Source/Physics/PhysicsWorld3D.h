@@ -37,7 +37,7 @@ namespace Nova
     {
     public:
         PhysicsWorld3D();
-        void OnInit() override;
+        void OnInit(Scene* Owner) override;
         void Step(f32 TimeStep) override;
         void OnDestroy() override;
 

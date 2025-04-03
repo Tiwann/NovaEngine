@@ -1,13 +1,13 @@
 ﻿#pragma once
 #include "Runtime/Types.h"
 #include "Containers/String.h"
-#include <InputExport.h>
+#include <CoreExport.h>
 
 namespace Nova
 {
     enum class GamepadThumbstick { Left, Right };
 
-    static String INPUT_API GamepadThumbstickToString(GamepadThumbstick Stick)
+    static String CORE_API GamepadThumbstickToString(GamepadThumbstick Stick)
     {
         switch (Stick)
         {

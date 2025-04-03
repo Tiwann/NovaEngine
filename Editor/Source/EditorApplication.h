@@ -6,7 +6,7 @@ namespace Nova
     class EditorApplication final : public Application
     {
     public:
-        explicit EditorApplication(const Array<const char*>& Arguments) : Application(Arguments){}
+        explicit EditorApplication(const Array<const char*>& Arguments);
         ApplicationConfiguration CreateConfiguration(ApplicationConfigurationSerializer& Serializer) const override;
         void OnInit() override;
         void OnExit() override;

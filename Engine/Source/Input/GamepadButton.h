@@ -3,7 +3,7 @@
 #include "Containers/String.h"
 #include "Containers/StringView.h"
 #include "Containers/StringFormat.h"
-#include <InputExport.h>
+#include <CoreExport.h>
 
 namespace Nova
 {
@@ -28,7 +28,7 @@ namespace Nova
         MaxButtons
     };
 
-    static String INPUT_API GamepadButtonToString(GamepadButton Button)
+    static String CORE_API GamepadButtonToString(GamepadButton Button)
     {
         switch (Button)
         {

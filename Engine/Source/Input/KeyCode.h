@@ -1,7 +1,6 @@
 #pragma once
-#include "Runtime/NumericTypes.h"
 
-#define NOVA_KEY_UNKNOWN            U16_MAX
+#define NOVA_KEY_UNKNOWN            -1
 #define NOVA_KEY_SPACE              32
 #define NOVA_KEY_APOSTROPHE         39
 #define NOVA_KEY_COMMA              44

@@ -32,7 +32,7 @@ namespace Nova
         using ConstSelector = Function<const Out*(ReferenceType)>;
 
         static constexpr SizeType InvalidIndex = -1ULL;
-        
+
         Array()
         {
             m_Allocated = 1;
@@ -60,7 +60,7 @@ namespace Nova
             m_Data = Memory::Calloc<T>(m_Allocated);
             std::copy(List.begin(), List.end(), m_Data);
         }
-        
+
         Array(ConstPointerType Data, SizeType Count) : m_Count(Count), m_Allocated(Count)
         {
             m_Data = Memory::Calloc<T>(m_Allocated);
@@ -106,7 +106,7 @@ namespace Nova
         {
             if(this == &Other)
                 return *this;
-            
+
             m_Data = Other.m_Data;
             m_Count = Other.m_Count;
             m_Allocated = Other.m_Allocated;
@@ -152,7 +152,7 @@ namespace Nova
             Assert(m_Count != 0, "Cannot get first element, array is empty!");
             return m_Data[0];
         }
-        
+
         ConstReferenceType First() const
         {
             Assert(m_Count != 0, "Cannot get first element, array is empty!");
@@ -164,7 +164,7 @@ namespace Nova
             Assert(m_Count != 0, "Cannot get last element, array is empty!");
             return m_Data[m_Count - 1];
         }
-        
+
         ConstReferenceType Last() const
         {
             Assert(m_Count != 0, "Cannot get first element, array is empty!");
@@ -182,8 +182,14 @@ namespace Nova
                 Memory::Free(m_Data);
                 m_Data = Realloc;
             }
-            
+
             m_Data[m_Count++] = Element;
+        }
+
+        void AddUnique(ConstReferenceType Element)
+        {
+            if (Find(Element) == -1)
+                Add(Element);
         }
 
         void AddRange(const std::initializer_list<T>& List)
@@ -197,7 +203,7 @@ namespace Nova
                 Memory::Free(m_Data);
                 m_Data = Realloc;
             }
-            
+
             std::copy(List.begin(), List.end(), &m_Data[m_Count]);
             m_Count += List.size();
         }
@@ -213,7 +219,7 @@ namespace Nova
                 Memory::Free(m_Data);
                 m_Data = Realloc;
             }
-            
+
             std::copy(Other.begin(), Other.end(), &m_Data[m_Count]);
             m_Count += Other.Count();
         }
@@ -229,9 +235,17 @@ namespace Nova
                 Memory::Free(m_Data);
                 m_Data = Realloc;
             }
-            
+
             std::copy(Data, Data + Count, &m_Data[m_Count]);
             m_Count += Count;
+        }
+
+        Array Union(const Array& Other)
+        {
+            Array Result = *this;
+            for (const T& Element : Other)
+                AddUnique(Element);
+            return Result;
         }
 
         bool Remove(ConstReferenceType Element)
@@ -284,7 +298,7 @@ namespace Nova
         {
             RemoveAt(m_Count);
         }
-        
+
         void Clear()
         {
             m_Count = 0;
@@ -349,15 +363,15 @@ namespace Nova
 
         bool IsEmpty() const { return m_Count == 0; }
 
-        
+
         void Sort(const Predicate& Predicate)
         {
             //std::ranges::sort(m_Data, m_Data + m_Count, Predicate);
         }
-        
+
         Iterator begin() override { return m_Data; }
         Iterator end() override { return m_Data + m_Count; }
-        
+
         ConstIterator begin() const override{ return m_Data; }
         ConstIterator end() const override { return (PointerType)(&m_Data[0] + m_Count); }
 

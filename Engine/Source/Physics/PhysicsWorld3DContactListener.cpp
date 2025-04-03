@@ -1,6 +1,7 @@
 ﻿#include "PhysicsWorld3DContactListener.h"
 #include "PhysicsWorld3D.h"
 #include "PhysicsContact3D.h"
+#include "PhysicsBody3D.h"
 #include "JoltContact.h"
 #include <Jolt/Physics/Body/BodyInterface.h>
 

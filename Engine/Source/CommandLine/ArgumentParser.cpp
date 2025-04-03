@@ -2,6 +2,7 @@
 #include "Containers/StringFormat.h"
 #include "Runtime/Types.h"
 #include "Runtime/Assertion.h"
+#include "Runtime/ArithmeticTypes.h"
 
 namespace Nova
 {
@@ -17,6 +18,10 @@ namespace Nova
     ArgumentParser::ArgumentParser(const String& Name, const Arguments& Arguments, const ArgumentParserSettings& Settings)
         : m_Name(Name), m_Arguments(Arguments), m_Settings(Settings), m_PrefixCharacters(GetPrefixCharacters())
     {
+        const Int32 A = 0;
+        const Int32 B{A % 3};
+        const bool C = A.Equals(B);
+        const auto D = 6 / B;
 
     }
 

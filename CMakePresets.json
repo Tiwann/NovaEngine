@@ -1,0 +1,34 @@
+{
+	"version": 6,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 30,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "DebugEditor",
+			"description": "Debug with Editor",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/Intermediate/DebugEditor",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "DebugEditor",
+				"CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DebugEditor",
+				"CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DebugEditor",
+				"CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DebugEditor"
+			}
+		},
+		{
+			"name": "DevEditor",
+			"description": "Release with Editor (Debug info)",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/Intermediate/DevEditor",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "DevEditor",
+				"CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DevEditor",
+				"CMAKE_ARCHIVE_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DevEditor",
+				"CMAKE_LIBRARY_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DevEditor"
+			}
+		}
+	]
+}

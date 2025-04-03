@@ -17,3 +17,9 @@
 [submodule "imgui"]
 	path = Engine/Dependencies/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "imguizmo"]
+	path = Engine/Dependencies/imguizmo
+	url = git@github.com:CedricGuillemet/ImGuizmo.git
+[submodule "slang"]
+	path = Engine/Dependencies/slang
+	url = git@github.com:shader-slang/slang.git

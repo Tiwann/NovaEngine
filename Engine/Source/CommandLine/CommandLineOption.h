@@ -1,22 +1,16 @@
 #pragma once
-#include <Containers/String.h>
+#include "Containers/String.h"
+#include "Interfaces/Equatable.h"
 #include <optional>
 
 namespace Nova
 {
-    template<typename T>
-    struct IEquatable
-    {
-        virtual ~IEquatable() = default;
-        virtual bool operator==(const T& Other) const = 0;
-    };
-
     struct CommandLineOptionPossibleValue : IEquatable<CommandLineOptionPossibleValue>
     {
         String Name;
         String HelpText;
 
-        bool operator==(const CommandLineOptionPossibleValue& Other) const override
+        bool Equals(const CommandLineOptionPossibleValue& Other) const override
         {
             return Name == Other.Name && HelpText == Other.HelpText;
         }

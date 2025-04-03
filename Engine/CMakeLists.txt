@@ -42,7 +42,7 @@ ADD_SUBDIRECTORY(Dependencies/Jolt/Build)
 SET_TARGET_PROPERTIES(Jolt PROPERTIES FOLDER Dependencies)
 
 #[[ VMA ]]
-ADD_SUBDIRECTORY(Dependencies/vma)
+ADD_SUBDIRECTORY(Dependencies/VulkanMemoryAllocator)
 SET_TARGET_PROPERTIES(VulkanMemoryAllocator PROPERTIES FOLDER Dependencies)
 
 #[[ STB ]]

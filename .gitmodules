@@ -1,18 +1,19 @@
-[submodule "Engine/Dependencies/glfw"]
+[submodule "glfw"]
 	path = Engine/Dependencies/glfw
 	url = git@github.com:glfw/glfw.git
-[submodule "Engine/Dependencies/box2d"]
+[submodule "box2d"]
 	path = Engine/Dependencies/box2d
 	url = git@github.com:erincatto/box2d.git
-[submodule "Engine/Dependencies/Jolt"]
+	branch = v2.4.2
+[submodule "Jolt"]
 	path = Engine/Dependencies/Jolt
 	url = git@github.com:jrouwe/JoltPhysics.git
-[submodule "Engine/Dependencies/assimp"]
+[submodule "assimp"]
 	path = Engine/Dependencies/assimp
 	url = git@github.com:assimp/assimp.git
-[submodule "Engine/Dependencies/vma"]
+[submodule "vma"]
 	path = Engine/Dependencies/vma
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-[submodule "Engine/Dependencies/imgui"]
+[submodule "imgui"]
 	path = Engine/Dependencies/imgui
 	url = git@github.com:ocornut/imgui.git

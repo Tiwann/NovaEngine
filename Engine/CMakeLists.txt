@@ -61,7 +61,7 @@ ADD_LIBRARY(imgui STATIC
 TARGET_INCLUDE_DIRECTORIES(imgui INTERFACE Dependencies/imgui)
 
 
-FILE(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h REMOVE_RECURSE Source/Platform/*.cpp Source//Platform/*.h)
+FILE(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h REMOVE_RECURSE Source/Platform/*.cpp Source/Platform/*.h)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     FILE(GLOB Source/Platform/Windows/*.cpp Source/Platform/Windows/*.h)

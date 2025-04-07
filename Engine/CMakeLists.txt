@@ -1,27 +1,16 @@
 set(ENGINE_MODULES Core)
 include(Dependencies/Dependencies.cmake)
 
-file(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h REMOVE_RECURSE SOURCES Source/Platform/*.cpp Source/Platform/*.h)
+file(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    file(GLOB_RECURSE SOURCES Source/Platform/Windows/*.cpp Source/Platform/Windows/*.h)
-    file(GLOB_RECURSE SOURCES Source/Platform/DirectX/*.cpp Source/Platform/DirectX/*.h)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    file(GLOB_RECURSE SOURCES Source/Platform/Linux/*.cpp Source/Platform/Linux/*.h)
-else (CMAKE_SYSTEM_NAME STREQUAL "Apple")
-    file(GLOB_RECURSE SOURCES Source/Platform/MacOS/*.cpp Source/Platform/MacOS/*.h)
-endif ()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(NovaEngine SHARED ${SOURCES})
-target_sources(NovaEngine SHARED FILE_SET )
 
-
-
-if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+#[[if(CMAKE_SYSTEM_NAME MATCHES "Windows")
     target_link_libraries(NovaEngine PUBLIC nvrhi_d3d12 d3d12 dxgi d3dcompiler)
-endif ()
+endif ()]]
 target_link_libraries(NovaEngine PUBLIC glfw VulkanMemoryAllocator box2d Jolt imgui imguizmo stb nvrhi nvrhi_vk Vulkan::Vulkan)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
@@ -39,13 +28,10 @@ elseif(CMAKE_BUILD_TYPE MATCHES "DistNoEditor" or CMAKE_BUILD_TYPE MATCHES "Dist
     target_compile_definitions(NovaEngine PUBLIC NOVA_DIST)
 endif()
 
-if(WIN32)
-    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows")
-elseif (LINUX)
-    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_LINUX NOVA_SYSTEM_NAME="Linux")
-elseif (APPLE)
-    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_MACOS NOVA_SYSTEM_NAME="MacOS")
-endif ()
+target_compile_definitions(NovaEngine
+        PUBLIC $<PLATFORM_ID:Windows>:NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows"
+        PUBLIC $<PLATFORM_ID:Unix>:NOVA_PLATFORM_LINUX NOVA_SYSTEM_NAME="Linux"
+        PUBLIC $<PLATFORM_ID:Darwin>:NOVA_PLATFORM_DARWIN NOVA_SYSTEM_NAME="Darwin")
 
 foreach (MODULE ${ENGINE_MODULES})
     set(MODULE_EXPORT_HEADER ${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h)

@@ -2,7 +2,7 @@
 #include "Core/PopupMessage.h"
 #include "Core/Containers/Map.h"
 
-namespace Hydro
+namespace Nova
 {
     class WindowsPopupMessage : public PopupMessage
     {

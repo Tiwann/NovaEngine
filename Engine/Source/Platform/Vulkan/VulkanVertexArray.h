@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Core/Graphics/VertexArray.h"
 
-namespace Hydro
+namespace Nova
 {
     class VulkanVertexArray : public VertexArray
     {

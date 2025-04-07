@@ -236,7 +236,7 @@ namespace Nova
         return IsGamepadConnected(ID) && s_GamepadStates[ID].buttons[(size_t)Button];
     }
 
-    Vector2 Input::GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick)
+    Vector2 Input::GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick, f32 Deadzone)
     {
         Vector2 Axis;
         switch (Thumbstick)
@@ -244,7 +244,7 @@ namespace Nova
         case GamepadThumbstick::Left: Axis = {s_GamepadAxes[ID][0], -s_GamepadAxes[ID][1]}; break;
         case GamepadThumbstick::Right: Axis = {s_GamepadAxes[ID][2], -s_GamepadAxes[ID][3]}; break;
         }
-        return Axis.Magnitude() < NOVA_GAMEPAD_DEADZONE ? Vector2::Zero : Axis;
+        return Axis.Magnitude() < Deadzone ? Vector2::Zero : Axis;
     }
 
     f32 Input::GetGamepadLeftShoulder(size_t ID)

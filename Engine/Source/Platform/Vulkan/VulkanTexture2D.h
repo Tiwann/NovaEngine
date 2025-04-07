@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
 
-namespace Hydro
+namespace Nova
 {
     class VulkanRenderer;
     

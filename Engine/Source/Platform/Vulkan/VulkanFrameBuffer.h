@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Core/Graphics/FrameBuffer.h"
 
-namespace Hydro
+namespace Nova
 {
     class VulkanFrameBuffer : public FrameBuffer
     {

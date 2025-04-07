@@ -15,8 +15,7 @@ namespace Nova
     }
 }
 
-
-#if defined(NOVA_PLATFORM_WINDOWS) && defined(NOVA_RELEASE)
+#if defined(NOVA_PLATFORM_WINDOWS) && defined(NOVA_DIST)
 #include <Windows.h>
 INT APIENTRY WinMain(HINSTANCE, HINSTANCE, PSTR, INT)
 {

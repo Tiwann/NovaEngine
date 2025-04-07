@@ -9,7 +9,7 @@
 #include "Core/Graphics/IndexBuffer.h"
 #include "Core/Graphics/VertexBuffer.h"
 
-namespace Hydro
+namespace Nova
 {
     #if defined(NOVA_DEBUG)
     static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugMessageCallback(
@@ -53,7 +53,7 @@ namespace Hydro
             ApplicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
             ApplicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
             ApplicationInfo.pApplicationName = *m_Application->GetConfiguration().AppName;
-            ApplicationInfo.pEngineName = "Hydro Engine";
+            ApplicationInfo.pEngineName = "Nova Engine";
 
             u32 GlfwExtensionsCount;
             const char** GlfwExtensions = glfwGetRequiredInstanceExtensions(&GlfwExtensionsCount);

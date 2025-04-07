@@ -2,7 +2,7 @@
 #include "Core/Graphics/VertexBuffer.h"
 
 
-namespace Hydro
+namespace Nova
 {
     struct Vertex;
     

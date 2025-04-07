@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Graphics/IndexBuffer.h"
 
-namespace Hydro
+namespace Nova
 {
     class OpenGLIndexBuffer : public IndexBuffer
     {

@@ -1,6 +1,6 @@
 #include "DirectXVertexArray.h"
 
-namespace Hydro
+namespace Nova
 {
     void DirectXVertexArray::Bind() const
     {

@@ -54,7 +54,7 @@ namespace Nova
             m_Configuration.AppName = Format("{} | {}", m_Configuration.AppName, NOVA_RHI_NAME);
         
         if(m_Configuration.ShowOSName)
-            m_Configuration.AppName = Format("{} {}", m_Configuration.AppName, NOVA_OS_NAME);
+            m_Configuration.AppName = Format("{} {}", m_Configuration.AppName, NOVA_SYSTEM_NAME);
         
         if(m_Configuration.ShowConfiguration)
             m_Configuration.AppName = Format("{} {}", m_Configuration.AppName, NOVA_CONFIG_NAME);

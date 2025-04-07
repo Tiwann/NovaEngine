@@ -9,8 +9,8 @@
 		{
 			"name": "DebugEditor",
 			"description": "Debug with Editor",
-			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/Intermediate/DebugEditor",
+			"generator": "Visual Studio 17 2022",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "DebugEditor",
 				"CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DebugEditor",
@@ -21,8 +21,8 @@
 		{
 			"name": "DevEditor",
 			"description": "Release with Editor (Debug info)",
-			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/Intermediate/DevEditor",
+			"generator": "Visual Studio 17 2022",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "DevEditor",
 				"CMAKE_RUNTIME_OUTPUT_DIRECTORY": "${sourceDir}/Binaries/DevEditor",

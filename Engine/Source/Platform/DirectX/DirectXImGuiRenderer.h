@@ -1,7 +1,7 @@
 #pragma once
 #include "Editor/ImGuiRenderer.h"
 
-namespace Hydro
+namespace Nova
 {
     class DirectXImGuiRenderer : public ImGuiRenderer
     {

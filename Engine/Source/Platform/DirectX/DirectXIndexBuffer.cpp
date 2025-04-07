@@ -2,7 +2,7 @@
 #include "Platform/PlatformRenderer.h"
 #include "Core/Application.h"
 
-namespace Hydro
+namespace Nova
 {
     DirectXIndexBuffer::~DirectXIndexBuffer()
     {

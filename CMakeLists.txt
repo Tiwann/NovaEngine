@@ -1,6 +1,6 @@
-﻿CMAKE_MINIMUM_REQUIRED(VERSION 3.30)
-PROJECT(NovaEngine)
+﻿cmake_minimum_required(VERSION 3.30)
+project(NovaEngine)
 
-SET(BUILD_TESTING OFF)
-ADD_SUBDIRECTORY(Engine)
-ADD_SUBDIRECTORY(Editor)
+set(BUILD_TESTING OFF)
+add_subdirectory(Engine)
+add_subdirectory(Editor)

@@ -1,6 +1,6 @@
 #include "DirectXShader.h"
 
-namespace Hydro
+namespace Nova
 {
     DirectXShader::DirectXShader(const String& Name, const Path& Filepath) : Shader(Name, Filepath)
     {

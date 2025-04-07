@@ -2,7 +2,7 @@
 #include "Core/Graphics/IndexBuffer.h"
 #include "Platform/PlatformRenderer.h"
 
-namespace Hydro
+namespace Nova
 {
     class VulkanIndexBuffer : public IndexBuffer
     {

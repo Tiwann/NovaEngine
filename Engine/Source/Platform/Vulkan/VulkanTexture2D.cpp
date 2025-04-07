@@ -2,7 +2,7 @@
 #include "Core/Application.h"
 #include "VulkanRenderer.h"
 
-namespace Hydro
+namespace Nova
 {
     VulkanTexture2D::VulkanTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot): Texture2D(Name, Width, Height, Params, Slot)
     {

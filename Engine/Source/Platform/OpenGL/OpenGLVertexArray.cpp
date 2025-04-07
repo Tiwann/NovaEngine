@@ -4,7 +4,7 @@
 
 
 
-namespace Hydro
+namespace Nova
 {
     OpenGLVertexArray::OpenGLVertexArray()
     {

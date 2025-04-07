@@ -3,7 +3,7 @@
 #include "Math/Vector2.h"
 #include <glad/gl.h>
 
-namespace Hydro
+namespace Nova
 {
     OpenGLFrameBuffer::OpenGLFrameBuffer()
     {

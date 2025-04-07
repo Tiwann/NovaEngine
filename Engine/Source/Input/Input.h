@@ -19,7 +19,6 @@ struct GLFWgamepadstate;
 namespace Nova
 {
     constexpr i32 NOVA_MAX_GAMEPADS = 16;
-    constexpr f32 NOVA_GAMEPAD_DEADZONE = 0.05f;
 
     struct Vector2;
     
@@ -48,7 +47,7 @@ namespace Nova
         static bool GetGamepadButtonDown(size_t ID, GamepadButton Button);
         static bool GetGamepadButtonUp(size_t ID, GamepadButton Button);
         static bool GetGamepadButton(size_t ID, GamepadButton Button);
-        static Vector2 GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick);
+        static Vector2 GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick, f32 Deadzone = 0);
         static f32 GetGamepadLeftShoulder(size_t ID);
         static f32 GetGamepadRightShoulder(size_t ID);        
     private:

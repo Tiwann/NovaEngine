@@ -8,7 +8,7 @@
 #include "Core/Graphics/VertexBuffer.h"
 
 
-namespace Hydro
+namespace Nova
 {
 #if defined(NOVA_DEBUG)
     static void DebugCallback(D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity, D3D12_MESSAGE_ID ID, LPCSTR Description, void* pContext)

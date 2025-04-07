@@ -3,7 +3,7 @@
 
 typedef i32 GLint;
 
-namespace Hydro
+namespace Nova
 {
     class OpenGLTexture2D : public Texture2D
     {

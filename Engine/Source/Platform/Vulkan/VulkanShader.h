@@ -3,7 +3,7 @@
 #include <slang/slang.h>
 #include <vulkan/vulkan.h>
 
-namespace Hydro
+namespace Nova
 {
     class VulkanShader : public Shader
     {

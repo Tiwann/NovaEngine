@@ -9,7 +9,7 @@
 #include <ImGuizmo/ImGuizmo.h>
 
 
-namespace Hydro
+namespace Nova
 {
     bool VulkanImGuiRenderer::Initialize(Application* Application)
     {

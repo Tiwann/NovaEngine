@@ -1,7 +1,7 @@
 #pragma once
 #include "Core/Graphics/Shader.h"
 
-namespace Hydro
+namespace Nova
 {
     class DirectXShader : public Shader
     {

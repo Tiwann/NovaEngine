@@ -5,7 +5,7 @@
 #include "Core/Graphics/ShaderCompiler.h"
 
 
-namespace Hydro
+namespace Nova
 {
     VulkanShader::VulkanShader(const String& Name, const Path& Filepath) : Shader(Name, Filepath)
     {

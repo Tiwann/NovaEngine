@@ -4,7 +4,7 @@
 #include <CoreExport.h>
 
 #if defined(NOVA_CORE)
-    #if defined(NOVA_DEBUG)
+    #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         #define NOVA_LOG(CategoryName, InVerbosity, ...) \
         do { \
             Nova::Logger& _Logger = Nova::Log::GetCoreLogger(); \
@@ -16,7 +16,7 @@
         #define NOVA_LOG(CategoryName, Verbosity, ...) NOVA_VOID
     #endif
 #else
-    #if defined(NOVA_DEBUG)
+    #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         #define NOVA_LOG(CategoryName, InVerbosity, ...) \
         do { \
         Nova::Logger& _Logger = Nova::Log::GetClientLogger(); \

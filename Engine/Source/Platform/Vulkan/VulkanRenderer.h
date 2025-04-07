@@ -14,7 +14,7 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define VK_FAILED(Res) (((VkResult)(Res)) != VK_SUCCESS)
 #define VK_CHECK_MSG(Res, Msg, ...) do { if(VK_FAILED((Res))) NOVA_VULKAN_ERROR((Msg), __VA_ARGS__); }  while(0)
 
-namespace Hydro
+namespace Nova
 {
     struct VkFrameData
     {

@@ -2,7 +2,7 @@
 #include "Core/Graphics/IndexBuffer.h"
 
 struct ID3D12Resource;
-namespace Hydro
+namespace Nova
 {
     class DirectXIndexBuffer : public IndexBuffer
     {

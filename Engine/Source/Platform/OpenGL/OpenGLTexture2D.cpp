@@ -5,7 +5,7 @@
 #include "Core/Containers/StringFormat.h"
 #include <glad/gl.h>
 
-namespace Hydro
+namespace Nova
 {
     OpenGLTexture2D::OpenGLTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot) : Texture2D(Name, Width, Height, Params, Slot)
     {

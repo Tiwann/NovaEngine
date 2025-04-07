@@ -1,5 +1,6 @@
 #pragma once
 
+
 #if defined(NOVA_PLATFORM_OPENGL)
 #include "OpenGL/OpenGLRenderer.h"
 #endif

@@ -4,7 +4,7 @@
 
 typedef u32 GLenum;
 
-namespace Hydro
+namespace Nova
 {
     class OpenGLFrameBuffer : public FrameBuffer
     {

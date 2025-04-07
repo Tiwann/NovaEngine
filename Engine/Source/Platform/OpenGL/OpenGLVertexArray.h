@@ -3,7 +3,7 @@
 #include "Core/NumericTypes.h"
 
 
-namespace Hydro
+namespace Nova
 {
     class OpenGLVertexArray : public VertexArray
     {

@@ -3,12 +3,12 @@
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
-namespace Hydro
+namespace Nova
 {
    class VulkanRenderer;
 }
 
-namespace Hydro
+namespace Nova
 {
    class VulkanVertexBuffer : public VertexBuffer
    {

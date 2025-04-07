@@ -1,7 +1,7 @@
 ﻿
 #include "VulkanVertexArray.h"
 
-namespace Hydro
+namespace Nova
 {
     void VulkanVertexArray::Bind() const
     {

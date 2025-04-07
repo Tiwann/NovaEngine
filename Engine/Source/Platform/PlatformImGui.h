@@ -3,19 +3,19 @@
 #include <imgui_internal.h>
 
 
-namespace Hydro
+namespace Nova
 {
     struct Vector3; class UUID;
 }
 
 namespace ImGui
 {
-    IMGUI_API void PushID(const Hydro::UUID& guid);
-    IMGUI_API ImGuiID GetID(const Hydro::UUID& guid);
+    IMGUI_API void PushID(const Nova::UUID& guid);
+    IMGUI_API ImGuiID GetID(const Nova::UUID& guid);
 }
 
 namespace ImGuizmo
 {
-    IMGUI_API void DecomposeMatrixToComponents(const f32* matrix, Hydro::Vector3& translation, Hydro::Vector3& rotation, Hydro::Vector3& scale);
-    IMGUI_API void RecomposeMatrixFromComponents(const Hydro::Vector3& translation, const Hydro::Vector3& rotation, const Hydro::Vector3& scale, f32* matrix);
+    IMGUI_API void DecomposeMatrixToComponents(const f32* matrix, Nova::Vector3& translation, Nova::Vector3& rotation, Nova::Vector3& scale);
+    IMGUI_API void RecomposeMatrixFromComponents(const Nova::Vector3& translation, const Nova::Vector3& rotation, const Nova::Vector3& scale, f32* matrix);
 }

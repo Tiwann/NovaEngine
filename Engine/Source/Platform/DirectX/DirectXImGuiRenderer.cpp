@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 #include <ImGuizmo/ImGuizmo.h>
 
-namespace Hydro
+namespace Nova
 {
     bool DirectXImGuiRenderer::Initialize(Application* Application)
     {

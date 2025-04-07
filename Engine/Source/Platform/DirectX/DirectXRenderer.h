@@ -11,7 +11,7 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(DirectX, "D3D12");
 #define NOVA_DIRECTX_WARNING(message, ...) NOVA_LOG(DirectX, Verbosity::Warning, message, __VA_ARGS__)
 #define DX_FAILED(Result) FAILED(Result)
     
-namespace Hydro
+namespace Nova
 {
 
     struct D3D12FrameData

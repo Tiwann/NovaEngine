@@ -11,7 +11,7 @@
 #include "Core/Entity.h"
 
 
-namespace Hydro
+namespace Nova
 {
     OpenGLShader::OpenGLShader(const String& Name, Path Filepath)
         : Shader(Name, std::move(Filepath)), m_Program(UINT32_MAX), m_VertexHandle(UINT32_MAX), m_FragmentHandle(UINT32_MAX)

@@ -1,6 +1,6 @@
 #include "DirectXFrameBuffer.h"
 
-namespace Hydro
+namespace Nova
 {
     void DirectXFrameBuffer::Destroy()
     {

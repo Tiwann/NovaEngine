@@ -3,7 +3,7 @@
 
 struct ID3D12Resource;
 
-namespace Hydro
+namespace Nova
 {
     class DirectXTexture2D : public Texture2D
     {

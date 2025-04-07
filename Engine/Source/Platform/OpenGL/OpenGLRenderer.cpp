@@ -20,7 +20,7 @@
 
 #include "Core/Containers/ScopedPointer.h"
 
-namespace Hydro
+namespace Nova
 {
     bool OpenGLRenderer::Initialize()
     {

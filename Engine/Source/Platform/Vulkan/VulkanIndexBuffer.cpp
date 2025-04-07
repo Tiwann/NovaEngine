@@ -1,7 +1,7 @@
 ﻿#include "VulkanIndexBuffer.h"
 #include "Core/Application.h"
 
-namespace Hydro
+namespace Nova
 {
     VulkanIndexBuffer::VulkanIndexBuffer()
     : m_Renderer(g_Application->GetRenderer<VulkanRenderer>())

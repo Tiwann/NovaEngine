@@ -1,7 +1,7 @@
 #include "OpenGLIndexBuffer.h"
 #include <glad/gl.h>
 
-namespace Hydro
+namespace Nova
 {
     OpenGLIndexBuffer::OpenGLIndexBuffer()
     {

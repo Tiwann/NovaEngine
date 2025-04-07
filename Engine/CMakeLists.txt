@@ -1,155 +1,66 @@
-SET(ENGINE_MODULES Core)
+set(ENGINE_MODULES Core)
+include(Dependencies/Dependencies.cmake)
 
-#[[ GLFW ]]
-OPTION(GLFW_BUILD_DOCS OFF)
-OPTION(GLFW_BUILD_TESTS OFF)
-OPTION(GLFW_BUILD_EXAMPLES OFF)
-OPTION(BUILD_SHARED_LIBS OFF)
-OPTION(GLFW_INSTALL OFF)
-ADD_SUBDIRECTORY(Dependencies/glfw)
-SET_PROPERTY(TARGET glfw PROPERTY FOLDER Dependencies)
-
-#[[ ASSIMP ]]
-OPTION(ASSIMP_BUILD_TESTS OFF)
-OPTION(ASSIMP_INSTALL OFF)
-OPTION(ASSIMP_INSTALL_PDB OFF)
-OPTION(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
-OPTION(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
-
-SET(ASSIMP_BUILD_FBX_EXPORTER   ON CACHE BOOL "" FORCE)
-SET(ASSIMP_BUILD_OBJ_EXPORTER   ON CACHE BOOL "" FORCE)
-SET(ASSIMP_BUILD_GLTF_EXPORTER  ON CACHE BOOL "" FORCE)
-
-SET(ASSIMP_BUILD_FBX_IMPORTER   ON CACHE BOOL "" FORCE)
-SET(ASSIMP_BUILD_OBJ_IMPORTER   ON CACHE BOOL "" FORCE)
-SET(ASSIMP_BUILD_GLTF_IMPORTER  ON CACHE BOOL "" FORCE)
-SET(ASSIMP_BUILD_BLEND_IMPORTER  ON CACHE BOOL "" FORCE)
-
-ADD_SUBDIRECTORY(Dependencies/assimp)
-SET_TARGET_PROPERTIES(assimp PROPERTIES FOLDER Dependencies)
-
-#[[ BOX2D ]]
-OPTION(BOX2D_BUILD_DOCS OFF)
-OPTION(BOX2D_BUILD_TESTBED OFF)
-OPTION(BOX2D_BUILD_UNIT_TESTS OFF)
-OPTION(BOX2D_USER_SETTINGS OFF)
-OPTION(BUILD_SHARED_LIBS OFF)
-ADD_SUBDIRECTORY(Dependencies/box2d)
-SET_TARGET_PROPERTIES(box2d PROPERTIES FOLDER Dependencies)
-
-#[[ JOLT ]]
-ADD_SUBDIRECTORY(Dependencies/Jolt/Build)
-SET_TARGET_PROPERTIES(Jolt PROPERTIES FOLDER Dependencies)
-
-#[[ VMA ]]
-ADD_SUBDIRECTORY(Dependencies/VulkanMemoryAllocator)
-SET_TARGET_PROPERTIES(VulkanMemoryAllocator PROPERTIES FOLDER Dependencies)
-
-#[[ STB ]]
-ADD_SUBDIRECTORY(Dependencies/stb)
-SET_TARGET_PROPERTIES(stb PROPERTIES FOLDER Dependencies)
-
-#[[ SLANG ]]
-#option(SLANG_ENABLE_TESTS OFF)
-#option(SLANG_ENABLE_EXAMPLES OFF)
-#option(SLANG_ENABLE_SLANGC OFF)
-#option(SLANG_ENABLE_GFX OFF)
-#ADD_SUBDIRECTORY(Dependencies/slang)
-#SET_PROPERTY(TARGET slang PROPERTY FOLDER Dependencies)
-
-#[[ IMGUI ]]
-SET(CMAKE_CXX_STANDARD 17)
-SET(IMGUI_DIR Dependencies/imgui)
-ADD_LIBRARY(imgui STATIC
-        ${IMGUI_DIR}/imconfig.h
-        ${IMGUI_DIR}/imgui.cpp
-        ${IMGUI_DIR}/imgui.h
-        ${IMGUI_DIR}/imgui_demo.cpp
-        ${IMGUI_DIR}/imgui_draw.cpp
-        ${IMGUI_DIR}/imgui_internal.h
-        ${IMGUI_DIR}/imgui_tables.cpp
-        ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/imstb_rectpack.h
-        ${IMGUI_DIR}/imstb_textedit.h
-        ${IMGUI_DIR}/imstb_truetype.h
-)
-TARGET_INCLUDE_DIRECTORIES(imgui INTERFACE Dependencies/imgui)
-SET_TARGET_PROPERTIES(imgui PROPERTIES FOLDER Dependencies)
-
-#[[ IMGUIZMO ]]
-SET(IMGUIZMO_DIR Dependencies/imguizmo)
-SET(IMGUIZMO_SOURCES
-        ${IMGUIZMO_DIR}/GraphEditor.cpp
-        ${IMGUIZMO_DIR}/GraphEditor.h
-        ${IMGUIZMO_DIR}/ImCurveEdit.cpp
-        ${IMGUIZMO_DIR}/ImCurveEdit.h
-        ${IMGUIZMO_DIR}/ImGradient.cpp
-        ${IMGUIZMO_DIR}/ImGradient.h
-        ${IMGUIZMO_DIR}/ImGuizmo.h
-        ${IMGUIZMO_DIR}/ImGuizmo.cpp
-        ${IMGUIZMO_DIR}/ImSequencer.h
-        ${IMGUIZMO_DIR}/ImSequencer.cpp
-        ${IMGUIZMO_DIR}/ImZoomSlider.h
-)
-ADD_LIBRARY(imguizmo STATIC ${IMGUIZMO_SOURCES})
-TARGET_LINK_LIBRARIES(imguizmo PRIVATE imgui)
-TARGET_INCLUDE_DIRECTORIES(imguizmo INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-SET_TARGET_PROPERTIES(imguizmo PROPERTIES FOLDER Dependencies)
-
-FILE(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h REMOVE_RECURSE Source/Platform/*.cpp Source/Platform/*.h)
+file(GLOB_RECURSE SOURCES Source/*.cpp Source/*.h REMOVE_RECURSE SOURCES Source/Platform/*.cpp Source/Platform/*.h)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    FILE(GLOB Source/Platform/Windows/*.cpp Source/Platform/Windows/*.h)
+    file(GLOB_RECURSE SOURCES Source/Platform/Windows/*.cpp Source/Platform/Windows/*.h)
+    file(GLOB_RECURSE SOURCES Source/Platform/DirectX/*.cpp Source/Platform/DirectX/*.h)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    FILE(GLOB Source/Platform/Linux/*.cpp Source/Platform/Linux/*.h)
-else (CMAKE_SYSTEM_NAME STREQUAL "MacOS")
-    FILE(GLOB Source/Platform/MacOS/*.cpp Source/Platform/MacOS/*.h)
+    file(GLOB_RECURSE SOURCES Source/Platform/Linux/*.cpp Source/Platform/Linux/*.h)
+else (CMAKE_SYSTEM_NAME STREQUAL "Apple")
+    file(GLOB_RECURSE SOURCES Source/Platform/MacOS/*.cpp Source/Platform/MacOS/*.h)
 endif ()
 
-SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-ADD_LIBRARY(NovaEngine SHARED ${SOURCES})
-
-TARGET_LINK_LIBRARIES(NovaEngine PUBLIC glfw VulkanMemoryAllocator box2d Jolt ImGui imguizmo STB)
-TARGET_INCLUDE_DIRECTORIES(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_library(NovaEngine SHARED ${SOURCES})
+target_sources(NovaEngine SHARED FILE_SET )
 
 
-SET_TARGET_PROPERTIES(NovaEngine PROPERTIES
+
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+    target_link_libraries(NovaEngine PUBLIC nvrhi_d3d12 d3d12 dxgi d3dcompiler)
+endif ()
+target_link_libraries(NovaEngine PUBLIC glfw VulkanMemoryAllocator box2d Jolt imgui imguizmo stb nvrhi nvrhi_vk Vulkan::Vulkan)
+target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
+set_target_properties(NovaEngine PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
         LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
 )
 
-if(CMAKE_BUILD_TYPE MATCHES "DebugNoEditor")
-    ADD_COMPILE_DEFINITIONS(NOVA_DEBUG)
-elseif(CMAKE_BUILD_TYPE MATCHES "DevNoEditor")
-    ADD_COMPILE_DEFINITIONS(NOVA_DEV)
-elseif(CMAKE_BUILD_TYPE MATCHES "DistNoEditor")
-    ADD_COMPILE_DEFINITIONS(NOVA_DIST)
+if(CMAKE_BUILD_TYPE MATCHES "DebugNoEditor" OR CMAKE_BUILD_TYPE MATCHES "DebugEditor")
+    target_compile_definitions(NovaEngine PUBLIC NOVA_DEBUG)
+elseif(CMAKE_BUILD_TYPE MATCHES "DevNoEditor" OR CMAKE_BUILD_TYPE MATCHES "DevEditor")
+    target_compile_definitions(NovaEngine PUBLIC NOVA_DEV)
+elseif(CMAKE_BUILD_TYPE MATCHES "DistNoEditor" or CMAKE_BUILD_TYPE MATCHES "Dist")
+    target_compile_definitions(NovaEngine PUBLIC NOVA_DIST)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-    ADD_COMPILE_DEFINITIONS(NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows")
-elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    ADD_COMPILE_DEFINITIONS(NOVA_PLATFORM_LINUX NOVA_SYSTEM_NAME="Linux")
-elseif (CMAKE_SYSTEM_NAME MATCHES "MacOS")
-    ADD_COMPILE_DEFINITIONS(NOVA_PLATFORM_MACOS NOVA_SYSTEM_NAME="MacOS")
+if(WIN32)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows")
+elseif (LINUX)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_LINUX NOVA_SYSTEM_NAME="Linux")
+elseif (APPLE)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_MACOS NOVA_SYSTEM_NAME="MacOS")
 endif ()
 
-FOREACH (MODULE ${ENGINE_MODULES})
-    SET(MODULE_EXPORT_HEADER ${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h)
-    SET(HEADER_FILE ${CMAKE_BINARY_DIR}/Include/${MODULE}Export.h)
-    FILE(READ ${MODULE_EXPORT_HEADER} HEADER_CONTENTS)
-    STRING(TOUPPER ${MODULE} MODULE_UPPER)
-    STRING(REPLACE "@MODULE_NAME@" ${MODULE_UPPER} HEADER_CONTENTS ${HEADER_CONTENTS})
-    FILE(WRITE ${HEADER_FILE} ${HEADER_CONTENTS})
+foreach (MODULE ${ENGINE_MODULES})
+    set(MODULE_EXPORT_HEADER ${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h)
+    set(HEADER_FILE ${CMAKE_BINARY_DIR}/Include/${MODULE}Export.h)
+    file(READ ${MODULE_EXPORT_HEADER} HEADER_CONTENTS)
+    string(TOUPPER ${MODULE} MODULE_UPPER)
+    string(REPLACE "@MODULE_NAME@" ${MODULE_UPPER} HEADER_CONTENTS ${HEADER_CONTENTS})
+    file(WRITE ${HEADER_FILE} ${HEADER_CONTENTS})
 
-    TARGET_COMPILE_DEFINITIONS(NovaEngine
+    target_compile_definitions(NovaEngine
             INTERFACE MODULE_SHARED
             INTERFACE MODULE_BUILD)
 
-    TARGET_INCLUDE_DIRECTORIES(NovaEngine PUBLIC ${CMAKE_BINARY_DIR}/Include)
-    TARGET_INCLUDE_DIRECTORIES(NovaEngine PUBLIC ${MODULE}/Public)
-    TARGET_INCLUDE_DIRECTORIES(NovaEngine PRIVATE ${MODULE}/Private)
-    TARGET_INCLUDE_DIRECTORIES(NovaEngine PRIVATE ${MODULE})
-ENDFOREACH ()
+    target_include_directories(NovaEngine PUBLIC ${CMAKE_BINARY_DIR}/Include)
+    target_include_directories(NovaEngine PUBLIC ${MODULE}/Public)
+    target_include_directories(NovaEngine PRIVATE ${MODULE}/Private)
+    target_include_directories(NovaEngine PRIVATE ${MODULE})
+endforeach ()

@@ -8,7 +8,7 @@
 #include <ImGuizmo/ImGuizmo.h>
 
 
-namespace Hydro
+namespace Nova
 {
     bool OpenGLImGuiRenderer::Initialize(Application* Application)
     {

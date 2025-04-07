@@ -1,31 +1,31 @@
 ﻿#include "VulkanFrameBuffer.h"
 
-void Hydro::VulkanFrameBuffer::Destroy()
+void Nova::VulkanFrameBuffer::Destroy()
 {
 }
 
-void Hydro::VulkanFrameBuffer::Bind()
+void Nova::VulkanFrameBuffer::Bind()
 {
 }
 
-void Hydro::VulkanFrameBuffer::Unbind()
+void Nova::VulkanFrameBuffer::Unbind()
 {
 }
 
-Hydro::AttachmentTexture Hydro::VulkanFrameBuffer::CreateAttachment(FrameBufferAttachment Attachment)
+Nova::AttachmentTexture Nova::VulkanFrameBuffer::CreateAttachment(FrameBufferAttachment Attachment)
 {
     return {  .Attachment= FrameBufferAttachment::None, .Texture= nullptr };
 }
 
-void Hydro::VulkanFrameBuffer::RemoveAttachment(const AttachmentTexture& Attachment)
+void Nova::VulkanFrameBuffer::RemoveAttachment(const AttachmentTexture& Attachment)
 {
 }
 
-bool Hydro::VulkanFrameBuffer::Validate()
+bool Nova::VulkanFrameBuffer::Validate()
 {
     return true;
 }
 
-void Hydro::VulkanFrameBuffer::Resize(const Vector2& NewSize)
+void Nova::VulkanFrameBuffer::Resize(const Vector2& NewSize)
 {
 }

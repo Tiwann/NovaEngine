@@ -4,7 +4,7 @@
 
 
 
-namespace Hydro
+namespace Nova
 {
     DirectXTexture2D::DirectXTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot)
         : Texture2D(Name, Width, Height, Params, Slot)

@@ -6,7 +6,7 @@
 #include <GLFW/glfw3native.h>
 
 
-namespace Hydro
+namespace Nova
 {
     WindowsPopupMessage::ResponseConvertor WindowsPopupMessage::s_ResponseConvertor
     {

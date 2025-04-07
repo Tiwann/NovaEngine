@@ -3,7 +3,7 @@
 #include "Core/Application.h"
 #include <vk_mem_alloc.h>
 
-namespace Hydro
+namespace Nova
 {
     VulkanVertexBuffer::VulkanVertexBuffer() : m_Renderer(g_Application->GetRenderer<VulkanRenderer>())
     {

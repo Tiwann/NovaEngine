@@ -1,10 +1,10 @@
 ﻿#pragma once
-#include "Core/Graphics/Renderer.h"
-#include "Core/LogCategory.h"
+#include "Graphics/Renderer.h"
+#include "Runtime/LogCategory.h"
 #include <directx/d3dx12.h>
 #include <dxgi1_6.h>
 
-#include "Core/Image.h"
+#include "Runtime/Image.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(DirectX, "D3D12");
 #define NOVA_DIRECTX_ERROR(message, ...) NOVA_LOG(DirectX, Verbosity::Error, message, __VA_ARGS__)

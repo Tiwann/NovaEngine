@@ -19,4 +19,10 @@ namespace Nova
     private:
         PointerType m_Data = nullptr;
     };
+
+    template <typename T, typename... Args>
+    ScopedPointer<T> MakeScoped(Args&&... Arguments)
+    {
+        return ScopedPointer<T>(new T(std::forward<Args>(Arguments)...));
+    }
 }

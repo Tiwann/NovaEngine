@@ -16,12 +16,12 @@ namespace Nova
         }
     };
 
-    struct CommandLineOptionPossibleValueList
+    struct CommandLineOptionPossibleValueList : IEquatable<CommandLineOptionPossibleValueList>
     {
         String Name;
         Array<CommandLineOptionPossibleValue> Values;
 
-        bool operator==(const CommandLineOptionPossibleValueList& Other) const
+        bool Equals(const CommandLineOptionPossibleValueList& Other) const override
         {
             return Name == Other.Name && Values == Other.Values;
         }

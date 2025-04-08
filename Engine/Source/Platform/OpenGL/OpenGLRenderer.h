@@ -1,12 +1,12 @@
 ﻿#pragma once
-#include "Core/Graphics/CullMode.h"
-#include "Core/Graphics/Renderer.h"
-#include "Core/LogCategory.h"
-#include "Core/LogVerbosity.h"
+#include "Graphics/CullMode.h"
+#include "Graphics/Renderer.h"
+#include "Runtime/LogCategory.h"
+#include "Runtime/LogVerbosity.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(OpenGL, "OPENGL");
 
-typedef u32 GLenum;
+typedef Nova::u32 GLenum;
 
 namespace Nova
 {

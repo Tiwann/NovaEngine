@@ -14,20 +14,20 @@ namespace Nova
     struct PhysicsContact3D;
     class PhysicsWorld3DContactListener;
 
-    class PHYSICS_HIDDEN PhysicsWorld3DBroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface
+    class CORE_HIDDEN PhysicsWorld3DBroadPhaseLayerInterface : public JPH::BroadPhaseLayerInterface
     {
     public:
         JPH::uint GetNumBroadPhaseLayers() const override;
         JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override;
     };
 
-    class PHYSICS_HIDDEN PhysicsWorld3DObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter
+    class CORE_HIDDEN PhysicsWorld3DObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter
     {
     public:
         bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::BroadPhaseLayer inLayer2) const override;
     };
 
-    class PHYSICS_HIDDEN PhysicsWorld3DObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
+    class CORE_HIDDEN PhysicsWorld3DObjectLayerPairFilter : public JPH::ObjectLayerPairFilter
     {
     public:
         bool ShouldCollide(JPH::ObjectLayer inLayer1, JPH::ObjectLayer inLayer2) const override;

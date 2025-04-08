@@ -2,7 +2,7 @@
 #include "Core/Log.h"
 #include "Core/LogVerbosity.h"
 #include "Core/Memory.h"
-#include "Core/Containers/StringFormat.h"
+#include "Containers/StringFormat.h"
 #include <glad/gl.h>
 
 namespace Nova

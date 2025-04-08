@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Graphics/VertexArray.h"
+#include "Graphics/VertexArray.h"
 
 namespace Nova
 {

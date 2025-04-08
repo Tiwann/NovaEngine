@@ -1,0 +1,105 @@
+﻿#pragma once
+#include "Runtime/Asset.h"
+#include "Runtime/Image.h"
+#include "Runtime/SharedPointer.h"
+#include "Runtime/LogCategory.h"
+#include "Runtime/SpriteSheet.h"
+
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(Texture2D, "TEXTURE2D");
+
+namespace Nova
+{
+    class Image;
+    struct Vector2;
+    class Sprite;
+    class SpriteAnimation;
+    struct SpriteSheet;
+
+    enum class TextureFilter
+    {
+        Nearest,
+        Linear,
+    };
+
+    enum class TextureWrap
+    {
+        Clamp,
+        Repeat,
+        Mirror,
+    };
+
+    struct TextureParams
+    {
+        TextureFilter Filter;
+        TextureWrap Wrap;
+        ImageFormat Format;
+        
+        TextureParams& WithFilter(TextureFilter NewFilter)
+        {
+            Filter = NewFilter;
+            return *this;
+        }
+
+        TextureParams& WithWrap(TextureWrap NewWrap)
+        {
+            Wrap = NewWrap;
+            return *this;
+        }
+
+        TextureParams& WithFormat(ImageFormat Fmt)
+        {
+            Format = Fmt;
+            return *this;
+        }
+
+        bool operator==(const TextureParams& Other) const
+        {
+            return Filter == Other.Filter && Wrap == Other.Wrap && Format == Other.Format;
+        }
+    };
+    
+    class Texture2D : public Asset
+    {
+    public:
+        Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0);
+        ~Texture2D() override = default;
+
+
+        static Texture2D* Create(const String& Name = "NewTexture");
+        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params,u32 Slot = 0);
+        static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot = 0);
+        static Texture2D* CreateWhiteTexture(u32 Width, u32 Height);
+
+        String GetAssetType() const override;
+        virtual void SetTextureParameters(const TextureParams& Params) = 0;
+        virtual void SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format) = 0;
+        void SetData(const Ref<Image>& Image);
+        virtual Ref<Image> GetImage() const = 0;
+        virtual void Bind() const = 0;
+        virtual void Unbind() const = 0;
+        virtual uintptr_t GetHandle() const = 0;
+
+        Vector2 GetSize() const;
+        u32 GetWidth() const;
+        u32 GetHeight() const;
+        u32 GetSlot() const;
+        ImageFormat GetFormat() const;
+        void SetSlot(u32 Slot);
+        virtual bool GetPixels(Buffer<u8>& OutPixels) const = 0;
+
+
+        template<typename T>
+        T As() const requires (std::is_convertible_v<T, void*>) { return (T)GetHandle(); }
+        
+        Sprite CreateSprite(const Vector2& Position, const Vector2& Size);
+        Sprite CreateSprite();
+        SpriteAnimation* CreateAnimation(u32 NumRows, u32 NumColumns, u32 NumSprites, u32 SpriteSize);
+        SpriteAnimation* CreateAnimation(const SpriteSheet& SpriteSheet);
+    protected:
+        u32 m_Width{0}, m_Height{0};
+        u32 m_Slot{0};
+        ImageFormat m_Format{ImageFormat::RGBA8};
+        TextureParams m_Params;
+    };
+}

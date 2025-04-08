@@ -4,10 +4,10 @@
 #include "Core/Log.h"
 #include "Core/LogVerbosity.h"
 #include "Core/PopupMessage.h"
-#include "Core/Containers/ScopedPointer.h"
+#include "Containers/ScopedPointer.h"
 #include <GLFW/glfw3.h>
-#include "Core/Graphics/IndexBuffer.h"
-#include "Core/Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/VertexBuffer.h"
 
 namespace Nova
 {

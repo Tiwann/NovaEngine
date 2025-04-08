@@ -6,7 +6,7 @@ namespace Nova
 {
     class PhysicsWorld2D;
     
-    class PHYSICS_HIDDEN PhysicsWorld2DContactListener : public b2ContactListener
+    class CORE_HIDDEN PhysicsWorld2DContactListener : public b2ContactListener
     {
     public:
         PhysicsWorld2DContactListener(PhysicsWorld2D* World);

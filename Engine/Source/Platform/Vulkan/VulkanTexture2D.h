@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Core/Graphics/Texture2D.h"
+#include "Graphics/Texture2D.h"
 #include <vulkan/vulkan.hpp>
 #include <vk_mem_alloc.h>
 

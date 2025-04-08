@@ -4,8 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include "Core/Graphics/IndexBuffer.h"
-#include "Core/Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/VertexBuffer.h"
 
 
 namespace Nova

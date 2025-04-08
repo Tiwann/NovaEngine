@@ -2,23 +2,23 @@
 #include "Core/Application.h"
 #include "Core/Window.h"
 #include "Core/Log.h"
-#include "Core/Color.h"
+#include "Runtime/Color.h"
 #include "Core/LogVerbosity.h"
-#include "Core/Graphics/Vertex.h"
+#include "Graphics/Vertex.h"
 
 #include "Components/Camera.h"
-#include "Core/Graphics/Shader.h"
-#include "Core/Graphics/IndexBuffer.h"
+#include "Graphics/Shader.h"
+#include "Graphics/IndexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
-#include "Core/Graphics/VertexArray.h"
-#include "Core/Graphics/VertexBuffer.h"
-#include "Core/Graphics/VertexBufferLayout.h"
+#include "Graphics/VertexArray.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/VertexBufferLayout.h"
 #include "Math/LinearAlgebra.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
-#include "Core/Containers/ScopedPointer.h"
+#include "Containers/ScopedPointer.h"
 
 namespace Nova
 {

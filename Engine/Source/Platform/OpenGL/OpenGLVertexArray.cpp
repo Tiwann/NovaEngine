@@ -1,5 +1,5 @@
 #include "OpenGLVertexArray.h"
-#include "Core/Graphics/VertexBufferLayout.h"
+#include "Graphics/VertexBufferLayout.h"
 #include <glad/gl.h>
 
 

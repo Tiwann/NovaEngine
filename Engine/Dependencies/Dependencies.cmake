@@ -117,7 +117,7 @@ set(IMGUIZMO_SOURCES
 )
 add_library(imguizmo STATIC ${IMGUIZMO_SOURCES})
 target_link_libraries(imguizmo PRIVATE imgui)
-target_include_directories(imguizmo INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(imguizmo INTERFACE ${IMGUIZMO_DIR})
 set_target_properties(imguizmo PROPERTIES FOLDER Dependencies)
 ###########################################################
 
@@ -126,3 +126,20 @@ set_target_properties(imguizmo PROPERTIES FOLDER Dependencies)
 ##[[ VULKAN ]]
 ###########################################################
 find_package(Vulkan REQUIRED)
+
+
+###########################################################
+##[[ FMOD ]]
+###########################################################
+add_subdirectory(Dependencies/FMODCore)
+add_subdirectory(Dependencies/FMODStudio)
+
+###########################################################
+##[[ UTFCPP ]]
+###########################################################
+add_subdirectory(Dependencies/utfcpp)
+
+###########################################################
+##[[ GLAD ]]
+###########################################################
+add_subdirectory(Dependencies/glad)

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "CameraProjectionType.h"
-#include "Runtime/NumericTypes.h"
+#include "Runtime/Types.h"
 
 namespace Nova
 {

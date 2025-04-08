@@ -1,0 +1,42 @@
+﻿#include "Renderer.h"
+#include "Platform/PlatformRenderer.h"
+#include "Platform/OpenGL/OpenGLRenderer.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
+
+namespace Nova
+{
+    Renderer* Renderer::Create(Application* Owner, const GraphicsApi& GraphicsApi)
+    {
+        switch (GraphicsApi)
+        {
+            case GraphicsApi::Vulkan:
+                return new VulkanRenderer(Owner);
+            case GraphicsApi::OpenGL:
+                return new OpenGLRenderer(Owner);
+        default:
+            return nullptr;
+        }
+    }
+
+    void Renderer::Clear(const Color& Color, float Depth)
+    {
+        ClearColor(Color);
+        ClearDepth(Depth);
+    }
+
+    void Renderer::SetCurrentCamera(Camera* Camera)
+    {
+        m_CurrentCamera = Camera;
+    }
+
+    Camera* Renderer::GetCurrentCamera()
+    {
+        return m_CurrentCamera;
+    }
+
+    const Camera* Renderer::GetCurrentCamera() const
+    {
+        return m_CurrentCamera;
+    }
+}
+

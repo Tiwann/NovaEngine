@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/Graphics/VertexArray.h"
-#include "Core/NumericTypes.h"
+#include "Graphics/VertexArray.h"
+#include "Runtime/Types.h"
 
 
 namespace Nova

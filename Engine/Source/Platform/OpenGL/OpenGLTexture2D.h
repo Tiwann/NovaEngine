@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Core/Graphics/Texture2D.h"
+#include "Graphics/Texture2D.h"
 
 typedef i32 GLint;
 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Core/Graphics/Shader.h"
+#include "Graphics/Shader.h"
 
 namespace Nova
 {

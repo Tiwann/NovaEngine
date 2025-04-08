@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Core/Graphics/Shader.h"
+#include "Graphics/Shader.h"
 #include <slang/slang.h>
 #include <vulkan/vulkan.h>
 

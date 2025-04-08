@@ -1,6 +1,6 @@
 #pragma once
-#include "Core/PopupMessage.h"
-#include "Core/Containers/Map.h"
+#include "Runtime/PopupMessage.h"
+#include "Containers/Map.h"
 
 namespace Nova
 {

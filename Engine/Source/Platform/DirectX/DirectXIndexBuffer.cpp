@@ -1,6 +1,6 @@
 #include "DirectXIndexBuffer.h"
 #include "Platform/PlatformRenderer.h"
-#include "Core/Application.h"
+#include "Runtime/Application.h"
 
 namespace Nova
 {

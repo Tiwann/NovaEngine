@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Graphics/FrameBuffer.h"
+#include "Graphics/FrameBuffer.h"
 #include "Core/NumericTypes.h"
 
 typedef u32 GLenum;

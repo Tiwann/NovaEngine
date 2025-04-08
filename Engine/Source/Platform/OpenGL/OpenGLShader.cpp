@@ -2,10 +2,10 @@
 #include "Core/Assertion.h"
 #include "Core/Log.h"
 #include "Core/LogVerbosity.h"
-#include "Core/Graphics/Texture2D.h"
+#include "Graphics/Texture2D.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/DirectionalLight.h"
-#include "Core/Containers/StringFormat.h"
+#include "Containers/StringFormat.h"
 #include <glad/gl.h>
 
 #include "Core/Entity.h"

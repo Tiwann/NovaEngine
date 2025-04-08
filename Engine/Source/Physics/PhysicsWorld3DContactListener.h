@@ -8,7 +8,7 @@ namespace Nova
     class PhysicsWorld3D;
     class PhysicsBody3D;
     
-    class PHYSICS_HIDDEN PhysicsWorld3DContactListener : public JPH::ContactListener
+    class CORE_HIDDEN PhysicsWorld3DContactListener : public JPH::ContactListener
     {
     public:
         PhysicsWorld3DContactListener(PhysicsWorld3D* World);

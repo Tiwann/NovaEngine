@@ -1,5 +1,5 @@
 #pragma once
-#include "Core/Graphics/VertexBuffer.h"
+#include "Graphics/VertexBuffer.h"
 
 struct ID3D12Resource;
 

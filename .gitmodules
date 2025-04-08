@@ -26,3 +26,6 @@
 [submodule "NVRHI"]
 	path = Engine/Dependencies/NVRHI
 	url = git@github.com:NVIDIA-RTX/NVRHI.git
+[submodule "utfcpp"]
+	path = Engine/Dependencies/utfcpp
+	url = git@github.com:nemtrif/utfcpp.git

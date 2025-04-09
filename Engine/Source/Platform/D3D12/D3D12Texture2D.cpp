@@ -1,26 +1,24 @@
-#include "DirectXTexture2D.h"
-#include "Core/Application.h"
+#include "D3D12Texture2D.h"
+#include "Runtime/Application.h"
 #include "Platform/PlatformRenderer.h"
-
-
 
 namespace Nova
 {
-    DirectXTexture2D::DirectXTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot)
+    D3D12Texture2D::D3D12Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot)
         : Texture2D(Name, Width, Height, Params, Slot)
     {
     }
 
-    void DirectXTexture2D::SetTextureParameters(const TextureParams& Params)
+    void D3D12Texture2D::SetTextureParameters(const TextureParams& Params)
     {
     }
 
-    void DirectXTexture2D::SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format)
+    void D3D12Texture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
     {
         m_Width = Width;
         m_Height = Height;
         m_Format = Format;
-        DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         m_Resource = Renderer->CreateTexture2D(L"Texture2D", m_Width, m_Height, m_Format);
         if (!m_Resource)
         {
@@ -67,30 +65,30 @@ namespace Nova
         Cmd->Release();
     }
 
-    void DirectXTexture2D::SetData(const Ref<Image>& Image)
+    void D3D12Texture2D::SetData(const SharedPtr<Image>& Image)
     {
-        DirectXTexture2D::SetData((u8*)Image->GetData(), Image->GetWidth(), Image->GetHeight(), Image->GetFormat());
+        D3D12Texture2D::SetData((u8*)Image->GetData(), Image->GetWidth(), Image->GetHeight(), Image->GetFormat());
     }
 
-    Ref<Image> DirectXTexture2D::GetImage() const
+    SharedPtr<Image> D3D12Texture2D::GetImage() const
     {
         return nullptr;
     }
 
-    void DirectXTexture2D::Bind() const
+    void D3D12Texture2D::Bind() const
     {
     }
 
-    void DirectXTexture2D::Unbind() const
+    void D3D12Texture2D::Unbind() const
     {
     }
 
-    uintptr_t DirectXTexture2D::GetHandle() const
+    uintptr_t D3D12Texture2D::GetHandle() const
     {
         return reinterpret_cast<uintptr_t>(m_Resource);
     }
 
-    bool DirectXTexture2D::GetPixels(Buffer<u8>& OutPixels) const
+    bool D3D12Texture2D::GetPixels(Buffer<u8>& OutPixels) const
     {
         return false;
     }

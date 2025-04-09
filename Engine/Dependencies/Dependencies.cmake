@@ -94,7 +94,7 @@ add_library(imgui STATIC
         ${IMGUI_DIR}/imstb_textedit.h
         ${IMGUI_DIR}/imstb_truetype.h
 )
-target_include_directories(imgui INTERFACE Dependencies/imgui)
+target_include_directories(imgui INTERFACE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 set_target_properties(imgui PROPERTIES FOLDER Dependencies)
 ###########################################################
 
@@ -143,3 +143,27 @@ add_subdirectory(Dependencies/utfcpp)
 ##[[ GLAD ]]
 ###########################################################
 add_subdirectory(Dependencies/glad)
+set_target_properties(glad PROPERTIES FOLDER Dependencies)
+
+###########################################################
+##[[ MINIAUDIO ]]
+###########################################################
+add_subdirectory(Dependencies/miniaudio)
+set_target_properties(miniaudio PROPERTIES FOLDER Dependencies)
+
+###########################################################
+##[[ VORBIS ]]
+###########################################################
+add_subdirectory(Dependencies/ogg)
+add_subdirectory(Dependencies/vorbis)
+
+###########################################################
+##[[ json ]]
+###########################################################
+add_subdirectory(Dependencies/json)
+
+###########################################################
+##[[ tinygltf ]]
+###########################################################
+add_subdirectory(Dependencies/tinygltf)
+

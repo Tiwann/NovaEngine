@@ -22,6 +22,6 @@ namespace Nova
     protected:
         String m_Name;
         bool m_Opened;
-        GUID m_Guid;
+        UUID m_UUID;
     };
 }

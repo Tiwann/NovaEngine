@@ -3,10 +3,10 @@
 
 namespace Nova
 {
-    class DirectXShader : public Shader
+    class D3D12Shader : public Shader
     {
     public:
-        DirectXShader(const String& Name, const Path& Filepath);
+        D3D12Shader(const String& Name, const Path& Filepath);
 
         bool Compile() override;
         bool Link() override;

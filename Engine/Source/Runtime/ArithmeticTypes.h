@@ -2,6 +2,7 @@
 #include "Runtime/Types.h"
 #include "Runtime/TypeTraits.h"
 #include "Interfaces/Equatable.h"
+#include "Interfaces/Comparable.h"
 
 namespace Nova
 {

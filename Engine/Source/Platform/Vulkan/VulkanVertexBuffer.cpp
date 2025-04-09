@@ -1,6 +1,6 @@
 ﻿#include "VulkanVertexBuffer.h"
 #include "Platform/PlatformRenderer.h"
-#include "Core/Application.h"
+#include "Runtime/Application.h"
 #include <vk_mem_alloc.h>
 
 namespace Nova

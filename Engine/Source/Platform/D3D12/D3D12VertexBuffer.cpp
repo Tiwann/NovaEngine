@@ -1,21 +1,21 @@
-#include "DirectXVertexBuffer.h"
+#include "D3D12VertexBuffer.h"
 #include "Platform/PlatformRenderer.h"
-#include "Core/Application.h"
+#include "Runtime/Application.h"
 
 namespace Nova
 {
-    DirectXVertexBuffer::~DirectXVertexBuffer()
+    D3D12VertexBuffer::~D3D12VertexBuffer()
     {
-        DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         Renderer->WaitDeviceIdle();
         m_Handle->Release();
         m_Handle = nullptr;
         m_Ready = false;
     }
 
-    DirectXVertexBuffer::DirectXVertexBuffer(const Vertex* Data, size_t Count) : VertexBuffer(Data, Count)
+    D3D12VertexBuffer::D3D12VertexBuffer(const Vertex* Data, size_t Count) : VertexBuffer(Data, Count)
     {
-        const DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         m_Handle = Renderer->CreateBuffer(L"Vertex Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(Vertex));
         if (!m_Handle)
         {
@@ -23,13 +23,13 @@ namespace Nova
             g_Application->RequireExit();
             return;
         }
-        DirectXVertexBuffer::SendData(Data, Count);
+        D3D12VertexBuffer::SendData(Data, Count);
     }
 
-    void DirectXVertexBuffer::SendData(const Vertex* Data, size_t Count)
+    void D3D12VertexBuffer::SendData(const Vertex* Data, size_t Count)
     {
         VertexBuffer::SendData(Data, Count);
-        DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
 
         if (m_Handle && m_Ready)
         {
@@ -95,9 +95,9 @@ namespace Nova
         m_Ready = true;
     }
 
-    void DirectXVertexBuffer::Bind() const
+    void D3D12VertexBuffer::Bind() const
     {
-        const DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         ID3D12GraphicsCommandList* Cmd = Renderer->GetCurrentGraphicsCommandBuffer();
 
         D3D12_VERTEX_BUFFER_VIEW VertexBufferView;
@@ -107,7 +107,7 @@ namespace Nova
         Cmd->IASetVertexBuffers(0, 1, &VertexBufferView);
     }
 
-    ID3D12Resource* DirectXVertexBuffer::GetHandle() const
+    ID3D12Resource* D3D12VertexBuffer::GetHandle() const
     {
         return m_Handle;
     }

@@ -16,7 +16,7 @@ namespace Nova
     {
         EditorWindow::OnInit();
 
-        m_FrameBuffer = FrameBuffer::Create();
+        m_FrameBuffer = FrameBuffer::Create(TODO);
         m_FrameBuffer->CreateAttachment(FrameBufferAttachment::Color);
         m_FrameBuffer->CreateAttachment(FrameBufferAttachment::Depth);
         

@@ -4,12 +4,12 @@
 struct ID3D12Resource;
 namespace Nova
 {
-    class DirectXIndexBuffer : public IndexBuffer
+    class D3D12IndexBuffer : public IndexBuffer
     {
     public:
-        DirectXIndexBuffer() = default;
-        DirectXIndexBuffer(const u32* Indices, size_t Count);
-        ~DirectXIndexBuffer() override;
+        D3D12IndexBuffer() = default;
+        D3D12IndexBuffer(const u32* Indices, size_t Count);
+        ~D3D12IndexBuffer() override;
         void SendData(const u32* Indices, size_t Count) override;
         void Bind() const override;
 

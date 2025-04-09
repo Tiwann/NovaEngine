@@ -1,5 +1,6 @@
 ﻿#include "LightComponent.h"
 #include "Editor/EditorGUI.h"
+#include "Containers/StaticArray.h"
 
 namespace Nova
 {

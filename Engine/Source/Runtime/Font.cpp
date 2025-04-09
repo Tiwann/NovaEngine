@@ -5,7 +5,7 @@ namespace Nova
 {
     Font::Font(const String& Name) : Asset(Name)
     {
-        NOVA_ASSERT(false, "Fonts are not implemented yet!");
+        Assert(false, "Fonts are not implemented yet!");
     }
 
     String Font::GetAssetType() const
@@ -15,7 +15,7 @@ namespace Nova
 
     bool Font::LoadFromFile(const Path& Filepath)
     {
-        NOVA_ASSERT(false, "Fonts are not implemented yet!");
+        Assert(false, "Fonts are not implemented yet!");
         return false;
     }
     

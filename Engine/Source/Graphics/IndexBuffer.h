@@ -1,7 +1,9 @@
 #pragma once
+#include "Renderer.h"
 #include "Containers/Buffer.h"
 #include "Runtime/Types.h"
 #include "Containers/Array.h"
+#include "Renderer.h"
 
 namespace Nova
 {
@@ -16,9 +18,9 @@ namespace Nova
         virtual void SendData(const u32* Indices, size_t Count);
         void         SendData(const Array<u32>& Indices);
 
-        static IndexBuffer* Create();
-        static IndexBuffer* Create(const u32* Indices, size_t Count);
-        static IndexBuffer* Create(const Array<u32>& Indices);
+        static IndexBuffer* Create(GraphicsApi const& GraphicsApi);
+        static IndexBuffer* Create(const u32* Indices, size_t Count, GraphicsApi const& GraphicsApi);
+        static IndexBuffer* Create(const Array<u32>& Indices, GraphicsApi const& GraphicsApi);
 
         size_t Count() const;
     protected:

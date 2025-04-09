@@ -1,8 +1,6 @@
-﻿#include "Core/Cursors.h"
-
+﻿#include "Runtime/Cursors.h"
 #include "Window.h"
 #include <GLFW/glfw3.h>
-
 
 namespace Nova
 {

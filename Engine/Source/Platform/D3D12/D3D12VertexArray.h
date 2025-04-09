@@ -3,10 +3,10 @@
 
 namespace Nova
 {
-    class DirectXVertexArray : public VertexArray
+    class D3D12VertexArray : public VertexArray
     {
     public:
-        DirectXVertexArray() = default;
+        D3D12VertexArray() = default;
         void Bind() const override;
         void Unbind() const override;
         void SetBufferLayout(const VertexBufferLayout& Layout) override;

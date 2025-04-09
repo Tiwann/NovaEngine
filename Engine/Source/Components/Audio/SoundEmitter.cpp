@@ -91,8 +91,8 @@ namespace Nova
 
         if (ImGui::TreeNode("Sound"))
         {
-            const String GUID = m_Sound ? m_Sound->GetGuid().GetString() : "None";
-            UI::Text(Format("GUID: {}", GUID));
+            const String UUID = m_Sound ? m_Sound->GetGuid().GetString() : "None";
+            UI::Text(Format("UUID: {}", UUID));
             if(m_Sound)
             {
                 UI::Text(Format("Channels: {}", m_Sound->GetChannels()));

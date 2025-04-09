@@ -6,22 +6,17 @@ namespace Nova
     {
         return (u32)Major << 16 | Minor;
     }
-    
-    bool Version::operator<(const Version& Other) const
+
+    int Version::Compare(const Version& Other) const
     {
         if (Major < Other.Major)
-            return true;
+            return -1;
         if (Major > Other.Major)
-            return false;
+            return 1;
         if (Major == Other.Major && Minor < Other.Minor)
-            return true;
+            return -1;
         if (Major == Other.Major && Minor > Other.Minor)
-            return false;
-        return false;
-    }
-    
-    bool Version::operator==(const Version& Other) const
-    {
-        return Major == Other.Major && Minor == Other.Minor;
+            return 1;
+        return 0;
     }
 }

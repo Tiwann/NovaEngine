@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Graphics/Texture2D.h"
 
-typedef i32 GLint;
+typedef Nova::i32 GLint;
 
 namespace Nova
 {
@@ -12,16 +12,16 @@ namespace Nova
         ~OpenGLTexture2D() override;
 
         void SetTextureParameters(const TextureParams& Params) override;
-        void SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format) override;
-        Ref<Image> GetImage() const override;
+        void SetData(u8* Data, u32 Width, u32 Height, Format Format) override;
+        SharedPtr<Image> GetImage() const override;
         void Bind() const override;
         void Unbind() const override;
 
         uintptr_t GetHandle() const override;
         bool GetPixels(Buffer<u8>& OutPixels) const override;
     private:
-        u32 FormatToOpenGLFormat(ImageFormat Format) const;
-        u32 FormatToType(ImageFormat Format) const;
+        u32 FormatToOpenGLFormat(Format Format) const;
+        u32 FormatToType(Format Format) const;
 
     private:
         u32 m_Handle{UINT32_MAX};

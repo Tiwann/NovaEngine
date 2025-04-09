@@ -1,11 +1,11 @@
-#include "DirectXRenderer.h"
-#include "Core/Application.h"
-#include "Core/Window.h"
+#include "D3D12Renderer.h"
+#include "Runtime/Application.h"
+#include "Runtime/Window.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/VertexBuffer.h"
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#include "Graphics/IndexBuffer.h"
-#include "Graphics/VertexBuffer.h"
 
 
 namespace Nova
@@ -27,7 +27,7 @@ namespace Nova
     }
 #endif
     
-    bool DirectXRenderer::Initialize()
+    bool D3D12Renderer::Initialize()
     {
         m_ImageCount = (u32)m_Application->GetGraphicsSettings().BufferType;
         
@@ -222,16 +222,16 @@ namespace Nova
         return true;
     }
 
-    void DirectXRenderer::Destroy()
+    void D3D12Renderer::Destroy()
     {
     }
 
-    void DirectXRenderer::ClearDepth(float Depth)
+    void D3D12Renderer::ClearDepth(float Depth)
     {
         
     }
 
-    void DirectXRenderer::ClearColor(const Color& Color)
+    void D3D12Renderer::ClearColor(const Color& Color)
     {
         const LONG WindowWidth = g_Application->GetWindow()->GetWidth<LONG>();
         const LONG WindowHeight = g_Application->GetWindow()->GetHeight<LONG>();
@@ -242,7 +242,7 @@ namespace Nova
         Cmd->ClearRenderTargetView({RenderTargetViewHandle}, (const f32*)&Color, 0, &ClearRect);
     }
 
-    bool DirectXRenderer::BeginFrame()
+    bool D3D12Renderer::BeginFrame()
     {
         if (ShouldRecreateSwapchain)
         {
@@ -336,7 +336,7 @@ namespace Nova
         return true;
     }
 
-    void DirectXRenderer::EndFrame()
+    void D3D12Renderer::EndFrame()
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         ID3D12Resource* RenderTarget = GetCurrentRenderTarget();
@@ -354,7 +354,7 @@ namespace Nova
         }
     }
 
-    void DirectXRenderer::Present()
+    void D3D12Renderer::Present()
     {
         const GraphicsSettings& Settings = g_Application->GetGraphicsSettings();
         if (DX_FAILED(m_Swapchain->Present(Settings.VSync, 0)))
@@ -377,7 +377,7 @@ namespace Nova
         FenceValue++;
     }
 
-    void DirectXRenderer::WaitDeviceIdle()
+    void D3D12Renderer::WaitDeviceIdle()
     {
         ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence;
         UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
@@ -390,18 +390,18 @@ namespace Nova
         }
     }
 
-    void DirectXRenderer::SetViewportRect(Vector2 Position, Vector2 Size)
+    void D3D12Renderer::SetViewportRect(Vector2 Position, Vector2 Size)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         const D3D12_VIEWPORT Viewport = CD3DX12_VIEWPORT(Position.x, Position.y, Position.x + Size.x, Position.y + Size.y);
         Cmd->RSSetViewports(1, &Viewport);
     }
 
-    void DirectXRenderer::Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader)
+    void D3D12Renderer::Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader)
     {
     }
 
-    void DirectXRenderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void D3D12Renderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         VertexBuffer->Bind();
         IndexBuffer->Bind();
@@ -428,46 +428,46 @@ namespace Nova
         Cmd->IASetPrimitiveTopology(Topology);
     }
 
-    void DirectXRenderer::DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color)
+    void D3D12Renderer::DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color)
     {
     }
 
-    void DirectXRenderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents,
+    void D3D12Renderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents,
         f32 Thickness, const Color& Color)
     {
     }
 
-    void DirectXRenderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
+    void D3D12Renderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
     {
     }
 
-    void DirectXRenderer::Blit()
+    void D3D12Renderer::Blit()
     {
     }
 
-    void DirectXRenderer::SetCullMode(CullMode Mode)
+    void D3D12Renderer::SetCullMode(CullMode Mode)
     {
         
     }
 
-    void DirectXRenderer::SetDepthFunction(DepthFunction DepthFunction)
+    void D3D12Renderer::SetDepthFunction(DepthFunction DepthFunction)
     {
     }
 
-    void DirectXRenderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation,
+    void D3D12Renderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation,
         BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
     {
     }
 
-    void DirectXRenderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
+    void D3D12Renderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
     {
     }
 
-    void DirectXRenderer::SetBlending(bool Enabled)
+    void D3D12Renderer::SetBlending(bool Enabled)
     {
     }
 
-    ID3D12GraphicsCommandList* DirectXRenderer::CreateOneTimeCommandBuffer() const
+    ID3D12GraphicsCommandList* D3D12Renderer::CreateOneTimeCommandBuffer() const
     {
         ID3D12CommandAllocator* CommandAllocator = GetCurrentCommandAllocator();
         ID3D12GraphicsCommandList* Cmd = nullptr;
@@ -480,7 +480,7 @@ namespace Nova
     }
 
 
-    ID3D12Resource* DirectXRenderer::CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const
+    ID3D12Resource* D3D12Renderer::CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const
     {
         const CD3DX12_HEAP_PROPERTIES HeapProps(Type);
         const CD3DX12_RESOURCE_DESC BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(Size);
@@ -501,21 +501,21 @@ namespace Nova
         return OutResource;
     }
 
-    ID3D12Resource* DirectXRenderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, ImageFormat Format) const
+    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const
     {
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)
         {
-        case ImageFormat::None:
+        case Format::None:
             DXFormat = DXGI_FORMAT_UNKNOWN;
             break;
-        case ImageFormat::RGBA8:
+        case Format::RGBA8:
             DXFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             break;
-        case ImageFormat::RGBA16:
+        case Format::RGBA16:
             DXFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
             break;
-        case ImageFormat::RGBA32F:
+        case Format::RGBA32F:
             DXFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
             break;
         }

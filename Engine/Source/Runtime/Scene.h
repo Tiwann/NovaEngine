@@ -5,6 +5,7 @@
 #include "Entity.h"
 #include "Containers/Function.h"
 #include "Containers/String.h"
+#include "Containers/BumpAllocator.h"
 #include "Physics/PhysicsWorld2D.h"
 #include "Physics/PhysicsWorld3D.h"
 
@@ -22,7 +23,7 @@ namespace Nova
         using ConstIterator = Array<Entity*>::ConstIterator;
         friend class Physics2D;
 
-        Scene() = default;
+        explicit Scene(Application* Owner) : m_Owner(Owner) {}
         ~Scene() = default;
          
         void OnInit();
@@ -62,9 +63,12 @@ namespace Nova
         ConstIterator end() const;
 
         Array<Entity*> GetEntities();
+
+        Application* GetOwner() const { return m_Owner; }
     private:
         UUID m_UUID;
         String m_Name;
+        Application* m_Owner = nullptr;
         BumpAllocator<Entity, 8192> m_EntityPool;
         Array<Entity*> m_Entities;
         PhysicsWorld2D m_PhysicsWorld2D;

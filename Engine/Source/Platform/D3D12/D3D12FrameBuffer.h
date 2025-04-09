@@ -3,10 +3,10 @@
 
 namespace Nova
 {
-    class DirectXFrameBuffer : public FrameBuffer
+    class D3D12FrameBuffer : public FrameBuffer
     {
     public:
-        DirectXFrameBuffer() = default;
+        D3D12FrameBuffer() = default;
         void Destroy() override;
         void Bind() override;
         void Unbind() override;

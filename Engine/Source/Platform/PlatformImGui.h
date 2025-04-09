@@ -16,6 +16,6 @@ namespace ImGui
 
 namespace ImGuizmo
 {
-    IMGUI_API void DecomposeMatrixToComponents(const f32* matrix, Nova::Vector3& translation, Nova::Vector3& rotation, Nova::Vector3& scale);
-    IMGUI_API void RecomposeMatrixFromComponents(const Nova::Vector3& translation, const Nova::Vector3& rotation, const Nova::Vector3& scale, f32* matrix);
+    IMGUI_API void DecomposeMatrixToComponents(const Nova::f32* matrix, Nova::Vector3& translation, Nova::Vector3& rotation, Nova::Vector3& scale);
+    IMGUI_API void RecomposeMatrixFromComponents(const Nova::Vector3& translation, const Nova::Vector3& rotation, const Nova::Vector3& scale, Nova::f32* matrix);
 }

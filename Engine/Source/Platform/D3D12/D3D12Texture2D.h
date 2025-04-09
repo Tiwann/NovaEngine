@@ -5,15 +5,14 @@ struct ID3D12Resource;
 
 namespace Nova
 {
-    class DirectXTexture2D : public Texture2D
+    class D3D12Texture2D : public Texture2D
     {
     public:
-        DirectXTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot);
+        D3D12Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot);
 
         void SetTextureParameters(const TextureParams& Params) override;
-        void SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format) override;
-        void SetData(const Ref<Image>& Image) override;
-        Ref<Image> GetImage() const override;
+        void SetData(u8* Data, u32 Width, u32 Height, Format Format) override;
+        SharedPtr<Image> GetImage() const override;
         void Bind() const override;
         void Unbind() const override;
         uintptr_t GetHandle() const override;

@@ -1,6 +1,7 @@
 #pragma once
 #include "Runtime/Assertion.h"
 #include "Containers/Function.h"
+#include "Containers/Array.h"
 
 #define NOVA_BIND_EVENT(Event, Func) (Event).BindMember(this, (Func))
 #define NOVA_BIND_EVENT_AS(Event, As, Func) (Event).BindMember<As>(this, (Func))

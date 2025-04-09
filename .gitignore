@@ -4,4 +4,4 @@
 /.idea
 /.vs
 /.vscode
-/cmake-*/
+/cmake*

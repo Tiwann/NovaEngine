@@ -1,9 +1,8 @@
 #include "TextureManager.h"
-
-#include "Core/Log.h"
-#include "Core/LogVerbosity.h"
-#include "Core/Graphics/Texture2D.h"
-#include "Core/Containers/StringFormat.h"
+#include "Containers/StringFormat.h"
+#include "Graphics/Texture2D.h"
+#include "Runtime/Log.h"
+#include "Runtime/LogVerbosity.h"
 
 namespace Nova
 {

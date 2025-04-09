@@ -7,7 +7,7 @@ namespace Nova
     class WindowsPopupMessage : public PopupMessage
     {
     public:
-        WindowsPopupMessage(NOVA_POPUPMESSAGE_SIGNATURE);
+        WindowsPopupMessage(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
         PopupMessageResult Show() override;
         
         using ResponseConvertor = Map<PopupMessageResponse, i32>;

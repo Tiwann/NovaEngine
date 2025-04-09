@@ -33,30 +33,7 @@ namespace Nova
     {
         TextureFilter Filter;
         TextureWrap Wrap;
-        ImageFormat Format;
-        
-        TextureParams& WithFilter(TextureFilter NewFilter)
-        {
-            Filter = NewFilter;
-            return *this;
-        }
-
-        TextureParams& WithWrap(TextureWrap NewWrap)
-        {
-            Wrap = NewWrap;
-            return *this;
-        }
-
-        TextureParams& WithFormat(ImageFormat Fmt)
-        {
-            Format = Fmt;
-            return *this;
-        }
-
-        bool operator==(const TextureParams& Other) const
-        {
-            return Filter == Other.Filter && Wrap == Other.Wrap && Format == Other.Format;
-        }
+        Format Format;
     };
     
     class Texture2D : public Asset
@@ -73,9 +50,9 @@ namespace Nova
 
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
-        virtual void SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format) = 0;
-        void SetData(const Ref<Image>& Image);
-        virtual Ref<Image> GetImage() const = 0;
+        virtual void SetData(u8* Data, u32 Width, u32 Height, Format Format) = 0;
+        void SetData(const SharedPtr<Image>& Image);
+        virtual SharedPtr<Image> GetImage() const = 0;
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
         virtual uintptr_t GetHandle() const = 0;
@@ -84,7 +61,7 @@ namespace Nova
         u32 GetWidth() const;
         u32 GetHeight() const;
         u32 GetSlot() const;
-        ImageFormat GetFormat() const;
+        Format GetFormat() const;
         void SetSlot(u32 Slot);
         virtual bool GetPixels(Buffer<u8>& OutPixels) const = 0;
 
@@ -99,7 +76,7 @@ namespace Nova
     protected:
         u32 m_Width{0}, m_Height{0};
         u32 m_Slot{0};
-        ImageFormat m_Format{ImageFormat::RGBA8};
+        Format m_Format{Format::NONE};
         TextureParams m_Params;
     };
 }

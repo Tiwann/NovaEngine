@@ -58,7 +58,7 @@ namespace Nova
             PointerType Where = GetAvailableSpace();
             if(!Where)
             {
-                NOVA_ASSERT(false, "BumpAllocator::New No space available");
+                Assert(false, "BumpAllocator::New No space available");
             }
             return std::construct_at(Where, std::forward<Args>(Arguments)...);
         }
@@ -66,7 +66,7 @@ namespace Nova
         void Free(PointerType Ptr)
         {
             if(!Ptr) return;
-            NOVA_ASSERT(Ptr >= &m_Data[0] && Ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
+            Assert(Ptr >= &m_Data[0] && Ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
             Ptr->~T();
             SizeType Index = Ptr - &m_Data[0];
             m_AvailableFlags[Index] = true;

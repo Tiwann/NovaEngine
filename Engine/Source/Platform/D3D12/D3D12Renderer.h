@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include "Graphics/Renderer.h"
 #include "Runtime/LogCategory.h"
-#include <directx/d3dx12.h>
+#include "Runtime/Image.h"
+#include <d3d12.h>
 #include <dxgi1_6.h>
 
-#include "Runtime/Image.h"
 
-NOVA_DECLARE_LOG_CATEGORY_STATIC(DirectX, "D3D12");
-#define NOVA_DIRECTX_ERROR(message, ...) NOVA_LOG(DirectX, Verbosity::Error, message, __VA_ARGS__)
-#define NOVA_DIRECTX_WARNING(message, ...) NOVA_LOG(DirectX, Verbosity::Warning, message, __VA_ARGS__)
+NOVA_DECLARE_LOG_CATEGORY_STATIC(D3D12, "D3D12");
+#define NOVA_DIRECTX_ERROR(message, ...) NOVA_LOG(D3D12, Verbosity::Error, message, __VA_ARGS__)
+#define NOVA_DIRECTX_WARNING(message, ...) NOVA_LOG(D3D12, Verbosity::Warning, message, __VA_ARGS__)
 #define DX_FAILED(Result) FAILED(Result)
     
 namespace Nova
@@ -24,11 +24,11 @@ namespace Nova
         u64                         FenceValue = 0;
     };
     
-    class DirectXRenderer : public Renderer
+    class D3D12Renderer : public Renderer
     {
     public:
-        DirectXRenderer(Application* Owner) : Renderer(Owner) {}
-        ~DirectXRenderer() override = default;
+        D3D12Renderer(Application* Owner) : Renderer(Owner, GraphicsApi::D3D12) {}
+        ~D3D12Renderer() override = default;
 
         bool Initialize() override;
         void Destroy() override;
@@ -52,7 +52,7 @@ namespace Nova
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
         ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
-        ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, ImageFormat Format) const;
+        ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const;
     public:
         ID3D12Device9*              GetDevice() const { return m_Device; }
         u32                         GetImageCount() const { return m_ImageCount; }
@@ -78,7 +78,7 @@ namespace Nova
         ID3D12CommandQueue*         m_CommandQueue = nullptr;
         ID3D12DescriptorHeap*       m_RenderTargetViewDescriptorHeap = nullptr;
         ID3D12DescriptorHeap*       m_ImGuiFontDescriptorHeap = nullptr;
-        D3D12FrameData              m_FrameData[NOVA_MAX_FRAMES_IN_FLIGHT] = {};
+        D3D12FrameData              m_FrameData[3] = {};
         HANDLE                      m_FenceEvent = nullptr;
     };
 }

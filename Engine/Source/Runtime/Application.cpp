@@ -7,6 +7,14 @@
 #include "Scene.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Containers/ScopedPointer.h"
+#include "Utility.h"
+#include "Graphics/Renderer.h"
+#include "Audio/AudioSystem.h"
+#include "ResourceManager/ResourceManager.h"
+#include "ResourceManager/ShaderManager.h"
+#include "ResourceManager/TextureManager.h"
+#include "ResourceManager/SoundManager.h"
+
 
 #include <GLFW/glfw3.h>
 
@@ -61,19 +69,7 @@ namespace Nova
         
         m_MainWindow = new Window(m_Configuration);
 
-        if(File::Exists(m_Configuration.IconPath))
-        {
-            const ScopedPointer Icon = new Image(m_Configuration.IconPath, Format::R32G32B32A32_FLOAT);
-            m_MainWindow->SetIcon(Icon);
-        } else
-        {
-            NOVA_LOG(Application, Verbosity::Warning, "Failed to load custom window icon! Loading default from memory.");
-            using namespace MemoryData;
-            const BufferView DefaultIconData(NovaEngineLogo, std::size(NovaEngineLogo));
-            const Ref<Image> DefaultIcon = Image::Create(DefaultIconData, ImageFormat::RGBA8);
-            m_MainWindow->SetIcon(DefaultIcon);
-        }
-        
+
         glfwSetWindowUserPointer(m_MainWindow->GetNativeWindow(), this);
         // Set window callbacks
         glfwSetWindowCloseCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow*)
@@ -207,7 +203,7 @@ namespace Nova
         
         if(m_Configuration.WithEditor)
         {
-            m_ImGuiRenderer = ImGuiRenderer::Create();
+            m_ImGuiRenderer = ImGuiRenderer::Create(TODO);
             if (!m_ImGuiRenderer->Initialize(this))
             {
                 delete m_ImGuiRenderer;

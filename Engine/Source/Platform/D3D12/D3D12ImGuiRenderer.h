@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    class DirectXImGuiRenderer : public ImGuiRenderer
+    class D3D12ImGuiRenderer : public ImGuiRenderer
     {
     public:
         bool Initialize(Application* Application) override;

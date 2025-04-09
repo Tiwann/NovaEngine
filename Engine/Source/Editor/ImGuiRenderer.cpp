@@ -2,14 +2,22 @@
 #include "Editor/Font.h"
 #include "Runtime/Application.h"
 #include "Platform/PlatformImGuiRenderer.h"
+#include "Graphics/Renderer.h"
 #include <ImGuizmo.h>
 
 
 namespace Nova
 {
-    ImGuiRenderer* ImGuiRenderer::Create()
+    ImGuiRenderer* ImGuiRenderer::Create(GraphicsApi const& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(ImGuiRenderer);
+        switch (GraphicsApi) {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLImGuiRenderer();
+        case GraphicsApi::Vulkan: return new VulkanImGuiRenderer();
+        case GraphicsApi::D3D12: return new D3D12ImGuiRenderer();
+        default: return nullptr;
+        }
+
     }
 
     bool ImGuiRenderer::Initialize(Application* Application)

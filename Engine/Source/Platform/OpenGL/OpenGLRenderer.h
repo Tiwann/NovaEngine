@@ -15,7 +15,7 @@ namespace Nova
     class OpenGLRenderer : public Renderer
     {
     public:
-        OpenGLRenderer(Application* Owner) : Renderer(Owner) {}
+        OpenGLRenderer(Application* Owner) : Renderer(Owner, GraphicsApi::OpenGL) {}
         ~OpenGLRenderer() override = default;
 
         bool Initialize() override;

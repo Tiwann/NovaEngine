@@ -5,12 +5,12 @@ struct ID3D12Resource;
 
 namespace Nova
 {
-    class DirectXVertexBuffer : public VertexBuffer
+    class D3D12VertexBuffer : public VertexBuffer
     {
     public:
-        DirectXVertexBuffer() = default;
-        DirectXVertexBuffer(const Vertex* Data, size_t Count);
-        ~DirectXVertexBuffer() override;
+        D3D12VertexBuffer() = default;
+        D3D12VertexBuffer(const Vertex* Data, size_t Count);
+        ~D3D12VertexBuffer() override;
 
         void SendData(const Vertex* Data, size_t Count) override;
         void Bind() const override;

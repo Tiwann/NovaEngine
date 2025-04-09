@@ -1,7 +1,8 @@
 #include "WindowsPopupMessage.h"
-#include "Core/Application.h"
-#include "Core/Window.h"
+#include "Runtime/Application.h"
+#include "Runtime/Window.h"
 
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
@@ -39,7 +40,7 @@ namespace Nova
         { PopupMessageIcon::Info, MB_ICONINFORMATION }
     };
     
-    WindowsPopupMessage::WindowsPopupMessage(NOVA_POPUPMESSAGE_SIGNATURE) : PopupMessage(Title, Message, Response, Icon)
+    WindowsPopupMessage::WindowsPopupMessage(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon) : PopupMessage(Title, Message, Response, Icon)
     {
     }
 

@@ -29,8 +29,13 @@ namespace Nova
         return {};
     }
 
+    const char* PhysicsWorld3DBroadPhaseLayerInterface::GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const
+    {
+        return "Broadphase layer";
+    }
+
     bool PhysicsWorld3DObjectVsBroadPhaseLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer1,
-        JPH::BroadPhaseLayer inLayer2) const
+                                                                    JPH::BroadPhaseLayer inLayer2) const
     {
         return ObjectVsBroadPhaseLayerFilter::ShouldCollide(inLayer1, inLayer2);
     }

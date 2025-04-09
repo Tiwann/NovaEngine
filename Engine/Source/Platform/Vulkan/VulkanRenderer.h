@@ -21,7 +21,7 @@ namespace Nova
         VkCommandBuffer CommandBuffer;
         VkImageView ImageView;
         VkImage Image;
-        VkFormat ImageFormat;
+        VkFormat Format;
         VkSemaphore SubmitSemaphore;
         VkSemaphore PresentSemaphore;
         VkFence Fence;
@@ -115,7 +115,7 @@ namespace Nova
         VkPresentModeKHR                  m_PresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
         VkSwapchainKHR                    m_Swapchain = nullptr;
         VkFormat                          m_SwapchainImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
-        VkFrameData                       m_Frames[NOVA_MAX_FRAMES_IN_FLIGHT] = { };
+        VkFrameData                       m_Frames[3] = { };
         VkCommandPool                     m_CommandPool = nullptr;
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;

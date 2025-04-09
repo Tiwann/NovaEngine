@@ -158,10 +158,10 @@ namespace Nova
                 CombinedMesh->Vertices.Add(Vertex);
             }
             
-            CombinedMesh->VertexArray = VertexArray::Create();
+            CombinedMesh->VertexArray = VertexArray::Create(TODO);
             CombinedMesh->VertexArray->Bind();
             
-            CombinedMesh->VertexBuffer = VertexBuffer::Create();
+            CombinedMesh->VertexBuffer = VertexBuffer::Create(TODO, TODO);
             CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
             CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             m_Meshes.Add(CombinedMesh);
@@ -261,10 +261,10 @@ namespace Nova
                     CombinedMesh->Vertices.Add(Vertex);
                 }
 
-                CombinedMesh->VertexArray = VertexArray::Create();
+                CombinedMesh->VertexArray = VertexArray::Create(TODO);
                 CombinedMesh->VertexArray->Bind();
 
-                CombinedMesh->VertexBuffer = VertexBuffer::Create();
+                CombinedMesh->VertexBuffer = VertexBuffer::Create(TODO, TODO);
                 CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
                 CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             }
@@ -320,10 +320,10 @@ namespace Nova
                 });
             }
 
-            CombinedMesh->VertexArray = VertexArray::Create();
+            CombinedMesh->VertexArray = VertexArray::Create(TODO);
             CombinedMesh->VertexArray->Bind();
 
-            CombinedMesh->VertexBuffer = VertexBuffer::Create();
+            CombinedMesh->VertexBuffer = VertexBuffer::Create(TODO, TODO);
             CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
             CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             m_Meshes.Add(CombinedMesh);

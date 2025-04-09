@@ -1,8 +1,6 @@
-#pragma once#include "Macros.h"
+#pragma once
 #include "Containers/MulticastDelegate.h"
 #include "Containers/String.h"
-
-#define NOVA_POPUPMESSAGE_SIGNATURE const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon
 
 namespace Nova
 {
@@ -46,9 +44,13 @@ namespace Nova
     {
         using PopupMessageAction = MulticastDelegate<void()>;
     public:
-        NOVA_NOT_COPYABLE_NOT_MOVABLE(PopupMessage);
-        PopupMessage(NOVA_POPUPMESSAGE_SIGNATURE);
+        PopupMessage(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
         virtual ~PopupMessage();
+
+        PopupMessage(const PopupMessage&) = delete;
+        PopupMessage& operator=(const PopupMessage&) = delete;
+        PopupMessage(PopupMessage&&) = delete;
+        PopupMessage& operator=(PopupMessage&&) = delete;
         
         String Title;
         String Message;
@@ -59,6 +61,6 @@ namespace Nova
         
         virtual PopupMessageResult Show() = 0;
 
-        static PopupMessage* Create(NOVA_POPUPMESSAGE_SIGNATURE);
+        static PopupMessage* Create(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
     };
 }

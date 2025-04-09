@@ -65,7 +65,7 @@ namespace Nova
         void Free(PointerType Ptr)
         {
             if(!Ptr) return;
-            NOVA_ASSERT(Ptr >= &m_Data[0] && Ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
+            Assert(Ptr >= &m_Data[0] && Ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
             Ptr->~T();
             SizeType Index = Ptr - &m_Data[0];
             m_AvailableFlags[Index] = true;

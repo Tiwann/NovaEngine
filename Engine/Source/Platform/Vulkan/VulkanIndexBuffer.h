@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Graphics/IndexBuffer.h"
 #include "Platform/PlatformRenderer.h"
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
 
 namespace Nova
 {

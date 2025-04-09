@@ -32,7 +32,7 @@ namespace Nova
     {
         Texture2D* Texture = Create(Name, 0, 0, Params, Slot);
         const ScopedBuffer<u8> RawImageData = File::ReadToBuffer(Filepath);
-        const Ref<Image> ImageData = Image::Create(BufferView<u8>(RawImageData.AsBuffer()), ImageFormat::RGBA8);
+        const SharedPtr<Image> ImageData = Image::Create(BufferView<u8>(RawImageData.AsBuffer()), Format::RGBA8);
         Texture->SetData(ImageData);
         return Texture;
     }
@@ -44,7 +44,7 @@ namespace Nova
         const size_t Size = (size_t)Width * (size_t)Height * 4ULL;
         u8* Data = new u8[Size]{};
         memset(Data, 0xffui8, Size);
-        Texture->SetData(Data, Width, Height, ImageFormat::RGBA8);
+        Texture->SetData(Data, Width, Height, Format::RGBA8);
         delete[] Data;
         return Texture;
     }
@@ -54,7 +54,7 @@ namespace Nova
         return "Texture2D";
     }
 
-    void Texture2D::SetData(const Ref<Image>& Image)
+    void Texture2D::SetData(const SharedPtr<Image>& Image)
     {
         SetData((u8*)Image->GetData(), Image->GetWidth(), Image->GetHeight(), Image->GetFormat());
     }
@@ -79,7 +79,7 @@ namespace Nova
         return m_Slot;
     }
     
-    ImageFormat Texture2D::GetFormat() const
+    Format Texture2D::GetFormat() const
     {
         return m_Format;
     }
@@ -91,7 +91,7 @@ namespace Nova
 
     Sprite Texture2D::CreateSprite(const Vector2& Position, const Vector2& Size)
     {
-        NOVA_ASSERT(Position.x >= 0 && Position.x < (f32)m_Width &&
+        Assert(Position.x >= 0 && Position.x < (f32)m_Width &&
                     Position.y >= 0 && Position.y < (f32)m_Height &&
                     Position.x + Size.x <= (f32)m_Width && 
                     Position.y + Size.y <= (f32)m_Height, "Failed to created sprite");

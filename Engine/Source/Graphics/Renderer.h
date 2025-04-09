@@ -80,7 +80,7 @@ namespace Nova
     class Renderer
     {
     public:
-        Renderer(Application* Owner) : m_Application(Owner) {}
+        Renderer(Application* Owner, const GraphicsApi& GraphicsApi) : m_Application(Owner), m_GraphicsApi(GraphicsApi) {}
         static Renderer* Create(Application* Owner, const GraphicsApi& GraphicsApi);
 
         bool ShouldRecreateSwapchain = false;
@@ -110,11 +110,13 @@ namespace Nova
         void SetCurrentCamera(Camera* Camera);
         Camera* GetCurrentCamera();
         const Camera* GetCurrentCamera() const;
+        GraphicsApi GetGraphicsApi() const;
        
         static inline VertexBuffer* QuadVertexBuffer = nullptr;
         static inline VertexBuffer* CubeVertexBuffer = nullptr;
     protected:
         Camera* m_CurrentCamera = nullptr;
         Application* m_Application = nullptr;
+        GraphicsApi m_GraphicsApi;
     };
 }

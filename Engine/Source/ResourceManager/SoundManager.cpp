@@ -1,7 +1,7 @@
 #include "SoundManager.h"
-#include "Core/Application.h"
+#include "Runtime/Application.h"
 #include "Audio/AudioSystem.h"
-#include "Core/Containers/StringFormat.h"
+#include "Containers/StringFormat.h"
 
 
 namespace Nova

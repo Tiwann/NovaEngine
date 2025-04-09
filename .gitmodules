@@ -17,6 +17,7 @@
 [submodule "imgui"]
 	path = Engine/Dependencies/imgui
 	url = git@github.com:ocornut/imgui.git
+	branch = docking
 [submodule "imguizmo"]
 	path = Engine/Dependencies/imguizmo
 	url = git@github.com:CedricGuillemet/ImGuizmo.git
@@ -29,3 +30,12 @@
 [submodule "utfcpp"]
 	path = Engine/Dependencies/utfcpp
 	url = git@github.com:nemtrif/utfcpp.git
+[submodule "vorbis"]
+	path = Engine/Dependencies/vorbis
+	url = git@gitlab.xiph.org:xiph/vorbis.git
+[submodule "ogg"]
+	path = Engine/Dependencies/ogg
+	url = git@gitlab.xiph.org:xiph/ogg.git
+[submodule "json"]
+	path = Engine/Dependencies/json
+	url = git@github.com:nlohmann/json.git

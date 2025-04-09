@@ -1,5 +1,5 @@
 ﻿#include "VulkanTexture2D.h"
-#include "Core/Application.h"
+#include "Runtime/Application.h"
 #include "VulkanRenderer.h"
 
 namespace Nova
@@ -87,7 +87,7 @@ namespace Nova
         }
     }
 
-    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format)
+    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
     {
         const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
@@ -179,7 +179,7 @@ namespace Nova
         }
     }
     
-    Ref<Image> VulkanTexture2D::GetImage() const
+    SharedPtr<Image> VulkanTexture2D::GetImage() const
     {
         return nullptr;
     }
@@ -203,13 +203,13 @@ namespace Nova
         return false;
     }
 
-    VkFormat VulkanTexture2D::ConvertFormat(ImageFormat Format)
+    VkFormat VulkanTexture2D::ConvertFormat(Format Format)
     {
         switch (Format)
         {
-        case ImageFormat::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM;
-        case ImageFormat::RGBA16: return VK_FORMAT_R16G16B16A16_UNORM;
-        case ImageFormat::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case Format::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM;
+        case Format::RGBA16: return VK_FORMAT_R16G16B16A16_UNORM;
+        case Format::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
         }
         return VK_FORMAT_UNDEFINED;
     }

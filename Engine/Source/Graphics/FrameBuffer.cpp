@@ -2,7 +2,6 @@
 #include "Texture2D.h"
 #include "Platform/PlatformFrameBuffer.h"
 
-
 namespace Nova
 {
 
@@ -16,8 +15,20 @@ namespace Nova
         return m_Attachments;
     }
 
-    FrameBuffer* FrameBuffer::Create()
+    FrameBuffer* FrameBuffer::Create(const GraphicsApi& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(FrameBuffer);
+        switch (GraphicsApi)
+        {
+        case GraphicsApi::None:
+            return nullptr;
+        case GraphicsApi::OpenGL:
+            return new OpenGLFrameBuffer();
+        case GraphicsApi::Vulkan:
+            return new VulkanFrameBuffer();
+        case GraphicsApi::D3D12:
+            return new D3D12FrameBuffer();
+        default:
+            return nullptr;
+        }
     }
 }

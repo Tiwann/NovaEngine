@@ -1,5 +1,6 @@
 #pragma once
 #include "Containers/Array.h"
+#include "Renderer.h"
 
 namespace Nova
 {
@@ -40,7 +41,7 @@ namespace Nova
 
         AttachmentTexture& GetAttachment(Array<AttachmentTexture>::SizeType Index);
         const Array<AttachmentTexture>& GetAttachments() const;
-        static FrameBuffer* Create();
+        static FrameBuffer* Create(const GraphicsApi& GraphicsApi);
     protected:
         Array<AttachmentTexture> m_Attachments;
     };

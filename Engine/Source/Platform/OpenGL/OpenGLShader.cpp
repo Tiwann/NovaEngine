@@ -1,14 +1,13 @@
 ﻿#include "OpenGLShader.h"
-#include "Core/Assertion.h"
-#include "Core/Log.h"
-#include "Core/LogVerbosity.h"
+#include "Runtime/Assertion.h"
+#include "Runtime/Log.h"
+#include "Runtime/LogVerbosity.h"
+#include "Runtime/Entity.h"
 #include "Graphics/Texture2D.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/DirectionalLight.h"
 #include "Containers/StringFormat.h"
 #include <glad/gl.h>
-
-#include "Core/Entity.h"
 
 
 namespace Nova

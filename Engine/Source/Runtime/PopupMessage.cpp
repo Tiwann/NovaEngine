@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    PopupMessage::PopupMessage(NOVA_POPUPMESSAGE_SIGNATURE)
+    PopupMessage::PopupMessage(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon)
         : Title(Title), Message(Message), Response(Response), Icon(Icon)
     {
         
@@ -15,8 +15,12 @@ namespace Nova
         OnPopupMessageOpened.ClearAll();
     }
 
-    PopupMessage* PopupMessage::Create(NOVA_POPUPMESSAGE_SIGNATURE)
+    PopupMessage* PopupMessage::Create(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon)
     {
-        NOVA_OS_PLATFORM_RETURN(PopupMessage, Title, Message, Response, Icon);
+#if defined(NOVA_PLATFORM_WINDOWS)
+        return new WindowsPopupMessage(Title, Message, Response, Icon);
+#else
+        return new LinuxPopupMessage(Title, Message, Response, Icon);
+#endif
     }
 }

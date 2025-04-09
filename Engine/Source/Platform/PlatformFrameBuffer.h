@@ -1,13 +1,4 @@
 #pragma once
-
-#if defined(NOVA_PLATFORM_OPENGL)
 #include "OpenGL/OpenGLFrameBuffer.h"
-#endif
-
-#if defined(NOVA_PLATFORM_VULKAN)
 #include "Vulkan/VulkanFrameBuffer.h"
-#endif
-
-#if defined(NOVA_PLATFORM_DIRECTX)
-#include "DirectX/DirectXFrameBuffer.h"
-#endif
+#include "D3D12/D3D12FrameBuffer.h"

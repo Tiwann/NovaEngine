@@ -1,16 +1,16 @@
-#include "DirectXImGuiRenderer.h"
+#include "D3D12ImGuiRenderer.h"
 #include "Platform/PlatformRenderer.h"
-#include "Core/Window.h"
-#include "Core/Application.h"
+#include "Runtime/Window.h"
+#include "Runtime/Application.h"
 
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_dx12.h>
 #include <GLFW/glfw3.h>
-#include <ImGuizmo/ImGuizmo.h>
+#include <ImGuizmo.h>
 
 namespace Nova
 {
-    bool DirectXImGuiRenderer::Initialize(Application* Application)
+    bool D3D12ImGuiRenderer::Initialize(Application* Application)
     {
         ImGuiRenderer::Initialize(Application);
         Window* Window = Application->GetWindow();
@@ -22,7 +22,7 @@ namespace Nova
             return false;
         }
 
-        const DirectXRenderer* Renderer = Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = Application->GetRenderer<D3D12Renderer>();
         ID3D12Device9* Device = Renderer->GetDevice();
         ID3D12DescriptorHeap* DescriptorHeap = Renderer->GetImGuiDescriptorHeap();
         const u64 CPUHandle = DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr;
@@ -36,14 +36,14 @@ namespace Nova
         return true;
     }
 
-    void DirectXImGuiRenderer::Shutdown()
+    void D3D12ImGuiRenderer::Shutdown()
     {
         ImGui_ImplDX12_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext(m_Context);
     }
 
-    void DirectXImGuiRenderer::BeginFrame()
+    void D3D12ImGuiRenderer::BeginFrame()
     {
         ImGui_ImplDX12_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -52,11 +52,11 @@ namespace Nova
     }
     
 
-    void DirectXImGuiRenderer::Render()
+    void D3D12ImGuiRenderer::Render()
     {
         ImGui::Render();
         ImDrawData* Data = ImGui::GetDrawData();
-        const DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         ID3D12GraphicsCommandList* Cmd = Renderer->GetCurrentGraphicsCommandBuffer();
         ID3D12DescriptorHeap* DescriptorHeap = Renderer->GetImGuiDescriptorHeap();
         Cmd->SetDescriptorHeaps(1, &DescriptorHeap);

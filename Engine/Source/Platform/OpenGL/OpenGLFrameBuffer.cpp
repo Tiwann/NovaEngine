@@ -60,7 +60,7 @@ namespace Nova
         TexParams.Wrap = TextureWrap::Clamp;
         
         Texture2D* Texture = Texture2D::Create("OpenGLFramebufferAttachment", 0, 0, TexParams);
-        Texture->SetData(nullptr, 0, 0, ImageFormat::RGBA8);
+        Texture->SetData(nullptr, 0, 0, Format::RGBA8);
         const GLenum BufferAttachment = GetOpenGLAttachment(Attachment);
         glFramebufferTexture2D(GL_FRAMEBUFFER, BufferAttachment, GL_TEXTURE_2D, (GLuint)Texture->GetHandle(), 0);
 

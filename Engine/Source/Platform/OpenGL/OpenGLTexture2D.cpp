@@ -1,7 +1,7 @@
 ﻿#include "OpenGLTexture2D.h"
-#include "Core/Log.h"
-#include "Core/LogVerbosity.h"
-#include "Core/Memory.h"
+#include "Runtime/Log.h"
+#include "Runtime/LogVerbosity.h"
+#include "Runtime/Memory.h"
 #include "Containers/StringFormat.h"
 #include <glad/gl.h>
 
@@ -38,7 +38,7 @@ namespace Nova
         Unbind();
     }
 
-    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, ImageFormat Format)
+    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
     {
         Bind();
         m_Width = Width;
@@ -50,19 +50,19 @@ namespace Nova
         Unbind();
     }
 
-    Ref<Image> OpenGLTexture2D::GetImage() const
+    SharedPtr<Image> OpenGLTexture2D::GetImage() const
     {
         Bind();
         size_t Size = 0;
         switch (m_Format)
         {
-            case ImageFormat::RGBA8: Size = m_Width * m_Height * 4; break;
-            case ImageFormat::RGBA16: Size = m_Width * m_Height * 4 * 2; break;
-            case ImageFormat::RGBA32F: Size = m_Width * m_Height * 4 * 4; break;
+            case Format::RGBA8: Size = m_Width * m_Height * 4; break;
+            case Format::RGBA16: Size = m_Width * m_Height * 4 * 2; break;
+            case Format::RGBA32F: Size = m_Width * m_Height * 4 * 4; break;
         }
         u8* Data = (u8*)NOVA_MALLOC(Size);
         glGetTextureImage(m_Handle, 0, GL_RGBA, FormatToType(m_Format), (GLsizei)Size, Data);
-        Ref<Image> ImageData = CreateRef<Image>(m_Width, m_Height, m_Format, Data);
+        SharedPtr<Image> ImageData = CreateRef<Image>(m_Width, m_Height, m_Format, Data);
         NOVA_FREE(Data);
         Unbind();
         return ImageData;
@@ -88,7 +88,7 @@ namespace Nova
     bool OpenGLTexture2D::GetPixels(Buffer<u8>& OutPixels) const
     {
         Bind();
-        const size_t BytePerPixelChannel = m_Format == ImageFormat::RGBA8 ? 1ULL : m_Format == ImageFormat::RGBA16 ? 2ULL : 4ULL;
+        const size_t BytePerPixelChannel = m_Format == Format::RGBA8 ? 1ULL : m_Format == Format::RGBA16 ? 2ULL : 4ULL;
         const size_t Size = (size_t)m_Width * (size_t)m_Height * 4ULL * BytePerPixelChannel;
         OutPixels.Allocate(Size);
         glGetTextureImage(m_Handle, 0, FormatToOpenGLFormat(m_Format), FormatToType(m_Format), (GLsizei)Size, (GLvoid*)OutPixels.Data());
@@ -96,12 +96,12 @@ namespace Nova
     }
     
 
-    u32 OpenGLTexture2D::FormatToType(ImageFormat Format) const
+    u32 OpenGLTexture2D::FormatToType(Format Format) const
     {
         switch (Format) {
-        case ImageFormat::RGBA8: return GL_UNSIGNED_BYTE;
-        case ImageFormat::RGBA16: return GL_UNSIGNED_SHORT;
-        case ImageFormat::RGBA32F: return GL_FLOAT;
+        case Format::RGBA8: return GL_UNSIGNED_BYTE;
+        case Format::RGBA16: return GL_UNSIGNED_SHORT;
+        case Format::RGBA32F: return GL_FLOAT;
         }
         return 0;
     }
@@ -126,12 +126,12 @@ namespace Nova
         return 0;
     }
 
-    u32 OpenGLTexture2D::FormatToOpenGLFormat(ImageFormat Format) const
+    u32 OpenGLTexture2D::FormatToOpenGLFormat(Format Format) const
     {
         switch (Format) {
-        case ImageFormat::RGBA8: return GL_RGBA;
-        case ImageFormat::RGBA16: return GL_RGBA;
-        case ImageFormat::RGBA32F: return GL_RGBA;
+        case Format::RGBA8: return GL_RGBA;
+        case Format::RGBA16: return GL_RGBA;
+        case Format::RGBA32F: return GL_RGBA;
         }
         return 0;
     }

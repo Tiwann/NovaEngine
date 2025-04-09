@@ -1,5 +1,5 @@
 #include "AudioWriter.h"
-#include "Random.h"
+#include "Runtime/Random.h"
 
 #include <vorbis/vorbisenc.h>
 #include <drlibs/drmp3.h>

@@ -1,21 +1,21 @@
-#include "DirectXIndexBuffer.h"
+#include "D3D12IndexBuffer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Application.h"
 
 namespace Nova
 {
-    DirectXIndexBuffer::~DirectXIndexBuffer()
+    D3D12IndexBuffer::~D3D12IndexBuffer()
     {
-        DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         Renderer->WaitDeviceIdle();
         m_Handle->Release();
         m_Handle = nullptr;
         m_Ready = false;
     }
 
-    DirectXIndexBuffer::DirectXIndexBuffer(const u32* Indices, size_t Count) : IndexBuffer(Indices, Count)
+    D3D12IndexBuffer::D3D12IndexBuffer(const u32* Indices, size_t Count) : IndexBuffer(Indices, Count)
     {
-        const DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         m_Handle = Renderer->CreateBuffer(L"Index Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(u32));
         if (!m_Handle)
         {
@@ -24,13 +24,13 @@ namespace Nova
             return;
         }
 
-        DirectXIndexBuffer::SendData(Indices, Count);
+        D3D12IndexBuffer::SendData(Indices, Count);
     }
 
-    void DirectXIndexBuffer::SendData(const u32* Indices, size_t Count)
+    void D3D12IndexBuffer::SendData(const u32* Indices, size_t Count)
     {
         IndexBuffer::SendData(Indices, Count);
-        DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
 
         if (m_Handle && m_Ready)
         {
@@ -96,14 +96,14 @@ namespace Nova
         m_Ready = true;
     }
 
-    void DirectXIndexBuffer::Bind() const
+    void D3D12IndexBuffer::Bind() const
     {
         if (!m_Ready)
         {
             NOVA_DIRECTX_ERROR("Failed to bind Index Buffer: Not Ready yet!");
             return;
         }
-        const DirectXRenderer* Renderer = g_Application->GetRenderer<DirectXRenderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         ID3D12GraphicsCommandList* Cmd = Renderer->GetCurrentGraphicsCommandBuffer();
 
         D3D12_INDEX_BUFFER_VIEW BufferView;
@@ -113,7 +113,7 @@ namespace Nova
         Cmd->IASetIndexBuffer(&BufferView);
     }
 
-    ID3D12Resource* DirectXIndexBuffer::GetHandle() const
+    ID3D12Resource* D3D12IndexBuffer::GetHandle() const
     {
         return m_Handle;
     }

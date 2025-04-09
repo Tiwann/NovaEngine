@@ -1,11 +1,11 @@
 #include "OpenGLImGuiRenderer.h"
 #include "Platform/PlatformRenderer.h"
-#include "Core/Window.h"
-#include "Core/Application.h"
+#include "Runtime/Window.h"
+#include "Runtime/Application.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
-#include <ImGuizmo/ImGuizmo.h>
+#include <ImGuizmo.h>
 
 
 namespace Nova

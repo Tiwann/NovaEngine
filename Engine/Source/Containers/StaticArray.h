@@ -31,7 +31,7 @@ namespace Nova
             //Fill(T());
         }
 
-        constexpr StaticArray(const std::initializer_list<T>& List)
+        constexpr StaticArray(const std::initializer_list<T>& List, SizeType Number = N)
         {
             std::copy(List.begin(), List.end(), m_Data);
         }

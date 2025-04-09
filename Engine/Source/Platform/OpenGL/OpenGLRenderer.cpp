@@ -1,9 +1,9 @@
 #include "OpenGLRenderer.h"
-#include "Core/Application.h"
-#include "Core/Window.h"
-#include "Core/Log.h"
+#include "Runtime/Application.h"
+#include "Runtime/Window.h"
+#include "Runtime/Log.h"
 #include "Runtime/Color.h"
-#include "Core/LogVerbosity.h"
+#include "Runtime/LogVerbosity.h"
 #include "Graphics/Vertex.h"
 
 #include "Components/Camera.h"
@@ -14,11 +14,12 @@
 #include "Graphics/VertexBuffer.h"
 #include "Graphics/VertexBufferLayout.h"
 #include "Math/LinearAlgebra.h"
+#include "Containers/ScopedPointer.h"
+#include "Containers/StaticArray.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
-#include "Containers/ScopedPointer.h"
 
 namespace Nova
 {
@@ -130,14 +131,14 @@ namespace Nova
 
     void OpenGLRenderer::DrawLine(const Vector3& PointA, const Vector3& PointB, f32 Thickness, const Color& Color)
     {
-        ScopedPointer<VertexArray> VertexArray = VertexArray::Create();
+        ScopedPointer<VertexArray> VertexArray = VertexArray::Create(TODO);
         VertexArray->Bind();
         const Vertex Points[] {
             Vertex { PointA, Vector2::Zero, Vector3::Zero, Color },
             Vertex { PointB, Vector2::Zero, Vector3::Zero, Color },
         };
-        ScopedPointer<VertexBuffer> VertexBuffer = VertexBuffer::Create(Points, std::size(Points));
-        ScopedPointer<IndexBuffer> IndexBuffer = IndexBuffer::Create({0, 1});
+        ScopedPointer<VertexBuffer> VertexBuffer = VertexBuffer::Create(Points, std::size(Points), TODO);
+        ScopedPointer<IndexBuffer> IndexBuffer = IndexBuffer::Create({0, 1}, TODO);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
         
@@ -159,17 +160,17 @@ namespace Nova
 
     void OpenGLRenderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color)
     {
-        VertexArray* VertexArray = VertexArray::Create();
+        VertexArray* VertexArray = VertexArray::Create(TODO);
         VertexArray->Bind();
         StaticArray<Vertex, 4> Points
         {
-            { Position + Vector3(-HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },    
-            { Position + Vector3(+HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-            { Position + Vector3(+HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-            { Position + Vector3(-HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
+            Vertex{ Position + Vector3(-HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
+            Vertex{ Position + Vector3(+HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
+            Vertex{ Position + Vector3(+HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
+            Vertex{ Position + Vector3(-HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
         };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, Points.Count());
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3});
+        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, Points.Count(), TODO);
+        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, TODO);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
         
@@ -187,7 +188,7 @@ namespace Nova
 
     void OpenGLRenderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
     {
-        VertexArray* VertexArray = VertexArray::Create();
+        VertexArray* VertexArray = VertexArray::Create(TODO);
         VertexArray->Bind();
         const Vertex Points[] = {
             { Position + Vector3(-Radius, +Radius, 0.0f) , {0.0f, 1.0f}, Vector3::Zero, Color },    
@@ -195,8 +196,8 @@ namespace Nova
             { Position + Vector3(+Radius, -Radius, 0.0f) , {1.0f, 0.0f}, Vector3::Zero, Color },
             { Position + Vector3(-Radius, -Radius, 0.0f) , {0.0f, 0.0f}, Vector3::Zero, Color },
         };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, std::size(Points));
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3});
+        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, std::size(Points), TODO);
+        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, TODO);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
 

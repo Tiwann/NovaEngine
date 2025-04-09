@@ -33,7 +33,7 @@ namespace Nova
         VertexBufferLayout(const Array<VertexAttribute>& Attributes);
         
         void AddAttribute(const VertexAttribute& Attribute);
-        void Apply(const Ref<VertexArray>& Vao) const;
+        void Apply(VertexArray* Vao) const;
         
         size_t Count() const;
         size_t Stride() const;

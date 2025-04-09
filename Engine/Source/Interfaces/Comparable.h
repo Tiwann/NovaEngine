@@ -22,5 +22,10 @@ namespace Nova
         {
             return Compare(Other) == 0;
         }
+
+        bool operator!=(const T& Other) const
+        {
+            return Compare(Other) != 0;
+        }
     };
 }

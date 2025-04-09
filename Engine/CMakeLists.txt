@@ -24,7 +24,26 @@ list(REMOVE_ITEM NOVA_ENGINE_SRC ${NOVA_ENGINE_PLATFORM_SRC})
 set(CMAKE_CXX_STANDARD 20)
 add_library(NovaEngine SHARED)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SRC} ${NOVA_ENGINE_PLATFORM_SRC})
-target_link_libraries(NovaEngine PUBLIC utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt imgui imguizmo stb Vulkan::Vulkan)
+target_link_libraries(NovaEngine PUBLIC
+        assimp
+        utf8cpp
+        fmod-core
+        fmod-studio
+        glfw
+        glad
+        VulkanMemoryAllocator
+        box2d
+        Jolt
+        imgui
+        imguizmo
+        stb
+        Vulkan::Vulkan
+        miniaudio
+        ogg
+        vorbis
+        vorbisenc
+        tinygltf
+)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
 set_target_properties(NovaEngine

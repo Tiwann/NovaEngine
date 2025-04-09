@@ -68,7 +68,7 @@ namespace Nova
 		{
 			for(const auto& Delegate : m_Subscribers)
 			{
-				NOVA_ASSERT(Delegate, "Tried to broadcast event but found a invalid subscriber");
+				Assert(Delegate, "Tried to broadcast event but found a invalid subscriber");
 			}
 			
 			for (const auto& Delegate : m_Subscribers)

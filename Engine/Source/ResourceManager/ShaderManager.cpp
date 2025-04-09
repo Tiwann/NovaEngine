@@ -1,8 +1,8 @@
 ﻿#include "ShaderManager.h"
-#include "Core/LogVerbosity.h"
-#include "Core/Log.h"
-#include "Core/Containers/StringFormat.h"
-#include "Core/Application.h"
+#include "Containers/StringFormat.h"
+#include "Runtime/LogVerbosity.h"
+#include "Runtime/Log.h"
+#include "Runtime/Application.h"
 
 namespace Nova
 {

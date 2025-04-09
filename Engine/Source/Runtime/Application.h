@@ -5,6 +5,12 @@
 #include "LogCategory.h"
 #include "Containers/MulticastDelegate.h"
 #include "Scene.h"
+#include "Input/Input.h"
+#include "Runtime/AssetDatabase.h"
+#include "Runtime/ModuleManager.h"
+#include "ResourceManager/SoundManager.h"
+#include "Editor/ImGuiRenderer.h"
+#include "Editor/Menu.h"
 
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Application, "APPLICATION");

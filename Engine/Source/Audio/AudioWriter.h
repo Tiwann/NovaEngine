@@ -1,5 +1,5 @@
 #pragma once
-#include "NumericTypes.h"
+#include "Runtime/Types.h"
 #include "Serialization/Stream.h"
 
 namespace Nova

@@ -25,11 +25,16 @@ namespace Nova
     void SpriteRenderer::OnInit()
     {
         Component::OnInit();
-        m_VertexArray = VertexArray::Create();
+        const Entity* Owner = GetOwner();
+        const Scene* CurrentScene = Owner->GetScene();
+        const Application* CurrentApplication = CurrentScene->GetOwner();
+        const Renderer* Renderer = CurrentApplication->GetRenderer();
+
+        m_VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
         m_VertexArray->Bind();
         
-        m_VertexBuffer = VertexBuffer::Create();
-        m_IndexBuffer = IndexBuffer::Create();
+        m_VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
+        m_IndexBuffer = IndexBuffer::Create(TODO, TODO);
         m_IndexBuffer->SendData({ 0, 2, 1, 0, 3, 2 });
         
         ShaderManager* Manager = g_Application->GetShaderManager();

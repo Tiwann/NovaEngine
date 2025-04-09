@@ -21,7 +21,7 @@ void Nova::ShaderCompiler::Compile(const Path& Filepath, Buffer<u8>& OutVertex, 
     case GraphicsAPI::Vulkan:
         Target = SLANG_SPIRV;
         break;
-    case GraphicsAPI::DirectX:
+    case GraphicsAPI::D3D12:
         Target = SLANG_DXBC;
         break;
     }

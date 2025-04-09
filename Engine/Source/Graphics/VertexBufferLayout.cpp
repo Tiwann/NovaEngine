@@ -1,5 +1,4 @@
 #include "VertexBufferLayout.h"
-
 #include "VertexArray.h"
 
 namespace Nova
@@ -41,7 +40,7 @@ namespace Nova
         m_Attributes.Add(Attribute);
     }
 
-    void VertexBufferLayout::Apply(const Ref<VertexArray>& Vao) const
+    void VertexBufferLayout::Apply(VertexArray* Vao) const
     {
         Vao->SetBufferLayout(*this);
     }

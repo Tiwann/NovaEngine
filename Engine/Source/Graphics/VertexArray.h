@@ -1,4 +1,5 @@
 #pragma once
+#include "Renderer.h"
 
 namespace Nova
 {
@@ -16,6 +17,6 @@ namespace Nova
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
         virtual void SetBufferLayout(const VertexBufferLayout& Layout) = 0;
-        static VertexArray* Create();
+        static VertexArray* Create(GraphicsApi const& GraphicsApi);
     };
 }

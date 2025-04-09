@@ -1,13 +1,14 @@
 #include "VulkanRenderer.h"
-#include "Core/Application.h"
-#include "Core/Window.h"
-#include "Core/Log.h"
-#include "Core/LogVerbosity.h"
-#include "Core/PopupMessage.h"
+#include "Runtime/Application.h"
+#include "Runtime/Window.h"
+#include "Runtime/Log.h"
+#include "Runtime/LogVerbosity.h"
+#include "Runtime/PopupMessage.h"
 #include "Containers/ScopedPointer.h"
-#include <GLFW/glfw3.h>
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/VertexBuffer.h"
+#include "Graphics/Shader.h"
+#include <GLFW/glfw3.h>
 
 namespace Nova
 {
@@ -34,7 +35,7 @@ namespace Nova
     #endif
 
 
-    VulkanRenderer::VulkanRenderer(Application* Owner) : Renderer(Owner)
+    VulkanRenderer::VulkanRenderer(Application* Owner) : Renderer(Owner, GraphicsApi::Vulkan)
     {
         m_ImageCount = (u32)g_Application->GetConfiguration().Graphics.BufferType;
     }
@@ -43,7 +44,7 @@ namespace Nova
     {
         const i32 WindowWidth = g_Application->GetWindow()->GetWidth<i32>();
         const i32 WindowHeight = g_Application->GetWindow()->GetHeight<i32>();
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////
         /// INSTANCE CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +78,7 @@ namespace Nova
             InstanceCreateInfo.ppEnabledExtensionNames = Extensions.Data();
             InstanceCreateInfo.enabledLayerCount = (u32)Layers.Count();
             InstanceCreateInfo.ppEnabledLayerNames = Layers.Data();
-            
+
             if (VK_FAILED(vkCreateInstance(&InstanceCreateInfo, nullptr, &m_Instance)))
             {
                 NOVA_VULKAN_ERROR("Failed to create instance!");
@@ -107,7 +108,7 @@ namespace Nova
             DebugMessengerCreateInfo.pfnUserCallback = VulkanDebugMessageCallback;
             DebugMessengerCreateInfo.messageSeverity = SeverityFlags;
             DebugMessengerCreateInfo.messageType = TypeFlags;
-            
+
             if (VK_FAILED(m_FunctionPointers.vkCreateDebugUtilsMessengerEXT(m_Instance, &DebugMessengerCreateInfo, nullptr, &m_DebugMessenger)))
             {
                 NOVA_VULKAN_ERROR("Failed to create debug messenger!");
@@ -159,7 +160,7 @@ namespace Nova
                 Message->Show();
                 return false;
             }
-            
+
             if (VK_FAILED(glfwCreateWindowSurface(m_Instance, m_Application->GetWindow()->GetNativeWindow(), nullptr, &m_Surface)))
             {
                 NOVA_VULKAN_ERROR("Failed to create window surface!");
@@ -240,11 +241,11 @@ namespace Nova
 
             VkPhysicalDeviceShaderObjectFeaturesEXT ShaderObjectFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT };
             ShaderObjectFeatures.shaderObject = true;
-            
+
             VkPhysicalDeviceDynamicRenderingFeatures DynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
             DynamicRenderingFeatures.pNext = &ShaderObjectFeatures;
             DynamicRenderingFeatures.dynamicRendering = true;
-            
+
             VkDeviceCreateInfo DeviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
             DeviceCreateInfo.pNext = &DynamicRenderingFeatures;
             DeviceCreateInfo.queueCreateInfoCount = (u32)QueueCreateInfos.Count();
@@ -257,7 +258,7 @@ namespace Nova
             VkPhysicalDeviceFeatures Features = {};
             Features.samplerAnisotropy = true;
             DeviceCreateInfo.pEnabledFeatures = &Features;
-            
+
             if (VK_FAILED(vkCreateDevice(m_PhysicalDevice, &DeviceCreateInfo, nullptr, &m_Device)))
             {
                 NOVA_VULKAN_ERROR("Failed to create device!");
@@ -296,7 +297,7 @@ namespace Nova
         ScopedBuffer<VkSurfaceFormatKHR> SurfaceFormats(SurfaceFormatCount);
         vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, SurfaceFormats.GetData());
 
-        
+
         const GraphicsSettings& GraphicsSettings = m_Application->GetGraphicsSettings();
         if (GraphicsSettings.VSync)
         {
@@ -318,7 +319,7 @@ namespace Nova
         {
             m_PresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
         }
-        
+
         //////////////////////////////////////////////////////////////////////////////////////////
         /// SAWPCHAIN POOL CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -350,14 +351,14 @@ namespace Nova
                 SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
                 SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
             }
-            
+
             if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
                 m_Application->RequireExit();
                 return false;
             }
-            
+
             u32 SwapchainImageCount;
             vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
             ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
@@ -377,11 +378,11 @@ namespace Nova
                 m_Application->RequireExit();
                 return false;
             }
-            
+
             for (size_t i = 0; i < m_ImageCount; i++)
             {
                 const VkImage Image = SwapchainImages[i];
-                
+
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
                 ImageViewCreateInfo.image = Image;
                 ImageViewCreateInfo.components = VkComponentMapping();
@@ -392,7 +393,7 @@ namespace Nova
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
                 ImageViewCreateInfo.subresourceRange.levelCount = 1;
                 ImageViewCreateInfo.subresourceRange.layerCount = 1;
-                
+
                 if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
@@ -430,7 +431,7 @@ namespace Nova
                     CommandBufferAllocateInfo.commandPool = m_CommandPool;
                     CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                     CommandBufferAllocateInfo.commandBufferCount = 1;
-                    
+
                     if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
                     {
                         NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
@@ -553,7 +554,7 @@ namespace Nova
             }
 
         }*/
-        
+
         VkPhysicalDeviceProperties2 PhysicalDeviceProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
         vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &PhysicalDeviceProperties);
         char* PhysicalDeviceName = PhysicalDeviceProperties.properties.deviceName;
@@ -571,7 +572,7 @@ namespace Nova
 
         vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
         vmaDestroyAllocator(m_Allocator);
-        
+
         for (size_t i = 0; i < m_ImageCount; ++i)
         {
             vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &m_Frames[i].CommandBuffer);
@@ -600,11 +601,11 @@ namespace Nova
         {
             return false;
         }
-        
+
         if (ShouldRecreateSwapchain)
         {
             vkDeviceWaitIdle(m_Device);
-            
+
             for (size_t i = 0; i < m_ImageCount; ++i)
             {
                 VkFrameData& VkFrameData = m_Frames[i];
@@ -616,7 +617,7 @@ namespace Nova
             }
             Memory::Memset(m_Frames, 0, m_ImageCount);
             vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
-            
+
             VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
             SwapchainCreateInfo.surface = m_Surface;
             SwapchainCreateInfo.imageFormat = m_SwapchainImageFormat;
@@ -643,14 +644,14 @@ namespace Nova
                 SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
                 SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
             }
-            
+
             if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
                 m_Application->RequireExit();
                 return false;
             }
-            
+
             u32 SwapchainImageCount;
             vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
             ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
@@ -670,11 +671,11 @@ namespace Nova
                 m_Application->RequireExit();
                 return false;
             }
-            
+
             for (size_t i = 0; i < m_ImageCount; i++)
             {
                 const VkImage Image = SwapchainImages[i];
-                
+
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
                 ImageViewCreateInfo.image = Image;
                 ImageViewCreateInfo.components = VkComponentMapping();
@@ -685,7 +686,7 @@ namespace Nova
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
                 ImageViewCreateInfo.subresourceRange.levelCount = 1;
                 ImageViewCreateInfo.subresourceRange.layerCount = 1;
-                
+
                 if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
@@ -723,7 +724,7 @@ namespace Nova
                     CommandBufferAllocateInfo.commandPool = m_CommandPool;
                     CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
                     CommandBufferAllocateInfo.commandBufferCount = 1;
-                    
+
                     if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
                     {
                         NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
@@ -732,7 +733,7 @@ namespace Nova
                     }
                 }
             }
-            
+
             ShouldRecreateSwapchain = false;
             m_CurrentFrameIndex = 0;
             m_NewFrameIndex = 0;
@@ -745,20 +746,20 @@ namespace Nova
             NOVA_VULKAN_ERROR("Failed to wait for fence {}!", m_CurrentFrameIndex);
             return false;
         }
-        
+
         if (VK_FAILED(vkResetFences(m_Device, 1, &CurrentFence)))
         {
             NOVA_VULKAN_ERROR("Failed to reset fence {}!", m_CurrentFrameIndex);
             return false;
         }
 
-        
+
         if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain, U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
         {
             NOVA_VULKAN_ERROR("Failed to acquire next image index!");
             return false;
         }
-        
+
         VkCommandBufferBeginInfo BeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
         BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         const VkCommandBuffer CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
@@ -795,7 +796,7 @@ namespace Nova
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &Barrier
         );
-        
+
         VkRenderingInfo RenderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
         RenderingInfo.layerCount = 1;
         RenderingInfo.renderArea.extent = VkExtent2D{ WindowWidth, WindowHeight };
@@ -803,9 +804,9 @@ namespace Nova
         RenderingInfo.viewMask = 0;
         RenderingInfo.colorAttachmentCount = 1;
         RenderingInfo.pColorAttachments = &RenderingAttachmentInfo;
-        
+
         vkCmdBeginRendering(CommandBuffer, &RenderingInfo);
-        
+
         return true;
     }
 
@@ -813,7 +814,7 @@ namespace Nova
     {
         const VkCommandBuffer& CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
         const VkFence& Fence = m_Frames[m_CurrentFrameIndex].Fence;
-        
+
         vkCmdEndRendering(CommandBuffer);
 
         VkImageMemoryBarrier Barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
@@ -847,8 +848,8 @@ namespace Nova
         SubmitInfo.pSignalSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
         SubmitInfo.waitSemaphoreCount = 1;
         SubmitInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].PresentSemaphore;
-        
-        
+
+
         if (VK_FAILED(vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, Fence)))
         {
             NOVA_VULKAN_ERROR("Failed to submit command buffer!");
@@ -879,7 +880,7 @@ namespace Nova
     {
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
-        
+
         const VkCommandBuffer CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
         VkClearAttachment ClearAttachment;
         ClearAttachment.colorAttachment = 0;
@@ -891,7 +892,7 @@ namespace Nova
         ClearRect.rect.offset = VkOffset2D{ 0, 0 };
         ClearRect.layerCount = 1;
         ClearRect.baseArrayLayer = 0;
-        
+
         vkCmdClearAttachments(CommandBuffer, 1, &ClearAttachment, 1u, &ClearRect);
     }
 
@@ -899,7 +900,7 @@ namespace Nova
     {
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
-        
+
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         VkClearAttachment ClearColorAttachment;
         ClearColorAttachment.colorAttachment = 0;
@@ -912,14 +913,14 @@ namespace Nova
         ClearDepthAttachment.clearValue.depthStencil = VkClearDepthStencilValue{ Depth, 0 };
 
         const VkClearAttachment ClearAttachments[] = { ClearColorAttachment, ClearDepthAttachment };
-        
+
 
         VkClearRect ClearRect;
         ClearRect.rect.extent = VkExtent2D{ WindowWidth, WindowHeight };
         ClearRect.rect.offset = VkOffset2D{ 0, 0 };
         ClearRect.layerCount = 1;
         ClearRect.baseArrayLayer = 0;
-        
+
         vkCmdClearAttachments(Cmd, std::size(ClearAttachments), ClearAttachments, 1u, &ClearRect);
     }
 
@@ -931,7 +932,7 @@ namespace Nova
         PresentInfo.pImageIndices = &m_NewFrameIndex;
         PresentInfo.waitSemaphoreCount = 1;
         PresentInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
-        
+
         if (VK_FAILED(vkQueuePresentKHR(m_GraphicsQueue, &PresentInfo)))
         {
             NOVA_VULKAN_ERROR("Failed to present!");
@@ -1012,7 +1013,7 @@ namespace Nova
 
     void VulkanRenderer::Blit()
     {
-        
+
     }
 
     VkInstance VulkanRenderer::GetInstance() const
@@ -1049,7 +1050,7 @@ namespace Nova
     {
         return m_Swapchain;
     }
-    
+
     u32 VulkanRenderer::GetGraphicsQueueFamily() const
     {
         return m_GraphicsQueueIndex;
@@ -1176,5 +1177,5 @@ namespace Nova
         }
         throw;
     }
-    
+
 }

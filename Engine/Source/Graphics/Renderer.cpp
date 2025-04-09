@@ -38,5 +38,10 @@ namespace Nova
     {
         return m_CurrentCamera;
     }
+
+    GraphicsApi Renderer::GetGraphicsApi() const
+    {
+        return m_GraphicsApi;
+    }
 }
 

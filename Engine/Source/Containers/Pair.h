@@ -1,15 +1,14 @@
 #pragma once
-#include "Interfaces/Equatable.h"
 
 namespace Nova
 {
     template<typename KeyType, typename ValueType>
-    struct Pair : IEquatable<Pair<KeyType, ValueType>>
+    struct Pair
     {
         KeyType Key;
         ValueType Value;
 
-        bool Equals(const Pair& Other) const override
+        bool operator==(const Pair& Other) const
         {
             return Key == Other.Key && Value == Other.Value;
         }

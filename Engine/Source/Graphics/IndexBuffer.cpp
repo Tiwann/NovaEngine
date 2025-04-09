@@ -22,19 +22,31 @@ namespace Nova
         SendData(Indices.Data(), Indices.Count());
     }
 
-    IndexBuffer* IndexBuffer::Create()
+    IndexBuffer* IndexBuffer::Create(GraphicsApi const& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(IndexBuffer);
+        switch (GraphicsApi) {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLIndexBuffer();
+        case GraphicsApi::Vulkan: return new VulkanIndexBuffer();
+        case GraphicsApi::D3D12: return new D3D12IndexBuffer();
+        default: return nullptr;
+        }
     }
 
-    IndexBuffer* IndexBuffer::Create(const u32* Indices, size_t Count)
+    IndexBuffer* IndexBuffer::Create(const u32* Indices, size_t Count, GraphicsApi const& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(IndexBuffer, Indices, Count);
+        switch (GraphicsApi) {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLIndexBuffer(Indices, Count);
+        case GraphicsApi::Vulkan: return new VulkanIndexBuffer(Indices, Count);
+        case GraphicsApi::D3D12: return new D3D12IndexBuffer(Indices, Count);
+        default: return nullptr;
+        }
     }
 
-    IndexBuffer* IndexBuffer::Create(const Array<u32>& Indices)
+    IndexBuffer* IndexBuffer::Create(const Array<u32>& Indices, GraphicsApi const& GraphicsApi)
     {
-        return Create(Indices.Data(), Indices.Count());
+        return Create(Indices.Data(), Indices.Count(), GraphicsApi);
     }
 
     size_t IndexBuffer::Count() const

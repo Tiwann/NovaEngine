@@ -3,7 +3,7 @@
 	url = git@github.com:glfw/glfw.git
 [submodule "box2d"]
 	path = Engine/Dependencies/box2d
-	url = git@github.com:erincatto/box2d.git
+	url = git@github.com:Tiwann/box2d.git
 	branch = v2.4.2
 [submodule "Jolt"]
 	path = Engine/Dependencies/Jolt

@@ -1,8 +1,5 @@
 ﻿#pragma once
-#include "Runtime/Types.h"
 #include "Containers/String.h"
-#include "Containers/StringView.h"
-#include "Containers/StringFormat.h"
 #include <CoreExport.h>
 
 namespace Nova
@@ -28,7 +25,7 @@ namespace Nova
         MaxButtons
     };
 
-    static String CORE_API GamepadButtonToString(GamepadButton Button)
+    inline String CORE_API GamepadButtonToString(GamepadButton Button)
     {
         switch (Button)
         {

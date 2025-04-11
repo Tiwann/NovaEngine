@@ -78,7 +78,8 @@ namespace Nova
         }
         return true;
     }
-    
+
+#define NOVA_USE_DEFAULT_OPENGL_SHADER_COMPILER
     bool OpenGLShader::Compile()
     {
         Compiled =

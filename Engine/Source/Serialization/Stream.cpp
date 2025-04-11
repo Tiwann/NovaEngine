@@ -14,7 +14,7 @@ Nova::Stream::SizeType Nova::Stream::ReadLine(String& OutLine)
     }
 
     SizeType Count = 0;
-    StaticArray<char, 1024> TempBuffer;
+    char TempBuffer[1024];
     while (IsGood())
     {
         char Character;
@@ -43,7 +43,7 @@ Nova::Stream::SizeType Nova::Stream::ReadLine(String& OutLine)
         return IsGood() ? 0 : EndOfFile;
     }
     
-    OutLine = String(TempBuffer.Data(), Count);
+    OutLine = String(TempBuffer, Count);
     OutLine.TrimEnd(' ');
     return IsGood() ? OutLine.Count() : EndOfFile;
     

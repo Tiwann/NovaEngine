@@ -48,6 +48,7 @@ set_target_properties(box2d PROPERTIES FOLDER Dependencies)
 ###########################################################
 #[[ JOLT ]]
 ###########################################################
+option(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
 add_subdirectory(Dependencies/Jolt/Build)
 set_target_properties(Jolt PROPERTIES FOLDER Dependencies)
 
@@ -62,7 +63,7 @@ set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER Dependencies)
 #[[ STB ]]
 ###########################################################
 add_subdirectory(Dependencies/stb)
-set_target_properties(stb PROPERTIES FOLDER Dependencies)
+set_target_properties(STB PROPERTIES FOLDER Dependencies)
 ###########################################################
 
 ###########################################################
@@ -81,7 +82,7 @@ set_target_properties(nvrhi PROPERTIES FOLDER Dependencies)
 ###########################################################
 set(CMAKE_CXX_STANDARD 17)
 set(IMGUI_DIR Dependencies/imgui)
-add_library(imgui STATIC
+add_library(ImGui STATIC
         ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui.h
@@ -93,9 +94,18 @@ add_library(imgui STATIC
         ${IMGUI_DIR}/imstb_rectpack.h
         ${IMGUI_DIR}/imstb_textedit.h
         ${IMGUI_DIR}/imstb_truetype.h
+        ${IMGUI_DIR}/backends/imgui_impl_dx12.h
+        ${IMGUI_DIR}/backends/imgui_impl_dx12.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_vulkan.h
+        ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.h
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
 )
-target_include_directories(imgui INTERFACE ${IMGUI_DIR} ${IMGUI_DIR}/backends)
-set_target_properties(imgui PROPERTIES FOLDER Dependencies)
+target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
+target_link_libraries(ImGui PRIVATE glfw Vulkan::Vulkan)
+set_target_properties(ImGui PROPERTIES FOLDER Dependencies)
 ###########################################################
 
 ###########################################################
@@ -116,7 +126,7 @@ set(IMGUIZMO_SOURCES
         ${IMGUIZMO_DIR}/ImZoomSlider.h
 )
 add_library(imguizmo STATIC ${IMGUIZMO_SOURCES})
-target_link_libraries(imguizmo PRIVATE imgui)
+target_link_libraries(imguizmo PRIVATE ImGui)
 target_include_directories(imguizmo INTERFACE ${IMGUIZMO_DIR})
 set_target_properties(imguizmo PROPERTIES FOLDER Dependencies)
 ###########################################################
@@ -167,3 +177,20 @@ add_subdirectory(Dependencies/json)
 ###########################################################
 add_subdirectory(Dependencies/tinygltf)
 
+
+###########################################################
+##[[ DirectX-Headers ]]
+###########################################################
+add_subdirectory(Dependencies/DirectX-Headers)
+
+###########################################################
+##[[ SLANG ]]
+###########################################################
+option(SLANG_ENABLE_EXAMPLES OFF)
+option(SLANG_ENABLE_GFX OFF)
+option(SLANG_ENABLE_SLANGC OFF)
+option(SLANG_ENABLE_SLANG_RHI OFF)
+option(SLANG_ENABLE_TESTS OFF)
+option(SLANG_EXCLUDE_DAWN ON)
+option(SLANG_EXCLUDE_TINT ON)
+add_subdirectory(Dependencies/slang)

@@ -15,7 +15,7 @@ namespace Nova
         using BodyArray = Array<BodyType*>;
         virtual ~PhysicsWorld() = default;
         virtual void OnInit(Scene* Owner) = 0;
-        virtual void Step(f32 TimeStep) = 0;
+        virtual void Step() = 0;
         virtual void OnDestroy() = 0;
         
         virtual void OnContactBegin(const ContactType* Contact) { }
@@ -28,9 +28,20 @@ namespace Nova
 
         // User can't modify this array neither modify the bodies contained in it
         const BodyArray& GetBodies() const { return m_Bodies; }
+
+        void SetTimeStep(f32 TimeStep)
+        {
+            m_TimeStep = TimeStep;
+        }
+
+        f32 GetTimeStep() const
+        {
+            return m_TimeStep;
+        }
     protected:
         BodyArray m_Bodies;
         Scene* m_Owner = nullptr;
+        f32 m_TimeStep = 1.0f / 60.0f;
     };
-    
+
 }

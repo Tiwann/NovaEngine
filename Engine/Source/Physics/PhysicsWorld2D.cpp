@@ -4,8 +4,7 @@
 #include "PhysicsContact2D.h"
 #include "PhysicsContactInfo2D.h"
 #include "Math/Functions.h"
-#include "Runtime/Log.h"
-#include "MathConversions.h"
+#include "Math/MathConversions.h"
 #include "Runtime/Application.h"
 
 #include <box2d/b2_world.h>
@@ -17,15 +16,14 @@ namespace Nova
 {
     void PhysicsWorld2D::OnInit(Scene* Owner)
     {
-        Base::OnInit(Owner);
-        m_World = new b2World(ToB2Vec2(m_Gravity));
+        m_World = new b2World({0.0f, -9.81f});
         m_ContactListener = new PhysicsWorld2DContactListener(this);
         m_World->SetContactListener(m_ContactListener);
     }
 
-    void PhysicsWorld2D::Step(const f32 TimeStep)
+    void PhysicsWorld2D::Step()
     {
-        m_World->Step(TimeStep * (f32)g_Application->GetTimeScale(), 8, 3);
+        m_World->Step(m_TimeStep * (f32)g_Application->GetTimeScale(), 8, 3);
     }
 
     void PhysicsWorld2D::OnDestroy()
@@ -136,11 +134,11 @@ namespace Nova
 
     void PhysicsWorld2D::SetGravity(const Vector2& Gravity)
     {
-        m_Gravity = Gravity;
+        m_World->SetGravity(ToB2Vec2(Gravity));
     }
 
     Vector2 PhysicsWorld2D::GetGravity() const
     {
-        return m_Gravity;
+        return ToVector2(m_World->GetGravity());
     }
 }

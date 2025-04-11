@@ -2,6 +2,8 @@
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Application.h"
 
+#include <directx/d3dx12_barriers.h>
+
 namespace Nova
 {
     D3D12IndexBuffer::~D3D12IndexBuffer()
@@ -20,7 +22,7 @@ namespace Nova
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer");
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return;
         }
 
@@ -43,7 +45,7 @@ namespace Nova
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer");
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return;
         }
         
@@ -52,7 +54,7 @@ namespace Nova
         if (!UploadHeap)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer Upload Heap");
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return;
         }
 

@@ -1,20 +1,6 @@
-﻿FILE(GLOB_RECURSE SOURCES *.cpp *.h)
+﻿file(GLOB_RECURSE SOURCES *.cpp *.h)
 
-SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-ADD_EXECUTABLE(NovaEditor ${SOURCES})
-TARGET_LINK_LIBRARIES(NovaEditor PRIVATE NovaEngine)
-
-if(CMAKE_BUILD_TYPE MATCHES "DebugEditor")
-    ADD_COMPILE_DEFINITIONS(NOVA_DEBUG NOVA_EDITOR)
-elseif(CMAKE_BUILD_TYPE MATCHES "DevEditor")
-    ADD_COMPILE_DEFINITIONS(NOVA_DEV NOVA_EDITOR)
-endif()
-
-
-
-
-
-
-
+set(CMAKE_CXX_STANDARD 20)
+add_executable(NovaEditor ${SOURCES})
+target_link_libraries(NovaEditor PRIVATE NovaEngine)
+target_compile_definitions(NovaEditor PRIVATE NOVA_EDITOR)

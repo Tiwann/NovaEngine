@@ -8,13 +8,14 @@ namespace Nova
 {
     Shader* ShaderManager::Load(const String& Name, const Path& Filepath)
     {
-        Shader* LoadedShader = Shader::Create(*Name, Filepath);
+        const Renderer* Renderer = g_Application->GetRenderer();
+        Shader* LoadedShader = Shader::Create(*Name, Filepath, Renderer->GetGraphicsApi());
         if(!LoadedShader) return nullptr;
         
         if(!LoadedShader->Compile())
         {
             delete LoadedShader;
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return nullptr;
         }
         

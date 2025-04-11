@@ -25,15 +25,14 @@ namespace Nova
 {
     bool OpenGLRenderer::Initialize()
     {
-        Application& application = *g_Application;
         NOVA_LOG(OpenGL, Verbosity::Trace, "Creating OpenGL context");
-        glfwMakeContextCurrent(application.GetWindow()->GetNativeWindow());
-        glfwSwapInterval(application.GetConfiguration().Graphics.VSync);
+        glfwMakeContextCurrent(g_Application->GetWindow()->GetNativeWindow());
+        glfwSwapInterval(g_Application->GetConfiguration().Graphics.VSync);
         
         if(!gladLoadGL(glfwGetProcAddress))
         {
             NOVA_LOG(OpenGL, Verbosity::Error, "Failed to retrieve OpenGL function pointers!");
-            application.RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -131,14 +130,14 @@ namespace Nova
 
     void OpenGLRenderer::DrawLine(const Vector3& PointA, const Vector3& PointB, f32 Thickness, const Color& Color)
     {
-        ScopedPointer<VertexArray> VertexArray = VertexArray::Create(TODO);
+        ScopedPointer<VertexArray> VertexArray = VertexArray::Create(m_GraphicsApi);
         VertexArray->Bind();
         const Vertex Points[] {
             Vertex { PointA, Vector2::Zero, Vector3::Zero, Color },
             Vertex { PointB, Vector2::Zero, Vector3::Zero, Color },
         };
-        ScopedPointer<VertexBuffer> VertexBuffer = VertexBuffer::Create(Points, std::size(Points), TODO);
-        ScopedPointer<IndexBuffer> IndexBuffer = IndexBuffer::Create({0, 1}, TODO);
+        ScopedPointer<VertexBuffer> VertexBuffer = VertexBuffer::Create(Points, std::size(Points), m_GraphicsApi);
+        ScopedPointer<IndexBuffer> IndexBuffer = IndexBuffer::Create({0, 1}, m_GraphicsApi);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
         
@@ -160,7 +159,7 @@ namespace Nova
 
     void OpenGLRenderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color)
     {
-        VertexArray* VertexArray = VertexArray::Create(TODO);
+        VertexArray* VertexArray = VertexArray::Create(m_GraphicsApi);
         VertexArray->Bind();
         StaticArray<Vertex, 4> Points
         {
@@ -169,8 +168,8 @@ namespace Nova
             Vertex{ Position + Vector3(+HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
             Vertex{ Position + Vector3(-HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
         };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, Points.Count(), TODO);
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, TODO);
+        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, Points.Count(), m_GraphicsApi);
+        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, m_GraphicsApi);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
         
@@ -188,7 +187,7 @@ namespace Nova
 
     void OpenGLRenderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
     {
-        VertexArray* VertexArray = VertexArray::Create(TODO);
+        VertexArray* VertexArray = VertexArray::Create(m_GraphicsApi);
         VertexArray->Bind();
         const Vertex Points[] = {
             { Position + Vector3(-Radius, +Radius, 0.0f) , {0.0f, 1.0f}, Vector3::Zero, Color },    
@@ -196,8 +195,8 @@ namespace Nova
             { Position + Vector3(+Radius, -Radius, 0.0f) , {1.0f, 0.0f}, Vector3::Zero, Color },
             { Position + Vector3(-Radius, -Radius, 0.0f) , {0.0f, 0.0f}, Vector3::Zero, Color },
         };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, std::size(Points), TODO);
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, TODO);
+        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, std::size(Points), m_GraphicsApi);
+        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, m_GraphicsApi);
 
         VertexArray->SetBufferLayout(VertexBufferLayout::Default);
 

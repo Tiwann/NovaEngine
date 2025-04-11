@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "ApplicationConfiguration.h"
+#include "ExitCode.h"
 #include "Containers/TreeNode.h"
 #include "Containers/String.h"
 #include "LogCategory.h"
@@ -23,7 +24,6 @@ typedef slang::IGlobalSession SlangSession;
 
 namespace Nova
 {
-    class ApplicationConfigurationSerializer;
     class TextureManager;
     class ShaderManager;
     class Renderer;
@@ -87,7 +87,7 @@ namespace Nova
         virtual void OnUpdate(f32 Delta);
         virtual void OnGUI(f32 Delta);
 
-        virtual ApplicationConfiguration CreateConfiguration(ApplicationConfigurationSerializer& Serializer) const = 0;
+        virtual ApplicationConfiguration CreateConfiguration() const = 0;
         
         const ApplicationConfiguration&  GetConfiguration() const;
         const GraphicsSettings&          GetGraphicsSettings() const;
@@ -109,7 +109,7 @@ namespace Nova
         DetailsPanel*           GetDetailsPanel() const;
         ViewportPanel*          GetViewportPanel() const;
         
-        void                    RequireExit();
+        void                    RequireExit(ExitCode ExitCode);
         void                    RequireExitAndRestart();
         void                    SetCursorVisible(bool Visible) const;
 

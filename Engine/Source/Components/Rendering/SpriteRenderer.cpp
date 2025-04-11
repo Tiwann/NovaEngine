@@ -2,17 +2,17 @@
 #include "Components/Transform.h"
 #include "Containers/StaticArray.h"
 #include "Runtime/Application.h"
+#include "Runtime/Scene.h"
+#include "Runtime/Entity.h"
+#include "Runtime/Color.h"
 #include "Graphics/VertexArray.h"
 #include "Graphics/VertexBuffer.h"
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/VertexBufferLayout.h"
 #include "Graphics/Shader.h"
-#include "Runtime/Color.h"
 #include "Graphics/Renderer.h"
-#include "ResourceManager/ShaderManager.h"
-
 #include "Graphics/Texture2D.h"
-
+#include "ResourceManager/ShaderManager.h"
 #include "Editor/EditorGUI.h"
 
 namespace Nova
@@ -34,7 +34,7 @@ namespace Nova
         m_VertexArray->Bind();
         
         m_VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
-        m_IndexBuffer = IndexBuffer::Create(TODO, TODO);
+        m_IndexBuffer = IndexBuffer::Create(Renderer->GetGraphicsApi());
         m_IndexBuffer->SendData({ 0, 2, 1, 0, 3, 2 });
         
         ShaderManager* Manager = g_Application->GetShaderManager();

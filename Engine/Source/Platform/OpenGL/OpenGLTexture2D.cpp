@@ -3,6 +3,7 @@
 #include "Runtime/LogVerbosity.h"
 #include "Runtime/Memory.h"
 #include "Containers/StringFormat.h"
+#include "Runtime/Formats.h"
 #include <glad/gl.h>
 
 namespace Nova
@@ -38,7 +39,7 @@ namespace Nova
         Unbind();
     }
 
-    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
+    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
     {
         Bind();
         m_Width = Width;
@@ -56,13 +57,13 @@ namespace Nova
         size_t Size = 0;
         switch (m_Format)
         {
-            case Format::RGBA8: Size = m_Width * m_Height * 4; break;
-            case Format::RGBA16: Size = m_Width * m_Height * 4 * 2; break;
-            case Format::RGBA32F: Size = m_Width * m_Height * 4 * 4; break;
+            case Formats::R8G8B8A8_UNORM: Size = m_Width * m_Height * 4; break;
+            case Formats::R16G16B16A16_USHORT: Size = m_Width * m_Height * 4 * 2; break;
+            case Formats::R32G32B32A32_FLOAT: Size = m_Width * m_Height * 4 * 4; break;
         }
-        u8* Data = (u8*)NOVA_MALLOC(Size);
+        u8* Data = Memory::Malloc<u8>(Size);
         glGetTextureImage(m_Handle, 0, GL_RGBA, FormatToType(m_Format), (GLsizei)Size, Data);
-        SharedPtr<Image> ImageData = CreateRef<Image>(m_Width, m_Height, m_Format, Data);
+        SharedPtr<Image> ImageData = MakeShared<Image>(m_Width, m_Height, m_Format, Data);
         NOVA_FREE(Data);
         Unbind();
         return ImageData;
@@ -85,25 +86,42 @@ namespace Nova
         return m_Handle;
     }
 
-    bool OpenGLTexture2D::GetPixels(Buffer<u8>& OutPixels) const
-    {
-        Bind();
-        const size_t BytePerPixelChannel = m_Format == Format::RGBA8 ? 1ULL : m_Format == Format::RGBA16 ? 2ULL : 4ULL;
-        const size_t Size = (size_t)m_Width * (size_t)m_Height * 4ULL * BytePerPixelChannel;
-        OutPixels.Allocate(Size);
-        glGetTextureImage(m_Handle, 0, FormatToOpenGLFormat(m_Format), FormatToType(m_Format), (GLsizei)Size, (GLvoid*)OutPixels.Data());
-        return !OutPixels.IsEmpty();
-    }
-    
 
-    u32 OpenGLTexture2D::FormatToType(Format Format) const
+    u32 OpenGLTexture2D::FormatToType(Formats Format) const
     {
-        switch (Format) {
-        case Format::RGBA8: return GL_UNSIGNED_BYTE;
-        case Format::RGBA16: return GL_UNSIGNED_SHORT;
-        case Format::RGBA32F: return GL_FLOAT;
+        switch (Format)
+        {
+        case Formats::NONE: return 0;
+        case Formats::R8_UNORM: return GL_UNSIGNED_BYTE;
+        case Formats::R8_SNORM: return GL_BYTE;
+        case Formats::R16_USHORT: return GL_UNSIGNED_SHORT;
+        case Formats::R16_SHORT: return GL_SHORT;
+        case Formats::R32_FLOAT: return GL_FLOAT;
+        case Formats::R32_UINT: return GL_UNSIGNED_INT;
+        case Formats::R32_SINT: return GL_INT;
+        case Formats::R8G8_UNORM: return GL_UNSIGNED_BYTE;
+        case Formats::R8G8_SNORM: return GL_BYTE;
+        case Formats::R16G16_USHORT: return GL_UNSIGNED_SHORT;
+        case Formats::R16G16_SHORT: return GL_SHORT;
+        case Formats::R32G32_UINT: return GL_UNSIGNED_INT;
+        case Formats::R32G32_SINT: return GL_INT;
+        case Formats::R32G32_FLOAT: return GL_FLOAT;
+        case Formats::R8G8B8_UNORM: return GL_UNSIGNED_BYTE;
+        case Formats::R8G8B8_SNORM: return GL_BYTE;
+        case Formats::R16G16B16_USHORT: return GL_UNSIGNED_SHORT;
+        case Formats::R16G16B16_SHORT: return GL_SHORT;
+        case Formats::R32G32B32_UINT: return GL_UNSIGNED_INT;
+        case Formats::R32G32B32_SINT: return GL_INT;
+        case Formats::R32G32B32_FLOAT: return GL_FLOAT;
+        case Formats::R8G8B8A8_UNORM: return GL_UNSIGNED_BYTE;
+        case Formats::R8G8B8A8_SNORM: return GL_BYTE;
+        case Formats::R16G16B16A16_USHORT: return GL_UNSIGNED_SHORT;
+        case Formats::R16G16B16A16_SHORT: return GL_SHORT;
+        case Formats::R32G32B32A32_UINT: return GL_UNSIGNED_INT;
+        case Formats::R32G32B32A32_SINT: return GL_INT;
+        case Formats::R32G32B32A32_FLOAT: return GL_FLOAT;
+        default: return 0;
         }
-        return 0;
     }
 
     GLint OpenGLTexture2D::GetTextureWrap(TextureWrap Wrap)
@@ -126,12 +144,59 @@ namespace Nova
         return 0;
     }
 
-    u32 OpenGLTexture2D::FormatToOpenGLFormat(Format Format) const
+    u32 OpenGLTexture2D::FormatToOpenGLFormat(Formats Format) const
     {
-        switch (Format) {
-        case Format::RGBA8: return GL_RGBA;
-        case Format::RGBA16: return GL_RGBA;
-        case Format::RGBA32F: return GL_RGBA;
+        switch (Format)
+        {
+        case Formats::NONE: return GL_NONE;
+        case Formats::R8_UNORM: return GL_R8;
+        case Formats::R8_SNORM: return GL_R8;
+        case Formats::R16_USHORT: return GL_R16;
+        case Formats::R16_SHORT: return GL_R16;
+        case Formats::R32_FLOAT: return GL_R32F;
+        case Formats::R32_UINT: return GL_R32UI;
+        case Formats::R32_SINT: return GL_R32I;
+        case Formats::R8G8_UNORM: return GL_RG8;
+        case Formats::R8G8_SNORM:
+            break;
+        case Formats::R16G16_USHORT:
+            break;
+        case Formats::R16G16_SHORT:
+            break;
+        case Formats::R32G32_UINT:
+            break;
+        case Formats::R32G32_SINT:
+            break;
+        case Formats::R32G32_FLOAT:
+            break;
+        case Formats::R8G8B8_UNORM:
+            break;
+        case Formats::R8G8B8_SNORM:
+            break;
+        case Formats::R16G16B16_USHORT:
+            break;
+        case Formats::R16G16B16_SHORT:
+            break;
+        case Formats::R32G32B32_UINT:
+            break;
+        case Formats::R32G32B32_SINT:
+            break;
+        case Formats::R32G32B32_FLOAT:
+            break;
+        case Formats::R8G8B8A8_UNORM:
+            break;
+        case Formats::R8G8B8A8_SNORM:
+            break;
+        case Formats::R16G16B16A16_USHORT:
+            break;
+        case Formats::R16G16B16A16_SHORT:
+            break;
+        case Formats::R32G32B32A32_UINT:
+            break;
+        case Formats::R32G32B32A32_SINT:
+            break;
+        case Formats::R32G32B32A32_FLOAT:
+            break;
         }
         return 0;
     }

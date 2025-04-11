@@ -43,9 +43,16 @@ namespace Nova
         return m_Filepath.stem().string().c_str();
     }
     
-    Shader* Shader::Create(const String& Name, const Path& Filepath)
+    Shader* Shader::Create(const String& Name, const Path& Filepath, const GraphicsApi& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(Shader, Name, Filepath);
+        switch (GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLShader(Name, Filepath);
+        case GraphicsApi::Vulkan: return new VulkanShader(Name, Filepath);
+        case GraphicsApi::D3D12: return new D3D12Shader(Name, Filepath);
+        default: return nullptr;
+        }
     }
 
     const ShaderSource& Shader::GetSource() const
@@ -67,20 +74,17 @@ namespace Nova
             return;
         }
 
-        if constexpr (g_CurrentGraphicsAPI == GraphicsApi::OpenGL)
-        {
-            const String FileContent = File::ReadToString(AbsolutePath);
-            SplitSources(FileContent);
+        const String FileContent = File::ReadToString(AbsolutePath);
+        SplitSources(FileContent);
 
-            NOVA_LOG(Shader, Verbosity::Trace, "Preprocessing shader \"{}\"", ShaderName);
-            if(!Preprocess(m_Source.Vertex) || !Preprocess(m_Source.Fragment))
-            {
-                NOVA_LOG(Shader, Verbosity::Info, "Shader preprocess failed. File {}.", ShaderName);
-                return;
-            }
-        
-            NOVA_LOG(Shader, Verbosity::Info, "Shader successfully loaded shader source from: {}", ShaderName);
+        NOVA_LOG(Shader, Verbosity::Trace, "Preprocessing shader \"{}\"", ShaderName);
+        if(!Preprocess(m_Source.Vertex) || !Preprocess(m_Source.Fragment))
+        {
+            NOVA_LOG(Shader, Verbosity::Info, "Shader preprocess failed. File {}.", ShaderName);
+            return;
         }
+
+        NOVA_LOG(Shader, Verbosity::Info, "Shader successfully loaded shader source from: {}", ShaderName);
     }
     
     void Shader::LoadSource(Path Filepath)

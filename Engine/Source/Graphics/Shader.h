@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Renderer.h"
 #include "Runtime/Filesystem.h"
 #include "Runtime/ShaderSource.h"
 #include "Runtime/LogCategory.h"
@@ -7,6 +8,7 @@
 #include "Runtime/Asset.h"
 #include "Components/Rendering/AmbientLight.h"
 #include "Components/Rendering/PointLight.h"
+#include "Graphics/Renderer.h"
 
 
 namespace Nova
@@ -71,7 +73,7 @@ namespace Nova
         virtual i32 GetUniformLocation(const String& Name) = 0;
         String GetFilename() const;
         
-        static Shader* Create(const String& Name, const Path& Filepath);
+        static Shader* Create(const String& Name, const Path& Filepath, const GraphicsApi& GraphicsApi);
         const ShaderSource& GetSource() const;
     protected:
         explicit Shader(const String& Name, Path Filepath);

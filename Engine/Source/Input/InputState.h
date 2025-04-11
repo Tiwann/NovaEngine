@@ -12,7 +12,7 @@ namespace Nova
         Released,
     };
 
-    static String CORE_API InputStateToString(InputState State)
+    inline String CORE_API InputStateToString(InputState State)
     {
         switch (State)
         {

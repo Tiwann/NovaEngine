@@ -1,12 +1,13 @@
 ﻿#include "Texture2D.h"
 
+#include "Containers/ScopedPointer.h"
 #include "Runtime/Assertion.h"
 #include "Platform/PlatformTexture2D.h"
 #include "Runtime/Log.h"
 #include "Runtime/Sprite.h"
 #include "Runtime/SpriteAnimation.h"
 #include "Runtime/SpriteSheet.h"
-
+#include "Graphics/Renderer.h"
 #include "Math/Vector2.h"
 
 namespace Nova
@@ -18,21 +19,35 @@ namespace Nova
     }
 
 
-    Texture2D* Texture2D::Create(const String& Name)
+    Texture2D* Texture2D::Create(const String& Name, const GraphicsApi& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(Texture2D, Name, 0, 0, TextureParams().WithFilter(TextureFilter::Linear).WithWrap(TextureWrap::Clamp), 0);
+        switch (GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLTexture2D(Name, 0, 0, TextureParams(), 0);
+        case GraphicsApi::Vulkan: return new VulkanTexture2D(Name, 0, 0, TextureParams(), 0);
+        case GraphicsApi::D3D12: return new D3D12Texture2D(Name, 0, 0, TextureParams(), 0);
+        default: return nullptr;
+        }
     }
 
-    Texture2D* Texture2D::Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot)
+    Texture2D* Texture2D::Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot, const GraphicsApi& GraphicsApi)
     {
-        NOVA_RHI_PLATFORM_RETURN(Texture2D, Name, Width, Height, Params, Slot);
+        switch (GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return new OpenGLTexture2D(Name, Width, Height, Params, Slot);
+        case GraphicsApi::Vulkan: return new VulkanTexture2D(Name, Width, Height, Params, Slot);
+        case GraphicsApi::D3D12: return new D3D12Texture2D(Name, Width, Height, Params, Slot);
+        default: return nullptr;
+        }
     }
 
     Texture2D* Texture2D::CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot)
     {
         Texture2D* Texture = Create(Name, 0, 0, Params, Slot);
-        const ScopedBuffer<u8> RawImageData = File::ReadToBuffer(Filepath);
-        const SharedPtr<Image> ImageData = Image::Create(BufferView<u8>(RawImageData.AsBuffer()), Format::RGBA8);
+        const ScopedBuffer RawImageData = File::ReadToBuffer(Filepath);
+        const SharedPtr<Image> ImageData = MakeShared<Image>(BufferView(RawImageData.AsBuffer()), Formats::R8G8B8A8_UNORM);
         Texture->SetData(ImageData);
         return Texture;
     }
@@ -44,7 +59,7 @@ namespace Nova
         const size_t Size = (size_t)Width * (size_t)Height * 4ULL;
         u8* Data = new u8[Size]{};
         memset(Data, 0xffui8, Size);
-        Texture->SetData(Data, Width, Height, Format::RGBA8);
+        Texture->SetData(Data, Width, Height, Formats::R8G8B8A8_UNORM);
         delete[] Data;
         return Texture;
     }
@@ -79,7 +94,7 @@ namespace Nova
         return m_Slot;
     }
     
-    Format Texture2D::GetFormat() const
+    Formats Texture2D::GetFormat() const
     {
         return m_Format;
     }

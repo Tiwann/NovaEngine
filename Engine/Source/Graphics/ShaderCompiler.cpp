@@ -3,36 +3,24 @@
 #include "Graphics/Renderer.h"
 #include <slang/slang.h>
 
-
-void Nova::ShaderCompiler::Compile(const Path& Filepath, Buffer<u8>& OutVertex, Buffer<u8>& OutFragment, ShaderOptimization Optimization)
+namespace Nova
+{
+    void ShaderCompiler::Compile(const Path& Filepath, Buffer<u8>& OutVertex, Buffer<u8>& OutFragment, ShaderOptimization Optimization)
 {
     SlangSession* Session = g_Application->GetSlangSession();
 
-    ScopedBuffer<u8> ShaderContent = File::ReadToBuffer(Filepath);
-    BufferView<char> ContentView = BufferView<u8>(ShaderContent.AsBuffer()).As<char>();
-    
+    const ScopedBuffer ShaderContent = File::ReadToBuffer(Filepath);
+    const BufferView<char> ContentView = BufferView(ShaderContent.AsBuffer()).As<char>();
+
     SlangCompileRequest* Request = spCreateCompileRequest(Session);
-    SlangCompileTarget Target = SLANG_TARGET_NONE;
-    switch (g_CurrentGraphicsAPI)
-    {
-    case GraphicsAPI::OpenGL:
-        Target = SLANG_SPIRV;
-        break;
-    case GraphicsAPI::Vulkan:
-        Target = SLANG_SPIRV;
-        break;
-    case GraphicsAPI::D3D12:
-        Target = SLANG_DXBC;
-        break;
-    }
-    spSetCodeGenTarget(Request, Target);
+    spSetCodeGenTarget(Request, SLANG_SPIRV);
     spSetCompileFlags(Request, 0);
-    
+
     const int Index = spAddTranslationUnit(Request, SLANG_SOURCE_LANGUAGE_SLANG, nullptr);
     spAddTranslationUnitSourceStringSpan(Request, Index, Filepath.string().c_str(), ContentView.As<char>().Data(), ContentView.Data() + ContentView.Count());
-    const int VertEntry = spAddEntryPoint(Request, Index, "vert", SlangStage::SLANG_STAGE_VERTEX);
-    const int FragEntry = spAddEntryPoint(Request, Index, "frag", SlangStage::SLANG_STAGE_FRAGMENT);
-    
+    const int VertEntry = spAddEntryPoint(Request, Index, "vert", SLANG_STAGE_VERTEX);
+    const int FragEntry = spAddEntryPoint(Request, Index, "frag", SLANG_STAGE_FRAGMENT);
+
     const SlangResult Result = spCompile(Request);
     if (SLANG_FAILED(Result))
     {
@@ -56,6 +44,8 @@ void Nova::ShaderCompiler::Compile(const Path& Filepath, Buffer<u8>& OutVertex, 
             std::cout << "Shader compiled successfully! Code size: " << codeSize << " bytes\n";
         }
     }
-    
+
     spDestroyCompileRequest(Request);
+}
+
 }

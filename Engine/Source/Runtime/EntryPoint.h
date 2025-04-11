@@ -1,7 +1,7 @@
 #pragma once
 #include "Containers/Array.h"
 #include "Containers/String.h"
-#include "Types.h"
+#include "ExitCode.h"
 
 #define NOVA_DEFINE_APPLICATION_CLASS(ApplicationClass) Nova::Application* Nova::CreateApplication(const Nova::Array<const char*>& Arguments) \
     { \
@@ -13,7 +13,7 @@ namespace Nova
 {
     extern class Application* CreateApplication(const Array<const char*>& Arguments);
     inline bool g_ApplicationRunning = true;
-    inline i32 g_ExitCode = 0;
-    int Main(int Argc, char** Argv);
+    inline ExitCode g_ExitCode = ExitCode::Success;
+    ExitCode Main(int Argc, char** Argv);
 }
 

@@ -16,7 +16,7 @@ namespace Nova
     {
     public:
         void OnInit(Scene* Owner) override;
-        void Step(f32 TimeStep) override;
+        void Step() override;
         void OnDestroy() override;
         
         void OnContactBegin(const PhysicsContact2D* Contact) override;
@@ -32,6 +32,5 @@ namespace Nova
     private:
         b2World* m_World = nullptr;
         PhysicsWorld2DContactListener* m_ContactListener = nullptr;
-        Vector2 m_Gravity{ 0.0f, -9.81f };
     };
 }

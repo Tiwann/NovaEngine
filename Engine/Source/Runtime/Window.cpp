@@ -98,7 +98,7 @@ namespace Nova
     void Window::SetIcon(const Path& Filepath) const
     {
         ScopedBuffer ImageData = File::ReadToBuffer(Filepath);
-        const Image IconImage(ImageData.AsBuffer(), Format::R32G32B32A32_FLOAT);
+        const Image IconImage(ImageData.AsBuffer(), Formats::R32G32B32A32_FLOAT);
         const GLFWimage GLFWImage{ (int)IconImage.GetWidth(), (int)IconImage.GetHeight(), (u8*)IconImage.GetData() };
         glfwSetWindowIcon(m_Handle, 1, &GLFWImage);
     }

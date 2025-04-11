@@ -4,7 +4,7 @@
 [submodule "box2d"]
 	path = Engine/Dependencies/box2d
 	url = git@github.com:Tiwann/box2d.git
-	branch = v2.4.2
+	branch = nova
 [submodule "Jolt"]
 	path = Engine/Dependencies/Jolt
 	url = git@github.com:jrouwe/JoltPhysics.git
@@ -39,3 +39,6 @@
 [submodule "json"]
 	path = Engine/Dependencies/json
 	url = git@github.com:nlohmann/json.git
+[submodule "DirectX-Headers"]
+	path = Engine/Dependencies/DirectX-Headers
+	url = git@github.com:microsoft/DirectX-Headers.git

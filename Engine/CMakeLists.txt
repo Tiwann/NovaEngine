@@ -2,68 +2,29 @@ set(ENGINE_MODULES Core)
 include(Dependencies/Dependencies.cmake)
 
 file(GLOB_RECURSE NOVA_ENGINE_SRC Source/*.cpp Source/*.h)
-if(WIN32)
-    file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
-            ${MODULE_PATH}/Platform/Windows/*.cpp
-            ${MODULE_PATH}/Platform/Windows/*.h
-    )
-elseif(UNIX AND NOT APPLE)
-    file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
-            ${MODULE_PATH}/Platform/Linux/*.cpp
-            ${MODULE_PATH}/Platform/Linux/*.h
-    )
-elseif(APPLE)
-    file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
-            ${MODULE_PATH}/Platform/MacOS/*.cpp
-            ${MODULE_PATH}/Platform/MacOS/*.h
-    )
-endif()
+file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
+        $<$<PLATFORM_ID:Windows>:${MODULE_PATH}/Platform/Windows/*.cpp ${MODULE_PATH}/Platform/Windows/*.h>
+        $<$<PLATFORM_ID:Unix>:${MODULE_PATH}/Platform/Linux/*.cpp ${MODULE_PATH}/Platform/Linux/*.h>
+        $<$<PLATFORM_ID:Darwin>:${MODULE_PATH}/Platform/MacOS/*.cpp ${MODULE_PATH}/Platform/MacOS/*.h>
+)
 
 list(REMOVE_ITEM NOVA_ENGINE_SRC ${NOVA_ENGINE_PLATFORM_SRC})
 
 set(CMAKE_CXX_STANDARD 20)
-add_library(NovaEngine SHARED)
+add_library(NovaEngine STATIC)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SRC} ${NOVA_ENGINE_PLATFORM_SRC})
-target_link_libraries(NovaEngine PUBLIC
-        assimp
-        utf8cpp
-        fmod-core
-        fmod-studio
-        glfw
-        glad
-        VulkanMemoryAllocator
-        box2d
-        Jolt
-        imgui
-        imguizmo
-        stb
-        Vulkan::Vulkan
-        miniaudio
-        ogg
-        vorbis
-        vorbisenc
-        tinygltf
-)
+target_link_libraries(NovaEngine PUBLIC slang assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt ImGui imguizmo STB Vulkan::Vulkan miniaudio ogg vorbis vorbisenc tinygltf $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
-target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
-set_target_properties(NovaEngine
-        PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
-        PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
-        PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
-)
-
-if(CMAKE_BUILD_TYPE MATCHES "DebugNoEditor" OR CMAKE_BUILD_TYPE MATCHES "DebugEditor")
-    target_compile_definitions(NovaEngine PUBLIC NOVA_DEBUG)
-elseif(CMAKE_BUILD_TYPE MATCHES "DevNoEditor" OR CMAKE_BUILD_TYPE MATCHES "DevEditor")
-    target_compile_definitions(NovaEngine PUBLIC NOVA_DEV)
-elseif(CMAKE_BUILD_TYPE MATCHES "DistNoEditor" OR CMAKE_BUILD_TYPE MATCHES "Dist")
-    target_compile_definitions(NovaEngine PUBLIC NOVA_DIST)
-endif()
-
-target_compile_definitions(NovaEngine
-        PUBLIC $<$<PLATFORM_ID:Windows>:NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows">
+target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
+        PRIVATE $<$<PLATFORM_ID:Windows>:UNICODE _UNICODE WIN32_LEAN_AND_MEAN>
+        PUBLIC $<$<PLATFORM_ID:Windows>:NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows" UNICODE _UNICODE WIN32_LEAN_AND_MEAN>
         PUBLIC $<$<PLATFORM_ID:Unix>:NOVA_PLATFORM_LINUX NOVA_SYSTEM_NAME="Linux">
-        PUBLIC $<$<PLATFORM_ID:Darwin>:NOVA_PLATFORM_DARWIN NOVA_SYSTEM_NAME="Darwin">)
+        PUBLIC $<$<PLATFORM_ID:Darwin>:NOVA_PLATFORM_DARWIN NOVA_SYSTEM_NAME="Darwin">
+        PUBLIC $<$<CONFIG:Debug>:NOVA_DEBUG>
+        PUBLIC $<$<CONFIG:RelWithDebInfo>:NOVA_DEV>
+        PUBLIC $<$<OR:$<CONFIG:MinSizeRel>,$<CONFIG:Release>>:NOVA_DIST>
+        PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
+)
 
 foreach (MODULE ${ENGINE_MODULES})
     set(MODULE_EXPORT_HEADER ${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h)
@@ -72,10 +33,6 @@ foreach (MODULE ${ENGINE_MODULES})
     string(TOUPPER ${MODULE} MODULE_UPPER)
     string(REPLACE "@MODULE_NAME@" ${MODULE_UPPER} HEADER_CONTENTS ${HEADER_CONTENTS})
     file(WRITE ${HEADER_FILE} ${HEADER_CONTENTS})
-
-    target_compile_definitions(NovaEngine
-            INTERFACE MODULE_SHARED
-            INTERFACE MODULE_BUILD)
 
     target_include_directories(NovaEngine PUBLIC ${CMAKE_BINARY_DIR}/Include)
     target_include_directories(NovaEngine PUBLIC ${MODULE}/Public)

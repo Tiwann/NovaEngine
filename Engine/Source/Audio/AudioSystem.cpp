@@ -84,7 +84,10 @@ namespace Nova
 
         Result = m_Handle->init(1024, FMOD_INIT_NORMAL, nullptr);
         FMOD_CHECK(Result);
-        
+
+        i8 VersionMajor = (FMOD_VERSION >> 8) & 0xFF;
+        i8 VersionMinor = (FMOD_VERSION >> 0) & 0xFF;
+        NOVA_LOG(AudioEngine, Verbosity::Info, "Using FMOD {}.{}", VersionMajor, VersionMinor);
         return true;
     }
 

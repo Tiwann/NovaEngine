@@ -81,13 +81,10 @@ namespace Nova
 
     void VulkanTexture2D::SetTextureParameters(const TextureParams& Params)
     {
-        if (m_Params != Params)
-        {
-            m_Params = Params;
-        }
+        m_Params = Params;
     }
 
-    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
+    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
     {
         const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
@@ -198,20 +195,41 @@ namespace Nova
         return (uintptr_t)(VkImage)m_Handle;
     }
 
-    bool VulkanTexture2D::GetPixels(Buffer<u8>& OutPixels) const
-    {
-        return false;
-    }
-
-    VkFormat VulkanTexture2D::ConvertFormat(Format Format)
+    VkFormat VulkanTexture2D::ConvertFormat(Formats Format)
     {
         switch (Format)
         {
-        case Format::RGBA8: return VK_FORMAT_R8G8B8A8_UNORM;
-        case Format::RGBA16: return VK_FORMAT_R16G16B16A16_UNORM;
-        case Format::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case Formats::NONE: return VK_FORMAT_UNDEFINED;
+        case Formats::R8_UNORM: return VK_FORMAT_R8_UNORM;
+        case Formats::R8_SNORM: return VK_FORMAT_R8_SNORM;
+        case Formats::R16_USHORT: return VK_FORMAT_R16_UINT;
+        case Formats::R16_SHORT: return VK_FORMAT_R16_SINT;
+        case Formats::R32_FLOAT: return VK_FORMAT_R32_SFLOAT;
+        case Formats::R32_UINT: return VK_FORMAT_R32_UINT;
+        case Formats::R32_SINT: return VK_FORMAT_R32_SINT;
+        case Formats::R8G8_UNORM: return VK_FORMAT_R8G8_UNORM;
+        case Formats::R8G8_SNORM: return VK_FORMAT_R8G8_SNORM;
+        case Formats::R16G16_USHORT: return VK_FORMAT_R16G16_UINT;
+        case Formats::R16G16_SHORT: return VK_FORMAT_R16G16_SINT;
+        case Formats::R32G32_UINT: return VK_FORMAT_R32G32_UINT;
+        case Formats::R32G32_SINT: return VK_FORMAT_R32G32_SINT;
+        case Formats::R32G32_FLOAT: return VK_FORMAT_R32G32_SFLOAT;
+        case Formats::R8G8B8_UNORM: return VK_FORMAT_R8G8B8_UNORM;
+        case Formats::R8G8B8_SNORM: return VK_FORMAT_R8G8B8_SNORM;
+        case Formats::R16G16B16_USHORT: return VK_FORMAT_R16G16B16_UINT;
+        case Formats::R16G16B16_SHORT: return VK_FORMAT_R16G16B16_SINT;
+        case Formats::R32G32B32_UINT: return VK_FORMAT_R32G32B32_UINT;
+        case Formats::R32G32B32_SINT: return VK_FORMAT_R32G32B32_SINT;
+        case Formats::R32G32B32_FLOAT: return VK_FORMAT_R32G32B32_SFLOAT;
+        case Formats::R8G8B8A8_UNORM: return VK_FORMAT_R8G8B8A8_UNORM;
+        case Formats::R8G8B8A8_SNORM: return VK_FORMAT_R8G8B8A8_SNORM;
+        case Formats::R16G16B16A16_USHORT: return VK_FORMAT_R16G16B16A16_UINT;
+        case Formats::R16G16B16A16_SHORT: return VK_FORMAT_R16G16B16A16_SINT;
+        case Formats::R32G32B32A32_UINT: return VK_FORMAT_R32G32B32A32_UINT;
+        case Formats::R32G32B32A32_SINT: return VK_FORMAT_R32G32B32A32_SINT;
+        case Formats::R32G32B32A32_FLOAT: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default: return VK_FORMAT_UNDEFINED;
         }
-        return VK_FORMAT_UNDEFINED;
     }
 
     VkFilter VulkanTexture2D::ConvertFilter(TextureFilter Filter)

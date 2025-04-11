@@ -82,7 +82,7 @@ namespace Nova
             if (VK_FAILED(vkCreateInstance(&InstanceCreateInfo, nullptr, &m_Instance)))
             {
                 NOVA_VULKAN_ERROR("Failed to create instance!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -112,7 +112,7 @@ namespace Nova
             if (VK_FAILED(m_FunctionPointers.vkCreateDebugUtilsMessengerEXT(m_Instance, &DebugMessengerCreateInfo, nullptr, &m_DebugMessenger)))
             {
                 NOVA_VULKAN_ERROR("Failed to create debug messenger!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
         }
@@ -126,7 +126,7 @@ namespace Nova
             if (VK_FAILED(vkEnumeratePhysicalDevices(m_Instance, &AvailableDevicesCount, nullptr)))
             {
                 NOVA_VULKAN_ERROR("Failed to enumerate physical devices!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -134,7 +134,7 @@ namespace Nova
             if (VK_FAILED(vkEnumeratePhysicalDevices(m_Instance, &AvailableDevicesCount, AvailablePhysicalDevices.GetData())))
             {
                 NOVA_VULKAN_ERROR("Failed to enumerate physical devices!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -144,7 +144,7 @@ namespace Nova
                 vkGetPhysicalDeviceProperties(PhysicalDevice, &Properties);
                 VkPhysicalDeviceFeatures Features;
                 vkGetPhysicalDeviceFeatures(PhysicalDevice, &Features);
-                if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && Features.samplerAnisotropy == true)
+                if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && Features.samplerAnisotropy == (VkBool32)true)
                 {
                     m_PhysicalDevice = PhysicalDevice;
                     break;
@@ -154,7 +154,7 @@ namespace Nova
             if (!m_PhysicalDevice)
             {
                 NOVA_VULKAN_ERROR("Failed to pick physical device!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
 
                 ScopedPointer<PopupMessage> Message = PopupMessage::Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
                 Message->Show();
@@ -164,7 +164,7 @@ namespace Nova
             if (VK_FAILED(glfwCreateWindowSurface(m_Instance, m_Application->GetWindow()->GetNativeWindow(), nullptr, &m_Surface)))
             {
                 NOVA_VULKAN_ERROR("Failed to create window surface!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -200,14 +200,14 @@ namespace Nova
             if (m_GraphicsQueueIndex == U32_MAX)
             {
                 NOVA_VULKAN_ERROR("Failed to find a suitable graphics queue!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
             if (m_PresentQueueIndex == U32_MAX)
             {
                 NOVA_VULKAN_ERROR("Failed to find a suitable presentation queue!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -262,7 +262,7 @@ namespace Nova
             if (VK_FAILED(vkCreateDevice(m_PhysicalDevice, &DeviceCreateInfo, nullptr, &m_Device)))
             {
                 NOVA_VULKAN_ERROR("Failed to create device!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -274,7 +274,7 @@ namespace Nova
             if (!m_GraphicsQueue)
             {
                 NOVA_VULKAN_ERROR("Failed to retrieve graphics queue!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -284,7 +284,7 @@ namespace Nova
             if (!m_PresentQueue)
             {
                 NOVA_VULKAN_ERROR("Failed to retrieve present queue!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
         }
@@ -355,7 +355,7 @@ namespace Nova
             if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -365,7 +365,7 @@ namespace Nova
             if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
             {
                 NOVA_VULKAN_ERROR("Failed to get swapchain image!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -375,7 +375,7 @@ namespace Nova
             if (VK_FAILED(vkCreateCommandPool(m_Device, &CommandPoolCreateInfo, nullptr, &m_CommandPool)))
             {
                 NOVA_VULKAN_ERROR("Failed to create command pool!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -397,7 +397,7 @@ namespace Nova
                 if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -421,7 +421,7 @@ namespace Nova
                 if (VK_FAILED(vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &m_Frames[i].Fence)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create Fence!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -435,7 +435,7 @@ namespace Nova
                     if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
                     {
                         NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
-                        m_Application->RequireExit();
+                        m_Application->RequireExit(ExitCode::Error);
                         return false;
                     }
                 }
@@ -455,7 +455,7 @@ namespace Nova
             if (VK_FAILED(vmaCreateAllocator(&AllocatorCreateInfo, &m_Allocator)))
             {
                 NOVA_VULKAN_ERROR("Failed to create allocator!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
         }
@@ -478,7 +478,7 @@ namespace Nova
             if (VK_FAILED(vkCreateDescriptorPool(m_Device, &DescriptorPoolCreateInfo, nullptr, &m_DescriptorPool)))
             {
                 NOVA_VULKAN_ERROR("Failed to create descriptor pool!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
         }
@@ -648,7 +648,7 @@ namespace Nova
             if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -658,7 +658,7 @@ namespace Nova
             if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
             {
                 NOVA_VULKAN_ERROR("Failed to get swapchain image!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -668,7 +668,7 @@ namespace Nova
             if (VK_FAILED(vkCreateCommandPool(m_Device, &CommandPoolCreateInfo, nullptr, &m_CommandPool)))
             {
                 NOVA_VULKAN_ERROR("Failed to create command pool!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -690,7 +690,7 @@ namespace Nova
                 if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -714,7 +714,7 @@ namespace Nova
                 if (VK_FAILED(vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &m_Frames[i].Fence)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create Fence!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -728,7 +728,7 @@ namespace Nova
                     if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
                     {
                         NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
-                        m_Application->RequireExit();
+                        m_Application->RequireExit(ExitCode::Error);
                         return false;
                     }
                 }
@@ -853,7 +853,7 @@ namespace Nova
         if (VK_FAILED(vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, Fence)))
         {
             NOVA_VULKAN_ERROR("Failed to submit command buffer!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
         }
     }
 
@@ -936,7 +936,7 @@ namespace Nova
         if (VK_FAILED(vkQueuePresentKHR(m_GraphicsQueue, &PresentInfo)))
         {
             NOVA_VULKAN_ERROR("Failed to present!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
         }
 
         m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_ImageCount;

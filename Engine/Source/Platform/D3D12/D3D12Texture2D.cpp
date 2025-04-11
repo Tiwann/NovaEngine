@@ -2,6 +2,10 @@
 #include "Runtime/Application.h"
 #include "Platform/PlatformRenderer.h"
 
+#include <directx/d3dx12_barriers.h>
+#include <directx/d3dx12_resource_helpers.h>
+
+
 namespace Nova
 {
     D3D12Texture2D::D3D12Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot)
@@ -13,7 +17,7 @@ namespace Nova
     {
     }
 
-    void D3D12Texture2D::SetData(u8* Data, u32 Width, u32 Height, Format Format)
+    void D3D12Texture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
     {
         m_Width = Width;
         m_Height = Height;
@@ -65,11 +69,6 @@ namespace Nova
         Cmd->Release();
     }
 
-    void D3D12Texture2D::SetData(const SharedPtr<Image>& Image)
-    {
-        D3D12Texture2D::SetData((u8*)Image->GetData(), Image->GetWidth(), Image->GetHeight(), Image->GetFormat());
-    }
-
     SharedPtr<Image> D3D12Texture2D::GetImage() const
     {
         return nullptr;
@@ -86,10 +85,5 @@ namespace Nova
     uintptr_t D3D12Texture2D::GetHandle() const
     {
         return reinterpret_cast<uintptr_t>(m_Resource);
-    }
-
-    bool D3D12Texture2D::GetPixels(Buffer<u8>& OutPixels) const
-    {
-        return false;
     }
 }

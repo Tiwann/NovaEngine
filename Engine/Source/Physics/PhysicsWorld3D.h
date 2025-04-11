@@ -39,7 +39,7 @@ namespace Nova
     public:
         PhysicsWorld3D();
         void OnInit(Scene* Owner) override;
-        void Step(f32 TimeStep) override;
+        void Step() override;
         void OnDestroy() override;
 
         void OnContactBegin(const PhysicsContact3D* Contact) override;
@@ -53,6 +53,8 @@ namespace Nova
         const JPH::PhysicsSystem& GetSystem() const;
         JPH::PhysicsSystem& GetSystem();
 
+        void SetGravity(const Vector3& Gravity);
+        Vector3 GetGravity() const;
     private:
         JPH::TempAllocatorImpl m_TempAllocator;
         JPH::JobSystemThreadPool m_JobSystem;

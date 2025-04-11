@@ -147,4 +147,7 @@ namespace Nova
 
     template<typename T>
     static constexpr bool IsColorValue = IsColor<T>::Value;
+
+    template<typename From, typename To>
+    static constexpr bool IsConvertible = __is_convertible_to(From, To);
 }

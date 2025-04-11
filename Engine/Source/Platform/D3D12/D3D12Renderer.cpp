@@ -3,9 +3,11 @@
 #include "Runtime/Window.h"
 #include "Graphics/IndexBuffer.h"
 #include "Graphics/VertexBuffer.h"
+
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
-
+#include <directx/d3dx12.h>
 
 
 namespace Nova
@@ -35,7 +37,7 @@ namespace Nova
         if (DX_FAILED(CreateDXGIFactory2(0, IID_PPV_ARGS(&m_Factory))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Factory!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -59,7 +61,7 @@ namespace Nova
         if (DX_FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_Debug))))
         {
             NOVA_DIRECTX_ERROR("Failed to get debug interface!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -71,7 +73,7 @@ namespace Nova
         if (DX_FAILED(D3D12CreateDevice(m_Adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Device! Maybe your GPU doesn't support D3D12 Feature Level 12.2 (D3D_FEATURE_LEVEL_12_2)");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -80,7 +82,7 @@ namespace Nova
         if (DX_FAILED(m_Device->QueryInterface(IID_PPV_ARGS(&m_InfoQueue))))
         {
             NOVA_DIRECTX_ERROR("Failed to get D3D12 Info Queue interface!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
         
@@ -94,7 +96,7 @@ namespace Nova
         if (DX_FAILED(m_InfoQueue->RegisterMessageCallback(DebugCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &callbackCookie)))
         {
             NOVA_DIRECTX_ERROR("Failed to register debug callback!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 #endif
@@ -105,7 +107,7 @@ namespace Nova
         if (DX_FAILED(m_Device->CreateCommandQueue(&CommandQueueDesc, IID_PPV_ARGS(&m_CommandQueue))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Command Queue!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -146,7 +148,7 @@ namespace Nova
         if (DX_FAILED(m_Factory->CreateSwapChainForHwnd(m_CommandQueue, Win32Window, &SwapchainDesc, nullptr, nullptr, (IDXGISwapChain1**)&m_Swapchain)))
         {
             NOVA_DIRECTX_ERROR("Failed to create Swapchain!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -157,7 +159,7 @@ namespace Nova
         if (DX_FAILED(m_Device->CreateDescriptorHeap(&RenderTargetViewHeapDesc, IID_PPV_ARGS(&m_RenderTargetViewDescriptorHeap))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Descriptor Heap!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
         
@@ -170,7 +172,7 @@ namespace Nova
             if (DX_FAILED(m_Swapchain->GetBuffer(i, IID_PPV_ARGS(RenderTarget))))
             {
                 NOVA_DIRECTX_ERROR("Failed to get Render Target!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -182,14 +184,14 @@ namespace Nova
             if (DX_FAILED(m_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_FrameData[i].CommandAllocator))))
             {
                 NOVA_DIRECTX_ERROR("Failed to create Command Allocator!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
             
             if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator, nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
             {
                 NOVA_DIRECTX_ERROR("Failed to create Command List!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
@@ -198,7 +200,7 @@ namespace Nova
             if (DX_FAILED(m_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_FrameData[i].Fence))))
             {
                 NOVA_DIRECTX_ERROR("Failed to create Fence!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
             m_FenceEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
@@ -214,7 +216,7 @@ namespace Nova
             if (DX_FAILED(m_Device->CreateDescriptorHeap(&ImGuiFontDescriptorHeapDesc, IID_PPV_ARGS(&m_ImGuiFontDescriptorHeap))))
             {
                 NOVA_DIRECTX_ERROR("Failed to create Descriptor Heap for ImGui font!");
-                m_Application->RequireExit();
+                m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
         }
@@ -270,7 +272,7 @@ namespace Nova
                 if (DX_FAILED(m_Swapchain->GetBuffer(i, IID_PPV_ARGS(&m_FrameData[i].RenderTarget))))
                 {
                     NOVA_DIRECTX_ERROR("Failed to get Render Target!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -282,14 +284,14 @@ namespace Nova
                 if (DX_FAILED(m_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_FrameData[i].CommandAllocator))))
                 {
                     NOVA_DIRECTX_ERROR("Failed to create Command Allocator!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
             
                 if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator, nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
                 {
                     NOVA_DIRECTX_ERROR("Failed to create Command List!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
@@ -298,7 +300,7 @@ namespace Nova
                 if (DX_FAILED(m_Device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_FrameData[i].Fence))))
                 {
                     NOVA_DIRECTX_ERROR("Failed to create Fence!");
-                    m_Application->RequireExit();
+                    m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
                 m_FenceEvent = CreateEventA(nullptr, FALSE, FALSE, nullptr);
@@ -317,14 +319,14 @@ namespace Nova
         if (DX_FAILED(Allocator->Reset()))
         {
             NOVA_DIRECTX_ERROR("Failed to reset Command Allocator!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
         
         if (DX_FAILED(Cmd->Reset(Allocator, nullptr)))
         {
             NOVA_DIRECTX_ERROR("Failed to reset Command Buffer!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
         
@@ -350,17 +352,16 @@ namespace Nova
         if (DX_FAILED(m_CommandQueue->Signal(m_FrameData[m_CurrentFrameIndex].Fence, FenceValue)))
         {
             NOVA_DIRECTX_ERROR("Failed to signal Fence!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
         }
     }
 
     void D3D12Renderer::Present()
     {
-        const GraphicsSettings& Settings = g_Application->GetGraphicsSettings();
-        if (DX_FAILED(m_Swapchain->Present(Settings.VSync, 0)))
+        if (const GraphicsSettings& Settings = g_Application->GetGraphicsSettings(); DX_FAILED(m_Swapchain->Present(Settings.VSync, 0)))
         {
             NOVA_DIRECTX_ERROR("Failed to present!");
-            m_Application->RequireExit();
+            m_Application->RequireExit(ExitCode::Error);
             return;
         }
         
@@ -501,21 +502,83 @@ namespace Nova
         return OutResource;
     }
 
-    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const
+    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Formats Format) const
     {
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)
         {
-        case Format::None:
-            DXFormat = DXGI_FORMAT_UNKNOWN;
+        case Formats::NONE:
+            DXFormat =  DXGI_FORMAT_UNKNOWN;
             break;
-        case Format::RGBA8:
+        case Formats::R8_UNORM:
+            DXFormat = DXGI_FORMAT_R8_UNORM;
+            break;
+        case Formats::R8_SNORM:
+            DXFormat = DXGI_FORMAT_R8_SNORM;
+            break;
+        case Formats::R16_USHORT:
+            DXFormat = DXGI_FORMAT_R16_UINT;
+            break;
+        case Formats::R16_SHORT:
+            DXFormat = DXGI_FORMAT_R16_SINT;
+            break;
+        case Formats::R32_FLOAT:
+            DXFormat = DXGI_FORMAT_R32_FLOAT;
+            break;
+        case Formats::R32_UINT:
+            DXFormat = DXGI_FORMAT_R32_UINT;
+            break;
+        case Formats::R32_SINT:
+            DXFormat = DXGI_FORMAT_R32_SINT;
+            break;
+        case Formats::R8G8_UNORM:
+            DXFormat = DXGI_FORMAT_R8G8_UNORM;
+            break;
+        case Formats::R8G8_SNORM:
+            DXFormat = DXGI_FORMAT_R8G8_SNORM;
+            break;
+        case Formats::R16G16_USHORT:
+            DXFormat = DXGI_FORMAT_R16G16_UINT;
+            break;
+        case Formats::R16G16_SHORT:
+            DXFormat = DXGI_FORMAT_R16G16_SINT;
+            break;
+        case Formats::R32G32_UINT:
+            DXFormat = DXGI_FORMAT_R32G32_UINT;
+            break;
+        case Formats::R32G32_SINT:
+            DXFormat = DXGI_FORMAT_R32G32_SINT;
+            break;
+        case Formats::R32G32_FLOAT:
+            DXFormat = DXGI_FORMAT_R32G32_FLOAT;
+            break;
+        case Formats::R8G8B8_UNORM:
+        case Formats::R8G8B8_SNORM:
+        case Formats::R16G16B16_USHORT:
+        case Formats::R16G16B16_SHORT:
+        case Formats::R32G32B32_UINT:
+        case Formats::R32G32B32_SINT:
+        case Formats::R32G32B32_FLOAT:
+            break;
+        case Formats::R8G8B8A8_UNORM:
             DXFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             break;
-        case Format::RGBA16:
-            DXFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+        case Formats::R8G8B8A8_SNORM:
+            DXFormat = DXGI_FORMAT_R8G8B8A8_SNORM;
             break;
-        case Format::RGBA32F:
+        case Formats::R16G16B16A16_USHORT:
+            DXFormat = DXGI_FORMAT_R16G16B16A16_UINT;
+            break;
+        case Formats::R16G16B16A16_SHORT:
+            DXFormat = DXGI_FORMAT_R16G16B16A16_SINT;
+            break;
+        case Formats::R32G32B32A32_UINT:
+            DXFormat = DXGI_FORMAT_R32G32B32A32_UINT;
+            break;
+        case Formats::R32G32B32A32_SINT:
+            DXFormat = DXGI_FORMAT_R32G32B32A32_SINT;
+            break;
+        case Formats::R32G32B32A32_FLOAT:
             DXFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
             break;
         }

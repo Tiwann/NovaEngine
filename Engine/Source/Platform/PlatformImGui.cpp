@@ -1,6 +1,5 @@
 ﻿#include "PlatformImGui.h"
 #include "Runtime/Application.h"
-#include "Runtime/Window.h"
 #include "Math/LinearAlgebra.h"
 #include "Runtime/Types.h"
 #include <ImGuizmo.h>
@@ -28,7 +27,7 @@ void ImGuizmo::DecomposeMatrixToComponents(const Nova::f32* matrix, Nova::Vector
     ImGuizmo::DecomposeMatrixToComponents(matrix, translation.ValuePtr(), rotation.ValuePtr(), scale.ValuePtr());
 }
 
-void ImGuizmo::RecomposeMatrixFromComponents(const Nova::Vector3& translation, const Nova::Vector3& rotation, const Nova::Vector3& scale, f32* matrix)
+void ImGuizmo::RecomposeMatrixFromComponents(const Nova::Vector3& translation, const Nova::Vector3& rotation, const Nova::Vector3& scale, Nova::f32* matrix)
 {
     ImGuizmo::RecomposeMatrixFromComponents(translation.ValuePtr(), rotation.ValuePtr(), scale.ValuePtr(), matrix);
 }

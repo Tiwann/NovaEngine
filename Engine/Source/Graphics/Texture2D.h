@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Renderer.h"
 #include "Runtime/Asset.h"
 #include "Runtime/Image.h"
 #include "Runtime/SharedPointer.h"
@@ -33,7 +34,7 @@ namespace Nova
     {
         TextureFilter Filter;
         TextureWrap Wrap;
-        Format Format;
+        Formats Format;
     };
     
     class Texture2D : public Asset
@@ -43,14 +44,15 @@ namespace Nova
         ~Texture2D() override = default;
 
 
-        static Texture2D* Create(const String& Name = "NewTexture");
-        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params,u32 Slot = 0);
+        static Texture2D* Create(const String& Name = "NewTexture", const GraphicsApi& GraphicsApi = {});
+        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi =
+                                     {});
         static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot = 0);
         static Texture2D* CreateWhiteTexture(u32 Width, u32 Height);
 
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
-        virtual void SetData(u8* Data, u32 Width, u32 Height, Format Format) = 0;
+        virtual void SetData(u8* Data, u32 Width, u32 Height, const Formats& Format) = 0;
         void SetData(const SharedPtr<Image>& Image);
         virtual SharedPtr<Image> GetImage() const = 0;
         virtual void Bind() const = 0;
@@ -61,13 +63,11 @@ namespace Nova
         u32 GetWidth() const;
         u32 GetHeight() const;
         u32 GetSlot() const;
-        Format GetFormat() const;
+        Formats GetFormat() const;
         void SetSlot(u32 Slot);
-        virtual bool GetPixels(Buffer<u8>& OutPixels) const = 0;
-
 
         template<typename T>
-        T As() const requires (std::is_convertible_v<T, void*>) { return (T)GetHandle(); }
+        T As() const { return (T)GetHandle(); }
         
         Sprite CreateSprite(const Vector2& Position, const Vector2& Size);
         Sprite CreateSprite();
@@ -76,7 +76,7 @@ namespace Nova
     protected:
         u32 m_Width{0}, m_Height{0};
         u32 m_Slot{0};
-        Format m_Format{Format::NONE};
+        Formats m_Format{Formats::NONE};
         TextureParams m_Params;
     };
 }

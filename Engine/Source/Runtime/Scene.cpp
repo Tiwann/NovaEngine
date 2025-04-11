@@ -7,8 +7,8 @@ namespace Nova
 {
     void Scene::OnInit()
     {
-        m_PhysicsWorld2D.OnInit();
-        m_PhysicsWorld3D.OnInit();
+        m_PhysicsWorld2D.OnInit(this);
+        m_PhysicsWorld3D.OnInit(this);
         
         for(Entity* Entity : m_Entities)
         {
@@ -23,8 +23,8 @@ namespace Nova
             Entity->OnUpdate(Delta);
         }
 
-        m_PhysicsWorld2D.Step(Physics2D::TimeStep);
-        m_PhysicsWorld3D.Step(Physics3D::TimeStep);
+        m_PhysicsWorld2D.Step();
+        m_PhysicsWorld3D.Step();
 
         for(Entity* Entity : m_Entities)
         {

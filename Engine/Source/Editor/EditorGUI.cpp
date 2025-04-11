@@ -182,7 +182,7 @@ namespace Nova::UI
 
     void Image(const Texture2D* InTexture, const Vector2& DrawSize)
     {
-        ImGui::Image(InTexture->As<ImTextureID>(), DrawSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image(InTexture->As<ImTextureID>(), ImVec2(DrawSize.x, DrawSize.y), ImVec2(0, 1), ImVec2(1, 0));
     }
 
 

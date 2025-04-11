@@ -260,7 +260,7 @@ namespace Nova
 
         void RemoveAt(SizeType Index)
         {
-            Assert(Index < m_Count, "Index out of bounds!");
+            Assert(Index <= m_Count, "Index out of bounds!");
             std::move(m_Data + Index + 1, m_Data + m_Count, m_Data + Index);
             m_Count--;
         }

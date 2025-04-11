@@ -26,8 +26,8 @@ namespace Nova
     {
     public:
         using Arguments = Array<const char*>;
-        explicit ArgumentParser(const String& Name, const Arguments& Arguments, const ArgumentParserSettings& Settings);
-
+        explicit ArgumentParser(String  Name, Arguments  Arguments, ArgumentParserSettings  Settings);
+        explicit ArgumentParser(String  Name, const Arguments& Arguments, ArgumentParserSettings  Settings, const Array<CommandLineOption>& Options);
 
         void SetSettings(const ArgumentParserSettings& Settings);
         void AddOption(const CommandLineOption& Option);
@@ -57,14 +57,14 @@ namespace Nova
 
             return {false};
         }*/
-
+        String GetHelpText();
     private:
         bool IsArgumentValid(const String& Argument) const;
         String GetOptionNameFromArgument(const String& Argument) const;
         Pair<String, std::any> SplitArgument(const String& Argument) const;
         size_t GetDescMaxLength(const Array<CommandLineOption>& TheOptions) const;
         size_t GetDescLength(const CommandLineOption& Option) const;
-        String GetHelpText();
+
 
         Array<String::CharacterType> GetPrefixCharacters() const;
 

@@ -6,8 +6,6 @@
 #include "LogVerbosity.h"
 #include "Scene.h"
 #include "CommandLine/ArgumentParser.h"
-#include "Containers/ScopedPointer.h"
-#include "Utility.h"
 #include "Graphics/Renderer.h"
 #include "Audio/AudioSystem.h"
 #include "ResourceManager/ResourceManager.h"
@@ -17,6 +15,22 @@
 
 
 #include <GLFW/glfw3.h>
+#include <slang/slang.h>
+
+#include "CameraSettings.h"
+#include "Cursors.h"
+#include "ExitCode.h"
+#include "ScopedTimer.h"
+#include "Editor/DetailsPanel.h"
+#include "Editor/PhysicsSettingsPanel.h"
+#include "Editor/SceneHierarchyPanel.h"
+#include "Editor/Selection.h"
+#include "Editor/ViewportPanel.h"
+
+#include "Components/Camera.h"
+#include "Components/Rendering/ModelRenderer.h"
+#include "Editor/EditorGUI.h"
+#include "Graphics/FrameBuffer.h"
 
 
 #define NOVA_LOG_WINDOW_CALLBACKS
@@ -24,16 +38,13 @@
 namespace Nova
 {
     extern bool g_ApplicationRunning;
-    extern i32 g_ExitCode;
+    extern ExitCode g_ExitCode;
 
     Application::Application(Array<const char*> Arguments) : m_Arguments(std::move(Arguments))
     {
         Memory::Memzero(m_Configuration);
-
-        m_EngineDirectory = *GetEnv("NOVA_ENGINE_PATH");
-        m_ApplicationDirectory = Directory::GetCurrentWorkingDirectory();
+        m_EngineDirectory = Path(NOVA_ENGINE_ROOT_DIR) / "Engine";
         m_EngineAssetsDirectory = m_EngineDirectory / "Assets";
-        m_ApplicationAssetsDirectory = m_ApplicationDirectory / "Assets";
     }
 
     bool Application::PreInitialize()
@@ -47,6 +58,7 @@ namespace Nova
         
         NOVA_LOG(Application, Verbosity::Info, "Using GLFW version {}.{}.{}", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 
+
         glfwSetErrorCallback([](int code, const char* message)
         {
             NOVA_LOG(Application, Verbosity::Warning, "[GLFW] Error {}: {}", code, message);
@@ -55,18 +67,7 @@ namespace Nova
         // Create Window, set its callbacks
         NOVA_LOG(Application, Verbosity::Trace, "Creating window...");
 
-        ApplicationConfigurationSerializer Serializer;
-        m_Configuration = CreateConfiguration(Serializer);
-        
-        if(m_Configuration.ShowGraphicsAPIName)
-            m_Configuration.AppName = Format("{} | {}", m_Configuration.AppName, NOVA_RHI_NAME);
-        
-        if(m_Configuration.ShowOSName)
-            m_Configuration.AppName = Format("{} {}", m_Configuration.AppName, NOVA_SYSTEM_NAME);
-        
-        if(m_Configuration.ShowConfiguration)
-            m_Configuration.AppName = Format("{} {}", m_Configuration.AppName, NOVA_CONFIG_NAME);
-        
+        m_Configuration = CreateConfiguration();
         m_MainWindow = new Window(m_Configuration);
 
 
@@ -74,7 +75,7 @@ namespace Nova
         // Set window callbacks
         glfwSetWindowCloseCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow*)
         {
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
         });
 
         glfwSetWindowFocusCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int focus){
@@ -179,8 +180,7 @@ namespace Nova
         }
 
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
-        
-        m_Renderer = Renderer::Create(this);
+        m_Renderer = Renderer::Create(this, GraphicsApi::Vulkan);
         if(!m_Renderer->Initialize())
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create renderer!");
@@ -189,6 +189,7 @@ namespace Nova
         
         NOVA_LOG(Application, Verbosity::Info, "Renderer created!");
 
+        NOVA_LOG(Application, Verbosity::Trace, "Initializing Audio System...");
         m_AudioSystem = new AudioSystem(this);
         if(!m_AudioSystem->Init())
         {
@@ -203,7 +204,7 @@ namespace Nova
         
         if(m_Configuration.WithEditor)
         {
-            m_ImGuiRenderer = ImGuiRenderer::Create(TODO);
+            m_ImGuiRenderer = ImGuiRenderer::Create(GraphicsApi::Vulkan);
             if (!m_ImGuiRenderer->Initialize(this))
             {
                 delete m_ImGuiRenderer;
@@ -211,7 +212,7 @@ namespace Nova
             }
         }
 
-        if (!((m_SlangSession = spCreateSession(nullptr))))
+        if (createGlobalSession(&m_SlangSession); !m_SlangSession)
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create slang session!");
             return false;
@@ -221,11 +222,12 @@ namespace Nova
 
     void Application::OnInit()
     {
-        m_ShaderManager->Load("Sprite",       m_EngineAssetsDirectory / "Shaders/Sprite.glsl");
-        m_ShaderManager->Load("UniformColor", m_EngineAssetsDirectory / "Shaders/UniformColor.glsl");
-        m_ShaderManager->Load("Circle",       m_EngineAssetsDirectory / "Shaders/Circle.glsl");
-        
-        m_Scene = new Scene;
+        //m_ShaderManager->Load("Sprite",       m_EngineAssetsDirectory / "Shaders/Sprite.glsl");
+        //m_ShaderManager->Load("UniformColor", m_EngineAssetsDirectory / "Shaders/UniformColor.glsl");
+        //m_ShaderManager->Load("Circle",       m_EngineAssetsDirectory / "Shaders/Circle.glsl");
+
+        JPH::RegisterDefaultAllocator();
+        m_Scene = new Scene(this);
         m_Scene->SetName("Default Scene");
         m_Scene->OnInit();
 
@@ -256,7 +258,7 @@ namespace Nova
             const Path Filepath = File::SaveFileDialog("Save scene as...", "", NovaSceneFilters);
             ApplicationEvents::OnSceneSaveEvent.Broadcast(Filepath);
         }});
-        File.AddChild({ "Exit", nullptr, [this]{ RequireExit(); } });
+        File.AddChild({ "Exit", nullptr, [this]{ RequireExit(ExitCode::Success); } });
 
         auto& Edit = m_MenuBar.AddChild({ "Edit" });
         Edit.AddChild({ "Undo" });
@@ -313,7 +315,7 @@ namespace Nova
         if(!PreInitialize())
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to init Nova Framework Core!");
-            RequireExit();
+            RequireExit(ExitCode::Error);
             return;
         }
 
@@ -359,63 +361,66 @@ namespace Nova
     
     void Application::OnRender(Renderer* Renderer)
     {
-
-#if defined(NOVA_PLATFORM_OPENGL)
-        if(m_Configuration.WithEditor)
+        switch (Renderer->GetGraphicsApi())
         {
-            if(!m_ViewportPanel->IsAvailable()) return;
-
-            // Clear all screen
-            Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
-            Renderer->ClearDepth(0.0f);
-            
-            m_ViewportPanel->GetFrameBuffer()->Bind();
-            if(m_Renderer->GetCurrentCamera())
-                m_Renderer->GetCurrentCamera()->Settings.SetDimensions(m_ViewportPanel->GetSize()); // Temp
-            Renderer->SetViewportRect(Vector2::Zero, m_ViewportPanel->GetSize());
-            const Camera* Camera = Renderer->GetCurrentCamera();
-            Renderer->ClearColor(Camera->ClearColor);
-            Renderer->ClearDepth(0.0f);
-            m_Scene->OnRender(Renderer);
-            m_ViewportPanel->GetFrameBuffer()->Unbind();
-
-            if (m_Configuration.WithEditor)
+        case GraphicsApi::None: return;
+        case GraphicsApi::OpenGL:
+            if(m_Configuration.WithEditor)
             {
-                m_ImGuiRenderer->BeginFrame();
-                ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                OnGUI((f32)m_DeltaTime);
-                m_ImGuiRenderer->EndFrame();
-                m_ImGuiRenderer->Render();
-            }
-            Renderer->Present();
-        }
-        else
-        {
-            const Camera* Camera = Renderer->GetCurrentCamera();
-            Renderer->ClearColor(Camera->ClearColor);
-            Renderer->ClearDepth(1.0f);
-            m_Scene->OnRender(Renderer);
-        }
-#elif defined(NOVA_PLATFORM_VULKAN) || defined(NOVA_PLATFORM_DIRECTX)
-        if (Renderer->BeginFrame() && g_ApplicationRunning)
-        {
-            const Camera* Camera = Renderer->GetCurrentCamera();
-            Renderer->Clear(Camera->ClearColor, 0.0f);
-            m_Scene->OnRender(Renderer);
+                if(!m_ViewportPanel->IsAvailable()) return;
 
-            if (m_Configuration.WithEditor)
-            {
-                m_ImGuiRenderer->BeginFrame();
-                ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                OnGUI((f32)m_DeltaTime);
-                m_ImGuiRenderer->EndFrame();
-                m_ImGuiRenderer->Render();
+                // Clear all screen
+                Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
+                Renderer->ClearDepth(0.0f);
+
+                m_ViewportPanel->GetFrameBuffer()->Bind();
+                if(m_Renderer->GetCurrentCamera())
+                    m_Renderer->GetCurrentCamera()->Settings.SetDimensions(m_ViewportPanel->GetSize()); // Temp
+                Renderer->SetViewportRect(Vector2::Zero, m_ViewportPanel->GetSize());
+                const Camera* Camera = Renderer->GetCurrentCamera();
+                Renderer->ClearColor(Camera->ClearColor);
+                Renderer->ClearDepth(0.0f);
+                m_Scene->OnRender(Renderer);
+                m_ViewportPanel->GetFrameBuffer()->Unbind();
+
+                if (m_Configuration.WithEditor)
+                {
+                    m_ImGuiRenderer->BeginFrame();
+                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                    OnGUI((f32)m_DeltaTime);
+                    m_ImGuiRenderer->EndFrame();
+                    m_ImGuiRenderer->Render();
+                }
+                Renderer->Present();
             }
-            
-            Renderer->EndFrame();
-            Renderer->Present();
+            else
+            {
+                const Camera* Camera = Renderer->GetCurrentCamera();
+                Renderer->ClearColor(Camera->ClearColor);
+                Renderer->ClearDepth(1.0f);
+                m_Scene->OnRender(Renderer);
+            }
+        case GraphicsApi::Vulkan:
+        case GraphicsApi::D3D12:
+            if (Renderer->BeginFrame() && g_ApplicationRunning)
+            {
+                const Camera* Camera = Renderer->GetCurrentCamera();
+                Renderer->Clear(Camera->ClearColor, 0.0f);
+                m_Scene->OnRender(Renderer);
+
+                if (m_Configuration.WithEditor)
+                {
+                    m_ImGuiRenderer->BeginFrame();
+                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                    OnGUI((f32)m_DeltaTime);
+                    m_ImGuiRenderer->EndFrame();
+                    m_ImGuiRenderer->Render();
+                }
+
+                Renderer->EndFrame();
+                Renderer->Present();
+            }
         }
-#endif
     }
     
     void Application::OnUpdate(f32 Delta)
@@ -530,12 +535,12 @@ namespace Nova
         return m_MainWindow;
     }
 
-    void Application::RequireExit()
+    void Application::RequireExit(const ExitCode ExitCode)
     {
         NOVA_LOG(Application, Verbosity::Warning, "Exit required. Cleaning...");
         m_IsRunning = false;
         g_ApplicationRunning = false;
-        g_ExitCode =
+        g_ExitCode = ExitCode;
     }
 
     void Application::RequireExitAndRestart()
@@ -543,6 +548,7 @@ namespace Nova
         NOVA_LOG(Application, Verbosity::Warning, "Exit required. Cleaning... Application will restart");
         m_IsRunning = false;
         g_ApplicationRunning = true;
+        g_ExitCode = ExitCode::Restarted;
     }
 
     void Application::SetCursorVisible(bool Visible) const

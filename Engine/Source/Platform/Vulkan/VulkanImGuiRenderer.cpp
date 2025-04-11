@@ -50,7 +50,7 @@ namespace Nova
             if(Result != VK_SUCCESS)
             {
                 NOVA_IMGUI_ERROR("Something went wrong.");
-                g_Application->RequireExit();
+                g_Application->RequireExit(ExitCode::Error);
             }
         };
         

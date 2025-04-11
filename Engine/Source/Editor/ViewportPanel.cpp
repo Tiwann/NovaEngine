@@ -4,6 +4,8 @@
 #include "Runtime/Application.h"
 #include "Graphics/FrameBuffer.h"
 #include "Graphics/Texture2D.h"
+#include "Math/MathConversions.h"
+
 
 namespace
 {
@@ -16,7 +18,8 @@ namespace Nova
     {
         EditorWindow::OnInit();
 
-        m_FrameBuffer = FrameBuffer::Create(TODO);
+        const Renderer* Renderer = g_Application->GetRenderer();
+        m_FrameBuffer = FrameBuffer::Create(Renderer->GetGraphicsApi());
         m_FrameBuffer->CreateAttachment(FrameBufferAttachment::Color);
         m_FrameBuffer->CreateAttachment(FrameBufferAttachment::Depth);
         
@@ -36,13 +39,13 @@ namespace Nova
     void ViewportPanel::OnInspectorGUI(const ImGuiIO& IO)
     {
         EditorWindow::OnInspectorGUI(IO);
-        
-        UI::ScopedStyleVarPusher WindowPadding(UI::StyleVar::WindowPadding, Vector2::Zero);
-        ImGui::SetNextWindowSize(WindowStartSize, ImGuiCond_Appearing);
+        UI::ScopedStyleVarPusher WindowPadding(UI::StyleVar::WindowPadding, ImVec2(0.0f, 0.0f));
+
+        ImGui::SetNextWindowSize(ImVec2(WindowStartSize.x, WindowStartSize.y), ImGuiCond_Appearing);
         UI::NewWindow(m_Name, m_Opened, WindowFlagBits::None, [this]
         {
-            m_Size = ImGui::GetContentRegionAvail();
-            m_Position = ImGui::GetWindowPos();
+            m_Size = ToVector2(ImGui::GetContentRegionAvail());
+            m_Position = ToVector2(ImGui::GetWindowPos());
             m_MouseInside = ImGui::IsWindowHovered();
             const AttachmentTexture* ColorAttachment = m_FrameBuffer->GetAttachments().Single([](const AttachmentTexture& Attachment)
             {

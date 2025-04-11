@@ -1,4 +1,6 @@
 #include "ArgumentParser.h"
+
+#include <utility>
 #include "Containers/StringFormat.h"
 #include "Runtime/Types.h"
 #include "Runtime/Assertion.h"
@@ -15,14 +17,18 @@ namespace Nova
         return std::regex(*RegexString);
     }
 
-    ArgumentParser::ArgumentParser(const String& Name, const Arguments& Arguments, const ArgumentParserSettings& Settings)
-        : m_Name(Name), m_Arguments(Arguments), m_Settings(Settings), m_PrefixCharacters(GetPrefixCharacters())
+    ArgumentParser::ArgumentParser(String Name, Arguments  Arguments, ArgumentParserSettings  Settings)
+        : m_Name(std::move(Name)), m_Arguments(std::move(Arguments)), m_Settings(std::move(Settings)), m_PrefixCharacters(GetPrefixCharacters())
     {
-        const Int32 A = 0;
-        const Int32 B{A % 3};
-        const bool C = A.Equals(B);
-        const auto D = 6 / B;
+        m_Arguments.RemoveAt(0);
+    }
 
+    ArgumentParser::ArgumentParser(String  Name, const Arguments& Arguments,
+        ArgumentParserSettings  Settings, const Array<CommandLineOption>& Options)
+    : m_Name(std::move(Name)), m_Arguments(Arguments), m_Settings(std::move(Settings)), m_PrefixCharacters(GetPrefixCharacters()), m_Options(Options)
+    {
+        m_Arguments.RemoveAt(0);
+        Parse();
     }
 
     void ArgumentParser::SetSettings(const ArgumentParserSettings& Settings)
@@ -74,13 +80,13 @@ namespace Nova
             for (size_t i = 0; i < SpaceLength; ++i)
                 Space.Append(" ");
             String Required = Option.Required ? "(Required)" : "";
-            String Formatted = Format("    {}{} {}{} {}{Space}\t{} {}\n",
+            String Formatted = Format("    {}{} {}{} {}{}\t{} {}\n",
                 m_Settings.ShortFormatPrefix,
                 Option.ShortName,
-                m_Settings.
-                LongFormatPrefix,
+                m_Settings.LongFormatPrefix,
                 Option.LongName,
                 Values,
+                Space,
                 Option.HelpText,
                 Required);
             HelpText.Append(Formatted);

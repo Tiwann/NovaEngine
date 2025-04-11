@@ -1,6 +1,7 @@
 #include "D3D12VertexBuffer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Application.h"
+#include <directx/d3dx12_barriers.h>
 
 namespace Nova
 {
@@ -20,7 +21,7 @@ namespace Nova
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer");
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return;
         }
         D3D12VertexBuffer::SendData(Data, Count);
@@ -40,7 +41,7 @@ namespace Nova
             if (!m_Handle)
             {
                 NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer");
-                g_Application->RequireExit();
+                g_Application->RequireExit(ExitCode::Error);
                 return;
             }
         }
@@ -50,7 +51,7 @@ namespace Nova
         if (!UploadHeap)
         {
             NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer Upload Heap");
-            g_Application->RequireExit();
+            g_Application->RequireExit(ExitCode::Error);
             return;
         }
 

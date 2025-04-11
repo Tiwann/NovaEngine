@@ -2,7 +2,8 @@
 #include "Graphics/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/Image.h"
-#include <d3d12.h>
+
+#include <directx/d3d12.h>
 #include <dxgi1_6.h>
 
 
@@ -52,7 +53,7 @@ namespace Nova
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
         ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
-        ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const;
+        ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Formats Format) const;
     public:
         ID3D12Device9*              GetDevice() const { return m_Device; }
         u32                         GetImageCount() const { return m_ImageCount; }

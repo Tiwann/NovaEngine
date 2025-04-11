@@ -14,6 +14,7 @@
 #include "PhysicsContact3D.h"
 #include "PhysicsContactInfo3D.h"
 #include "PhysicsShape3D.h"
+#include "Math/MathConversions.h"
 #include "Runtime/Application.h"
 
 
@@ -34,8 +35,7 @@ namespace Nova
         return "Broadphase layer";
     }
 
-    bool PhysicsWorld3DObjectVsBroadPhaseLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer1,
-                                                                    JPH::BroadPhaseLayer inLayer2) const
+    bool PhysicsWorld3DObjectVsBroadPhaseLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer1,JPH::BroadPhaseLayer inLayer2) const
     {
         return ObjectVsBroadPhaseLayerFilter::ShouldCollide(inLayer1, inLayer2);
     }
@@ -54,17 +54,15 @@ namespace Nova
 
     void PhysicsWorld3D::OnInit(Scene* Owner)
     {
-        Base::OnInit(Owner);
-        JPH::RegisterDefaultAllocator();
         JPH::Factory::sInstance = new JPH::Factory();
         JPH::RegisterTypes();
         
-        m_System.SetGravity(Physics3D::Gravity);
+        m_System.SetGravity(JPH::Vec3(0.0f, -9.81f, 0.0f));
         
-        m_System.Init(Physics3D::MaxBodies,
+        m_System.Init(MaxBodies,
             0,
-            Physics3D::MaxBodyPairs,
-            Physics3D::MaxContactConstraints,
+            MaxBodyPairs,
+            MaxContactConstraints,
             m_LayerInterface,
             m_LayerFilter,
             m_LayerPairFilter);
@@ -73,9 +71,9 @@ namespace Nova
         m_System.SetContactListener(m_ContactListener);
     }
 
-    void PhysicsWorld3D::Step(const f32 TimeStep)
+    void PhysicsWorld3D::Step()
     {
-        m_System.Update(TimeStep * (f32)g_Application->GetTimeScale(), 2, &m_TempAllocator, &m_JobSystem);
+        m_System.Update(m_TimeStep * (f32)g_Application->GetTimeScale(), 2, &m_TempAllocator, &m_JobSystem);
     }
 
     void PhysicsWorld3D::OnDestroy()
@@ -98,15 +96,15 @@ namespace Nova
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
 
         PhysicsContactInfo3D ContactInfoA;
-        ContactInfoA.Point = WorldManifold.GetWorldSpaceContactPointOn1(0);
-        ContactInfoA.Normal = -WorldManifold.mWorldSpaceNormal;
+        ContactInfoA.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn1(0));
+        ContactInfoA.Normal = ToVector3(-WorldManifold.mWorldSpaceNormal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = true;
         BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo3D ContactInfoB;
-        ContactInfoB.Point = WorldManifold.GetWorldSpaceContactPointOn2(0);
-        ContactInfoB.Normal = WorldManifold.mWorldSpaceNormal;
+        ContactInfoB.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn2(0));
+        ContactInfoB.Normal = ToVector3(WorldManifold.mWorldSpaceNormal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = true;
         BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
@@ -122,15 +120,15 @@ namespace Nova
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
 
         PhysicsContactInfo3D ContactInfoA;
-        ContactInfoA.Point = WorldManifold.GetWorldSpaceContactPointOn1(0);
-        ContactInfoA.Normal = -WorldManifold.mWorldSpaceNormal;
+        ContactInfoA.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn1(0));
+        ContactInfoA.Normal = ToVector3(-WorldManifold.mWorldSpaceNormal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = true;
         BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo3D ContactInfoB;
-        ContactInfoB.Point = WorldManifold.GetWorldSpaceContactPointOn2(0);
-        ContactInfoB.Normal = WorldManifold.mWorldSpaceNormal;
+        ContactInfoB.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn2(0));
+        ContactInfoB.Normal = ToVector3(WorldManifold.mWorldSpaceNormal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = true;
         BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
@@ -146,15 +144,15 @@ namespace Nova
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
 
         PhysicsContactInfo3D ContactInfoA;
-        ContactInfoA.Point = WorldManifold.GetWorldSpaceContactPointOn1(0);
-        ContactInfoA.Normal = -WorldManifold.mWorldSpaceNormal;
+        ContactInfoA.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn1(0));
+        ContactInfoA.Normal = ToVector3(-WorldManifold.mWorldSpaceNormal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = false;
         BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo3D ContactInfoB;
-        ContactInfoB.Point = WorldManifold.GetWorldSpaceContactPointOn2(0);
-        ContactInfoB.Normal = WorldManifold.mWorldSpaceNormal;
+        ContactInfoB.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn2(0));
+        ContactInfoB.Normal = ToVector3(WorldManifold.mWorldSpaceNormal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = false;
         BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
@@ -164,8 +162,8 @@ namespace Nova
     {
         JPH::BodyInterface& BodyInterface = m_System.GetBodyInterface();
         JPH::BodyCreationSettings Settings;
-        Settings.mPosition = Definition.Position;
-        Settings.mRotation = JPH::Quat::sEulerAngles(Definition.Rotation.Apply(Math::Radians));
+        Settings.mPosition = ToJoltVec3(Definition.Position);
+        Settings.mRotation = JPH::Quat::sEulerAngles(ToJoltVec3(Definition.Rotation.Apply(Math::Radians)));
         Settings.mMotionType = (JPH::EMotionType)Definition.Type;
         Settings.mFriction = Material.Friction;
         Settings.mRestitution = Material.Bounciness;
@@ -207,6 +205,16 @@ namespace Nova
     JPH::PhysicsSystem& PhysicsWorld3D::GetSystem()
     {
         return m_System;
+    }
+
+    void PhysicsWorld3D::SetGravity(const Vector3& Gravity)
+    {
+        m_System.SetGravity(ToJoltVec3(Gravity));
+    }
+
+    Vector3 PhysicsWorld3D::GetGravity() const
+    {
+        return ToVector3(m_System.GetGravity());
     }
 }
 

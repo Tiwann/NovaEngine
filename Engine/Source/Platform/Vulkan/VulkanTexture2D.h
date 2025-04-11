@@ -13,12 +13,11 @@ namespace Nova
         VulkanTexture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot);
 
         void SetTextureParameters(const TextureParams& Params) override;
-        void SetData(u8* Data, u32 Width, u32 Height, Format Format) override;
+        void SetData(u8* Data, u32 Width, u32 Height, const Formats& Format) override;
         SharedPtr<Image> GetImage() const override;
         void Bind() const override;
         void Unbind() const override;
         uintptr_t GetHandle() const override;
-        bool GetPixels(Buffer<u8>& OutPixels) const override;
 
     private:
         VkImage m_Handle = nullptr;
@@ -27,7 +26,7 @@ namespace Nova
         VmaAllocation m_Allocation = nullptr;
         VmaAllocationInfo m_AllocationInfo = {};
 
-        static VkFormat ConvertFormat(Format Format);
+        static VkFormat ConvertFormat(Formats Format);
         static VkFilter ConvertFilter(TextureFilter Filter);
         static VkSamplerAddressMode ConvertWrap(TextureWrap Wrap);
     };

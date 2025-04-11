@@ -1,5 +1,5 @@
 #pragma once
-#include "Graphics/FrameBuffer.h"
+#include "Rendering/FrameBuffer.h"
 
 namespace Nova
 {

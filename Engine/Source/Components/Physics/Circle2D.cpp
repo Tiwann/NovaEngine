@@ -1,7 +1,7 @@
 ﻿#include "Circle2D.h"
 #include "Components/Transform.h"
 #include "Runtime/Color.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Physics/PhysicsBody2D.h"
 #include "Physics/CircleShape2D.h"
 #include "Editor/EditorGUI.h"

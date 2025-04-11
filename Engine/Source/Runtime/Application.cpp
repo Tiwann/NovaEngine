@@ -6,7 +6,7 @@
 #include "LogVerbosity.h"
 #include "Scene.h"
 #include "CommandLine/ArgumentParser.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Audio/AudioSystem.h"
 #include "ResourceManager/ResourceManager.h"
 #include "ResourceManager/ShaderManager.h"
@@ -30,7 +30,7 @@
 #include "Components/Camera.h"
 #include "Components/Rendering/ModelRenderer.h"
 #include "Editor/EditorGUI.h"
-#include "Graphics/FrameBuffer.h"
+#include "Rendering/FrameBuffer.h"
 
 
 #define NOVA_LOG_WINDOW_CALLBACKS
@@ -180,7 +180,7 @@ namespace Nova
         }
 
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
-        m_Renderer = Renderer::Create(this, GraphicsApi::Vulkan);
+        m_Renderer = Renderer::Create(this, m_Configuration.Graphics.GraphicsApi);
         if(!m_Renderer->Initialize())
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create renderer!");
@@ -204,7 +204,7 @@ namespace Nova
         
         if(m_Configuration.WithEditor)
         {
-            m_ImGuiRenderer = ImGuiRenderer::Create(GraphicsApi::Vulkan);
+            m_ImGuiRenderer = ImGuiRenderer::Create(m_Configuration.Graphics.GraphicsApi);
             if (!m_ImGuiRenderer->Initialize(this))
             {
                 delete m_ImGuiRenderer;

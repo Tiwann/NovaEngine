@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Graphics/VertexBuffer.h"
+#include "Rendering/VertexBuffer.h"
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 

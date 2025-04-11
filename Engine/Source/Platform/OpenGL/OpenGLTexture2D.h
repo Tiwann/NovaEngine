@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 
 typedef Nova::i32 GLint;
 

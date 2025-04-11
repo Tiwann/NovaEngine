@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "Graphics/CullMode.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/CullMode.h"
+#include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/LogVerbosity.h"
 

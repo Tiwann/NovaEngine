@@ -1,5 +1,5 @@
 #pragma once
-#include "Graphics/VertexArray.h"
+#include "Rendering/VertexArray.h"
 #include "Runtime/Types.h"
 
 

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/Image.h"
 

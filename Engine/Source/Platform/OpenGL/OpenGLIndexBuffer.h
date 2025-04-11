@@ -1,5 +1,5 @@
 #pragma once
-#include "Graphics/IndexBuffer.h"
+#include "Rendering/IndexBuffer.h"
 
 namespace Nova
 {

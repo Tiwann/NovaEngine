@@ -6,7 +6,7 @@
 #include "Components/Camera.h"
 #include "Components/Physics/RigidBody2D.h"
 #include "Runtime/Application.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Runtime/Scene.h"
 #include <ImGuizmo.h>
 

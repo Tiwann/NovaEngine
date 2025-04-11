@@ -1,7 +1,7 @@
 #pragma once
 #include "Runtime/LogCategory.h"
 #include "Runtime/Log.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(ImGui, "IMGUI");
 #define NOVA_IMGUI_ERROR(str, ...) NOVA_LOG(ImGui, Verbosity::Error, str, __VA_ARGS__)

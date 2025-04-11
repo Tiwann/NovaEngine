@@ -1,6 +1,6 @@
 #pragma once
 #include "ResourceManager.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(TextureManager, "TEXTURE MANAGER")
 

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CullMode.h"
 #include "Math/Matrix4.h"
+#include "GraphicsApi.h"
 
 namespace Nova
 {
@@ -69,13 +70,7 @@ namespace Nova
         ReverseSubtract,
     };
 
-    enum class GraphicsApi
-    {
-        None,
-        OpenGL,
-        Vulkan,
-        D3D12
-    };
+
 
     class Renderer
     {

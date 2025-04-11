@@ -1,6 +1,6 @@
 #include "TextureManager.h"
 #include "Containers/StringFormat.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 #include "Runtime/Log.h"
 #include "Runtime/LogVerbosity.h"
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
-#include "Graphics/Vertex.h"
+#include "Rendering/Vertex.h"
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 

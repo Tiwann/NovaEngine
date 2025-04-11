@@ -5,12 +5,12 @@
 #include "Components/Transform.h"
 #include "Runtime/Model.h"
 #include "Runtime/PopupMessage.h"
-#include "Graphics/VertexArray.h"
+#include "Rendering/VertexArray.h"
 #include "Editor/EditorGUI.h"
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/Application.h"
-#include "Graphics/Renderer.h"
-#include "Graphics/VertexBuffer.h"
+#include "Rendering/Renderer.h"
+#include "Rendering/VertexBuffer.h"
 
 
 namespace Nova

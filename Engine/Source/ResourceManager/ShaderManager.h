@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "ResourceManager.h"
-#include "Graphics/Shader.h"
+#include "Rendering/Shader.h"
 #include "Runtime/LogCategory.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(ShaderManager, "SHADER MANAGER")

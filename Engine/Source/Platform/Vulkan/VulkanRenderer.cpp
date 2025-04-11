@@ -5,9 +5,9 @@
 #include "Runtime/LogVerbosity.h"
 #include "Runtime/PopupMessage.h"
 #include "Containers/ScopedPointer.h"
-#include "Graphics/IndexBuffer.h"
-#include "Graphics/VertexBuffer.h"
-#include "Graphics/Shader.h"
+#include "Rendering/IndexBuffer.h"
+#include "Rendering/VertexBuffer.h"
+#include "Rendering/Shader.h"
 #include <GLFW/glfw3.h>
 
 namespace Nova

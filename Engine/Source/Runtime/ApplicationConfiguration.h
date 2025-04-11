@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Containers/String.h"
 #include "AudioSettings.h"
-#include "Graphics/GraphicsSettings.h"
+#include "Rendering/GraphicsSettings.h"
 #include "Filesystem.h"
 
 namespace Nova

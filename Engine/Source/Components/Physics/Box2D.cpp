@@ -1,7 +1,7 @@
 #include "Box2D.h"
 #include "Runtime/Scene.h"
 #include "Components/Transform.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Runtime/Color.h"
 #include "Physics/PhysicsBody2D.h"
 #include "Physics/BoxShape2D.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "Graphics/IndexBuffer.h"
+#include "Rendering/IndexBuffer.h"
 
 struct ID3D12Resource;
 namespace Nova

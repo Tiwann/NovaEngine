@@ -1,5 +1,5 @@
 #pragma once
-#include "Graphics/FrameBuffer.h"
+#include "Rendering/FrameBuffer.h"
 #include "Runtime/Types.h"
 
 typedef Nova::u32 GLenum;

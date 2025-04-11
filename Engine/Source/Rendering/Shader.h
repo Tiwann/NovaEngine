@@ -8,7 +8,7 @@
 #include "Runtime/Asset.h"
 #include "Components/Rendering/AmbientLight.h"
 #include "Components/Rendering/PointLight.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 
 
 namespace Nova

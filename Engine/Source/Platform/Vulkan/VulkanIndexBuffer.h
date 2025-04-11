@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Graphics/IndexBuffer.h"
+#include "Rendering/IndexBuffer.h"
 #include "Platform/PlatformRenderer.h"
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>

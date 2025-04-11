@@ -1,5 +1,5 @@
 #include "Sprite.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 
 namespace Nova
 {

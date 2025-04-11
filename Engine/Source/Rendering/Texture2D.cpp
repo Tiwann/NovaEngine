@@ -7,7 +7,7 @@
 #include "Runtime/Sprite.h"
 #include "Runtime/SpriteAnimation.h"
 #include "Runtime/SpriteSheet.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include "Math/Vector2.h"
 
 namespace Nova

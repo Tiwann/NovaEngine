@@ -1,7 +1,7 @@
 #pragma once
 #include "Containers/Array.h"
 #include "Tweener.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 
 namespace Nova
 {

@@ -3,7 +3,7 @@
 #include "Runtime/Log.h"
 #include "Runtime/LogVerbosity.h"
 #include "Runtime/Entity.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/Texture2D.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/DirectionalLight.h"
 #include "Containers/StringFormat.h"

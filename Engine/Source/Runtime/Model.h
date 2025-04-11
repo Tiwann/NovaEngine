@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Asset.h"
 #include "Filesystem.h"
-#include "Graphics/Vertex.h"
+#include "Rendering/Vertex.h"
 #include "Containers/Array.h"
 
 

@@ -28,7 +28,8 @@ namespace Nova
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
-        Configuration.Graphics.BufferType = GraphicsSettings::SwapchainBufferType::DoubleBuffering;
+        Configuration.Graphics.GraphicsApi = GraphicsApi::D3D12;
+        Configuration.Graphics.BufferType = SwapchainBuffering::DoubleBuffering;
         Configuration.Graphics.VSync = false;
         Configuration.WithEditor = true;
         return Configuration;

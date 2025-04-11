@@ -2,7 +2,7 @@
 
 #include "VulkanRenderer.h"
 #include "Runtime/Application.h"
-#include "Graphics/ShaderCompiler.h"
+#include "Rendering/ShaderCompiler.h"
 
 
 namespace Nova

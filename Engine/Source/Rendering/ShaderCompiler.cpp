@@ -1,6 +1,6 @@
 #include "ShaderCompiler.h"
 #include "Runtime/Application.h"
-#include "Graphics/Renderer.h"
+#include "Rendering/Renderer.h"
 #include <slang/slang.h>
 
 namespace Nova

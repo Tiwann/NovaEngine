@@ -1,8 +1,8 @@
 #include "D3D12Renderer.h"
 #include "Runtime/Application.h"
 #include "Runtime/Window.h"
-#include "Graphics/IndexBuffer.h"
-#include "Graphics/VertexBuffer.h"
+#include "Rendering/IndexBuffer.h"
+#include "Rendering/VertexBuffer.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>

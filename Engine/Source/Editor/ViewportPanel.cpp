@@ -2,8 +2,8 @@
 #include "EditorGUI.h"
 #include "StyleVar.h"
 #include "Runtime/Application.h"
-#include "Graphics/FrameBuffer.h"
-#include "Graphics/Texture2D.h"
+#include "Rendering/FrameBuffer.h"
+#include "Rendering/Texture2D.h"
 #include "Math/MathConversions.h"
 
 

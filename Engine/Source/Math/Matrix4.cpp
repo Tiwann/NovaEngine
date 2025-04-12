@@ -164,13 +164,13 @@ namespace Nova
 
     Vector4& Matrix4::operator[](size_t i)
     {
-        Assert(i < 4, "Cannot access Mat4 element: index out of bounds.");
+        NOVA_ASSERT(i < 4, "Cannot access Mat4 element: index out of bounds.");
         return Columns[i];
     }
 
     const Vector4& Matrix4::operator[](size_t i) const
     {
-        Assert(i < 4, "Cannot access Mat4 element: index out of bounds.");
+        NOVA_ASSERT(i < 4, "Cannot access Mat4 element: index out of bounds.");
         return Columns[i];
     }
 

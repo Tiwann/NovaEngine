@@ -119,55 +119,55 @@ namespace Nova
 
         ReferenceType operator[](SizeType Index)
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
             return m_Data[Index];
         }
 
         ConstReferenceType operator[](SizeType Index) const
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
             return m_Data[Index];
         }
 
         void SetAt(SizeType Index, ConstReferenceType Element)
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
             m_Data[Index] = Element;
         }
 
         ReferenceType GetAt(SizeType Index)
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
             return m_Data[Index];
         }
 
         ConstReferenceType GetAt(SizeType Index) const
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
             return m_Data[Index];
         }
 
         ReferenceType First()
         {
-            Assert(m_Count != 0, "Cannot get first element, array is empty!");
+            NOVA_ASSERT(m_Count != 0, "Cannot get first element, array is empty!");
             return m_Data[0];
         }
 
         ConstReferenceType First() const
         {
-            Assert(m_Count != 0, "Cannot get first element, array is empty!");
+            NOVA_ASSERT(m_Count != 0, "Cannot get first element, array is empty!");
             return m_Data[0];
         }
 
         ReferenceType Last()
         {
-            Assert(m_Count != 0, "Cannot get last element, array is empty!");
+            NOVA_ASSERT(m_Count != 0, "Cannot get last element, array is empty!");
             return m_Data[m_Count - 1];
         }
 
         ConstReferenceType Last() const
         {
-            Assert(m_Count != 0, "Cannot get first element, array is empty!");
+            NOVA_ASSERT(m_Count != 0, "Cannot get first element, array is empty!");
             return m_Data[m_Count - 1];
         }
 
@@ -260,7 +260,7 @@ namespace Nova
 
         void RemoveAt(SizeType Index)
         {
-            Assert(Index <= m_Count, "Index out of bounds!");
+            NOVA_ASSERT(Index <= m_Count, "Index out of bounds!");
             std::move(m_Data + Index + 1, m_Data + m_Count, m_Data + Index);
             m_Count--;
         }

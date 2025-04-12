@@ -62,32 +62,32 @@ namespace Nova
         void LogTrace(const String& Fmt, const Args&... Arguments)
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Reset));
-            const String Message = Format(Fmt, Arguments...);
-            std::cout << Format("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            const String Message = StringFormat(Fmt, Arguments...);
+            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
         }
 
         template<typename... Args>
         void LogError(const String& Fmt, const Args&... Arguments)
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Red));
-            const String Message = Format(Fmt, Arguments...);
-            std::cout << Format("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            const String Message = StringFormat(Fmt, Arguments...);
+            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
         }
 
         template<typename... Args>
         void LogWarning(const String& Fmt, const Args&... Arguments)
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Yellow));
-            const String Message = Format(Fmt, Arguments...);
-            std::cout << Format("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            const String Message = StringFormat(Fmt, Arguments...);
+            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
         }
 
         template<typename... Args>
         void LogInfo(const String& Fmt, const Args&... Arguments)
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Green));
-            const String Message = Format(Fmt, Arguments...);
-            std::cout << Format("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            const String Message = StringFormat(Fmt, Arguments...);
+            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
         }
 
         template<typename... Args>

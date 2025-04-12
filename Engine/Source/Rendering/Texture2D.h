@@ -34,25 +34,21 @@ namespace Nova
     {
         TextureFilter Filter;
         TextureWrap Wrap;
-        Formats Format;
+        Format Format;
     };
     
     class Texture2D : public Asset
     {
     public:
-        Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0);
         ~Texture2D() override = default;
-
-
+        
         static Texture2D* Create(const String& Name = "NewTexture", const GraphicsApi& GraphicsApi = {});
-        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi =
-                                     {});
+        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi ={});
         static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot = 0);
-        static Texture2D* CreateWhiteTexture(u32 Width, u32 Height);
 
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
-        virtual void SetData(u8* Data, u32 Width, u32 Height, const Formats& Format) = 0;
+        virtual void SetData(u8* Data, u32 Width, u32 Height, const Format& Format) = 0;
         void SetData(const SharedPtr<Image>& Image);
         virtual SharedPtr<Image> GetImage() const = 0;
         virtual void Bind() const = 0;
@@ -63,7 +59,7 @@ namespace Nova
         u32 GetWidth() const;
         u32 GetHeight() const;
         u32 GetSlot() const;
-        Formats GetFormat() const;
+        Format GetFormat() const;
         void SetSlot(u32 Slot);
 
         template<typename T>
@@ -74,9 +70,11 @@ namespace Nova
         SpriteAnimation* CreateAnimation(u32 NumRows, u32 NumColumns, u32 NumSprites, u32 SpriteSize);
         SpriteAnimation* CreateAnimation(const SpriteSheet& SpriteSheet);
     protected:
+        Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0);
+
         u32 m_Width{0}, m_Height{0};
         u32 m_Slot{0};
-        Formats m_Format{Formats::NONE};
+        Format m_Format{Format::NONE};
         TextureParams m_Params;
     };
 }

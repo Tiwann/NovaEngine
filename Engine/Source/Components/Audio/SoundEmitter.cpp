@@ -92,16 +92,16 @@ namespace Nova
         if (ImGui::TreeNode("Sound"))
         {
             const String UUID = m_Sound ? m_Sound->GetGuid().GetString() : "None";
-            UI::Text(Format("UUID: {}", UUID));
+            UI::Text(StringFormat("UUID: {}", UUID));
             if(m_Sound)
             {
-                UI::Text(Format("Channels: {}", m_Sound->GetChannels()));
-                UI::Text(Format("Sound Type: {}", SoundTypeToString(m_Sound->GetType())));
-                UI::Text(Format("Sound Format: {}", SoundFormatToString(m_Sound->GetFormat())));
+                UI::Text(StringFormat("Channels: {}", m_Sound->GetChannels()));
+                UI::Text(StringFormat("Sound Type: {}", SoundTypeToString(m_Sound->GetType())));
+                UI::Text(StringFormat("Sound Format: {}", SoundFormatToString(m_Sound->GetFormat())));
                 const f32 Seconds = m_Sound->GetDuration();
                 const int Minutes = Math::IntegerPart(Seconds / 60.0f);
                 const int RemainSeconds = ((int)Seconds) % 60;
-                UI::Text(Format("Duration: {:02}:{:02}", Minutes, RemainSeconds));
+                UI::Text(StringFormat("Duration: {:02}:{:02}", Minutes, RemainSeconds));
             }
             
             ImGui::Separator();

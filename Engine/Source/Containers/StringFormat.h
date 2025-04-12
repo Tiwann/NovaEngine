@@ -18,7 +18,7 @@ struct std::formatter<Nova::StringView> : std::formatter<std::string_view>
 namespace Nova
 {
     template <typename... Args>
-    String Format(const StringView& Fmt, const Args&... Arguments)
+    String StringFormat(const StringView& Fmt, const Args&... Arguments)
     {
         std::string Formatted = std::vformat(static_cast<std::string_view>(Fmt), std::make_format_args(Arguments...));
         return {Formatted.data(), Formatted.size()};

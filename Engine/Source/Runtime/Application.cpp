@@ -21,6 +21,7 @@
 #include "Cursors.h"
 #include "ExitCode.h"
 #include "ScopedTimer.h"
+#include "TweenManager.h"
 #include "Editor/DetailsPanel.h"
 #include "Editor/PhysicsSettingsPanel.h"
 #include "Editor/SceneHierarchyPanel.h"
@@ -31,9 +32,6 @@
 #include "Components/Rendering/ModelRenderer.h"
 #include "Editor/EditorGUI.h"
 #include "Rendering/FrameBuffer.h"
-
-
-#define NOVA_LOG_WINDOW_CALLBACKS
 
 namespace Nova
 {
@@ -55,7 +53,6 @@ namespace Nova
             NOVA_LOG(Application, Verbosity::Error, "Failed to initialize glfw!");
             return false;
         }
-        
         NOVA_LOG(Application, Verbosity::Info, "Using GLFW version {}.{}.{}", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 
 
@@ -72,10 +69,10 @@ namespace Nova
 
 
         glfwSetWindowUserPointer(m_MainWindow->GetNativeWindow(), this);
-        // Set window callbacks
+
         glfwSetWindowCloseCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow*)
         {
-            g_Application->RequireExit(ExitCode::Error);
+            g_Application->RequireExit(ExitCode::Success);
         });
 
         glfwSetWindowFocusCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int focus){
@@ -222,7 +219,7 @@ namespace Nova
 
     void Application::OnInit()
     {
-        //m_ShaderManager->Load("Sprite",       m_EngineAssetsDirectory / "Shaders/Sprite.glsl");
+        //m_ShaderManager->Load("Sprite", m_EngineAssetsDirectory / "Shaders/Sprite.slang");
         //m_ShaderManager->Load("UniformColor", m_EngineAssetsDirectory / "Shaders/UniformColor.glsl");
         //m_ShaderManager->Load("Circle",       m_EngineAssetsDirectory / "Shaders/Circle.glsl");
 
@@ -367,7 +364,6 @@ namespace Nova
         case GraphicsApi::OpenGL:
             if(m_Configuration.WithEditor)
             {
-                if(!m_ViewportPanel->IsAvailable()) return;
 
                 // Clear all screen
                 Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
@@ -400,6 +396,7 @@ namespace Nova
                 Renderer->ClearDepth(1.0f);
                 m_Scene->OnRender(Renderer);
             }
+            break;
         case GraphicsApi::Vulkan:
         case GraphicsApi::D3D12:
             if (Renderer->BeginFrame() && g_ApplicationRunning)
@@ -420,12 +417,14 @@ namespace Nova
                 Renderer->EndFrame();
                 Renderer->Present();
             }
+            break;
         }
     }
     
     void Application::OnUpdate(f32 Delta)
     {     
         m_AudioSystem->OnUpdate();
+        TweenManager::Get().Update(Delta);
         m_Scene->OnUpdate(Delta);
         m_DetailsPanel->OnUpdate(Delta);
         m_SceneHierarchyPanel->OnUpdate(Delta);
@@ -445,7 +444,7 @@ namespace Nova
 
         if (ImGui::Begin("Stats"))
         {
-            ImGui::Text("Frame Time: %.2f ms", Delta);
+            ImGui::Text("Frame Time: %.2f ms", Delta * 1000.0f);
         }
         ImGui::End();
         

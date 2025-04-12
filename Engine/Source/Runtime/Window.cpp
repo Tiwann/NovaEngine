@@ -16,17 +16,20 @@ namespace Nova
         glfwWindowHint(GLFW_RESIZABLE, m_Resizable);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 
-#if defined(NOVA_PLATFORM_OPENGL)
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_SAMPLES, 16);
-#if defined(NOVA_DEBUG)
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
-#else
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); 
-#endif
+        if (Config.Graphics.GraphicsApi == GraphicsApi::OpenGL)
+        {
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+            glfwWindowHint(GLFW_SAMPLES, 16);
+
+            #if defined(NOVA_DEBUG)
+            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+            #endif
+        } else
+        {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        }
         m_Handle = glfwCreateWindow((int)m_Width, (int)m_Height, *m_Name, nullptr, nullptr);
     }
 
@@ -98,7 +101,7 @@ namespace Nova
     void Window::SetIcon(const Path& Filepath) const
     {
         ScopedBuffer ImageData = File::ReadToBuffer(Filepath);
-        const Image IconImage(ImageData.AsBuffer(), Formats::R32G32B32A32_FLOAT);
+        const Image IconImage(ImageData.AsBuffer(), Format::R32G32B32A32_FLOAT);
         const GLFWimage GLFWImage{ (int)IconImage.GetWidth(), (int)IconImage.GetHeight(), (u8*)IconImage.GetData() };
         glfwSetWindowIcon(m_Handle, 1, &GLFWImage);
     }

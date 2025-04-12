@@ -4,15 +4,16 @@
 #include "Runtime/LogCategory.h"
 #include "Runtime/Project.h"
 #include "Runtime/SharedPointer.h"
+#include "Editor/EditorWindow.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(NovaEditor, "NOVA EDITOR")
 
 namespace Nova
 {
-    class EditorApplication final : public Application
+    class NovaEditor final : public Application
     {
     public:
-        explicit EditorApplication(const Array<const char*>& Arguments);
+        explicit NovaEditor(const Array<const char*>& Arguments);
         ApplicationConfiguration CreateConfiguration() const override;
         void OnInit() override;
         void OnExit() override;
@@ -22,5 +23,7 @@ namespace Nova
         void OpenProject(const Path& ProjectPath);
     private:
         SharedPtr<Project> m_CurrentProject;
+        Array<EditorWindow*> m_EditorWindows;
+        ImGuiRenderer* m_ImGuiRenderer = nullptr;
     };
 }

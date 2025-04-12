@@ -9,10 +9,14 @@ namespace Nova
     {
         switch (GraphicsApi)
         {
-            case GraphicsApi::Vulkan:
-                return new VulkanRenderer(Owner);
-            case GraphicsApi::OpenGL:
-                return new OpenGLRenderer(Owner);
+        case GraphicsApi::None:
+            return nullptr;
+        case GraphicsApi::Vulkan:
+            return new VulkanRenderer(Owner);
+        case GraphicsApi::OpenGL:
+            return new OpenGLRenderer(Owner);
+        case GraphicsApi::D3D12:
+            return new D3D12Renderer(Owner);
         default:
             return nullptr;
         }

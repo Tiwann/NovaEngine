@@ -17,7 +17,7 @@ namespace Nova
     {
     }
 
-    void D3D12Texture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
+    void D3D12Texture2D::SetData(u8* Data, u32 Width, u32 Height, const Format& Format)
     {
         m_Width = Width;
         m_Height = Height;
@@ -48,7 +48,7 @@ namespace Nova
 
         D3D12_SUBRESOURCE_DATA SubresourceData;
         SubresourceData.pData = Data;
-        SubresourceData.RowPitch = (LONG_PTR)(Width * GetBytesPerPixel(m_Format));
+        SubresourceData.RowPitch = (LONG_PTR)(Width * GetFormatSize(m_Format));
         SubresourceData.SlicePitch = SubresourceData.RowPitch * Height;
         UpdateSubresources(Cmd, m_Resource, UploadHeap, 0, 0, 1, &SubresourceData);
 

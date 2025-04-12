@@ -1,6 +1,7 @@
 ﻿#include "Runtime/Filesystem.h"
 #include "Runtime/Window.h"
 #include "Runtime/Application.h"
+#include "Containers/StringConversion.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
@@ -12,70 +13,92 @@ namespace Nova
 {
     Path Directory::GetUserDirectory()
     {
-        CHAR DirectoryPath[MAX_PATH] = { 0 };
-        const DWORD DirectoryPathLength = GetEnvironmentVariableA("USERPROFILE", DirectoryPath, MAX_PATH);
-        const std::string_view DirectoryStr(DirectoryPath, DirectoryPathLength);
-        return DirectoryStr;
+        WCHAR DirectoryPath[MAX_PATH] = { 0 };
+        const DWORD DirectoryPathLength = GetEnvironmentVariableW(L"USERPROFILE", DirectoryPath, MAX_PATH);
+        return Path(DirectoryPath, DirectoryPath + DirectoryPathLength);
     }
     
     Path File::OpenFileDialog(const String& Title, const Path& DefaultPath, const DialogFilters& Filters)
     {
         Window* Window = g_Application->GetWindow();
-        OPENFILENAMEA OpenFileName = { };
+        OPENFILENAME OpenFileName = { };
         Memory::Memzero(OpenFileName);
-        CHAR szFile[MAX_PATH] = { 0 };
+        WCHAR szFile[MAX_PATH] = { 0 };
         OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
         OpenFileName.lStructSize = sizeof(OPENFILENAME);
         OpenFileName.lpstrFile = szFile;
         OpenFileName.nMaxFile = MAX_PATH;
         ScopedBuffer<char> FilterString = Filters.GetFilterString();
-        OpenFileName.lpstrFilter = FilterString.GetData();
+        const i32 Length = MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), nullptr, 0);
+        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length];
+        MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), FilterWideString, Length);
+
+        OpenFileName.lpstrFilter = FilterWideString;
         OpenFileName.nFilterIndex = 1;
         OpenFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER;
-        OpenFileName.lpstrInitialDir = DefaultPath.string().c_str();
-        OpenFileName.lpstrTitle = *Title;
-        return GetOpenFileNameA(&OpenFileName) ? OpenFileName.lpstrFile : "";
+        OpenFileName.lpstrInitialDir = DefaultPath.wstring().c_str();
+
+        WideString WideTitle = StringConvertToWide(Title);
+        OpenFileName.lpstrTitle = *WideTitle;
+
+        const bool Result = GetOpenFileNameW(&OpenFileName);
+        delete[] FilterWideString;
+        return Result ? OpenFileName.lpstrFile : L"";
     }
 
     Path File::SaveFileDialog(const String& Title, const Path& DefaultPath, const DialogFilters& Filters)
     {
         Window* Window = g_Application->GetWindow();
-        OPENFILENAMEA OpenFileName = { };
-        ZeroMemory(&OpenFileName, sizeof(OPENFILENAME));
-        CHAR szFile[MAX_PATH] = { 0 };
+        OPENFILENAME OpenFileName = { };
+        Memory::Memzero(OpenFileName);
+        WCHAR szFile[MAX_PATH] = { 0 };
         OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
         OpenFileName.lStructSize = sizeof(OPENFILENAME);
         OpenFileName.lpstrFile = szFile;
         OpenFileName.nMaxFile = MAX_PATH;
         ScopedBuffer<char> FilterString = Filters.GetFilterString();
-        OpenFileName.lpstrFilter = FilterString.GetData();
+        const i32 Length = MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), nullptr, 0);
+        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length];
+        MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), FilterWideString, Length);
+
+        OpenFileName.lpstrFilter = FilterWideString;
         OpenFileName.nFilterIndex = 1;
         OpenFileName.Flags = OFN_CREATEPROMPT | OFN_NOCHANGEDIR | OFN_OVERWRITEPROMPT | OFN_NOLONGNAMES | OFN_EXTENSIONDIFFERENT |OFN_EXPLORER;
-        OpenFileName.lpstrInitialDir = DefaultPath.string().c_str();
-        OpenFileName.lpstrTitle = *Title;
-        return GetSaveFileNameA(&OpenFileName) ? OpenFileName.lpstrFile : "";
-    }
-        Path Directory::OpenFolderDialog(const String& Title, const Path& DefaultPath)
-    {
-            Window* Window = g_Application->GetWindow();
-            OPENFILENAMEA OpenFileName = { };
-            ZeroMemory(&OpenFileName, sizeof(OPENFILENAME));
-            CHAR szFile[MAX_PATH] = { 0 };
-            OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
-            OpenFileName.lStructSize = sizeof(OPENFILENAME);
-            OpenFileName.lpstrFile = szFile;
-            OpenFileName.nMaxFile = MAX_PATH;
-            OpenFileName.nFilterIndex = 1;
-            OpenFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER;
-            OpenFileName.lpstrInitialDir = DefaultPath.string().c_str();
-            OpenFileName.lpstrTitle = *Title;
-            return GetOpenFileNameA(&OpenFileName) ? OpenFileName.lpstrFile : "";
+
+        WideString WideTitle = StringConvertToWide(Title);
+        OpenFileName.lpstrTitle = *WideTitle;
+
+        OpenFileName.lpstrInitialDir = DefaultPath.wstring().c_str();
+        OpenFileName.lpstrTitle = *WideTitle;
+        const bool Result = GetSaveFileNameW(&OpenFileName);
+        delete[] FilterWideString;
+        return Result ? OpenFileName.lpstrFile : L"";
     }
 
-        Path Directory::GetCurrentWorkingDirectory()
-        {
-            WCHAR CurrentDir[MAX_PATH] = { 0 };
-            GetCurrentDirectoryW(MAX_PATH, CurrentDir);
-            return CurrentDir;
-        }
+    Path Directory::OpenFolderDialog(const String& Title, const Path& DefaultPath)
+    {
+        Window* Window = g_Application->GetWindow();
+        OPENFILENAME OpenFileName = { };
+        Memory::Memzero(OpenFileName);
+        WCHAR szFile[MAX_PATH] = { 0 };
+        OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
+        OpenFileName.lStructSize = sizeof(OPENFILENAME);
+        OpenFileName.lpstrFile = szFile;
+        OpenFileName.nMaxFile = MAX_PATH;
+        OpenFileName.nFilterIndex = 1;
+        OpenFileName.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR | OFN_EXPLORER;
+        OpenFileName.lpstrInitialDir = DefaultPath.wstring().c_str();
+
+        WideString WideTitle = StringConvertToWide(Title);
+        OpenFileName.lpstrTitle = *WideTitle;
+        const bool Result = GetOpenFileNameW(&OpenFileName);
+        return Result ? OpenFileName.lpstrFile : L"";
+    }
+
+    Path Directory::GetCurrentWorkingDirectory()
+    {
+        WCHAR CurrentDir[MAX_PATH] = { 0 };
+        GetCurrentDirectoryW(MAX_PATH, CurrentDir);
+        return CurrentDir;
+    }
 }

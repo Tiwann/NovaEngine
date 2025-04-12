@@ -9,8 +9,11 @@ namespace Nova
     {
         D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
         Renderer->WaitDeviceIdle();
-        m_Handle->Release();
-        m_Handle = nullptr;
+        if (m_Handle)
+        {
+            m_Handle->Release();
+            m_Handle = nullptr;
+        }
         m_Ready = false;
     }
 

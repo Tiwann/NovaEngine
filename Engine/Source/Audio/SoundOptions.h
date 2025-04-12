@@ -17,7 +17,8 @@ namespace Nova
         LoadCompressed = 0x00000200,
         Unique = 0x00020000,
         CreateSample = 0x00000100,
-        CreateStream = 0x00000080
+        CreateStream = 0x00000080,
+        OpenMemory = 0x00000800,
     };
 
     NOVA_DECLARE_FLAGS(SoundFlagBits, SoundFlags);

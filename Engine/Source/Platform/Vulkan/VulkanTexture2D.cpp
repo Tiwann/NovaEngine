@@ -84,7 +84,7 @@ namespace Nova
         m_Params = Params;
     }
 
-    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
+    void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Format& Format)
     {
         const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
@@ -170,7 +170,7 @@ namespace Nova
             }
         }
         
-        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Data, m_Allocation, 0, (size_t)(Width * Height) * GetBytesPerPixel(Format))))
+        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Data, m_Allocation, 0, (size_t)(Width * Height) * GetFormatSize(Format))))
         {
             NOVA_VULKAN_ERROR("Failed to copy texture data to gpu memory!");
         }
@@ -195,39 +195,39 @@ namespace Nova
         return (uintptr_t)(VkImage)m_Handle;
     }
 
-    VkFormat VulkanTexture2D::ConvertFormat(Formats Format)
+    VkFormat VulkanTexture2D::ConvertFormat(Format Format)
     {
         switch (Format)
         {
-        case Formats::NONE: return VK_FORMAT_UNDEFINED;
-        case Formats::R8_UNORM: return VK_FORMAT_R8_UNORM;
-        case Formats::R8_SNORM: return VK_FORMAT_R8_SNORM;
-        case Formats::R16_USHORT: return VK_FORMAT_R16_UINT;
-        case Formats::R16_SHORT: return VK_FORMAT_R16_SINT;
-        case Formats::R32_FLOAT: return VK_FORMAT_R32_SFLOAT;
-        case Formats::R32_UINT: return VK_FORMAT_R32_UINT;
-        case Formats::R32_SINT: return VK_FORMAT_R32_SINT;
-        case Formats::R8G8_UNORM: return VK_FORMAT_R8G8_UNORM;
-        case Formats::R8G8_SNORM: return VK_FORMAT_R8G8_SNORM;
-        case Formats::R16G16_USHORT: return VK_FORMAT_R16G16_UINT;
-        case Formats::R16G16_SHORT: return VK_FORMAT_R16G16_SINT;
-        case Formats::R32G32_UINT: return VK_FORMAT_R32G32_UINT;
-        case Formats::R32G32_SINT: return VK_FORMAT_R32G32_SINT;
-        case Formats::R32G32_FLOAT: return VK_FORMAT_R32G32_SFLOAT;
-        case Formats::R8G8B8_UNORM: return VK_FORMAT_R8G8B8_UNORM;
-        case Formats::R8G8B8_SNORM: return VK_FORMAT_R8G8B8_SNORM;
-        case Formats::R16G16B16_USHORT: return VK_FORMAT_R16G16B16_UINT;
-        case Formats::R16G16B16_SHORT: return VK_FORMAT_R16G16B16_SINT;
-        case Formats::R32G32B32_UINT: return VK_FORMAT_R32G32B32_UINT;
-        case Formats::R32G32B32_SINT: return VK_FORMAT_R32G32B32_SINT;
-        case Formats::R32G32B32_FLOAT: return VK_FORMAT_R32G32B32_SFLOAT;
-        case Formats::R8G8B8A8_UNORM: return VK_FORMAT_R8G8B8A8_UNORM;
-        case Formats::R8G8B8A8_SNORM: return VK_FORMAT_R8G8B8A8_SNORM;
-        case Formats::R16G16B16A16_USHORT: return VK_FORMAT_R16G16B16A16_UINT;
-        case Formats::R16G16B16A16_SHORT: return VK_FORMAT_R16G16B16A16_SINT;
-        case Formats::R32G32B32A32_UINT: return VK_FORMAT_R32G32B32A32_UINT;
-        case Formats::R32G32B32A32_SINT: return VK_FORMAT_R32G32B32A32_SINT;
-        case Formats::R32G32B32A32_FLOAT: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        case Format::NONE: return VK_FORMAT_UNDEFINED;
+        case Format::R8_UNORM: return VK_FORMAT_R8_UNORM;
+        case Format::R8_SNORM: return VK_FORMAT_R8_SNORM;
+        case Format::R16_USHORT: return VK_FORMAT_R16_UINT;
+        case Format::R16_SHORT: return VK_FORMAT_R16_SINT;
+        case Format::R32_FLOAT: return VK_FORMAT_R32_SFLOAT;
+        case Format::R32_UINT: return VK_FORMAT_R32_UINT;
+        case Format::R32_SINT: return VK_FORMAT_R32_SINT;
+        case Format::R8G8_UNORM: return VK_FORMAT_R8G8_UNORM;
+        case Format::R8G8_SNORM: return VK_FORMAT_R8G8_SNORM;
+        case Format::R16G16_USHORT: return VK_FORMAT_R16G16_UINT;
+        case Format::R16G16_SHORT: return VK_FORMAT_R16G16_SINT;
+        case Format::R32G32_UINT: return VK_FORMAT_R32G32_UINT;
+        case Format::R32G32_SINT: return VK_FORMAT_R32G32_SINT;
+        case Format::R32G32_FLOAT: return VK_FORMAT_R32G32_SFLOAT;
+        case Format::R8G8B8_UNORM: return VK_FORMAT_R8G8B8_UNORM;
+        case Format::R8G8B8_SNORM: return VK_FORMAT_R8G8B8_SNORM;
+        case Format::R16G16B16_USHORT: return VK_FORMAT_R16G16B16_UINT;
+        case Format::R16G16B16_SHORT: return VK_FORMAT_R16G16B16_SINT;
+        case Format::R32G32B32_UINT: return VK_FORMAT_R32G32B32_UINT;
+        case Format::R32G32B32_SINT: return VK_FORMAT_R32G32B32_SINT;
+        case Format::R32G32B32_FLOAT: return VK_FORMAT_R32G32B32_SFLOAT;
+        case Format::R8G8B8A8_UNORM: return VK_FORMAT_R8G8B8A8_UNORM;
+        case Format::R8G8B8A8_SNORM: return VK_FORMAT_R8G8B8A8_SNORM;
+        case Format::R16G16B16A16_USHORT: return VK_FORMAT_R16G16B16A16_UINT;
+        case Format::R16G16B16A16_SHORT: return VK_FORMAT_R16G16B16A16_SINT;
+        case Format::R32G32B32A32_UINT: return VK_FORMAT_R32G32B32A32_UINT;
+        case Format::R32G32B32A32_SINT: return VK_FORMAT_R32G32B32A32_SINT;
+        case Format::R32G32B32A32_FLOAT: return VK_FORMAT_R32G32B32A32_SFLOAT;
         default: return VK_FORMAT_UNDEFINED;
         }
     }

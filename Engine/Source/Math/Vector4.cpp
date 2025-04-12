@@ -125,14 +125,14 @@ namespace Nova
 
     f32& Vector4::operator[](u32 Index)
     {
-        Assert(Index < 4, "Index out of bounds!");
+        NOVA_ASSERT(Index < 4, "Index out of bounds!");
         f32* AsFloat = (f32*)this;
         return AsFloat[Index];
     }
 
     const f32& Vector4::operator[](u32 Index) const
     {
-        Assert(Index < 4, "Index out of bounds!");
+        NOVA_ASSERT(Index < 4, "Index out of bounds!");
         const f32* AsFloat = (const f32*)this;
         return AsFloat[Index];
     }

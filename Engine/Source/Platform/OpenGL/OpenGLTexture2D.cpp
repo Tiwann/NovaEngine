@@ -3,7 +3,7 @@
 #include "Runtime/LogVerbosity.h"
 #include "Runtime/Memory.h"
 #include "Containers/StringFormat.h"
-#include "Runtime/Formats.h"
+#include "Runtime/Format.h"
 #include <glad/gl.h>
 
 namespace Nova
@@ -39,7 +39,7 @@ namespace Nova
         Unbind();
     }
 
-    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Formats& Format)
+    void OpenGLTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Format& Format)
     {
         Bind();
         m_Width = Width;
@@ -57,9 +57,9 @@ namespace Nova
         size_t Size = 0;
         switch (m_Format)
         {
-            case Formats::R8G8B8A8_UNORM: Size = m_Width * m_Height * 4; break;
-            case Formats::R16G16B16A16_USHORT: Size = m_Width * m_Height * 4 * 2; break;
-            case Formats::R32G32B32A32_FLOAT: Size = m_Width * m_Height * 4 * 4; break;
+            case Format::R8G8B8A8_UNORM: Size = m_Width * m_Height * 4; break;
+            case Format::R16G16B16A16_USHORT: Size = m_Width * m_Height * 4 * 2; break;
+            case Format::R32G32B32A32_FLOAT: Size = m_Width * m_Height * 4 * 4; break;
         }
         u8* Data = Memory::Malloc<u8>(Size);
         glGetTextureImage(m_Handle, 0, GL_RGBA, FormatToType(m_Format), (GLsizei)Size, Data);
@@ -87,39 +87,39 @@ namespace Nova
     }
 
 
-    u32 OpenGLTexture2D::FormatToType(Formats Format) const
+    u32 OpenGLTexture2D::FormatToType(Format Format) const
     {
         switch (Format)
         {
-        case Formats::NONE: return 0;
-        case Formats::R8_UNORM: return GL_UNSIGNED_BYTE;
-        case Formats::R8_SNORM: return GL_BYTE;
-        case Formats::R16_USHORT: return GL_UNSIGNED_SHORT;
-        case Formats::R16_SHORT: return GL_SHORT;
-        case Formats::R32_FLOAT: return GL_FLOAT;
-        case Formats::R32_UINT: return GL_UNSIGNED_INT;
-        case Formats::R32_SINT: return GL_INT;
-        case Formats::R8G8_UNORM: return GL_UNSIGNED_BYTE;
-        case Formats::R8G8_SNORM: return GL_BYTE;
-        case Formats::R16G16_USHORT: return GL_UNSIGNED_SHORT;
-        case Formats::R16G16_SHORT: return GL_SHORT;
-        case Formats::R32G32_UINT: return GL_UNSIGNED_INT;
-        case Formats::R32G32_SINT: return GL_INT;
-        case Formats::R32G32_FLOAT: return GL_FLOAT;
-        case Formats::R8G8B8_UNORM: return GL_UNSIGNED_BYTE;
-        case Formats::R8G8B8_SNORM: return GL_BYTE;
-        case Formats::R16G16B16_USHORT: return GL_UNSIGNED_SHORT;
-        case Formats::R16G16B16_SHORT: return GL_SHORT;
-        case Formats::R32G32B32_UINT: return GL_UNSIGNED_INT;
-        case Formats::R32G32B32_SINT: return GL_INT;
-        case Formats::R32G32B32_FLOAT: return GL_FLOAT;
-        case Formats::R8G8B8A8_UNORM: return GL_UNSIGNED_BYTE;
-        case Formats::R8G8B8A8_SNORM: return GL_BYTE;
-        case Formats::R16G16B16A16_USHORT: return GL_UNSIGNED_SHORT;
-        case Formats::R16G16B16A16_SHORT: return GL_SHORT;
-        case Formats::R32G32B32A32_UINT: return GL_UNSIGNED_INT;
-        case Formats::R32G32B32A32_SINT: return GL_INT;
-        case Formats::R32G32B32A32_FLOAT: return GL_FLOAT;
+        case Format::NONE: return 0;
+        case Format::R8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8_SNORM: return GL_BYTE;
+        case Format::R16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16_SHORT: return GL_SHORT;
+        case Format::R32_FLOAT: return GL_FLOAT;
+        case Format::R32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32_SINT: return GL_INT;
+        case Format::R8G8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8_SNORM: return GL_BYTE;
+        case Format::R16G16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16_SHORT: return GL_SHORT;
+        case Format::R32G32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32_SINT: return GL_INT;
+        case Format::R32G32_FLOAT: return GL_FLOAT;
+        case Format::R8G8B8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8B8_SNORM: return GL_BYTE;
+        case Format::R16G16B16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16B16_SHORT: return GL_SHORT;
+        case Format::R32G32B32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32B32_SINT: return GL_INT;
+        case Format::R32G32B32_FLOAT: return GL_FLOAT;
+        case Format::R8G8B8A8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8B8A8_SNORM: return GL_BYTE;
+        case Format::R16G16B16A16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16B16A16_SHORT: return GL_SHORT;
+        case Format::R32G32B32A32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32B32A32_SINT: return GL_INT;
+        case Format::R32G32B32A32_FLOAT: return GL_FLOAT;
         default: return 0;
         }
     }
@@ -144,59 +144,39 @@ namespace Nova
         return 0;
     }
 
-    u32 OpenGLTexture2D::FormatToOpenGLFormat(Formats Format) const
+    u32 OpenGLTexture2D::FormatToOpenGLFormat(Format Format) const
     {
         switch (Format)
         {
-        case Formats::NONE: return GL_NONE;
-        case Formats::R8_UNORM: return GL_R8;
-        case Formats::R8_SNORM: return GL_R8;
-        case Formats::R16_USHORT: return GL_R16;
-        case Formats::R16_SHORT: return GL_R16;
-        case Formats::R32_FLOAT: return GL_R32F;
-        case Formats::R32_UINT: return GL_R32UI;
-        case Formats::R32_SINT: return GL_R32I;
-        case Formats::R8G8_UNORM: return GL_RG8;
-        case Formats::R8G8_SNORM:
-            break;
-        case Formats::R16G16_USHORT:
-            break;
-        case Formats::R16G16_SHORT:
-            break;
-        case Formats::R32G32_UINT:
-            break;
-        case Formats::R32G32_SINT:
-            break;
-        case Formats::R32G32_FLOAT:
-            break;
-        case Formats::R8G8B8_UNORM:
-            break;
-        case Formats::R8G8B8_SNORM:
-            break;
-        case Formats::R16G16B16_USHORT:
-            break;
-        case Formats::R16G16B16_SHORT:
-            break;
-        case Formats::R32G32B32_UINT:
-            break;
-        case Formats::R32G32B32_SINT:
-            break;
-        case Formats::R32G32B32_FLOAT:
-            break;
-        case Formats::R8G8B8A8_UNORM:
-            break;
-        case Formats::R8G8B8A8_SNORM:
-            break;
-        case Formats::R16G16B16A16_USHORT:
-            break;
-        case Formats::R16G16B16A16_SHORT:
-            break;
-        case Formats::R32G32B32A32_UINT:
-            break;
-        case Formats::R32G32B32A32_SINT:
-            break;
-        case Formats::R32G32B32A32_FLOAT:
-            break;
+        case Format::NONE: return GL_NONE;
+        case Format::R8_UNORM: return GL_RED;
+        case Format::R8_SNORM: return GL_RED;
+        case Format::R16_USHORT: return GL_RED;
+        case Format::R16_SHORT: return GL_RED;
+        case Format::R32_FLOAT: return GL_RED;
+        case Format::R32_UINT: return GL_RED;
+        case Format::R32_SINT: return GL_RED;
+        case Format::R8G8_UNORM: return GL_RG;
+        case Format::R8G8_SNORM:return GL_RG;
+        case Format::R16G16_USHORT:return GL_RG;
+        case Format::R16G16_SHORT:return GL_RG;
+        case Format::R32G32_UINT:return GL_RG;
+        case Format::R32G32_SINT:return GL_RG;
+        case Format::R32G32_FLOAT:return GL_RG;
+        case Format::R8G8B8_UNORM:return GL_RGB;
+        case Format::R8G8B8_SNORM:return GL_RGB;
+        case Format::R16G16B16_USHORT:return GL_RGB;
+        case Format::R16G16B16_SHORT:return GL_RGB;
+        case Format::R32G32B32_UINT:return GL_RGB;
+        case Format::R32G32B32_SINT:return GL_RGB;
+        case Format::R32G32B32_FLOAT:return GL_RGB;
+        case Format::R8G8B8A8_UNORM:return GL_RGBA;
+        case Format::R8G8B8A8_SNORM:return GL_RGBA;
+        case Format::R16G16B16A16_USHORT:return GL_RGBA;
+        case Format::R16G16B16A16_SHORT:return GL_RGBA;
+        case Format::R32G32B32A32_UINT:return GL_RGBA;
+        case Format::R32G32B32A32_SINT:return GL_RGBA;
+        case Format::R32G32B32A32_FLOAT:return GL_RGBA;
         }
         return 0;
     }

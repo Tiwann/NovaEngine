@@ -3,6 +3,8 @@
 #include "Math/Vector2.h"
 #include <glad/gl.h>
 
+#include "Runtime/Application.h"
+
 namespace Nova
 {
     OpenGLFrameBuffer::OpenGLFrameBuffer()
@@ -58,9 +60,10 @@ namespace Nova
         TextureParams TexParams;
         TexParams.Filter = TextureFilter::Nearest;
         TexParams.Wrap = TextureWrap::Clamp;
-        
-        Texture2D* Texture = Texture2D::Create("OpenGLFramebufferAttachment", 0, 0, TexParams);
-        Texture->SetData(nullptr, 0, 0, Formats::R8G8B8A8_UNORM);
+
+        Renderer* Renderer = g_Application->GetRenderer();
+        Texture2D* Texture = Texture2D::Create("OpenGLFramebufferAttachment", 0, 0, TexParams, 0, Renderer->GetGraphicsApi());
+        Texture->SetData(nullptr, 0, 0, Format::R8G8B8A8_UNORM);
         const GLenum BufferAttachment = GetOpenGLAttachment(Attachment);
         glFramebufferTexture2D(GL_FRAMEBUFFER, BufferAttachment, GL_TEXTURE_2D, (GLuint)Texture->GetHandle(), 0);
 

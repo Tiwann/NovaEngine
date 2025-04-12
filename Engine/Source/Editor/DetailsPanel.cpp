@@ -41,7 +41,7 @@ namespace Nova
             ImGui::Checkbox("Enabled", &SelectedEntity->m_Enabled);
             ImGui::PopID();
 
-            UI::Text(Format("UUID: {}", SelectedEntity->GetGuid().GetString()));
+            UI::Text(StringFormat("UUID: {}", SelectedEntity->GetGuid().GetString()));
             static bool ShowContextMenu;
             SelectedEntity->ForEach([&IO](Component* Component)
             {

@@ -19,6 +19,7 @@ namespace Nova
         StringViewBase() = default;
         StringViewBase(const StringType& Str) : m_Data(Str.Data()), m_Count(Str.Count()){}
         StringViewBase(ConstPointerType Data) : m_Data(Data), m_Count(StringLength(Data)){}
+        StringViewBase(ConstPointerType Data, SizeType Count) : m_Data(Data), m_Count(Count){}
         StringViewBase(std::nullptr_t) : m_Data(nullptr), m_Count(0){}
         StringViewBase(const StringViewBase&) = default;
         StringViewBase(StringViewBase&&) noexcept = default;
@@ -42,7 +43,7 @@ namespace Nova
 
         const CharacterType& operator[](SizeType Index) const
         {
-            Assert(Index < m_Count, "Index out of bounds!");
+            NOVA_ASSERT(Index < m_Count, "Index out of bounds!");
             return m_Data[Index];
         }
 

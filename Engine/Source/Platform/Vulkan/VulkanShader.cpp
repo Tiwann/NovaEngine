@@ -38,13 +38,13 @@ namespace Nova
         
         // At the moment we assume that vertex shaders should have the attribute [shader("vertex")] and entry point should be named vsmain
         // At the moment we assume that fragment shaders should have the attribute [shader("fragment")] and entry point should be named fsmain
-        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("vsmain", SLANG_STAGE_VERTEX, &m_VertexEntryPoint, nullptr)))
+        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("VertexMain", SLANG_STAGE_VERTEX, &m_VertexEntryPoint, nullptr)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to check vertex entry point!");
             return false;
         }
         
-        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("fsmain", SLANG_STAGE_FRAGMENT, &m_FragmentEntryPoint, nullptr)))
+        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("FragmentMain", SLANG_STAGE_FRAGMENT, &m_FragmentEntryPoint, nullptr)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to check fragment entry point!");
             return false;
@@ -71,6 +71,80 @@ namespace Nova
         return true;
     }
 
+
+    struct ReflectedShaderInfo
+    {
+        Array<VkDescriptorSetLayout> DescriptorSetLayouts;
+        Array<VkPushConstantRange> PushConstantRanges;
+    };
+
+    bool ReflectShaderResources(slang::IComponentType* program, ReflectedShaderInfo& outInfo, VkDevice Device)
+    {
+        slang::ProgramLayout* layout = program->getLayout();
+        if (!layout)
+        {
+            NOVA_LOG(Shader, Verbosity::Error, "Failed to get shader layout from Slang.");
+            return false;
+        }
+
+        const u32 paramCount = layout->getParameterCount();
+        for (u32 i = 0; i < paramCount; ++i)
+        {
+            slang::VariableLayoutReflection* var = layout->getParameterByIndex(i);
+            if (!var) continue;
+
+            slang::TypeReflection* type = var->getType();
+            if (!type) continue;
+
+            const SlangStage stage = var->getStage();
+            VkShaderStageFlags vkStage = 0;
+            if (stage & SLANG_STAGE_VERTEX) vkStage |= VK_SHADER_STAGE_VERTEX_BIT;
+            if (stage & SLANG_STAGE_FRAGMENT) vkStage |= VK_SHADER_STAGE_FRAGMENT_BIT;
+            if (stage & SLANG_STAGE_COMPUTE) vkStage |= VK_SHADER_STAGE_COMPUTE_BIT;
+
+            VkDescriptorSetLayoutBinding binding = {};
+            binding.binding = var->getBindingIndex();
+            binding.stageFlags = vkStage;
+            binding.descriptorCount = 1;
+
+            switch (type->getKind())
+            {
+            case slang::TypeReflection::Kind::ConstantBuffer:
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                break;
+            case slang::TypeReflection::Kind::SamplerState:
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+                break;
+            case slang::TypeReflection::Kind::Resource:
+            case slang::TypeReflection::Kind::TextureBuffer:
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+                break;
+            case slang::TypeReflection::Kind::ShaderStorageBuffer:
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                break;
+            default:
+                continue; // Skip unsupported types for now
+            }
+
+            VkDescriptorSetLayoutCreateInfo layoutInfo = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
+            layoutInfo.bindingCount = 1;
+            layoutInfo.pBindings = &binding;
+
+            VkDescriptorSetLayout layoutVk = nullptr;
+            if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &layoutInfo, nullptr, &layoutVk)))
+            {
+                const char* varName = var->getName();
+                NOVA_LOG(Shader, Verbosity::Error, "Failed to create descriptor set layout for [{}]!",
+                         varName ? varName : "Unknown");
+                return false;
+            }
+
+            outInfo.DescriptorSetLayouts.Add(layoutVk);
+        }
+        return true;
+    }
+
+
     bool VulkanShader::Validate()
     {
         if (!m_LinkedProgram) return false;
@@ -90,107 +164,41 @@ namespace Nova
             return false;
         }
 
-        
-        Array<VkDescriptorSetLayout> Layouts = { Layout->getParameterCount() };
-        for (size_t i = 0; i < Layouts.Count(); ++i)
+        ReflectedShaderInfo shaderInfo;
+        if (!ReflectShaderResources(m_LinkedProgram, shaderInfo, Device))
+            return false;
+
+        const VulkanRenderer* renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VkDevice device = renderer->GetDevice();
+        const VkFunctionPointers& vkFns = renderer->GetFunctionPointers();
+
+        // Create Vulkan ShaderEXTs
+        VkShaderCreateInfoEXT infos[2] = {};
+        infos[0].sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
+        infos[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
+        infos[0].codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+        infos[0].pName = "main";
+        infos[0].pCode = CompiledVertexCode->getBufferPointer();
+        infos[0].codeSize = CompiledVertexCode->getBufferSize();
+        infos[0].pSetLayouts = shaderInfo.DescriptorSetLayouts.Data();
+        infos[0].setLayoutCount = shaderInfo.DescriptorSetLayouts.Count();
+        infos[0].pPushConstantRanges = shaderInfo.PushConstantRanges.Data();
+        infos[0].pushConstantRangeCount = shaderInfo.PushConstantRanges.Count();
+
+        infos[1] = infos[0];
+        infos[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        infos[1].pCode = CompiledFragmentCode->getBufferPointer();
+        infos[1].codeSize = CompiledFragmentCode->getBufferSize();
+
+        VkShaderEXT handles[2] = {};
+        if (VK_FAILED(vkFns.vkCreateShadersEXT(device, 2, infos, nullptr, handles)))
         {
-            slang::VariableLayoutReflection* Variable = Layout->getParameterByIndex((SlangUInt32)i);
-            switch (Variable->getType()->getKind())
-            {
-            case slang::TypeReflection::Kind::None:
-                break;
-            case slang::TypeReflection::Kind::Struct:
-                break;
-            case slang::TypeReflection::Kind::Array:
-                break;
-            case slang::TypeReflection::Kind::Matrix:
-                break;
-            case slang::TypeReflection::Kind::Vector:
-                break;
-            case slang::TypeReflection::Kind::Scalar:
-                break;
-            case slang::TypeReflection::Kind::ConstantBuffer:
-                break;
-            case slang::TypeReflection::Kind::Resource:
-                break;
-            case slang::TypeReflection::Kind::SamplerState:
-                break;
-            case slang::TypeReflection::Kind::TextureBuffer:
-                break;
-            case slang::TypeReflection::Kind::ShaderStorageBuffer:
-                break;
-            case slang::TypeReflection::Kind::ParameterBlock:
-                break;
-            case slang::TypeReflection::Kind::GenericTypeParameter:
-                break;
-            case slang::TypeReflection::Kind::Interface:
-                break;
-            case slang::TypeReflection::Kind::OutputStream:
-                break;
-            case slang::TypeReflection::Kind::Specialized:
-                break;
-            case slang::TypeReflection::Kind::Feedback:
-                break;
-            case slang::TypeReflection::Kind::Pointer:
-                break;
-            case slang::TypeReflection::Kind::DynamicResource:
-                break;
-            }
-            
-            VkDescriptorSetLayoutBinding Binding = { };
-            Binding.binding = 0;
-            Binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            Binding.descriptorCount = 1;
-            Binding.stageFlags = Variable->getStage() == SLANG_STAGE_VERTEX ? VK_SHADER_STAGE_VERTEX_BIT
-            : Variable->getStage() == SLANG_STAGE_FRAGMENT ? VK_SHADER_STAGE_FRAGMENT_BIT : 0;
-
-            VkDescriptorSetLayoutCreateInfo SetLayoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-            SetLayoutInfo.bindingCount = 1;
-            SetLayoutInfo.pBindings = &Binding;
-
-            if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &SetLayoutInfo, nullptr, &Layouts[i])))
-            {
-                NOVA_LOG(Shader, Verbosity::Error, "Failed to create descriptor layout ({})!", i);
-                return false;
-            }
-        }
-        
-        
-        // Need to reflect on shaders to get Layouts and push constants
-        VkShaderCreateInfoEXT VertexShaderCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
-        VertexShaderCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        VertexShaderCreateInfo.nextStage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        VertexShaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-        VertexShaderCreateInfo.codeSize = CompiledVertexCode->getBufferSize();
-        VertexShaderCreateInfo.pCode = CompiledVertexCode->getBufferPointer();
-        VertexShaderCreateInfo.pName = "main";
-        VertexShaderCreateInfo.pSetLayouts = Layouts.Data();
-        VertexShaderCreateInfo.setLayoutCount = (u32)Layouts.Count();
-        VertexShaderCreateInfo.pPushConstantRanges = nullptr;
-        VertexShaderCreateInfo.pushConstantRangeCount = 0;
-
-        VkShaderCreateInfoEXT FragmentShaderCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
-        FragmentShaderCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        FragmentShaderCreateInfo.nextStage = 0;
-        FragmentShaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-        FragmentShaderCreateInfo.codeSize = CompiledFragmentCode->getBufferSize();
-        FragmentShaderCreateInfo.pCode = CompiledFragmentCode->getBufferPointer();
-        FragmentShaderCreateInfo.pName = "main";
-        FragmentShaderCreateInfo.pSetLayouts = Layouts.Data();
-        FragmentShaderCreateInfo.setLayoutCount = (u32)Layouts.Count();
-        FragmentShaderCreateInfo.pPushConstantRanges = nullptr;
-        FragmentShaderCreateInfo.pushConstantRangeCount = 0;
-
-        const VkShaderCreateInfoEXT CreateInfos[2] = { VertexShaderCreateInfo, FragmentShaderCreateInfo };
-        
-        const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
-        if (VK_FAILED(Functions.vkCreateShadersEXT(Device, (u32)std::size(CreateInfos), CreateInfos, nullptr, &m_VertexHandle)))
-        {
-            NOVA_VULKAN_ERROR("Failed to create vulkan shaders!");
+            NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
             return false;
         }
-        
-        return true;
+
+        m_VertexHandle = handles[0];
+        m_FragmentHandle = handles[1];
     }
 
     bool VulkanShader::Bind()

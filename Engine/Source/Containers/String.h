@@ -46,7 +46,7 @@ namespace Nova
         
         StringBase(StringLiteralType Data)
         {
-            Assert(Data, "Cannot construct string with nullptr!");
+            NOVA_ASSERT(Data, "Cannot construct string with nullptr!");
             m_Count = StringLength(Data);
             m_Data = new CharacterType[m_Count + 1]{};
             memcpy(m_Data, Data, m_Count * CharacterSize);
@@ -54,7 +54,7 @@ namespace Nova
 
         StringBase(CharacterType* Data, SizeType Count)
         {
-            Assert(Data, "Cannot construct string with nullptr!");
+            NOVA_ASSERT(Data, "Cannot construct string with nullptr!");
             m_Count = Count;
             m_Data = new CharacterType[m_Count + 1]{};
             memcpy(m_Data, Data, m_Count * CharacterSize);
@@ -110,13 +110,13 @@ namespace Nova
 
         CharacterType& operator[](SizeType Index)
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count, "Index out of bounds");
             return m_Data[Index];
         }
         
         const CharacterType& operator[](SizeType Index) const
         {
-            Assert(Index <= m_Count, "Index out of bounds");
+            NOVA_ASSERT(Index <= m_Count, "Index out of bounds");
             return m_Data[Index];
         }
 
@@ -145,7 +145,7 @@ namespace Nova
         
         StringBase& Append(StringLiteralType Data)
         {
-            Assert(Data, "Cannot append string with nullptr string literal!");
+            NOVA_ASSERT(Data, "Cannot append string with nullptr string literal!");
             const SizeType DataCount = StringLength(Data);
             const SizeType NewCount = m_Count + DataCount;
             CharacterType* NewData = new CharacterType[NewCount + 1]{};
@@ -185,7 +185,7 @@ namespace Nova
         
         StringBase Substring(SizeType Begin, SizeType End) const
         {
-            Assert(Begin < m_Count && Begin + (End - Begin) <= m_Count, "Indices out of bounds!");
+            NOVA_ASSERT(Begin < m_Count && Begin + (End - Begin) <= m_Count, "Indices out of bounds!");
             const SizeType NewCount = End - Begin + 1;
             CharacterType* NewData = new CharacterType[NewCount + 1]{};
             memcpy(NewData, m_Data + Begin, NewCount * CharacterSize);
@@ -283,7 +283,7 @@ namespace Nova
 
         StringBase& Replace(SizeType Index, SizeType Count, const StringBase& To)
         {
-            Assert(Index < m_Count && Index + Count <= m_Count, "Range is out of bounds!");
+            NOVA_ASSERT(Index < m_Count && Index + Count <= m_Count, "Range is out of bounds!");
             if (Index == -1ULL) return *this;
 
             if (To.Count() <= Count)
@@ -329,10 +329,10 @@ namespace Nova
 
         StringBase& Remove(SizeType From, SizeType To)
         {
-            Assert(From < To, "Range is illegal");
-            Assert(From < m_Count, "Range is illegal");
-            Assert(To <= m_Count, "Range is illegal");
-            Assert(From + (To - From) <= m_Count, "Range is illegal");
+            NOVA_ASSERT(From < To, "Range is illegal");
+            NOVA_ASSERT(From < m_Count, "Range is illegal");
+            NOVA_ASSERT(To <= m_Count, "Range is illegal");
+            NOVA_ASSERT(From + (To - From) <= m_Count, "Range is illegal");
             const SizeType Delta = To - From;
             
             const CharacterType* Src = m_Data + To;

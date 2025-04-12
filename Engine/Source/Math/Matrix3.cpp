@@ -77,13 +77,13 @@ namespace Nova
 
     Vector3& Matrix3::operator[](size_t i)
     {
-        Assert(i < 2, "Cannot access Mat2 element: index out of bounds.");
+        NOVA_ASSERT(i < 2, "Cannot access Mat3 element: index out of bounds.");
         return Columns[i];
     }
 
     const Vector3& Matrix3::operator[](size_t i) const
     {
-        Assert(i < 2, "Cannot access Mat2 element: index out of bounds.");
+        NOVA_ASSERT(i < 2, "Cannot access Mat3 element: index out of bounds.");
         return Columns[i];
     }
 

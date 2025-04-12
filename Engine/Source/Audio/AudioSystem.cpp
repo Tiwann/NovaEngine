@@ -9,6 +9,8 @@
 #include <fmod/fmod.hpp>
 #include <fmod/fmod_errors.h>
 
+#include "Containers/StringConversion.h"
+
 
 #define FMOD_FAILED(Result) (Result) != FMOD_RESULT::FMOD_OK
 
@@ -62,7 +64,7 @@ namespace Nova
 
     bool AudioSystem::Init()
     {
-        FMOD_RESULT Result = FMOD::System_Create(&m_Handle);
+        FMOD_RESULT Result = System_Create(&m_Handle);
         FMOD_CHECK(Result);
 
 #if defined(NOVA_DEBUG)
@@ -85,8 +87,8 @@ namespace Nova
         Result = m_Handle->init(1024, FMOD_INIT_NORMAL, nullptr);
         FMOD_CHECK(Result);
 
-        i8 VersionMajor = (FMOD_VERSION >> 8) & 0xFF;
-        i8 VersionMinor = (FMOD_VERSION >> 0) & 0xFF;
+        const i8 VersionMajor = (FMOD_VERSION >> 8) & 0xFF;
+        const i8 VersionMinor = (FMOD_VERSION >> 0) & 0xFF;
         NOVA_LOG(AudioEngine, Verbosity::Info, "Using FMOD {}.{}", VersionMajor, VersionMinor);
         return true;
     }
@@ -105,9 +107,9 @@ namespace Nova
     FMOD::Sound* AudioSystem::CreateSound(const Path& Filepath, SoundFlags Flags)
     {
         FMOD::Sound* Sound = nullptr;
-
-        const SoundFlags NewFlags = Flags.Append(SoundFlags(FMOD_CREATESAMPLE));
-        const FMOD_RESULT Result = m_Handle->createSound(Filepath.string().c_str(), NewFlags.As<FMOD_MODE>(), nullptr, &Sound);
+        const SoundFlags NewFlags = Flags.Append(SoundFlagBits::CreateSample);
+        String MultibytePath = StringConvertToMultibyte(WideStringView(Filepath.wstring().c_str(), Filepath.wstring().length()));
+        const FMOD_RESULT Result = m_Handle->createSound(*MultibytePath, NewFlags.As<FMOD_MODE>(), nullptr, &Sound);
         if(Result != FMOD_OK)
         {
             const String Error = FMOD_ErrorString(Result);
@@ -124,7 +126,7 @@ namespace Nova
         SoundCreateInfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
         SoundCreateInfo.length = (u32)Buffer.Count();
 
-        SoundFlags NewFlags = Flags.Append(SoundFlags(FMOD_CREATESAMPLE)).Append(SoundFlags(FMOD_OPENMEMORY));
+        const SoundFlags NewFlags = Flags.Append(SoundFlagBits::CreateSample | SoundFlagBits::OpenMemory);
         const FMOD_RESULT Result = m_Handle->createSound((const char*)Buffer.Data(), NewFlags.As<FMOD_MODE>(), &SoundCreateInfo, &Sound);
         if(Result != FMOD_OK)
         {

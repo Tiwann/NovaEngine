@@ -11,7 +11,7 @@ namespace Nova
         D3D12Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot);
 
         void SetTextureParameters(const TextureParams& Params) override;
-        void SetData(u8* Data, u32 Width, u32 Height, const Formats& Format) override;
+        void SetData(u8* Data, u32 Width, u32 Height, const Format& Format) override;
         SharedPtr<Image> GetImage() const override;
         void Bind() const override;
         void Unbind() const override;

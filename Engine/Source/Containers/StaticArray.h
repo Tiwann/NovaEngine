@@ -38,7 +38,7 @@ namespace Nova
         
         StaticArray(ConstPointerType Data, SizeType Count)
         {
-            Assert(Count <= N, "Cannot fill in an Array<N> with more elements than N");
+            NOVA_ASSERT(Count <= N, "Cannot fill in an Array<N> with more elements than N");
             std::copy(Data, Data + Count, m_Data);
         }
 
@@ -59,13 +59,13 @@ namespace Nova
 
         ReferenceType operator[](SizeType Index)
         {
-            Assert(Index < N, "Index out of bounds");
+            NOVA_ASSERT(Index < N, "Index out of bounds");
             return m_Data[Index];
         }
 
         ConstReferenceType operator[](SizeType Index) const
         {
-            Assert(Index < N, "Index out of bounds");
+            NOVA_ASSERT(Index < N, "Index out of bounds");
             return m_Data[Index];
         }
 
@@ -81,19 +81,19 @@ namespace Nova
         
         void SetAt(SizeType Index, ConstReferenceType Element)
         {
-            Assert(Index < N, "Index out of bounds");
+            NOVA_ASSERT(Index < N, "Index out of bounds");
             m_Data[Index] = Element;
         }
 
         ReferenceType GetAt(SizeType Index)
         {
-            Assert(Index < N, "Index out of bounds");
+            NOVA_ASSERT(Index < N, "Index out of bounds");
             return m_Data[Index];
         }
 
         ConstReferenceType GetAt(SizeType Index) const
         {
-            Assert(Index < N, "Index out of bounds");
+            NOVA_ASSERT(Index < N, "Index out of bounds");
             return m_Data[Index];
         }
 

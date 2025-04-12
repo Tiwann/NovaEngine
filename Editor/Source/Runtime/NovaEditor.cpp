@@ -1,14 +1,14 @@
-﻿#include "EditorApplication.h"
+﻿#include "NovaEditor.h"
 #include "Runtime/EntryPoint.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Components/Camera.h"
 #include "Runtime/TweenManager.h"
 
-NOVA_DEFINE_APPLICATION_CLASS(EditorApplication)
+NOVA_DEFINE_APPLICATION_CLASS(NovaEditor)
 
 namespace Nova
 {
-    EditorApplication::EditorApplication(const Array<const char*>& Arguments) : Application(Arguments)
+    NovaEditor::NovaEditor(const Array<const char*>& Arguments) : Application(Arguments)
     {
         const CommandLineOption ProjectOption { 'p', "project", false, false, "Open specified project" };
         ArgumentParser ArgParser("NovaEditor", Arguments, ArgumentParserSettings::WindowsStyle, ProjectOption);
@@ -18,7 +18,7 @@ namespace Nova
         }
     }
 
-    ApplicationConfiguration EditorApplication::CreateConfiguration() const
+    ApplicationConfiguration NovaEditor::CreateConfiguration() const
     {
         ApplicationConfiguration Configuration;
         Configuration.AppName = "Nova Editor";
@@ -28,7 +28,7 @@ namespace Nova
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
-        Configuration.Graphics.GraphicsApi = GraphicsApi::D3D12;
+        Configuration.Graphics.GraphicsApi = GraphicsApi::OpenGL;
         Configuration.Graphics.BufferType = SwapchainBuffering::DoubleBuffering;
         Configuration.Graphics.VSync = false;
         Configuration.WithEditor = true;
@@ -36,40 +36,36 @@ namespace Nova
     }
 
     Camera* Camera = nullptr;
-    void EditorApplication::OnInit()
+    void NovaEditor::OnInit()
     {
         Application::OnInit();
+
         const EntityHandle CameraEntity = GetScene()->CreateEntity("Camera");
         Camera = CameraEntity->AddComponent<class Camera>();
         GetRenderer()->SetCurrentCamera(Camera);
         Camera->ClearColor = Color::Red;
     }
 
-    void EditorApplication::OnExit()
+    void NovaEditor::OnExit()
     {
         Application::OnExit();
     }
 
-    void EditorApplication::OnRender(Renderer* Renderer)
+    void NovaEditor::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
     }
 
-    void EditorApplication::OnUpdate(f32 Delta)
+    void NovaEditor::OnUpdate(f32 Delta)
     {
         Application::OnUpdate(Delta);
-        TweenManager::Update(Delta);
-
-        if (Input::GetKeyDown(KeyCode::Space))
+        for (EditorWindow* EditorWindow : m_EditorWindows)
         {
-            static bool IsA = false;
-            TweenManager::DoClearColor(Camera, IsA ? Color::Red : Color::Cyan, 1.0f);
-            IsA = !IsA;
+            EditorWindow->OnUpdate(Delta);
         }
-
     }
 
-    void EditorApplication::OpenProject(const Path& ProjectPath)
+    void NovaEditor::OpenProject(const Path& ProjectPath)
     {
         m_CurrentProject.reset();
         m_CurrentProject = MakeShared<Project>(ProjectPath);

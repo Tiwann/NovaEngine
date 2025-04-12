@@ -10,7 +10,7 @@ namespace Nova
 
     VertexBuffer::VertexBuffer(const Vertex* Data, size_t Count) : m_Data(Data, Count)
     {
-        Assert(Data || Count != 0, "Tried to create a Vertex Buffer with no data!");
+        NOVA_ASSERT(Data || Count != 0, "Tried to create a Vertex Buffer with no data!");
     }
 
     VertexBuffer* VertexBuffer::Create(GraphicsApi const& GraphicsApi)
@@ -47,7 +47,7 @@ namespace Nova
 
     void VertexBuffer::SendData(const Vertex* Data, size_t Count)
     {
-        Assert(Data || Count != 0, "Invalid data during uploading");
+        NOVA_ASSERT(Data || Count != 0, "Invalid data during uploading");
         m_Data = BufferView(Data, Count);
     }
 

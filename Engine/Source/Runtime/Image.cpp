@@ -1,74 +1,76 @@
 #include "Image.h"
-#include "Formats.h"
+#include "Format.h"
 #include <stb/stb_image.h>
+
+#include "Platform/D3D12/D3D12Renderer.h"
 
 namespace Nova
 {
-    Image::Image(const u32 Width, const u32 Height, const Formats Format, const void* Pixels) : m_Width(Width), m_Height(Height), m_Format(Format)
+    Image::Image(const u32 Width, const u32 Height, const Format Format, const void* Pixels) : m_Width(Width), m_Height(Height), m_Format(Format)
     {
-        const size_t BytesPerPixel = GetBytesPerPixel(Format);
+        const size_t BytesPerPixel = GetFormatSize(Format);
         const size_t TotalBytes = Width * Height * BytesPerPixel;
         m_Pixels = malloc(TotalBytes);
         std::copy_n((const u8*)Pixels, TotalBytes, (u8*)m_Pixels);
     }
 
-    Image::Image(const Path& Filepath, const Formats Format) : m_Format(Format)
+    Image::Image(const Path& Filepath, const Format Format) : m_Format(Format)
     {
         stbi_set_flip_vertically_on_load(true);
         switch (m_Format)
         {
-        case Formats::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_UNORM:
             m_Pixels = stbi_load(Filepath.string().c_str(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_USHORT:
             m_Pixels = stbi_load_16(Filepath.string().c_str(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R32G32B32A32_FLOAT:
+        case Format::R32G32B32A32_FLOAT:
             m_Pixels = stbi_loadf(Filepath.string().c_str(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
-        default: Assert(false, "This format is not supported");
+        default: NOVA_ASSERT(false, "This format is not supported");
         }
     }
 
-    Image::Image(const Buffer<u8>& Buffer, const Formats Format) : m_Format(Format)
+    Image::Image(const Buffer<u8>& Buffer, const Format Format) : m_Format(Format)
     {
         stbi_set_flip_vertically_on_load(true);
         switch (m_Format)
         {
-        case Formats::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_UNORM:
             m_Pixels = stbi_load_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_USHORT:
             m_Pixels = stbi_load_16_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R32G32B32A32_FLOAT:
+        case Format::R32G32B32A32_FLOAT:
             m_Pixels = stbi_loadf_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
-        default: Assert(false, "This format is not supported");
+        default: NOVA_ASSERT(false, "This format is not supported");
         }
     }
 
-    Image::Image(const BufferView<u8>& Buffer, const Formats Format) : m_Format(Format)
+    Image::Image(const BufferView<u8>& Buffer, const Format Format) : m_Format(Format)
     {
         stbi_set_flip_vertically_on_load(true);
         switch (m_Format)
         {
-        case Formats::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_UNORM:
             m_Pixels = stbi_load_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_USHORT:
             m_Pixels = stbi_load_16_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
         
-        case Formats::R32G32B32A32_FLOAT:
+        case Format::R32G32B32A32_FLOAT:
             m_Pixels = stbi_loadf_from_memory(Buffer.Data(), (int)Buffer.Count(), (i32*)&m_Width, (i32*)&m_Height, nullptr, 4);
             break;
-        default: Assert(false, "This format is not supported");
+        default: NOVA_ASSERT(false, "This format is not supported");
         }
     }
     
@@ -89,7 +91,7 @@ namespace Nova
 
     size_t Image::GetSize() const
     {
-        return m_Width * m_Height * GetBytesPerPixel(m_Format);
+        return m_Width * m_Height * GetFormatSize(m_Format);
     }
 
     const void* Image::GetData() const
@@ -107,7 +109,7 @@ namespace Nova
         return m_Pixels && m_Width && m_Height;
     }
 
-    Formats Image::GetFormat() const
+    Format Image::GetFormat() const
     {
         return m_Format;
     }

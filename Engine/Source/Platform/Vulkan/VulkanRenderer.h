@@ -29,19 +29,16 @@ namespace Nova
 
     struct VkFunctionPointers
     {
-#if defined(NOVA_DEBUG)
+        #if defined(NOVA_DEBUG)
         PFN_vkCreateDebugUtilsMessengerEXT  vkCreateDebugUtilsMessengerEXT = nullptr;
         PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = nullptr;
-#endif
+        #endif
         PFN_vkCmdSetColorBlendEquationEXT   vkCmdSetColorBlendEquationEXT = nullptr;
         PFN_vkCmdSetColorBlendEnableEXT     vkCmdSetColorBlendEnableEXT = nullptr;
         PFN_vkCreateShadersEXT              vkCreateShadersEXT = nullptr;
         PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
     };
 
-    constexpr VkDeviceSize ZeroOffset = 0;
-    constexpr VkComponentMapping ComponentMappingRGBA = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A };
-    
     class VulkanRenderer : public Renderer
     {
     public:

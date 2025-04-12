@@ -502,83 +502,83 @@ namespace Nova
         return OutResource;
     }
 
-    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Formats Format) const
+    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const
     {
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)
         {
-        case Formats::NONE:
+        case Format::NONE:
             DXFormat =  DXGI_FORMAT_UNKNOWN;
             break;
-        case Formats::R8_UNORM:
+        case Format::R8_UNORM:
             DXFormat = DXGI_FORMAT_R8_UNORM;
             break;
-        case Formats::R8_SNORM:
+        case Format::R8_SNORM:
             DXFormat = DXGI_FORMAT_R8_SNORM;
             break;
-        case Formats::R16_USHORT:
+        case Format::R16_USHORT:
             DXFormat = DXGI_FORMAT_R16_UINT;
             break;
-        case Formats::R16_SHORT:
+        case Format::R16_SHORT:
             DXFormat = DXGI_FORMAT_R16_SINT;
             break;
-        case Formats::R32_FLOAT:
+        case Format::R32_FLOAT:
             DXFormat = DXGI_FORMAT_R32_FLOAT;
             break;
-        case Formats::R32_UINT:
+        case Format::R32_UINT:
             DXFormat = DXGI_FORMAT_R32_UINT;
             break;
-        case Formats::R32_SINT:
+        case Format::R32_SINT:
             DXFormat = DXGI_FORMAT_R32_SINT;
             break;
-        case Formats::R8G8_UNORM:
+        case Format::R8G8_UNORM:
             DXFormat = DXGI_FORMAT_R8G8_UNORM;
             break;
-        case Formats::R8G8_SNORM:
+        case Format::R8G8_SNORM:
             DXFormat = DXGI_FORMAT_R8G8_SNORM;
             break;
-        case Formats::R16G16_USHORT:
+        case Format::R16G16_USHORT:
             DXFormat = DXGI_FORMAT_R16G16_UINT;
             break;
-        case Formats::R16G16_SHORT:
+        case Format::R16G16_SHORT:
             DXFormat = DXGI_FORMAT_R16G16_SINT;
             break;
-        case Formats::R32G32_UINT:
+        case Format::R32G32_UINT:
             DXFormat = DXGI_FORMAT_R32G32_UINT;
             break;
-        case Formats::R32G32_SINT:
+        case Format::R32G32_SINT:
             DXFormat = DXGI_FORMAT_R32G32_SINT;
             break;
-        case Formats::R32G32_FLOAT:
+        case Format::R32G32_FLOAT:
             DXFormat = DXGI_FORMAT_R32G32_FLOAT;
             break;
-        case Formats::R8G8B8_UNORM:
-        case Formats::R8G8B8_SNORM:
-        case Formats::R16G16B16_USHORT:
-        case Formats::R16G16B16_SHORT:
-        case Formats::R32G32B32_UINT:
-        case Formats::R32G32B32_SINT:
-        case Formats::R32G32B32_FLOAT:
+        case Format::R8G8B8_UNORM:
+        case Format::R8G8B8_SNORM:
+        case Format::R16G16B16_USHORT:
+        case Format::R16G16B16_SHORT:
+        case Format::R32G32B32_UINT:
+        case Format::R32G32B32_SINT:
+        case Format::R32G32B32_FLOAT:
             break;
-        case Formats::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_UNORM:
             DXFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
             break;
-        case Formats::R8G8B8A8_SNORM:
+        case Format::R8G8B8A8_SNORM:
             DXFormat = DXGI_FORMAT_R8G8B8A8_SNORM;
             break;
-        case Formats::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_USHORT:
             DXFormat = DXGI_FORMAT_R16G16B16A16_UINT;
             break;
-        case Formats::R16G16B16A16_SHORT:
+        case Format::R16G16B16A16_SHORT:
             DXFormat = DXGI_FORMAT_R16G16B16A16_SINT;
             break;
-        case Formats::R32G32B32A32_UINT:
+        case Format::R32G32B32A32_UINT:
             DXFormat = DXGI_FORMAT_R32G32B32A32_UINT;
             break;
-        case Formats::R32G32B32A32_SINT:
+        case Format::R32G32B32A32_SINT:
             DXFormat = DXGI_FORMAT_R32G32B32A32_SINT;
             break;
-        case Formats::R32G32B32A32_FLOAT:
+        case Format::R32G32B32A32_FLOAT:
             DXFormat = DXGI_FORMAT_R32G32B32A32_FLOAT;
             break;
         }

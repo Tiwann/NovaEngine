@@ -13,7 +13,7 @@ namespace Nova
 
     std::regex ArgumentParserSettings::GetRegex() const
     {
-        const String RegexString = Format(R"(^({}|{})[A-Za-z]+({}[A-Za-z0-9:/\\._]+)?$)", ShortFormatPrefix, LongFormatPrefix, AssigmentCharacter);
+        const String RegexString = StringFormat(R"(^({}|{})[A-Za-z]+({}[A-Za-z0-9:/\\._]+)?$)", ShortFormatPrefix, LongFormatPrefix, AssigmentCharacter);
         return std::regex(*RegexString);
     }
 
@@ -41,8 +41,8 @@ namespace Nova
         size_t MaxChars = 0;
         for (const CommandLineOption& Option : TheOptions)
         {
-            String Values = Option.PossibleValues.has_value() ? Format("[{}]", Option.PossibleValues.value().Name) : "";
-            String Desc = Format("{}{} {}{} {}", m_Settings.ShortFormatPrefix, Option.ShortName, m_Settings.LongFormatPrefix, Option.LongName, Values);
+            String Values = Option.PossibleValues.has_value() ? StringFormat("[{}]", Option.PossibleValues.value().Name) : "";
+            String Desc = StringFormat("{}{} {}{} {}", m_Settings.ShortFormatPrefix, Option.ShortName, m_Settings.LongFormatPrefix, Option.LongName, Values);
             MaxChars = Math::Max(MaxChars, Desc.Count());
 
             if (Option.PossibleValues.has_value())
@@ -59,28 +59,28 @@ namespace Nova
 
     size_t ArgumentParser::GetDescLength(const CommandLineOption& Option) const
     {
-        const String Values = Option.PossibleValues.has_value() ? Format("[{}]", Option.PossibleValues.value().Name) : "";
-        const String Desc = Format("{}{} {}{} {}", m_Settings.ShortFormatPrefix, Option.ShortName, m_Settings.LongFormatPrefix, Option.LongName, Values);
+        const String Values = Option.PossibleValues.has_value() ? StringFormat("[{}]", Option.PossibleValues.value().Name) : "";
+        const String Desc = StringFormat("{}{} {}{} {}", m_Settings.ShortFormatPrefix, Option.ShortName, m_Settings.LongFormatPrefix, Option.LongName, Values);
         return Desc.Count();
     }
 
     String ArgumentParser::GetHelpText()
     {
         String HelpText;
-        HelpText.Append(Format("Usage: {} [options]\n", m_Name));
+        HelpText.Append(StringFormat("Usage: {} [options]\n", m_Name));
         HelpText.Append("options:\n");
 
         const size_t MaxDescLength = GetDescMaxLength(m_Options);
 
         for(const CommandLineOption& Option : m_Options)
         {
-            const String Values = Option.PossibleValues.has_value() ? Format("[{}]", Option.PossibleValues.value().Name) : "";
+            const String Values = Option.PossibleValues.has_value() ? StringFormat("[{}]", Option.PossibleValues.value().Name) : "";
             String Space;
             const size_t SpaceLength = MaxDescLength - GetDescLength(Option) + 1;
             for (size_t i = 0; i < SpaceLength; ++i)
                 Space.Append(" ");
             String Required = Option.Required ? "(Required)" : "";
-            String Formatted = Format("    {}{} {}{} {}{}\t{} {}\n",
+            String Formatted = StringFormat("    {}{} {}{} {}{}\t{} {}\n",
                 m_Settings.ShortFormatPrefix,
                 Option.ShortName,
                 m_Settings.LongFormatPrefix,
@@ -95,14 +95,14 @@ namespace Nova
         for (const CommandLineOption& Option : m_Options)
         {
             if (!Option.PossibleValues.has_value()) continue;
-            HelpText.Append(Format("{}:", Option.PossibleValues.value().Name));
+            HelpText.Append(StringFormat("{}:", Option.PossibleValues.value().Name));
 
             for(const CommandLineOptionPossibleValue& PossibleValue : Option.PossibleValues.value().Values)
             {
                 String Space;
                 const i32 SpaceLength = MaxDescLength - PossibleValue.Name.Count() + 1;
                 for (i32 i = 0; i < SpaceLength; i++) Space.Append(" ");
-                HelpText.Append(Format("    {}{}\t{}\n",PossibleValue.Name,Space,PossibleValue.HelpText));
+                HelpText.Append(StringFormat("    {}{}\t{}\n",PossibleValue.Name,Space,PossibleValue.HelpText));
             }
         }
         return HelpText;

@@ -15,6 +15,7 @@ add_library(NovaEngine STATIC)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SRC} ${NOVA_ENGINE_PLATFORM_SRC})
 target_link_libraries(NovaEngine PUBLIC slang assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt ImGui imguizmo STB Vulkan::Vulkan miniaudio ogg vorbis vorbisenc tinygltf $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
+target_link_options(NovaEngine PRIVATE /NATVIS:${CMAKE_CURRENT_SOURCE_DIR}/NovaEngine.natvis)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
         PRIVATE $<$<PLATFORM_ID:Windows>:UNICODE _UNICODE WIN32_LEAN_AND_MEAN>
         PUBLIC $<$<PLATFORM_ID:Windows>:NOVA_PLATFORM_WINDOWS NOVA_SYSTEM_NAME="Windows" UNICODE _UNICODE WIN32_LEAN_AND_MEAN>

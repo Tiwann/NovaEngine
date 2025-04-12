@@ -83,15 +83,15 @@ namespace Nova
             {
                 if (i != Filter.Extensions.Count() - 1)
                 {
-                    ExtensionsComma.Append(Format(".{}, ", Filter.Extensions[i]));
-                    ExtensionsSemiColon.Append(Format("*.{};", Filter.Extensions[i]));
+                    ExtensionsComma.Append(StringFormat(".{}, ", Filter.Extensions[i]));
+                    ExtensionsSemiColon.Append(StringFormat("*.{};", Filter.Extensions[i]));
                 } else
                 {
-                    ExtensionsComma.Append(Format(".{}", Filter.Extensions[i]));
-                    ExtensionsSemiColon.Append(Format("*.{}", Filter.Extensions[i]));
+                    ExtensionsComma.Append(StringFormat(".{}", Filter.Extensions[i]));
+                    ExtensionsSemiColon.Append(StringFormat("*.{}", Filter.Extensions[i]));
                 }
             }
-            DisplayNames.Add(Format("{} ({})", Filter.Name, ExtensionsComma));
+            DisplayNames.Add(StringFormat("{} ({})", Filter.Name, ExtensionsComma));
             Extensions.Add(ExtensionsSemiColon);
         }
 

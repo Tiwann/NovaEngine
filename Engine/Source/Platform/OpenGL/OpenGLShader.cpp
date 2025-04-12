@@ -167,9 +167,9 @@ namespace Nova
         const f32 Intensity = Enabled ? DirLight->GetIntensity() : 0.0f;
         const Color Color = Enabled ? DirLight->GetColor() : Color::Black;
         
-        SetUniformFloat3(Format("{}.direction", Name), Transform->GetForwardVector());
-        SetUniformFloat(Format("{}.intensity", Name), Intensity);
-        SetUniformFloat4(Format("{}.color", Name), Color);
+        SetUniformFloat3(StringFormat("{}.direction", Name), Transform->GetForwardVector());
+        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
+        SetUniformFloat4(StringFormat("{}.color", Name), Color);
     }
 
     void OpenGLShader::SetPointLight(const String& Name, const PointLight* PointLight)
@@ -179,10 +179,10 @@ namespace Nova
         const f32 Intensity = Enabled ? PointLight->GetIntensity() : 0.0f;
         const Color Color = Enabled ? PointLight->GetColor() : Color::Black;
 
-        SetUniformFloat(Format("{}.intensity", Name), Intensity);
-        SetUniformFloat4(Format("{}.color", Name), Color);
-        SetUniformFloat(Format("{}.innerRadius", Name), PointLight->GetInnerRadius());
-        SetUniformFloat(Format("{}.outerRadius", Name), PointLight->GetOuterRadius());
+        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
+        SetUniformFloat4(StringFormat("{}.color", Name), Color);
+        SetUniformFloat(StringFormat("{}.innerRadius", Name), PointLight->GetInnerRadius());
+        SetUniformFloat(StringFormat("{}.outerRadius", Name), PointLight->GetOuterRadius());
     }
 
     void OpenGLShader::SetAmbientLight(const String& Name, const AmbientLight* AmbientLight)
@@ -192,8 +192,8 @@ namespace Nova
         const f32 Intensity = Enabled ? AmbientLight->GetIntensity() : 0.0f;
         const Color Color = Enabled ? AmbientLight->GetColor() : Color::Black;
 
-        SetUniformFloat(Format("{}.intensity", Name), Intensity);
-        SetUniformFloat4(Format("{}.color", Name), Color);
+        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
+        SetUniformFloat4(StringFormat("{}.color", Name), Color);
     }
 
 #define NOVA_SHADER_UNIFORM_CHECK(Uniform, Name) \

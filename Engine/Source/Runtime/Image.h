@@ -1,7 +1,7 @@
 #pragma once
 #include "Containers/Buffer.h"
 #include "Filesystem.h"
-#include "Formats.h"
+#include "Format.h"
 #include <CoreExport.h>
 
 namespace Nova {
@@ -9,13 +9,13 @@ namespace Nova {
 	class CORE_API Image
 	{
 	public:
-		Image(u32 Width, u32 Height, Formats Format, const void* Pixels);
-		Image(const Path& Filepath, Formats Format);
-		Image(const Buffer<u8>& Buffer, Formats Format);
-		Image(const BufferView<u8>& Buffer, Formats Format);
+		Image(u32 Width, u32 Height, Format Format, const void* Pixels);
+		Image(const Path& Filepath, Format Format);
+		Image(const Buffer<u8>& Buffer, Format Format);
+		Image(const BufferView<u8>& Buffer, Format Format);
 		~Image();
 
-		Formats GetFormat() const;
+		Format GetFormat() const;
 		u32 GetWidth() const;
 		u32 GetHeight() const;
 		size_t GetSize() const;
@@ -25,7 +25,7 @@ namespace Nova {
 	
 	private:
 		u32 m_Width{0}, m_Height{0};
-		Formats m_Format{Formats::NONE};
+		Format m_Format{Format::NONE};
 		void* m_Pixels{nullptr};
 	};
 }

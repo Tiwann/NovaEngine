@@ -26,13 +26,13 @@ namespace Nova
     bool OpenGLRenderer::Initialize()
     {
         NOVA_LOG(OpenGL, Verbosity::Trace, "Creating OpenGL context");
-        glfwMakeContextCurrent(g_Application->GetWindow()->GetNativeWindow());
-        glfwSwapInterval(g_Application->GetConfiguration().Graphics.VSync);
+        glfwMakeContextCurrent(m_Application->GetWindow()->GetNativeWindow());
+        glfwSwapInterval(m_Application->GetConfiguration().Graphics.VSync);
         
         if(!gladLoadGL(glfwGetProcAddress))
         {
             NOVA_LOG(OpenGL, Verbosity::Error, "Failed to retrieve OpenGL function pointers!");
-            g_Application->RequireExit(ExitCode::Error);
+            m_Application->RequireExit(ExitCode::Error);
             return false;
         }
 
@@ -78,7 +78,7 @@ namespace Nova
 
     void OpenGLRenderer::Present()
     {
-        glfwSwapBuffers(g_Application->GetWindow()->GetNativeWindow());
+        glfwSwapBuffers(m_Application->GetWindow()->GetNativeWindow());
     }
 
     bool OpenGLRenderer::BeginFrame()

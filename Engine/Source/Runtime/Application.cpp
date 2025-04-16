@@ -16,6 +16,7 @@
 
 #include <GLFW/glfw3.h>
 #include <slang/slang.h>
+#include <slang/slang-com-ptr.h>
 
 #include "CameraSettings.h"
 #include "Cursors.h"
@@ -45,6 +46,11 @@ namespace Nova
         m_EngineAssetsDirectory = m_EngineDirectory / "Assets";
     }
 
+    static void OnGLFWError(i32 Code, const char* Message)
+    {
+        NOVA_LOG(Application, Verbosity::Warning, "[GLFW] Error {}: {}", Code, Message);
+    }
+
     bool Application::PreInitialize()
     {
         // Init GLFW
@@ -55,11 +61,7 @@ namespace Nova
         }
         NOVA_LOG(Application, Verbosity::Info, "Using GLFW version {}.{}.{}", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 
-
-        glfwSetErrorCallback([](int code, const char* message)
-        {
-            NOVA_LOG(Application, Verbosity::Warning, "[GLFW] Error {}: {}", code, message);
-        });
+        glfwSetErrorCallback(OnGLFWError);
         
         // Create Window, set its callbacks
         NOVA_LOG(Application, Verbosity::Trace, "Creating window...");
@@ -164,17 +166,14 @@ namespace Nova
                 NOVA_LOG(Application, Verbosity::Warning, "Gamepad {} connected: {}", JoystickID, GamepadName);
             }
         });
-        
-        
-        
-        NOVA_LOG(Application, Verbosity::Info, "Window successfully created!");
-        
-        
+
+
         if(!m_MainWindow->IsValid())
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create window!");
             return false;
         }
+        NOVA_LOG(Application, Verbosity::Info, "Window successfully created!");
 
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
         m_Renderer = Renderer::Create(this, m_Configuration.Graphics.GraphicsApi);
@@ -341,7 +340,66 @@ namespace Nova
 
 
             OnUpdate((float)m_UnscaledDeltaTime);
-            OnRender(m_Renderer);
+
+
+            switch (m_Renderer->GetGraphicsApi())
+            {
+            case GraphicsApi::None: return;
+            case GraphicsApi::OpenGL:
+                if (m_Configuration.WithEditor)
+                {
+                    // Clear all screen
+                    m_Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
+                    m_Renderer->ClearDepth(0.0f);
+
+                    m_ViewportPanel->GetFrameBuffer()->Bind();
+                    if (m_Renderer->GetCurrentCamera())
+                        m_Renderer->GetCurrentCamera()->Settings.SetDimensions(m_ViewportPanel->GetSize()); // Temp
+                    m_Renderer->SetViewportRect(Vector2::Zero, m_ViewportPanel->GetSize());
+                    const Camera* Camera = m_Renderer->GetCurrentCamera();
+                    m_Renderer->ClearColor(Camera->ClearColor);
+                    m_Renderer->ClearDepth(0.0f);
+                    m_Scene->OnRender(m_Renderer);
+                    OnRender(m_Renderer);
+                    m_ViewportPanel->GetFrameBuffer()->Unbind();
+
+                    m_ImGuiRenderer->BeginFrame();
+                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(),
+                                                 ImGuiDockNodeFlags_PassthruCentralNode);
+                    OnGUI((f32)m_DeltaTime);
+                    m_ImGuiRenderer->EndFrame();
+                    m_ImGuiRenderer->Render();
+                    m_Renderer->Present();
+                }
+                else
+                {
+                    const Camera* Camera = m_Renderer->GetCurrentCamera();
+                    m_Renderer->ClearColor(Camera->ClearColor);
+                    m_Renderer->ClearDepth(1.0f);
+                    m_Scene->OnRender(m_Renderer);
+                }
+                break;
+            case GraphicsApi::Vulkan:
+            case GraphicsApi::D3D12:
+                if (m_Renderer->BeginFrame() && g_ApplicationRunning)
+                {
+                    OnRender(m_Renderer);
+                    m_Scene->OnRender(m_Renderer);
+
+                    if (m_Configuration.WithEditor)
+                    {
+                        m_ImGuiRenderer->BeginFrame();
+                        ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                        OnGUI((f32)m_DeltaTime);
+                        m_ImGuiRenderer->EndFrame();
+                        m_ImGuiRenderer->Render();
+                    }
+                    m_Renderer->EndFrame();
+                    m_Renderer->Present();
+                }
+                break;
+            }
+
             ApplicationEvents::OnFrameEnd.Broadcast();
         }
         
@@ -358,67 +416,7 @@ namespace Nova
     
     void Application::OnRender(Renderer* Renderer)
     {
-        switch (Renderer->GetGraphicsApi())
-        {
-        case GraphicsApi::None: return;
-        case GraphicsApi::OpenGL:
-            if(m_Configuration.WithEditor)
-            {
 
-                // Clear all screen
-                Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
-                Renderer->ClearDepth(0.0f);
-
-                m_ViewportPanel->GetFrameBuffer()->Bind();
-                if(m_Renderer->GetCurrentCamera())
-                    m_Renderer->GetCurrentCamera()->Settings.SetDimensions(m_ViewportPanel->GetSize()); // Temp
-                Renderer->SetViewportRect(Vector2::Zero, m_ViewportPanel->GetSize());
-                const Camera* Camera = Renderer->GetCurrentCamera();
-                Renderer->ClearColor(Camera->ClearColor);
-                Renderer->ClearDepth(0.0f);
-                m_Scene->OnRender(Renderer);
-                m_ViewportPanel->GetFrameBuffer()->Unbind();
-
-                if (m_Configuration.WithEditor)
-                {
-                    m_ImGuiRenderer->BeginFrame();
-                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                    OnGUI((f32)m_DeltaTime);
-                    m_ImGuiRenderer->EndFrame();
-                    m_ImGuiRenderer->Render();
-                }
-                Renderer->Present();
-            }
-            else
-            {
-                const Camera* Camera = Renderer->GetCurrentCamera();
-                Renderer->ClearColor(Camera->ClearColor);
-                Renderer->ClearDepth(1.0f);
-                m_Scene->OnRender(Renderer);
-            }
-            break;
-        case GraphicsApi::Vulkan:
-        case GraphicsApi::D3D12:
-            if (Renderer->BeginFrame() && g_ApplicationRunning)
-            {
-                const Camera* Camera = Renderer->GetCurrentCamera();
-                Renderer->Clear(Camera->ClearColor, 0.0f);
-                m_Scene->OnRender(Renderer);
-
-                if (m_Configuration.WithEditor)
-                {
-                    m_ImGuiRenderer->BeginFrame();
-                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                    OnGUI((f32)m_DeltaTime);
-                    m_ImGuiRenderer->EndFrame();
-                    m_ImGuiRenderer->Render();
-                }
-
-                Renderer->EndFrame();
-                Renderer->Present();
-            }
-            break;
-        }
     }
     
     void Application::OnUpdate(f32 Delta)
@@ -453,7 +451,6 @@ namespace Nova
 
     void Application::OnExit()
     {
-        spDestroySession(m_SlangSession);
         m_Scene->OnDestroy();
         delete m_Scene;
         
@@ -504,6 +501,8 @@ namespace Nova
         m_Renderer->Destroy();
         delete m_Renderer;
         m_Renderer = nullptr;
+
+        slang::shutdown();
         
         m_MainWindow->Destroy();
         delete m_MainWindow;
@@ -595,17 +594,6 @@ namespace Nova
     {
         return m_EngineAssetsDirectory;
     }
-
-    Path const& Application::GetApplicationDirectory() const
-    {
-        return m_ApplicationDirectory;
-    }
-
-    Path const& Application::GetAssetsDirectory() const
-    {
-        return m_ApplicationAssetsDirectory;
-    }
-
 
     Renderer* Application::GetRenderer() const
     {

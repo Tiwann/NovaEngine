@@ -15,7 +15,10 @@ namespace Nova
         using MapType = Map<String, T*>;
         using PairType = typename MapType::PairType;
         
-        virtual ~ResourceManager() = default;
+        virtual ~ResourceManager()
+        {
+            UnloadAll();
+        }
         virtual T* Load(const String& Name, const Path& Filepath) = 0;
         virtual T* Retrieve(const String& Name) = 0;
 

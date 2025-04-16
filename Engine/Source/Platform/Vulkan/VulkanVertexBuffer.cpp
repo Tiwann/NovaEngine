@@ -25,7 +25,7 @@ namespace Nova
         const VmaAllocator Allocator = m_Renderer->GetAllocator();
 
         VkBufferCreateInfo BufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        BufferCreateInfo.size = Count * sizeof(VertexBuffer);
+        BufferCreateInfo.size = Count * sizeof(Vertex);
         BufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         BufferCreateInfo.flags = 0;
@@ -36,7 +36,7 @@ namespace Nova
         AllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         AllocCreateInfo.priority = 1.0f;
         AllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-        AllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        AllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
         if (VK_FAILED(vmaCreateBuffer(Allocator,
             &BufferCreateInfo,

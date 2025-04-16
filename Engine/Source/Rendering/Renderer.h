@@ -6,7 +6,6 @@
 namespace Nova
 {
     class Color;
-    struct Rectangle;
     class VertexArray;
     class VertexBuffer;
     class IndexBuffer;

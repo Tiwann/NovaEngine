@@ -93,6 +93,7 @@ namespace Nova
             m_FunctionPointers.vkCmdSetColorBlendEnableEXT = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorBlendEnableEXT");
             m_FunctionPointers.vkCmdSetColorBlendEquationEXT = (PFN_vkCmdSetColorBlendEquationEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorBlendEquationEXT");
             m_FunctionPointers.vkCreateShadersEXT = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateShadersEXT");
+            m_FunctionPointers.vkDestroyShaderEXT = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyShaderEXT");
             m_FunctionPointers.vkCmdBindShadersEXT = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdBindShadersEXT");
         }
 
@@ -348,7 +349,7 @@ namespace Nova
             else
             {
                 const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
                 SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
             }
 
@@ -487,23 +488,30 @@ namespace Nova
         /// GRAPHICS PIPELINE CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         /*{
-            VkPipelineShaderStageCreateInfo VertShaderStageInfo{};
-            VertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            VertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-            VertShaderStageInfo.module = VertShaderModule;
-            VertShaderStageInfo.pName = "main";
 
-            VkPipelineShaderStageCreateInfo FragShaderStageInfo{};
-            FragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            FragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            FragShaderStageInfo.module = FragShaderModule;
-            FragShaderStageInfo.pName = "main";
+            Array<VkVertexInputAttributeDescription> VertexInputAttributeDescriptions
+            {
+                VkVertexInputAttributeDescription{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) },
+                VkVertexInputAttributeDescription{ 0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TextureCoordinate) },
+                VkVertexInputAttributeDescription{ 0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) },
+                VkVertexInputAttributeDescription{ 0, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Color) },
+            };
 
-            VkPipelineShaderStageCreateInfo ShaderStages[] = {VertShaderStageInfo, FragShaderStageInfo};
+            Array<VkVertexInputBindingDescription> VertexInputBindingDescriptions
+            {
+                VkVertexInputBindingDescription {  0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
+                VkVertexInputBindingDescription {  1, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
+                VkVertexInputBindingDescription {  2, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
+                VkVertexInputBindingDescription {  3, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
+            };
 
             // Configuration du pipeline
             VkPipelineVertexInputStateCreateInfo VertexInputInfo{};
             VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            VertexInputInfo.vertexAttributeDescriptionCount = VertexInputAttributeDescriptions.Count();
+            VertexInputInfo.pVertexAttributeDescriptions = VertexInputAttributeDescriptions.Data();
+            VertexInputInfo.vertexBindingDescriptionCount = VertexInputBindingDescriptions.Count();
+            VertexInputInfo.pVertexBindingDescriptions = VertexInputBindingDescriptions.Data();
 
             VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
             InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -535,10 +543,13 @@ namespace Nova
             PipelineRenderingInfo.colorAttachmentCount = 1;
             PipelineRenderingInfo.pColorAttachmentFormats = &m_SwapchainImageFormat;
 
+
+            VkPipelineShaderStageCreateInfo VertexStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+            VertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+
+
             VkGraphicsPipelineCreateInfo PipelineInfo{};
             PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            PipelineInfo.stageCount = 2;
-            PipelineInfo.pStages = ShaderStages;
             PipelineInfo.pVertexInputState = &VertexInputInfo;
             PipelineInfo.pInputAssemblyState = &InputAssembly;
             PipelineInfo.pRasterizationState = &Rasterizer;
@@ -546,6 +557,8 @@ namespace Nova
             PipelineInfo.pColorBlendState = &ColorBlending;
             PipelineInfo.layout = m_PipelineLayout;
             PipelineInfo.pNext = &PipelineRenderingInfo;
+            PipelineInfo.stageCount = 2;
+            PipelineInfo.pStages
 
             if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &PipelineInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
             {
@@ -609,14 +622,8 @@ namespace Nova
             for (size_t i = 0; i < m_ImageCount; ++i)
             {
                 VkFrameData& VkFrameData = m_Frames[i];
-                vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &VkFrameData.CommandBuffer);
-                vkDestroyFence(m_Device, VkFrameData.Fence, nullptr);
-                vkDestroySemaphore(m_Device, VkFrameData.PresentSemaphore, nullptr);
-                vkDestroySemaphore(m_Device, VkFrameData.SubmitSemaphore, nullptr);
                 vkDestroyImageView(m_Device, VkFrameData.ImageView, nullptr);
             }
-            Memory::Memset(m_Frames, 0, m_ImageCount);
-            vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 
             VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
             SwapchainCreateInfo.surface = m_Surface;
@@ -641,16 +648,20 @@ namespace Nova
             else
             {
                 const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
                 SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
             }
 
-            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
+            VkSwapchainKHR NewSwapchain = nullptr;
+            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &NewSwapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
                 m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
+
+            vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
+            m_Swapchain = NewSwapchain;
 
             u32 SwapchainImageCount;
             vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
@@ -662,22 +673,12 @@ namespace Nova
                 return false;
             }
 
-            VkCommandPoolCreateInfo CommandPoolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-            CommandPoolCreateInfo.queueFamilyIndex = m_GraphicsQueueIndex;
-            CommandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-            if (VK_FAILED(vkCreateCommandPool(m_Device, &CommandPoolCreateInfo, nullptr, &m_CommandPool)))
-            {
-                NOVA_VULKAN_ERROR("Failed to create command pool!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
-
             for (size_t i = 0; i < m_ImageCount; i++)
             {
-                const VkImage Image = SwapchainImages[i];
+                 m_Frames[i].Image = SwapchainImages[i];
 
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                ImageViewCreateInfo.image = Image;
+                ImageViewCreateInfo.image =  m_Frames[i].Image;
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
                 ImageViewCreateInfo.format = m_SwapchainImageFormat;
@@ -690,30 +691,6 @@ namespace Nova
                 if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
-                    m_Application->RequireExit(ExitCode::Error);
-                    return false;
-                }
-
-                m_Frames[i].Image = Image;
-
-                VkSemaphoreCreateInfo SemaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-                if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].SubmitSemaphore)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Submit Semaphore! (Image {})", i);
-                    return false;
-                }
-
-                if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].PresentSemaphore)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Present Semaphore! (Image {})", i);
-                    return false;
-                }
-
-                VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-                FenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-                if (VK_FAILED(vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &m_Frames[i].Fence)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Fence!");
                     m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
@@ -769,12 +746,6 @@ namespace Nova
             return false;
         }
 
-        VkRenderingAttachmentInfo RenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        RenderingAttachmentInfo.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
-        RenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        RenderingAttachmentInfo.imageView = m_Frames[m_CurrentFrameIndex].ImageView;
-        RenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        RenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         VkImageMemoryBarrier Barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -787,15 +758,22 @@ namespace Nova
         Barrier.subresourceRange.levelCount = 1;
         Barrier.subresourceRange.baseArrayLayer = 0;
         Barrier.subresourceRange.layerCount = 1;
-        Barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        Barrier.dstAccessMask = VK_ACCESS_NONE_KHR;
+        Barrier.srcAccessMask = VK_ACCESS_NONE_KHR;
+        Barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
         vkCmdPipelineBarrier(
             CommandBuffer,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             0, 0, nullptr, 0, nullptr, 1, &Barrier
         );
+
+        VkRenderingAttachmentInfo RenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+        RenderingAttachmentInfo.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
+        RenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        RenderingAttachmentInfo.imageView = m_Frames[m_CurrentFrameIndex].ImageView;
+        RenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        RenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
         VkRenderingInfo RenderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
         RenderingInfo.layerCount = 1;
@@ -834,7 +812,7 @@ namespace Nova
         vkCmdPipelineBarrier(
             CommandBuffer,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &Barrier
         );
         VK_CHECK_MSG(vkEndCommandBuffer(CommandBuffer), "Failed to end command buffer!");
@@ -959,9 +937,77 @@ namespace Nova
     void VulkanRenderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        Array<VkVertexInputAttributeDescription2EXT> VertexInputAttributeDescriptions
+            {
+                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) },
+                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TextureCoordinate) },
+                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) },
+                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 3, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Color) },
+            };
+
+        Array<VkVertexInputBindingDescription2EXT> VertexInputBindingDescriptions
+        {
+            VkVertexInputBindingDescription2EXT { VK_STRUCTURE_TYPE_VERTEX_INPUT_BINDING_DESCRIPTION_2_EXT, nullptr, 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX, 1 }
+        };
+
+        const PFN_vkCmdSetVertexInputEXT vkCmdSetVertexInputEXT = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetVertexInputEXT");
+        vkCmdSetVertexInputEXT(Cmd, VertexInputBindingDescriptions.Count(), VertexInputBindingDescriptions.Data(), VertexInputAttributeDescriptions.Count(), VertexInputAttributeDescriptions.Data());
+
+        const PFN_vkCmdSetRasterizerDiscardEnable vkCmdSetRasterizerDiscardEnable = (PFN_vkCmdSetRasterizerDiscardEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetRasterizerDiscardEnable");
+        vkCmdSetRasterizerDiscardEnable(GetCurrentCommandBuffer(), false);
+
+        SetCullMode(CullMode::None);
+
+        const PFN_vkCmdSetDepthTestEnable vkCmdSetDepthTestEnable = (PFN_vkCmdSetDepthTestEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthTestEnable");
+        vkCmdSetDepthTestEnable(GetCurrentCommandBuffer(), false);
+
+        const PFN_vkCmdSetDepthWriteEnable vkCmdSetDepthWriteEnable = (PFN_vkCmdSetDepthWriteEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthWriteEnable");
+        vkCmdSetDepthWriteEnable(GetCurrentCommandBuffer(), false);
+
+        const PFN_vkCmdSetStencilTestEnable vkCmdSetStencilTestEnable = (PFN_vkCmdSetStencilTestEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetStencilTestEnable");
+        vkCmdSetStencilTestEnable(GetCurrentCommandBuffer(), false);
+
+        const PFN_vkCmdSetDepthBiasEnable vkCmdSetDepthBiasEnable = (PFN_vkCmdSetDepthBiasEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthBiasEnable");
+        vkCmdSetDepthBiasEnable(GetCurrentCommandBuffer(), false);
+
+        const f32 Width = g_Application->GetWindow()->GetWidth<f32>();
+        const f32 Height = g_Application->GetWindow()->GetHeight<f32>();
+
+        const VkViewport Viewport{0.0f, Height, Width, -Height, 0.0f, 1.0f };
+        vkCmdSetViewportWithCount(GetCurrentCommandBuffer(), 1, &Viewport);
+
+        VkRect2D Scissor;
+        Scissor.extent = { (u32)Width, (u32)Height };
+        Scissor.offset = { 0, 0 };
+        vkCmdSetScissorWithCount(GetCurrentCommandBuffer(), 1, &Scissor);
+
+        vkCmdSetPrimitiveTopology(GetCurrentCommandBuffer(), VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
+        vkCmdSetPrimitiveRestartEnable(GetCurrentCommandBuffer(), false);
+
+        const PFN_vkCmdSetPolygonModeEXT vkCmdSetPolygonModeEXT = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetPolygonModeEXT");
+        vkCmdSetPolygonModeEXT(GetCurrentCommandBuffer(), VK_POLYGON_MODE_FILL);
+
+        const PFN_vkCmdSetRasterizationSamplesEXT vkCmdSetRasterizationSamplesEXT = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetRasterizationSamplesEXT");
+        vkCmdSetRasterizationSamplesEXT(GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT);
+
+        VkSampleMask SampleMask = 0xFFFFFFFF;
+        const PFN_vkCmdSetSampleMaskEXT vkCmdSetSampleMaskEXT = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetSampleMaskEXT");
+        vkCmdSetSampleMaskEXT(GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT, &SampleMask);
+
+        const PFN_vkCmdSetAlphaToCoverageEnableEXT vkCmdSetAlphaToCoverageEnableEXT = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetAlphaToCoverageEnableEXT");
+        vkCmdSetAlphaToCoverageEnableEXT(GetCurrentCommandBuffer(), false);
+
+
+        const VkColorComponentFlags ColorFlags = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT| VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+        const PFN_vkCmdSetColorWriteMaskEXT vkCmdSetColorWriteMaskEXT = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorWriteMaskEXT");
+        vkCmdSetColorWriteMaskEXT(GetCurrentCommandBuffer(), 0, 1, &ColorFlags);
+
+        SetBlending(false);
+
         IndexBuffer->Bind();
         VertexBuffer->Bind();
         Shader->Bind();
+
         vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
     }
 
@@ -1109,6 +1155,11 @@ namespace Nova
     const VkFunctionPointers& VulkanRenderer::GetFunctionPointers() const
     {
         return m_FunctionPointers;
+    }
+
+    void VulkanRenderer::BindPipeline()
+    {
+        vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
     }
 
     VkCullModeFlags VulkanRenderer::GetCullMode(CullMode Mode)

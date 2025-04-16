@@ -1,5 +1,6 @@
 set(FMOD_STUDIO_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Binaries)
 set(FMOD_STUDIO_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+include(${CMAKE_SOURCE_DIR}/AutoCopy.cmake)
 
 add_library(fmod-studio SHARED IMPORTED GLOBAL)
 

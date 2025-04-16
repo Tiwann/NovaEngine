@@ -10,10 +10,10 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(NovaEditor, "NOVA EDITOR")
 
 namespace Nova
 {
-    class NovaEditor final : public Application
+    class HelloTriangle final : public Application
     {
     public:
-        explicit NovaEditor(const Array<const char*>& Arguments);
+        explicit HelloTriangle(const Array<const char*>& Arguments);
         ApplicationConfiguration CreateConfiguration() const override;
         void OnInit() override;
         void OnExit() override;

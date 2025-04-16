@@ -36,6 +36,7 @@ namespace Nova
         PFN_vkCmdSetColorBlendEquationEXT   vkCmdSetColorBlendEquationEXT = nullptr;
         PFN_vkCmdSetColorBlendEnableEXT     vkCmdSetColorBlendEnableEXT = nullptr;
         PFN_vkCreateShadersEXT              vkCreateShadersEXT = nullptr;
+        PFN_vkDestroyShaderEXT              vkDestroyShaderEXT = nullptr;
         PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
     };
 
@@ -87,6 +88,8 @@ namespace Nova
         VkCommandPool GetCommandPool() const;
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
+
+        void BindPipeline();
     private:
         static VkCullModeFlags GetCullMode(CullMode Mode);
         static VkBlendFactor GetBlendMode(BlendMode Mode);

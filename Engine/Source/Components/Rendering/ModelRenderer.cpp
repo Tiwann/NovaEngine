@@ -24,7 +24,7 @@ namespace Nova
         Component::OnInit();
         m_Model = new Model("TransientModel");
         ShaderManager* ShaderManager = g_Application->GetShaderManager();
-        m_Shader = ShaderManager->Retrieve("BlinnPhong");
+        m_Shader = ShaderManager->Retrieve("HelloTriangle");
     }
 
     void ModelRenderer::OnDestroy()

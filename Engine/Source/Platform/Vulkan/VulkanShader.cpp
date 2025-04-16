@@ -23,6 +23,14 @@ namespace Nova
         }
     }
 
+    VulkanShader::~VulkanShader()
+    {
+        const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
+        Functions.vkDestroyShaderEXT(Renderer->GetDevice(), m_VertexHandle, nullptr);
+        Functions.vkDestroyShaderEXT(Renderer->GetDevice(), m_FragmentHandle, nullptr);
+    }
+
     bool VulkanShader::Compile()
     {
         if (!m_Compiler)
@@ -56,7 +64,7 @@ namespace Nova
     {
         if (!m_Compiler) return false;
         
-        slang::IComponentType* const ShaderStages[] { m_ShaderModule, m_VertexEntryPoint, m_FragmentEntryPoint };
+        slang::IComponentType* const ShaderStages[] { m_VertexEntryPoint, m_FragmentEntryPoint };
         if (SLANG_FAILED(m_Compiler->createCompositeComponentType(ShaderStages, std::size(ShaderStages), &m_Program, nullptr)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create program!");
@@ -168,37 +176,41 @@ namespace Nova
         if (!ReflectShaderResources(m_LinkedProgram, shaderInfo, Device))
             return false;
 
-        const VulkanRenderer* renderer = g_Application->GetRenderer<VulkanRenderer>();
-        const VkDevice device = renderer->GetDevice();
-        const VkFunctionPointers& vkFns = renderer->GetFunctionPointers();
+        const VkFunctionPointers& FunctionPtrs = Renderer->GetFunctionPointers();
 
-        // Create Vulkan ShaderEXTs
-        VkShaderCreateInfoEXT infos[2] = {};
-        infos[0].sType = VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT;
-        infos[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        infos[0].codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-        infos[0].pName = "main";
-        infos[0].pCode = CompiledVertexCode->getBufferPointer();
-        infos[0].codeSize = CompiledVertexCode->getBufferSize();
-        infos[0].pSetLayouts = shaderInfo.DescriptorSetLayouts.Data();
-        infos[0].setLayoutCount = shaderInfo.DescriptorSetLayouts.Count();
-        infos[0].pPushConstantRanges = shaderInfo.PushConstantRanges.Data();
-        infos[0].pushConstantRangeCount = shaderInfo.PushConstantRanges.Count();
+        VkShaderCreateInfoEXT VertexCreateInfo= { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
+        VertexCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        VertexCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+        VertexCreateInfo.pName = "main";
+        VertexCreateInfo.pCode = CompiledVertexCode->getBufferPointer();
+        VertexCreateInfo.codeSize = CompiledVertexCode->getBufferSize();
+        VertexCreateInfo.pSetLayouts = shaderInfo.DescriptorSetLayouts.Data();
+        VertexCreateInfo.setLayoutCount = shaderInfo.DescriptorSetLayouts.Count();
+        VertexCreateInfo.pPushConstantRanges = shaderInfo.PushConstantRanges.Data();
+        VertexCreateInfo.pushConstantRangeCount = shaderInfo.PushConstantRanges.Count();
 
-        infos[1] = infos[0];
-        infos[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        infos[1].pCode = CompiledFragmentCode->getBufferPointer();
-        infos[1].codeSize = CompiledFragmentCode->getBufferSize();
+        VkShaderCreateInfoEXT FragmentCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
+        FragmentCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        FragmentCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+        FragmentCreateInfo.pName = "main";
+        FragmentCreateInfo.pCode = CompiledFragmentCode->getBufferPointer();
+        FragmentCreateInfo.codeSize = CompiledFragmentCode->getBufferSize();
+        FragmentCreateInfo.pSetLayouts = shaderInfo.DescriptorSetLayouts.Data();
+        FragmentCreateInfo.setLayoutCount = shaderInfo.DescriptorSetLayouts.Count();
+        FragmentCreateInfo.pPushConstantRanges = shaderInfo.PushConstantRanges.Data();
+        FragmentCreateInfo.pushConstantRangeCount = shaderInfo.PushConstantRanges.Count();
 
-        VkShaderEXT handles[2] = {};
-        if (VK_FAILED(vkFns.vkCreateShadersEXT(device, 2, infos, nullptr, handles)))
+        const VkShaderCreateInfoEXT CreateInfos[2] = { VertexCreateInfo, FragmentCreateInfo };
+        VkShaderEXT Handles[2] = {};
+        if (VK_FAILED(FunctionPtrs.vkCreateShadersEXT(Device, 2, CreateInfos, nullptr, Handles)))
         {
             NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
             return false;
         }
 
-        m_VertexHandle = handles[0];
-        m_FragmentHandle = handles[1];
+        m_VertexHandle = Handles[0];
+        m_FragmentHandle = Handles[1];
+        return true;
     }
 
     bool VulkanShader::Bind()
@@ -207,7 +219,7 @@ namespace Nova
         const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
 
-        const VkShaderStageFlagBits ShaderStages[2] = { VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT };
+        constexpr VkShaderStageFlagBits ShaderStages[2] = { VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT };
         const VkShaderEXT Shaders[2] = { m_VertexHandle, m_FragmentHandle };
         Functions.vkCmdBindShadersEXT(Cmd, (u32)std::size(ShaderStages), ShaderStages, Shaders);
         return true;

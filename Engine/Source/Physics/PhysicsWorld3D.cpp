@@ -16,6 +16,7 @@
 #include "PhysicsShape3D.h"
 #include "Math/MathConversions.h"
 #include "Runtime/Application.h"
+#include "Runtime/Utils.h"
 
 
 namespace Nova
@@ -30,10 +31,12 @@ namespace Nova
         return {};
     }
 
+#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
     const char* PhysicsWorld3DBroadPhaseLayerInterface::GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const
     {
         return "Broadphase layer";
     }
+#endif
 
     bool PhysicsWorld3DObjectVsBroadPhaseLayerFilter::ShouldCollide(JPH::ObjectLayer inLayer1,JPH::BroadPhaseLayer inLayer2) const
     {
@@ -46,7 +49,7 @@ namespace Nova
     }
 
     PhysicsWorld3D::PhysicsWorld3D()
-    : m_TempAllocator(10 * 1024 * 1024),
+    : m_TempAllocator(MB<10>()),
     m_JobSystem(JPH::cMaxPhysicsJobs, JPH::cMaxPhysicsBarriers, (int)(std::thread::hardware_concurrency() - 1))
     {
         

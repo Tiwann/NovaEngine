@@ -9,7 +9,7 @@ namespace Nova
     {
     public:
         VulkanShader(const String& Name, const Path& Filepath);
-
+        ~VulkanShader();
         bool Compile() override;
         bool Link() override;
         bool Validate() override;

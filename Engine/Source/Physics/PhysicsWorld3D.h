@@ -19,7 +19,9 @@ namespace Nova
     public:
         JPH::uint GetNumBroadPhaseLayers() const override;
         JPH::BroadPhaseLayer GetBroadPhaseLayer(JPH::ObjectLayer inLayer) const override;
+#if defined(JPH_EXTERNAL_PROFILE) || defined(JPH_PROFILE_ENABLED)
         const char* GetBroadPhaseLayerName(JPH::BroadPhaseLayer inLayer) const override;
+#endif
     };
 
     class CORE_HIDDEN PhysicsWorld3DObjectVsBroadPhaseLayerFilter : public JPH::ObjectVsBroadPhaseLayerFilter

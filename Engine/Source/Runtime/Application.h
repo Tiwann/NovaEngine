@@ -54,6 +54,9 @@ namespace Nova
         using KeyDelegate = MulticastDelegate<void(KeyCode, InputState)>;
         static inline KeyDelegate OnKeyEvent;
 
+        static inline MulticastDelegate<void(KeyCode)> OnKeyPressedEvent;
+        static inline MulticastDelegate<void(KeyCode)> OnKeyReleasedEvent;
+
         using MouseButtonDelegate = MulticastDelegate<void(MouseButton, InputState)>;
         static inline MouseButtonDelegate OnMouseButtonEvent;
 
@@ -122,8 +125,6 @@ namespace Nova
 
         Path const&             GetEngineDirectory() const;
         Path const&             GetEngineAssetsDirectory() const;
-        Path const&             GetApplicationDirectory() const;
-        Path const&             GetAssetsDirectory() const;
     private:
         ////////////////////////////////////////////
         /// CORE COMPONENTS
@@ -168,9 +169,7 @@ namespace Nova
         f64  m_UnscaledDeltaTime = 0.0;
         f64  m_UnscaledTime = 0.0;
         Path m_EngineDirectory;
-        Path m_ApplicationDirectory;
         Path m_EngineAssetsDirectory;
-        Path m_ApplicationAssetsDirectory;
         bool PreInitialize();
     };
 

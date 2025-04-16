@@ -26,7 +26,7 @@ namespace Nova
         AllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         AllocCreateInfo.priority = 1.0f;
         AllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-        AllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        AllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
         if (VK_FAILED(vmaCreateBuffer(Allocator,
             &BufferCreateInfo,

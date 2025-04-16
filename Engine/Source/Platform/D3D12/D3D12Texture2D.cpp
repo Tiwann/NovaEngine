@@ -21,16 +21,16 @@ namespace Nova
     {
         m_Width = Width;
         m_Height = Height;
-        m_Format = Format;
+        m_Params.Format = Format;
         D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
-        m_Resource = Renderer->CreateTexture2D(L"Texture2D", m_Width, m_Height, m_Format);
-        if (!m_Resource)
+        m_Handle = Renderer->CreateTexture2D(L"Texture2D", m_Width, m_Height, Format);
+        if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Texture2D resource!");
             return;
         }
 
-        const size_t UploadBufferSize = GetRequiredIntermediateSize(m_Resource, 0, 1);
+        const size_t UploadBufferSize = GetRequiredIntermediateSize(m_Handle, 0, 1);
         ID3D12Resource* UploadHeap = Renderer->CreateBuffer(L"Texture2D Upload Heap", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, UploadBufferSize);
         if (!UploadHeap)
         {
@@ -48,12 +48,12 @@ namespace Nova
 
         D3D12_SUBRESOURCE_DATA SubresourceData;
         SubresourceData.pData = Data;
-        SubresourceData.RowPitch = (LONG_PTR)(Width * GetFormatSize(m_Format));
+        SubresourceData.RowPitch = (LONG_PTR)(Width * GetFormatSize(m_Params.Format));
         SubresourceData.SlicePitch = SubresourceData.RowPitch * Height;
-        UpdateSubresources(Cmd, m_Resource, UploadHeap, 0, 0, 1, &SubresourceData);
+        UpdateSubresources(Cmd, m_Handle, UploadHeap, 0, 0, 1, &SubresourceData);
 
         const CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            m_Resource,
+            m_Handle,
             D3D12_RESOURCE_STATE_COPY_DEST,
             D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -69,11 +69,6 @@ namespace Nova
         Cmd->Release();
     }
 
-    SharedPtr<Image> D3D12Texture2D::GetImage() const
-    {
-        return nullptr;
-    }
-
     void D3D12Texture2D::Bind() const
     {
     }
@@ -84,6 +79,6 @@ namespace Nova
 
     uintptr_t D3D12Texture2D::GetHandle() const
     {
-        return reinterpret_cast<uintptr_t>(m_Resource);
+        return reinterpret_cast<uintptr_t>(m_Handle);
     }
 }

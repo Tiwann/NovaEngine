@@ -20,7 +20,7 @@ namespace Nova
         for(size_t i = 0; i < Count; i++)
         {
             const Path& Filepath = Filepaths[i];
-            constexpr TextureParams Params = {TextureFilter::Nearest, TextureWrap::Clamp};
+            constexpr TextureParams Params = { Filter::Nearest, SamplerAddressMode::ClampToEdge };
             Texture2D* Texture = Texture2D::CreateFromFile("RuntimeLoadedTextureForSpriteAnim", Filepath, Params);
             Result->AddSprite(Sprite::CreateFromTexture(Texture));
         }

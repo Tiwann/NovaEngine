@@ -84,7 +84,7 @@ namespace Nova
     
     Format Texture2D::GetFormat() const
     {
-        return m_Format;
+        return m_Params.Format;
     }
 
     void Texture2D::SetSlot(u32 Slot)

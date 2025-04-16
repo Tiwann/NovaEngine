@@ -9,8 +9,8 @@ namespace Nova
     Texture2D* TextureManager::Load(const String& Name, const Path& Filepath)
     {
         constexpr TextureParams DefaultParams = {
-            .Filter = TextureFilter::Nearest,
-            .Wrap = TextureWrap::Repeat,
+            .Filter = Filter::Nearest,
+            .AddressMode = SamplerAddressMode::Repeat,
         };
         
         Texture2D* LoadedTexture = Texture2D::CreateFromFile(*Name, Filepath, DefaultParams);

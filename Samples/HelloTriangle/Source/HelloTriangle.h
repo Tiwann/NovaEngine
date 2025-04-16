@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "Runtime/Application.h"
-#include "Runtime/LogCategory.h"
+#include "../../../Engine/Source/Runtime/Application.h"
+#include "../../../Engine/Source/Runtime/LogCategory.h"
 NOVA_DECLARE_LOG_CATEGORY_STATIC(NovaEditor, "HELLO TRIANGLE")
 
 namespace Nova

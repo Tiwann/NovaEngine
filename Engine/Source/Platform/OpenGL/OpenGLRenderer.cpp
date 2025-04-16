@@ -108,7 +108,7 @@ namespace Nova
             NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
         }
 
-        glDrawArrays(GetOpenGLDrawMode(Mode), 0, (i32)NumVert);
+        glDrawArrays(ConvertDrawMode(Mode), 0, (i32)NumVert);
     }
 
     void OpenGLRenderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
@@ -125,7 +125,7 @@ namespace Nova
         {
             NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
         }
-        glDrawElements(GetOpenGLDrawMode(Mode), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(ConvertDrawMode(Mode), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
     }
 
     void OpenGLRenderer::DrawLine(const Vector3& PointA, const Vector3& PointB, f32 Thickness, const Color& Color)
@@ -275,7 +275,7 @@ namespace Nova
         }
     }
 
-    GLenum OpenGLRenderer::GetOpenGLBlendOperation(BlendOperation Operation)
+    GLenum OpenGLRenderer::ConvertBlendOperation(BlendOperation Operation)
     {
         switch (Operation)
         {
@@ -288,17 +288,113 @@ namespace Nova
         throw;
     }
 
-    
+    GLenum OpenGLRenderer::ConvertFilter(Filter Filter)
+    {
+        switch (Filter)
+        {
+        case Filter::Nearest: return GL_NEAREST;
+        case Filter::Linear: return GL_LINEAR;
+        default: throw;
+        }
+    }
+
+    GLenum OpenGLRenderer::ConvertSamplerAddressMode(const SamplerAddressMode AddressMode)
+    {
+        switch (AddressMode) {
+        case SamplerAddressMode::ClampToEdge: return GL_CLAMP_TO_EDGE;
+        case SamplerAddressMode::Repeat: return GL_REPEAT;
+        case SamplerAddressMode::MirroredRepeat: return GL_MIRRORED_REPEAT;
+        case SamplerAddressMode::ClampToBorder: GL_CLAMP_TO_BORDER;
+        case SamplerAddressMode::MirrorClampToEdge: GL_MIRROR_CLAMP_TO_EDGE;
+        default: throw;
+        }
+    }
+
+    GLenum OpenGLRenderer::ConvertFormat(const Format Format)
+    {
+        switch (Format)
+        {
+        case Format::NONE: return GL_NONE;
+        case Format::R8_UNORM: return GL_RED;
+        case Format::R8_SNORM: return GL_RED;
+        case Format::R16_USHORT: return GL_RED;
+        case Format::R16_SHORT: return GL_RED;
+        case Format::R32_FLOAT: return GL_RED;
+        case Format::R32_UINT: return GL_RED;
+        case Format::R32_SINT: return GL_RED;
+        case Format::R8G8_UNORM: return GL_RG;
+        case Format::R8G8_SNORM:return GL_RG;
+        case Format::R16G16_USHORT:return GL_RG;
+        case Format::R16G16_SHORT:return GL_RG;
+        case Format::R32G32_UINT:return GL_RG;
+        case Format::R32G32_SINT:return GL_RG;
+        case Format::R32G32_FLOAT:return GL_RG;
+        case Format::R8G8B8_UNORM:return GL_RGB;
+        case Format::R8G8B8_SNORM:return GL_RGB;
+        case Format::R16G16B16_USHORT:return GL_RGB;
+        case Format::R16G16B16_SHORT:return GL_RGB;
+        case Format::R32G32B32_UINT:return GL_RGB;
+        case Format::R32G32B32_SINT:return GL_RGB;
+        case Format::R32G32B32_FLOAT:return GL_RGB;
+        case Format::R8G8B8A8_UNORM:return GL_RGBA;
+        case Format::R8G8B8A8_SNORM:return GL_RGBA;
+        case Format::R16G16B16A16_USHORT:return GL_RGBA;
+        case Format::R16G16B16A16_SHORT:return GL_RGBA;
+        case Format::R32G32B32A32_UINT:return GL_RGBA;
+        case Format::R32G32B32A32_SINT:return GL_RGBA;
+        case Format::R32G32B32A32_FLOAT:return GL_RGBA;
+        }
+        return 0;
+    }
+
+    GLenum OpenGLRenderer::GetFormatType(const Format Format)
+    {
+        switch (Format)
+        {
+        case Format::NONE: return 0;
+        case Format::R8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8_SNORM: return GL_BYTE;
+        case Format::R16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16_SHORT: return GL_SHORT;
+        case Format::R32_FLOAT: return GL_FLOAT;
+        case Format::R32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32_SINT: return GL_INT;
+        case Format::R8G8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8_SNORM: return GL_BYTE;
+        case Format::R16G16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16_SHORT: return GL_SHORT;
+        case Format::R32G32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32_SINT: return GL_INT;
+        case Format::R32G32_FLOAT: return GL_FLOAT;
+        case Format::R8G8B8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8B8_SNORM: return GL_BYTE;
+        case Format::R16G16B16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16B16_SHORT: return GL_SHORT;
+        case Format::R32G32B32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32B32_SINT: return GL_INT;
+        case Format::R32G32B32_FLOAT: return GL_FLOAT;
+        case Format::R8G8B8A8_UNORM: return GL_UNSIGNED_BYTE;
+        case Format::R8G8B8A8_SNORM: return GL_BYTE;
+        case Format::R16G16B16A16_USHORT: return GL_UNSIGNED_SHORT;
+        case Format::R16G16B16A16_SHORT: return GL_SHORT;
+        case Format::R32G32B32A32_UINT: return GL_UNSIGNED_INT;
+        case Format::R32G32B32A32_SINT: return GL_INT;
+        case Format::R32G32B32A32_FLOAT: return GL_FLOAT;
+        default: return 0;
+        }
+    }
+
+
     void OpenGLRenderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
     {
-        glBlendFunc(GetOpenGLBlendMode(Source), GetOpenGLBlendMode(Destination));
-        glBlendEquation(GetOpenGLBlendOperation(Operation));
+        glBlendFunc(ConvertBlendMode(Source), ConvertBlendMode(Destination));
+        glBlendEquation(ConvertBlendOperation(Operation));
     }
 
     void OpenGLRenderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
     {
-        glBlendFuncSeparate(GetOpenGLBlendMode(ColorSource), GetOpenGLBlendMode(ColorDest), GetOpenGLBlendMode(AlphaSource), GetOpenGLBlendMode(AlphaDest));
-        glBlendEquationSeparate(GetOpenGLBlendOperation(ColorOperation), GetOpenGLBlendOperation(AlphaOperation));
+        glBlendFuncSeparate(ConvertBlendMode(ColorSource), ConvertBlendMode(ColorDest), ConvertBlendMode(AlphaSource), ConvertBlendMode(AlphaDest));
+        glBlendEquationSeparate(ConvertBlendOperation(ColorOperation), ConvertBlendOperation(AlphaOperation));
     }
     
     void OpenGLRenderer::SetBlending(bool Enabled)
@@ -317,7 +413,7 @@ namespace Nova
         
     }
 
-    GLenum OpenGLRenderer::GetOpenGLDrawMode(DrawMode Mode)
+    GLenum OpenGLRenderer::ConvertDrawMode(DrawMode Mode)
     {
         switch (Mode)
         {
@@ -330,7 +426,7 @@ namespace Nova
         return 0;
     }
 
-    GLenum OpenGLRenderer::GetOpenGLBlendMode(BlendMode Mode)
+    GLenum OpenGLRenderer::ConvertBlendMode(BlendMode Mode)
     {
         switch (Mode)
         {

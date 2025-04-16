@@ -3,6 +3,9 @@
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/LogVerbosity.h"
+#include "Rendering/Filter.h"
+#include "Rendering/SamplerAddressMode.h"
+#include "Runtime/Format.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(OpenGL, "OPENGL");
 
@@ -37,9 +40,14 @@ namespace Nova
         void SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation) override; 
         void SetBlending(bool Enabled) override;
         void Blit() override;
-        GLenum GetOpenGLDrawMode(DrawMode Mode);
-        GLenum GetOpenGLBlendMode(BlendMode Mode);
-        GLenum GetOpenGLBlendOperation(BlendOperation Operation);
+
+        static GLenum ConvertDrawMode(DrawMode Mode);
+        static GLenum ConvertBlendMode(BlendMode Mode);
+        static GLenum ConvertBlendOperation(BlendOperation Operation);
+        static GLenum ConvertFilter(Filter Filter);
+        static GLenum ConvertSamplerAddressMode(SamplerAddressMode AddressMode);
+        static GLenum ConvertFormat(Format Format);
+        static GLenum GetFormatType(Format Format);
     protected:
         static String GetDebugSourceName(u32 Source);
         static Verbosity GetDebugVerbosity(u32 Severity);

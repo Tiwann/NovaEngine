@@ -1,11 +1,11 @@
-﻿#include "HelloTriangle.h"
-#include "Runtime/EntryPoint.h"
-#include "CommandLine/ArgumentParser.h"
-#include "Rendering/IndexBuffer.h"
-#include "Rendering/Shader.h"
-#include "Rendering/Vertex.h"
-#include "Rendering/VertexBuffer.h"
-#include "ResourceManager/ShaderManager.h"
+﻿#include "Runtime/HelloTriangle.h"
+#include "../../../Engine/Source/Runtime/EntryPoint.h"
+#include "../../../Engine/Source/CommandLine/ArgumentParser.h"
+#include "../../../Engine/Source/Rendering/IndexBuffer.h"
+#include "../../../Engine/Source/Rendering/Shader.h"
+#include "../../../Engine/Source/Rendering/Vertex.h"
+#include "../../../Engine/Source/Rendering/VertexBuffer.h"
+#include "../../../Engine/Source/ResourceManager/ShaderManager.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 

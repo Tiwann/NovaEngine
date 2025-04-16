@@ -8,7 +8,7 @@ namespace Nova
     class VulkanShader : public Shader
     {
     public:
-        VulkanShader(const String& Name, const Path& Filepath);
+        VulkanShader(Renderer* Renderer, const String& Name, const Path& Filepath);
         ~VulkanShader();
         bool Compile() override;
         bool Link() override;
@@ -37,6 +37,7 @@ namespace Nova
         Matrix4 GetUniformMat4(const String& Name) override;
         i32 GetUniformInt(const String& Name) override;
 
+        VkDescriptorSet GetDescriptorSet() const;
     private:
         slang::ISession* m_Compiler = nullptr;
         slang::IModule* m_Module = nullptr;
@@ -49,5 +50,7 @@ namespace Nova
         slang::IBlob* m_FragmentCompiledCode = nullptr;
         VkShaderEXT m_VertexHandle = nullptr;
         VkShaderEXT m_FragmentHandle = nullptr;
+        VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
+        VkDescriptorSet m_DescriptorSet = nullptr;
     };
 }

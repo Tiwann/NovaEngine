@@ -2,7 +2,7 @@
 
 namespace Nova
 {
-    D3D12Shader::D3D12Shader(const String& Name, const Path& Filepath) : Shader(Name, Filepath)
+    D3D12Shader::D3D12Shader(Renderer* Renderer, const String& Name, const Path& Filepath) : Shader(Renderer, Name, Filepath)
     {
     }
 

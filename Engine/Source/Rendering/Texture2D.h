@@ -5,6 +5,8 @@
 #include "Runtime/SharedPointer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/SpriteSheet.h"
+#include "Filter.h"
+#include "SamplerAddressMode.h"
 
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Texture2D, "TEXTURE2D");
@@ -17,23 +19,10 @@ namespace Nova
     class SpriteAnimation;
     struct SpriteSheet;
 
-    enum class TextureFilter
-    {
-        Nearest,
-        Linear,
-    };
-
-    enum class TextureWrap
-    {
-        Clamp,
-        Repeat,
-        Mirror,
-    };
-
     struct TextureParams
     {
-        TextureFilter Filter;
-        TextureWrap Wrap;
+        Filter Filter;
+        SamplerAddressMode AddressMode;
         Format Format;
     };
     
@@ -43,14 +32,14 @@ namespace Nova
         ~Texture2D() override = default;
         
         static Texture2D* Create(const String& Name = "NewTexture", const GraphicsApi& GraphicsApi = {});
-        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi ={});
+        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi = {});
         static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot = 0);
 
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
         virtual void SetData(u8* Data, u32 Width, u32 Height, const Format& Format) = 0;
         void SetData(const SharedPtr<Image>& Image);
-        virtual SharedPtr<Image> GetImage() const = 0;
+
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
         virtual uintptr_t GetHandle() const = 0;
@@ -74,7 +63,6 @@ namespace Nova
 
         u32 m_Width{0}, m_Height{0};
         u32 m_Slot{0};
-        Format m_Format{Format::NONE};
         TextureParams m_Params;
     };
 }

@@ -2,6 +2,8 @@
 #include "CullMode.h"
 #include "Math/Matrix4.h"
 #include "GraphicsApi.h"
+#include "Containers/String.h"
+#include "Runtime/Filesystem.h"
 
 namespace Nova
 {
@@ -100,11 +102,13 @@ namespace Nova
         virtual void SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation) = 0;
         virtual void SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation) = 0;
         virtual void SetBlending(bool Enabled) = 0;
-        
+        Shader* CreateShader(const String& Name, const Path& Filepath);
         void SetCurrentCamera(Camera* Camera);
         Camera* GetCurrentCamera();
         const Camera* GetCurrentCamera() const;
         GraphicsApi GetGraphicsApi() const;
+        Application* GetOwner();
+        const Application* GetOwner() const;
        
         static inline VertexBuffer* QuadVertexBuffer = nullptr;
         static inline VertexBuffer* CubeVertexBuffer = nullptr;

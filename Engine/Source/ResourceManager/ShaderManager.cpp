@@ -8,8 +8,8 @@ namespace Nova
 {
     Shader* ShaderManager::Load(const String& Name, const Path& Filepath)
     {
-        const Renderer* Renderer = g_Application->GetRenderer();
-        Shader* LoadedShader = Shader::Create(*Name, Filepath, Renderer->GetGraphicsApi());
+        Renderer* Renderer = g_Application->GetRenderer();
+        Shader* LoadedShader = Renderer->CreateShader(*Name, Filepath);
         if(!LoadedShader) return nullptr;
         
         if(!LoadedShader->Compile())

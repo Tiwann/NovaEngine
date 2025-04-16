@@ -6,7 +6,6 @@
 #include "Rendering/Vertex.h"
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
-#include "Runtime/TweenManager.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 
@@ -36,8 +35,6 @@ namespace Nova
         return Configuration;
     }
 
-
-
     void HelloTriangle::OnInit()
     {
         Application::OnInit();
@@ -46,9 +43,9 @@ namespace Nova
 
         const Array<Vertex> Vertices
         {
-            Vertex(Vector3(-0.5f, +0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Red),
-            Vertex(Vector3(+0.0f, -0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Green),
-            Vertex(Vector3(+0.5f, +0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Blue),
+            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Red),
+            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Green),
+            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Blue),
         };
 
         const Array<u32> Indices { 0, 1, 2 };

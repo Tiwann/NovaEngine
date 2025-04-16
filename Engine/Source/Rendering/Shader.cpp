@@ -42,26 +42,14 @@ namespace Nova
     {
         return m_Filepath.stem().string().c_str();
     }
-    
-    Shader* Shader::Create(const String& Name, const Path& Filepath, const GraphicsApi& GraphicsApi)
-    {
-        switch (GraphicsApi)
-        {
-        case GraphicsApi::None: return nullptr;
-        case GraphicsApi::OpenGL: return new OpenGLShader(Name, Filepath);
-        case GraphicsApi::Vulkan: return new VulkanShader(Name, Filepath);
-        case GraphicsApi::D3D12: return new D3D12Shader(Name, Filepath);
-        default: return nullptr;
-        }
-    }
 
     const ShaderSource& Shader::GetSource() const
     {
         return m_Source;
     }
 
-    Shader::Shader(const String& Name, Path Filepath)
-        : Asset(Name), m_Filepath(std::move(Filepath))
+    Shader::Shader(Renderer* Renderer, const String& Name, Path Filepath)
+        : Asset(Name), m_Renderer(Renderer), m_Filepath(std::move(Filepath))
     {
         const Path AbsolutePath = weakly_canonical(m_Filepath);
         const String& ShaderName = GetName();

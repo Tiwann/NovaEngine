@@ -16,22 +16,6 @@ typedef struct VertexOutput
     float4 Color;
 } FragmentInput;
 
-/*
-struct CameraData
-{
-    float4x4 View;
-    float4x4 Projection;
-};
-
-struct ModelData
-{
-    float4x4 Transform;
-}
-
-ConstantBuffer<CameraData> Camera;
-ConstantBuffer<ModelData> Model;
- */
-
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)
@@ -45,8 +29,12 @@ VertexOutput VertexMain(VertexInput Input)
     return Out;
 }
 
+Texture2D Texture;
+SamplerState Sampler;
+
 [shader("fragment")]
 float4 FragmentMain(FragmentInput Input)
 {
+    float4 Color = Texture.Sample(Sampler, Input.TexCoord);
     return Input.Color;
 }

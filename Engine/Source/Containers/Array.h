@@ -52,7 +52,7 @@ namespace Nova
         {
             m_Allocated = Math::NearestPowerOfTwo<SizeType>(Count);
             m_Data = Memory::Calloc<T>(m_Allocated);
-            m_Count = 0;
+            m_Count = 2;
         }
 
         Array(const std::initializer_list<T>& List) : m_Count(List.size()), m_Allocated(List.size())

@@ -6,7 +6,7 @@ namespace Nova
     class OpenGLShader : public Shader
     {
     public:
-        explicit OpenGLShader(const String& Name, Path Filepath);
+        explicit OpenGLShader(Renderer* Renderer, const String& Name, Path Filepath);
         
         ~OpenGLShader() override;
         bool Compile() override;

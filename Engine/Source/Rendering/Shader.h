@@ -72,11 +72,11 @@ namespace Nova
         virtual i32 GetUniformInt(const String& Name){ return 0;}
         virtual i32 GetUniformLocation(const String& Name) = 0;
         String GetFilename() const;
-        
-        static Shader* Create(const String& Name, const Path& Filepath, const GraphicsApi& GraphicsApi);
+
         const ShaderSource& GetSource() const;
     protected:
-        explicit Shader(const String& Name, Path Filepath);
+        explicit Shader(Renderer* Renderer, const String& Name, Path Filepath);
+        Renderer* m_Renderer = nullptr;
         Path m_Filepath;
         ShaderSource m_Source;
 

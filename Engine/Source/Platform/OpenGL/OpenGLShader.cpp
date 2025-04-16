@@ -12,8 +12,8 @@
 
 namespace Nova
 {
-    OpenGLShader::OpenGLShader(const String& Name, Path Filepath)
-        : Shader(Name, std::move(Filepath)), m_Program(UINT32_MAX), m_VertexHandle(UINT32_MAX), m_FragmentHandle(UINT32_MAX)
+    OpenGLShader::OpenGLShader(Renderer* Renderer, const String& Name, Path Filepath)
+        : Shader(Renderer, Name, std::move(Filepath)), m_Program(UINT32_MAX), m_VertexHandle(UINT32_MAX), m_FragmentHandle(UINT32_MAX)
     {
         
     }

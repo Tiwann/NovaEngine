@@ -1033,21 +1033,21 @@ namespace Nova
     void VulkanRenderer::SetCullMode(CullMode Mode)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        vkCmdSetCullMode(Cmd, GetCullMode(Mode));
+        vkCmdSetCullMode(Cmd, ConvertCullMode(Mode));
     }
 
     void VulkanRenderer::SetDepthFunction(DepthFunction DepthFunction)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        vkCmdSetDepthCompareOp(Cmd, GetDepthFunction(DepthFunction));
+        vkCmdSetDepthCompareOp(Cmd, ConvertDepthFunction(DepthFunction));
     }
 
     void VulkanRenderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkColorBlendEquationEXT ColorBlendEquation {
-            GetBlendMode(ColorSource), GetBlendMode(ColorDest), GetBlendOperation(ColorOperation),
-            GetBlendMode(AlphaSource), GetBlendMode(AlphaDest), GetBlendOperation(AlphaOperation)
+            ConvertBlendMode(ColorSource), ConvertBlendMode(ColorDest), ConvertBlendOperation(ColorOperation),
+            ConvertBlendMode(AlphaSource), ConvertBlendMode(AlphaDest), ConvertBlendOperation(AlphaOperation)
         };
         m_FunctionPointers.vkCmdSetColorBlendEquationEXT(Cmd, 0, 1, &ColorBlendEquation);
     }
@@ -1157,12 +1157,66 @@ namespace Nova
         return m_FunctionPointers;
     }
 
-    void VulkanRenderer::BindPipeline()
+    VkFormat VulkanRenderer::ConvertFormat(const Format Format)
     {
-        vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+         switch (Format)
+        {
+        case Format::NONE:                  return VK_FORMAT_UNDEFINED;
+        case Format::R8_UNORM:              return VK_FORMAT_R8_UNORM;
+        case Format::R8_SNORM:              return VK_FORMAT_R8_SNORM;
+        case Format::R16_USHORT:            return VK_FORMAT_R16_UINT;
+        case Format::R16_SHORT:             return VK_FORMAT_R16_SINT;
+        case Format::R32_FLOAT:             return VK_FORMAT_R32_SFLOAT;
+        case Format::R32_UINT:              return VK_FORMAT_R32_UINT;
+        case Format::R32_SINT:              return VK_FORMAT_R32_SINT;
+        case Format::R8G8_UNORM:            return VK_FORMAT_R8G8_UNORM;
+        case Format::R8G8_SNORM:            return VK_FORMAT_R8G8_SNORM;
+        case Format::R16G16_USHORT:         return VK_FORMAT_R16G16_UINT;
+        case Format::R16G16_SHORT:          return VK_FORMAT_R16G16_SINT;
+        case Format::R32G32_UINT:           return VK_FORMAT_R32G32_UINT;
+        case Format::R32G32_SINT:           return VK_FORMAT_R32G32_SINT;
+        case Format::R32G32_FLOAT:          return VK_FORMAT_R32G32_SFLOAT;
+        case Format::R8G8B8_UNORM:          return VK_FORMAT_R8G8B8_UNORM;
+        case Format::R8G8B8_SNORM:          return VK_FORMAT_R8G8B8_SNORM;
+        case Format::R16G16B16_USHORT:      return VK_FORMAT_R16G16B16_UINT;
+        case Format::R16G16B16_SHORT:       return VK_FORMAT_R16G16B16_SINT;
+        case Format::R32G32B32_UINT:        return VK_FORMAT_R32G32B32_UINT;
+        case Format::R32G32B32_SINT:        return VK_FORMAT_R32G32B32_SINT;
+        case Format::R32G32B32_FLOAT:       return VK_FORMAT_R32G32B32_SFLOAT;
+        case Format::R8G8B8A8_UNORM:        return VK_FORMAT_R8G8B8A8_UNORM;
+        case Format::R8G8B8A8_SNORM:        return VK_FORMAT_R8G8B8A8_SNORM;
+        case Format::R16G16B16A16_USHORT:   return VK_FORMAT_R16G16B16A16_UINT;
+        case Format::R16G16B16A16_SHORT:    return VK_FORMAT_R16G16B16A16_SINT;
+        case Format::R32G32B32A32_UINT:     return VK_FORMAT_R32G32B32A32_UINT;
+        case Format::R32G32B32A32_SINT:     return VK_FORMAT_R32G32B32A32_SINT;
+        case Format::R32G32B32A32_FLOAT:    return VK_FORMAT_R32G32B32A32_SFLOAT;
+        default: return VK_FORMAT_UNDEFINED;
+        }
     }
 
-    VkCullModeFlags VulkanRenderer::GetCullMode(CullMode Mode)
+    VkFilter VulkanRenderer::ConvertFilter(Filter Filter)
+    {
+        switch (Filter) {
+        case Filter::Nearest: return VK_FILTER_NEAREST;
+        case Filter::Linear: return VK_FILTER_LINEAR;
+        }
+        throw;
+    }
+
+    VkSamplerAddressMode VulkanRenderer::ConvertSamplerAddressMode(const SamplerAddressMode Wrap)
+    {
+        switch (Wrap)
+        {
+        case SamplerAddressMode::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        case SamplerAddressMode::MirroredRepeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+        case SamplerAddressMode::ClampToEdge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        case SamplerAddressMode::ClampToBorder: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        case SamplerAddressMode::MirrorClampToEdge: return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+        }
+        throw;
+    }
+
+    VkCullModeFlags VulkanRenderer::ConvertCullMode(CullMode Mode)
     {
         switch (Mode)
         {
@@ -1174,7 +1228,7 @@ namespace Nova
         return VK_CULL_MODE_NONE;
     }
 
-    VkBlendFactor VulkanRenderer::GetBlendMode(BlendMode Mode)
+    VkBlendFactor VulkanRenderer::ConvertBlendMode(BlendMode Mode)
     {
         switch (Mode) {
         case BlendMode::Zero: return VK_BLEND_FACTOR_ZERO;
@@ -1200,7 +1254,7 @@ namespace Nova
         throw;
     }
 
-    VkCompareOp VulkanRenderer::GetDepthFunction(DepthFunction Func)
+    VkCompareOp VulkanRenderer::ConvertDepthFunction(DepthFunction Func)
     {
         switch (Func)
         {
@@ -1216,7 +1270,7 @@ namespace Nova
         throw;
     }
 
-    VkBlendOp VulkanRenderer::GetBlendOperation(BlendOperation Operation)
+    VkBlendOp VulkanRenderer::ConvertBlendOperation(BlendOperation Operation)
     {
         switch (Operation)
         {

@@ -2,6 +2,10 @@
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
+#include "Rendering/SamplerAddressMode.h"
+#include "Rendering/Filter.h"
+#include "Runtime/Format.h"
+
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
@@ -40,11 +44,10 @@ namespace Nova
         PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
     };
 
-    class VulkanRenderer : public Renderer
+    class VulkanRenderer final : public Renderer
     {
     public:
-        
-        VulkanRenderer(Application* Owner);
+        explicit VulkanRenderer(Application* Owner);
         ~VulkanRenderer() override = default;
         
         bool Initialize() override;
@@ -89,12 +92,14 @@ namespace Nova
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
 
-        void BindPipeline();
-    private:
-        static VkCullModeFlags GetCullMode(CullMode Mode);
-        static VkBlendFactor GetBlendMode(BlendMode Mode);
-        static VkCompareOp GetDepthFunction(DepthFunction Func);
-        static VkBlendOp GetBlendOperation(BlendOperation Operation);
+        static VkFormat ConvertFormat(Format Format);
+        static VkFilter ConvertFilter(Filter Filter);
+        static VkSamplerAddressMode ConvertSamplerAddressMode(SamplerAddressMode Wrap);
+        static VkCullModeFlags ConvertCullMode(CullMode Mode);
+        static VkBlendFactor ConvertBlendMode(BlendMode Mode);
+        static VkCompareOp ConvertDepthFunction(DepthFunction Func);
+        static VkBlendOp ConvertBlendOperation(BlendOperation Operation);
+        static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:
         u32                               m_CurrentFrameIndex = 0;
         u32                               m_NewFrameIndex = 0;
@@ -119,7 +124,5 @@ namespace Nova
         VkCommandPool                     m_CommandPool = nullptr;
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;
-        VkPipeline                        m_Pipeline = nullptr;
-        VkPipelineLayout                  m_PipelineLayout = nullptr;
     };
 }

@@ -58,8 +58,8 @@ namespace Nova
         Bind();
 
         TextureParams TexParams;
-        TexParams.Filter = TextureFilter::Nearest;
-        TexParams.Wrap = TextureWrap::Clamp;
+        TexParams.Filter = Filter::Linear;
+        TexParams.AddressMode = SamplerAddressMode::Repeat;
 
         Renderer* Renderer = g_Application->GetRenderer();
         Texture2D* Texture = Texture2D::Create("OpenGLFramebufferAttachment", 0, 0, TexParams, 0, Renderer->GetGraphicsApi());

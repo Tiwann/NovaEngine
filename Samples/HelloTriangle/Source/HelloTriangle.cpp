@@ -56,14 +56,14 @@ namespace Nova
         m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
 
         PipelineSpecification PipelineSpecification;
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"Position", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"TextureCoordinate", Format::R32G32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"Normal", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"Color", Format::R32G32B32A32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"POSITION", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"TEXCOORDINATE", Format::R32G32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"NORMAL", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"COLOR", Format::R32G32B32A32_FLOAT});
         PipelineSpecification.BlendEnable = false;
         PipelineSpecification.CullMode = CullMode::None;
         PipelineSpecification.FrontFace = FrontFace::Clockwise;
-        PipelineSpecification.Viewport = { 0.0f, 0.0f, 600, 400 };
+        PipelineSpecification.Viewport = { 0.0f, 400, 600, -400 };
         PipelineSpecification.Scissor.Extent = { 600, 400 };
         PipelineSpecification.Scissor.Offset = { 0, 0 };
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
@@ -74,9 +74,10 @@ namespace Nova
         PipelineSpecification.DepthTestEnable = false;
         PipelineSpecification.DepthWriteEnable = false;
         PipelineSpecification.PrimitiveRestartEnable = false;
-        PipelineSpecification.RasterizerDiscardEnable = true;
+        PipelineSpecification.RasterizerDiscardEnable = false;
         PipelineSpecification.StencilTestEnable = false;
         PipelineSpecification.DynamicRendering = false;
+        PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
     }
 
@@ -84,6 +85,7 @@ namespace Nova
     {
         delete m_VertexBuffer;
         delete m_IndexBuffer;
+        delete m_Pipeline;
         Application::OnExit();
     }
 

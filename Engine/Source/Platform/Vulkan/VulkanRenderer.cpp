@@ -940,7 +940,7 @@ namespace Nova
     void VulkanRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        Array<VkVertexInputAttributeDescription2EXT> VertexInputAttributeDescriptions
+        /*Array<VkVertexInputAttributeDescription2EXT> VertexInputAttributeDescriptions
             {
                 VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) },
                 VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TextureCoordinate) },
@@ -1007,10 +1007,11 @@ namespace Nova
         vkCmdSetColorWriteMaskEXT(GetCurrentCommandBuffer(), 0, 1, &ColorFlags);
 
         SetBlending(false);
+        */
 
         IndexBuffer->Bind();
         VertexBuffer->Bind();
-        Shader->Bind();
+        //Shader->Bind();
 
         vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
     }

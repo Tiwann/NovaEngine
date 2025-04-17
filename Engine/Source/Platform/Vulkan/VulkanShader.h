@@ -25,6 +25,7 @@ namespace Nova
         slang::IEntryPoint* EntryPoint = nullptr;
         slang::IBlob* CompiledCode = nullptr;
         VkShaderEXT Handle = nullptr;
+        VkShaderModule Module = nullptr;
     };
 
     class VulkanShader : public Shader
@@ -61,6 +62,7 @@ namespace Nova
         Matrix4 GetUniformMat4(const String& Name) override;
         i32 GetUniformInt(const String& Name) override;
 
+        const Array<ShaderModule>& GetShaderModules() const;
     private:
         bool FindShaderStage(const StringView& Name, ShaderStage Stage);
     private:

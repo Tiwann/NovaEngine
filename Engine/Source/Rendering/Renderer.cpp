@@ -1,6 +1,7 @@
 ﻿#include "Renderer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Platform/D3D12/D3D12IndexBuffer.h"
+#include "Platform/D3D12/D3D12Pipeline.h"
 #include "Platform/D3D12/D3D12Shader.h"
 #include "Platform/D3D12/D3D12VertexBuffer.h"
 #include "Platform/OpenGL/OpenGLIndexBuffer.h"
@@ -52,7 +53,7 @@ namespace Nova
         case GraphicsApi::None:     return nullptr;
         case GraphicsApi::OpenGL:   return nullptr;
         case GraphicsApi::Vulkan:   return new VulkanPipeline(this, Specification);
-        case GraphicsApi::D3D12:    return nullptr;
+        case GraphicsApi::D3D12:    return new D3D12Pipeline(this, Specification);
         default:                    return nullptr;
         }
     }

@@ -8,7 +8,7 @@ namespace Nova
     {
     public:
         D3D12Pipeline(Renderer* Renderer, const PipelineSpecification& Specification);
-
+        ~D3D12Pipeline() override;
         ID3D12PipelineState* GetHandle() const;
     private:
         ID3D12PipelineState* m_Handle;

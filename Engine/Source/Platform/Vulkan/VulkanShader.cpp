@@ -26,7 +26,16 @@ namespace Nova
     VulkanShader::~VulkanShader()
     {
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VkDevice Device = Renderer->GetDevice();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
+        for (ShaderModule& Module : m_ShaderModules)
+        {
+            Module.Stage = ShaderStage::None;
+            Module.CompiledCode->release();
+            Module.EntryPoint->release();
+            vkDestroyShaderModule(Device, Module.Module, nullptr);
+            Functions.vkDestroyShaderEXT(Device, Module.Handle, nullptr);
+        }
     }
 
     bool VulkanShader::Compile()
@@ -108,13 +117,25 @@ namespace Nova
                 NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
                 return false;
             }
+
+
+
+            VkShaderModuleCreateInfo ModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+            ModuleCreateInfo.codeSize = Module.CompiledCode->getBufferSize();
+            ModuleCreateInfo.pCode = (const u32*)Module.CompiledCode->getBufferPointer();
+
+            if (VK_FAILED(vkCreateShaderModule(Device, &ModuleCreateInfo, nullptr, &Module.Module)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create Vulkan shader module!");
+                return false;
+            }
         }
         return true;
     }
 
     bool VulkanShader::Bind()
     {
-        const VulkanRenderer* Renderer =dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
         const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
 
@@ -128,6 +149,11 @@ namespace Nova
 
         Functions.vkCmdBindShadersEXT(Cmd, ShaderStages.Count(), ShaderStages.Data(), Handles.Data());
         return true;
+    }
+
+    const Array<ShaderModule>& VulkanShader::GetShaderModules() const
+    {
+        return m_ShaderModules;
     }
 
     void VulkanShader::Delete()

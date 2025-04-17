@@ -5,9 +5,13 @@
 #include "Rendering/SamplerAddressMode.h"
 #include "Rendering/Filter.h"
 #include "Runtime/Format.h"
-
+#include "Rendering/FrontFace.h"
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
+
+#include "Rendering/PolygonMode.h"
+#include "Rendering/PrimitiveTopology.h"
+#include "Rendering/ShaderStage.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 
@@ -59,17 +63,15 @@ namespace Nova
         void Clear(const Color& Color, float Depth) override;
         void Present() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
-        void Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
-        void DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color) override;
-        void DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color) override;
-        void DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color) override;
+        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
+        void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
-        void SetDepthFunction(DepthFunction DepthFunction) override;
-        void SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation) override;
-        void SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation) override;
-        void Blit() override;
+        void SetDepthCompareOperation(CompareOperation DepthFunction) override;
+        void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
+        void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
+
+        void BindPipeline(const Pipeline* Pipeline) override;
         
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
@@ -92,13 +94,19 @@ namespace Nova
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
 
+
+
         static VkFormat ConvertFormat(Format Format);
         static VkFilter ConvertFilter(Filter Filter);
         static VkSamplerAddressMode ConvertSamplerAddressMode(SamplerAddressMode Wrap);
         static VkCullModeFlags ConvertCullMode(CullMode Mode);
-        static VkBlendFactor ConvertBlendMode(BlendMode Mode);
-        static VkCompareOp ConvertDepthFunction(DepthFunction Func);
+        static VkBlendFactor ConvertBlendFactor(BlendFactor Mode);
+        static VkCompareOp ConvertCompareOperation(CompareOperation Func);
         static VkBlendOp ConvertBlendOperation(BlendOperation Operation);
+        static VkPrimitiveTopology ConvertTopology(PrimitiveTopology Topology);
+        static VkFrontFace ConvertFrontFace(FrontFace FrontFace);
+        static VkPolygonMode ConvertPolygonMode(PolygonMode PolygonMode);
+        static VkShaderStageFlagBits ConvertShaderStage(ShaderStage Stage);
         static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:
         u32                               m_CurrentFrameIndex = 0;

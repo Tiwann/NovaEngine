@@ -13,14 +13,13 @@ namespace Nova
    class VulkanVertexBuffer : public VertexBuffer
    {
    public:
-      VulkanVertexBuffer();
+      explicit VulkanVertexBuffer(Renderer* Renderer);
+      explicit VulkanVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
       ~VulkanVertexBuffer() override;
-      VulkanVertexBuffer(const Vertex* Data, size_t Count);
 
       void SendData(const Vertex* Data, size_t Count) override;
       void Bind() const override;
    private:
-      VulkanRenderer* m_Renderer = nullptr;
       VkBuffer m_Handle = nullptr;
       VmaAllocation m_Allocation = nullptr;
       VmaAllocationInfo m_AllocationInfo = VmaAllocationInfo{ };

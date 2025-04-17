@@ -13,6 +13,7 @@ namespace Nova
         bool Validate() override;
         bool Bind() override;
         void Delete() override;
-        i32 GetUniformLocation(const String& Name) override;
+    private:
+
     };
 }

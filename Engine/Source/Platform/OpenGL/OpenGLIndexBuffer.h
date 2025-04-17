@@ -6,9 +6,9 @@ namespace Nova
     class OpenGLIndexBuffer : public IndexBuffer
     {
     public:
-        OpenGLIndexBuffer();
+        explicit OpenGLIndexBuffer(Renderer* Renderer);
+        explicit OpenGLIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
         ~OpenGLIndexBuffer() override;
-        OpenGLIndexBuffer(const u32* Indices, size_t Count);
 
         void SendData(const u32* Indices, size_t Count) override;
         void Bind() const override;

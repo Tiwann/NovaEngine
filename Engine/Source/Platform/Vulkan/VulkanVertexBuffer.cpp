@@ -5,24 +5,18 @@
 
 namespace Nova
 {
-    VulkanVertexBuffer::VulkanVertexBuffer() : m_Renderer(g_Application->GetRenderer<VulkanRenderer>())
+    VulkanVertexBuffer::VulkanVertexBuffer(Renderer* Renderer) : VertexBuffer(Renderer)
     {
     }
 
-    VulkanVertexBuffer::~VulkanVertexBuffer()
-    {
-        const VkDevice Device = m_Renderer->GetDevice();
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
-        vkDeviceWaitIdle(Device);
-        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
-    }
 
-    VulkanVertexBuffer::VulkanVertexBuffer(const Vertex* Data, size_t Count) : VertexBuffer(Data, Count),
-    m_Renderer(g_Application->GetRenderer<VulkanRenderer>())
+
+    VulkanVertexBuffer::VulkanVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : VertexBuffer(Renderer, Data, Count)
     {
         VertexBuffer::SendData(Data, Count);
-        
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
+
+        const VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(Renderer);
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
 
         VkBufferCreateInfo BufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
         BufferCreateInfo.size = Count * sizeof(Vertex);
@@ -56,15 +50,25 @@ namespace Nova
         }
     }
 
+    VulkanVertexBuffer::~VulkanVertexBuffer()
+    {
+        const VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(m_Renderer);
+        const VkDevice Device = CastedRenderer->GetDevice();
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
+        vkDeviceWaitIdle(Device);
+        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
+    }
+
     void VulkanVertexBuffer::SendData(const Vertex* Data, size_t Count)
     {
         VertexBuffer::SendData(Data, Count);
 
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
+        const VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(m_Renderer);
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
 
         if (m_Handle || m_Allocation)
         {
-            const VkDevice Device = m_Renderer->GetDevice();
+            const VkDevice Device = CastedRenderer->GetDevice();
             vkDeviceWaitIdle(Device);
             vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
         }
@@ -103,7 +107,8 @@ namespace Nova
 
     void VulkanVertexBuffer::Bind() const
     {
-        const VkCommandBuffer Cmd = m_Renderer->GetCurrentCommandBuffer();
+        const VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(m_Renderer);
+        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer();
         constexpr VkDeviceSize Offsets[] = { 0 };
         vkCmdBindVertexBuffers(Cmd, 0, 1, &m_Handle, Offsets);
     }

@@ -288,9 +288,14 @@ namespace Nova
 
         SizeType Find(ConstReferenceType Element) const
         {
+
             for(SizeType i = 0; i < m_Count; ++i)
+            {
                 if(m_Data[i] == Element)
+                {
                     return i;
+                }
+            }
             return -1;
         }
 

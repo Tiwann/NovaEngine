@@ -8,8 +8,8 @@ namespace Nova
     class D3D12VertexBuffer : public VertexBuffer
     {
     public:
-        D3D12VertexBuffer() = default;
-        D3D12VertexBuffer(const Vertex* Data, size_t Count);
+        explicit D3D12VertexBuffer(Renderer* Renderer);
+        explicit D3D12VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
         ~D3D12VertexBuffer() override;
 
         void SendData(const Vertex* Data, size_t Count) override;

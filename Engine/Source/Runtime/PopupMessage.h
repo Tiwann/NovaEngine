@@ -1,5 +1,6 @@
 #pragma once
 #include "Containers/MulticastDelegate.h"
+#include "Containers/ScopedPointer.h"
 #include "Containers/String.h"
 
 namespace Nova
@@ -47,11 +48,6 @@ namespace Nova
         PopupMessage(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
         virtual ~PopupMessage();
 
-        PopupMessage(const PopupMessage&) = delete;
-        PopupMessage& operator=(const PopupMessage&) = delete;
-        PopupMessage(PopupMessage&&) = delete;
-        PopupMessage& operator=(PopupMessage&&) = delete;
-        
         String Title;
         String Message;
         PopupMessageResponse Response;
@@ -61,6 +57,6 @@ namespace Nova
         
         virtual PopupMessageResult Show() = 0;
 
-        static PopupMessage* Create(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
+        static ScopedPointer<PopupMessage> Create(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
     };
 }

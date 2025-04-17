@@ -89,7 +89,7 @@ namespace Nova
     void HelloTriangle::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
-        Renderer->DrawIndexed(DrawMode::Triangles, nullptr, s_VertexBuffer, s_IndexBuffer, s_HelloTriangleShader);
+        Renderer->DrawIndexed(nullptr, s_VertexBuffer, s_IndexBuffer, s_HelloTriangleShader);
     }
 
     void HelloTriangle::OnUpdate(f32 Delta)

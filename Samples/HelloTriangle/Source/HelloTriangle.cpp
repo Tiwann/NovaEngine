@@ -1,11 +1,12 @@
-﻿#include "Runtime/HelloTriangle.h"
-#include "../../../Engine/Source/Runtime/EntryPoint.h"
-#include "../../../Engine/Source/CommandLine/ArgumentParser.h"
-#include "../../../Engine/Source/Rendering/IndexBuffer.h"
-#include "../../../Engine/Source/Rendering/Shader.h"
-#include "../../../Engine/Source/Rendering/Vertex.h"
-#include "../../../Engine/Source/Rendering/VertexBuffer.h"
-#include "../../../Engine/Source/ResourceManager/ShaderManager.h"
+﻿#include "HelloTriangle.h"
+#include "Runtime/EntryPoint.h"
+#include "CommandLine/ArgumentParser.h"
+#include "Rendering/IndexBuffer.h"
+#include "Rendering/Pipeline.h"
+#include "Rendering/Shader.h"
+#include "Rendering/Vertex.h"
+#include "Rendering/VertexBuffer.h"
+#include "ResourceManager/ShaderManager.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 
@@ -21,16 +22,16 @@ namespace Nova
     ApplicationConfiguration HelloTriangle::CreateConfiguration() const
     {
         ApplicationConfiguration Configuration;
-        Configuration.AppName = "Nova Editor";
-        Configuration.WindowWidth = 1600;
-        Configuration.WindowHeight = 900;
-        Configuration.WindowResizable = true;
+        Configuration.AppName = "Hello Triangle | Nova Engine";
+        Configuration.WindowWidth = 600;
+        Configuration.WindowHeight = 400;
+        Configuration.WindowResizable = false;
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
-        Configuration.Graphics.BufferType = SwapchainBuffering::DoubleBuffering;
-        Configuration.Graphics.VSync = false;
+        Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
+        Configuration.Graphics.VSync = true;
         Configuration.WithEditor = false;
         return Configuration;
     }
@@ -50,8 +51,33 @@ namespace Nova
 
         const Array<u32> Indices { 0, 1, 2 };
 
-        m_VertexBuffer = VertexBuffer::Create(Vertices, GraphicsApi::Vulkan);
-        m_IndexBuffer = IndexBuffer::Create(Indices, GraphicsApi::Vulkan);
+        Renderer* Renderer = GetRenderer();
+        m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
+        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
+
+        PipelineSpecification PipelineSpecification;
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"Position", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"TextureCoordinate", Format::R32G32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"Normal", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexBufferLayout.AddAttribute({"Color", Format::R32G32B32A32_FLOAT});
+        PipelineSpecification.BlendEnable = false;
+        PipelineSpecification.CullMode = CullMode::None;
+        PipelineSpecification.FrontFace = FrontFace::Clockwise;
+        PipelineSpecification.Viewport = { 0.0f, 0.0f, 600, 400 };
+        PipelineSpecification.Scissor.Extent = { 600, 400 };
+        PipelineSpecification.Scissor.Offset = { 0, 0 };
+        PipelineSpecification.PolygonMode = PolygonMode::Fill;
+        PipelineSpecification.PrimitiveTopology = PrimitiveTopology::TriangleList;
+        PipelineSpecification.RasterizationSamples = 1;
+        PipelineSpecification.DepthBiasEnable = false;
+        PipelineSpecification.DepthClampEnable = false;
+        PipelineSpecification.DepthTestEnable = false;
+        PipelineSpecification.DepthWriteEnable = false;
+        PipelineSpecification.PrimitiveRestartEnable = false;
+        PipelineSpecification.RasterizerDiscardEnable = true;
+        PipelineSpecification.StencilTestEnable = false;
+        PipelineSpecification.DynamicRendering = false;
+        m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
     }
 
     void HelloTriangle::OnExit()
@@ -64,6 +90,7 @@ namespace Nova
     void HelloTriangle::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
-        Renderer->DrawIndexed(DrawMode::Triangles, nullptr, m_VertexBuffer, m_IndexBuffer, m_Shader);
+        Renderer->BindPipeline(m_Pipeline);
+        Renderer->DrawIndexed(nullptr, m_VertexBuffer, m_IndexBuffer, m_Shader);
     }
 }

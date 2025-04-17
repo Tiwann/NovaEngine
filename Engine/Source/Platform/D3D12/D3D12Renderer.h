@@ -39,17 +39,15 @@ namespace Nova
         bool BeginFrame() override;
         void EndFrame() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
-        void Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer,Shader* Shader) override;
-        void DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color) override;
-        void DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness,const Color& Color) override;
-        void DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color) override;
-        void Blit() override;
+        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
+        void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
+
         void SetCullMode(CullMode Mode) override;
-        void SetDepthFunction(DepthFunction DepthFunction) override;
-        void SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation,BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation) override;
-        void SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation) override;
+        void SetDepthCompareOperation(CompareOperation DepthFunction) override;
+        void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
+        void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void SetBlending(bool Enabled) override;
+        void BindPipeline(const Pipeline* Pipeline) override;
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
         ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;

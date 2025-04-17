@@ -10,6 +10,8 @@
 #include "Rendering/Shader.h"
 #include <GLFW/glfw3.h>
 
+#include "VulkanPipeline.h"
+
 namespace Nova
 {
     #if defined(NOVA_DEBUG)
@@ -157,7 +159,8 @@ namespace Nova
                 NOVA_VULKAN_ERROR("Failed to pick physical device!");
                 m_Application->RequireExit(ExitCode::Error);
 
-                ScopedPointer<PopupMessage> Message = PopupMessage::Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
+                ScopedPointer<PopupMessage> Message = PopupMessage::
+                Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
                 Message->Show();
                 return false;
             }
@@ -835,7 +838,7 @@ namespace Nova
         }
     }
 
-    void VulkanRenderer::ClearDepth(float Depth)
+    void VulkanRenderer::ClearDepth(const float Depth)
     {
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
@@ -874,7 +877,7 @@ namespace Nova
         vkCmdClearAttachments(CommandBuffer, 1, &ClearAttachment, 1u, &ClearRect);
     }
 
-    void VulkanRenderer::Clear(const Color& Color, float Depth)
+    void VulkanRenderer::Clear(const Color& Color, const float Depth)
     {
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
@@ -921,20 +924,20 @@ namespace Nova
     }
 
 
-    void VulkanRenderer::SetViewportRect(Vector2 Position, Vector2 Size)
+    void VulkanRenderer::SetViewportRect(const Vector2 Position, const Vector2 Size)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkViewport Viewport = { Position.x, Position.y, Size.x, Size.y, 0.0f, 1.0f };
         vkCmdSetViewport(Cmd, 0, 1, &Viewport);
     }
 
-    void VulkanRenderer::Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader)
+    void VulkanRenderer::Draw(VertexArray* VAO, const u32 NumVert, Shader* Shader)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         vkCmdDraw(Cmd, NumVert, 1, 0, 0);
     }
 
-    void VulkanRenderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void VulkanRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         Array<VkVertexInputAttributeDescription2EXT> VertexInputAttributeDescriptions
@@ -956,7 +959,8 @@ namespace Nova
         const PFN_vkCmdSetRasterizerDiscardEnable vkCmdSetRasterizerDiscardEnable = (PFN_vkCmdSetRasterizerDiscardEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetRasterizerDiscardEnable");
         vkCmdSetRasterizerDiscardEnable(GetCurrentCommandBuffer(), false);
 
-        SetCullMode(CullMode::None);
+        SetCullMode(CullMode::BackFace);
+        vkCmdSetFrontFace(GetCurrentCommandBuffer(), VK_FRONT_FACE_CLOCKWISE);
 
         const PFN_vkCmdSetDepthTestEnable vkCmdSetDepthTestEnable = (PFN_vkCmdSetDepthTestEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthTestEnable");
         vkCmdSetDepthTestEnable(GetCurrentCommandBuffer(), false);
@@ -1011,56 +1015,48 @@ namespace Nova
         vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
     }
 
-    void VulkanRenderer::DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color)
-    {
-    }
 
-    void VulkanRenderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color)
-    {
-    }
-
-    void VulkanRenderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
-    {
-    }
-
-    void VulkanRenderer::SetBlending(bool Enabled)
+    void VulkanRenderer::SetBlending(const bool Enabled)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkBool32 Enables[] = { Enabled };
         m_FunctionPointers.vkCmdSetColorBlendEnableEXT(Cmd, 0, 1, Enables);
     }
 
-    void VulkanRenderer::SetCullMode(CullMode Mode)
+    void VulkanRenderer::SetCullMode(const CullMode Mode)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         vkCmdSetCullMode(Cmd, ConvertCullMode(Mode));
     }
 
-    void VulkanRenderer::SetDepthFunction(DepthFunction DepthFunction)
+    void VulkanRenderer::SetDepthCompareOperation(const CompareOperation DepthFunction)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        vkCmdSetDepthCompareOp(Cmd, ConvertDepthFunction(DepthFunction));
+        vkCmdSetDepthCompareOp(Cmd, ConvertCompareOperation(DepthFunction));
     }
 
-    void VulkanRenderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
+    void VulkanRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor
+                                          AlphaDest, const BlendOperation AlphaOperation)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkColorBlendEquationEXT ColorBlendEquation {
-            ConvertBlendMode(ColorSource), ConvertBlendMode(ColorDest), ConvertBlendOperation(ColorOperation),
-            ConvertBlendMode(AlphaSource), ConvertBlendMode(AlphaDest), ConvertBlendOperation(AlphaOperation)
+            ConvertBlendFactor(ColorSource), ConvertBlendFactor(ColorDest), ConvertBlendOperation(ColorOperation),
+            ConvertBlendFactor(AlphaSource), ConvertBlendFactor(AlphaDest), ConvertBlendOperation(AlphaOperation)
         };
         m_FunctionPointers.vkCmdSetColorBlendEquationEXT(Cmd, 0, 1, &ColorBlendEquation);
     }
 
-    void VulkanRenderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
+    void VulkanRenderer::SetBlendFunction(const BlendFactor Source, const BlendFactor Destination, const BlendOperation Operation)
     {
         SetBlendFunction(Source, Destination, Operation, Source, Destination, Operation);
     }
 
-    void VulkanRenderer::Blit()
+    void VulkanRenderer::BindPipeline(const Pipeline* Pipeline)
     {
-
+        const VulkanPipeline* VkPipeline = static_cast<const VulkanPipeline*>(Pipeline);
+        vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, VkPipeline->GetHandle());
     }
+
 
     VkInstance VulkanRenderer::GetInstance() const
     {
@@ -1194,7 +1190,7 @@ namespace Nova
         }
     }
 
-    VkFilter VulkanRenderer::ConvertFilter(Filter Filter)
+    VkFilter VulkanRenderer::ConvertFilter(const Filter Filter)
     {
         switch (Filter) {
         case Filter::Nearest: return VK_FILTER_NEAREST;
@@ -1216,7 +1212,7 @@ namespace Nova
         throw;
     }
 
-    VkCullModeFlags VulkanRenderer::ConvertCullMode(CullMode Mode)
+    VkCullModeFlags VulkanRenderer::ConvertCullMode(const CullMode Mode)
     {
         switch (Mode)
         {
@@ -1228,49 +1224,49 @@ namespace Nova
         return VK_CULL_MODE_NONE;
     }
 
-    VkBlendFactor VulkanRenderer::ConvertBlendMode(BlendMode Mode)
+    VkBlendFactor VulkanRenderer::ConvertBlendFactor(const BlendFactor Mode)
     {
         switch (Mode) {
-        case BlendMode::Zero: return VK_BLEND_FACTOR_ZERO;
-        case BlendMode::One: return VK_BLEND_FACTOR_ONE;
-        case BlendMode::SourceColor: return VK_BLEND_FACTOR_SRC_COLOR;
-        case BlendMode::OneMinusSourceColor: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-        case BlendMode::DestColor: return VK_BLEND_FACTOR_DST_COLOR;
-        case BlendMode::OneMinusDestColor: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-        case BlendMode::SourceAlpha: return VK_BLEND_FACTOR_SRC_ALPHA;
-        case BlendMode::OneMinusSourceAlpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        case BlendMode::DestAlpha: return VK_BLEND_FACTOR_DST_ALPHA;
-        case BlendMode::OneMinusDestAlpha: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-        case BlendMode::ConstantColor: return VK_BLEND_FACTOR_CONSTANT_COLOR;
-        case BlendMode::OnMinusConstantColor: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-        case BlendMode::ConstantAlpha: return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-        case BlendMode::OneMinusConstantAlpha: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-        case BlendMode::SourceAlphaSaturated: return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-        case BlendMode::Source1Color: return VK_BLEND_FACTOR_SRC1_COLOR;
-        case BlendMode::OneMinusSource1Color: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-        case BlendMode::Source1Alpha: return VK_BLEND_FACTOR_SRC1_ALPHA;
-        case BlendMode::OneMinusSource1Alpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        case BlendFactor::Zero: return VK_BLEND_FACTOR_ZERO;
+        case BlendFactor::One: return VK_BLEND_FACTOR_ONE;
+        case BlendFactor::SourceColor: return VK_BLEND_FACTOR_SRC_COLOR;
+        case BlendFactor::OneMinusSourceColor: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+        case BlendFactor::DestColor: return VK_BLEND_FACTOR_DST_COLOR;
+        case BlendFactor::OneMinusDestColor: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+        case BlendFactor::SourceAlpha: return VK_BLEND_FACTOR_SRC_ALPHA;
+        case BlendFactor::OneMinusSourceAlpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor::DestAlpha: return VK_BLEND_FACTOR_DST_ALPHA;
+        case BlendFactor::OneMinusDestAlpha: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        case BlendFactor::ConstantColor: return VK_BLEND_FACTOR_CONSTANT_COLOR;
+        case BlendFactor::OnMinusConstantColor: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::ConstantAlpha: return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+        case BlendFactor::OneMinusConstantAlpha: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+        case BlendFactor::SourceAlphaSaturated: return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+        case BlendFactor::Source1Color: return VK_BLEND_FACTOR_SRC1_COLOR;
+        case BlendFactor::OneMinusSource1Color: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+        case BlendFactor::Source1Alpha: return VK_BLEND_FACTOR_SRC1_ALPHA;
+        case BlendFactor::OneMinusSource1Alpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
         }
         throw;
     }
 
-    VkCompareOp VulkanRenderer::ConvertDepthFunction(DepthFunction Func)
+    VkCompareOp VulkanRenderer::ConvertCompareOperation(const CompareOperation Func)
     {
         switch (Func)
         {
-        case DepthFunction::Always:         return VK_COMPARE_OP_ALWAYS;
-        case DepthFunction::Never:          return VK_COMPARE_OP_NEVER;
-        case DepthFunction::Less:           return VK_COMPARE_OP_LESS;
-        case DepthFunction::LessOrEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
-        case DepthFunction::Equal:          return VK_COMPARE_OP_EQUAL;
-        case DepthFunction::NotEqual:       return VK_COMPARE_OP_NOT_EQUAL;
-        case DepthFunction::Greater:        return VK_COMPARE_OP_GREATER;
-        case DepthFunction::GreaterOrEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        case CompareOperation::Always:         return VK_COMPARE_OP_ALWAYS;
+        case CompareOperation::Never:          return VK_COMPARE_OP_NEVER;
+        case CompareOperation::Less:           return VK_COMPARE_OP_LESS;
+        case CompareOperation::LessOrEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case CompareOperation::Equal:          return VK_COMPARE_OP_EQUAL;
+        case CompareOperation::NotEqual:       return VK_COMPARE_OP_NOT_EQUAL;
+        case CompareOperation::Greater:        return VK_COMPARE_OP_GREATER;
+        case CompareOperation::GreaterOrEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
         }
         throw;
     }
 
-    VkBlendOp VulkanRenderer::ConvertBlendOperation(BlendOperation Operation)
+    VkBlendOp VulkanRenderer::ConvertBlendOperation(const BlendOperation Operation)
     {
         switch (Operation)
         {
@@ -1283,4 +1279,50 @@ namespace Nova
         throw;
     }
 
+    VkPrimitiveTopology VulkanRenderer::ConvertTopology(PrimitiveTopology Topology)
+    {
+        switch (Topology)
+        {
+        case PrimitiveTopology::PointList: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case PrimitiveTopology::LineList: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case PrimitiveTopology::LineStrip: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case PrimitiveTopology::TriangleList: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case PrimitiveTopology::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PrimitiveTopology::TriangleFan: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        default: throw;
+        }
+    }
+
+    VkFrontFace VulkanRenderer::ConvertFrontFace(FrontFace FrontFace)
+    {
+        switch (FrontFace)
+        {
+        case FrontFace::Clockwise: return VK_FRONT_FACE_CLOCKWISE;
+        case FrontFace::CounterClockwise: return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        default: throw;
+        }
+    }
+
+    VkPolygonMode VulkanRenderer::ConvertPolygonMode(PolygonMode PolygonMode)
+    {
+        switch (PolygonMode)
+        {
+        case PolygonMode::Fill:; return VK_POLYGON_MODE_FILL;
+        case PolygonMode::Line: return VK_POLYGON_MODE_LINE;
+        case PolygonMode::Point: return VK_POLYGON_MODE_POINT;
+        default: throw;
+        }
+    }
+
+    VkShaderStageFlagBits VulkanRenderer::ConvertShaderStage(const ShaderStage Stage)
+    {
+        switch (Stage)
+        {
+        case ShaderStage::None: return (VkShaderStageFlagBits)0;
+        case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        default: throw;
+        }
+    }
 }

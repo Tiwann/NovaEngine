@@ -51,6 +51,6 @@ namespace Nova
     void Box3D::RenderCollisions(Renderer* Renderer) const
     {
         const Matrix4 Transform = GetTransform()->GetWorldSpaceMatrix();
-        Renderer->DrawWireQuad(Transform, m_Center, m_HalfExtents, 1.0f, Color::Green);
+        // Renderer->DrawWireQuad(Transform, m_Center, m_HalfExtents, 1.0f, Color::Green);
     }
 }

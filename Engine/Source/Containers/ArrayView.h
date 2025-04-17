@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Array.h"
-#include <initializer_list>
 
 namespace Nova
 {
@@ -21,9 +20,8 @@ namespace Nova
         
     public:
         ArrayView() : m_Data(nullptr), m_Count(0) {}
-        ArrayView(const ArrayType& Arr) : m_Data(Arr.Data()), m_Count(Arr.Count()){}
-        
-        explicit ArrayView(const std::initializer_list<T>& List) : m_Data(List.begin()), m_Count(List.size()){}
+        explicit ArrayView(const ArrayType& Arr) : m_Data(Arr.Data()), m_Count(Arr.Count()){}
+
         ArrayView(const ArrayView&) = default;
         ArrayView(ArrayView&&) noexcept = default;
         ArrayView& operator=(const ArrayView&) = default;

@@ -3,12 +3,12 @@
 
 namespace Nova
 {
-    OpenGLVertexBuffer::OpenGLVertexBuffer()
+    OpenGLVertexBuffer::OpenGLVertexBuffer(Renderer* Renderer) : VertexBuffer(Renderer)
     {
         glCreateBuffers(1, &m_Handle);
     }
 
-    OpenGLVertexBuffer::OpenGLVertexBuffer(const Vertex* Data, size_t Count) : VertexBuffer(Data, Count)
+    OpenGLVertexBuffer::OpenGLVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : VertexBuffer(Renderer, Data, Count)
     {
         glCreateBuffers(1, &m_Handle);
         glBindBuffer(GL_ARRAY_BUFFER, m_Handle);

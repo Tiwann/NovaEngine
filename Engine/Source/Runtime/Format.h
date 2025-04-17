@@ -73,7 +73,7 @@ namespace Nova
         }
     }
 
-    static size_t GetBytesPerChannel(const Format Format)
+    static size_t GetFormatBytesPerChannel(const Format Format)
     {
         switch (Format)
         {
@@ -107,6 +107,43 @@ namespace Nova
         case Format::R32G32B32A32_SINT: return 4ULL;
         case Format::R32G32B32A32_FLOAT: return 4ULL;
         default: return 0;
+        }
+    }
+
+    static size_t GetFormatComponentCount(const Format Format)
+    {
+        switch (Format)
+        {
+        case Format::NONE: return 0ULL;
+        case Format::R8_UNORM: return 1ULL;
+        case Format::R8_SNORM: return 1ULL;
+        case Format::R16_USHORT: return 1ULL;
+        case Format::R16_SHORT: return 1ULL;
+        case Format::R32_FLOAT: return 1ULL;
+        case Format::R32_UINT: return 1ULL;
+        case Format::R32_SINT: return 1ULL;
+        case Format::R8G8_UNORM: return 2ULL;
+        case Format::R8G8_SNORM: return 2ULL;
+        case Format::R16G16_USHORT: return 2ULL;
+        case Format::R16G16_SHORT: return 2ULL;
+        case Format::R32G32_UINT: return 2ULL;
+        case Format::R32G32_SINT: return 2ULL;
+        case Format::R32G32_FLOAT: return 2ULL;
+        case Format::R8G8B8_UNORM: return 3ULL;
+        case Format::R8G8B8_SNORM: return 3ULL;
+        case Format::R16G16B16_USHORT: return 3ULL;
+        case Format::R16G16B16_SHORT: return 3ULL;
+        case Format::R32G32B32_UINT: return 3ULL;
+        case Format::R32G32B32_SINT: return 3ULL;
+        case Format::R32G32B32_FLOAT: return 3ULL;
+        case Format::R8G8B8A8_UNORM: return 4ULL;
+        case Format::R8G8B8A8_SNORM: return 4ULL;
+        case Format::R16G16B16A16_USHORT: return 4ULL;
+        case Format::R16G16B16A16_SHORT: return 4ULL;
+        case Format::R32G32B32A32_UINT: return 4ULL;
+        case Format::R32G32B32A32_SINT: return 4ULL;
+        case Format::R32G32B32A32_FLOAT: return 4ULL;
+        default: throw;
         }
     }
 }

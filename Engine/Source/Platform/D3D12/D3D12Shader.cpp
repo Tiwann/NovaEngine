@@ -29,10 +29,4 @@ namespace Nova
     void D3D12Shader::Delete()
     {
     }
-
-    i32 D3D12Shader::GetUniformLocation(const String& Name)
-    {
-        return 0;
-    }
-
 }

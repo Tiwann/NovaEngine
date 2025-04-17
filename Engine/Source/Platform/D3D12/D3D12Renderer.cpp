@@ -9,6 +9,8 @@
 #include <GLFW/glfw3native.h>
 #include <directx/d3dx12.h>
 
+#include "D3D12Pipeline.h"
+
 
 namespace Nova
 {
@@ -398,74 +400,45 @@ namespace Nova
         Cmd->RSSetViewports(1, &Viewport);
     }
 
-    void D3D12Renderer::Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader)
+    void D3D12Renderer::Draw(VertexArray* VAO, u32 NumVert, Shader* Shader)
     {
     }
 
-    void D3D12Renderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void D3D12Renderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         VertexBuffer->Bind();
         IndexBuffer->Bind();
 
-        D3D12_PRIMITIVE_TOPOLOGY Topology = D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
-        switch (Mode)
-        {
-        case DrawMode::Points:
-            Topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
-            break;
-        case DrawMode::Lines:
-            Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
-            break;
-        case DrawMode::LineStrip:
-            Topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
-            break;
-
-        case DrawMode::Triangles:
-            Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-            break;
-        }
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         Cmd->DrawIndexedInstanced((UINT)IndexBuffer->Count(), 1, 0, 0, 0);
-        Cmd->IASetPrimitiveTopology(Topology);
     }
 
-    void D3D12Renderer::DrawLine(const Vector3& PosA, const Vector3& PosB, f32 Thickness, const Color& Color)
-    {
-    }
-
-    void D3D12Renderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents,
-        f32 Thickness, const Color& Color)
-    {
-    }
-
-    void D3D12Renderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
-    {
-    }
-
-    void D3D12Renderer::Blit()
-    {
-    }
 
     void D3D12Renderer::SetCullMode(CullMode Mode)
     {
         
     }
 
-    void D3D12Renderer::SetDepthFunction(DepthFunction DepthFunction)
+    void D3D12Renderer::SetDepthCompareOperation(CompareOperation DepthFunction)
     {
     }
 
-    void D3D12Renderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation,
-        BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
+    void D3D12Renderer::SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation,BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation)
     {
     }
 
-    void D3D12Renderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
+    void D3D12Renderer::SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation)
     {
     }
 
     void D3D12Renderer::SetBlending(bool Enabled)
     {
+    }
+
+    void D3D12Renderer::BindPipeline(const Pipeline* Pipeline)
+    {
+        ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
+        Cmd->SetPipelineState(((const D3D12Pipeline*)Pipeline)->GetHandle());
     }
 
     ID3D12GraphicsCommandList* D3D12Renderer::CreateOneTimeCommandBuffer() const

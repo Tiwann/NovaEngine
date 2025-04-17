@@ -9,8 +9,8 @@ namespace Nova
     class OpenGLVertexBuffer : public VertexBuffer
     {
     public:
-        OpenGLVertexBuffer();
-        OpenGLVertexBuffer(const Vertex* Data, size_t Count);
+        explicit OpenGLVertexBuffer(Renderer* Renderer);
+        explicit OpenGLVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
         ~OpenGLVertexBuffer() override;
         
         void SendData(const Vertex* Data, size_t Count) override;

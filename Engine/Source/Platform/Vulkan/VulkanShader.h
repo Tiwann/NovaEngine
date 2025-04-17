@@ -1,23 +1,47 @@
 ﻿#pragma once
 #include "Rendering/Shader.h"
-#include <slang/slang.h>
 #include <vulkan/vulkan.h>
+
+#include "Containers/StringView.h"
+
+
+struct ISlangBlob;
+
+namespace slang
+{
+    struct IEntryPoint;
+    typedef ISlangBlob IBlob;
+    struct ISession;
+    struct IModule;
+    struct IComponentType;
+}
 
 namespace Nova
 {
+    struct ShaderModule
+    {
+        ShaderStage Stage = ShaderStage::None;
+        i32 EntryPointIndex = 0xFFFFFFFF;
+        slang::IEntryPoint* EntryPoint = nullptr;
+        slang::IBlob* CompiledCode = nullptr;
+        VkShaderEXT Handle = nullptr;
+    };
+
     class VulkanShader : public Shader
     {
     public:
         VulkanShader(Renderer* Renderer, const String& Name, const Path& Filepath);
-        ~VulkanShader();
+        ~VulkanShader() override;
+
         bool Compile() override;
         bool Link() override;
         bool Validate() override;
         bool Bind() override;
         void Delete() override;
+
         i32 GetUniformLocation(const String& Name) override;
         String GetAssetType() const override;
-        bool Reload() override;
+
         void SetDirectionalLight(const String& Name, const DirectionalLight* DirLight) override;
         void SetPointLight(const String& Name, const PointLight* PointLight) override;
         void SetAmbientLight(const String& Name, const AmbientLight* AmbientLight) override;
@@ -37,20 +61,13 @@ namespace Nova
         Matrix4 GetUniformMat4(const String& Name) override;
         i32 GetUniformInt(const String& Name) override;
 
-        VkDescriptorSet GetDescriptorSet() const;
+    private:
+        bool FindShaderStage(const StringView& Name, ShaderStage Stage);
     private:
         slang::ISession* m_Compiler = nullptr;
-        slang::IModule* m_Module = nullptr;
         slang::IModule* m_ShaderModule = nullptr;
-        slang::IEntryPoint* m_VertexEntryPoint = nullptr;
-        slang::IEntryPoint* m_FragmentEntryPoint = nullptr;
         slang::IComponentType* m_Program = nullptr;
         slang::IComponentType* m_LinkedProgram = nullptr;
-        slang::IBlob* m_VertexCompiledCode = nullptr;
-        slang::IBlob* m_FragmentCompiledCode = nullptr;
-        VkShaderEXT m_VertexHandle = nullptr;
-        VkShaderEXT m_FragmentHandle = nullptr;
-        VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
-        VkDescriptorSet m_DescriptorSet = nullptr;
+        Array<ShaderModule> m_ShaderModules;
     };
 }

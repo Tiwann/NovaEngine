@@ -2,6 +2,7 @@
 #include "VulkanRenderer.h"
 #include "Runtime/Application.h"
 #include "Rendering/ShaderCompiler.h"
+#include <slang/slang.h>
 
 
 namespace Nova
@@ -26,36 +27,27 @@ namespace Nova
     {
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
-        Functions.vkDestroyShaderEXT(Renderer->GetDevice(), m_VertexHandle, nullptr);
-        Functions.vkDestroyShaderEXT(Renderer->GetDevice(), m_FragmentHandle, nullptr);
-        vkDestroyDescriptorSetLayout(Renderer->GetDevice(), m_DescriptorSetLayout, nullptr);
-        vkFreeDescriptorSets(Renderer->GetDevice(), Renderer->GetDescriptorPool(), 1, &m_DescriptorSet);
     }
 
     bool VulkanShader::Compile()
     {
         if (!m_Compiler)
-        {
             return false;
-        }
         
         m_ShaderModule = m_Compiler->loadModuleFromSource(*m_Name, m_Filepath.string().c_str(), nullptr, nullptr);
         if (!m_ShaderModule)
         {
             NOVA_LOG(Shader, Verbosity::Error, "Failed to compile shader: Failed to load module");
-        }
-        
-        // At the moment we assume that vertex shaders should have the attribute [shader("vertex")] and entry point should be named vsmain
-        // At the moment we assume that fragment shaders should have the attribute [shader("fragment")] and entry point should be named fsmain
-        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("VertexMain", SLANG_STAGE_VERTEX, &m_VertexEntryPoint, nullptr)))
-        {
-            NOVA_LOG(Application, Verbosity::Error, "Failed to check vertex entry point!");
             return false;
         }
-        
-        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint("FragmentMain", SLANG_STAGE_FRAGMENT, &m_FragmentEntryPoint, nullptr)))
+
+        FindShaderStage("VertexMain", ShaderStage::Vertex);
+        FindShaderStage("GeometryMain", ShaderStage::Geometry);
+        FindShaderStage("FragmentMain", ShaderStage::Fragment);
+
+        if (m_ShaderModules.IsEmpty())
         {
-            NOVA_LOG(Application, Verbosity::Error, "Failed to check fragment entry point!");
+            NOVA_LOG(Shader, Verbosity::Error, "No shader stage found!");
             return false;
         }
         return true;
@@ -64,9 +56,12 @@ namespace Nova
     bool VulkanShader::Link()
     {
         if (!m_Compiler) return false;
-        
-        slang::IComponentType* const ShaderStages[] { m_VertexEntryPoint, m_FragmentEntryPoint };
-        if (SLANG_FAILED(m_Compiler->createCompositeComponentType(ShaderStages, std::size(ShaderStages), &m_Program, nullptr)))
+
+        Array<slang::IComponentType*> EntryPoints;
+        for (const ShaderModule& Module : m_ShaderModules)
+            EntryPoints.Add(Module.EntryPoint);
+
+        if (SLANG_FAILED(m_Compiler->createCompositeComponentType(EntryPoints.Data(), EntryPoints.Count(), &m_Program, nullptr)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create program!");
             return false;
@@ -87,116 +82,33 @@ namespace Nova
 
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
         const VkDevice Device = Renderer->GetDevice();
-        
-        slang::IBlob* CompiledVertexCode = nullptr;
-        slang::IBlob* CompiledFragmentCode = nullptr;
-        m_LinkedProgram->getEntryPointCode(0, 0, &CompiledVertexCode);
-        m_LinkedProgram->getEntryPointCode(1, 0, &CompiledFragmentCode);
 
-        slang::ProgramLayout* Layout = m_LinkedProgram->getLayout();
-        if (!Layout)
+        for (size_t i = 0; i < m_ShaderModules.Count(); i++)
         {
-            NOVA_LOG(Shader, Verbosity::Error, "Failed to get shader layout from Slang.");
-            return false;
-        }
-
-        const u32 ParameterCount = Layout->getParameterCount();
-        Array<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings((Array<VkDescriptorSetLayoutBinding>::SizeType)ParameterCount);
-        for (u32 i = 0; i < ParameterCount; ++i)
-        {
-            slang::VariableLayoutReflection* Variable = Layout->getParameterByIndex(i);
-            if (!Variable) continue;
-
-            NOVA_LOG(Shader, Verbosity::Trace, "Slang Shader Parameter: {}", Variable->getName());
-            const SlangStage Stage = Variable->getStage();
-            VkShaderStageFlags VulkanStage = 0;
-            if (Stage & SLANG_STAGE_VERTEX) VulkanStage |= VK_SHADER_STAGE_VERTEX_BIT;
-            if (Stage & SLANG_STAGE_FRAGMENT) VulkanStage |= VK_SHADER_STAGE_FRAGMENT_BIT;
-            if (Stage & SLANG_STAGE_COMPUTE) VulkanStage |= VK_SHADER_STAGE_COMPUTE_BIT;
-
-            DescriptorSetLayoutBindings[i].binding = Variable->getBindingIndex();
-            DescriptorSetLayoutBindings[i].stageFlags = VulkanStage;
-            DescriptorSetLayoutBindings[i].descriptorCount = 1;
-
-            slang::TypeReflection* Type = Variable->getType();
-            if (!Type) continue;
-
-            slang::TypeReflection::Kind Kind = Type->getKind();
-            switch (Kind)
-            {
-            case slang::TypeReflection::Kind::ConstantBuffer:
-                DescriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                break;
-            case slang::TypeReflection::Kind::SamplerState:
-                DescriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-                break;
-            case slang::TypeReflection::Kind::Resource:
-            case slang::TypeReflection::Kind::TextureBuffer:
-                DescriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-                break;
-            case slang::TypeReflection::Kind::ShaderStorageBuffer:
-                DescriptorSetLayoutBindings[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                break;
-            default:
-                continue;
-            }
-        }
-
-        VkDescriptorSetLayoutCreateInfo LayoutCreateInfo = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        LayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
-        LayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
-
-        if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &LayoutCreateInfo, nullptr, &m_DescriptorSetLayout)))
-        {
-            NOVA_LOG(Shader, Verbosity::Error, "Failed to create descriptor set layout!");
-            return false;
+            m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode);
         }
 
         const VkFunctionPointers& FunctionPtrs = Renderer->GetFunctionPointers();
 
-        VkShaderCreateInfoEXT VertexCreateInfo= { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
-        VertexCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        VertexCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-        VertexCreateInfo.pName = "main";
-        VertexCreateInfo.pCode = CompiledVertexCode->getBufferPointer();
-        VertexCreateInfo.codeSize = CompiledVertexCode->getBufferSize();
-        VertexCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
-        VertexCreateInfo.setLayoutCount = 1;
-        VertexCreateInfo.pPushConstantRanges = nullptr;
-        VertexCreateInfo.pushConstantRangeCount = 0;
-
-        VkShaderCreateInfoEXT FragmentCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
-        FragmentCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        FragmentCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-        FragmentCreateInfo.pName = "main";
-        FragmentCreateInfo.pCode = CompiledFragmentCode->getBufferPointer();
-        FragmentCreateInfo.codeSize = CompiledFragmentCode->getBufferSize();
-        FragmentCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
-        FragmentCreateInfo.setLayoutCount = 1;
-        FragmentCreateInfo.pPushConstantRanges = nullptr;
-        FragmentCreateInfo.pushConstantRangeCount = 0;
-
-        const VkShaderCreateInfoEXT CreateInfos[2] = { VertexCreateInfo, FragmentCreateInfo };
-        VkShaderEXT Handles[2] = {};
-        if (VK_FAILED(FunctionPtrs.vkCreateShadersEXT(Device, 2, CreateInfos, nullptr, Handles)))
+        for (ShaderModule& Module : m_ShaderModules)
         {
-            NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
-            return false;
+            VkShaderCreateInfoEXT ShaderCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
+            ShaderCreateInfo.stage = VulkanRenderer::ConvertShaderStage(Module.Stage);
+            ShaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
+            ShaderCreateInfo.pName = "main";
+            ShaderCreateInfo.pCode = Module.CompiledCode->getBufferPointer();
+            ShaderCreateInfo.codeSize = Module.CompiledCode->getBufferSize();
+            ShaderCreateInfo.pSetLayouts = nullptr;
+            ShaderCreateInfo.setLayoutCount = 0;
+            ShaderCreateInfo.pPushConstantRanges = nullptr;
+            ShaderCreateInfo.pushConstantRangeCount = 0;
+
+            if (VK_FAILED(FunctionPtrs.vkCreateShadersEXT(Device, 1, &ShaderCreateInfo, nullptr, &Module.Handle)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
+                return false;
+            }
         }
-
-        m_VertexHandle = Handles[0];
-        m_FragmentHandle = Handles[1];
-
-        VkDescriptorSetAllocateInfo AllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-        AllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
-        AllocateInfo.pSetLayouts = &m_DescriptorSetLayout;
-        AllocateInfo.descriptorSetCount = 1;
-        if (VK_FAILED(vkAllocateDescriptorSets(Renderer->GetDevice(), &AllocateInfo, &m_DescriptorSet)))
-        {
-            NOVA_VULKAN_ERROR("Failed to allocate descriptor sets!");
-            return false;
-        }
-
         return true;
     }
 
@@ -206,9 +118,15 @@ namespace Nova
         const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
 
-        constexpr VkShaderStageFlagBits ShaderStages[2] = { VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT };
-        const VkShaderEXT Shaders[2] = { m_VertexHandle, m_FragmentHandle };
-        Functions.vkCmdBindShadersEXT(Cmd, (u32)std::size(ShaderStages), ShaderStages, Shaders);
+        Array<VkShaderStageFlagBits> ShaderStages;
+        Array<VkShaderEXT> Handles;
+        for (const ShaderModule& Module : m_ShaderModules)
+        {
+            ShaderStages.Add(VulkanRenderer::ConvertShaderStage(Module.Stage));
+            Handles.Add(Module.Handle);
+        }
+
+        Functions.vkCmdBindShadersEXT(Cmd, ShaderStages.Count(), ShaderStages.Data(), Handles.Data());
         return true;
     }
 
@@ -224,11 +142,6 @@ namespace Nova
     String VulkanShader::GetAssetType() const
     {
         return Shader::GetAssetType();
-    }
-
-    bool VulkanShader::Reload()
-    {
-        return Shader::Reload();
     }
 
     void VulkanShader::SetDirectionalLight(const String& Name, const DirectionalLight* DirLight)
@@ -321,8 +234,33 @@ namespace Nova
         return Shader::GetUniformInt(Name);
     }
 
-    VkDescriptorSet VulkanShader::GetDescriptorSet() const
+    static SlangStage ConvertShaderStage(ShaderStage Stage)
     {
-        return m_DescriptorSet;
+        switch (Stage) {
+        case ShaderStage::None: return SLANG_STAGE_FRAGMENT;
+        case ShaderStage::Vertex: return SLANG_STAGE_VERTEX;
+        case ShaderStage::Geometry: return SLANG_STAGE_GEOMETRY;
+        case ShaderStage::Fragment: return SLANG_STAGE_FRAGMENT;
+        default: throw;
+        }
+
+    }
+
+    bool VulkanShader::FindShaderStage(const StringView& Name, ShaderStage Stage)
+    {
+        slang::IEntryPoint* EntryPoint = nullptr;
+        if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint(*Name, ConvertShaderStage(Stage), &EntryPoint, nullptr)))
+            return false;
+
+        if (EntryPoint)
+        {
+            ShaderModule Module;
+            Module.Stage = Stage;
+            Module.EntryPoint = EntryPoint;
+            m_ShaderModules.Add(Module);
+
+            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetName(), Name);
+        }
+        return true;
     }
 }

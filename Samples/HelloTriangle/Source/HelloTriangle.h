@@ -14,6 +14,7 @@ namespace Nova
         void OnExit() override;
         void OnRender(Renderer* Renderer) override;
     private:
+        Pipeline* m_Pipeline = nullptr;
         Shader* m_Shader = nullptr;
         VertexBuffer* m_VertexBuffer = nullptr;
         IndexBuffer* m_IndexBuffer = nullptr;

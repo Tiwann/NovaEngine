@@ -4,18 +4,12 @@
 #include "Runtime/Log.h"
 #include "Runtime/Color.h"
 #include "Runtime/LogVerbosity.h"
-#include "Rendering/Vertex.h"
-
 #include "Components/Camera.h"
 #include "Rendering/Shader.h"
 #include "Rendering/IndexBuffer.h"
-#include "ResourceManager/ShaderManager.h"
 #include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
 #include "Rendering/VertexBufferLayout.h"
-#include "Math/LinearAlgebra.h"
-#include "Containers/ScopedPointer.h"
-#include "Containers/StaticArray.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
@@ -37,7 +31,7 @@ namespace Nova
         }
 
 
-        const auto Callback = [](GLenum Source, GLenum, GLuint, GLenum Severity, GLsizei, const GLchar *Message, const void *) -> void
+        const auto Callback = [](const GLenum Source, GLenum, GLuint, const GLenum Severity, GLsizei, const GLchar *Message, const void *) -> void
         {
             const Verbosity Verbo = GetDebugVerbosity(Severity);
             const String SourceName = GetDebugSourceName(Source);
@@ -64,7 +58,7 @@ namespace Nova
     {
     }
 
-    void OpenGLRenderer::ClearDepth(float Depth)
+    void OpenGLRenderer::ClearDepth(const float Depth)
     {
         glClearDepthf(Depth);
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -90,12 +84,12 @@ namespace Nova
     {
     }
 
-    void OpenGLRenderer::SetViewportRect(Vector2 Position, Vector2 Size)
+    void OpenGLRenderer::SetViewportRect(const Vector2 Position, const Vector2 Size)
     {
         glViewport((GLint)Position.x, (GLint)Position.y, (GLint)Size.x, (GLint)Size.y);
     }
 
-    void OpenGLRenderer::Draw(DrawMode Mode, VertexArray* VertexArray, u32 NumVert, Shader* Shader)
+    void OpenGLRenderer::Draw(VertexArray* VertexArray, u32 NumVert, Shader* Shader)
     {
         VertexArray->Bind();
         Shader->Bind();
@@ -108,10 +102,10 @@ namespace Nova
             NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
         }
 
-        glDrawArrays(ConvertDrawMode(Mode), 0, (i32)NumVert);
+        //glDrawArrays(ConvertPolygonMode(Mode), 0, (i32)NumVert);
     }
 
-    void OpenGLRenderer::DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void OpenGLRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         VertexArray->Bind();
         VertexBuffer->Bind();
@@ -125,96 +119,11 @@ namespace Nova
         {
             NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
         }
-        glDrawElements(ConvertDrawMode(Mode), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
+
+        //glDrawElements(ConvertPolygonMode(Mode), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
     }
-
-    void OpenGLRenderer::DrawLine(const Vector3& PointA, const Vector3& PointB, f32 Thickness, const Color& Color)
-    {
-        ScopedPointer<VertexArray> VertexArray = VertexArray::Create(m_GraphicsApi);
-        VertexArray->Bind();
-        const Vertex Points[] {
-            Vertex { PointA, Vector2::Zero, Vector3::Zero, Color },
-            Vertex { PointB, Vector2::Zero, Vector3::Zero, Color },
-        };
-        ScopedPointer<VertexBuffer> VertexBuffer = VertexBuffer::Create(Points, std::size(Points), m_GraphicsApi);
-        ScopedPointer<IndexBuffer> IndexBuffer = IndexBuffer::Create({0, 1}, m_GraphicsApi);
-
-        VertexArray->SetBufferLayout(VertexBufferLayout::Default);
-        
-        Shader* Shader = m_Application->GetShaderManager()->Retrieve("UniformColor");
-        Shader->Bind();
-        
-
-        Matrix4 Model = Matrix4::Identity;
-        Model.Scale({1.0f, 1.0f, 1.0f});
-        Shader->SetUniformMat4("uModel", Model);
-        
-        glLineWidth(Thickness);
     
-        DrawIndexed(DrawMode::Lines, VertexArray, VertexBuffer, IndexBuffer, Shader);
-        delete IndexBuffer;
-        delete VertexBuffer;
-        delete VertexArray;
-    }
-
-    void OpenGLRenderer::DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color)
-    {
-        VertexArray* VertexArray = VertexArray::Create(m_GraphicsApi);
-        VertexArray->Bind();
-        StaticArray<Vertex, 4> Points
-        {
-            Vertex{ Position + Vector3(-HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-            Vertex{ Position + Vector3(+HalfExtents.x, HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-            Vertex{ Position + Vector3(+HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-            Vertex{ Position + Vector3(-HalfExtents.x, -HalfExtents.y, 0.0f) , Vector2::Zero, Vector3::Zero, Color },
-        };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, Points.Count(), m_GraphicsApi);
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, m_GraphicsApi);
-
-        VertexArray->SetBufferLayout(VertexBufferLayout::Default);
-        
-        Shader* Shader = m_Application->GetShaderManager()->Retrieve("UniformColor");
-        Shader->Bind();
-        Shader->SetUniformMat4("uModel", Transform);
-        
-        glLineWidth(Thickness);
-    
-        DrawIndexed(DrawMode::LineLoop, VertexArray, VertexBuffer, IndexBuffer, Shader);
-        delete IndexBuffer;
-        delete VertexBuffer;
-        delete VertexArray;
-    }
-
-    void OpenGLRenderer::DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color)
-    {
-        VertexArray* VertexArray = VertexArray::Create(m_GraphicsApi);
-        VertexArray->Bind();
-        const Vertex Points[] = {
-            { Position + Vector3(-Radius, +Radius, 0.0f) , {0.0f, 1.0f}, Vector3::Zero, Color },    
-            { Position + Vector3(+Radius, +Radius, 0.0f) , {1.0f, 1.0f}, Vector3::Zero, Color },
-            { Position + Vector3(+Radius, -Radius, 0.0f) , {1.0f, 0.0f}, Vector3::Zero, Color },
-            { Position + Vector3(-Radius, -Radius, 0.0f) , {0.0f, 0.0f}, Vector3::Zero, Color },
-        };
-        VertexBuffer* VertexBuffer = VertexBuffer::Create(Points, std::size(Points), m_GraphicsApi);
-        IndexBuffer* IndexBuffer = IndexBuffer::Create({0, 1, 2, 3}, m_GraphicsApi);
-
-        VertexArray->SetBufferLayout(VertexBufferLayout::Default);
-
-        ShaderManager* Manager = m_Application->GetShaderManager();
-        Shader* Shader = Manager->Retrieve("Circle");
-        Shader->Bind();
-        
-        Shader->SetUniformMat4("uModel", Transform);
-        Shader->SetUniformFloat("uThickness", 0.2f);
-        Shader->SetUniformFloat("uSmoothness", 0.05f);
-
-        DrawIndexed(DrawMode::Triangles, VertexArray, VertexBuffer, IndexBuffer, Shader);
-        delete IndexBuffer;
-        delete VertexBuffer;
-        delete VertexArray;
-    }
-
-    void OpenGLRenderer::SetCullMode(CullMode Mode)
+    void OpenGLRenderer::SetCullMode(const CullMode Mode)
     {
         switch(Mode)
         {
@@ -236,46 +145,46 @@ namespace Nova
         }
     }
 
-    void OpenGLRenderer::SetDepthFunction(DepthFunction DepthFunction)
+    void OpenGLRenderer::SetDepthCompareOperation(const CompareOperation CompareOperation)
     {
-        switch (DepthFunction)
+        switch (CompareOperation)
         {
-        case DepthFunction::Always:
+        case CompareOperation::Always:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_ALWAYS);
             break;
-        case DepthFunction::Never:
+        case CompareOperation::Never:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_NEVER);
             break;
-        case DepthFunction::Less:
+        case CompareOperation::Less:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LESS);
             break;
-        case DepthFunction::LessOrEqual:
+        case CompareOperation::LessOrEqual:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
             break;
-        case DepthFunction::Equal:
+        case CompareOperation::Equal:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_EQUAL);
             break;
-        case DepthFunction::NotEqual:
+        case CompareOperation::NotEqual:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_NOTEQUAL);
             break;
-        case DepthFunction::Greater:
+        case CompareOperation::Greater:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_GREATER);
             break;
-        case DepthFunction::GreaterOrEqual:
+        case CompareOperation::GreaterOrEqual:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_GEQUAL);
             break;
         }
     }
 
-    GLenum OpenGLRenderer::ConvertBlendOperation(BlendOperation Operation)
+    GLenum OpenGLRenderer::ConvertBlendOperation(const BlendOperation Operation)
     {
         switch (Operation)
         {
@@ -288,7 +197,7 @@ namespace Nova
         throw;
     }
 
-    GLenum OpenGLRenderer::ConvertFilter(Filter Filter)
+    GLenum OpenGLRenderer::ConvertFilter(const Filter Filter)
     {
         switch (Filter)
         {
@@ -385,19 +294,20 @@ namespace Nova
     }
 
 
-    void OpenGLRenderer::SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation)
+    void OpenGLRenderer::SetBlendFunction(const BlendFactor Source, const BlendFactor Destination, const BlendOperation Operation)
     {
-        glBlendFunc(ConvertBlendMode(Source), ConvertBlendMode(Destination));
+        glBlendFunc(ConvertBlendFactor(Source), ConvertBlendFactor(Destination));
         glBlendEquation(ConvertBlendOperation(Operation));
     }
 
-    void OpenGLRenderer::SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation)
+    void OpenGLRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor
+                                          AlphaDest, const BlendOperation AlphaOperation)
     {
-        glBlendFuncSeparate(ConvertBlendMode(ColorSource), ConvertBlendMode(ColorDest), ConvertBlendMode(AlphaSource), ConvertBlendMode(AlphaDest));
+        glBlendFuncSeparate(ConvertBlendFactor(ColorSource), ConvertBlendFactor(ColorDest), ConvertBlendFactor(AlphaSource), ConvertBlendFactor(AlphaDest));
         glBlendEquationSeparate(ConvertBlendOperation(ColorOperation), ConvertBlendOperation(AlphaOperation));
     }
     
-    void OpenGLRenderer::SetBlending(bool Enabled)
+    void OpenGLRenderer::SetBlending(const bool Enabled)
     {
         if (Enabled)
         {
@@ -408,53 +318,56 @@ namespace Nova
         }
     }
 
-    void OpenGLRenderer::Blit()
+    void OpenGLRenderer::BindPipeline(const Pipeline* Pipeline)
     {
-        
+
     }
 
-    GLenum OpenGLRenderer::ConvertDrawMode(DrawMode Mode)
+
+    GLenum OpenGLRenderer::ConvertPrimitiveTopology(const PrimitiveTopology Mode)
     {
         switch (Mode)
         {
-        case DrawMode::Points: return GL_POINTS;
-        case DrawMode::Lines: return GL_LINES;
-        case DrawMode::LineStrip: return GL_LINE_STRIP;
-        case DrawMode::Triangles: return GL_TRIANGLES;
-        case DrawMode::LineLoop: return GL_LINE_LOOP;
+        case PrimitiveTopology::PointList: return GL_POINTS;
+        case PrimitiveTopology::LineList: return GL_LINES;
+        case PrimitiveTopology::LineStrip: return GL_LINE_STRIP;
+        case PrimitiveTopology::TriangleList: return GL_TRIANGLES;
+        case PrimitiveTopology::TriangleFan: return GL_TRIANGLE_FAN;
+        case PrimitiveTopology::TriangleStrip: return GL_TRIANGLE_STRIP;
+        default: throw;
         }
         return 0;
     }
 
-    GLenum OpenGLRenderer::ConvertBlendMode(BlendMode Mode)
+    GLenum OpenGLRenderer::ConvertBlendFactor(const BlendFactor Mode)
     {
         switch (Mode)
         {
-        case BlendMode::Zero:                   return GL_ZERO;
-        case BlendMode::One:                    return GL_ONE;
-        case BlendMode::SourceColor:            return GL_SRC_COLOR;
-        case BlendMode::OneMinusSourceColor:    return GL_ONE_MINUS_SRC_COLOR;
-        case BlendMode::DestColor:              return GL_DST_COLOR;
-        case BlendMode::OneMinusDestColor:      return GL_ONE_MINUS_DST_COLOR;
-        case BlendMode::SourceAlpha:            return GL_SRC_ALPHA;
-        case BlendMode::OneMinusSourceAlpha:    return GL_ONE_MINUS_SRC_ALPHA;
-        case BlendMode::DestAlpha:              return GL_DST_ALPHA;
-        case BlendMode::OneMinusDestAlpha:      return GL_ONE_MINUS_DST_ALPHA;
-        case BlendMode::ConstantColor:          return GL_CONSTANT_COLOR;
-        case BlendMode::OnMinusConstantColor:   return GL_ONE_MINUS_CONSTANT_COLOR;
-        case BlendMode::ConstantAlpha:          return GL_CONSTANT_ALPHA;
-        case BlendMode::OneMinusConstantAlpha:  return GL_ONE_MINUS_CONSTANT_ALPHA;
-        case BlendMode::SourceAlphaSaturated:   return GL_SRC_ALPHA_SATURATE;
-        case BlendMode::Source1Color:           return GL_SRC1_COLOR;
-        case BlendMode::OneMinusSource1Color:   return GL_ONE_MINUS_SRC1_COLOR;
-        case BlendMode::Source1Alpha:           return GL_SRC1_ALPHA;
-        case BlendMode::OneMinusSource1Alpha:   return GL_ONE_MINUS_SRC1_ALPHA;
+        case BlendFactor::Zero:                   return GL_ZERO;
+        case BlendFactor::One:                    return GL_ONE;
+        case BlendFactor::SourceColor:            return GL_SRC_COLOR;
+        case BlendFactor::OneMinusSourceColor:    return GL_ONE_MINUS_SRC_COLOR;
+        case BlendFactor::DestColor:              return GL_DST_COLOR;
+        case BlendFactor::OneMinusDestColor:      return GL_ONE_MINUS_DST_COLOR;
+        case BlendFactor::SourceAlpha:            return GL_SRC_ALPHA;
+        case BlendFactor::OneMinusSourceAlpha:    return GL_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor::DestAlpha:              return GL_DST_ALPHA;
+        case BlendFactor::OneMinusDestAlpha:      return GL_ONE_MINUS_DST_ALPHA;
+        case BlendFactor::ConstantColor:          return GL_CONSTANT_COLOR;
+        case BlendFactor::OnMinusConstantColor:   return GL_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::ConstantAlpha:          return GL_CONSTANT_ALPHA;
+        case BlendFactor::OneMinusConstantAlpha:  return GL_ONE_MINUS_CONSTANT_ALPHA;
+        case BlendFactor::SourceAlphaSaturated:   return GL_SRC_ALPHA_SATURATE;
+        case BlendFactor::Source1Color:           return GL_SRC1_COLOR;
+        case BlendFactor::OneMinusSource1Color:   return GL_ONE_MINUS_SRC1_COLOR;
+        case BlendFactor::Source1Alpha:           return GL_SRC1_ALPHA;
+        case BlendFactor::OneMinusSource1Alpha:   return GL_ONE_MINUS_SRC1_ALPHA;
         }
         return -1u;
     }
 
 
-    String OpenGLRenderer::GetDebugSourceName(u32 Source)
+    String OpenGLRenderer::GetDebugSourceName(const u32 Source)
     {
         switch (Source)
         {
@@ -468,7 +381,7 @@ namespace Nova
         }
     }
 
-    Verbosity OpenGLRenderer::GetDebugVerbosity(u32 Severity)
+    Verbosity OpenGLRenderer::GetDebugVerbosity(const u32 Severity)
     {
         switch (Severity)
         {

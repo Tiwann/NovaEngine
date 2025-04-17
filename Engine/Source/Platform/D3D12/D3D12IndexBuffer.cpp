@@ -6,19 +6,14 @@
 
 namespace Nova
 {
-    D3D12IndexBuffer::~D3D12IndexBuffer()
+    D3D12IndexBuffer::D3D12IndexBuffer(Renderer* Renderer) : IndexBuffer(Renderer)
     {
-        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
-        Renderer->WaitDeviceIdle();
-        m_Handle->Release();
-        m_Handle = nullptr;
-        m_Ready = false;
     }
 
-    D3D12IndexBuffer::D3D12IndexBuffer(const u32* Indices, size_t Count) : IndexBuffer(Indices, Count)
+    D3D12IndexBuffer::D3D12IndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count) : IndexBuffer(Renderer, Indices, Count)
     {
-        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
-        m_Handle = Renderer->CreateBuffer(L"Index Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(u32));
+        const D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
+        m_Handle = CastedRenderer->CreateBuffer(L"Index Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(u32));
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer");
@@ -29,19 +24,28 @@ namespace Nova
         D3D12IndexBuffer::SendData(Indices, Count);
     }
 
+    D3D12IndexBuffer::~D3D12IndexBuffer()
+    {
+        D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
+        CastedRenderer->WaitDeviceIdle();
+        m_Handle->Release();
+        m_Handle = nullptr;
+        m_Ready = false;
+    }
+
     void D3D12IndexBuffer::SendData(const u32* Indices, size_t Count)
     {
         IndexBuffer::SendData(Indices, Count);
-        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
+        D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
 
         if (m_Handle && m_Ready)
         {
             m_Ready = false;
-            Renderer->WaitDeviceIdle();
+            CastedRenderer->WaitDeviceIdle();
             m_Handle->Release();
         }
 
-        m_Handle = Renderer->CreateBuffer(L"Index Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(u32));
+        m_Handle = CastedRenderer->CreateBuffer(L"Index Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(u32));
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer");
@@ -49,8 +53,8 @@ namespace Nova
             return;
         }
         
-        ID3D12Device9* Device = Renderer->GetDevice();
-        ID3D12Resource* UploadHeap = Renderer->CreateBuffer(L"Index Buffer Upload Heap", D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, Count * sizeof(u32));
+        ID3D12Device9* Device = CastedRenderer->GetDevice();
+        ID3D12Resource* UploadHeap = CastedRenderer->CreateBuffer(L"Index Buffer Upload Heap", D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, Count * sizeof(u32));
         if (!UploadHeap)
         {
             NOVA_DIRECTX_ERROR("Failed to create Index Buffer Upload Heap");
@@ -71,7 +75,7 @@ namespace Nova
         UploadHeap->Unmap(0, nullptr);
 
         ID3D12GraphicsCommandList* Cmd = nullptr;
-        ID3D12CommandAllocator* CommandAllocator = Renderer->GetCurrentCommandAllocator();
+        ID3D12CommandAllocator* CommandAllocator = CastedRenderer->GetCurrentCommandAllocator();
         if (DX_FAILED(Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator, nullptr, IID_PPV_ARGS(&Cmd))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Command Buffer!");
@@ -88,11 +92,11 @@ namespace Nova
         Cmd->ResourceBarrier(1, &Barrier);
         Cmd->Close();
 
-        ID3D12CommandQueue* Queue = Renderer->GetCommandQueue();
+        ID3D12CommandQueue* Queue = CastedRenderer->GetCommandQueue();
         ID3D12CommandList* const Commands[]{ Cmd };
         Queue->ExecuteCommandLists(1, Commands);
 
-        Renderer->WaitDeviceIdle();
+        CastedRenderer->WaitDeviceIdle();
         UploadHeap->Release();
         Cmd->Release();
         m_Ready = true;
@@ -105,8 +109,8 @@ namespace Nova
             NOVA_DIRECTX_ERROR("Failed to bind Index Buffer: Not Ready yet!");
             return;
         }
-        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
-        ID3D12GraphicsCommandList* Cmd = Renderer->GetCurrentGraphicsCommandBuffer();
+        D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
+        ID3D12GraphicsCommandList* Cmd = CastedRenderer->GetCurrentGraphicsCommandBuffer();
 
         D3D12_INDEX_BUFFER_VIEW BufferView;
         BufferView.BufferLocation = m_Handle->GetGPUVirtualAddress();

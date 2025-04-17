@@ -29,12 +29,8 @@ VertexOutput VertexMain(VertexInput Input)
     return Out;
 }
 
-Texture2D Texture;
-SamplerState Sampler;
-
 [shader("fragment")]
-float4 FragmentMain(FragmentInput Input)
+float4 FragmentMain(FragmentInput Input) :  SV_Target
 {
-    float4 Color = Texture.Sample(Sampler, Input.TexCoord);
     return Input.Color;
 }

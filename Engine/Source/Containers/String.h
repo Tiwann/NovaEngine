@@ -122,7 +122,7 @@ namespace Nova
 
         bool operator==(const StringBase& Other) const
         {
-            return std::strcmp(m_Data, Other.m_Data) == 0 && m_Count != Other.m_Count;
+            return std::strcmp(m_Data, Other.m_Data) == 0 && m_Count == Other.m_Count;
         }
 
         bool IsEmpty() const { return m_Count == 0; }

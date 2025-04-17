@@ -33,10 +33,10 @@ namespace Nova
             NOVA_LOG(Shader, Verbosity::Trace, "Compiling vertex shader: {}", ShaderName);
             m_VertexHandle = glCreateShader(GL_VERTEX_SHADER);
 
-            const char* VertexSource = *m_Source.Vertex;
-            const i32 VertexSize = (i32)m_Source.Vertex.Count();
-            glShaderSource(m_VertexHandle, 1, &VertexSource, &VertexSize);
-            glCompileShader(m_VertexHandle);
+            //const char* VertexSource = *m_Source.Vertex;
+            //const i32 VertexSize = (i32)m_Source.Vertex.Count();
+            //glShaderSource(m_VertexHandle, 1, &VertexSource, &VertexSize);
+            //glCompileShader(m_VertexHandle);
             
             int Success = 0;
             glGetShaderiv(m_VertexHandle, GL_COMPILE_STATUS, &Success);
@@ -58,10 +58,10 @@ namespace Nova
             NOVA_LOG(Shader, Verbosity::Trace, "Compiling fragment shader: {}", ShaderName);
             m_FragmentHandle = glCreateShader(GL_FRAGMENT_SHADER);
 
-            const char* FragmentSource = *m_Source.Fragment;
-            const i32 FragmentSize = (i32)m_Source.Fragment.Count();
-            glShaderSource(m_FragmentHandle, 1, &FragmentSource, &FragmentSize);
-            glCompileShader(m_FragmentHandle);
+            //const char* FragmentSource = *m_Source.Fragment;
+            //const i32 FragmentSize = (i32)m_Source.Fragment.Count();
+            //glShaderSource(m_FragmentHandle, 1, &FragmentSource, &FragmentSize);
+            //glCompileShader(m_FragmentHandle);
             
             int Success = 0;
             glGetShaderiv(m_FragmentHandle, GL_COMPILE_STATUS, &Success);

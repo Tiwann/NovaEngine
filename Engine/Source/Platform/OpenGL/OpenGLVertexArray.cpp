@@ -2,8 +2,6 @@
 #include "Rendering/VertexBufferLayout.h"
 #include <glad/gl.h>
 
-
-
 namespace Nova
 {
     OpenGLVertexArray::OpenGLVertexArray()
@@ -29,12 +27,13 @@ namespace Nova
 
     void OpenGLVertexArray::SetBufferLayout(const VertexBufferLayout& Layout)
     {
-        for (size_t Att = 0; Att < Layout.Count(); Att++)
+        glBindVertexArray(m_Handle);
+        for (size_t i = 0; i < Layout.Count(); i++)
         {
-            const VertexAttribute& Attribute = Layout[Att];
-            const size_t Count = GetNumComponents(Attribute.Type);
-            glEnableVertexAttribArray((GLuint)Att);
-            glVertexAttribPointer((GLuint)Att, (GLint)Count, GL_FLOAT, GL_FALSE, (GLsizei)Layout.Stride(), (const void*)Layout.GetOffset(Attribute));
+            const VertexAttribute& Attribute = Layout[i];
+            const size_t Count = GetFormatComponentCount(Attribute.Format);
+            glEnableVertexAttribArray((GLuint)i);
+            glVertexAttribPointer((GLuint)i, (GLint)Count, GL_FLOAT, GL_FALSE, (GLsizei)Layout.Stride(), (const void*)Layout.GetOffset(Attribute));
         }
     }
 }

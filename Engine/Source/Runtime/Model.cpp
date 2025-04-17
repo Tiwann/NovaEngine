@@ -160,13 +160,13 @@ namespace Nova
                 CombinedMesh->Vertices.Add(Vertex);
             }
 
-            const Renderer* Renderer = g_Application->GetRenderer();
+            Renderer* Renderer = g_Application->GetRenderer();
             CombinedMesh->VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
             CombinedMesh->VertexArray->Bind();
             
-            CombinedMesh->VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
+            CombinedMesh->VertexBuffer = Renderer->CreateVertexBuffer();
             CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
-            CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
+            //CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             m_Meshes.Add(CombinedMesh);
         }
 
@@ -264,13 +264,13 @@ namespace Nova
                     CombinedMesh->Vertices.Add(Vertex);
                 }
 
-                const Renderer* Renderer = g_Application->GetRenderer();
+                Renderer* Renderer = g_Application->GetRenderer();
                 CombinedMesh->VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
                 CombinedMesh->VertexArray->Bind();
 
-                CombinedMesh->VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
+                CombinedMesh->VertexBuffer = Renderer->CreateVertexBuffer();
                 CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
-                CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
+                //CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             }
             m_Meshes.Add(CombinedMesh);
         }
@@ -324,13 +324,13 @@ namespace Nova
                 });
             }
 
-            const Renderer* Renderer = g_Application->GetRenderer();
+            Renderer* Renderer = g_Application->GetRenderer();
             CombinedMesh->VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
             CombinedMesh->VertexArray->Bind();
 
-            CombinedMesh->VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
+            CombinedMesh->VertexBuffer = Renderer->CreateVertexBuffer();
             CombinedMesh->VertexBuffer->SendData(CombinedMesh->Vertices.Data(), CombinedMesh->Vertices.Count());
-            CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
+            //CombinedMesh->VertexArray->SetBufferLayout(VertexBufferLayout::Default);
             m_Meshes.Add(CombinedMesh);
         }
         return true;

@@ -28,13 +28,13 @@ namespace Nova
         const Entity* Owner = GetOwner();
         const Scene* CurrentScene = Owner->GetScene();
         const Application* CurrentApplication = CurrentScene->GetOwner();
-        const Renderer* Renderer = CurrentApplication->GetRenderer();
+        Renderer* Renderer = CurrentApplication->GetRenderer();
 
         m_VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
         m_VertexArray->Bind();
         
-        m_VertexBuffer = VertexBuffer::Create(Renderer->GetGraphicsApi());
-        m_IndexBuffer = IndexBuffer::Create(Renderer->GetGraphicsApi());
+        m_VertexBuffer = Renderer->CreateVertexBuffer();
+        m_IndexBuffer = Renderer->CreateIndexBuffer();
         m_IndexBuffer->SendData({ 0, 2, 1, 0, 3, 2 });
         
         ShaderManager* Manager = g_Application->GetShaderManager();
@@ -91,7 +91,7 @@ namespace Nova
         
         m_VertexArray->Bind();
         m_VertexBuffer->SendData(SpriteVertices.Data(), SpriteVertices.Count());
-        m_VertexArray->SetBufferLayout(VertexBufferLayout::Default);
+        //m_VertexArray->SetBufferLayout(VertexBufferLayout::Default);
         
         m_Shader->Bind();
         m_Shader->SetUniformMat4("uModel", GetTransform()->GetWorldSpaceMatrix());
@@ -107,7 +107,7 @@ namespace Nova
         m_Shader->SetUniformFloat4("uColorTint", m_ColorTint);
         const Matrix3 SpriteScale = m_Sprite.GetTexture() ? Math::Scale(Matrix3::Identity, m_Sprite.GetSize() / (f32)m_PixelsPerUnit) : Matrix3::Identity;
         m_Shader->SetUniformMat3("uSpriteScale", SpriteScale);
-        Renderer->DrawIndexed(DrawMode::Triangles, m_VertexArray, m_VertexBuffer, m_IndexBuffer, m_Shader);
+        Renderer->DrawIndexed(m_VertexArray, m_VertexBuffer, m_IndexBuffer, m_Shader);
     }
 
     void SpriteRenderer::OnInspectorGUI(const ImGuiIO& IO)

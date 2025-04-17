@@ -1,14 +1,13 @@
 ﻿#pragma once
 #include "Renderer.h"
+#include "ShaderStage.h"
 #include "Runtime/Filesystem.h"
-#include "Runtime/ShaderSource.h"
 #include "Runtime/LogCategory.h"
 #include "Math/LinearAlgebra.h"
 #include "Containers/String.h"
 #include "Runtime/Asset.h"
 #include "Components/Rendering/AmbientLight.h"
 #include "Components/Rendering/PointLight.h"
-#include "Rendering/Renderer.h"
 
 
 namespace Nova
@@ -27,8 +26,13 @@ namespace Nova
     public:
         ~Shader() override = default;
         String GetAssetType() const override;
-        virtual bool Reload()
+
+        virtual bool Reload(const Path& NewFilepath = {})
         {
+            if (File::Exists(NewFilepath) && m_Filepath != NewFilepath)
+            {
+                m_Filepath = NewFilepath;
+            }
             Bind();
             Delete();
             LoadSource(m_Filepath);
@@ -42,6 +46,7 @@ namespace Nova
             if(!Result) return false;
             return true;
         }
+
         virtual bool Compile() = 0;
         virtual bool Link() = 0;
         virtual bool Validate() = 0;
@@ -69,24 +74,23 @@ namespace Nova
         virtual Vector3 GetUniformFloat3(const String& Name){ return Vector3::Zero; }
         virtual Vector4 GetUniformFloat4(const String& Name){ return Vector4::Zero; }
         virtual Matrix4 GetUniformMat4(const String& Name){ return Matrix4::Identity; }
-        virtual i32 GetUniformInt(const String& Name){ return 0;}
-        virtual i32 GetUniformLocation(const String& Name) = 0;
+        virtual i32 GetUniformInt(const String& Name){ return 0; }
+        virtual i32 GetUniformLocation(const String& Name){ return 0; }
         String GetFilename() const;
 
-        const ShaderSource& GetSource() const;
+
     protected:
         explicit Shader(Renderer* Renderer, const String& Name, Path Filepath);
         Renderer* m_Renderer = nullptr;
         Path m_Filepath;
-        ShaderSource m_Source;
+        String m_Source;
+        Array<ShaderStage> m_Stages;
 
         bool Compiled{false};
         bool Linked{false};
         bool Validated{false};
 
         void LoadSource(Path Filepath);
-        void SplitSources(const String& Source);
-        bool Preprocess(String& Source);
     };
 
 

@@ -4,6 +4,7 @@
 #include "Runtime/LogCategory.h"
 #include "Runtime/LogVerbosity.h"
 #include "Rendering/Filter.h"
+#include "Rendering/PrimitiveTopology.h"
 #include "Rendering/SamplerAddressMode.h"
 #include "Runtime/Format.h"
 
@@ -29,20 +30,18 @@ namespace Nova
         bool BeginFrame() override;
         void EndFrame() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
-        void Draw(DrawMode Mode, VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(DrawMode Mode, VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
-        void DrawLine(const Vector3& PointA, const Vector3& PointB, f32 Thickness, const Color& Color) override;
-        void DrawWireQuad(const Matrix4& Transform, const Vector3& Position, const Vector2& HalfExtents, f32 Thickness, const Color& Color) override;
-        void DrawCircle(const Matrix4& Transform, const Vector3& Position, f32 Radius, const Color& Color) override;
+        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
+        void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
         void SetCullMode(CullMode Mode) override;
-        void SetDepthFunction(DepthFunction DepthFunction) override;
-        void SetBlendFunction(BlendMode Source, BlendMode Destination, BlendOperation Operation) override;
-        void SetBlendFunction(BlendMode ColorSource, BlendMode ColorDest, BlendOperation ColorOperation, BlendMode AlphaSource, BlendMode AlphaDest, BlendOperation AlphaOperation) override; 
+        void SetDepthCompareOperation(CompareOperation DepthFunction) override;
+        void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
+        void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlending(bool Enabled) override;
-        void Blit() override;
+        void BindPipeline(const Pipeline* Pipeline) override;
 
-        static GLenum ConvertDrawMode(DrawMode Mode);
-        static GLenum ConvertBlendMode(BlendMode Mode);
+
+        static GLenum ConvertPrimitiveTopology(PrimitiveTopology Mode);
+        static GLenum ConvertBlendFactor(BlendFactor Mode);
         static GLenum ConvertBlendOperation(BlendOperation Operation);
         static GLenum ConvertFilter(Filter Filter);
         static GLenum ConvertSamplerAddressMode(SamplerAddressMode AddressMode);

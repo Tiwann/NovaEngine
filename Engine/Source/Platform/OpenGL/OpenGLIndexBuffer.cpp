@@ -3,12 +3,12 @@
 
 namespace Nova
 {
-    OpenGLIndexBuffer::OpenGLIndexBuffer()
+    OpenGLIndexBuffer::OpenGLIndexBuffer(Renderer* Renderer) : IndexBuffer(Renderer)
     {
         glCreateBuffers(1, &m_Handle);
     }
 
-    OpenGLIndexBuffer::OpenGLIndexBuffer(const u32* Indices, size_t Count) : IndexBuffer(Indices, Count)
+    OpenGLIndexBuffer::OpenGLIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count) : IndexBuffer(Renderer, Indices, Count)
     {
         glCreateBuffers(1, &m_Handle);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Handle);

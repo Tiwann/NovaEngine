@@ -56,8 +56,8 @@ namespace Nova
             
             if (PassIndex > 0)
             {
-                Renderer->SetBlending(true);
-                Renderer->SetBlendFunction(BlendMode::One, BlendMode::One, BlendOperation::Add);
+                // Renderer->SetBlending(true);
+                // Renderer->SetBlendFunction(BlendMode::One, BlendMode::One, BlendOperation::Add);
             } else
             {
                 Renderer->SetBlending(false);
@@ -84,7 +84,7 @@ namespace Nova
                 const Matrix4 LocalToWorldNormal = Math::LocalToWorldNormal(EntityPosition, EntityRotation);
                 m_Shader->SetUniformMat4("uLocalToWorldNormal", LocalToWorldNormal);
                 
-                Renderer->Draw(DrawMode::Triangles, Mesh->VertexArray, (i32)Mesh->Vertices.Count(), m_Shader);
+                Renderer->Draw(Mesh->VertexArray, (i32)Mesh->Vertices.Count(), m_Shader);
             }
             
             PassIndex++;
@@ -110,12 +110,11 @@ namespace Nova
     bool ModelRenderer::OpenFile()
     {
         const Path Filepath = File::OpenFileDialog("Open 3D mode file...", "", DialogFilters::ModelFilters);
-        PopupMessage* Message = PopupMessage::Create("Warning", "Failed to open 3D model", PopupMessageResponse::OK, PopupMessageIcon::Warning);
+        ScopedPointer<PopupMessage> Message = PopupMessage::Create("Warning", "Failed to open 3D model", PopupMessageResponse::OK, PopupMessageIcon::Warning);
             
         if (!File::Exists(Filepath))
         {
             if (Message) Message->Show();
-            delete Message;
             return false;
         }
             
@@ -124,7 +123,6 @@ namespace Nova
         {
             if (Message) Message->Show();
             delete model;
-            delete Message;
             return false;
         }
 
@@ -134,8 +132,6 @@ namespace Nova
             m_Model = model;
             OnModelChange(m_Model);
         }
-
-        delete Message;
         return true;
     }
 

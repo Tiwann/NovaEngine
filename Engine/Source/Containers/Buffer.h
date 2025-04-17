@@ -263,6 +263,7 @@ namespace Nova
             std::copy(m_Data, m_Data + m_Count, Out.Data());
         }
 
+
     private:
         const Type* m_Data;
         size_t m_Count;

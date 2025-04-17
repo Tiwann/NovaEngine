@@ -49,6 +49,6 @@ namespace Nova
     void Circle2D::RenderCollisions(Renderer* Renderer) const
     {
         const Matrix4 Transform = GetTransform()->GetWorldSpaceMatrix();
-        Renderer->DrawCircle(Transform, m_Center, m_Radius, Color::Green);
+        // Renderer->DrawCircle(Transform, m_Center, m_Radius, Color::Green);
     }
 }

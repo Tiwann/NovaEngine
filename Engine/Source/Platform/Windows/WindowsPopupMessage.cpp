@@ -6,6 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include "Containers/StringConversion.h"
+
 
 namespace Nova
 {
@@ -51,7 +53,7 @@ namespace Nova
         const HWND WindowHandle = glfwGetWin32Window(NativeWindow);
 
         const i32 Flags = s_ResponseConvertor[Response] | s_IconConvertor[Icon];
-        const i32 Win32Result = MessageBoxA(WindowHandle, *Message, *Title, Flags);
+        const i32 Win32Result = MessageBox(WindowHandle, *StringConvertToWide(Message), *StringConvertToWide(Title), Flags);
         const PopupMessageResult Result = s_ResultConvertor[Win32Result];
         if(OnPopupMessageClosed.IsBound()) OnPopupMessageClosed.Broadcast();
         return Result;

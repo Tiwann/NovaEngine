@@ -1,18 +1,20 @@
 ﻿#include "VulkanIndexBuffer.h"
+
+#include "VulkanRenderer.h"
 #include "Runtime/Application.h"
 
 namespace Nova
 {
-    VulkanIndexBuffer::VulkanIndexBuffer()
-    : m_Renderer(g_Application->GetRenderer<VulkanRenderer>())
+    VulkanIndexBuffer::VulkanIndexBuffer(Renderer* Renderer) : IndexBuffer(Renderer)
     {
 
     }
 
-    VulkanIndexBuffer::VulkanIndexBuffer(const u32* Indices, size_t Count)
-    : IndexBuffer(Indices, Count), m_Renderer(g_Application->GetRenderer<VulkanRenderer>())
+    VulkanIndexBuffer::VulkanIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count)
+    : IndexBuffer(Renderer, Indices, Count)
     {
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
+        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
 
         VkBufferCreateInfo BufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
         BufferCreateInfo.size = Count * sizeof(u32);
@@ -48,8 +50,9 @@ namespace Nova
 
     VulkanIndexBuffer::~VulkanIndexBuffer()
     {
-        const VkDevice Device = m_Renderer->GetDevice();
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
+        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VkDevice Device = CastedRenderer->GetDevice();
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
         vkDeviceWaitIdle(Device);
         vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
     }
@@ -57,11 +60,12 @@ namespace Nova
     void VulkanIndexBuffer::SendData(const u32* Indices, size_t Count)
     {
         IndexBuffer::SendData(Indices, Count);
-        const VmaAllocator Allocator = m_Renderer->GetAllocator();
+        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
 
         if (m_Handle || m_Allocation)
         {
-            const VkDevice Device = m_Renderer->GetDevice();
+            const VkDevice Device = CastedRenderer->GetDevice();
             vkDeviceWaitIdle(Device);
             vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
         }
@@ -104,7 +108,8 @@ namespace Nova
 
     void VulkanIndexBuffer::Bind() const
     {
-        const VkCommandBuffer Cmd = m_Renderer->GetCurrentCommandBuffer();
+        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
+        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer();
         vkCmdBindIndexBuffer(Cmd, m_Handle, 0, VK_INDEX_TYPE_UINT32);
     }
 }

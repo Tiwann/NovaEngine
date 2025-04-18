@@ -8,6 +8,8 @@
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
 
+#include <vulkan/vulkan.h>
+
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 
 namespace Nova
@@ -87,6 +89,12 @@ namespace Nova
         delete m_IndexBuffer;
         delete m_Pipeline;
         Application::OnExit();
+    }
+
+    void HelloTriangle::OnUpdate(float DeltaTime)
+    {
+        Application::OnUpdate(DeltaTime);
+
     }
 
     void HelloTriangle::OnRender(Renderer* Renderer)

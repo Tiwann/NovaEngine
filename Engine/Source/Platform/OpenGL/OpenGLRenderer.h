@@ -37,7 +37,7 @@ namespace Nova
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlending(bool Enabled) override;
-        void BindPipeline(const Pipeline* Pipeline) override;
+        void BindPipeline(Pipeline* Pipeline) override;
 
 
         static GLenum ConvertPrimitiveTopology(PrimitiveTopology Mode);

@@ -9,7 +9,7 @@ namespace Nova
     {
     public:
         VulkanPipeline(Renderer* Renderer, const PipelineSpecification& Specification);
-        ~VulkanPipeline();
+        ~VulkanPipeline() override;
         VkPipeline GetHandle() const;
     private:
         VkPipeline m_Handle;

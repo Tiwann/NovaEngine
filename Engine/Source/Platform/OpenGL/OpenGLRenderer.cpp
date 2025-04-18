@@ -318,7 +318,7 @@ namespace Nova
         }
     }
 
-    void OpenGLRenderer::BindPipeline(const Pipeline* Pipeline)
+    void OpenGLRenderer::BindPipeline(Pipeline* Pipeline)
     {
 
     }

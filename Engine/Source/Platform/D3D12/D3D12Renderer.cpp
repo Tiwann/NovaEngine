@@ -435,7 +435,7 @@ namespace Nova
     {
     }
 
-    void D3D12Renderer::BindPipeline(const Pipeline* Pipeline)
+    void D3D12Renderer::BindPipeline(Pipeline* Pipeline)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         Cmd->SetPipelineState(((const D3D12Pipeline*)Pipeline)->GetHandle());

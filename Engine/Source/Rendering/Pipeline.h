@@ -45,6 +45,8 @@ namespace Nova
 
     class Pipeline : public Object
     {
+    public:
+        const PipelineSpecification& GetSpecification() const;
     protected:
         Pipeline(Renderer* Renderer, const PipelineSpecification& Specification);
 

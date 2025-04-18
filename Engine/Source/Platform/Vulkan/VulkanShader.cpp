@@ -4,7 +4,6 @@
 #include "Rendering/ShaderCompiler.h"
 #include <slang/slang.h>
 
-
 namespace Nova
 {
     VulkanShader::VulkanShader(Renderer* Renderer, const String& Name, const Path& Filepath) : Shader(Renderer, Name, Filepath)
@@ -27,15 +26,18 @@ namespace Nova
     {
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
         const VkDevice Device = Renderer->GetDevice();
-        const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
-        for (ShaderModule& Module : m_ShaderModules)
+        for (VulkanShaderModule& Module : m_ShaderModules)
         {
             Module.Stage = ShaderStage::None;
             Module.CompiledCode->release();
             Module.EntryPoint->release();
-            vkDestroyShaderModule(Device, Module.Module, nullptr);
-            Functions.vkDestroyShaderEXT(Device, Module.Handle, nullptr);
+            vkDestroyShaderModule(Device, Module.Handle, nullptr);
         }
+
+        vkFreeDescriptorSets(Device, Renderer->GetDescriptorPool(), m_DescriptorSets.Count(), m_DescriptorSets.Data());
+        vkDestroyPipelineLayout(Device, m_PipelineLayout, nullptr);
+        for (const VkDescriptorSetLayout& Layout : m_DescriptorSetLayouts)
+            vkDestroyDescriptorSetLayout(Device, Layout, nullptr);
     }
 
     bool VulkanShader::Compile()
@@ -67,7 +69,7 @@ namespace Nova
         if (!m_Compiler) return false;
 
         Array<slang::IComponentType*> EntryPoints;
-        for (const ShaderModule& Module : m_ShaderModules)
+        for (const VulkanShaderModule& Module : m_ShaderModules)
             EntryPoints.Add(Module.EntryPoint);
 
         if (SLANG_FAILED(m_Compiler->createCompositeComponentType(EntryPoints.Data(), EntryPoints.Count(), &m_Program, nullptr)))
@@ -84,6 +86,54 @@ namespace Nova
         return true;
     }
 
+    static VkDescriptorType SlangConvertTypeReflectionKind(const slang::BindingType Kind)
+    {
+        switch (Kind)
+        {
+        case slang::BindingType::Unknown: throw;
+        case slang::BindingType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
+        case slang::BindingType::Texture: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case slang::BindingType::ConstantBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case slang::BindingType::ParameterBlock: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case slang::BindingType::TypedBuffer: throw;
+        case slang::BindingType::RawBuffer: throw;
+        case slang::BindingType::CombinedTextureSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case slang::BindingType::InputRenderTarget: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+        case slang::BindingType::InlineUniformData: return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK;
+        case slang::BindingType::RayTracingAccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        case slang::BindingType::VaryingInput: throw;
+        case slang::BindingType::VaryingOutput: throw;
+        case slang::BindingType::ExistentialValue: throw;
+        case slang::BindingType::PushConstant: throw;
+        case slang::BindingType::MutableFlag: throw;
+        case slang::BindingType::MutableTexture: throw;
+        case slang::BindingType::MutableTypedBuffer: throw;
+        case slang::BindingType::MutableRawBuffer: throw;
+        case slang::BindingType::BaseMask: throw;
+        case slang::BindingType::ExtMask: throw;
+        default: throw;
+        }
+        throw;
+    }
+
+    static VkShaderStageFlagBits SlangConvertShaderStage(const SlangStage Stage)
+    {
+        switch (Stage) {
+        case SLANG_STAGE_NONE: throw;
+        case SLANG_STAGE_VERTEX: return VK_SHADER_STAGE_VERTEX_BIT;
+        case SLANG_STAGE_FRAGMENT: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case SLANG_STAGE_COMPUTE: return VK_SHADER_STAGE_COMPUTE_BIT;
+        case SLANG_STAGE_RAY_GENERATION: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        case SLANG_STAGE_INTERSECTION: return VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
+        case SLANG_STAGE_ANY_HIT: return VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
+        case SLANG_STAGE_CLOSEST_HIT: return VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
+        case SLANG_STAGE_MISS: return VK_SHADER_STAGE_MISS_BIT_KHR;
+        case SLANG_STAGE_CALLABLE: return VK_SHADER_STAGE_CALLABLE_BIT_KHR;
+        case SLANG_STAGE_MESH: return VK_SHADER_STAGE_MESH_BIT_EXT;
+        default: throw;
+        }
+
+    }
 
     bool VulkanShader::Validate()
     {
@@ -94,41 +144,83 @@ namespace Nova
 
         for (size_t i = 0; i < m_ShaderModules.Count(); i++)
         {
-            m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode);
-        }
-
-        const VkFunctionPointers& FunctionPtrs = Renderer->GetFunctionPointers();
-
-        for (ShaderModule& Module : m_ShaderModules)
-        {
-            VkShaderCreateInfoEXT ShaderCreateInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
-            ShaderCreateInfo.stage = VulkanRenderer::ConvertShaderStage(Module.Stage);
-            ShaderCreateInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
-            ShaderCreateInfo.pName = "main";
-            ShaderCreateInfo.pCode = Module.CompiledCode->getBufferPointer();
-            ShaderCreateInfo.codeSize = Module.CompiledCode->getBufferSize();
-            ShaderCreateInfo.pSetLayouts = nullptr;
-            ShaderCreateInfo.setLayoutCount = 0;
-            ShaderCreateInfo.pPushConstantRanges = nullptr;
-            ShaderCreateInfo.pushConstantRangeCount = 0;
-
-            if (VK_FAILED(FunctionPtrs.vkCreateShadersEXT(Device, 1, &ShaderCreateInfo, nullptr, &Module.Handle)))
+            if (SLANG_FAILED(m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode)))
             {
-                NOVA_VULKAN_ERROR("Failed to create Vulkan shaders with EXT_shader_object.");
+                NOVA_LOG(Application, Verbosity::Error, "Failed to get entry point code!");
                 return false;
             }
+        }
 
 
-
+        for (VulkanShaderModule& Module : m_ShaderModules)
+        {
             VkShaderModuleCreateInfo ModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
             ModuleCreateInfo.codeSize = Module.CompiledCode->getBufferSize();
             ModuleCreateInfo.pCode = (const u32*)Module.CompiledCode->getBufferPointer();
 
-            if (VK_FAILED(vkCreateShaderModule(Device, &ModuleCreateInfo, nullptr, &Module.Module)))
+            if (VK_FAILED(vkCreateShaderModule(Device, &ModuleCreateInfo, nullptr, &Module.Handle)))
             {
                 NOVA_VULKAN_ERROR("Failed to create Vulkan shader module!");
                 return false;
             }
+        }
+
+
+        slang::ProgramLayout* Layout = m_LinkedProgram->getLayout();
+        slang::VariableLayoutReflection* Globals = Layout->getGlobalParamsVarLayout();
+        slang::TypeLayoutReflection* Reflection = Globals->getTypeLayout();
+
+        for (u32 SetIndex = 0; SetIndex < Reflection->getDescriptorSetCount(); ++SetIndex)
+        {
+            const u32 RangeCount = Reflection->getDescriptorSetDescriptorRangeCount(SetIndex);
+            Array<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings;
+            for (u32 BindingIndex = 0; BindingIndex < RangeCount; ++BindingIndex)
+            {
+                const slang::BindingType BindingType = Reflection->getDescriptorSetDescriptorRangeType(SetIndex, BindingIndex);
+
+                VkDescriptorSetLayoutBinding Binding { };
+                Binding.binding = BindingIndex;
+                Binding.descriptorCount = 1;
+                Binding.descriptorType = SlangConvertTypeReflectionKind(BindingType);
+                Binding.stageFlags = GetShaderStages();
+
+                DescriptorSetLayoutBindings.Add(Binding);
+            }
+
+            VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+            DescriptorSetLayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
+            DescriptorSetLayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
+
+            VkDescriptorSetLayout SetLayout = nullptr;
+            if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &DescriptorSetLayoutCreateInfo, nullptr, &SetLayout)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create descriptor set layout!");
+                return false;
+            }
+            m_DescriptorSetLayouts.Add(SetLayout);
+        }
+
+        m_DescriptorSets = Array<VkDescriptorSet>(m_DescriptorSetLayouts.Count());
+
+        VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+        DescriptorSetAllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
+        DescriptorSetAllocateInfo.descriptorSetCount = m_DescriptorSetLayouts.Count();
+        DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+        if (VK_FAILED(vkAllocateDescriptorSets(Device, &DescriptorSetAllocateInfo, m_DescriptorSets.Data())))
+        {
+            NOVA_VULKAN_ERROR("Failed to allocate descriptor sets!");
+            return false;
+        }
+
+        VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        PipelineLayoutCreateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+        PipelineLayoutCreateInfo.setLayoutCount = m_DescriptorSetLayouts.Count();
+        PipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        PipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        if (VK_FAILED(vkCreatePipelineLayout(Device, &PipelineLayoutCreateInfo, nullptr, &m_PipelineLayout)))
+        {
+            NOVA_VULKAN_ERROR("Failed to create pipeline layout!");
+            return false;
         }
         return true;
     }
@@ -139,21 +231,19 @@ namespace Nova
         const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
 
-        Array<VkShaderStageFlagBits> ShaderStages;
-        Array<VkShaderEXT> Handles;
-        for (const ShaderModule& Module : m_ShaderModules)
-        {
-            ShaderStages.Add(VulkanRenderer::ConvertShaderStage(Module.Stage));
-            Handles.Add(Module.Handle);
-        }
-
-        Functions.vkCmdBindShadersEXT(Cmd, ShaderStages.Count(), ShaderStages.Data(), Handles.Data());
+        (void)Cmd;
+        (void)Functions;
         return true;
     }
 
-    const Array<ShaderModule>& VulkanShader::GetShaderModules() const
+    const Array<VulkanShaderModule>& VulkanShader::GetShaderModules() const
     {
         return m_ShaderModules;
+    }
+
+    VkPipelineLayout VulkanShader::GetPipelineLayout() const
+    {
+        return m_PipelineLayout;
     }
 
     void VulkanShader::Delete()
@@ -168,96 +258,6 @@ namespace Nova
     String VulkanShader::GetAssetType() const
     {
         return Shader::GetAssetType();
-    }
-
-    void VulkanShader::SetDirectionalLight(const String& Name, const DirectionalLight* DirLight)
-    {
-        Shader::SetDirectionalLight(Name, DirLight);
-    }
-
-    void VulkanShader::SetPointLight(const String& Name, const PointLight* PointLight)
-    {
-        Shader::SetPointLight(Name, PointLight);
-    }
-
-    void VulkanShader::SetAmbientLight(const String& Name, const AmbientLight* AmbientLight)
-    {
-        Shader::SetAmbientLight(Name, AmbientLight);
-    }
-
-    void VulkanShader::SetUniformFloat(const String& Name, f32 Value)
-    {
-        Shader::SetUniformFloat(Name, Value);
-    }
-
-    void VulkanShader::SetUniformFloat2(const String& Name, const Vector2& Value)
-    {
-        Shader::SetUniformFloat2(Name, Value);
-    }
-
-    void VulkanShader::SetUniformFloat3(const String& Name, const Vector3& Value)
-    {
-        Shader::SetUniformFloat3(Name, Value);
-    }
-
-    void VulkanShader::SetUniformFloat4(const String& Name, const Vector4& Value)
-    {
-        Shader::SetUniformFloat4(Name, Value);
-    }
-
-    void VulkanShader::SetUniformMat4(const String& Name, const Matrix4& Value)
-    {
-        Shader::SetUniformMat4(Name, Value);
-    }
-
-    void VulkanShader::SetUniformInt(const String& Name, i32 Value)
-    {
-        Shader::SetUniformInt(Name, Value);
-    }
-
-    void VulkanShader::SetUniformTexture(const String& Name, Texture2D* Texture)
-    {
-        Shader::SetUniformTexture(Name, Texture);
-    }
-
-    void VulkanShader::SetUniformMat2(const String& Name, const Matrix2& Value)
-    {
-        Shader::SetUniformMat2(Name, Value);
-    }
-
-    void VulkanShader::SetUniformMat3(const String& Name, const Matrix3& Value)
-    {
-        Shader::SetUniformMat3(Name, Value);
-    }
-
-    f32 VulkanShader::GetUniformFloat(const String& Name)
-    {
-        return Shader::GetUniformFloat(Name);
-    }
-
-    Vector2 VulkanShader::GetUniformFloat2(const String& Name)
-    {
-        return Shader::GetUniformFloat2(Name);
-    }
-
-    Vector3 VulkanShader::GetUniformFloat3(const String& Name)
-    {
-        return Shader::GetUniformFloat3(Name);
-    }
-
-    Vector4 VulkanShader::GetUniformFloat4(const String& Name)
-    {
-        return Shader::GetUniformFloat4(Name);
-    }
-
-    Matrix4 VulkanShader::GetUniformMat4(const String& Name)
-    {
-        return Shader::GetUniformMat4(Name);
-    }
-
-    i32 VulkanShader::GetUniformInt(const String& Name)
-    {
-        return Shader::GetUniformInt(Name);
     }
 
     static SlangStage ConvertShaderStage(ShaderStage Stage)
@@ -280,7 +280,7 @@ namespace Nova
 
         if (EntryPoint)
         {
-            ShaderModule Module;
+            VulkanShaderModule Module;
             Module.Stage = Stage;
             Module.EntryPoint = EntryPoint;
             m_ShaderModules.Add(Module);
@@ -288,5 +288,23 @@ namespace Nova
             NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetName(), Name);
         }
         return true;
+    }
+
+    VkShaderStageFlags VulkanShader::GetShaderStages() const
+    {
+        VkShaderStageFlags Result = 0;
+        for (const VulkanShaderModule& Module : m_ShaderModules)
+            Result |= VulkanRenderer::ConvertShaderStage(Module.Stage);
+        return Result;
+    }
+
+    const Array<VkDescriptorSet>& VulkanShader::GetDescriptorSets() const
+    {
+        return m_DescriptorSets;
+    }
+
+    const Array<VkDescriptorSetLayout>& VulkanShader::GetDescriptorSetLayout() const
+    {
+        return m_DescriptorSetLayouts;
     }
 }

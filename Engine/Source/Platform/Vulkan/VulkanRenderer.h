@@ -71,7 +71,7 @@ namespace Nova
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
 
-        void BindPipeline(const Pipeline* Pipeline) override;
+        void BindPipeline(Pipeline* Pipeline) override;
         
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;

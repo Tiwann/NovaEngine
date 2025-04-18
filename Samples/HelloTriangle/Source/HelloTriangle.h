@@ -12,6 +12,7 @@ namespace Nova
         ApplicationConfiguration CreateConfiguration() const override;
         void OnInit() override;
         void OnExit() override;
+        void OnUpdate(float DeltaTime) override;
         void OnRender(Renderer* Renderer) override;
     private:
         Pipeline* m_Pipeline = nullptr;

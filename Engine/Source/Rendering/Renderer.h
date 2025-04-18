@@ -52,7 +52,7 @@ namespace Nova
         virtual void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) = 0;
         virtual void SetBlending(bool Enabled) = 0;
 
-        virtual void BindPipeline(const Pipeline* Pipeline) = 0;
+        virtual void BindPipeline(Pipeline* Pipeline) = 0;
 
 
         Shader* CreateShader(const String& Name, const Path& Filepath);

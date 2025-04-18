@@ -13,13 +13,13 @@
 #include "Components/Rendering/ModelRenderer.h"
 #include <vulkan/vulkan.h>
 
-NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
+NOVA_DEFINE_APPLICATION_CLASS(NovaEditor)
 
 namespace Nova
 {
     class ModelRenderer;
 
-    HelloTriangle::HelloTriangle(const Array<const char*>& Arguments) : Application(Arguments)
+    NovaEditor::NovaEditor(const Array<const char*>& Arguments) : Application(Arguments)
     {
         const CommandLineOption ProjectOption { 'p', "project", false, false, "Open specified project" };
         ArgumentParser ArgParser("NovaEditor", Arguments, ArgumentParserSettings::WindowsStyle, ProjectOption);
@@ -29,7 +29,7 @@ namespace Nova
         }
     }
 
-    ApplicationConfiguration HelloTriangle::CreateConfiguration() const
+    ApplicationConfiguration NovaEditor::CreateConfiguration() const
     {
         ApplicationConfiguration Configuration;
         Configuration.AppName = "Nova Editor";
@@ -51,7 +51,7 @@ namespace Nova
     static VertexBuffer* s_VertexBuffer = nullptr;
     static IndexBuffer* s_IndexBuffer = nullptr;
 
-    void HelloTriangle::OnInit()
+    void NovaEditor::OnInit()
     {
         Application::OnInit();
 
@@ -60,8 +60,8 @@ namespace Nova
         GetRenderer()->SetCurrentCamera(s_Camera);
         s_Camera->ClearColor = Color::Black;
 
-        const Path ShaderPath = GetEngineAssetsDirectory() / "Shaders/HelloTriangle.slang";
-        s_HelloTriangleShader = m_ShaderManager->Load("HelloTriangle", ShaderPath);
+        const Path ShaderPath = GetEngineAssetsDirectory() / "Shaders/NovaEditor.slang";
+        s_HelloTriangleShader = m_ShaderManager->Load("NovaEditor", ShaderPath);
 
         const Array<Vertex> Vertices
         {
@@ -79,20 +79,20 @@ namespace Nova
         s_IndexBuffer = IndexBuffer::Create(Indices, GraphicsApi::Vulkan);
     }
 
-    void HelloTriangle::OnExit()
+    void NovaEditor::OnExit()
     {
         delete s_VertexBuffer;
         delete s_IndexBuffer;
         Application::OnExit();
     }
 
-    void HelloTriangle::OnRender(Renderer* Renderer)
+    void NovaEditor::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
         Renderer->DrawIndexed(nullptr, s_VertexBuffer, s_IndexBuffer, s_HelloTriangleShader);
     }
 
-    void HelloTriangle::OnUpdate(f32 Delta)
+    void NovaEditor::OnUpdate(f32 Delta)
     {
         Application::OnUpdate(Delta);
         for (EditorWindow* EditorWindow : m_EditorWindows)
@@ -101,7 +101,7 @@ namespace Nova
         }
     }
 
-    void HelloTriangle::OpenProject(const Path& ProjectPath)
+    void NovaEditor::OpenProject(const Path& ProjectPath)
     {
         m_CurrentProject.reset();
         m_CurrentProject = MakeShared<Project>(ProjectPath);

@@ -117,29 +117,15 @@ namespace Nova
         Array<VkPipelineShaderStageCreateInfo> ShaderStages;
         if (Specification.ShaderProgram)
         {
-            for (const ShaderModule& Module : ((VulkanShader*)Specification.ShaderProgram)->GetShaderModules())
+            for (const VulkanShaderModule& Module : ((VulkanShader*)Specification.ShaderProgram)->GetShaderModules())
             {
                 VkPipelineShaderStageCreateInfo ShaderStageCreateInfo { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-                ShaderStageCreateInfo.module = Module.Module;
+                ShaderStageCreateInfo.module = Module.Handle;
                 ShaderStageCreateInfo.stage = VulkanRenderer::ConvertShaderStage(Module.Stage);
                 ShaderStageCreateInfo.pName = "main";
                 ShaderStageCreateInfo.pSpecializationInfo = nullptr;
                 ShaderStages.Add(ShaderStageCreateInfo);
             }
-        }
-
-        // Should get this from VulkanShader using Slang
-        VkPipelineLayoutCreateInfo PipelineLayoutInfo { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-        PipelineLayoutInfo.pSetLayouts = nullptr;
-        PipelineLayoutInfo.setLayoutCount = 0;
-        PipelineLayoutInfo.pPushConstantRanges = nullptr;
-        PipelineLayoutInfo.pushConstantRangeCount = 0;
-
-        VkPipelineLayout PipelineLayout = nullptr;
-        if (VK_FAILED(vkCreatePipelineLayout(Device, &PipelineLayoutInfo, nullptr, &PipelineLayout)))
-        {
-            NOVA_VULKAN_ERROR("Failed to create pipeline layout");
-            return;
         }
 
         constexpr VkFormat Formats[] { VK_FORMAT_R8G8B8A8_UNORM };
@@ -163,7 +149,7 @@ namespace Nova
         PipelineCreateInfo.renderPass = nullptr;
         PipelineCreateInfo.pStages = ShaderStages.Data();
         PipelineCreateInfo.stageCount = ShaderStages.Count();
-        PipelineCreateInfo.layout = PipelineLayout;
+        PipelineCreateInfo.layout = ((VulkanShader*)Specification.ShaderProgram)->GetPipelineLayout();
 
         if (VK_FAILED(vkCreateGraphicsPipelines(Device, nullptr, 1, &PipelineCreateInfo, nullptr, &m_Handle)))
         {

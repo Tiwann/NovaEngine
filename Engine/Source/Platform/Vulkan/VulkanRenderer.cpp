@@ -11,6 +11,7 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanPipeline.h"
+#include "VulkanShader.h"
 
 namespace Nova
 {
@@ -469,9 +470,9 @@ namespace Nova
         //////////////////////////////////////////////////////////////////////////////////////////
         {
             VkDescriptorPoolSize PoolSizes[] = {
-                { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 8 },
-                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 16 },
-                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 64 }
+                { VK_DESCRIPTOR_TYPE_SAMPLER, 32 },
+                { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 32 },
+                { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 32 }
             };
             VkDescriptorPoolCreateInfo DescriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
             DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
@@ -778,6 +779,7 @@ namespace Nova
         RenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         RenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
+
         VkRenderingInfo RenderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
         RenderingInfo.layerCount = 1;
         RenderingInfo.renderArea.extent = VkExtent2D{ WindowWidth, WindowHeight };
@@ -1052,10 +1054,15 @@ namespace Nova
         SetBlendFunction(Source, Destination, Operation, Source, Destination, Operation);
     }
 
-    void VulkanRenderer::BindPipeline(const Pipeline* Pipeline)
+    void VulkanRenderer::BindPipeline(Pipeline* Pipeline)
     {
-        const VulkanPipeline* VkPipeline = static_cast<const VulkanPipeline*>(Pipeline);
-        vkCmdBindPipeline(GetCurrentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, VkPipeline->GetHandle());
+        const VulkanPipeline* CastedPipeline = dynamic_cast<VulkanPipeline*>(Pipeline);
+        const VulkanShader* Shader = dynamic_cast<VulkanShader*>(CastedPipeline->GetSpecification().ShaderProgram);
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
+
+        const Array<VkDescriptorSet>& DescriptorSets = Shader->GetDescriptorSets();
+        vkCmdBindDescriptorSets(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, Shader->GetPipelineLayout(), 0, DescriptorSets.Count(), DescriptorSets.Data(), 0, nullptr);
     }
 
 

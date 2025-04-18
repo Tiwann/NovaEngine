@@ -7,6 +7,10 @@ namespace Nova
         None,
         Vertex,
         Geometry,
-        Fragment
+        Fragment,
+        Compute,
+        RayGeneration,
+        Tessellation,
+        Mesh
     };
 }

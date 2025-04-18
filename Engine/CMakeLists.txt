@@ -2,6 +2,7 @@ set(ENGINE_MODULES Core)
 include(Dependencies/Dependencies.cmake)
 include(../AutoCopy.cmake)
 
+
 file(GLOB_RECURSE NOVA_ENGINE_SRC Source/*.cpp Source/*.h)
 file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
         $<$<PLATFORM_ID:Windows>:${MODULE_PATH}/Platform/Windows/*.cpp ${MODULE_PATH}/Platform/Windows/*.h>
@@ -27,6 +28,11 @@ target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
         PUBLIC $<$<OR:$<CONFIG:MinSizeRel>,$<CONFIG:Release>>:NOVA_DIST>
         PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
 )
+
+
+if(MSVC)
+    add_compile_options(/MP)
+endif ()
 
 foreach (MODULE ${ENGINE_MODULES})
     set(MODULE_EXPORT_HEADER ${CMAKE_CURRENT_LIST_DIR}/ModuleExport.in.h)

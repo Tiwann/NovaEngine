@@ -24,8 +24,8 @@ namespace Nova {
 		bool Valid() const;
 	
 	private:
-		u32 m_Width{0}, m_Height{0};
+		u32 m_Width = 0, m_Height = 0;
 		Format m_Format{Format::NONE};
-		void* m_Pixels{nullptr};
+		void* m_Pixels = nullptr;
 	};
 }

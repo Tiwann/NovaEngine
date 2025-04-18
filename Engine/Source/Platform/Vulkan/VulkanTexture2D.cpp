@@ -16,7 +16,7 @@ namespace Nova
         
         VkImageCreateInfo ImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         ImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-        ImageCreateInfo.format = VulkanRenderer::ConvertFormat(Params.Format);
+        ImageCreateInfo.format = Renderer->Convertor.ConvertFormat(Params.Format);
         ImageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
         ImageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT;
         ImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -47,7 +47,7 @@ namespace Nova
         VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
         ImageViewCreateInfo.image = m_Handle;
         ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        ImageViewCreateInfo.format = VulkanRenderer::ConvertFormat(Params.Format);
+        ImageViewCreateInfo.format = Renderer->Convertor.ConvertFormat(Params.Format);
         ImageViewCreateInfo.components = VulkanRenderer::DefaultComponentMapping;
         ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
@@ -81,7 +81,7 @@ namespace Nova
 
             VkImageCreateInfo ImageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
             ImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-            ImageCreateInfo.format = VulkanRenderer::ConvertFormat(Format);
+            ImageCreateInfo.format = Renderer->Convertor.ConvertFormat(Format);
             ImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             ImageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
             ImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -115,7 +115,7 @@ namespace Nova
             VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
             ImageViewCreateInfo.image = m_Handle;
             ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            ImageViewCreateInfo.format = VulkanRenderer::ConvertFormat(Format);
+            ImageViewCreateInfo.format = Renderer->Convertor.ConvertFormat(Format);
             ImageViewCreateInfo.components = VulkanRenderer::DefaultComponentMapping;
             
             ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;

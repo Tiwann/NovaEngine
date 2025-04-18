@@ -1,4 +1,4 @@
-#include "VertexBufferLayout.h"
+#include "VertexLayout.h"
 #include "VertexArray.h"
 
 namespace Nova
@@ -8,22 +8,22 @@ namespace Nova
         return Name == Other.Name && Format == Other.Format;
     }
 
-    VertexBufferLayout::VertexBufferLayout(const Array<VertexAttribute>& Attributes) : m_Attributes(Attributes)
+    VertexLayout::VertexLayout(const Array<VertexAttribute>& Attributes) : m_Attributes(Attributes)
     {
         
     }
 
-    void VertexBufferLayout::AddAttribute(const VertexAttribute& Attribute)
+    void VertexLayout::AddAttribute(const VertexAttribute& Attribute)
     {
         m_Attributes.Add(Attribute);
     }
 
-    size_t VertexBufferLayout::Count() const
+    size_t VertexLayout::Count() const
     {
         return m_Attributes.Count();
     }
 
-    size_t VertexBufferLayout::Stride() const
+    size_t VertexLayout::Stride() const
     {
         size_t Result = 0;
         for(const VertexAttribute& Attribute : m_Attributes)
@@ -33,7 +33,7 @@ namespace Nova
         return Result;
     }
 
-    size_t VertexBufferLayout::GetOffset(const VertexAttribute& Attribute) const
+    size_t VertexLayout::GetOffset(const VertexAttribute& Attribute) const
     {
         const Array<VertexAttribute>::SizeType Index = m_Attributes.Find(Attribute);
         NOVA_ASSERT(Index != -1ULL, "invalid Vertex Attribute!")
@@ -46,17 +46,17 @@ namespace Nova
         return Result;
     }
 
-    const Array<VertexAttribute>& VertexBufferLayout::GetAttributes() const
+    const Array<VertexAttribute>& VertexLayout::GetAttributes() const
     {
         return m_Attributes;
     }
 
-    VertexAttribute& VertexBufferLayout::operator[](size_t Index)
+    VertexAttribute& VertexLayout::operator[](size_t Index)
     {
         return m_Attributes[Index];
     }
 
-    const VertexAttribute& VertexBufferLayout::operator[](size_t Index) const
+    const VertexAttribute& VertexLayout::operator[](size_t Index) const
     {
         return m_Attributes[Index];
     }

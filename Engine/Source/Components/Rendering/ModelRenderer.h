@@ -25,7 +25,7 @@ namespace Nova
         bool OpenFile();
         Model* GetModel() const;
     private:
-        Model* m_Model{nullptr};
-        Shader* m_Shader{nullptr};
+        Model* m_Model = nullptr;
+        Shader* m_Shader = nullptr;
     };
 }

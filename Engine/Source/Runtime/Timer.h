@@ -22,9 +22,9 @@ namespace Nova
 
         FinishedDelegate FinishedEvent;
     private:
-        f32 m_Time{0.0f};
+        f32 m_Time = 0.0f;
         bool m_Started{false};
         bool m_Loop{false};
-        f32 m_Duration{0.0f};
+        f32 m_Duration = 0.0f;
     };
 }

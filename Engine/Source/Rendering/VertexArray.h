@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    class VertexBufferLayout;
+    class VertexLayout;
 }
 
 namespace Nova
@@ -16,7 +16,7 @@ namespace Nova
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;
-        virtual void SetBufferLayout(const VertexBufferLayout& Layout) = 0;
+        virtual void SetBufferLayout(const VertexLayout& Layout) = 0;
         static VertexArray* Create(GraphicsApi const& GraphicsApi);
     };
 }

@@ -8,7 +8,7 @@
 #include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
 #include "Rendering/IndexBuffer.h"
-#include "Rendering/VertexBufferLayout.h"
+#include "Rendering/VertexLayout.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Renderer.h"
 #include "Rendering/Texture2D.h"

@@ -6,12 +6,14 @@
 #include "Rendering/Filter.h"
 #include "Runtime/Format.h"
 #include "Rendering/FrontFace.h"
-#include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
-
 #include "Rendering/PolygonMode.h"
 #include "Rendering/PrimitiveTopology.h"
 #include "Rendering/ShaderStage.h"
+
+#include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
+#include "VulkanRendererTypeConvertor.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 
@@ -93,20 +95,7 @@ namespace Nova
         VkCommandPool GetCommandPool() const;
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
-
-
-
-        static VkFormat ConvertFormat(Format Format);
-        static VkFilter ConvertFilter(Filter Filter);
-        static VkSamplerAddressMode ConvertSamplerAddressMode(SamplerAddressMode Wrap);
-        static VkCullModeFlags ConvertCullMode(CullMode Mode);
-        static VkBlendFactor ConvertBlendFactor(BlendFactor Mode);
-        static VkCompareOp ConvertCompareOperation(CompareOperation Func);
-        static VkBlendOp ConvertBlendOperation(BlendOperation Operation);
-        static VkPrimitiveTopology ConvertTopology(PrimitiveTopology Topology);
-        static VkFrontFace ConvertFrontFace(FrontFace FrontFace);
-        static VkPolygonMode ConvertPolygonMode(PolygonMode PolygonMode);
-        static VkShaderStageFlagBits ConvertShaderStage(ShaderStage Stage);
+        VulkanRendererTypeConvertor Convertor;
         static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:
         u32                               m_CurrentFrameIndex = 0;

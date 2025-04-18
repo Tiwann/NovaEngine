@@ -8,8 +8,8 @@ namespace Nova
     
     struct CORE_API Vector2
     {
-        union{ f32 x{0.0f}, r; };
-        union{ f32 y{0.0f}, g; };
+        union{ f32 x = 0.0f, r; };
+        union{ f32 y = 0.0f, g; };
 
         Vector2() = default;
         Vector2(f32 X, f32 Y);

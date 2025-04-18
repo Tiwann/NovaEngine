@@ -33,7 +33,12 @@ namespace Nova
         R16G16B16A16_SHORT,
         R32G32B32A32_UINT,
         R32G32B32A32_SINT,
-        R32G32B32A32_FLOAT
+        R32G32B32A32_FLOAT,
+
+        Float = R32_FLOAT,
+        Vector2 = R32G32_FLOAT,
+        Vector3 = R32G32B32_FLOAT,
+        Vector4 = R32G32B32A32_FLOAT,
     };
 
     static size_t GetFormatSize(const Format Format)

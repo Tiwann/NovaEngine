@@ -9,9 +9,9 @@ namespace Nova
 
     struct CORE_API Vector3
     {
-        union{ f32 x{0.0f}, r; };
-        union{ f32 y{0.0f}, g; };
-        union{ f32 z{0.0f}, b; };
+        union{ f32 x = 0.0f, r; };
+        union{ f32 y = 0.0f, g; };
+        union{ f32 z = 0.0f, b; };
 
         constexpr Vector3() = default;
         Vector3(f32 X, f32 Y, f32 Z);

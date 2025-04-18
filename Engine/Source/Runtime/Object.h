@@ -8,11 +8,15 @@ namespace Nova
     {
     public:
         Object();
-        Object(String Name);
+        explicit Object(String Name);
         virtual ~Object() = default;
 
         const String& GetName() const;
         void SetName(const String& NewName);
+
+        template <typename Derived> requires IsBaseOfValue<Object, Derived>
+        Derived* As() { return dynamic_cast<Derived*>(this); }
+
     protected:
         String m_Name;
     };

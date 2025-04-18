@@ -4,7 +4,7 @@
 #include "Math/Vector4.h"
 #include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
-#include "Rendering/VertexBufferLayout.h"
+#include "Rendering/VertexLayout.h"
 #include "ObjLoader.h"
 
 #include <tinygltf/tinygltf.h>

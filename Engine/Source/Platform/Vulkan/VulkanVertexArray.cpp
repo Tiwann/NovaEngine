@@ -11,7 +11,7 @@ namespace Nova
     {
     }
 
-    void VulkanVertexArray::SetBufferLayout(const VertexBufferLayout& Layout)
+    void VulkanVertexArray::SetBufferLayout(const VertexLayout& Layout)
     {
     }
 }

@@ -60,7 +60,7 @@ namespace Nova
         friend class Application;
         GLFWwindow* m_Handle = nullptr;
         String m_Name;
-        u32 m_Width{0}, m_Height{0}, m_PositionX{0}, m_PositionY{0};
+        u32 m_Width = 0, m_Height = 0, m_PositionX = 0, m_PositionY = 0;
         bool m_Resizable{false};
         bool m_HasFocus{false};
         bool m_Maximized{false};

@@ -9,6 +9,7 @@
 #include "CompareOperation.h"
 #include "Containers/Buffer.h"
 #include "Vertex.h"
+#include "Runtime/Object.h"
 
 namespace Nova
 {
@@ -26,7 +27,7 @@ namespace Nova
     struct PipelineSpecification;
     class VertexBuffer;
 
-    class Renderer
+    class Renderer : public Object
     {
     public:
         Renderer(Application* Owner, const GraphicsApi& GraphicsApi) : m_Application(Owner), m_GraphicsApi(GraphicsApi) {}
@@ -69,6 +70,8 @@ namespace Nova
         Application* GetOwner();
         const Application* GetOwner() const;
 
+        template<typename RendererType> requires IsBaseOfValue<Renderer, RendererType>
+        RendererType* As() { return dynamic_cast<RendererType*>(this); }
     protected:
         Camera* m_CurrentCamera = nullptr;
         Application* m_Application = nullptr;

@@ -12,7 +12,7 @@ namespace Nova
         ~OpenGLVertexArray() override;
         void Bind() const override;
         void Unbind() const override;
-        void SetBufferLayout(const VertexBufferLayout& Layout) override;
+        void SetBufferLayout(const VertexLayout& Layout) override;
     private:
         u32 m_Handle;
     };

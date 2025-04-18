@@ -9,10 +9,10 @@ namespace Nova
     
     struct CORE_API Vector4
     {
-        union{ f32 x{0.0f}, r; };
-        union{ f32 y{0.0f}, g; };
-        union{ f32 z{0.0f}, b; };
-        union{ f32 w{0.0f}, a; };
+        union{ f32 x = 0.0f, r; };
+        union{ f32 y = 0.0f, g; };
+        union{ f32 z = 0.0f, b; };
+        union{ f32 w = 0.0f, a; };
 
         Vector4() = default;
         Vector4(f32 X, f32 Y, f32 Z, f32 W);

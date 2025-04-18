@@ -5,11 +5,6 @@
 
 namespace Nova
 {
-    class VertexArray;
-}
-
-namespace Nova
-{
     struct VertexAttribute
     {
         String Name;
@@ -17,11 +12,11 @@ namespace Nova
         bool operator==(const VertexAttribute&) const;
     };
 
-    class VertexBufferLayout
+    class VertexLayout
     {
     public:
-        VertexBufferLayout() = default;
-        explicit VertexBufferLayout(const Array<VertexAttribute>& Attributes);
+        VertexLayout() = default;
+        explicit VertexLayout(const Array<VertexAttribute>& Attributes);
         
         void AddAttribute(const VertexAttribute& Attribute);
         

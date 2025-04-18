@@ -59,7 +59,7 @@ namespace Nova
         UUID m_UUID;
         String m_Name;
         bool m_Enabled;
-        Entity* m_Entity{nullptr};
+        Entity* m_Entity = nullptr;
         ComponentFlags m_Flags;
     private:
         friend class Entity;

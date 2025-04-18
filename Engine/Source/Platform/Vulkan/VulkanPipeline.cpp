@@ -2,16 +2,19 @@
 #include "VulkanRenderer.h"
 #include "VulkanShader.h"
 #include "Runtime/Log.h"
+#include "VulkanRendererTypeConvertor.h"
 
 namespace Nova
 {
-    VulkanPipeline::VulkanPipeline(Renderer* Renderer, const PipelineSpecification& Specification): Pipeline(Renderer, Specification)
+    VulkanPipeline::VulkanPipeline(Renderer* Renderer, const PipelineSpecification& Specification) : Pipeline(Renderer, Specification)
     {
-        VkDevice Device = ((VulkanRenderer*)Renderer)->GetDevice();
+        VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(Renderer);
+        VkDevice Device = CastedRenderer->GetDevice();
+        VulkanRendererTypeConvertor& Convertor = CastedRenderer->Convertor;
 
         VkPipelineInputAssemblyStateCreateInfo InputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
         InputAssemblyState.primitiveRestartEnable = Specification.PrimitiveRestartEnable;
-        InputAssemblyState.topology = VulkanRenderer::ConvertTopology(Specification.PrimitiveTopology);
+        InputAssemblyState.topology = Convertor.ConvertPrimitiveTopology(Specification.PrimitiveTopology);
 
         const Array<VertexAttribute>& VertexAttributes = Specification.VertexBufferLayout.GetAttributes();
         Array<VkVertexInputAttributeDescription> AttributeDescriptions;
@@ -22,7 +25,7 @@ namespace Nova
             VkVertexInputAttributeDescription AttributeDescription;
             AttributeDescription.binding = 0;
             AttributeDescription.location = i;
-            AttributeDescription.format = VulkanRenderer::ConvertFormat(VertexAttribute.Format);
+            AttributeDescription.format = Convertor.ConvertFormat(VertexAttribute.Format);
             AttributeDescription.offset = Specification.VertexBufferLayout.GetOffset(VertexAttribute);
             AttributeDescriptions.Add(AttributeDescription);
         }
@@ -41,9 +44,9 @@ namespace Nova
         VertexInputState.vertexBindingDescriptionCount = 1;
 
         VkPipelineRasterizationStateCreateInfo RasterizationState { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
-        RasterizationState.cullMode = VulkanRenderer::ConvertCullMode(Specification.CullMode);
-        RasterizationState.frontFace = VulkanRenderer::ConvertFrontFace(Specification.FrontFace);
-        RasterizationState.polygonMode = VulkanRenderer::ConvertPolygonMode(Specification.PolygonMode);
+        RasterizationState.cullMode = Convertor.ConvertCullMode(Specification.CullMode);
+        RasterizationState.frontFace = Convertor.ConvertFrontFace(Specification.FrontFace);
+        RasterizationState.polygonMode = Convertor.ConvertPolygonMode(Specification.PolygonMode);
         RasterizationState.rasterizerDiscardEnable = Specification.RasterizerDiscardEnable;
         RasterizationState.depthClampEnable = Specification.DepthClampEnable;
         RasterizationState.depthBiasEnable = Specification.DepthBiasEnable;
@@ -56,12 +59,12 @@ namespace Nova
         ColorBlendAttachmentState.blendEnable = Specification.BlendEnable;
         if (Specification.BlendEnable)
         {
-            ColorBlendAttachmentState.alphaBlendOp = VulkanRenderer::ConvertBlendOperation(Specification.BlendFunction.AlphaOperation);
-            ColorBlendAttachmentState.colorBlendOp = VulkanRenderer::ConvertBlendOperation(Specification.BlendFunction.ColorOperation);
-            ColorBlendAttachmentState.dstAlphaBlendFactor = VulkanRenderer::ConvertBlendFactor(Specification.BlendFunction.AlphaDest);
-            ColorBlendAttachmentState.dstColorBlendFactor = VulkanRenderer::ConvertBlendFactor(Specification.BlendFunction.ColorDest);
-            ColorBlendAttachmentState.srcAlphaBlendFactor = VulkanRenderer::ConvertBlendFactor(Specification.BlendFunction.AlphaSource);
-            ColorBlendAttachmentState.srcColorBlendFactor = VulkanRenderer::ConvertBlendFactor(Specification.BlendFunction.ColorSource);
+            ColorBlendAttachmentState.alphaBlendOp = Convertor.ConvertBlendOperation(Specification.BlendFunction.AlphaOperation);
+            ColorBlendAttachmentState.colorBlendOp = Convertor.ConvertBlendOperation(Specification.BlendFunction.ColorOperation);
+            ColorBlendAttachmentState.dstAlphaBlendFactor = Convertor.ConvertBlendFactor(Specification.BlendFunction.AlphaDest);
+            ColorBlendAttachmentState.dstColorBlendFactor = Convertor.ConvertBlendFactor(Specification.BlendFunction.ColorDest);
+            ColorBlendAttachmentState.srcAlphaBlendFactor = Convertor.ConvertBlendFactor(Specification.BlendFunction.AlphaSource);
+            ColorBlendAttachmentState.srcColorBlendFactor = Convertor.ConvertBlendFactor(Specification.BlendFunction.ColorSource);
         }
 
         ColorBlendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -121,7 +124,7 @@ namespace Nova
             {
                 VkPipelineShaderStageCreateInfo ShaderStageCreateInfo { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
                 ShaderStageCreateInfo.module = Module.Handle;
-                ShaderStageCreateInfo.stage = VulkanRenderer::ConvertShaderStage(Module.Stage);
+                ShaderStageCreateInfo.stage = Convertor.ConvertShaderStage(Module.Stage);
                 ShaderStageCreateInfo.pName = "main";
                 ShaderStageCreateInfo.pSpecializationInfo = nullptr;
                 ShaderStages.Add(ShaderStageCreateInfo);

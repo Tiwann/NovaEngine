@@ -488,90 +488,6 @@ namespace Nova
             }
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////
-        /// GRAPHICS PIPELINE CREATE
-        //////////////////////////////////////////////////////////////////////////////////////////
-        /*{
-
-            Array<VkVertexInputAttributeDescription> VertexInputAttributeDescriptions
-            {
-                VkVertexInputAttributeDescription{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) },
-                VkVertexInputAttributeDescription{ 0, 1, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TextureCoordinate) },
-                VkVertexInputAttributeDescription{ 0, 2, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) },
-                VkVertexInputAttributeDescription{ 0, 3, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Color) },
-            };
-
-            Array<VkVertexInputBindingDescription> VertexInputBindingDescriptions
-            {
-                VkVertexInputBindingDescription {  0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
-                VkVertexInputBindingDescription {  1, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
-                VkVertexInputBindingDescription {  2, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX },
-                VkVertexInputBindingDescription {  3, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX }
-            };
-
-            // Configuration du pipeline
-            VkPipelineVertexInputStateCreateInfo VertexInputInfo{};
-            VertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            VertexInputInfo.vertexAttributeDescriptionCount = VertexInputAttributeDescriptions.Count();
-            VertexInputInfo.pVertexAttributeDescriptions = VertexInputAttributeDescriptions.Data();
-            VertexInputInfo.vertexBindingDescriptionCount = VertexInputBindingDescriptions.Count();
-            VertexInputInfo.pVertexBindingDescriptions = VertexInputBindingDescriptions.Data();
-
-            VkPipelineInputAssemblyStateCreateInfo InputAssembly{};
-            InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-            InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-            InputAssembly.primitiveRestartEnable = VK_FALSE;
-
-            VkPipelineRasterizationStateCreateInfo Rasterizer{};
-            Rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-            Rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-            Rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-            Rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-            Rasterizer.lineWidth = 1.0f;
-
-            VkPipelineMultisampleStateCreateInfo Multisampling{};
-            Multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-            Multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-            VkPipelineColorBlendAttachmentState ColorBlendAttachment{};
-            ColorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-            ColorBlendAttachment.blendEnable = VK_FALSE;
-
-            VkPipelineColorBlendStateCreateInfo ColorBlending{};
-            ColorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-            ColorBlending.attachmentCount = 1;
-            ColorBlending.pAttachments = &ColorBlendAttachment;
-
-            VkPipelineRenderingCreateInfoKHR PipelineRenderingInfo{};
-            PipelineRenderingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR;
-            PipelineRenderingInfo.colorAttachmentCount = 1;
-            PipelineRenderingInfo.pColorAttachmentFormats = &m_SwapchainImageFormat;
-
-
-            VkPipelineShaderStageCreateInfo VertexStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-            VertexStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-
-
-            VkGraphicsPipelineCreateInfo PipelineInfo{};
-            PipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            PipelineInfo.pVertexInputState = &VertexInputInfo;
-            PipelineInfo.pInputAssemblyState = &InputAssembly;
-            PipelineInfo.pRasterizationState = &Rasterizer;
-            PipelineInfo.pMultisampleState = &Multisampling;
-            PipelineInfo.pColorBlendState = &ColorBlending;
-            PipelineInfo.layout = m_PipelineLayout;
-            PipelineInfo.pNext = &PipelineRenderingInfo;
-            PipelineInfo.stageCount = 2;
-            PipelineInfo.pStages
-
-            if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &PipelineInfo, nullptr, &m_Pipeline) != VK_SUCCESS)
-            {
-                NOVA_VULKAN_ERROR("Failed to create graphics pipeline!");
-                return false;
-            }
-
-        }*/
-
         VkPhysicalDeviceProperties2 PhysicalDeviceProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
         vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &PhysicalDeviceProperties);
         char* PhysicalDeviceName = PhysicalDeviceProperties.properties.deviceName;
@@ -1029,13 +945,13 @@ namespace Nova
     void VulkanRenderer::SetCullMode(const CullMode Mode)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        vkCmdSetCullMode(Cmd, ConvertCullMode(Mode));
+        vkCmdSetCullMode(Cmd, Convertor.ConvertCullMode(Mode));
     }
 
     void VulkanRenderer::SetDepthCompareOperation(const CompareOperation DepthFunction)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        vkCmdSetDepthCompareOp(Cmd, ConvertCompareOperation(DepthFunction));
+        vkCmdSetDepthCompareOp(Cmd, Convertor.ConvertCompareOperation(DepthFunction));
     }
 
     void VulkanRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor
@@ -1043,8 +959,8 @@ namespace Nova
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkColorBlendEquationEXT ColorBlendEquation {
-            ConvertBlendFactor(ColorSource), ConvertBlendFactor(ColorDest), ConvertBlendOperation(ColorOperation),
-            ConvertBlendFactor(AlphaSource), ConvertBlendFactor(AlphaDest), ConvertBlendOperation(AlphaOperation)
+            Convertor.ConvertBlendFactor(ColorSource), Convertor.ConvertBlendFactor(ColorDest), Convertor.ConvertBlendOperation(ColorOperation),
+            Convertor.ConvertBlendFactor(AlphaSource), Convertor.ConvertBlendFactor(AlphaDest), Convertor.ConvertBlendOperation(AlphaOperation)
         };
         m_FunctionPointers.vkCmdSetColorBlendEquationEXT(Cmd, 0, 1, &ColorBlendEquation);
     }
@@ -1056,8 +972,9 @@ namespace Nova
 
     void VulkanRenderer::BindPipeline(Pipeline* Pipeline)
     {
-        const VulkanPipeline* CastedPipeline = dynamic_cast<VulkanPipeline*>(Pipeline);
-        const VulkanShader* Shader = dynamic_cast<VulkanShader*>(CastedPipeline->GetSpecification().ShaderProgram);
+        const VulkanPipeline* CastedPipeline = Pipeline->As<VulkanPipeline>();
+        const PipelineSpecification& Specification = CastedPipeline->GetSpecification();
+        const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
 
@@ -1159,178 +1076,5 @@ namespace Nova
     const VkFunctionPointers& VulkanRenderer::GetFunctionPointers() const
     {
         return m_FunctionPointers;
-    }
-
-    VkFormat VulkanRenderer::ConvertFormat(const Format Format)
-    {
-         switch (Format)
-        {
-        case Format::NONE:                  return VK_FORMAT_UNDEFINED;
-        case Format::R8_UNORM:              return VK_FORMAT_R8_UNORM;
-        case Format::R8_SNORM:              return VK_FORMAT_R8_SNORM;
-        case Format::R16_USHORT:            return VK_FORMAT_R16_UINT;
-        case Format::R16_SHORT:             return VK_FORMAT_R16_SINT;
-        case Format::R32_FLOAT:             return VK_FORMAT_R32_SFLOAT;
-        case Format::R32_UINT:              return VK_FORMAT_R32_UINT;
-        case Format::R32_SINT:              return VK_FORMAT_R32_SINT;
-        case Format::R8G8_UNORM:            return VK_FORMAT_R8G8_UNORM;
-        case Format::R8G8_SNORM:            return VK_FORMAT_R8G8_SNORM;
-        case Format::R16G16_USHORT:         return VK_FORMAT_R16G16_UINT;
-        case Format::R16G16_SHORT:          return VK_FORMAT_R16G16_SINT;
-        case Format::R32G32_UINT:           return VK_FORMAT_R32G32_UINT;
-        case Format::R32G32_SINT:           return VK_FORMAT_R32G32_SINT;
-        case Format::R32G32_FLOAT:          return VK_FORMAT_R32G32_SFLOAT;
-        case Format::R8G8B8_UNORM:          return VK_FORMAT_R8G8B8_UNORM;
-        case Format::R8G8B8_SNORM:          return VK_FORMAT_R8G8B8_SNORM;
-        case Format::R16G16B16_USHORT:      return VK_FORMAT_R16G16B16_UINT;
-        case Format::R16G16B16_SHORT:       return VK_FORMAT_R16G16B16_SINT;
-        case Format::R32G32B32_UINT:        return VK_FORMAT_R32G32B32_UINT;
-        case Format::R32G32B32_SINT:        return VK_FORMAT_R32G32B32_SINT;
-        case Format::R32G32B32_FLOAT:       return VK_FORMAT_R32G32B32_SFLOAT;
-        case Format::R8G8B8A8_UNORM:        return VK_FORMAT_R8G8B8A8_UNORM;
-        case Format::R8G8B8A8_SNORM:        return VK_FORMAT_R8G8B8A8_SNORM;
-        case Format::R16G16B16A16_USHORT:   return VK_FORMAT_R16G16B16A16_UINT;
-        case Format::R16G16B16A16_SHORT:    return VK_FORMAT_R16G16B16A16_SINT;
-        case Format::R32G32B32A32_UINT:     return VK_FORMAT_R32G32B32A32_UINT;
-        case Format::R32G32B32A32_SINT:     return VK_FORMAT_R32G32B32A32_SINT;
-        case Format::R32G32B32A32_FLOAT:    return VK_FORMAT_R32G32B32A32_SFLOAT;
-        default: return VK_FORMAT_UNDEFINED;
-        }
-    }
-
-    VkFilter VulkanRenderer::ConvertFilter(const Filter Filter)
-    {
-        switch (Filter) {
-        case Filter::Nearest: return VK_FILTER_NEAREST;
-        case Filter::Linear: return VK_FILTER_LINEAR;
-        }
-        throw;
-    }
-
-    VkSamplerAddressMode VulkanRenderer::ConvertSamplerAddressMode(const SamplerAddressMode Wrap)
-    {
-        switch (Wrap)
-        {
-        case SamplerAddressMode::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        case SamplerAddressMode::MirroredRepeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-        case SamplerAddressMode::ClampToEdge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-        case SamplerAddressMode::ClampToBorder: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
-        case SamplerAddressMode::MirrorClampToEdge: return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
-        }
-        throw;
-    }
-
-    VkCullModeFlags VulkanRenderer::ConvertCullMode(const CullMode Mode)
-    {
-        switch (Mode)
-        {
-        case CullMode::FrontFace:           return VK_CULL_MODE_FRONT_BIT;
-        case CullMode::BackFace:            return VK_CULL_MODE_BACK_BIT;
-        case CullMode::FrontAndBackFaces:   return VK_CULL_MODE_FRONT_BIT | VK_CULL_MODE_BACK_BIT;
-        case CullMode::None:                return VK_CULL_MODE_NONE;
-        }
-        return VK_CULL_MODE_NONE;
-    }
-
-    VkBlendFactor VulkanRenderer::ConvertBlendFactor(const BlendFactor Mode)
-    {
-        switch (Mode) {
-        case BlendFactor::Zero: return VK_BLEND_FACTOR_ZERO;
-        case BlendFactor::One: return VK_BLEND_FACTOR_ONE;
-        case BlendFactor::SourceColor: return VK_BLEND_FACTOR_SRC_COLOR;
-        case BlendFactor::OneMinusSourceColor: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-        case BlendFactor::DestColor: return VK_BLEND_FACTOR_DST_COLOR;
-        case BlendFactor::OneMinusDestColor: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-        case BlendFactor::SourceAlpha: return VK_BLEND_FACTOR_SRC_ALPHA;
-        case BlendFactor::OneMinusSourceAlpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        case BlendFactor::DestAlpha: return VK_BLEND_FACTOR_DST_ALPHA;
-        case BlendFactor::OneMinusDestAlpha: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-        case BlendFactor::ConstantColor: return VK_BLEND_FACTOR_CONSTANT_COLOR;
-        case BlendFactor::OnMinusConstantColor: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-        case BlendFactor::ConstantAlpha: return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-        case BlendFactor::OneMinusConstantAlpha: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-        case BlendFactor::SourceAlphaSaturated: return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-        case BlendFactor::Source1Color: return VK_BLEND_FACTOR_SRC1_COLOR;
-        case BlendFactor::OneMinusSource1Color: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-        case BlendFactor::Source1Alpha: return VK_BLEND_FACTOR_SRC1_ALPHA;
-        case BlendFactor::OneMinusSource1Alpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
-        }
-        throw;
-    }
-
-    VkCompareOp VulkanRenderer::ConvertCompareOperation(const CompareOperation Func)
-    {
-        switch (Func)
-        {
-        case CompareOperation::Always:         return VK_COMPARE_OP_ALWAYS;
-        case CompareOperation::Never:          return VK_COMPARE_OP_NEVER;
-        case CompareOperation::Less:           return VK_COMPARE_OP_LESS;
-        case CompareOperation::LessOrEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
-        case CompareOperation::Equal:          return VK_COMPARE_OP_EQUAL;
-        case CompareOperation::NotEqual:       return VK_COMPARE_OP_NOT_EQUAL;
-        case CompareOperation::Greater:        return VK_COMPARE_OP_GREATER;
-        case CompareOperation::GreaterOrEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
-        }
-        throw;
-    }
-
-    VkBlendOp VulkanRenderer::ConvertBlendOperation(const BlendOperation Operation)
-    {
-        switch (Operation)
-        {
-        case BlendOperation::Add: return VK_BLEND_OP_ADD;
-        case BlendOperation::Min: return VK_BLEND_OP_MIN;
-        case BlendOperation::Max: return VK_BLEND_OP_MAX;
-        case BlendOperation::Subtract: return VK_BLEND_OP_SUBTRACT;
-        case BlendOperation::ReverseSubtract: return VK_BLEND_OP_REVERSE_SUBTRACT;
-        }
-        throw;
-    }
-
-    VkPrimitiveTopology VulkanRenderer::ConvertTopology(PrimitiveTopology Topology)
-    {
-        switch (Topology)
-        {
-        case PrimitiveTopology::PointList: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-        case PrimitiveTopology::LineList: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-        case PrimitiveTopology::LineStrip: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-        case PrimitiveTopology::TriangleList: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        case PrimitiveTopology::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-        case PrimitiveTopology::TriangleFan: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
-        default: throw;
-        }
-    }
-
-    VkFrontFace VulkanRenderer::ConvertFrontFace(FrontFace FrontFace)
-    {
-        switch (FrontFace)
-        {
-        case FrontFace::Clockwise: return VK_FRONT_FACE_CLOCKWISE;
-        case FrontFace::CounterClockwise: return VK_FRONT_FACE_COUNTER_CLOCKWISE;
-        default: throw;
-        }
-    }
-
-    VkPolygonMode VulkanRenderer::ConvertPolygonMode(PolygonMode PolygonMode)
-    {
-        switch (PolygonMode)
-        {
-        case PolygonMode::Fill:; return VK_POLYGON_MODE_FILL;
-        case PolygonMode::Line: return VK_POLYGON_MODE_LINE;
-        case PolygonMode::Point: return VK_POLYGON_MODE_POINT;
-        default: throw;
-        }
-    }
-
-    VkShaderStageFlagBits VulkanRenderer::ConvertShaderStage(const ShaderStage Stage)
-    {
-        switch (Stage)
-        {
-        case ShaderStage::None: return (VkShaderStageFlagBits)0;
-        case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-        case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
-        default: throw;
-        }
     }
 }

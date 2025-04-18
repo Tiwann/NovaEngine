@@ -61,8 +61,8 @@ namespace Nova
     protected:
         Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0);
 
-        u32 m_Width{0}, m_Height{0};
-        u32 m_Slot{0};
+        u32 m_Width = 0, m_Height = 0;
+        u32 m_Slot = 0;
         TextureParams m_Params;
     };
 }

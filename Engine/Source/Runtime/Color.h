@@ -9,7 +9,7 @@ namespace Nova
     class CORE_API Color
     {
     public:
-        f32 r{0.0f}, g{0.0f}, b{0.0f}, a{0.0f};
+        f32 r = 0.0f, g = 0.0f, b = 0.0f, a = 0.0f;
 
         Color();
         Color(u32 color);

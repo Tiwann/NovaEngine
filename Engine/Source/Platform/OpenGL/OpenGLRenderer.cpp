@@ -9,7 +9,7 @@
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/VertexArray.h"
 #include "Rendering/VertexBuffer.h"
-#include "Rendering/VertexBufferLayout.h"
+#include "Rendering/VertexLayout.h"
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>

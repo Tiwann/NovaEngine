@@ -122,8 +122,8 @@ namespace Nova
         ConstIterator end() const { return m_Data + m_Count; }
 
     private:
-        Type* m_Data{nullptr};
-        size_t m_Count{0};
+        Type* m_Data = nullptr;
+        size_t m_Count = 0;
     };
 
 

@@ -1,5 +1,5 @@
 #include "OpenGLVertexArray.h"
-#include "Rendering/VertexBufferLayout.h"
+#include "Rendering/VertexLayout.h"
 #include <glad/gl.h>
 
 namespace Nova
@@ -25,7 +25,7 @@ namespace Nova
         glBindVertexArray(0);
     }
 
-    void OpenGLVertexArray::SetBufferLayout(const VertexBufferLayout& Layout)
+    void OpenGLVertexArray::SetBufferLayout(const VertexLayout& Layout)
     {
         glBindVertexArray(m_Handle);
         for (size_t i = 0; i < Layout.Count(); i++)

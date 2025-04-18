@@ -200,16 +200,19 @@ namespace Nova
             m_DescriptorSetLayouts.Add(SetLayout);
         }
 
-        m_DescriptorSets = Array<VkDescriptorSet>(m_DescriptorSetLayouts.Count());
-
-        VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-        DescriptorSetAllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
-        DescriptorSetAllocateInfo.descriptorSetCount = m_DescriptorSetLayouts.Count();
-        DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
-        if (VK_FAILED(vkAllocateDescriptorSets(Device, &DescriptorSetAllocateInfo, m_DescriptorSets.Data())))
+        if (m_DescriptorSetLayouts.Count() > 0)
         {
-            NOVA_VULKAN_ERROR("Failed to allocate descriptor sets!");
-            return false;
+            m_DescriptorSets = Array<VkDescriptorSet>(m_DescriptorSetLayouts.Count());
+
+            VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+            DescriptorSetAllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
+            DescriptorSetAllocateInfo.descriptorSetCount = m_DescriptorSetLayouts.Count();
+            DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+            if (VK_FAILED(vkAllocateDescriptorSets(Device, &DescriptorSetAllocateInfo, m_DescriptorSets.Data())))
+            {
+                NOVA_VULKAN_ERROR("Failed to allocate descriptor sets!");
+                return false;
+            }
         }
 
         VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
@@ -292,9 +295,10 @@ namespace Nova
 
     VkShaderStageFlags VulkanShader::GetShaderStages() const
     {
+        const VulkanRenderer* Renderer = m_Renderer->As<VulkanRenderer>();
         VkShaderStageFlags Result = 0;
         for (const VulkanShaderModule& Module : m_ShaderModules)
-            Result |= VulkanRenderer::ConvertShaderStage(Module.Stage);
+            Result |= Renderer->Convertor.ConvertShaderStage(Module.Stage);
         return Result;
     }
 

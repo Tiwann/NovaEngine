@@ -5,7 +5,7 @@
 #include "PolygonMode.h"
 #include "PrimitiveTopology.h"
 #include "Scissor.h"
-#include "VertexBufferLayout.h"
+#include "VertexLayout.h"
 #include "Viewport.h"
 #include "Runtime/Object.h"
 
@@ -16,7 +16,7 @@ namespace Nova
 
     struct PipelineSpecification
     {
-        VertexBufferLayout VertexBufferLayout;
+        VertexLayout VertexBufferLayout;
         bool RasterizerDiscardEnable = true;
         bool PrimitiveRestartEnable = false;
         CullMode CullMode = CullMode::None;

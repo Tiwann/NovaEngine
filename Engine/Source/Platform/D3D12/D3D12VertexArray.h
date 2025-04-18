@@ -9,6 +9,6 @@ namespace Nova
         D3D12VertexArray() = default;
         void Bind() const override;
         void Unbind() const override;
-        void SetBufferLayout(const VertexBufferLayout& Layout) override;
+        void SetBufferLayout(const VertexLayout& Layout) override;
     };
 }

@@ -129,32 +129,32 @@ namespace Nova
         ////////////////////////////////////////////
         /// CORE COMPONENTS
         ////////////////////////////////////////////
-        Window*                 m_MainWindow{nullptr};
+        Window*                 m_MainWindow = nullptr;
         Array<Window*>          m_Windows;
-        Renderer*               m_Renderer{nullptr};
-        Scene*                  m_Scene{nullptr};
-        AudioSystem*            m_AudioSystem{nullptr};
-        ModuleManager*          m_ModuleManager{nullptr};
-        SlangSession*           m_SlangSession{nullptr};
+        Renderer*               m_Renderer = nullptr;
+        Scene*                  m_Scene = nullptr;
+        AudioSystem*            m_AudioSystem = nullptr;
+        ModuleManager*          m_ModuleManager = nullptr;
+        SlangSession*           m_SlangSession = nullptr;
     protected:
         ////////////////////////////////////////////
         /// RESOURCES MANAGERS
         ////////////////////////////////////////////
-        ShaderManager*          m_ShaderManager{nullptr};
-        TextureManager*         m_TextureManager{nullptr};
-        SoundManager*           m_SoundManager{nullptr};
-        AssetDatabase*          m_AssetDatabase{nullptr};
+        ShaderManager*          m_ShaderManager = nullptr;
+        TextureManager*         m_TextureManager = nullptr;
+        SoundManager*           m_SoundManager = nullptr;
+        AssetDatabase*          m_AssetDatabase = nullptr;
     private:
 
         ////////////////////////////////////////////
         /// UI COMPONENTS
         ////////////////////////////////////////////
-        ImGuiRenderer*          m_ImGuiRenderer{nullptr};
+        ImGuiRenderer*          m_ImGuiRenderer = nullptr;
         TreeNode<MenuItem>      m_MenuBar;
-        SceneHierarchyPanel*    m_SceneHierarchyPanel{nullptr};
-        DetailsPanel*           m_DetailsPanel{nullptr};
-        ViewportPanel*          m_ViewportPanel{nullptr};
-        PhysicsSettingsPanel*   m_PhysicsSettingsPanel{nullptr};
+        SceneHierarchyPanel*    m_SceneHierarchyPanel = nullptr;
+        DetailsPanel*           m_DetailsPanel = nullptr;
+        ViewportPanel*          m_ViewportPanel = nullptr;
+        PhysicsSettingsPanel*   m_PhysicsSettingsPanel = nullptr;
         
 
     private:

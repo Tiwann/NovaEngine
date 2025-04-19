@@ -14,6 +14,10 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
+#include "OpenGLPipeline.h"
+#include "OpenGLShader.h"
+#include "Rendering/Pipeline.h"
+
 
 namespace Nova
 {
@@ -107,20 +111,9 @@ namespace Nova
 
     void OpenGLRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
-        VertexArray->Bind();
         VertexBuffer->Bind();
         IndexBuffer->Bind();
-        Shader->Bind();
-        if(m_CurrentCamera)
-        {
-            Shader->SetUniformMat4("uView", m_CurrentCamera->GetViewMatrix());
-            Shader->SetUniformMat4("uProjection", m_CurrentCamera->GetProjectionMatrix());
-        } else
-        {
-            NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
-        }
-
-        //glDrawElements(ConvertPolygonMode(Mode), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(Convertor.ConvertPrimitiveTopology(m_BoundPipeline->GetSpecification().PrimitiveTopology), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
     }
     
     void OpenGLRenderer::SetCullMode(const CullMode Mode)
@@ -181,41 +174,6 @@ namespace Nova
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_GEQUAL);
             break;
-        }
-    }
-
-    GLenum OpenGLRenderer::ConvertBlendOperation(const BlendOperation Operation)
-    {
-        switch (Operation)
-        {
-        case BlendOperation::Add: return GL_FUNC_ADD;
-        case BlendOperation::Min: return GL_MIN;
-        case BlendOperation::Max: return GL_MAX;
-        case BlendOperation::Subtract: return GL_FUNC_SUBTRACT;
-        case BlendOperation::ReverseSubtract: return GL_FUNC_REVERSE_SUBTRACT;
-        }
-        throw;
-    }
-
-    GLenum OpenGLRenderer::ConvertFilter(const Filter Filter)
-    {
-        switch (Filter)
-        {
-        case Filter::Nearest: return GL_NEAREST;
-        case Filter::Linear: return GL_LINEAR;
-        default: throw;
-        }
-    }
-
-    GLenum OpenGLRenderer::ConvertSamplerAddressMode(const SamplerAddressMode AddressMode)
-    {
-        switch (AddressMode) {
-        case SamplerAddressMode::ClampToEdge: return GL_CLAMP_TO_EDGE;
-        case SamplerAddressMode::Repeat: return GL_REPEAT;
-        case SamplerAddressMode::MirroredRepeat: return GL_MIRRORED_REPEAT;
-        case SamplerAddressMode::ClampToBorder: GL_CLAMP_TO_BORDER;
-        case SamplerAddressMode::MirrorClampToEdge: GL_MIRROR_CLAMP_TO_EDGE;
-        default: throw;
         }
     }
 
@@ -296,15 +254,15 @@ namespace Nova
 
     void OpenGLRenderer::SetBlendFunction(const BlendFactor Source, const BlendFactor Destination, const BlendOperation Operation)
     {
-        glBlendFunc(ConvertBlendFactor(Source), ConvertBlendFactor(Destination));
-        glBlendEquation(ConvertBlendOperation(Operation));
+        glBlendFunc(Convertor.ConvertBlendFactor(Source), Convertor.ConvertBlendFactor(Destination));
+        glBlendEquation(Convertor.ConvertBlendOperation(Operation));
     }
 
     void OpenGLRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor
                                           AlphaDest, const BlendOperation AlphaOperation)
     {
-        glBlendFuncSeparate(ConvertBlendFactor(ColorSource), ConvertBlendFactor(ColorDest), ConvertBlendFactor(AlphaSource), ConvertBlendFactor(AlphaDest));
-        glBlendEquationSeparate(ConvertBlendOperation(ColorOperation), ConvertBlendOperation(AlphaOperation));
+        glBlendFuncSeparate(Convertor.ConvertBlendFactor(ColorSource), Convertor.ConvertBlendFactor(ColorDest), Convertor.ConvertBlendFactor(AlphaSource), Convertor.ConvertBlendFactor(AlphaDest));
+        glBlendEquationSeparate(Convertor.ConvertBlendOperation(ColorOperation), Convertor.ConvertBlendOperation(AlphaOperation));
     }
     
     void OpenGLRenderer::SetBlending(const bool Enabled)
@@ -318,52 +276,58 @@ namespace Nova
         }
     }
 
+    static void SetFeatureEnabled(const GLenum Feature, const bool Enabled)
+    {
+        const Function<void(GLenum)> EnableFunc = Enabled ? glEnable : glDisable;
+        EnableFunc.Call(Feature);
+    }
+
     void OpenGLRenderer::BindPipeline(Pipeline* Pipeline)
     {
-
-    }
-
-
-    GLenum OpenGLRenderer::ConvertPrimitiveTopology(const PrimitiveTopology Mode)
-    {
-        switch (Mode)
+        const PipelineSpecification& Specification = Pipeline->GetSpecification();
+        OpenGLPipeline* CastedPipeline = Pipeline->As<OpenGLPipeline>();
+        m_BoundPipeline = CastedPipeline;
+        const u32 VertexArrayObject = CastedPipeline->GetVertexArrayObject();
+        glBindVertexArray(VertexArrayObject);
+        glBindVertexArray(VertexArrayObject);
+        for (size_t i = 0; i < Specification.VertexLayout.Count(); i++)
         {
-        case PrimitiveTopology::PointList: return GL_POINTS;
-        case PrimitiveTopology::LineList: return GL_LINES;
-        case PrimitiveTopology::LineStrip: return GL_LINE_STRIP;
-        case PrimitiveTopology::TriangleList: return GL_TRIANGLES;
-        case PrimitiveTopology::TriangleFan: return GL_TRIANGLE_FAN;
-        case PrimitiveTopology::TriangleStrip: return GL_TRIANGLE_STRIP;
-        default: throw;
+            const VertexAttribute& Attribute = Specification.VertexLayout[i];
+            const size_t Count = GetFormatComponentCount(Attribute.Format);
+            glEnableVertexAttribArray((GLuint)i);
+            glVertexAttribPointer((GLuint)i, (GLint)Count, GL_FLOAT, GL_FALSE, (GLsizei)Specification.VertexLayout.Stride(), (const void*)Specification.VertexLayout.GetOffset(Attribute));
         }
-        return 0;
-    }
 
-    GLenum OpenGLRenderer::ConvertBlendFactor(const BlendFactor Mode)
-    {
-        switch (Mode)
+
+        SetFeatureEnabled(GL_DEPTH_TEST, Specification.DepthTestEnable);
+        SetFeatureEnabled(GL_DEPTH_CLAMP, Specification.DepthClampEnable);
+        SetFeatureEnabled(GL_STENCIL_TEST, Specification.StencilTestEnable);
+
+        glLineWidth(Specification.LineWidth);
+
+        const Viewport& Viewport = Specification.Viewport;
+        const auto& [Offset, Extent] = Specification.Scissor;
+        glViewport(Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height);
+        glScissor(Offset.X, Offset.Y, Extent.Width, Extent.Height);
+
+
+        SetFeatureEnabled(GL_CULL_FACE, Specification.CullMode != CullMode::None);
+        if (Specification.CullMode != CullMode::None)
+            glCullFace(Convertor.ConvertCullMode(Specification.CullMode));
+        glFrontFace(Convertor.ConvertFrontFace(Specification.FrontFace));
+
+        SetFeatureEnabled(GL_BLEND, Specification.BlendEnable);
+        if (Specification.BlendEnable)
         {
-        case BlendFactor::Zero:                   return GL_ZERO;
-        case BlendFactor::One:                    return GL_ONE;
-        case BlendFactor::SourceColor:            return GL_SRC_COLOR;
-        case BlendFactor::OneMinusSourceColor:    return GL_ONE_MINUS_SRC_COLOR;
-        case BlendFactor::DestColor:              return GL_DST_COLOR;
-        case BlendFactor::OneMinusDestColor:      return GL_ONE_MINUS_DST_COLOR;
-        case BlendFactor::SourceAlpha:            return GL_SRC_ALPHA;
-        case BlendFactor::OneMinusSourceAlpha:    return GL_ONE_MINUS_SRC_ALPHA;
-        case BlendFactor::DestAlpha:              return GL_DST_ALPHA;
-        case BlendFactor::OneMinusDestAlpha:      return GL_ONE_MINUS_DST_ALPHA;
-        case BlendFactor::ConstantColor:          return GL_CONSTANT_COLOR;
-        case BlendFactor::OnMinusConstantColor:   return GL_ONE_MINUS_CONSTANT_COLOR;
-        case BlendFactor::ConstantAlpha:          return GL_CONSTANT_ALPHA;
-        case BlendFactor::OneMinusConstantAlpha:  return GL_ONE_MINUS_CONSTANT_ALPHA;
-        case BlendFactor::SourceAlphaSaturated:   return GL_SRC_ALPHA_SATURATE;
-        case BlendFactor::Source1Color:           return GL_SRC1_COLOR;
-        case BlendFactor::OneMinusSource1Color:   return GL_ONE_MINUS_SRC1_COLOR;
-        case BlendFactor::Source1Alpha:           return GL_SRC1_ALPHA;
-        case BlendFactor::OneMinusSource1Alpha:   return GL_ONE_MINUS_SRC1_ALPHA;
+            const auto& [ColorSource, ColorDest, ColorOperation, AlphaSource, AlphaDest, AlphaOperation] = Specification.BlendFunction;
+            glBlendFuncSeparate(Convertor.ConvertBlendFactor(ColorSource), Convertor.ConvertBlendFactor(ColorDest), Convertor.ConvertBlendFactor(AlphaSource), Convertor.ConvertBlendFactor(AlphaDest));
+            glBlendEquationSeparate(Convertor.ConvertBlendOperation(ColorOperation), Convertor.ConvertBlendOperation(AlphaOperation));
         }
-        return -1u;
+
+
+        glPolygonMode(GL_FRONT_AND_BACK, Convertor.ConvertPolygonMode(Specification.PolygonMode));
+
+        Specification.ShaderProgram->As<OpenGLShader>()->Bind();
     }
 
 

@@ -5,6 +5,7 @@
 #include "Platform/D3D12/D3D12Shader.h"
 #include "Platform/D3D12/D3D12VertexBuffer.h"
 #include "Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "Platform/OpenGL/OpenGLPipeline.h"
 #include "Platform/OpenGL/OpenGLRenderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
@@ -51,7 +52,7 @@ namespace Nova
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return nullptr;
+        case GraphicsApi::OpenGL:   return new OpenGLPipeline(this, Specification);
         case GraphicsApi::Vulkan:   return new VulkanPipeline(this, Specification);
         case GraphicsApi::D3D12:    return new D3D12Pipeline(this, Specification);
         default:                    return nullptr;

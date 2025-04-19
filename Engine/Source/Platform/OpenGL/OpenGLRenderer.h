@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "OpenGLRendererTypeConvertor.h"
 #include "Rendering/CullMode.h"
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
@@ -15,11 +16,12 @@ typedef Nova::u32 GLenum;
 namespace Nova
 {
     class Shader;
+    class OpenGLPipeline;
     
     class OpenGLRenderer : public Renderer
     {
     public:
-        OpenGLRenderer(Application* Owner) : Renderer(Owner, GraphicsApi::OpenGL) {}
+        explicit OpenGLRenderer(Application* Owner) : Renderer(Owner, GraphicsApi::OpenGL) {}
         ~OpenGLRenderer() override = default;
 
         bool Initialize() override;
@@ -34,21 +36,17 @@ namespace Nova
         void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
+        static GLenum ConvertFormat(Format Format);
+        static GLenum GetFormatType(Format Format);
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlending(bool Enabled) override;
         void BindPipeline(Pipeline* Pipeline) override;
 
-
-        static GLenum ConvertPrimitiveTopology(PrimitiveTopology Mode);
-        static GLenum ConvertBlendFactor(BlendFactor Mode);
-        static GLenum ConvertBlendOperation(BlendOperation Operation);
-        static GLenum ConvertFilter(Filter Filter);
-        static GLenum ConvertSamplerAddressMode(SamplerAddressMode AddressMode);
-        static GLenum ConvertFormat(Format Format);
-        static GLenum GetFormatType(Format Format);
+        OpenGLRendererTypeConvertor Convertor;
     protected:
         static String GetDebugSourceName(u32 Source);
         static Verbosity GetDebugVerbosity(u32 Severity);
+        OpenGLPipeline* m_BoundPipeline = nullptr;
     };
 }

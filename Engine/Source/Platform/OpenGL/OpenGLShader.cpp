@@ -7,363 +7,180 @@
 #include "Components/Transform.h"
 #include "Components/Rendering/DirectionalLight.h"
 #include "Containers/StringFormat.h"
+#include "Runtime/Application.h"
+
 #include <glad/gl.h>
+#include <slang/slang.h>
+
+#include "OpenGLRenderer.h"
 
 
 namespace Nova
 {
     OpenGLShader::OpenGLShader(Renderer* Renderer, const String& Name, Path Filepath)
-        : Shader(Renderer, Name, std::move(Filepath)), m_Program(UINT32_MAX), m_VertexHandle(UINT32_MAX), m_FragmentHandle(UINT32_MAX)
+        : Shader(Renderer, Name, std::move(Filepath))
     {
-        
+
+        Array<slang::CompilerOptionEntry> CompileOptions;
+
+
+        slang::IGlobalSession* Slang = m_Renderer->GetOwner()->GetSlangSession();
+        slang::TargetDesc TargetDesc = {};
+        TargetDesc.format = SLANG_SPIRV;
+        TargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
+        TargetDesc.compilerOptionEntries = CompileOptions.Data();
+        TargetDesc.compilerOptionEntryCount = CompileOptions.Count();
+
+        slang::SessionDesc SessionDesc = {};
+        SessionDesc.targetCount = 1;
+        SessionDesc.targets = &TargetDesc;
+
+        if (SLANG_FAILED(Slang->createSession(SessionDesc, &m_Session)))
+        {
+            NOVA_LOG(Application, Verbosity::Error, "Failed to create Slang session!");
+        }
     }
     
     OpenGLShader::~OpenGLShader()
     {
-        glDeleteShader(m_VertexHandle);
-        glDeleteShader(m_FragmentHandle);
-        glDeleteProgram(m_Program);
+        for (const OpenGLShaderModule& Module : m_ShaderModules)
+        {
+            glDeleteShader(Module.Handle);
+        }
+        glDeleteProgram(m_ProgramHandle);
     }
 
-    bool OpenGLShader::CompileOpenGL()
-    {
-        // Compile Vertex
-        {
-            const String& ShaderName = GetName();
-            NOVA_LOG(Shader, Verbosity::Trace, "Compiling vertex shader: {}", ShaderName);
-            m_VertexHandle = glCreateShader(GL_VERTEX_SHADER);
 
-            //const char* VertexSource = *m_Source.Vertex;
-            //const i32 VertexSize = (i32)m_Source.Vertex.Count();
-            //glShaderSource(m_VertexHandle, 1, &VertexSource, &VertexSize);
-            //glCompileShader(m_VertexHandle);
-            
-            int Success = 0;
-            glGetShaderiv(m_VertexHandle, GL_COMPILE_STATUS, &Success);
-            if(!Success)
-            {
-                i32 Length = 0;
-                char Message[GL_INFO_LOG_LENGTH];
-                glGetShaderInfoLog(m_VertexHandle, GL_INFO_LOG_LENGTH, &Length, Message);
-                NOVA_LOG(Shader, Verbosity::Error, "Failed to compile vertex shader: {}", Message);
-                return false;
-            }
-            
-            NOVA_LOG(Shader, Verbosity::Info, "Successfully compiled vertex shader!");
+
+    bool OpenGLShader::Compile()
+    {
+        if (!m_Session)
+            return false;
+
+        m_Module = m_Session->loadModuleFromSource(*m_Name, m_Filepath.string().c_str(), nullptr, nullptr);
+        if (!m_Module)
+        {
+            NOVA_LOG(Shader, Verbosity::Error, "Failed to compile shader: Failed to load module");
+            return false;
         }
 
-        // Compile Fragment
+        FindShaderStage("VertexMain", ShaderStage::Vertex);
+        FindShaderStage("GeometryMain", ShaderStage::Geometry);
+        FindShaderStage("FragmentMain", ShaderStage::Fragment);
+
+        if (m_ShaderModules.IsEmpty())
         {
-            const String& ShaderName = GetName();
-            NOVA_LOG(Shader, Verbosity::Trace, "Compiling fragment shader: {}", ShaderName);
-            m_FragmentHandle = glCreateShader(GL_FRAGMENT_SHADER);
-
-            //const char* FragmentSource = *m_Source.Fragment;
-            //const i32 FragmentSize = (i32)m_Source.Fragment.Count();
-            //glShaderSource(m_FragmentHandle, 1, &FragmentSource, &FragmentSize);
-            //glCompileShader(m_FragmentHandle);
-            
-            int Success = 0;
-            glGetShaderiv(m_FragmentHandle, GL_COMPILE_STATUS, &Success);
-            if(!Success)
-            {
-                i32 Length = 0;
-                char Message[GL_INFO_LOG_LENGTH];
-                glGetShaderInfoLog(m_FragmentHandle, GL_INFO_LOG_LENGTH, &Length, Message);
-                NOVA_LOG(Shader, Verbosity::Error, "Failed to compiled fragment shader: {}", Message);
-                return false;
-            }
-
-            NOVA_LOG(Shader, Verbosity::Info, "Successfully compiled fragment shader!");
+            NOVA_LOG(Shader, Verbosity::Error, "No shader stage found!");
+            return false;
         }
         return true;
     }
 
-#define NOVA_USE_DEFAULT_OPENGL_SHADER_COMPILER
-    bool OpenGLShader::Compile()
-    {
-        Compiled =
-#if defined(NOVA_USE_DEFAULT_OPENGL_SHADER_COMPILER)
-        CompileOpenGL();
-#else
-        CompileShaderc();
-#endif
-        m_Program = glCreateProgram();
-        glAttachShader(m_Program, m_VertexHandle);
-        glAttachShader(m_Program, m_FragmentHandle);
-        return Compiled;
-    }
-
     bool OpenGLShader::Link()
     {
-        if(!Compiled)
+        if (!m_Session) return false;
+
+        Array<slang::IComponentType*> EntryPoints;
+        for (const OpenGLShaderModule& Module : m_ShaderModules)
+            EntryPoints.Add(Module.EntryPoint);
+
+        if (SLANG_FAILED(m_Session->createCompositeComponentType(EntryPoints.Data(), EntryPoints.Count(), &m_Program, nullptr)))
         {
-            NOVA_LOG(Shader, Verbosity::Error, "Shader program failed to link: One or more shader(s) failed to compile!");
-            return Linked = false;
+            NOVA_LOG(Application, Verbosity::Error, "Failed to create program!");
+            return false;
         }
-        
-        glLinkProgram(m_Program);
-        i32 Success = 0;
-        glGetProgramiv(m_Program, GL_LINK_STATUS, &Success);
-        if(!Success)
+
+        if (SLANG_FAILED(m_Program->link(&m_LinkedProgram, nullptr)))
         {
-            i32 Length = 0;
-            char Message[GL_INFO_LOG_LENGTH];
-            glGetProgramInfoLog(m_Program, GL_INFO_LOG_LENGTH, &Length, Message);
-            NOVA_LOG(Shader, Verbosity::Error, "Shader program failed to link: {}", Message);
-            return Linked = Success;
+            NOVA_LOG(Application, Verbosity::Error, "Failed to link program!");
+            return false;
         }
-        const String& ShaderName = GetName();
-        NOVA_LOG(Shader, Verbosity::Info, "Shader program {} successfully linked!", ShaderName);
-        return Linked = Success;
+        return true;
     }
 
     bool OpenGLShader::Validate()
     {
-        if(!Linked)
+        if (!m_LinkedProgram) return false;
+
+        const OpenGLRenderer* Renderer = m_Renderer->As<OpenGLRenderer>();
+        const OpenGLRendererTypeConvertor& Convertor = Renderer->Convertor;
+        for (size_t i = 0; i < m_ShaderModules.Count(); i++)
         {
-            NOVA_LOG(Shader, Verbosity::Error, "Shader program failed to validate: Shader program failed to link!");
-            return Validated = false;
+            if (SLANG_FAILED(m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode)))
+            {
+                NOVA_LOG(Application, Verbosity::Error, "Failed to get entry point code!");
+                return false;
+            }
         }
-        glValidateProgram(m_Program);
+
+        m_ProgramHandle = glCreateProgram();
+        for (OpenGLShaderModule& Module : m_ShaderModules)
+        {
+            Module.Handle = glCreateShader(Convertor.ConvertShaderStage(Module.Stage));
+            glShaderBinary(1, &Module.Handle, GL_SHADER_BINARY_FORMAT_SPIR_V, Module.CompiledCode->getBufferPointer(), Module.CompiledCode->getBufferSize());
+            glAttachShader(m_ProgramHandle, Module.Handle);
+        }
+
+        glLinkProgram(m_ProgramHandle);
         i32 Success = 0;
-        glGetProgramiv(m_Program, GL_VALIDATE_STATUS, &Success);
+
+        glGetProgramiv(m_ProgramHandle, GL_LINK_STATUS, &Success);
         if(!Success)
         {
             i32 Length = 0;
             char Message[GL_INFO_LOG_LENGTH];
-            glGetProgramInfoLog(m_Program, GL_INFO_LOG_LENGTH, &Length, Message);
-            NOVA_LOG(Shader, Verbosity::Error, "Shader program failed to validate: {}", Message);
-            return Validated = Success;
+            glGetProgramInfoLog(m_ProgramHandle, GL_INFO_LOG_LENGTH, &Length, Message);
+            NOVA_LOG(Shader, Verbosity::Error, "Shader program failed to link: {}", Message);
         }
-        NOVA_LOG(Shader, Verbosity::Info, "Shader program {} successfully validated!\n", GetName());
-        return Validated = Success;
+
+        NOVA_LOG(Shader, Verbosity::Info, "Shader program {} successfully linked!", m_Name);
+        glValidateProgram(m_ProgramHandle);
+
+        return true;
     }
 
     bool OpenGLShader::Bind()
     {
-        if(!Validated)
-        {
-            NOVA_LOG(Shader, Verbosity::Error, "Cannot use this shader: Not a valid shader!");
-            return false;
-        }
-
-        glUseProgram(m_Program);
+        glUseProgram(m_ProgramHandle);
         return true;
     }
 
     void OpenGLShader::Delete()
     {
-        glDeleteShader(m_VertexHandle);
-        glDeleteShader(m_FragmentHandle);
-        glDeleteProgram(m_Program);
+        glDeleteProgram(m_ProgramHandle);
     }
 
-    void OpenGLShader::SetDirectionalLight(const String& Name, const DirectionalLight* DirLight)
+    static SlangStage ConvertShaderStage(ShaderStage Stage)
     {
-        if (!DirLight) return;
-        const Transform* Transform = DirLight->GetTransform();
-        const bool Enabled = DirLight->GetOwner()->IsEnabled() && DirLight->IsEnabled();
-        const f32 Intensity = Enabled ? DirLight->GetIntensity() : 0.0f;
-        const Color Color = Enabled ? DirLight->GetColor() : Color::Black;
-        
-        SetUniformFloat3(StringFormat("{}.direction", Name), Transform->GetForwardVector());
-        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
-        SetUniformFloat4(StringFormat("{}.color", Name), Color);
+        switch (Stage) {
+        case ShaderStage::None: return SLANG_STAGE_FRAGMENT;
+        case ShaderStage::Vertex: return SLANG_STAGE_VERTEX;
+        case ShaderStage::Geometry: return SLANG_STAGE_GEOMETRY;
+        case ShaderStage::Fragment: return SLANG_STAGE_FRAGMENT;
+        case ShaderStage::Compute: return SLANG_STAGE_COMPUTE;
+        case ShaderStage::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
+        case ShaderStage::Tessellation: return SLANG_STAGE_HULL;
+        case ShaderStage::Mesh: return SLANG_STAGE_MESH;
+        default: throw;
+        }
     }
 
-    void OpenGLShader::SetPointLight(const String& Name, const PointLight* PointLight)
+    bool OpenGLShader::FindShaderStage(const StringView& Name, ShaderStage Stage)
     {
-        if (!PointLight) return;
-        const bool Enabled = PointLight->GetOwner()->IsEnabled() && PointLight->IsEnabled();
-        const f32 Intensity = Enabled ? PointLight->GetIntensity() : 0.0f;
-        const Color Color = Enabled ? PointLight->GetColor() : Color::Black;
+        slang::IEntryPoint* EntryPoint = nullptr;
+        if (SLANG_FAILED(m_Module->findAndCheckEntryPoint(*Name, ConvertShaderStage(Stage), &EntryPoint, nullptr)))
+            return false;
 
-        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
-        SetUniformFloat4(StringFormat("{}.color", Name), Color);
-        SetUniformFloat(StringFormat("{}.innerRadius", Name), PointLight->GetInnerRadius());
-        SetUniformFloat(StringFormat("{}.outerRadius", Name), PointLight->GetOuterRadius());
-    }
-
-    void OpenGLShader::SetAmbientLight(const String& Name, const AmbientLight* AmbientLight)
-    {
-        if (!AmbientLight) return;
-        const bool Enabled = AmbientLight->GetOwner()->IsEnabled() && AmbientLight->IsEnabled();
-        const f32 Intensity = Enabled ? AmbientLight->GetIntensity() : 0.0f;
-        const Color Color = Enabled ? AmbientLight->GetColor() : Color::Black;
-
-        SetUniformFloat(StringFormat("{}.intensity", Name), Intensity);
-        SetUniformFloat4(StringFormat("{}.color", Name), Color);
-    }
-
-#define NOVA_SHADER_UNIFORM_CHECK(Uniform, Name) \
-        if((Uniform) == -1) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            return; \
-        }((void)0)
-    
-    
-    void OpenGLShader::SetUniformFloat(const String& Name, f32 Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniform1f(Location, Value);
-    }
-    
-
-    void OpenGLShader::SetUniformFloat2(const String& Name, const Vector2& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniform2f(Location, Value.x, Value.y);
-    }
-
-    void OpenGLShader::SetUniformFloat3(const String& Name, const Vector3& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniform3f(Location, Value.x, Value.y, Value.z);
-    }
-
-    void OpenGLShader::SetUniformFloat4(const String& Name, const Vector4& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniform4fv(Location, 1, (const f32*)&Value);
-    }
-
-    void OpenGLShader::SetUniformMat4(const String& Name, const Matrix4& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniformMatrix4fv(Location, 1, false, (const f32*)&Value);
-    }
-
-    void OpenGLShader::SetUniformInt(const String& Name, i32 Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniform1i(Location, Value);
-    }
-
-    void OpenGLShader::SetUniformTexture(const String& Name, Texture2D* Texture)
-    {
-        if(!Texture)
+        if (EntryPoint)
         {
-            NOVA_LOG(Shader, Verbosity::Error, "Tried to upload a nullptr texture to a shader!");
-            return;
+            OpenGLShaderModule Module;
+            Module.Stage = Stage;
+            Module.EntryPoint = EntryPoint;
+            m_ShaderModules.Add(Module);
+
+            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetName(), Name);
         }
-        Texture->Bind();
-        SetUniformInt(Name, (i32)Texture->GetSlot());
+        return true;
     }
 
-    void OpenGLShader::SetUniformMat2(const String& Name, const Matrix2& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniformMatrix2fv(Location, 1, false, (const f32*)&Value);
-    }
-
-    void OpenGLShader::SetUniformMat3(const String& Name, const Matrix3& Value)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        NOVA_SHADER_UNIFORM_CHECK(Location, Name);
-        glUniformMatrix3fv(Location, 1, false, (const f32*)&Value);
-    }
-
-    f32 OpenGLShader::GetUniformFloat(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return 0.0f; \
-        }
-
-        f32 Result;
-        glGetUniformfv(m_Program, Location, &Result);
-        return Result;
-    }
-
-    Vector2 OpenGLShader::GetUniformFloat2(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return {0.0f}; \
-        }
-
-        Vector2 Result;
-        glGetnUniformfv(m_Program, Location, 2 * sizeof(f32), (f32*)&Result);
-        return Result;
-    }
-
-    Vector3 OpenGLShader::GetUniformFloat3(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return {0.0f}; \
-        }
-
-        Vector3 Result;
-        glGetnUniformfv(m_Program, Location, 3 * sizeof(f32), (f32*)&Result);
-        return Result;
-    }
-
-    Vector4 OpenGLShader::GetUniformFloat4(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return {0.0f}; \
-        }
-
-        Vector4 Result;
-        glGetnUniformfv(m_Program, Location, 4 * sizeof(f32), (f32*)&Result);
-        return Result;
-    }
-
-    Matrix4 OpenGLShader::GetUniformMat4(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", (Name), m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return Matrix4::Identity; \
-        }
-
-        Matrix4 Result;
-        glGetnUniformfv(m_Program, Location, 4 * 4 * sizeof(f32), (f32*)&Result);
-        return Result;
-    }
-
-    i32 OpenGLShader::GetUniformInt(const String& Name)
-    {
-        const i32 Location = glGetUniformLocation(m_Program, *Name);
-        if(!Location) \
-        { \
-            NOVA_LOG(Shader, Verbosity::Error, "Uniform \"{}\" doesn't exist in shader \"{}\"", Name, m_Name); \
-            NOVA_LOG(Shader, Verbosity::Error, "Path: {}", m_Filepath.string()); \
-            return 0; \
-        }
-
-        i32 Result;
-        glGetUniformiv(m_Program, Location, &Result);
-        return Result;
-    }
-
-    i32 OpenGLShader::GetUniformLocation(const String& Name)
-    {
-        return glGetUniformLocation(m_Program, *Name);
-    }
 }

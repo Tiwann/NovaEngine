@@ -5,6 +5,8 @@
 #include "OpenGLRenderer.h"
 #include <glad/gl.h>
 
+#include "Runtime/Application.h"
+
 
 namespace Nova
 {
@@ -14,10 +16,11 @@ namespace Nova
         glActiveTexture(GL_TEXTURE0 + Slot);
         glBindTexture(GL_TEXTURE_2D, m_Handle);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGLRenderer::ConvertFilter(m_Params.Filter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGLRenderer::ConvertFilter(m_Params.Filter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGLRenderer::ConvertSamplerAddressMode(m_Params.AddressMode));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGLRenderer::ConvertSamplerAddressMode(m_Params.AddressMode));
+        OpenGLRenderer* Renderer = g_Application->GetRenderer<OpenGLRenderer>();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));
 
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)m_Width, (GLsizei)m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     }
@@ -31,11 +34,12 @@ namespace Nova
     {
         Bind();
         m_Params = Params;
-        
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, OpenGLRenderer::ConvertFilter(m_Params.Filter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, OpenGLRenderer::ConvertFilter(m_Params.Filter));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, OpenGLRenderer::ConvertSamplerAddressMode(m_Params.AddressMode));
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, OpenGLRenderer::ConvertSamplerAddressMode(m_Params.AddressMode));
+
+        OpenGLRenderer* Renderer = g_Application->GetRenderer<OpenGLRenderer>();
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));
         Unbind();
     }
 

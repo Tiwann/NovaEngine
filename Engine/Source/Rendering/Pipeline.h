@@ -16,7 +16,7 @@ namespace Nova
 
     struct PipelineSpecification
     {
-        VertexLayout VertexBufferLayout;
+        VertexLayout VertexLayout;
         bool RasterizerDiscardEnable = true;
         bool PrimitiveRestartEnable = false;
         CullMode CullMode = CullMode::None;

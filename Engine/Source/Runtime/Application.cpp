@@ -346,37 +346,21 @@ namespace Nova
             {
             case GraphicsApi::None: return;
             case GraphicsApi::OpenGL:
-                if (m_Configuration.WithEditor)
+                if (m_Renderer->BeginFrame() && g_ApplicationRunning)
                 {
-                    // Clear all screen
-                    m_Renderer->ClearColor({0.08f, 0.08f, 0.08f, 1.0f});
-                    m_Renderer->ClearDepth(0.0f);
-
-                    m_ViewportPanel->GetFrameBuffer()->Bind();
-                    if (m_Renderer->GetCurrentCamera())
-                        m_Renderer->GetCurrentCamera()->Settings.SetDimensions(m_ViewportPanel->GetSize()); // Temp
-                    m_Renderer->SetViewportRect(Vector2::Zero, m_ViewportPanel->GetSize());
-                    const Camera* Camera = m_Renderer->GetCurrentCamera();
-                    m_Renderer->ClearColor(Camera->ClearColor);
-                    m_Renderer->ClearDepth(0.0f);
-                    m_Scene->OnRender(m_Renderer);
                     OnRender(m_Renderer);
-                    m_ViewportPanel->GetFrameBuffer()->Unbind();
-
-                    m_ImGuiRenderer->BeginFrame();
-                    ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(),
-                                                 ImGuiDockNodeFlags_PassthruCentralNode);
-                    OnGUI((f32)m_DeltaTime);
-                    m_ImGuiRenderer->EndFrame();
-                    m_ImGuiRenderer->Render();
-                    m_Renderer->Present();
-                }
-                else
-                {
-                    const Camera* Camera = m_Renderer->GetCurrentCamera();
-                    m_Renderer->ClearColor(Camera->ClearColor);
-                    m_Renderer->ClearDepth(1.0f);
                     m_Scene->OnRender(m_Renderer);
+
+                    if (m_Configuration.WithEditor)
+                    {
+                        m_ImGuiRenderer->BeginFrame();
+                        ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                        OnGUI((f32)m_DeltaTime);
+                        m_ImGuiRenderer->EndFrame();
+                        m_ImGuiRenderer->Render();
+                    }
+                    m_Renderer->EndFrame();
+                    m_Renderer->Present();
                 }
                 break;
             case GraphicsApi::Vulkan:

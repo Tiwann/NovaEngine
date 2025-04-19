@@ -572,5 +572,45 @@ namespace Nova
         OutResource->SetName(*Name);
         return OutResource;
     }
+
+    ID3D12Device9* D3D12Renderer::GetDevice() const
+    {
+        return m_Device;
+    }
+
+    u32 D3D12Renderer::GetImageCount() const
+    {
+        return m_ImageCount;
+    }
+
+    ID3D12GraphicsCommandList* D3D12Renderer::GetCurrentGraphicsCommandBuffer() const
+    {
+        return m_FrameData[m_CurrentFrameIndex].GraphicsCommandBuffer;
+    }
+
+    ID3D12Resource* D3D12Renderer::GetCurrentRenderTarget() const
+    {
+        return m_FrameData[m_CurrentFrameIndex].RenderTarget;
+    }
+
+    ID3D12DescriptorHeap* D3D12Renderer::GetRenderTargetViewDescriptorHeap() const
+    {
+        return m_RenderTargetViewDescriptorHeap;
+    }
+
+    ID3D12DescriptorHeap* D3D12Renderer::GetImGuiDescriptorHeap() const
+    {
+        return m_ImGuiFontDescriptorHeap;
+    }
+
+    ID3D12CommandAllocator* D3D12Renderer::GetCurrentCommandAllocator() const
+    {
+        return m_FrameData[m_CurrentFrameIndex].CommandAllocator;
+    }
+
+    ID3D12CommandQueue* D3D12Renderer::GetCommandQueue() const
+    {
+        return m_CommandQueue;
+    }
 }
 

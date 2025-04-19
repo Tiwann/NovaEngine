@@ -16,7 +16,7 @@ namespace Nova
         InputAssemblyState.primitiveRestartEnable = Specification.PrimitiveRestartEnable;
         InputAssemblyState.topology = Convertor.ConvertPrimitiveTopology(Specification.PrimitiveTopology);
 
-        const Array<VertexAttribute>& VertexAttributes = Specification.VertexBufferLayout.GetAttributes();
+        const Array<VertexAttribute>& VertexAttributes = Specification.VertexLayout.GetAttributes();
         Array<VkVertexInputAttributeDescription> AttributeDescriptions;
 
         for (size_t i = 0; i < VertexAttributes.Count(); i++)
@@ -26,14 +26,14 @@ namespace Nova
             AttributeDescription.binding = 0;
             AttributeDescription.location = i;
             AttributeDescription.format = Convertor.ConvertFormat(VertexAttribute.Format);
-            AttributeDescription.offset = Specification.VertexBufferLayout.GetOffset(VertexAttribute);
+            AttributeDescription.offset = Specification.VertexLayout.GetOffset(VertexAttribute);
             AttributeDescriptions.Add(AttributeDescription);
         }
 
 
         VkVertexInputBindingDescription BindingDescription;
         BindingDescription.binding = 0;
-        BindingDescription.stride = Specification.VertexBufferLayout.Stride();
+        BindingDescription.stride = Specification.VertexLayout.Stride();
         BindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
 

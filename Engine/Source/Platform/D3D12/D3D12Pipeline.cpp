@@ -11,13 +11,13 @@ namespace Nova
         // TODO: Create PSO
         D3D12_GRAPHICS_PIPELINE_STATE_DESC PipelineStateDescription = {};
         Array<D3D12_INPUT_ELEMENT_DESC> InputElementDescriptions;
-        for (size_t i = 0; i < Specification.VertexBufferLayout.Count(); i++)
+        for (size_t i = 0; i < Specification.VertexLayout.Count(); i++)
         {
-            const VertexAttribute& Attribute = Specification.VertexBufferLayout[i];
+            const VertexAttribute& Attribute = Specification.VertexLayout[i];
             D3D12_INPUT_ELEMENT_DESC InputElementDescription {};
             InputElementDescription.InputSlot = i;
             InputElementDescription.SemanticName = *Attribute.Name;
-            InputElementDescription.AlignedByteOffset = Specification.VertexBufferLayout.GetOffset(Attribute);
+            InputElementDescription.AlignedByteOffset = Specification.VertexLayout.GetOffset(Attribute);
             InputElementDescription.InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
             InputElementDescription.InstanceDataStepRate = 0;
             //InputElementDescription.InputSlot = ...;

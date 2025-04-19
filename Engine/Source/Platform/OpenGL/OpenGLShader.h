@@ -1,8 +1,30 @@
 ﻿#pragma once
+#include "Containers/StringView.h"
 #include "Rendering/Shader.h"
+
+struct ISlangBlob;
+
+namespace slang
+{
+    struct ISession;
+    struct IModule;
+    struct IEntryPoint;
+    struct IComponentType;
+    typedef ISlangBlob IBlob;
+}
 
 namespace Nova
 {
+
+    struct OpenGLShaderModule
+    {
+        u32 Handle = -1;
+        ShaderStage Stage = ShaderStage::None;
+        slang::IEntryPoint* EntryPoint = nullptr;
+        slang::IBlob* CompiledCode;
+    };
+
+
     class OpenGLShader : public Shader
     {
     public:
@@ -14,33 +36,14 @@ namespace Nova
         bool Validate() override;
         bool Bind() override;
         void Delete() override;
-        
-        void SetDirectionalLight(const String& Name, const DirectionalLight* DirLight) override;
-        void SetPointLight(const String& Name, const PointLight* PointLight) override;
-        void SetAmbientLight(const String& Name, const AmbientLight* AmbientLight) override;
-        void SetUniformFloat(const String& Name, f32 Value) override;
-        void SetUniformFloat2(const String& Name, const Vector2& Value) override;
-        void SetUniformFloat3(const String& Name, const Vector3& Value) override;
-        void SetUniformFloat4(const String& Name, const Vector4& Value) override;
-        void SetUniformInt(const String& Name, i32 Value) override;
-        void SetUniformTexture(const String& Name, Texture2D* Texture) override;
-        void SetUniformMat2(const String& Name, const Matrix2& Value) override;
-        void SetUniformMat3(const String& Name, const Matrix3& Value) override;
-        void SetUniformMat4(const String& Name, const Matrix4& Value) override;
 
-        f32 GetUniformFloat(const String& Name) override;
-        Vector2 GetUniformFloat2(const String& Name) override;
-        Vector3 GetUniformFloat3(const String& Name) override;
-        Vector4 GetUniformFloat4(const String& Name) override;
-        Matrix4 GetUniformMat4(const String& Name) override;
-        i32 GetUniformInt(const String& Name) override;
-        i32 GetUniformLocation(const String& Name) override;
+        bool FindShaderStage(const StringView& Name, ShaderStage Stage);
     protected:
-        u32 m_Program;
-        u32 m_VertexHandle;
-        u32 m_FragmentHandle;
-
-    private:
-        bool CompileOpenGL();
+        slang::ISession* m_Session = nullptr;
+        slang::IModule* m_Module = nullptr;
+        slang::IComponentType* m_Program = nullptr;
+        slang::IComponentType* m_LinkedProgram = nullptr;
+        Array<OpenGLShaderModule> m_ShaderModules;
+        u32 m_ProgramHandle = U32_MAX;
     };
 }

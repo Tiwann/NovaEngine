@@ -31,7 +31,7 @@ namespace Nova
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
-        Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
+        Configuration.Graphics.GraphicsApi = GraphicsApi::OpenGL;
         Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
         Configuration.Graphics.VSync = true;
         Configuration.WithEditor = false;
@@ -58,14 +58,14 @@ namespace Nova
         m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
 
         PipelineSpecification PipelineSpecification;
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"POSITION", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"TEXCOORDINATE", Format::R32G32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"NORMAL", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexBufferLayout.AddAttribute({"COLOR", Format::R32G32B32A32_FLOAT});
+        PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::R32G32_FLOAT});
+        PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::R32G32B32_FLOAT});
+        PipelineSpecification.VertexLayout.AddAttribute({"COLOR", Format::R32G32B32A32_FLOAT});
         PipelineSpecification.BlendEnable = false;
         PipelineSpecification.CullMode = CullMode::None;
         PipelineSpecification.FrontFace = FrontFace::Clockwise;
-        PipelineSpecification.Viewport = { 0.0f, 400, 600, -400 };
+        PipelineSpecification.Viewport = { 0.0f, 0.0f, 600, 400 };
         PipelineSpecification.Scissor.Extent = { 600, 400 };
         PipelineSpecification.Scissor.Offset = { 0, 0 };
         PipelineSpecification.PolygonMode = PolygonMode::Fill;

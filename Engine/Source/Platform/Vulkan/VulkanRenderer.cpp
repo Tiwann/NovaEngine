@@ -858,79 +858,8 @@ namespace Nova
     void VulkanRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
-        /*Array<VkVertexInputAttributeDescription2EXT> VertexInputAttributeDescriptions
-            {
-                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Position) },
-                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 1, 0, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, TextureCoordinate) },
-                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 2, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Normal) },
-                VkVertexInputAttributeDescription2EXT{ VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT, nullptr, 3, 0, VK_FORMAT_R32G32B32A32_SFLOAT, offsetof(Vertex, Color) },
-            };
-
-        Array<VkVertexInputBindingDescription2EXT> VertexInputBindingDescriptions
-        {
-            VkVertexInputBindingDescription2EXT { VK_STRUCTURE_TYPE_VERTEX_INPUT_BINDING_DESCRIPTION_2_EXT, nullptr, 0, sizeof(Vertex), VK_VERTEX_INPUT_RATE_VERTEX, 1 }
-        };
-
-        const PFN_vkCmdSetVertexInputEXT vkCmdSetVertexInputEXT = (PFN_vkCmdSetVertexInputEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetVertexInputEXT");
-        vkCmdSetVertexInputEXT(Cmd, VertexInputBindingDescriptions.Count(), VertexInputBindingDescriptions.Data(), VertexInputAttributeDescriptions.Count(), VertexInputAttributeDescriptions.Data());
-
-        const PFN_vkCmdSetRasterizerDiscardEnable vkCmdSetRasterizerDiscardEnable = (PFN_vkCmdSetRasterizerDiscardEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetRasterizerDiscardEnable");
-        vkCmdSetRasterizerDiscardEnable(GetCurrentCommandBuffer(), false);
-
-        SetCullMode(CullMode::BackFace);
-        vkCmdSetFrontFace(GetCurrentCommandBuffer(), VK_FRONT_FACE_CLOCKWISE);
-
-        const PFN_vkCmdSetDepthTestEnable vkCmdSetDepthTestEnable = (PFN_vkCmdSetDepthTestEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthTestEnable");
-        vkCmdSetDepthTestEnable(GetCurrentCommandBuffer(), false);
-
-        const PFN_vkCmdSetDepthWriteEnable vkCmdSetDepthWriteEnable = (PFN_vkCmdSetDepthWriteEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthWriteEnable");
-        vkCmdSetDepthWriteEnable(GetCurrentCommandBuffer(), false);
-
-        const PFN_vkCmdSetStencilTestEnable vkCmdSetStencilTestEnable = (PFN_vkCmdSetStencilTestEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetStencilTestEnable");
-        vkCmdSetStencilTestEnable(GetCurrentCommandBuffer(), false);
-
-        const PFN_vkCmdSetDepthBiasEnable vkCmdSetDepthBiasEnable = (PFN_vkCmdSetDepthBiasEnable)vkGetInstanceProcAddr(m_Instance, "vkCmdSetDepthBiasEnable");
-        vkCmdSetDepthBiasEnable(GetCurrentCommandBuffer(), false);
-
-        const f32 Width = g_Application->GetWindow()->GetWidth<f32>();
-        const f32 Height = g_Application->GetWindow()->GetHeight<f32>();
-
-        const VkViewport Viewport{0.0f, Height, Width, -Height, 0.0f, 1.0f };
-        vkCmdSetViewportWithCount(GetCurrentCommandBuffer(), 1, &Viewport);
-
-        VkRect2D Scissor;
-        Scissor.extent = { (u32)Width, (u32)Height };
-        Scissor.offset = { 0, 0 };
-        vkCmdSetScissorWithCount(GetCurrentCommandBuffer(), 1, &Scissor);
-
-        vkCmdSetPrimitiveTopology(GetCurrentCommandBuffer(), VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
-        vkCmdSetPrimitiveRestartEnable(GetCurrentCommandBuffer(), false);
-
-        const PFN_vkCmdSetPolygonModeEXT vkCmdSetPolygonModeEXT = (PFN_vkCmdSetPolygonModeEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetPolygonModeEXT");
-        vkCmdSetPolygonModeEXT(GetCurrentCommandBuffer(), VK_POLYGON_MODE_FILL);
-
-        const PFN_vkCmdSetRasterizationSamplesEXT vkCmdSetRasterizationSamplesEXT = (PFN_vkCmdSetRasterizationSamplesEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetRasterizationSamplesEXT");
-        vkCmdSetRasterizationSamplesEXT(GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT);
-
-        VkSampleMask SampleMask = 0xFFFFFFFF;
-        const PFN_vkCmdSetSampleMaskEXT vkCmdSetSampleMaskEXT = (PFN_vkCmdSetSampleMaskEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetSampleMaskEXT");
-        vkCmdSetSampleMaskEXT(GetCurrentCommandBuffer(), VK_SAMPLE_COUNT_1_BIT, &SampleMask);
-
-        const PFN_vkCmdSetAlphaToCoverageEnableEXT vkCmdSetAlphaToCoverageEnableEXT = (PFN_vkCmdSetAlphaToCoverageEnableEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetAlphaToCoverageEnableEXT");
-        vkCmdSetAlphaToCoverageEnableEXT(GetCurrentCommandBuffer(), false);
-
-
-        const VkColorComponentFlags ColorFlags = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT| VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        const PFN_vkCmdSetColorWriteMaskEXT vkCmdSetColorWriteMaskEXT = (PFN_vkCmdSetColorWriteMaskEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorWriteMaskEXT");
-        vkCmdSetColorWriteMaskEXT(GetCurrentCommandBuffer(), 0, 1, &ColorFlags);
-
-        SetBlending(false);
-        */
-
         IndexBuffer->Bind();
         VertexBuffer->Bind();
-        //Shader->Bind();
-
         vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
     }
 
@@ -954,8 +883,7 @@ namespace Nova
         vkCmdSetDepthCompareOp(Cmd, Convertor.ConvertCompareOperation(DepthFunction));
     }
 
-    void VulkanRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor
-                                          AlphaDest, const BlendOperation AlphaOperation)
+    void VulkanRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor AlphaDest, const BlendOperation AlphaOperation)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         const VkColorBlendEquationEXT ColorBlendEquation {

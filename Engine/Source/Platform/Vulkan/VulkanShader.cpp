@@ -270,9 +270,12 @@ namespace Nova
         case ShaderStage::Vertex: return SLANG_STAGE_VERTEX;
         case ShaderStage::Geometry: return SLANG_STAGE_GEOMETRY;
         case ShaderStage::Fragment: return SLANG_STAGE_FRAGMENT;
+        case ShaderStage::Compute: return SLANG_STAGE_COMPUTE;
+        case ShaderStage::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
+        case ShaderStage::Tessellation: return SLANG_STAGE_HULL;
+        case ShaderStage::Mesh: return SLANG_STAGE_MESH;
         default: throw;
         }
-
     }
 
     bool VulkanShader::FindShaderStage(const StringView& Name, ShaderStage Stage)

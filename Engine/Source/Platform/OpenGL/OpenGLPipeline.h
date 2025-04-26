@@ -7,8 +7,12 @@ namespace Nova
     class OpenGLPipeline : public Pipeline
     {
     public:
-        OpenGLPipeline(Renderer* Renderer, const PipelineSpecification& Specification);
-        virtual ~OpenGLPipeline();
+        explicit OpenGLPipeline(Renderer* Renderer);
+        ~OpenGLPipeline() override = default;
+
+        bool Initialize(const PipelineSpecification& Specification) override;
+        void Destroy() override;
+
         u32 GetVertexArrayObject() const;
     private:
         u32 m_Handle;

@@ -171,12 +171,25 @@ namespace Nova
         case Format::R32G32B32_FLOAT:       return VK_FORMAT_R32G32B32_SFLOAT;
         case Format::R8G8B8A8_UNORM:        return VK_FORMAT_R8G8B8A8_UNORM;
         case Format::R8G8B8A8_SNORM:        return VK_FORMAT_R8G8B8A8_SNORM;
+        case Format::R8G8B8A8_SRGB:         return VK_FORMAT_R8G8B8A8_SRGB;
         case Format::R16G16B16A16_USHORT:   return VK_FORMAT_R16G16B16A16_UINT;
         case Format::R16G16B16A16_SHORT:    return VK_FORMAT_R16G16B16A16_SINT;
         case Format::R32G32B32A32_UINT:     return VK_FORMAT_R32G32B32A32_UINT;
         case Format::R32G32B32A32_SINT:     return VK_FORMAT_R32G32B32A32_SINT;
         case Format::R32G32B32A32_FLOAT:    return VK_FORMAT_R32G32B32A32_SFLOAT;
         default: return VK_FORMAT_UNDEFINED;
+        }
+    }
+
+    VkPresentModeKHR VulkanRendererTypeConvertor::ConvertPresentMode(const PresentMode PresentMode) const
+    {
+        switch (PresentMode)
+        {
+        case PresentMode::Unknown: throw;
+        case PresentMode::Immediate: return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        case PresentMode::Mailbox: return VK_PRESENT_MODE_MAILBOX_KHR;
+        case PresentMode::Fifo: return VK_PRESENT_MODE_FIFO_KHR;
+        default: throw;
         }
     }
 }

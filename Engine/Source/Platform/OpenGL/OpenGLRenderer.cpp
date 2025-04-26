@@ -44,17 +44,15 @@ namespace Nova
             NOVA_LOG(OpenGL, Verbo, "Debug ({}): {}", SourceName, Message);
         };
 
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(Callback, nullptr);
 #endif
         
-        glEnable(GL_MULTISAMPLE);
+
         const String Renderer = (const char*)glGetString(GL_RENDERER);
         NOVA_LOG(OpenGL, Verbosity::Info, "Using OpenGL 4.6");
         NOVA_LOG(OpenGL, Verbosity::Info, "Using GPU: {}", Renderer);
-
-        
         return true;
     }
 
@@ -109,11 +107,13 @@ namespace Nova
         //glDrawArrays(ConvertPolygonMode(Mode), 0, (i32)NumVert);
     }
 
-    void OpenGLRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void OpenGLRenderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
     {
         VertexBuffer->Bind();
         IndexBuffer->Bind();
-        glDrawElements(Convertor.ConvertPrimitiveTopology(m_BoundPipeline->GetSpecification().PrimitiveTopology), (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
+        const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;
+        const GLenum GLTopology = Convertor.ConvertPrimitiveTopology(Topology);
+        glDrawElements(GLTopology, (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
     }
     
     void OpenGLRenderer::SetCullMode(const CullMode Mode)
@@ -303,12 +303,16 @@ namespace Nova
         SetFeatureEnabled(GL_DEPTH_CLAMP, Specification.DepthClampEnable);
         SetFeatureEnabled(GL_STENCIL_TEST, Specification.StencilTestEnable);
 
+        glDepthFunc(Convertor.ConvertCompareOperation(Specification.DepthCompareOperation));
+        glDepthRange(Specification.Viewport.MinDepth, Specification.Viewport.MaxDepth);
+
+
         glLineWidth(Specification.LineWidth);
 
         const Viewport& Viewport = Specification.Viewport;
-        const auto& [Offset, Extent] = Specification.Scissor;
+        const Scissor& Scissor = Specification.Scissor;
         glViewport(Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height);
-        glScissor(Offset.X, Offset.Y, Extent.Width, Extent.Height);
+        glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
 
 
         SetFeatureEnabled(GL_CULL_FACE, Specification.CullMode != CullMode::None);
@@ -324,10 +328,13 @@ namespace Nova
             glBlendEquationSeparate(Convertor.ConvertBlendOperation(ColorOperation), Convertor.ConvertBlendOperation(AlphaOperation));
         }
 
+        SetFeatureEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE, Specification.AlphaToCoverageEnable);
+        SetFeatureEnabled(GL_SAMPLE_ALPHA_TO_ONE, Specification.AlphaToOneEnable);
+        SetFeatureEnabled(GL_MULTISAMPLE, Specification.MultisampleEnable);
 
         glPolygonMode(GL_FRONT_AND_BACK, Convertor.ConvertPolygonMode(Specification.PolygonMode));
 
-        Specification.ShaderProgram->As<OpenGLShader>()->Bind();
+        Specification.ShaderProgram->Bind();
     }
 
 

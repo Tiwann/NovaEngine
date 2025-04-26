@@ -23,7 +23,7 @@ namespace Nova
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
             glfwWindowHint(GLFW_SAMPLES, 16);
 
-            #if defined(NOVA_DEBUG)
+            #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
             glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
             #endif
         } else

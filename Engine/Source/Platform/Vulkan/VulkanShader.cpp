@@ -1,11 +1,12 @@
 ﻿#include "VulkanShader.h"
 #include "VulkanRenderer.h"
 #include "Runtime/Application.h"
-#include "Rendering/ShaderCompiler.h"
 #include <slang/slang.h>
 
 namespace Nova
 {
+    static slang::IBlob* Diagnostic = nullptr;
+
     VulkanShader::VulkanShader(Renderer* Renderer, const String& Name, const Path& Filepath) : Shader(Renderer, Name, Filepath)
     {
         slang::IGlobalSession* Slang = m_Renderer->GetOwner()->GetSlangSession();
@@ -13,9 +14,18 @@ namespace Nova
         TargetDesc.format = SLANG_SPIRV;
         TargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
 
+        const Path ShaderDirs = Renderer->GetOwner()->GetEngineAssetsDirectory() / "Shaders";
+        const String ShaderIncludeDirectory = ShaderDirs.string().c_str();
+        Array<const char*> IncludeDirectories;
+        IncludeDirectories.Add(*ShaderIncludeDirectory);
+
+
         slang::SessionDesc SessionDesc = {};
         SessionDesc.targetCount = 1;
         SessionDesc.targets = &TargetDesc;
+        SessionDesc.searchPaths = IncludeDirectories.Data();
+        SessionDesc.searchPathCount = IncludeDirectories.Count();
+
         if (SLANG_FAILED(Slang->createSession(SessionDesc, &m_Compiler)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create Slang session!");
@@ -34,7 +44,11 @@ namespace Nova
             vkDestroyShaderModule(Device, Module.Handle, nullptr);
         }
 
-        vkFreeDescriptorSets(Device, Renderer->GetDescriptorPool(), m_DescriptorSets.Count(), m_DescriptorSets.Data());
+        if (!m_DescriptorSets.IsEmpty())
+        {
+            vkFreeDescriptorSets(Device, Renderer->GetDescriptorPool(), m_DescriptorSets.Count(), m_DescriptorSets.Data());
+        }
+
         vkDestroyPipelineLayout(Device, m_PipelineLayout, nullptr);
         for (const VkDescriptorSetLayout& Layout : m_DescriptorSetLayouts)
             vkDestroyDescriptorSetLayout(Device, Layout, nullptr);
@@ -45,10 +59,11 @@ namespace Nova
         if (!m_Compiler)
             return false;
         
-        m_ShaderModule = m_Compiler->loadModuleFromSource(*m_Name, m_Filepath.string().c_str(), nullptr, nullptr);
+        m_ShaderModule = m_Compiler->loadModuleFromSource(*m_Name, m_Filepath.string().c_str(), nullptr, &Diagnostic);
         if (!m_ShaderModule)
         {
             NOVA_LOG(Shader, Verbosity::Error, "Failed to compile shader: Failed to load module");
+            NOVA_LOG(Shader, Verbosity::Error, "{}", StringView((const char*)Diagnostic->getBufferPointer(), Diagnostic->getBufferSize()));
             return false;
         }
 
@@ -72,15 +87,17 @@ namespace Nova
         for (const VulkanShaderModule& Module : m_ShaderModules)
             EntryPoints.Add(Module.EntryPoint);
 
-        if (SLANG_FAILED(m_Compiler->createCompositeComponentType(EntryPoints.Data(), EntryPoints.Count(), &m_Program, nullptr)))
+        if (SLANG_FAILED(m_Compiler->createCompositeComponentType(EntryPoints.Data(), EntryPoints.Count(), &m_Program, &Diagnostic)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create program!");
+            NOVA_LOG(Shader, Verbosity::Error, "{}", StringView((const char*)Diagnostic->getBufferPointer(), Diagnostic->getBufferSize()));
             return false;
         }
         
-        if (SLANG_FAILED(m_Program->link(&m_LinkedProgram, nullptr)))
+        if (SLANG_FAILED(m_Program->link(&m_LinkedProgram, &Diagnostic)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to link program!");
+            NOVA_LOG(Shader, Verbosity::Error, "{}", StringView((const char*)Diagnostic->getBufferPointer(), Diagnostic->getBufferSize()));
             return false;
         }
         return true;
@@ -113,7 +130,6 @@ namespace Nova
         case slang::BindingType::ExtMask: throw;
         default: throw;
         }
-        throw;
     }
 
     static VkShaderStageFlagBits SlangConvertShaderStage(const SlangStage Stage)
@@ -144,9 +160,10 @@ namespace Nova
 
         for (size_t i = 0; i < m_ShaderModules.Count(); i++)
         {
-            if (SLANG_FAILED(m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode)))
+            if (SLANG_FAILED(m_LinkedProgram->getEntryPointCode(i, 0, &m_ShaderModules[i].CompiledCode, &Diagnostic)))
             {
                 NOVA_LOG(Application, Verbosity::Error, "Failed to get entry point code!");
+                NOVA_LOG(Shader, Verbosity::Error, "{}", StringView((const char*)Diagnostic->getBufferPointer(), Diagnostic->getBufferSize()));
                 return false;
             }
         }

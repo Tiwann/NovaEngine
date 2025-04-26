@@ -14,7 +14,7 @@
 
 namespace Nova
 {
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
     static void DebugCallback(D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity, D3D12_MESSAGE_ID ID, LPCSTR Description, void* pContext)
     {
         switch (Severity)
@@ -59,7 +59,7 @@ namespace Nova
         }
 
 
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         if (DX_FAILED(D3D12GetDebugInterface(IID_PPV_ARGS(&m_Debug))))
         {
             NOVA_DIRECTX_ERROR("Failed to get debug interface!");
@@ -72,7 +72,7 @@ namespace Nova
 
         
         // Creating device
-        if (DX_FAILED(D3D12CreateDevice(m_Adapter, D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device))))
+        if (DX_FAILED(D3D12CreateDevice(m_Adapter.Get(), D3D_FEATURE_LEVEL_12_0, IID_PPV_ARGS(&m_Device))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Device! Maybe your GPU doesn't support D3D12 Feature Level 12.2 (D3D_FEATURE_LEVEL_12_2)");
             m_Application->RequireExit(ExitCode::Error);
@@ -80,7 +80,7 @@ namespace Nova
         }
 
 
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         if (DX_FAILED(m_Device->QueryInterface(IID_PPV_ARGS(&m_InfoQueue))))
         {
             NOVA_DIRECTX_ERROR("Failed to get D3D12 Info Queue interface!");
@@ -106,7 +106,7 @@ namespace Nova
         // Creating Command Queue
         D3D12_COMMAND_QUEUE_DESC CommandQueueDesc = {};
         CommandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-        if (DX_FAILED(m_Device->CreateCommandQueue(&CommandQueueDesc, IID_PPV_ARGS(&m_CommandQueue))))
+        if (DX_FAILED(m_Device->CreateCommandQueue(&CommandQueueDesc, IID_PPV_ARGS(m_CommandQueue.GetAddressOf()))))
         {
             NOVA_DIRECTX_ERROR("Failed to create Command Queue!");
             m_Application->RequireExit(ExitCode::Error);
@@ -147,7 +147,7 @@ namespace Nova
         SwapchainFullscreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;*/
 
         const HWND Win32Window = glfwGetWin32Window(Window->GetNativeWindow());
-        if (DX_FAILED(m_Factory->CreateSwapChainForHwnd(m_CommandQueue, Win32Window, &SwapchainDesc, nullptr, nullptr, (IDXGISwapChain1**)&m_Swapchain)))
+        if (DX_FAILED(m_Factory->CreateSwapChainForHwnd(m_CommandQueue.Get(), Win32Window, &SwapchainDesc, nullptr, nullptr, (IDXGISwapChain1**)m_Swapchain.GetAddressOf())))
         {
             NOVA_DIRECTX_ERROR("Failed to create Swapchain!");
             m_Application->RequireExit(ExitCode::Error);
@@ -190,7 +190,7 @@ namespace Nova
                 return false;
             }
             
-            if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator, nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
+            if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
             {
                 NOVA_DIRECTX_ERROR("Failed to create Command List!");
                 m_Application->RequireExit(ExitCode::Error);
@@ -228,6 +228,8 @@ namespace Nova
 
     void D3D12Renderer::Destroy()
     {
+        WaitDeviceIdle();
+
     }
 
     void D3D12Renderer::ClearDepth(float Depth)
@@ -281,7 +283,7 @@ namespace Nova
                 const UINT Size = m_Device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
                 m_FrameData[i].RenderTargetViewHandle = m_RenderTargetViewDescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr;
                 m_FrameData[i].RenderTargetViewHandle += (SIZE_T)(i * Size);
-                m_Device->CreateRenderTargetView(m_FrameData[i].RenderTarget, nullptr, {m_FrameData[i].RenderTargetViewHandle});
+                m_Device->CreateRenderTargetView(m_FrameData[i].RenderTarget.Get(), nullptr, {m_FrameData[i].RenderTargetViewHandle});
 
                 if (DX_FAILED(m_Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_FrameData[i].CommandAllocator))))
                 {
@@ -290,7 +292,7 @@ namespace Nova
                     return false;
                 }
             
-                if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator, nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
+                if (DX_FAILED(m_Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_FrameData[i].CommandAllocator.Get(), nullptr, IID_PPV_ARGS(&m_FrameData[i].GraphicsCommandBuffer))))
                 {
                     NOVA_DIRECTX_ERROR("Failed to create Command List!");
                     m_Application->RequireExit(ExitCode::Error);
@@ -313,7 +315,7 @@ namespace Nova
             return false;
         }
         
-        ID3D12CommandAllocator* Allocator = m_FrameData[m_CurrentFrameIndex].CommandAllocator;
+        ID3D12CommandAllocator* Allocator = m_FrameData[m_CurrentFrameIndex].CommandAllocator.Get();
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         ID3D12Resource* RenderTarget = GetCurrentRenderTarget();
         const u64& RenderTargetViewHandle = m_FrameData[m_CurrentFrameIndex].RenderTargetViewHandle;
@@ -351,7 +353,7 @@ namespace Nova
         m_CommandQueue->ExecuteCommandLists(1, (ID3D12CommandList**)&Cmd);
         
         const UINT64 FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
-        if (DX_FAILED(m_CommandQueue->Signal(m_FrameData[m_CurrentFrameIndex].Fence, FenceValue)))
+        if (DX_FAILED(m_CommandQueue->Signal(m_FrameData[m_CurrentFrameIndex].Fence.Get(), FenceValue)))
         {
             NOVA_DIRECTX_ERROR("Failed to signal Fence!");
             m_Application->RequireExit(ExitCode::Error);
@@ -368,7 +370,7 @@ namespace Nova
         }
         
         m_CurrentFrameIndex = m_Swapchain->GetCurrentBackBufferIndex();
-        ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence;
+        ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence.Get();
         UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
 
         if (Fence->GetCompletedValue() < FenceValue)
@@ -382,7 +384,7 @@ namespace Nova
 
     void D3D12Renderer::WaitDeviceIdle()
     {
-        ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence;
+        ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence.Get();
         UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
         m_CommandQueue->Signal(Fence, FenceValue);
 
@@ -404,7 +406,7 @@ namespace Nova
     {
     }
 
-    void D3D12Renderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void D3D12Renderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
     {
         VertexBuffer->Bind();
         IndexBuffer->Bind();
@@ -575,7 +577,7 @@ namespace Nova
 
     ID3D12Device9* D3D12Renderer::GetDevice() const
     {
-        return m_Device;
+        return m_Device.Get();
     }
 
     u32 D3D12Renderer::GetImageCount() const
@@ -585,32 +587,32 @@ namespace Nova
 
     ID3D12GraphicsCommandList* D3D12Renderer::GetCurrentGraphicsCommandBuffer() const
     {
-        return m_FrameData[m_CurrentFrameIndex].GraphicsCommandBuffer;
+        return m_FrameData[m_CurrentFrameIndex].GraphicsCommandBuffer.Get();
     }
 
     ID3D12Resource* D3D12Renderer::GetCurrentRenderTarget() const
     {
-        return m_FrameData[m_CurrentFrameIndex].RenderTarget;
+        return m_FrameData[m_CurrentFrameIndex].RenderTarget.Get();
     }
 
     ID3D12DescriptorHeap* D3D12Renderer::GetRenderTargetViewDescriptorHeap() const
     {
-        return m_RenderTargetViewDescriptorHeap;
+        return m_RenderTargetViewDescriptorHeap.Get();
     }
 
     ID3D12DescriptorHeap* D3D12Renderer::GetImGuiDescriptorHeap() const
     {
-        return m_ImGuiFontDescriptorHeap;
+        return m_ImGuiFontDescriptorHeap.Get();
     }
 
     ID3D12CommandAllocator* D3D12Renderer::GetCurrentCommandAllocator() const
     {
-        return m_FrameData[m_CurrentFrameIndex].CommandAllocator;
+        return m_FrameData[m_CurrentFrameIndex].CommandAllocator.Get();
     }
 
     ID3D12CommandQueue* D3D12Renderer::GetCommandQueue() const
     {
-        return m_CommandQueue;
+        return m_CommandQueue.Get();
     }
 }
 

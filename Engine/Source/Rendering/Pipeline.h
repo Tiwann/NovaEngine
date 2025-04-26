@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "BlendFunction.h"
+#include "CompareOperation.h"
 #include "CullMode.h"
 #include "FrontFace.h"
 #include "PolygonMode.h"
@@ -25,8 +26,11 @@ namespace Nova
         PrimitiveTopology PrimitiveTopology = PrimitiveTopology::TriangleList;
         bool DepthTestEnable = false;
         bool DepthWriteEnable = false;
+        CompareOperation DepthCompareOperation = CompareOperation::Less;
         bool StencilTestEnable = false;
         bool DepthBiasEnable = false;
+        bool AlphaToCoverageEnable = false;
+        bool AlphaToOneEnable = false;
         float DepthBiasClamp = false;
         bool DepthClampEnable = false;
         float DepthBiasConstantFactor = 0.0f;
@@ -34,11 +38,12 @@ namespace Nova
         float LineWidth = 1.0f;
         Viewport Viewport;
         Scissor Scissor;
-        u8 RasterizationSamples;
+        u8 RasterizationSamples = 1;
         bool BlendEnable = false;
         BlendFunction BlendFunction;
         bool DynamicRendering = false;
         Shader* ShaderProgram = nullptr;
+        bool MultisampleEnable = false;
     };
 
     class Renderer;
@@ -46,9 +51,12 @@ namespace Nova
     class Pipeline : public Object
     {
     public:
+        virtual bool Initialize(const PipelineSpecification& Specification);
+        virtual void Destroy() = 0;
+
         const PipelineSpecification& GetSpecification() const;
     protected:
-        Pipeline(Renderer* Renderer, const PipelineSpecification& Specification);
+        explicit Pipeline(Renderer* Renderer);
 
         Renderer* m_Renderer = nullptr;
         PipelineSpecification m_Specification;

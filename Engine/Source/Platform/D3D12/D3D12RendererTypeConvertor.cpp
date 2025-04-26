@@ -173,11 +173,24 @@ namespace Nova
         case Format::R32G32B32_FLOAT:              return DXGI_FORMAT_R32G32B32_FLOAT;
         case Format::R8G8B8A8_UNORM:               return DXGI_FORMAT_R8G8B8A8_UNORM;
         case Format::R8G8B8A8_SNORM:               return DXGI_FORMAT_R8G8B8A8_SNORM;
+        case Format::R8G8B8A8_SRGB:                return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         case Format::R16G16B16A16_USHORT:          return DXGI_FORMAT_R16G16B16A16_UINT;
         case Format::R16G16B16A16_SHORT:           return DXGI_FORMAT_R16G16B16A16_SINT;
         case Format::R32G32B32A32_UINT:            return DXGI_FORMAT_R32G32B32A32_UINT;
         case Format::R32G32B32A32_SINT:            return DXGI_FORMAT_R32G32B32A32_SINT;
         case Format::R32G32B32A32_FLOAT:           return DXGI_FORMAT_R32G32B32A32_FLOAT;
+        default: throw;
+        }
+    }
+
+    DXGI_SWAP_EFFECT D3D12RendererTypeConvertor::ConvertPresentMode(const PresentMode PresentMode) const
+    {
+        switch (PresentMode)
+        {
+        case PresentMode::Unknown: throw;
+        case PresentMode::Immediate: return DXGI_SWAP_EFFECT_DISCARD;
+        case PresentMode::Mailbox: return DXGI_SWAP_EFFECT_FLIP_DISCARD;
+        case PresentMode::Fifo: return DXGI_SWAP_EFFECT_FLIP_DISCARD;
         default: throw;
         }
     }

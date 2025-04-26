@@ -6,6 +6,7 @@
 #include "Filter.h"
 #include "FrontFace.h"
 #include "PolygonMode.h"
+#include "PresentMode.h"
 #include "PrimitiveTopology.h"
 #include "SamplerAddressMode.h"
 #include "ShaderStage.h"
@@ -23,7 +24,8 @@ namespace Nova
     typename SamplerAddressModeType,
     typename ShaderStageType,
     typename CompareOperationType,
-    typename FormatType>
+    typename FormatType,
+    typename PresentModeType>
     struct RendererTypeConvertor
     {
         virtual ~RendererTypeConvertor() = default;
@@ -38,5 +40,6 @@ namespace Nova
         virtual ShaderStageType ConvertShaderStage(const ShaderStage Stage) const = 0;
         virtual CompareOperationType ConvertCompareOperation(const CompareOperation Operation) const = 0;
         virtual FormatType ConvertFormat(const Format Format) const = 0;
+        virtual PresentModeType ConvertPresentMode(const PresentMode PresentMode) const = 0;
     };
 }

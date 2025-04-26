@@ -89,7 +89,7 @@ namespace Nova
     void NovaEditor::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
-        Renderer->DrawIndexed(nullptr, s_VertexBuffer, s_IndexBuffer, s_HelloTriangleShader);
+        Renderer->DrawIndexed(s_VertexBuffer, s_IndexBuffer);
     }
 
     void NovaEditor::OnUpdate(f32 Delta)

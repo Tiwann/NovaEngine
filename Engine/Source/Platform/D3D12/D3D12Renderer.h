@@ -2,6 +2,7 @@
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/Image.h"
+#include "D3D12RendererTypeConvertor.h"
 
 #include <directx/d3d12.h>
 #include <dxgi1_6.h>
@@ -11,17 +12,17 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(D3D12, "D3D12");
 #define NOVA_DIRECTX_ERROR(message, ...) NOVA_LOG(D3D12, Verbosity::Error, message, __VA_ARGS__)
 #define NOVA_DIRECTX_WARNING(message, ...) NOVA_LOG(D3D12, Verbosity::Warning, message, __VA_ARGS__)
 #define DX_FAILED(Result) FAILED(Result)
-    
+
 namespace Nova
 {
 
     struct D3D12FrameData
     {
-        ID3D12Resource*             RenderTarget = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12Resource>      RenderTarget = nullptr;
         u64                         RenderTargetViewHandle = 0;
-        ID3D12GraphicsCommandList*  GraphicsCommandBuffer = nullptr;
-        ID3D12CommandAllocator*     CommandAllocator = nullptr;
-        ID3D12Fence*                Fence = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>  GraphicsCommandBuffer = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12CommandAllocator>     CommandAllocator = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12Fence>                Fence = nullptr;
         u64                         FenceValue = 0;
     };
     
@@ -40,7 +41,7 @@ namespace Nova
         void EndFrame() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
+        void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) override;
 
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
@@ -61,21 +62,23 @@ namespace Nova
         ID3D12CommandAllocator*     GetCurrentCommandAllocator() const;
         ID3D12CommandQueue*         GetCommandQueue() const;
         void                        WaitDeviceIdle();
+
+        D3D12RendererTypeConvertor  Convertor;
     private:
         u32                         m_ImageCount = 0;
         u32                         m_CurrentFrameIndex = 0;
-#if defined(NOVA_DEBUG)
-        ID3D12Debug6*               m_Debug = nullptr;
-        ID3D12InfoQueue1*           m_InfoQueue = nullptr;
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        Microsoft::WRL::ComPtr<ID3D12Debug6>               m_Debug = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12InfoQueue1>           m_InfoQueue = nullptr;
 #endif
-        ID3D12Device9*              m_Device = nullptr;
-        IDXGIFactory7*              m_Factory = nullptr;
-        IDXGIAdapter*               m_Adapter = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12Device9>              m_Device = nullptr;
+        Microsoft::WRL::ComPtr<IDXGIFactory7>              m_Factory = nullptr;
+        Microsoft::WRL::ComPtr<IDXGIAdapter>               m_Adapter = nullptr;
         DXGI_SWAP_EFFECT            m_PresentMode = DXGI_SWAP_EFFECT_DISCARD;
-        IDXGISwapChain4*            m_Swapchain = nullptr;
-        ID3D12CommandQueue*         m_CommandQueue = nullptr;
-        ID3D12DescriptorHeap*       m_RenderTargetViewDescriptorHeap = nullptr;
-        ID3D12DescriptorHeap*       m_ImGuiFontDescriptorHeap = nullptr;
+        Microsoft::WRL::ComPtr<IDXGISwapChain4>            m_Swapchain = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12CommandQueue>         m_CommandQueue = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>       m_RenderTargetViewDescriptorHeap = nullptr;
+        Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>       m_ImGuiFontDescriptorHeap = nullptr;
         D3D12FrameData              m_FrameData[3] = {};
         HANDLE                      m_FenceEvent = nullptr;
     };

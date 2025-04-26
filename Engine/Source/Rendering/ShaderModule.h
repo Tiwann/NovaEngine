@@ -27,4 +27,5 @@ namespace Nova
     };
 
     using VulkanShaderModule = ShaderModule<VkShaderModule>;
+    using D3D12ShaderModule = ShaderModule<void*>;
 }

@@ -8,9 +8,13 @@ namespace Nova
     class VulkanPipeline : public Pipeline
     {
     public:
-        VulkanPipeline(Renderer* Renderer, const PipelineSpecification& Specification);
-        ~VulkanPipeline() override;
+        explicit VulkanPipeline(Renderer* Renderer);
+        ~VulkanPipeline() override = default;
         VkPipeline GetHandle() const;
+
+        bool Initialize(const PipelineSpecification& Specification) override;
+        void Destroy() override;
+
     private:
         VkPipeline m_Handle;
     };

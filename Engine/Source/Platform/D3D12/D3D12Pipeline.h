@@ -2,15 +2,20 @@
 #include "Rendering/Pipeline.h"
 
 struct ID3D12PipelineState;
+
 namespace Nova
 {
     class D3D12Pipeline : public Pipeline
     {
     public:
-        D3D12Pipeline(Renderer* Renderer, const PipelineSpecification& Specification);
-        ~D3D12Pipeline() override;
+        explicit D3D12Pipeline(Renderer* Renderer);
+
+        void Destroy() override;
+        bool Initialize(const PipelineSpecification& Specification) override;
+
         ID3D12PipelineState* GetHandle() const;
+
     private:
-        ID3D12PipelineState* m_Handle;
+        ID3D12PipelineState* m_Handle = nullptr;
     };
 }

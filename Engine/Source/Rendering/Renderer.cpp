@@ -13,6 +13,7 @@
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
 
 namespace Nova
@@ -35,6 +36,28 @@ namespace Nova
         ClearDepth(Depth);
     }
 
+    Swapchain* Renderer::CreateSwapchain(const SwapchainDescription& Description)
+    {
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan:
+            {
+                VulkanSwapchain* Result = new VulkanSwapchain(this);
+                if (!Result->Initialize(Description))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        case GraphicsApi::D3D12:
+            return nullptr;
+        default: throw;
+        }
+    }
+
     Shader* Renderer::CreateShader(const String& Name, const Path& Filepath)
     {
         switch (m_GraphicsApi)
@@ -51,11 +74,38 @@ namespace Nova
     {
         switch (m_GraphicsApi)
         {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLPipeline(this, Specification);
-        case GraphicsApi::Vulkan:   return new VulkanPipeline(this, Specification);
-        case GraphicsApi::D3D12:    return new D3D12Pipeline(this, Specification);
-        default:                    return nullptr;
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL:
+            {
+                Pipeline* Result = new OpenGLPipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        case GraphicsApi::Vulkan:
+            {
+                Pipeline* Result = new VulkanPipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        case GraphicsApi::D3D12:
+            {
+                Pipeline* Result = new D3D12Pipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        default: return nullptr;
         }
     }
 

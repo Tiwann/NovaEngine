@@ -6,7 +6,7 @@ namespace Nova
 {
 
     struct VulkanRendererTypeConvertor : RendererTypeConvertor<VkCullModeFlags, VkBlendFactor, VkBlendOp,
-    VkFilter, VkFrontFace, VkPolygonMode, VkPrimitiveTopology, VkSamplerAddressMode, VkShaderStageFlagBits, VkCompareOp, VkFormat>
+    VkFilter, VkFrontFace, VkPolygonMode, VkPrimitiveTopology, VkSamplerAddressMode, VkShaderStageFlagBits, VkCompareOp, VkFormat, VkPresentModeKHR>
     {
         VkCullModeFlags ConvertCullMode(const CullMode Mode) const override;
         VkBlendFactor ConvertBlendFactor(const BlendFactor Factor) const override;
@@ -19,5 +19,6 @@ namespace Nova
         VkShaderStageFlagBits ConvertShaderStage(const ShaderStage Stage) const override;
         VkCompareOp ConvertCompareOperation(const CompareOperation Operation) const override;
         VkFormat ConvertFormat(const Format Format) const override;
+        VkPresentModeKHR ConvertPresentMode(const PresentMode PresentMode) const override;
     };
 }

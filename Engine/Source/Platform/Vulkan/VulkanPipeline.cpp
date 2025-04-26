@@ -6,11 +6,18 @@
 
 namespace Nova
 {
-    VulkanPipeline::VulkanPipeline(Renderer* Renderer, const PipelineSpecification& Specification) : Pipeline(Renderer, Specification)
+    VulkanPipeline::VulkanPipeline(Renderer* Renderer) : Pipeline(Renderer)
     {
-        VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(Renderer);
-        VkDevice Device = CastedRenderer->GetDevice();
-        VulkanRendererTypeConvertor& Convertor = CastedRenderer->Convertor;
+
+    }
+
+    bool VulkanPipeline::Initialize(const PipelineSpecification& Specification)
+    {
+        Pipeline::Initialize(Specification);
+
+        VulkanRenderer* Renderer = m_Renderer->As<VulkanRenderer>();
+        VkDevice Device = Renderer->GetDevice();
+        const VulkanRendererTypeConvertor& Convertor = Renderer->Convertor;
 
         VkPipelineInputAssemblyStateCreateInfo InputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
         InputAssemblyState.primitiveRestartEnable = Specification.PrimitiveRestartEnable;
@@ -81,29 +88,31 @@ namespace Nova
         VkPipelineDepthStencilStateCreateInfo DepthStencilState { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
         DepthStencilState.depthTestEnable = Specification.DepthTestEnable;
         DepthStencilState.depthWriteEnable = Specification.DepthWriteEnable;
+        DepthStencilState.stencilTestEnable = Specification.StencilTestEnable;
+        DepthStencilState.depthCompareOp = Convertor.ConvertCompareOperation(Specification.DepthCompareOperation);
 
         VkSampleMask SampleMask = 0xFFFFFFFF;
         VkPipelineMultisampleStateCreateInfo MultisampleState { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };
         MultisampleState.rasterizationSamples = (VkSampleCountFlagBits)Specification.RasterizationSamples;
-        MultisampleState.alphaToCoverageEnable = false;
-        MultisampleState.alphaToOneEnable = false;
+        MultisampleState.alphaToCoverageEnable = Specification.AlphaToCoverageEnable;
+        MultisampleState.alphaToOneEnable = Specification.AlphaToOneEnable;
         MultisampleState.pSampleMask = &SampleMask;
         MultisampleState.sampleShadingEnable = false;
         // MultisampleState.minSampleShading = ...; if sampleShading is true
 
         VkViewport Viewport;
         Viewport.x = Specification.Viewport.X;
-        Viewport.y = Specification.Viewport.Y;
+        Viewport.y = Specification.Viewport.Y + Specification.Viewport.Height;
         Viewport.width = Specification.Viewport.Width;
-        Viewport.height = Specification.Viewport.Height;
+        Viewport.height = -Specification.Viewport.Height;
         Viewport.minDepth = Specification.Viewport.MinDepth;
         Viewport.maxDepth = Specification.Viewport.MaxDepth;
 
         VkRect2D Scissor;
-        Scissor.offset.x = Specification.Scissor.Offset.X;
-        Scissor.offset.y = Specification.Scissor.Offset.Y;
-        Scissor.extent.width = Specification.Scissor.Extent.Width;
-        Scissor.extent.height = Specification.Scissor.Extent.Height;
+        Scissor.offset.x = Specification.Scissor.X;
+        Scissor.offset.y = Specification.Scissor.Y;
+        Scissor.extent.width = Specification.Scissor.Width;
+        Scissor.extent.height = Specification.Scissor.Height;
 
         VkPipelineViewportStateCreateInfo ViewportState { VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO };
         ViewportState.viewportCount = 1;
@@ -157,11 +166,13 @@ namespace Nova
         if (VK_FAILED(vkCreateGraphicsPipelines(Device, nullptr, 1, &PipelineCreateInfo, nullptr, &m_Handle)))
         {
             NOVA_VULKAN_ERROR("Failed to create graphics pipeline!");
-            return;
+            return false;
         }
+
+        return true;
     }
 
-    VulkanPipeline::~VulkanPipeline()
+    void VulkanPipeline::Destroy()
     {
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
         const VkDevice Device = Renderer->GetDevice();

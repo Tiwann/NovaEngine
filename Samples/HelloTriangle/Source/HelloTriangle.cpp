@@ -7,15 +7,13 @@
 #include "Rendering/Vertex.h"
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
-
-#include <vulkan/vulkan.h>
+#include "Runtime/DynamicLibrary.h"
+#include "Runtime/SharedPointer.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 
 namespace Nova
 {
-    class ModelRenderer;
-
     HelloTriangle::HelloTriangle(const Array<const char*>& Arguments) : Application(Arguments)
     {
 
@@ -31,7 +29,7 @@ namespace Nova
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
-        Configuration.Graphics.GraphicsApi = GraphicsApi::OpenGL;
+        Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
         Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
         Configuration.Graphics.VSync = true;
         Configuration.WithEditor = false;
@@ -41,8 +39,13 @@ namespace Nova
     void HelloTriangle::OnInit()
     {
         Application::OnInit();
+
         const Path ShaderPath = Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Shaders/HelloTriangle.slang";
-        m_Shader = m_ShaderManager->Load("HelloTriangle", ShaderPath);
+        if (m_Shader = m_ShaderManager->Load("HelloTriangle", ShaderPath); !m_Shader)
+        {
+            RequireExit(ExitCode::Error);
+            return;
+        }
 
         const Array<Vertex> Vertices
         {
@@ -58,16 +61,15 @@ namespace Nova
         m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
 
         PipelineSpecification PipelineSpecification;
-        PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::R32G32_FLOAT});
-        PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::R32G32B32_FLOAT});
-        PipelineSpecification.VertexLayout.AddAttribute({"COLOR", Format::R32G32B32A32_FLOAT});
+        PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
+        PipelineSpecification.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
+        PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::Vector3});
+        PipelineSpecification.VertexLayout.AddAttribute({"COLOR", Format::Vector4});
         PipelineSpecification.BlendEnable = false;
         PipelineSpecification.CullMode = CullMode::None;
         PipelineSpecification.FrontFace = FrontFace::Clockwise;
-        PipelineSpecification.Viewport = { 0.0f, 0.0f, 600, 400 };
-        PipelineSpecification.Scissor.Extent = { 600, 400 };
-        PipelineSpecification.Scissor.Offset = { 0, 0 };
+        PipelineSpecification.Viewport = Viewport(0.0f, 0.0f, 600.0f, 400.0f, 0.0f, 1.0f);
+        PipelineSpecification.Scissor = Scissor(0, 0, 600, 400);
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
         PipelineSpecification.PrimitiveTopology = PrimitiveTopology::TriangleList;
         PipelineSpecification.RasterizationSamples = 1;
@@ -87,11 +89,13 @@ namespace Nova
     {
         delete m_VertexBuffer;
         delete m_IndexBuffer;
+
+        m_Pipeline->Destroy();
         delete m_Pipeline;
         Application::OnExit();
     }
 
-    void HelloTriangle::OnUpdate(float DeltaTime)
+    void HelloTriangle::OnUpdate(const float DeltaTime)
     {
         Application::OnUpdate(DeltaTime);
 
@@ -101,6 +105,6 @@ namespace Nova
     {
         Application::OnRender(Renderer);
         Renderer->BindPipeline(m_Pipeline);
-        Renderer->DrawIndexed(nullptr, m_VertexBuffer, m_IndexBuffer, m_Shader);
+        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }
 }

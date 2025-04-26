@@ -67,7 +67,7 @@ namespace Nova
         FMOD_RESULT Result = System_Create(&m_Handle);
         FMOD_CHECK(Result);
 
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         const FMOD::DebugFlags Flags = FMOD::DebugFlagBits::LevelError | FMOD::DebugFlagBits::LevelWarning;
         FMOD::Debug_Initialize(Flags.As<FMOD_DEBUG_FLAGS>(), FMOD_DEBUG_MODE_CALLBACK, FMODDebugCallback);
 #endif

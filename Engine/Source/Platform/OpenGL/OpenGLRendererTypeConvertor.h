@@ -7,7 +7,7 @@ typedef Nova::u32 GLenum;
 namespace Nova
 {
     struct OpenGLRendererTypeConvertor : RendererTypeConvertor<GLenum, GLenum, GLenum, GLenum, GLenum, GLenum,
-    GLenum, GLenum, GLenum, GLenum, GLenum>
+    GLenum, GLenum, GLenum, GLenum, GLenum, GLenum>
     {
         GLenum ConvertCullMode(const CullMode Mode) const override;
         GLenum ConvertBlendFactor(const BlendFactor Factor) const override;
@@ -20,5 +20,6 @@ namespace Nova
         GLenum ConvertShaderStage(const ShaderStage Stage) const override;
         GLenum ConvertCompareOperation(const CompareOperation Operation) const override;
         GLenum ConvertFormat(const Format Format) const override;
+        GLenum ConvertPresentMode(const PresentMode PresentMode) const override;
     };
 }

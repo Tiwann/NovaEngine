@@ -176,4 +176,9 @@ namespace Nova
         default: throw;
         }
     }
+
+    GLenum OpenGLRendererTypeConvertor::ConvertPresentMode(const PresentMode PresentMode) const
+    {
+        throw;
+    }
 }

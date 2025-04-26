@@ -118,6 +118,7 @@ namespace Nova
         {
             Module.Handle = glCreateShader(Convertor.ConvertShaderStage(Module.Stage));
             glShaderBinary(1, &Module.Handle, GL_SHADER_BINARY_FORMAT_SPIR_V, Module.CompiledCode->getBufferPointer(), Module.CompiledCode->getBufferSize());
+            glSpecializeShader(Module.Handle, "main", 0, nullptr, nullptr);
             glAttachShader(m_ProgramHandle, Module.Handle);
         }
 

@@ -29,6 +29,7 @@ namespace Nova
         R32G32B32_FLOAT,
         R8G8B8A8_UNORM,
         R8G8B8A8_SNORM,
+        R8G8B8A8_SRGB,
         R16G16B16A16_USHORT,
         R16G16B16A16_SHORT,
         R32G32B32A32_UINT,

@@ -15,7 +15,7 @@
 
 namespace Nova
 {
-    #if defined(NOVA_DEBUG)
+    #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
     static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugMessageCallback(
         const VkDebugUtilsMessageSeverityFlagBitsEXT Severity,
         const VkDebugUtilsMessageTypeFlagsEXT,
@@ -67,7 +67,7 @@ namespace Nova
             Extensions.Add(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             Extensions.AddRange(GlfwExtensions, GlfwExtensionsCount);
 
-            #if defined(NOVA_DEBUG)
+            #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
             Extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
             #endif
 
@@ -89,7 +89,7 @@ namespace Nova
                 return false;
             }
 
-#if defined(NOVA_DEBUG)
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
             m_FunctionPointers.vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateDebugUtilsMessengerEXT");
             m_FunctionPointers.vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyDebugUtilsMessengerEXT");
 #endif
@@ -103,7 +103,7 @@ namespace Nova
         //////////////////////////////////////////////////////////////////////////////////////////
         /// DEBUG MESSENGER CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
-        #if defined(NOVA_DEBUG)
+        #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         {
             constexpr VkDebugUtilsMessageSeverityFlagsEXT SeverityFlags = VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT;
             constexpr VkDebugUtilsMessageTypeFlagsEXT TypeFlags = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
@@ -855,7 +855,7 @@ namespace Nova
         vkCmdDraw(Cmd, NumVert, 1, 0, 0);
     }
 
-    void VulkanRenderer::DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader)
+    void VulkanRenderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
         IndexBuffer->Bind();
@@ -907,7 +907,10 @@ namespace Nova
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
 
         const Array<VkDescriptorSet>& DescriptorSets = Shader->GetDescriptorSets();
-        vkCmdBindDescriptorSets(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, Shader->GetPipelineLayout(), 0, DescriptorSets.Count(), DescriptorSets.Data(), 0, nullptr);
+        if (DescriptorSets.Count() > 0)
+        {
+            vkCmdBindDescriptorSets(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, Shader->GetPipelineLayout(), 0, DescriptorSets.Count(), DescriptorSets.Data(), 0, nullptr);
+        }
     }
 
 

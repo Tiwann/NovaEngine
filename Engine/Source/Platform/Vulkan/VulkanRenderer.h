@@ -39,7 +39,7 @@ namespace Nova
 
     struct VkFunctionPointers
     {
-        #if defined(NOVA_DEBUG)
+        #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         PFN_vkCreateDebugUtilsMessengerEXT  vkCreateDebugUtilsMessengerEXT = nullptr;
         PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = nullptr;
         #endif
@@ -66,7 +66,7 @@ namespace Nova
         void Present() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) override;
+        void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;

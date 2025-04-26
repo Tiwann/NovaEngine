@@ -26,6 +26,8 @@ namespace Nova
     class Pipeline;
     struct PipelineSpecification;
     class VertexBuffer;
+    class Swapchain;
+    struct SwapchainDescription;
 
     class Renderer : public Object
     {
@@ -46,7 +48,7 @@ namespace Nova
         virtual void EndFrame() = 0;
         virtual void SetViewportRect(Vector2 Position, Vector2 Size) = 0;
         virtual void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) = 0;
-        virtual void DrawIndexed(VertexArray* VertexArray, VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer, Shader* Shader) = 0;
+        virtual void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;
         virtual void SetDepthCompareOperation(CompareOperation DepthFunction) = 0;
         virtual void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) = 0;
@@ -55,7 +57,7 @@ namespace Nova
 
         virtual void BindPipeline(Pipeline* Pipeline) = 0;
 
-
+        Swapchain* CreateSwapchain(const SwapchainDescription& Description);
         Shader* CreateShader(const String& Name, const Path& Filepath);
         Pipeline* CreatePipeline(const PipelineSpecification& Specification);
         VertexBuffer* CreateVertexBuffer();

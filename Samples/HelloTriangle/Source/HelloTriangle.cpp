@@ -1,9 +1,14 @@
 ﻿#include "HelloTriangle.h"
 #include "Runtime/EntryPoint.h"
 #include "CommandLine/ArgumentParser.h"
+#include "Platform/Vulkan/DescriptorSetInfo.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
+#include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Pipeline.h"
 #include "Rendering/Shader.h"
+#include "Rendering/UniformBuffer.h"
 #include "Rendering/Vertex.h"
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
@@ -35,6 +40,8 @@ namespace Nova
         Configuration.WithEditor = false;
         return Configuration;
     }
+
+    static VulkanUniformBuffer* CameraUBO = nullptr;
 
     void HelloTriangle::OnInit()
     {
@@ -83,12 +90,19 @@ namespace Nova
         PipelineSpecification.DynamicRendering = false;
         PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
+
+        CameraUBO = new VulkanUniformBuffer(Renderer);
+        CameraUBO->Allocate(sizeof(float));
+
     }
 
     void HelloTriangle::OnExit()
     {
         delete m_VertexBuffer;
         delete m_IndexBuffer;
+
+        CameraUBO->Free();
+        delete CameraUBO;
 
         m_Pipeline->Destroy();
         delete m_Pipeline;
@@ -99,6 +113,26 @@ namespace Nova
     {
         Application::OnUpdate(DeltaTime);
 
+        const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
+        const float Time = GetTime();
+        CameraUBO->Copy(&Time, sizeof(float), 0);
+
+        const VkDescriptorBufferInfo BufferInfos
+        {
+            .buffer = CameraUBO->GetHandle(),
+            .offset = 0,
+            .range = VK_WHOLE_SIZE,
+        };
+
+
+        const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
+       VkWriteDescriptorSet WriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        WriteDescriptors.descriptorCount = 1;
+        WriteDescriptors.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        WriteDescriptors.dstSet = Sets[0];
+        WriteDescriptors.dstBinding = 0;
+        WriteDescriptors.pBufferInfo = &BufferInfos;
+        vkUpdateDescriptorSets(Device, 1, &WriteDescriptors, 0, nullptr);
     }
 
     void HelloTriangle::OnRender(Renderer* Renderer)

@@ -16,6 +16,7 @@ namespace Nova
         VkBufferCreateInfo BufferCreateInfo { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
         BufferCreateInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
         BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        BufferCreateInfo.size = Size;
         BufferCreateInfo.pQueueFamilyIndices = nullptr;
         BufferCreateInfo.queueFamilyIndexCount = 0;
 
@@ -33,7 +34,7 @@ namespace Nova
             &m_Allocation,
             &m_AllocationInfo)))
         {
-            NOVA_VULKAN_ERROR("Failed to create Vertex Buffer!");
+            NOVA_VULKAN_ERROR("Failed to create uniform Buffer!");
             return false;
         }
 

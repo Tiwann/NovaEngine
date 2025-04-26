@@ -17,15 +17,18 @@ typedef struct VertexOutput
     float4 Color;
 } FragmentInput;
 
-ConstantBuffer<Camera> InCamera;
-ConstantBuffer<Model> InModel;
-
+ConstantBuffer<float> Time;
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    Out.Position = mul(InCamera.Projection * InCamera.View * InModel.Model, float4(Input.Position, 1.0));
+    float OffsetX = cos(Time) * 0.25;
+    float OffsetY = sin(Time) * 0.25;
+
+    Out.Position = float4(Input.Position, 1.0);
+    Out.Position.x = Out.Position.x + OffsetX;
+    Out.Position.y = Out.Position.y - OffsetY;
     Out.Position.z = (Out.Position.z + Out.Position.w) * 0.5;
     Out.TexCoord = Input.TexCoord;
     Out.Normal = Input.Normal;

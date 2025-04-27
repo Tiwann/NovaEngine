@@ -208,7 +208,7 @@ namespace Nova
             VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
             DescriptorSetLayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
             DescriptorSetLayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
-            
+
 
             VkDescriptorSetLayout SetLayout = nullptr;
             if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &DescriptorSetLayoutCreateInfo, nullptr, &SetLayout)))

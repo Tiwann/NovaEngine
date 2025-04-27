@@ -95,6 +95,7 @@ namespace Nova
         VkCommandPool GetCommandPool() const;
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
+        u32 GetCurrentFrameIndex() const;
         VulkanRendererTypeConvertor Convertor;
         static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:

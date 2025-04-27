@@ -1008,4 +1008,9 @@ namespace Nova
     {
         return m_FunctionPointers;
     }
+
+    u32 VulkanRenderer::GetCurrentFrameIndex() const
+    {
+        return m_CurrentFrameIndex;
+    }
 }

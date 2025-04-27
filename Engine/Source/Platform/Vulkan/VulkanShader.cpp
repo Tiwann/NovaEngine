@@ -201,12 +201,14 @@ namespace Nova
                 Binding.descriptorType = SlangConvertTypeReflectionKind(BindingType);
                 Binding.stageFlags = GetShaderStages();
 
+
                 DescriptorSetLayoutBindings.Add(Binding);
             }
 
             VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
             DescriptorSetLayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
             DescriptorSetLayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
+            
 
             VkDescriptorSetLayout SetLayout = nullptr;
             if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &DescriptorSetLayoutCreateInfo, nullptr, &SetLayout)))
@@ -222,6 +224,7 @@ namespace Nova
             m_DescriptorSets = Array<VkDescriptorSet>(m_DescriptorSetLayouts.Count());
 
             VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+
             DescriptorSetAllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
             DescriptorSetAllocateInfo.descriptorSetCount = m_DescriptorSetLayouts.Count();
             DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();

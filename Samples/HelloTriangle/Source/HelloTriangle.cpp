@@ -41,7 +41,7 @@ namespace Nova
         return Configuration;
     }
 
-    static VulkanUniformBuffer* CameraUBO = nullptr;
+    static VulkanUniformBuffer* TimeUBO[3];
 
     void HelloTriangle::OnInit()
     {
@@ -91,8 +91,11 @@ namespace Nova
         PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
 
-        CameraUBO = new VulkanUniformBuffer(Renderer);
-        CameraUBO->Allocate(sizeof(float));
+        for (size_t i = 0; i < GetRenderer()->As<VulkanRenderer>()->GetImageCount(); i++)
+        {
+            TimeUBO[i] = new VulkanUniformBuffer(Renderer);
+            TimeUBO[i]->Allocate(sizeof(float));
+        }
 
     }
 
@@ -101,8 +104,12 @@ namespace Nova
         delete m_VertexBuffer;
         delete m_IndexBuffer;
 
-        CameraUBO->Free();
-        delete CameraUBO;
+        for (size_t i = 0; i < GetRenderer()->As<VulkanRenderer>()->GetImageCount(); i++)
+        {
+            TimeUBO[i]->Free();
+            delete TimeUBO[i];
+        }
+
 
         m_Pipeline->Destroy();
         delete m_Pipeline;
@@ -114,19 +121,21 @@ namespace Nova
         Application::OnUpdate(DeltaTime);
 
         const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
+
         const float Time = GetTime();
-        CameraUBO->Copy(&Time, sizeof(float), 0);
+        const u32 Index = GetRenderer()->As<VulkanRenderer>()->GetCurrentFrameIndex();
+        VulkanUniformBuffer* CurrentTimeUBO = TimeUBO[Index];
+        CurrentTimeUBO->Copy(&Time, sizeof(float), 0);
 
         const VkDescriptorBufferInfo BufferInfos
         {
-            .buffer = CameraUBO->GetHandle(),
+            .buffer = CurrentTimeUBO->GetHandle(),
             .offset = 0,
             .range = VK_WHOLE_SIZE,
         };
 
-
         const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
-       VkWriteDescriptorSet WriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        VkWriteDescriptorSet WriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
         WriteDescriptors.descriptorCount = 1;
         WriteDescriptors.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         WriteDescriptors.dstSet = Sets[0];

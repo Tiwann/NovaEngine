@@ -107,7 +107,7 @@ namespace Nova
             m_Height = Height;
             m_Params.Format = Format;
 
-            vkDestroyImageView(Device, m_ImageView, nullptr);
+            vkDestroySampler(Device, m_Sampler, nullptr);
             vmaDestroyImage(Allocator, m_Handle, m_Allocation);
             vkDestroyImageView(Device, m_ImageView, nullptr);
 
@@ -124,7 +124,6 @@ namespace Nova
             ImageCreateInfo.extent.height = Height;
             ImageCreateInfo.extent.depth = 1;
             ImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-
 
             VmaAllocationCreateInfo AllocationCreateInfo = {};
             AllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;

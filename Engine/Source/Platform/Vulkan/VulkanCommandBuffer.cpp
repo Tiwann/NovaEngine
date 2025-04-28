@@ -57,7 +57,12 @@ namespace Nova
         else if (BeginInfo.Flags.Contains(CommandBufferUsageFlagBits::RenderPassContinue))
             VkInfo.flags |= VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT;
 
-        VkInfo.pInheritanceInfo = nullptr;
+        if (m_Level == CommandBufferLevel::Secondary)
+        {
+            VkCommandBufferInheritanceInfo InheritanceInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
+            VkInfo.pInheritanceInfo = &InheritanceInfo;
+        }
+
         if (VK_FAILED(vkBeginCommandBuffer(m_Handle, &VkInfo)))
             return false;
         return true;

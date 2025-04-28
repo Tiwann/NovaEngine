@@ -1,4 +1,7 @@
 ﻿#include "HelloTriangle.h"
+
+#include <Platform/Vulkan/VulkanCommandPool.h>
+
 #include "Runtime/EntryPoint.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Platform/Vulkan/DescriptorSetInfo.h"
@@ -65,6 +68,34 @@ namespace Nova
             RequireExit(ExitCode::Error);
             return;
         }
+
+        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        Barrier.subresourceRange.baseMipLevel = 0;
+        Barrier.subresourceRange.levelCount = 1;
+        Barrier.subresourceRange.baseArrayLayer = 0;
+        Barrier.subresourceRange.layerCount = 1;
+        Barrier.image = (VkImage)Texture->GetHandle();
+
+        VulkanCommandPool* CommandPool = GetRenderer()->As<VulkanRenderer>()->GetCommandPool();
+        VulkanCommandBuffer* CommandBuffer = CommandPool->AllocateCommandBuffer({ CommandBufferLevel::Primary })->As<VulkanCommandBuffer>();
+        VkCommandBuffer CommandBuffers[] = { CommandBuffer->GetHandle() };
+        if (CommandBuffer->Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
+        {
+            vkCmdPipelineBarrier(CommandBuffer->GetHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier);
+            CommandBuffer->End();
+
+            const VkQueue GraphicsQueue = GetRenderer()->As<VulkanRenderer>()->GetGraphicsQueue();
+            VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+            SubmitInfo.commandBufferCount = 1;
+            SubmitInfo.pCommandBuffers = CommandBuffers;
+            vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, nullptr);
+        }
+        
 
         const Array<Vertex> Vertices
         {
@@ -168,21 +199,7 @@ namespace Nova
         const float Time = GetTime();
         Renderer->UpdateUniformBuffer(TimeUBO, 0, sizeof(float), &Time);
 
-        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Barrier.subresourceRange.baseMipLevel = 0;
-        Barrier.subresourceRange.levelCount = 1;
-        Barrier.subresourceRange.baseArrayLayer = 0;
-        Barrier.subresourceRange.layerCount = 1;
-        Barrier.image = (VkImage)Texture->GetHandle();
 
-
-        const VkCommandBuffer Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer()->GetHandle();
-        vkCmdPipelineBarrier(Cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier);
     }
 
     void HelloTriangle::OnRender(Renderer* Renderer)

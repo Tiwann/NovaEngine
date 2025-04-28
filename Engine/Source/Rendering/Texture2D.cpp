@@ -12,7 +12,7 @@
 
 namespace Nova
 {
-    Texture2D::Texture2D(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot) : Asset(Name),
+    Texture2D::Texture2D(const String& Name, const u32 Width, const u32 Height, const TextureParams& Params, const u32 Slot) : Asset(Name),
         m_Width(Width), m_Height(Height), m_Slot(Slot), m_Params(Params)
     {
         
@@ -31,7 +31,7 @@ namespace Nova
         }
     }
 
-    Texture2D* Texture2D::Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot, const GraphicsApi& GraphicsApi)
+    Texture2D* Texture2D::Create(const String& Name, const u32 Width, const u32 Height, const TextureParams& Params, const u32 Slot, const GraphicsApi& GraphicsApi)
     {
         switch (GraphicsApi)
         {
@@ -43,9 +43,9 @@ namespace Nova
         }
     }
 
-    Texture2D* Texture2D::CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot)
+    Texture2D* Texture2D::CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params, const u32 Slot, const GraphicsApi& GraphicsApi)
     {
-        Texture2D* Texture = Create(Name, 0, 0, Params, Slot);
+        Texture2D* Texture = Create(Name, 0, 0, Params, Slot, GraphicsApi);
         const ScopedBuffer RawImageData = File::ReadToBuffer(Filepath);
         const SharedPtr<Image> ImageData = MakeShared<Image>(BufferView(RawImageData.AsBuffer()), Format::R8G8B8A8_UNORM);
         Texture->SetData(ImageData);
@@ -87,7 +87,7 @@ namespace Nova
         return m_Params.Format;
     }
 
-    void Texture2D::SetSlot(u32 Slot)
+    void Texture2D::SetSlot(const u32 Slot)
     {
         m_Slot = Slot;
     }
@@ -107,7 +107,7 @@ namespace Nova
         return { this, Vector2::Zero, GetSize() };
     }
 
-    SpriteAnimation* Texture2D::CreateAnimation(u32 NumRows, u32 NumColumns, u32 NumSprites, u32 SpriteSize)
+    SpriteAnimation* Texture2D::CreateAnimation(const u32 NumRows, const u32 NumColumns, const u32 NumSprites, const u32 SpriteSize)
     {
         SpriteAnimation* Result = SpriteAnimation::Create();
 

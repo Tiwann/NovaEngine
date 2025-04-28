@@ -1,4 +1,6 @@
 ﻿#include "SpriteAnimation.h"
+
+#include "Application.h"
 #include "Sprite.h"
 #include "Rendering/Texture2D.h"
 
@@ -21,7 +23,7 @@ namespace Nova
         {
             const Path& Filepath = Filepaths[i];
             constexpr TextureParams Params = { Filter::Nearest, SamplerAddressMode::ClampToEdge };
-            Texture2D* Texture = Texture2D::CreateFromFile("RuntimeLoadedTextureForSpriteAnim", Filepath, Params);
+            Texture2D* Texture = Texture2D::CreateFromFile("RuntimeLoadedTextureForSpriteAnim", Filepath, Params, 0, g_Application->GetRenderer()->GetGraphicsApi());
             Result->AddSprite(Sprite::CreateFromTexture(Texture));
         }
         return Result;

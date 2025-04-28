@@ -7,6 +7,13 @@
 #define NOVA_FLAG_REMOVE(Left, Right) ((Left) & ~(Right))
 #define NOVA_FLAG_BIT(Name, Position) Name = 1 << Position
 
+namespace Nova
+{
+    consteval unsigned int BIT(const unsigned int Position)
+    {
+        return 1 << Position;
+    }
+}
 
 #define NOVA_DECLARE_FLAGS(Enum, Name) \
     using Name = Nova::Flags<Enum>; \

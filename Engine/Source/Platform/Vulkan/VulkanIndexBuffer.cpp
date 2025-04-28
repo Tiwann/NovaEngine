@@ -1,5 +1,6 @@
 ﻿#include "VulkanIndexBuffer.h"
 
+#include "VulkanCommandBuffer.h"
 #include "VulkanRenderer.h"
 #include "Runtime/Application.h"
 
@@ -109,7 +110,7 @@ namespace Nova
     void VulkanIndexBuffer::Bind() const
     {
         const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindIndexBuffer(Cmd, m_Handle, 0, VK_INDEX_TYPE_UINT32);
     }
 }

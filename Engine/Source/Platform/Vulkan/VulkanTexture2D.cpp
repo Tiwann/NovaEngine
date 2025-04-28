@@ -60,6 +60,34 @@ namespace Nova
             vmaDestroyImage(Allocator, m_Handle, m_Allocation);
             return;
         }
+
+        const auto& Convertor = Renderer->Convertor;
+        VkSamplerCreateInfo SamplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+        SamplerCreateInfo.magFilter = Convertor.ConvertFilter(Params.Filter);
+        SamplerCreateInfo.minFilter = Convertor.ConvertFilter(Params.Filter);
+        SamplerCreateInfo.addressModeU = Convertor.ConvertSamplerAddressMode(Params.AddressMode);
+        SamplerCreateInfo.addressModeV = Convertor.ConvertSamplerAddressMode(Params.AddressMode);
+        SamplerCreateInfo.addressModeW = Convertor.ConvertSamplerAddressMode(Params.AddressMode);
+        SamplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        SamplerCreateInfo.anisotropyEnable = true;
+        SamplerCreateInfo.maxAnisotropy = 16.0f;
+        SamplerCreateInfo.unnormalizedCoordinates = false;
+
+        if (VK_FAILED(vkCreateSampler(Device, &SamplerCreateInfo, nullptr, &m_Sampler)))
+        {
+            NOVA_VULKAN_ERROR("Failed to create Vulkan Sampler !");
+            return;
+        }
+    }
+
+    VulkanTexture2D::~VulkanTexture2D()
+    {
+        const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        const VmaAllocator Allocator = Renderer->GetAllocator();
+        vmaDestroyImage(Allocator, m_Handle, m_Allocation);
+        vkDestroyImageView(Device, m_ImageView, nullptr);
+        vkDestroySampler(Device, m_Sampler, nullptr);
     }
 
     void VulkanTexture2D::SetTextureParameters(const TextureParams& Params)
@@ -75,6 +103,10 @@ namespace Nova
 
         if (Width != m_Width || Height != m_Height)
         {
+            m_Width = Width;
+            m_Height = Height;
+            m_Params.Format = Format;
+
             vkDestroyImageView(Device, m_ImageView, nullptr);
             vmaDestroyImage(Allocator, m_Handle, m_Allocation);
             vkDestroyImageView(Device, m_ImageView, nullptr);
@@ -130,10 +162,29 @@ namespace Nova
                 return;
             }
         }
-        
+
         if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Data, m_Allocation, 0, (size_t)(Width * Height) * GetFormatSize(Format))))
         {
             NOVA_VULKAN_ERROR("Failed to copy texture data to gpu memory!");
+        }
+
+
+        const auto& Convertor = Renderer->Convertor;
+        VkSamplerCreateInfo SamplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+        SamplerCreateInfo.magFilter = Convertor.ConvertFilter(Filter::Linear);
+        SamplerCreateInfo.minFilter = Convertor.ConvertFilter(Filter::Linear);
+        SamplerCreateInfo.addressModeU = Convertor.ConvertSamplerAddressMode(SamplerAddressMode::Repeat);
+        SamplerCreateInfo.addressModeV = Convertor.ConvertSamplerAddressMode(SamplerAddressMode::Repeat);
+        SamplerCreateInfo.addressModeW = Convertor.ConvertSamplerAddressMode(SamplerAddressMode::Repeat);
+        SamplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        SamplerCreateInfo.anisotropyEnable = true;
+        SamplerCreateInfo.maxAnisotropy = 16.0f;
+        SamplerCreateInfo.unnormalizedCoordinates = false;
+
+        if (VK_FAILED(vkCreateSampler(Device, &SamplerCreateInfo, nullptr, &m_Sampler)))
+        {
+            NOVA_VULKAN_ERROR("Failed to create Vulkan Sampler !");
+            return;
         }
     }
 
@@ -149,5 +200,15 @@ namespace Nova
     uintptr_t VulkanTexture2D::GetHandle() const
     {
         return (uintptr_t)m_Handle;
+    }
+
+    VkImageView VulkanTexture2D::GetImageView() const
+    {
+        return m_ImageView;
+    }
+
+    VkSampler VulkanTexture2D::GetSampler() const
+    {
+        return m_Sampler;
     }
 }

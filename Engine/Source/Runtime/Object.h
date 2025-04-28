@@ -11,8 +11,8 @@ namespace Nova
         explicit Object(String Name);
         virtual ~Object() = default;
 
-        const String& GetName() const;
-        void SetName(const String& NewName);
+        const String& GetObjectName() const;
+        void SetObjectName(const String& NewName);
 
         template <typename Derived> requires IsBaseOfValue<Object, Derived>
         Derived* As() { return dynamic_cast<Derived*>(this); }

@@ -31,9 +31,9 @@ namespace Nova
     public:
         ~Texture2D() override = default;
         
-        static Texture2D* Create(const String& Name = "NewTexture", const GraphicsApi& GraphicsApi = {});
-        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot = 0, const GraphicsApi& GraphicsApi = {});
-        static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot = 0);
+        static Texture2D* Create(const String& Name, const GraphicsApi& GraphicsApi);
+        static Texture2D* Create(const String& Name, u32 Width, u32 Height, const TextureParams& Params, u32 Slot, const GraphicsApi& GraphicsApi);
+        static Texture2D* CreateFromFile(const String& Name, const Path& Filepath, const TextureParams& Params,u32 Slot, const GraphicsApi& GraphicsApi);
 
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
@@ -51,9 +51,6 @@ namespace Nova
         Format GetFormat() const;
         void SetSlot(u32 Slot);
 
-        template<typename T>
-        T As() const { return (T)GetHandle(); }
-        
         Sprite CreateSprite(const Vector2& Position, const Vector2& Size);
         Sprite CreateSprite();
         SpriteAnimation* CreateAnimation(u32 NumRows, u32 NumColumns, u32 NumSprites, u32 SpriteSize);

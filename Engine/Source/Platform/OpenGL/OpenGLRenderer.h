@@ -30,6 +30,8 @@ namespace Nova
         void ClearColor(const Color& color) override;
         void Present() override;
         bool BeginFrame() override;
+        void BeginRendering() override;
+        void EndRendering() override;
         void EndFrame() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
@@ -42,6 +44,7 @@ namespace Nova
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlending(bool Enabled) override;
         void BindPipeline(Pipeline* Pipeline) override;
+        void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
         OpenGLRendererTypeConvertor Convertor;
     protected:

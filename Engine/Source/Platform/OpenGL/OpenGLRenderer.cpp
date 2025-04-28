@@ -82,6 +82,14 @@ namespace Nova
         return true;
     }
 
+    void OpenGLRenderer::BeginRendering()
+    {
+    }
+
+    void OpenGLRenderer::EndRendering()
+    {
+    }
+
     void OpenGLRenderer::EndFrame()
     {
     }
@@ -337,6 +345,9 @@ namespace Nova
         Specification.ShaderProgram->Bind();
     }
 
+    void OpenGLRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data)
+    {
+    }
 
     String OpenGLRenderer::GetDebugSourceName(const u32 Source)
     {

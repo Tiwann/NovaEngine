@@ -47,7 +47,7 @@ namespace Nova
         : Asset(Name), m_Renderer(Renderer), m_Filepath(std::move(Filepath))
     {
         const Path AbsolutePath = weakly_canonical(m_Filepath);
-        const String& ShaderName = GetName();
+        const String& ShaderName = GetObjectName();
 
         NOVA_LOG(Shader, Verbosity::Trace, "Loading shader source: {}", ShaderName);
         if(!File::Exists(AbsolutePath))

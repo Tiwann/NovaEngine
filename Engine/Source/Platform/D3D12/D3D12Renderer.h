@@ -38,6 +38,8 @@ namespace Nova
         void ClearColor(const Color& Color) override;
         void Present() override;
         bool BeginFrame() override;
+        void BeginRendering() override;
+        void EndRendering() override;
         void EndFrame() override;
         void SetViewportRect(Vector2 Position, Vector2 Size) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
@@ -49,6 +51,8 @@ namespace Nova
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void SetBlending(bool Enabled) override;
         void BindPipeline(Pipeline* Pipeline) override;
+
+        void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
         ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;

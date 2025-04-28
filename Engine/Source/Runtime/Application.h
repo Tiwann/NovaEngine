@@ -86,6 +86,7 @@ namespace Nova
         virtual void OnInit();
         virtual void OnStart();
         virtual void OnExit();
+        virtual void OnFrameStarted(Renderer* Renderer);
         virtual void OnRender(Renderer* Renderer);
         virtual void OnUpdate(f32 Delta);
         virtual void OnGUI(f32 Delta);

@@ -15,9 +15,9 @@ namespace Nova
         void* GetSymbol(const StringView& Name) const;
 
         template<typename FunctionPtrType> requires std::is_pointer_v<FunctionPtrType>
-        FunctionPtrType* GetSymbol(const StringView& Name)
+        FunctionPtrType GetSymbol(const StringView& Name)
         {
-            return (FunctionPtrType*)GetSymbol(Name);
+            return (FunctionPtrType)GetSymbol(Name);
         }
     private:
         Path m_Filepath;

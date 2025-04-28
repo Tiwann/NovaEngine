@@ -2,16 +2,20 @@
 #include "Runtime/EntryPoint.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Platform/Vulkan/DescriptorSetInfo.h"
+#include "Platform/Vulkan/VulkanCommandBuffer.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanTexture2D.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Pipeline.h"
 #include "Rendering/Shader.h"
+#include "Rendering/Texture2D.h"
 #include "Rendering/UniformBuffer.h"
 #include "Rendering/Vertex.h"
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
+#include "ResourceManager/TextureManager.h"
 #include "Runtime/DynamicLibrary.h"
 #include "Runtime/SharedPointer.h"
 
@@ -41,7 +45,8 @@ namespace Nova
         return Configuration;
     }
 
-    static VulkanUniformBuffer* TimeUBO[3];
+    static VulkanUniformBuffer* TimeUBO;
+    static Texture2D* Texture;
 
     void HelloTriangle::OnInit()
     {
@@ -54,14 +59,22 @@ namespace Nova
             return;
         }
 
+        const Path TexturePath = Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Textures/Designer.png";
+        if (Texture = m_TextureManager->Load("Texture", TexturePath); !Texture)
+        {
+            RequireExit(ExitCode::Error);
+            return;
+        }
+
         const Array<Vertex> Vertices
         {
-            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Red),
-            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Green),
-            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Vector2::Zero, Vector3::Zero, Color::Blue),
+            Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
+            Vertex({ -0.5f, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
+            Vertex({ +0.5f, +0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
+            Vertex({ +0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Vector3::Zero, Color::White),
         };
 
-        const Array<u32> Indices { 0, 1, 2 };
+        const Array<u32> Indices { 0, 1, 2, 0, 2, 3 };
 
         Renderer* Renderer = GetRenderer();
         m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
@@ -91,12 +104,43 @@ namespace Nova
         PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
 
-        for (size_t i = 0; i < GetRenderer()->As<VulkanRenderer>()->GetImageCount(); i++)
-        {
-            TimeUBO[i] = new VulkanUniformBuffer(Renderer);
-            TimeUBO[i]->Allocate(sizeof(float));
-        }
+        TimeUBO = new VulkanUniformBuffer(Renderer);
+        TimeUBO->Allocate(sizeof(float));
 
+        const VkDescriptorBufferInfo BufferInfo
+        {
+            .buffer = TimeUBO->GetHandle(),
+            .offset = 0,
+            .range = VK_WHOLE_SIZE,
+        };
+
+        const VkDescriptorImageInfo ImageInfo
+        {
+            .sampler = Texture->As<VulkanTexture2D>()->GetSampler(),
+            .imageView = Texture->As<VulkanTexture2D>()->GetImageView(),
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        };
+
+        const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
+        const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
+        VkWriteDescriptorSet WriteDescriptors[3] {  };
+
+        WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        WriteDescriptors[0].descriptorCount = 1;
+        WriteDescriptors[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        WriteDescriptors[0].dstSet = Sets[0];
+        WriteDescriptors[0].dstBinding = 0;
+        WriteDescriptors[0].pBufferInfo = &BufferInfo;
+
+        WriteDescriptors[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        WriteDescriptors[1].descriptorCount = 1;
+        WriteDescriptors[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        WriteDescriptors[1].dstSet = Sets[0];
+        WriteDescriptors[1].dstBinding = 1;
+        WriteDescriptors[1].pImageInfo = &ImageInfo;
+
+
+        vkUpdateDescriptorSets(Device, 2, WriteDescriptors, 0, nullptr);
     }
 
     void HelloTriangle::OnExit()
@@ -104,12 +148,8 @@ namespace Nova
         delete m_VertexBuffer;
         delete m_IndexBuffer;
 
-        for (size_t i = 0; i < GetRenderer()->As<VulkanRenderer>()->GetImageCount(); i++)
-        {
-            TimeUBO[i]->Free();
-            delete TimeUBO[i];
-        }
-
+        TimeUBO->Free();
+        delete TimeUBO;
 
         m_Pipeline->Destroy();
         delete m_Pipeline;
@@ -119,34 +159,36 @@ namespace Nova
     void HelloTriangle::OnUpdate(const float DeltaTime)
     {
         Application::OnUpdate(DeltaTime);
+    }
 
-        const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
+    void HelloTriangle::OnFrameStarted(Renderer* Renderer)
+    {
+	    Application::OnFrameStarted(Renderer);
 
         const float Time = GetTime();
-        const u32 Index = GetRenderer()->As<VulkanRenderer>()->GetCurrentFrameIndex();
-        VulkanUniformBuffer* CurrentTimeUBO = TimeUBO[Index];
-        CurrentTimeUBO->Copy(&Time, sizeof(float), 0);
+        Renderer->UpdateUniformBuffer(TimeUBO, 0, sizeof(float), &Time);
 
-        const VkDescriptorBufferInfo BufferInfos
-        {
-            .buffer = CurrentTimeUBO->GetHandle(),
-            .offset = 0,
-            .range = VK_WHOLE_SIZE,
-        };
+        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        Barrier.subresourceRange.baseMipLevel = 0;
+        Barrier.subresourceRange.levelCount = 1;
+        Barrier.subresourceRange.baseArrayLayer = 0;
+        Barrier.subresourceRange.layerCount = 1;
+        Barrier.image = (VkImage)Texture->GetHandle();
 
-        const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
-        VkWriteDescriptorSet WriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        WriteDescriptors.descriptorCount = 1;
-        WriteDescriptors.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        WriteDescriptors.dstSet = Sets[0];
-        WriteDescriptors.dstBinding = 0;
-        WriteDescriptors.pBufferInfo = &BufferInfos;
-        vkUpdateDescriptorSets(Device, 1, &WriteDescriptors, 0, nullptr);
+
+        const VkCommandBuffer Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer()->GetHandle();
+        vkCmdPipelineBarrier(Cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier);
     }
 
     void HelloTriangle::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
+
         Renderer->BindPipeline(m_Pipeline);
         Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }

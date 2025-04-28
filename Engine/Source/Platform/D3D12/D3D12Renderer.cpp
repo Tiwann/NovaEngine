@@ -342,6 +342,14 @@ namespace Nova
         return true;
     }
 
+    void D3D12Renderer::BeginRendering()
+    {
+    }
+
+    void D3D12Renderer::EndRendering()
+    {
+    }
+
     void D3D12Renderer::EndFrame()
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
@@ -440,7 +448,11 @@ namespace Nova
     void D3D12Renderer::BindPipeline(Pipeline* Pipeline)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
-        Cmd->SetPipelineState(((const D3D12Pipeline*)Pipeline)->GetHandle());
+        Cmd->SetPipelineState(Pipeline->As<D3D12Pipeline>()->GetHandle());
+    }
+
+    void D3D12Renderer::UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data)
+    {
     }
 
     ID3D12GraphicsCommandList* D3D12Renderer::CreateOneTimeCommandBuffer() const

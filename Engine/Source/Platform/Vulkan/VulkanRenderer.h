@@ -2,21 +2,9 @@
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
-#include "Rendering/SamplerAddressMode.h"
-#include "Rendering/Filter.h"
-#include "Runtime/Format.h"
-#include "Rendering/FrontFace.h"
-#include "Rendering/PolygonMode.h"
-#include "Rendering/PrimitiveTopology.h"
-#include "Rendering/ShaderStage.h"
-
-#include <vulkan/vulkan.h>
-#include <vk_mem_alloc.h>
-
 #include "VulkanRendererTypeConvertor.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
-
 #define NOVA_VULKAN_ERROR(str, ...) NOVA_LOG(Vulkan, Verbosity::Error, str, __VA_ARGS__)
 #define NOVA_VULKAN_WARNING(str, ...) NOVA_LOG(Vulkan, Verbosity::Warning, str, __VA_ARGS__)
 #define NOVA_VULKAN_SUCCESS(str, ...) NOVA_LOG(Vulkan, Verbosity::Info, str, __VA_ARGS__)
@@ -24,11 +12,17 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define VK_FAILED(Res) (((VkResult)(Res)) != VK_SUCCESS)
 #define VK_CHECK_MSG(Res, Msg, ...) do { if(VK_FAILED((Res))) NOVA_VULKAN_ERROR((Msg), __VA_ARGS__); }  while(0)
 
+typedef struct VmaAllocator_T* VmaAllocator;
+
 namespace Nova
 {
+
+    class VulkanCommandPool;
+    class VulkanCommandBuffer;
+
     struct VkFrameData
     {
-        VkCommandBuffer CommandBuffer;
+        VulkanCommandBuffer* CommandBuffer;
         VkImageView ImageView;
         VkImage Image;
         VkFormat Format;
@@ -50,6 +44,8 @@ namespace Nova
         PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
     };
 
+
+
     class VulkanRenderer final : public Renderer
     {
     public:
@@ -59,6 +55,8 @@ namespace Nova
         bool Initialize() override;
         void Destroy() override;
         bool BeginFrame() override;
+        void BeginRendering() override;
+        void EndRendering() override;
         void EndFrame() override;
         void ClearDepth(float Depth) override;
         void ClearColor(const Color& color) override;
@@ -74,7 +72,9 @@ namespace Nova
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
 
         void BindPipeline(Pipeline* Pipeline) override;
-        
+
+        void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
+
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetDevice() const;
@@ -87,12 +87,12 @@ namespace Nova
         
         BufferView<VkFrameData> GetFrameData() const;
         VkFrameData GetCurrentFrameData() const;
-        VkCommandBuffer GetCurrentCommandBuffer() const;
+        VulkanCommandBuffer* GetCurrentCommandBuffer() const;
         VkImage GetCurrentImage() const;
         VkImageView GetCurrentImageView() const;
         u32 GetImageCount() const;
         VkDescriptorPool GetDescriptorPool() const;
-        VkCommandPool GetCommandPool() const;
+        VulkanCommandPool* GetCommandPool() const;
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
         u32 GetCurrentFrameIndex() const;
@@ -119,8 +119,8 @@ namespace Nova
         VkSwapchainKHR                    m_Swapchain = nullptr;
         VkFormat                          m_SwapchainImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
         VkFrameData                       m_Frames[3] = { };
-        VkCommandPool                     m_CommandPool = nullptr;
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;
+        VulkanCommandPool*                m_CommandPool = nullptr;
     };
 }

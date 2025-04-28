@@ -130,7 +130,7 @@ namespace Nova
             Module.Stage = Stage;
             Module.EntryPoint = EntryPoint;
             m_ShaderModules.Add(Module);
-            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetName(), Name);
+            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetObjectName(), Name);
         }
         return true;
     }

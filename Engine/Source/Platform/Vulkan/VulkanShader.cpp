@@ -3,6 +3,8 @@
 #include "Runtime/Application.h"
 #include <slang/slang.h>
 
+#include "VulkanCommandBuffer.h"
+
 namespace Nova
 {
     static slang::IBlob* Diagnostic = nullptr;
@@ -251,7 +253,7 @@ namespace Nova
     bool VulkanShader::Bind()
     {
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = Renderer->GetCurrentCommandBuffer()->GetHandle();
         const VkFunctionPointers& Functions = Renderer->GetFunctionPointers();
 
         (void)Cmd;
@@ -311,7 +313,7 @@ namespace Nova
             Module.EntryPoint = EntryPoint;
             m_ShaderModules.Add(Module);
 
-            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetName(), Name);
+            NOVA_LOG(Application, Verbosity::Info, "Shader {}: Found entry point {}.", GetObjectName(), Name);
         }
         return true;
     }

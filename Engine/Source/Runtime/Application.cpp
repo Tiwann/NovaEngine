@@ -348,6 +348,9 @@ namespace Nova
             case GraphicsApi::OpenGL:
                 if (m_Renderer->BeginFrame() && g_ApplicationRunning)
                 {
+                    OnFrameStarted(m_Renderer);
+
+                    m_Renderer->BeginRendering();
                     OnRender(m_Renderer);
                     m_Scene->OnRender(m_Renderer);
 
@@ -367,6 +370,9 @@ namespace Nova
             case GraphicsApi::D3D12:
                 if (m_Renderer->BeginFrame() && g_ApplicationRunning)
                 {
+                    OnFrameStarted(m_Renderer);
+
+                    m_Renderer->BeginRendering();
                     OnRender(m_Renderer);
                     m_Scene->OnRender(m_Renderer);
 
@@ -378,6 +384,7 @@ namespace Nova
                         m_ImGuiRenderer->EndFrame();
                         m_ImGuiRenderer->Render();
                     }
+                    m_Renderer->EndRendering();
                     m_Renderer->EndFrame();
                     m_Renderer->Present();
                 }
@@ -495,7 +502,11 @@ namespace Nova
         glfwTerminate();
         ApplicationEvents::OnPostExitEvent.Broadcast();
     }
-    
+
+    void Application::OnFrameStarted(Renderer* Renderer)
+    {
+    }
+
     const ApplicationConfiguration& Application::GetConfiguration() const
     {
         return m_Configuration;

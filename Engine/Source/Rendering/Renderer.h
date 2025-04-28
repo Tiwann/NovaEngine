@@ -13,7 +13,8 @@
 
 namespace Nova
 {
-    class Color;
+	class UniformBuffer;
+	class Color;
     class VertexArray;
     class VertexBuffer;
     class IndexBuffer;
@@ -29,6 +30,10 @@ namespace Nova
     class Swapchain;
     struct SwapchainDescription;
 
+    class CommandPool;
+    struct CommandPoolCreateInfo;
+    class CommandBuffer;
+
     class Renderer : public Object
     {
     public:
@@ -37,7 +42,7 @@ namespace Nova
 
         bool ShouldRecreateSwapchain = false;
 
-        virtual ~Renderer() = default;
+        ~Renderer() override = default;
         virtual bool Initialize() = 0;
         virtual void Destroy() = 0;
         virtual void ClearDepth(float Depth) = 0;
@@ -45,6 +50,8 @@ namespace Nova
         virtual void Clear(const Color& Color, float Depth);
         virtual void Present() = 0;
         virtual bool BeginFrame() = 0;
+        virtual void BeginRendering() = 0;
+        virtual void EndRendering() = 0;
         virtual void EndFrame() = 0;
         virtual void SetViewportRect(Vector2 Position, Vector2 Size) = 0;
         virtual void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) = 0;
@@ -57,6 +64,9 @@ namespace Nova
 
         virtual void BindPipeline(Pipeline* Pipeline) = 0;
 
+        virtual void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) = 0;
+
+        CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainDescription& Description);
         Shader* CreateShader(const String& Name, const Path& Filepath);
         Pipeline* CreatePipeline(const PipelineSpecification& Specification);

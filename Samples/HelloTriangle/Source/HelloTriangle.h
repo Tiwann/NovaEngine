@@ -13,6 +13,7 @@ namespace Nova
         void OnInit() override;
         void OnExit() override;
         void OnUpdate(float DeltaTime) override;
+        void OnFrameStarted(Renderer* Renderer) override;
         void OnRender(Renderer* Renderer) override;
     private:
         Pipeline* m_Pipeline = nullptr;

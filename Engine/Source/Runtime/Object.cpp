@@ -11,12 +11,12 @@ namespace Nova
     {
     }
 
-    const String& Object::GetName() const
+    const String& Object::GetObjectName() const
     {
         return m_Name;
     }
 
-    void Object::SetName(const String& NewName)
+    void Object::SetObjectName(const String& NewName)
     {
         m_Name = NewName;
     }

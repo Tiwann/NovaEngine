@@ -3,6 +3,8 @@
 #include "Runtime/Application.h"
 #include <vk_mem_alloc.h>
 
+#include "VulkanCommandBuffer.h"
+
 namespace Nova
 {
     VulkanVertexBuffer::VulkanVertexBuffer(Renderer* Renderer) : VertexBuffer(Renderer)
@@ -107,8 +109,8 @@ namespace Nova
 
     void VulkanVertexBuffer::Bind() const
     {
-        const VulkanRenderer* CastedRenderer = static_cast<VulkanRenderer*>(m_Renderer);
-        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer();
+        const VulkanRenderer* CastedRenderer = m_Renderer->As<VulkanRenderer>();
+        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer()->GetHandle();
         constexpr VkDeviceSize Offsets[] = { 0 };
         vkCmdBindVertexBuffers(Cmd, 0, 1, &m_Handle, Offsets);
     }

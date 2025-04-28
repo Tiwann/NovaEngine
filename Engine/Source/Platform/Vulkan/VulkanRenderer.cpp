@@ -10,8 +10,12 @@
 #include "Rendering/Shader.h"
 #include <GLFW/glfw3.h>
 
+#include "VulkanCommandBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
+#include "VulkanUniformBuffer.h"
+#include "Platform/Vulkan/VulkanCommandPool.h"
+#include "Rendering/CommandBuffer.h"
 
 namespace Nova
 {
@@ -374,15 +378,10 @@ namespace Nova
                 return false;
             }
 
-            VkCommandPoolCreateInfo CommandPoolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
-            CommandPoolCreateInfo.queueFamilyIndex = m_GraphicsQueueIndex;
-            CommandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-            if (VK_FAILED(vkCreateCommandPool(m_Device, &CommandPoolCreateInfo, nullptr, &m_CommandPool)))
-            {
-                NOVA_VULKAN_ERROR("Failed to create command pool!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
+            CommandPoolCreateInfo CommandPoolCreateInfo;
+            CommandPoolCreateInfo.Flags = CommandPoolFlagBits::ResetCommandBuffer;
+            m_CommandPool = (VulkanCommandPool*)CreateCommandPool(CommandPoolCreateInfo);
+
 
             for (size_t i = 0; i < m_ImageCount; i++)
             {
@@ -430,20 +429,11 @@ namespace Nova
                     return false;
                 }
 
-                // Allocate command buffers
-                {
-                    VkCommandBufferAllocateInfo CommandBufferAllocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-                    CommandBufferAllocateInfo.commandPool = m_CommandPool;
-                    CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-                    CommandBufferAllocateInfo.commandBufferCount = 1;
 
-                    if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
-                    {
-                        NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
-                        m_Application->RequireExit(ExitCode::Error);
-                        return false;
-                    }
-                }
+                // Allocate command buffer
+                CommandBufferAllocateInfo AllocateInfo;
+                AllocateInfo.Level = CommandBufferLevel::Primary;
+                m_Frames[i].CommandBuffer = (VulkanCommandBuffer*)m_CommandPool->AllocateCommandBuffer(AllocateInfo);
             }
         }
 
@@ -508,13 +498,14 @@ namespace Nova
 
         for (size_t i = 0; i < m_ImageCount; ++i)
         {
-            vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &m_Frames[i].CommandBuffer);
+            m_CommandPool->FreeCommandBuffer(m_Frames[i].CommandBuffer);
             vkDestroyFence(m_Device, m_Frames[i].Fence, nullptr);
             vkDestroySemaphore(m_Device, m_Frames[i].SubmitSemaphore, nullptr);
             vkDestroySemaphore(m_Device, m_Frames[i].PresentSemaphore, nullptr);
             vkDestroyImageView(m_Device, m_Frames[i].ImageView, nullptr);
         }
-        vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+
+        delete m_CommandPool;
         vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
@@ -615,20 +606,10 @@ namespace Nova
                     return false;
                 }
 
-                // Allocate command buffers
-                {
-                    VkCommandBufferAllocateInfo CommandBufferAllocateInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
-                    CommandBufferAllocateInfo.commandPool = m_CommandPool;
-                    CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-                    CommandBufferAllocateInfo.commandBufferCount = 1;
-
-                    if (VK_FAILED(vkAllocateCommandBuffers(m_Device, &CommandBufferAllocateInfo, &m_Frames[i].CommandBuffer)))
-                    {
-                        NOVA_VULKAN_ERROR("Failed to allocate command buffer (Image {})!", i);
-                        m_Application->RequireExit(ExitCode::Error);
-                        return false;
-                    }
-                }
+                // Allocate command buffer
+                CommandBufferAllocateInfo AllocateInfo;
+                AllocateInfo.Level = CommandBufferLevel::Primary;
+                m_Frames[i].CommandBuffer = m_CommandPool->AllocateCommandBuffer(AllocateInfo)->As<VulkanCommandBuffer>();
             }
 
             ShouldRecreateSwapchain = false;
@@ -657,17 +638,23 @@ namespace Nova
             return false;
         }
 
-        VkCommandBufferBeginInfo BeginInfo = { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-        BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        const VkCommandBuffer CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
-        if (VK_FAILED(vkBeginCommandBuffer(CommandBuffer, &BeginInfo)))
-        {
-            NOVA_VULKAN_ERROR("Failed to begin command buffer!");
+        VulkanCommandBuffer* CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
+        CommandBufferBeginInfo BeginInfo;
+        BeginInfo.Flags = CommandBufferUsageFlagBits::OneTimeSubmit;
+        if (!CommandBuffer->Begin(BeginInfo))
             return false;
-        }
 
+        return true;
+    }
 
-        VkImageMemoryBarrier Barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+    void VulkanRenderer::BeginRendering()
+    {
+        const Window* Window = g_Application->GetWindow();
+        const u32 WindowWidth = Window->GetWidth<u32>();
+        const u32 WindowHeight = Window->GetHeight<u32>();
+        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
+
+        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         Barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -705,18 +692,15 @@ namespace Nova
         RenderingInfo.pColorAttachments = &RenderingAttachmentInfo;
 
         vkCmdBeginRendering(CommandBuffer, &RenderingInfo);
-
-        return true;
     }
 
-    void VulkanRenderer::EndFrame()
+    void VulkanRenderer::EndRendering()
     {
-        const VkCommandBuffer& CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
-        const VkFence& Fence = m_Frames[m_CurrentFrameIndex].Fence;
+        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
 
         vkCmdEndRendering(CommandBuffer);
 
-        VkImageMemoryBarrier Barrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         Barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         Barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -736,18 +720,24 @@ namespace Nova
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &Barrier
         );
-        VK_CHECK_MSG(vkEndCommandBuffer(CommandBuffer), "Failed to end command buffer!");
+    }
 
+    void VulkanRenderer::EndFrame()
+    {
+        VulkanCommandBuffer* CommandBuffer = GetCurrentCommandBuffer();
+        const VkFence& Fence = m_Frames[m_CurrentFrameIndex].Fence;
+        CommandBuffer->End();
+
+        const VkCommandBuffer SubmitCommandBuffers[1] { CommandBuffer->GetHandle() };
         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
         constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         SubmitInfo.pWaitDstStageMask = &Flags;
         SubmitInfo.commandBufferCount = 1;
-        SubmitInfo.pCommandBuffers = &CommandBuffer;
+        SubmitInfo.pCommandBuffers = SubmitCommandBuffers;
         SubmitInfo.signalSemaphoreCount = 1;
         SubmitInfo.pSignalSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
         SubmitInfo.waitSemaphoreCount = 1;
         SubmitInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].PresentSemaphore;
-
 
         if (VK_FAILED(vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, Fence)))
         {
@@ -761,7 +751,7 @@ namespace Nova
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
 
-        const VkCommandBuffer CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
+        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearAttachment;
         ClearAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         ClearAttachment.clearValue.depthStencil = VkClearDepthStencilValue{ Depth, 0 };
@@ -780,7 +770,7 @@ namespace Nova
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
 
-        const VkCommandBuffer CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
+        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearAttachment;
         ClearAttachment.colorAttachment = 0;
         ClearAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -800,7 +790,7 @@ namespace Nova
         const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
         const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
 
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearColorAttachment;
         ClearColorAttachment.colorAttachment = 0;
         ClearColorAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -844,20 +834,20 @@ namespace Nova
 
     void VulkanRenderer::SetViewportRect(const Vector2 Position, const Vector2 Size)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         const VkViewport Viewport = { Position.x, Position.y, Size.x, Size.y, 0.0f, 1.0f };
         vkCmdSetViewport(Cmd, 0, 1, &Viewport);
     }
 
     void VulkanRenderer::Draw(VertexArray* VAO, const u32 NumVert, Shader* Shader)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdDraw(Cmd, NumVert, 1, 0, 0);
     }
 
     void VulkanRenderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         IndexBuffer->Bind();
         VertexBuffer->Bind();
         vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
@@ -866,26 +856,26 @@ namespace Nova
 
     void VulkanRenderer::SetBlending(const bool Enabled)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         const VkBool32 Enables[] = { Enabled };
         m_FunctionPointers.vkCmdSetColorBlendEnableEXT(Cmd, 0, 1, Enables);
     }
 
     void VulkanRenderer::SetCullMode(const CullMode Mode)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdSetCullMode(Cmd, Convertor.ConvertCullMode(Mode));
     }
 
     void VulkanRenderer::SetDepthCompareOperation(const CompareOperation DepthFunction)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdSetDepthCompareOp(Cmd, Convertor.ConvertCompareOperation(DepthFunction));
     }
 
     void VulkanRenderer::SetBlendFunction(const BlendFactor ColorSource, const BlendFactor ColorDest, const BlendOperation ColorOperation, const BlendFactor AlphaSource, const BlendFactor AlphaDest, const BlendOperation AlphaOperation)
     {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         const VkColorBlendEquationEXT ColorBlendEquation {
             Convertor.ConvertBlendFactor(ColorSource), Convertor.ConvertBlendFactor(ColorDest), Convertor.ConvertBlendOperation(ColorOperation),
             Convertor.ConvertBlendFactor(AlphaSource), Convertor.ConvertBlendFactor(AlphaDest), Convertor.ConvertBlendOperation(AlphaOperation)
@@ -903,7 +893,7 @@ namespace Nova
         const VulkanPipeline* CastedPipeline = Pipeline->As<VulkanPipeline>();
         const PipelineSpecification& Specification = CastedPipeline->GetSpecification();
         const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer();
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
 
         const Array<VkDescriptorSet>& DescriptorSets = Shader->GetDescriptorSets();
@@ -913,6 +903,11 @@ namespace Nova
         }
     }
 
+    void VulkanRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data)
+    {
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
+        vkCmdUpdateBuffer(Cmd, dynamic_cast<VulkanUniformBuffer*>(Buffer)->GetHandle(), Offset, Size, Data);
+    }
 
     VkInstance VulkanRenderer::GetInstance() const
     {
@@ -969,7 +964,7 @@ namespace Nova
         return m_Frames[m_CurrentFrameIndex];
     }
 
-    VkCommandBuffer VulkanRenderer::GetCurrentCommandBuffer() const
+    VulkanCommandBuffer* VulkanRenderer::GetCurrentCommandBuffer() const
     {
         return m_Frames[m_CurrentFrameIndex].CommandBuffer;
     }
@@ -994,7 +989,7 @@ namespace Nova
         return m_DescriptorPool;
     }
 
-    VkCommandPool VulkanRenderer::GetCommandPool() const
+    VulkanCommandPool* VulkanRenderer::GetCommandPool() const
     {
         return m_CommandPool;
     }

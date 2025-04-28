@@ -9,6 +9,7 @@
 #include "Platform/OpenGL/OpenGLRenderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
+#include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
@@ -34,6 +35,18 @@ namespace Nova
     {
         ClearColor(Color);
         ClearDepth(Depth);
+    }
+
+    CommandPool* Renderer::CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)
+    {
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: return new VulkanCommandPool(this, CreateInfo);
+        case GraphicsApi::D3D12: return nullptr;
+        default: throw;
+        }
     }
 
     Swapchain* Renderer::CreateSwapchain(const SwapchainDescription& Description)

@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 #include <ImGuizmo.h>
 
+#include "VulkanCommandBuffer.h"
+
 
 namespace Nova
 {
@@ -85,7 +87,7 @@ namespace Nova
         ImGui::Render();
         ImDrawData* Data = ImGui::GetDrawData();
         const VulkanRenderer* Renderer = m_Application->GetRenderer<VulkanRenderer>();
-        const VkCommandBuffer CommandBuffer = Renderer->GetCurrentCommandBuffer();
+        const VkCommandBuffer CommandBuffer = Renderer->GetCurrentCommandBuffer()->GetHandle();
         ImGui_ImplVulkan_RenderDrawData(Data, CommandBuffer);
     }
 }

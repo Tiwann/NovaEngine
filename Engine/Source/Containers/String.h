@@ -62,7 +62,7 @@ namespace Nova
         
         StringBase(const StringBase& Other)
         {
-            delete[] m_Data;
+            delete m_Data;
             m_Data = new CharacterType[Other.m_Count + 1]{};
             memcpy(m_Data, Other.m_Data, Other.m_Count * CharacterSize);
             m_Count = Other.m_Count;

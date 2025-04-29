@@ -7,3 +7,7 @@ target_compile_definitions(HelloTriangle PRIVATE NOVA_APPLICATION_ROOT_DIR=\"${C
 target_include_directories(HelloTriangle PRIVATE Source)
 copy_imported_shared_lib(fmod-core HelloTriangle)
 copy_imported_shared_lib(fmod-studio HelloTriangle)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
+    set_target_properties(HelloTriangle PROPERTIES WIN32_EXECUTABLE TRUE)
+endif ()

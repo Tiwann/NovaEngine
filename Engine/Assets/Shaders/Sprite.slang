@@ -25,15 +25,14 @@ struct Camera
 
 struct Sprite
 {
+    Sampler2D Texture;
     float3x3 Scale;
     float2 Tiling;
-    Texture2D Texture;
     float4 ColorTint;
 }
 
 ConstantBuffer<Camera> InCamera;
 ConstantBuffer<Sprite> InSprite;
-SamplerState Sampler;
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)

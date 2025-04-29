@@ -1,6 +1,8 @@
 ﻿#include "VulkanTexture2D.h"
 #include "Runtime/Application.h"
 #include "VulkanRenderer.h"
+#include "VulkanCommandPool.h"
+#include "VulkanCommandBuffer.h"
 
 namespace Nova
 {
@@ -111,7 +113,8 @@ namespace Nova
             vmaDestroyImage(Allocator, m_Handle, m_Allocation);
             vkDestroyImageView(Device, m_ImageView, nullptr);
 
-            VkImageCreateInfo ImageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
+
+            VkImageCreateInfo ImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
             ImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
             ImageCreateInfo.format = Renderer->Convertor.ConvertFormat(Format);
             ImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
@@ -126,10 +129,9 @@ namespace Nova
             ImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
             VmaAllocationCreateInfo AllocationCreateInfo = {};
-            AllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
             AllocationCreateInfo.priority = 1.0f;
-            AllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-            AllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            AllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+
 
             const VkResult Result = vmaCreateImage(Allocator,
                 &ImageCreateInfo,
@@ -142,6 +144,88 @@ namespace Nova
                 NOVA_VULKAN_ERROR("Failed to create Vulkan image!");
                 return;
             }
+
+
+            const VkDeviceSize Size =  (size_t)(Width * Height) * GetFormatSize(Format);
+
+            VkBufferCreateInfo StagingBufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
+            StagingBufferInfo.size = Size;
+            StagingBufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+
+            VmaAllocationCreateInfo StagingBufferAllocInfo = {};
+            StagingBufferAllocInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
+            StagingBufferAllocInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+            StagingBufferAllocInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+
+            VkBuffer StagingBuffer = nullptr;
+            VmaAllocation StagingBufferAllocation = nullptr;
+            VmaAllocationInfo StagingBufferAllocInfoInfo { };
+            vmaCreateBuffer(Allocator, &StagingBufferInfo, &StagingBufferAllocInfo, &StagingBuffer, &StagingBufferAllocation, &StagingBufferAllocInfoInfo);
+            vmaCopyMemoryToAllocation(Allocator, Data, StagingBufferAllocation, 0, Size);
+
+
+            VulkanCommandPool* CommandPool = Renderer->GetCommandPool();
+            VulkanCommandBuffer* CommandBuffer = CommandPool->AllocateCommandBuffer({ CommandBufferLevel::Primary })->As<VulkanCommandBuffer>();
+
+            VkFence Fence = nullptr;
+            VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+            vkCreateFence(Device, &FenceCreateInfo, nullptr, &Fence);
+
+            if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit }))
+            {
+                VkImageMemoryBarrier Barrier1 { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+                Barrier1.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                Barrier1.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                Barrier1.srcAccessMask = 0;
+                Barrier1.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                Barrier1.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                Barrier1.subresourceRange.baseMipLevel = 0;
+                Barrier1.subresourceRange.levelCount = 1;
+                Barrier1.subresourceRange.baseArrayLayer = 0;
+                Barrier1.subresourceRange.layerCount = 1;
+                Barrier1.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                Barrier1.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                Barrier1.image = m_Handle;
+                vkCmdPipelineBarrier(CommandBuffer->GetHandle(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier1);
+
+                VkBufferImageCopy Region { };
+                Region.bufferOffset = 0;
+                Region.bufferRowLength = 0;
+                Region.bufferImageHeight = 0;
+                Region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                Region.imageSubresource.mipLevel = 0;
+                Region.imageSubresource.baseArrayLayer = 0;
+                Region.imageSubresource.layerCount = 1;
+                Region.imageOffset = { 0, 0, 0 };
+                Region.imageExtent = { Width, Height, 1 };
+                vkCmdCopyBufferToImage(CommandBuffer->GetHandle(), StagingBuffer, m_Handle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Region);
+
+                VkImageMemoryBarrier Barrier2 = Barrier1;
+                Barrier2.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                Barrier2.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                Barrier2.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                Barrier2.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                vkCmdPipelineBarrier(CommandBuffer->GetHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier2);
+                CommandBuffer->End();
+
+                VkCommandBuffer CommandBuffers[] = { CommandBuffer->GetHandle() };
+                VkQueue GraphicsQueue = Renderer->GetGraphicsQueue();
+                VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+                SubmitInfo.commandBufferCount = 1;
+                SubmitInfo.pCommandBuffers = CommandBuffers;
+
+                vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, Fence);
+                vkWaitForFences(Device, 1, &Fence, true, U64_MAX);
+                vkDestroyFence(Device, Fence, nullptr);
+                CommandPool->FreeCommandBuffer(CommandBuffer);
+            }
+
+            vmaDestroyBuffer(Allocator, StagingBuffer, StagingBufferAllocation);
+
+
+
+
+
 
             VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
             ImageViewCreateInfo.image = m_Handle;
@@ -160,11 +244,6 @@ namespace Nova
                 vmaDestroyImage(Allocator, m_Handle, m_Allocation);
                 return;
             }
-        }
-
-        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Data, m_Allocation, 0, (size_t)(Width * Height) * GetFormatSize(Format))))
-        {
-            NOVA_VULKAN_ERROR("Failed to copy texture data to gpu memory!");
         }
 
 

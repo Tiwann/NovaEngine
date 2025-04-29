@@ -28,11 +28,10 @@ VertexOutput VertexMain(VertexInput Input)
     const float OffsetY = sin(Time) * 0.25;
 
     Out.Position = float4(Input.Position, 1.0);
-    //Out.Position.x = Out.Position.x + OffsetX;
-    //Out.Position.y = Out.Position.y + OffsetY;
+    Out.Position.x = Out.Position.x + OffsetX;
+    Out.Position.y = Out.Position.y + OffsetY;
     Out.Position.z = (Out.Position.z + Out.Position.w) * 0.5;
     Out.TexCoord = Input.TexCoord;
-    Out.TexCoord.y = 1.0 - Out.TexCoord.y;
     Out.Normal = Input.Normal;
     Out.Color = Input.Color;
     return Out;
@@ -43,5 +42,5 @@ float4 FragmentMain(FragmentInput Input) : SV_Target
 {
     float4 Sampled = Texture.Sample(Input.TexCoord);
     return Sampled;
-    return float4(Input.TexCoord.xy, 0.0, 1.0);
+    //return float4(Input.TexCoord.xy, 0.0, 1.0);
 }

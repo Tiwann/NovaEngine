@@ -1,7 +1,4 @@
 ﻿#include "HelloTriangle.h"
-
-#include <Platform/Vulkan/VulkanCommandPool.h>
-
 #include "Runtime/EntryPoint.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Platform/Vulkan/DescriptorSetInfo.h"
@@ -10,6 +7,7 @@
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanTexture2D.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Pipeline.h"
 #include "Rendering/Shader.h"
@@ -19,8 +17,8 @@
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
 #include "ResourceManager/TextureManager.h"
-#include "Runtime/DynamicLibrary.h"
-#include "Runtime/SharedPointer.h"
+#include "Runtime/Window.h"
+
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
 
@@ -69,40 +67,17 @@ namespace Nova
             return;
         }
 
-        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        Barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        Barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        Barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Barrier.subresourceRange.baseMipLevel = 0;
-        Barrier.subresourceRange.levelCount = 1;
-        Barrier.subresourceRange.baseArrayLayer = 0;
-        Barrier.subresourceRange.layerCount = 1;
-        Barrier.image = (VkImage)Texture->GetHandle();
 
-        VulkanCommandPool* CommandPool = GetRenderer()->As<VulkanRenderer>()->GetCommandPool();
-        VulkanCommandBuffer* CommandBuffer = CommandPool->AllocateCommandBuffer({ CommandBufferLevel::Primary })->As<VulkanCommandBuffer>();
-        VkCommandBuffer CommandBuffers[] = { CommandBuffer->GetHandle() };
-        if (CommandBuffer->Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
-        {
-            vkCmdPipelineBarrier(CommandBuffer->GetHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &Barrier);
-            CommandBuffer->End();
-
-            const VkQueue GraphicsQueue = GetRenderer()->As<VulkanRenderer>()->GetGraphicsQueue();
-            VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-            SubmitInfo.commandBufferCount = 1;
-            SubmitInfo.pCommandBuffers = CommandBuffers;
-            vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, nullptr);
-        }
-        
+        const i32 Width = GetWindow()->GetWidth<i32>();
+        const i32 Height = GetWindow()->GetHeight<i32>();
+        const f32 AspectRatio = (f32)Width / (f32)Height;
 
         const Array<Vertex> Vertices
         {
-            Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
-            Vertex({ -0.5f, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
-            Vertex({ +0.5f, +0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
-            Vertex({ +0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f }, Vector3::Zero, Color::White),
+            Vertex({ -0.5f / AspectRatio, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
+            Vertex({ -0.5f / AspectRatio, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
+            Vertex({ +0.5f / AspectRatio, +0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
+            Vertex({ +0.5f / AspectRatio, -0.5f, 0.0f }, { 1.0f, 0.0f }, Vector3::Zero, Color::White),
         };
 
         const Array<u32> Indices { 0, 1, 2, 0, 2, 3 };
@@ -154,7 +129,7 @@ namespace Nova
 
         const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
         const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
-        VkWriteDescriptorSet WriteDescriptors[3] {  };
+        VkWriteDescriptorSet WriteDescriptors[2] {  };
 
         WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         WriteDescriptors[0].descriptorCount = 1;
@@ -190,6 +165,13 @@ namespace Nova
     void HelloTriangle::OnUpdate(const float DeltaTime)
     {
         Application::OnUpdate(DeltaTime);
+        static f32 Timer = 0.0f;
+        Timer += DeltaTime;
+        if (Timer > 1.0f)
+        {
+            Timer = 0.0f;
+            NOVA_LOG(HelloTriangle, Verbosity::Info, "FPS: {}", (i32)(1.0f / DeltaTime));
+        }
     }
 
     void HelloTriangle::OnFrameStarted(Renderer* Renderer)

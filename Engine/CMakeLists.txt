@@ -30,6 +30,8 @@ target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
 )
 
 
+
+
 if(MSVC)
     add_compile_options(/MP)
 endif ()

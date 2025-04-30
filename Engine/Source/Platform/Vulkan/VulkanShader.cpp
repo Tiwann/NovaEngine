@@ -1,9 +1,10 @@
 ﻿#include "VulkanShader.h"
 #include "VulkanRenderer.h"
+#include "VulkanCommandBuffer.h"
 #include "Runtime/Application.h"
+#include "Runtime/Log.h"
 #include <slang/slang.h>
 
-#include "VulkanCommandBuffer.h"
 
 namespace Nova
 {

@@ -1,6 +1,7 @@
 #include "D3D12VertexBuffer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Application.h"
+#include "Runtime/Log.h"
 #include <directx/d3dx12_barriers.h>
 
 namespace Nova

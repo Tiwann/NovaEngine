@@ -1,6 +1,8 @@
 #include "D3D12Renderer.h"
 #include "Runtime/Application.h"
 #include "Runtime/Window.h"
+#include "Runtime/Log.h"
+#include "D3D12Pipeline.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/VertexBuffer.h"
 
@@ -8,8 +10,6 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <directx/d3dx12.h>
-
-#include "D3D12Pipeline.h"
 
 
 namespace Nova

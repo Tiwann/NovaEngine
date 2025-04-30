@@ -1,7 +1,7 @@
 #include "D3D12Texture2D.h"
 #include "Runtime/Application.h"
 #include "Platform/PlatformRenderer.h"
-
+#include "Runtime/Log.h"
 #include <directx/d3dx12_barriers.h>
 #include <directx/d3dx12_resource_helpers.h>
 

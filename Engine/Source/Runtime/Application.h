@@ -5,12 +5,7 @@
 #include "Containers/String.h"
 #include "LogCategory.h"
 #include "Containers/MulticastDelegate.h"
-#include "Scene.h"
 #include "Input/Input.h"
-#include "Runtime/AssetDatabase.h"
-#include "Runtime/ModuleManager.h"
-#include "ResourceManager/SoundManager.h"
-#include "Editor/ImGuiRenderer.h"
 #include "Editor/Menu.h"
 
 
@@ -36,6 +31,10 @@ namespace Nova
     class DetailsPanel;
     class SceneHierarchyPanel;
     class PhysicsSettingsPanel;
+    class AssetDatabase;
+    class ModuleManager;
+    class SoundManager;
+    class ImGuiRenderer;
     
     struct ApplicationEvents
     {

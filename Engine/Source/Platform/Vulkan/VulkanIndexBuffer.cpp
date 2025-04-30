@@ -1,5 +1,5 @@
 ﻿#include "VulkanIndexBuffer.h"
-
+#include "Runtime/Log.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanRenderer.h"
 #include "Runtime/Application.h"

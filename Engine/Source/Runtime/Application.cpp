@@ -2,8 +2,6 @@
 #include "Window.h"
 #include "Image.h"
 #include "Log.h"
-#include "Color.h"
-#include "LogVerbosity.h"
 #include "Scene.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Rendering/Renderer.h"
@@ -18,6 +16,7 @@
 #include <slang/slang.h>
 #include <slang/slang-com-ptr.h>
 
+#include "AssetDatabase.h"
 #include "CameraSettings.h"
 #include "Cursors.h"
 #include "ExitCode.h"
@@ -32,7 +31,8 @@
 #include "Components/Camera.h"
 #include "Components/Rendering/ModelRenderer.h"
 #include "Editor/EditorGUI.h"
-#include "Rendering/FrameBuffer.h"
+#include "Editor/ImGuiRenderer.h"
+
 
 namespace Nova
 {

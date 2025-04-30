@@ -10,8 +10,8 @@ namespace Nova
 
 namespace ImGui
 {
-    IMGUI_API void PushID(const Nova::UUID& guid);
-    IMGUI_API ImGuiID GetID(const Nova::UUID& guid);
+    IMGUI_API void PushID(const Nova::UUID& Uuid);
+    IMGUI_API ImGuiID GetID(const Nova::UUID& Uuid);
 }
 
 namespace ImGuizmo

@@ -11,6 +11,7 @@
 #include "Runtime/Application.h"
 #include "Rendering/Renderer.h"
 #include "Rendering/VertexBuffer.h"
+#include "Runtime/Scene.h"
 
 
 namespace Nova

@@ -6,6 +6,11 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(HelloTriangle, "HELLO TRIANGLE")
 
 namespace Nova
 {
+    class Pipeline;
+    class Shader;
+    class VertexBuffer;
+    class IndexBuffer;
+
     class HelloTriangle final : public Application
     {
     public:

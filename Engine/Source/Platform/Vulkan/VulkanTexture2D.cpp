@@ -1,8 +1,9 @@
 ﻿#include "VulkanTexture2D.h"
-#include "Runtime/Application.h"
 #include "VulkanRenderer.h"
 #include "VulkanCommandPool.h"
 #include "VulkanCommandBuffer.h"
+#include "Runtime/Application.h"
+#include "Runtime/Log.h"
 
 namespace Nova
 {

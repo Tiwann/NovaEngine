@@ -16,9 +16,6 @@ namespace Nova
 }
 
 #if defined(NOVA_PLATFORM_WINDOWS) && defined(NOVA_DIST)
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#define NODRAWTEXT
 #include <Windows.h>
 INT APIENTRY WinMain(HINSTANCE, HINSTANCE, PSTR, INT)
 {

@@ -1,22 +1,22 @@
 ﻿#include "PlatformImGui.h"
-#include "Runtime/Application.h"
 #include "Math/LinearAlgebra.h"
 #include "Runtime/Types.h"
+#include "Runtime/UUID.h"
 #include <ImGuizmo.h>
 
 namespace ImGui
 {
-    void PushID(const Nova::UUID& guid)
+    void PushID(const Nova::UUID& Uuid)
     {
-        const Nova::u64* begin = guid.GetValues();
+        const Nova::u64* begin = Uuid.GetValues();
         const Nova::u64* end = begin + 2;
         PushID((const char*)begin, (const char*)end);
     }
 
-    ImGuiID GetID(const Nova::UUID& guid)
+    ImGuiID GetID(const Nova::UUID& Uuid)
     {
         ImGuiWindow* window = GImGui->CurrentWindow;
-        const Nova::u64* begin = guid.GetValues();
+        const Nova::u64* begin = Uuid.GetValues();
         const Nova::u64* end = begin + 2;
         return window->GetID((const char*)begin, (const char*)end);
     }  

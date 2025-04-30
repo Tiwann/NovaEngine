@@ -1,6 +1,7 @@
 #include "D3D12Shader.h"
 #include "Runtime/Application.h"
 #include "D3D12Renderer.h"
+#include "Runtime/Log.h"
 #include <slang/slang.h>
 
 

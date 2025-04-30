@@ -21,7 +21,6 @@ VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
     Out.Position = float4(Input.Position, 1.0);
-    Out.Position.z = (Out.Position.z + Out.Position.w) * 0.5;
     Out.TexCoord = Input.TexCoord;
     Out.Normal = Input.Normal;
     Out.Color = Input.Color;

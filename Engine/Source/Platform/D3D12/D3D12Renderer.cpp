@@ -403,11 +403,18 @@ namespace Nova
         }
     }
 
-    void D3D12Renderer::SetViewportRect(Vector2 Position, Vector2 Size)
+    void D3D12Renderer::SetViewport(const Viewport& Viewport)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
-        const D3D12_VIEWPORT Viewport = CD3DX12_VIEWPORT(Position.x, Position.y, Position.x + Size.x, Position.y + Size.y);
-        Cmd->RSSetViewports(1, &Viewport);
+        const D3D12_VIEWPORT Result = CD3DX12_VIEWPORT(Viewport.X, Viewport.Y, Viewport.X + Viewport.Width, Viewport.Y + Viewport.Height, Viewport.MinDepth, Viewport.MaxDepth);
+        Cmd->RSSetViewports(1, &Result);
+    }
+
+    void D3D12Renderer::SetScissor(const Scissor& Scissor)
+    {
+        ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
+        const D3D12_RECT Rect = CD3DX12_RECT(Scissor.X, Scissor.Y, Scissor.X + Scissor.Width, Scissor.Y + Scissor.Height);
+        Cmd->RSSetScissorRects(1, &Rect);
     }
 
     void D3D12Renderer::Draw(VertexArray* VAO, u32 NumVert, Shader* Shader)

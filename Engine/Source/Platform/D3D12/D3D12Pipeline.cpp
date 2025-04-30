@@ -7,7 +7,7 @@
 #include "Rendering/ShaderModule.h"
 
 #include <directx/d3d12.h>
-#include <slang.h>
+#include <slang/slang.h>
 
 
 

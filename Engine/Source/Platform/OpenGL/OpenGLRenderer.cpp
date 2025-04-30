@@ -94,9 +94,15 @@ namespace Nova
     {
     }
 
-    void OpenGLRenderer::SetViewportRect(const Vector2 Position, const Vector2 Size)
+    void OpenGLRenderer::SetViewport(const Viewport& Viewport)
     {
-        glViewport((GLint)Position.x, (GLint)Position.y, (GLint)Size.x, (GLint)Size.y);
+        glViewport(Viewport.X, Viewport.Y, Viewport.Width, Viewport.Height);
+        glDepthRangef(Viewport.MinDepth, Viewport.MaxDepth);
+    }
+
+    void OpenGLRenderer::SetScissor(const Scissor& Scissor)
+    {
+        glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
     }
 
     void OpenGLRenderer::Draw(VertexArray* VertexArray, u32 NumVert, Shader* Shader)

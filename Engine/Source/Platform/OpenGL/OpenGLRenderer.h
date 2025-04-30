@@ -33,7 +33,8 @@ namespace Nova
         void BeginRendering() override;
         void EndRendering() override;
         void EndFrame() override;
-        void SetViewportRect(Vector2 Position, Vector2 Size) override;
+        void SetViewport(const Viewport& Viewport) override;
+        void SetScissor(const Scissor& Scissor) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
         void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) override;
         void SetCullMode(CullMode Mode) override;

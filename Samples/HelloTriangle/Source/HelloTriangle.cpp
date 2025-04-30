@@ -9,6 +9,7 @@
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/EntryPoint.h"
 #include "Runtime/Log.h"
+#include "Runtime/Window.h"
 
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloTriangle)
@@ -116,8 +117,12 @@ namespace Nova
     void HelloTriangle::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
+        const f32 Width = GetWindow()->GetWidth<f32>();
+        const f32 Height = GetWindow()->GetHeight<f32>();
 
         Renderer->BindPipeline(m_Pipeline);
+        Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
+        Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
         Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }
 }

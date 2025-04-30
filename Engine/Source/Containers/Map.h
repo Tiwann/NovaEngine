@@ -15,7 +15,7 @@ namespace Nova
         using SizeType = typename Array<PairType>::SizeType;
         using Iterator = Iterator<PairType>;
         using ConstIterator = ConstIterator<PairType>;
-        
+
         Map() = default;
         Map(const std::initializer_list<PairType>& Array) : m_Data(ArrayType(Array)){}
         Map(const Map&) = default;
@@ -23,7 +23,7 @@ namespace Nova
         Map& operator=(const Map&) = default;
         Map& operator=(Map&&) = default;
 
-        
+
         ValueType& operator[](const KeyType& Key)
         {
             SizeType Index = FindKey(Key);
@@ -84,7 +84,7 @@ namespace Nova
 
         const PairType& GetAt(SizeType Index) const
         {
-            return m_Data.GetAt(Index);    
+            return m_Data.GetAt(Index);
         }
 
         void Clear()
@@ -106,13 +106,13 @@ namespace Nova
         {
             return m_Data == Other.m_Data;
         }
-        
-        
+
+
         Iterator begin() override { return m_Data.begin(); }
         Iterator end() override { return m_Data.end(); }
         ConstIterator begin() const override { return m_Data.begin(); }
         ConstIterator end() const override { return m_Data.end(); }
-    
+
     private:
         ArrayType m_Data;
     };

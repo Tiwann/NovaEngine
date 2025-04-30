@@ -832,11 +832,28 @@ namespace Nova
     }
 
 
-    void VulkanRenderer::SetViewportRect(const Vector2 Position, const Vector2 Size)
+    void VulkanRenderer::SetViewport(const Viewport& Viewport)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        const VkViewport Viewport = { Position.x, Position.y, Size.x, Size.y, 0.0f, 1.0f };
-        vkCmdSetViewport(Cmd, 0, 1, &Viewport);
+        VkViewport Result { };
+        Result.x = Viewport.X;
+        Result.y = Viewport.Y + Viewport.Height;
+        Result.width = Viewport.Width;
+        Result.height = -Viewport.Height;
+        Result.minDepth = Viewport.MinDepth;
+        Result.maxDepth = Viewport.MaxDepth;
+        vkCmdSetViewport(Cmd, 0, 1, &Result);
+    }
+
+    void VulkanRenderer::SetScissor(const Scissor& Scissor)
+    {
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
+        VkRect2D Rect { };
+        Rect.offset.x = Scissor.X;
+        Rect.offset.y = Scissor.Y;
+        Rect.extent.width = Scissor.Width;
+        Rect.extent.height = Scissor.Height;
+        vkCmdSetScissor(Cmd, 0, 1, &Rect);
     }
 
     void VulkanRenderer::Draw(VertexArray* VAO, const u32 NumVert, Shader* Shader)

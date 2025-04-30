@@ -7,6 +7,7 @@
 #include "BlendOperation.h"
 #include "BlendFactor.h"
 #include "CompareOperation.h"
+#include "Scissor.h"
 #include "Containers/Buffer.h"
 #include "Vertex.h"
 #include "Runtime/Object.h"
@@ -29,6 +30,7 @@ namespace Nova
     class VertexBuffer;
     class Swapchain;
     struct SwapchainDescription;
+    struct Viewport;
 
     class CommandPool;
     struct CommandPoolCreateInfo;
@@ -53,7 +55,8 @@ namespace Nova
         virtual void BeginRendering() = 0;
         virtual void EndRendering() = 0;
         virtual void EndFrame() = 0;
-        virtual void SetViewportRect(Vector2 Position, Vector2 Size) = 0;
+        virtual void SetViewport(const Viewport& Viewport) = 0;
+        virtual void SetScissor(const Scissor& Scissor) = 0;
         virtual void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) = 0;
         virtual void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;

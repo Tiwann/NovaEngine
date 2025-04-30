@@ -17,13 +17,27 @@ typedef struct VertexOutput
     vec4 Color;
 } FragmentInput;
 
+struct CameraData
+{
+    mat4 View;
+    mat4 Projection;
+}
+
+struct EntityData
+{
+    mat4 Model;
+}
+
+ConstantBuffer<CameraData> Camera;
+ConstantBuffer<EntityData> Entity;
 Sampler2D Texture;
+
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    Out.Position = vec4(Input.Position, 1.0);
+    Out.Position = ConvertToClipSpace(Camera, Entity.Model, vec4(Input.Position, 1.0));
     Out.TexCoord = Input.TexCoord;
     Out.Normal = Input.Normal;
     Out.Color = Input.Color;
@@ -31,7 +45,8 @@ VertexOutput VertexMain(VertexInput Input)
 }
 
 [shader("fragment")]
-float4 FragmentMain(FragmentInput Input) : SV_Target
+vec4 FragmentMain(FragmentInput Input) : SV_Target
 {
-    return Texture.Sample(Input.TexCoord);
+    vec4 Color = Texture.Sample(Input.TexCoord);
+    return Color * Input.Color;
 }

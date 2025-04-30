@@ -1,8 +1,6 @@
-﻿#include "HelloTexture.h"
-#include "Runtime/EntryPoint.h"
+﻿#include "HelloCube.h"
 #include "CommandLine/ArgumentParser.h"
-#include "Platform/Vulkan/VulkanRenderer.h"
-#include "Platform/Vulkan/VulkanShader.h"
+#include "Components/Rendering/ModelRenderer.h"
 #include "Platform/Vulkan/VulkanTexture2D.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Pipeline.h"
@@ -10,27 +8,30 @@
 #include "Rendering/Vertex.h"
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
-#include "ResourceManager/TextureManager.h"
-#include "Runtime/Window.h"
+#include "Runtime/EntityHandle.h"
+#include "Runtime/EntryPoint.h"
 #include "Runtime/Log.h"
+#include "Runtime/Scene.h"
+#include "Runtime/Window.h"
 
 
-NOVA_DEFINE_APPLICATION_CLASS(HelloTexture)
+NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
+
 
 namespace Nova
 {
-    HelloTexture::HelloTexture(const Array<const char*>& Arguments) : Application(Arguments)
+    HelloCube::HelloCube(const Array<const char*>& Arguments) : Application(Arguments)
     {
 
     }
 
-    ApplicationConfiguration HelloTexture::CreateConfiguration() const
+    ApplicationConfiguration HelloCube::CreateConfiguration() const
     {
         ApplicationConfiguration Configuration;
-        Configuration.AppName = "Hello Texture | Nova Engine";
+        Configuration.AppName = "Hello Cube | Nova Engine";
         Configuration.WindowWidth = 600;
         Configuration.WindowHeight = 400;
-        Configuration.WindowResizable = true;
+        Configuration.WindowResizable = false;
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
@@ -41,38 +42,34 @@ namespace Nova
         return Configuration;
     }
 
-    void HelloTexture::OnInit()
+    void HelloCube::OnInit()
     {
         Application::OnInit();
 
-        const Path ShaderPath = Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Shaders/HelloTexture.slang";
-        if (m_Shader = m_ShaderManager->Load("HelloTexture", ShaderPath); !m_Shader)
-        {
-            RequireExit(ExitCode::Error);
-            return;
-        }
-
-        const Path TexturePath = Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Textures/Checker.png";
-        if (m_Texture = m_TextureManager->Load("Texture", TexturePath); !m_Texture)
+        const Path ShaderPath = Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Shaders/HelloCube.slang";
+        if (m_Shader = m_ShaderManager->Load("HelloCube", ShaderPath); !m_Shader)
         {
             RequireExit(ExitCode::Error);
             return;
         }
 
 
-        const i32 Width = GetWindow()->GetWidth<i32>();
-        const i32 Height = GetWindow()->GetHeight<i32>();
-        const f32 AspectRatio = (f32)Width / (f32)Height;
+        const EntityHandle CubeEntity = GetScene()->CreateEntity("Cube");
+        ModelRenderer* RendererComponent = CubeEntity->AddComponent<ModelRenderer>();
+        if (!RendererComponent->OpenFile())
+        {
+            RequireExit(ExitCode::Error);
+            return;
+        }
 
         const Array<Vertex> Vertices
         {
-            Vertex({ -0.5f / AspectRatio, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
-            Vertex({ -0.5f / AspectRatio, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
-            Vertex({ +0.5f / AspectRatio, +0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
-            Vertex({ +0.5f / AspectRatio, -0.5f, 0.0f }, { 1.0f, 0.0f }, Vector3::Zero, Color::White),
+            Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
+            Vertex({ +0.0f, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
+            Vertex({ +0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
         };
 
-        const Array<u32> Indices { 0, 1, 2, 0, 2, 3 };
+        const Array<u32> Indices { 0, 1, 2 };
 
         Renderer* Renderer = GetRenderer();
         m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
@@ -101,30 +98,9 @@ namespace Nova
         PipelineSpecification.DynamicRendering = false;
         PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
-
-
-        const VkDescriptorImageInfo ImageInfo
-        {
-            .sampler = m_Texture->As<VulkanTexture2D>()->GetSampler(),
-            .imageView = m_Texture->As<VulkanTexture2D>()->GetImageView(),
-            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        };
-
-        const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
-        const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
-        VkWriteDescriptorSet WriteDescriptors[1] {  };
-        WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        WriteDescriptors[0].descriptorCount = 1;
-        WriteDescriptors[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        WriteDescriptors[0].dstSet = Sets[0];
-        WriteDescriptors[0].dstBinding = 0;
-        WriteDescriptors[0].pImageInfo = &ImageInfo;
-
-
-        vkUpdateDescriptorSets(Device, 1, WriteDescriptors, 0, nullptr);
     }
 
-    void HelloTexture::OnExit()
+    void HelloCube::OnExit()
     {
         delete m_VertexBuffer;
         delete m_IndexBuffer;
@@ -134,7 +110,7 @@ namespace Nova
         Application::OnExit();
     }
 
-    void HelloTexture::OnUpdate(const float DeltaTime)
+    void HelloCube::OnUpdate(const float DeltaTime)
     {
         Application::OnUpdate(DeltaTime);
         static f32 Timer = 0.0f;
@@ -142,16 +118,16 @@ namespace Nova
         if (Timer > 1.0f)
         {
             Timer = 0.0f;
-            NOVA_LOG(HelloTexture, Verbosity::Info, "FPS: {}", (i32)(1.0f / DeltaTime));
+            NOVA_LOG(HelloCube, Verbosity::Info, "FPS: {}", (i32)(1.0f / DeltaTime));
         }
     }
 
-    void HelloTexture::OnFrameStarted(Renderer* Renderer)
+    void HelloCube::OnFrameStarted(Renderer* Renderer)
     {
 	    Application::OnFrameStarted(Renderer);
     }
 
-    void HelloTexture::OnRender(Renderer* Renderer)
+    void HelloCube::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
         const f32 Width = GetWindow()->GetWidth<f32>();

@@ -120,7 +120,7 @@ namespace Nova
         ViewportState.scissorCount = 1;
         ViewportState.pScissors = &Scissor;
 
-        Array<VkDynamicState> DynamicStates {  };
+        Array<VkDynamicState> DynamicStates { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
         VkPipelineDynamicStateCreateInfo DynamicState { VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO };
         DynamicState.dynamicStateCount = DynamicStates.Count();
         DynamicState.pDynamicStates =  DynamicStates.Data();

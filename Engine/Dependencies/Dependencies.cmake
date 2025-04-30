@@ -67,17 +67,6 @@ set_target_properties(STB PROPERTIES FOLDER Dependencies)
 ###########################################################
 
 ###########################################################
-#[[ NVRHI ]]
-###########################################################
-if(CMAKE_SYSTEM_NAME MATCHES "Windows")
-    option(NVRHI_WITH_DX12 ON)
-endif ()
-option(NVRHI_WITH_VULKAN ON)
-add_subdirectory(Dependencies/NVRHI)
-set_target_properties(nvrhi PROPERTIES FOLDER Dependencies)
-###########################################################
-
-###########################################################
 #[[ IMGUI ]]
 ###########################################################
 set(CMAKE_CXX_STANDARD 17)

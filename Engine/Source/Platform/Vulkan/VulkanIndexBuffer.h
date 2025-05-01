@@ -14,8 +14,7 @@ namespace Nova
 
         void Bind() const override;
         void SendData(const u32* Indices, size_t Count) override;
-
-        void Invalidate() const;
+        VkBuffer GetHandle() const;
     private:
         VkBuffer            m_Handle = nullptr;
         VmaAllocation       m_Allocation = nullptr;

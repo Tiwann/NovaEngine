@@ -103,8 +103,9 @@ namespace Nova
         }
     }
 
-    void VulkanIndexBuffer::Invalidate() const
+    VkBuffer VulkanIndexBuffer::GetHandle() const
     {
+        return m_Handle;
     }
 
     void VulkanIndexBuffer::Bind() const

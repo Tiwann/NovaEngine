@@ -3,11 +3,11 @@
 
 namespace Nova
 {
-    VertexBuffer::VertexBuffer(Renderer* Renderer) : m_Renderer(Renderer), m_Data(nullptr, 0)
+    VertexBuffer::VertexBuffer(Renderer* Renderer) : Object("Vertex Buffer"), m_Renderer(Renderer), m_Data(nullptr, 0)
     {
     }
 
-    VertexBuffer::VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : m_Renderer(Renderer), m_Data(Data, Count)
+    VertexBuffer::VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : Object("Vertex Buffer"), m_Renderer(Renderer), m_Data(Data, Count)
     {
         NOVA_ASSERT(Data || Count != 0, "Tried to create a Vertex Buffer with no data!");
     }

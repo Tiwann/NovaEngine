@@ -17,12 +17,6 @@ typedef struct VertexOutput
     vec4 Color;
 } FragmentInput;
 
-struct CameraData
-{
-    mat4 View;
-    mat4 Projection;
-}
-
 struct EntityData
 {
     mat4 Model;
@@ -30,7 +24,6 @@ struct EntityData
 
 ConstantBuffer<CameraData> Camera;
 ConstantBuffer<EntityData> Entity;
-Sampler2D Texture;
 
 
 [shader("vertex")]
@@ -47,6 +40,5 @@ VertexOutput VertexMain(VertexInput Input)
 [shader("fragment")]
 vec4 FragmentMain(FragmentInput Input) : SV_Target
 {
-    vec4 Color = Texture.Sample(Input.TexCoord);
-    return Color * Input.Color;
+    return vec4(Input.TexCoord, 0.0, 1.0);
 }

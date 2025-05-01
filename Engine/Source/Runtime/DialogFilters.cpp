@@ -4,7 +4,10 @@
 namespace Nova
 {
     DialogFilters::DialogFilters() = default;
-    DialogFilters::~DialogFilters() = default;
+    DialogFilters::~DialogFilters()
+    {
+
+    }
 
     void DialogFilters::RemoveFilter(const String& Name, const Array<String>& Extensions)
     {
@@ -39,9 +42,9 @@ namespace Nova
         return Name == Other.Name && Extensions == Other.Extensions;
     }
 
-    DialogFilters::DialogFilters(const Array<Filter>& Filters): m_Filters(Filters)
+    DialogFilters::DialogFilters(const Array<Filter>& Filters)
     {
-        
+        m_Filters = Filters;
     }
 
     DialogFilters DialogFilters::ImageFilters = Array<DialogFilters::Filter> {

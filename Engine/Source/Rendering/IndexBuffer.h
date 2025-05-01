@@ -2,17 +2,18 @@
 #include "Containers/Buffer.h"
 #include "Runtime/Types.h"
 #include "Containers/Array.h"
+#include "Runtime/Object.h"
 
 namespace Nova
 {
     class Renderer;
 
-    class IndexBuffer
+    class IndexBuffer : public Object
     {
     public:
         explicit IndexBuffer(Renderer* Renderer);
         explicit IndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
-        virtual ~IndexBuffer() = default;
+        ~IndexBuffer() override = default;
         
         virtual void Bind() const = 0;
         virtual void SendData(const u32* Indices, size_t Count);

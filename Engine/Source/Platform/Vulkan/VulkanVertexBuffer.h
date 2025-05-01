@@ -19,6 +19,8 @@ namespace Nova
 
       void SendData(const Vertex* Data, size_t Count) override;
       void Bind() const override;
+
+      VkBuffer GetHandle() const;
    private:
       VkBuffer m_Handle = nullptr;
       VmaAllocation m_Allocation = nullptr;

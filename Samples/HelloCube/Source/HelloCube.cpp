@@ -14,6 +14,15 @@
 #include "Runtime/Scene.h"
 #include "Runtime/Window.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+#include "Platform/Vulkan/VulkanCommandBuffer.h"
+#include "Platform/Vulkan/VulkanIndexBuffer.h"
+#include "Platform/Vulkan/VulkanRenderer.h"
+#include "Platform/Vulkan/VulkanVertexBuffer.h"
+
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
 
@@ -42,6 +51,16 @@ namespace Nova
         return Configuration;
     }
 
+    struct MeshData
+    {
+        size_t VertexBufferOffset = 0;
+        size_t VertexBufferSize = 0;
+        size_t IndexBufferOffset = 0;
+        size_t IndexBufferSize = 0;
+    };
+
+    static Array<MeshData> Meshes;
+
     void HelloCube::OnInit()
     {
         Application::OnInit();
@@ -50,30 +69,79 @@ namespace Nova
         if (m_Shader = m_ShaderManager->Load("HelloCube", ShaderPath); !m_Shader)
         {
             RequireExit(ExitCode::Error);
-            return;
+            throw;
         }
 
-
-        const EntityHandle CubeEntity = GetScene()->CreateEntity("Cube");
-        ModelRenderer* RendererComponent = CubeEntity->AddComponent<ModelRenderer>();
-        if (!RendererComponent->OpenFile())
+        constexpr u32 Flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices;
+        DialogFilters Filters = DialogFilters::ModelFilters;
+        const Path ModelFilepath = File::OpenFileDialog("Please select a 3D model file", "", DialogFilters::ModelFilters);
+        Assimp::Importer ModelImporter;
+        const aiScene* LoadedScene = ModelImporter.ReadFile(ModelFilepath.string().c_str(), Flags);
+        if (!LoadedScene)
         {
+            NOVA_LOG(HelloCube, Verbosity::Error, "Failed to load model file!");
             RequireExit(ExitCode::Error);
-            return;
+            throw;
         }
 
-        const Array<Vertex> Vertices
+        if (!LoadedScene->HasMeshes())
         {
-            Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
-            Vertex({ +0.0f, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
-            Vertex({ +0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
-        };
+            NOVA_LOG(HelloCube, Verbosity::Error, "Model file doesn't contain any Meshes!");
+            RequireExit(ExitCode::Error);
+            throw;
+        }
 
-        const Array<u32> Indices { 0, 1, 2 };
+        Array<Vertex> AllVertices;
+        Array<u32> AllIndices;
+
+        for (size_t MeshIndex = 0; MeshIndex < LoadedScene->mNumMeshes; MeshIndex++)
+        {
+            aiMesh* LoadedMesh = LoadedScene->mMeshes[MeshIndex];
+
+            Array<u32> Indices;
+            for (u32 FaceIndex = 0; FaceIndex < LoadedMesh->mNumFaces; ++FaceIndex)
+            {
+                const aiFace& Face = LoadedMesh->mFaces[FaceIndex];
+                for (u32 i = 0; i < Face.mNumIndices; ++i)
+                    Indices.Add(Face.mIndices[i]);
+            }
+
+            Array<Vertex> Vertices;
+            for (u32 VertexIndex = 0; VertexIndex < LoadedMesh->mNumVertices; ++VertexIndex)
+            {
+                const aiVector3D& Position = LoadedMesh->HasPositions() ? LoadedMesh->mVertices[VertexIndex] : aiVector3D(0, 0, 0);
+                const aiVector3D& TexCoord = LoadedMesh->HasTextureCoords(0) ? LoadedMesh->mTextureCoords[0][VertexIndex] : aiVector3D(0, 0, 0);
+                const aiVector3D& Normal = LoadedMesh->HasNormals() ? LoadedMesh->mNormals[VertexIndex] : aiVector3D(0, 0, 0);
+                const aiColor4D& Color = LoadedMesh->HasVertexColors(0) ? LoadedMesh->mColors[0][VertexIndex] : aiColor4D(0, 0, 0, 0);
+
+                Vector3(* const ToVector3)(const aiVector3D&) = [](const aiVector3D& In) { return Vector3(In.x, In.y, In.z); };
+                Vector2(* const ToVector2)(const aiVector3D&) = [](const aiVector3D& In) { return Vector2(In.x, In.y); };
+                Vector4(* const ToVector4)(const aiColor4D&) = [](const aiColor4D& In) { return Vector4(In.r, In.g, In.b, In.a); };
+
+
+                const Vertex Vertex {
+                    .Position = ToVector3(Position),
+                    .TextureCoordinate = ToVector2(TexCoord),
+                    .Normal = ToVector3(Normal),
+                    .Color = ToVector4(Color)
+                };
+                Vertices.Add(Vertex);
+            }
+
+            AllVertices.AddRange(Vertices);
+            AllIndices.AddRange(Indices);
+
+            MeshData Mesh { };
+            Mesh.VertexBufferSize = Vertices.Count() * sizeof(Vertex);
+            Mesh.VertexBufferOffset = MeshIndex == 0 ? 0 : Meshes[MeshIndex - 1].VertexBufferOffset + Meshes[MeshIndex - 1].VertexBufferSize;
+            Mesh.IndexBufferOffset = Indices.Count() * sizeof(u32);
+            Mesh.IndexBufferSize = MeshIndex == 0 ? 0 : Meshes[MeshIndex - 1].IndexBufferOffset + Meshes[MeshIndex - 1].IndexBufferSize;
+            Meshes.Add(Mesh);
+        }
 
         Renderer* Renderer = GetRenderer();
-        m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
-        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
+        m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(AllVertices.Data(), AllVertices.Count()));
+        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(AllIndices.Data(), AllIndices.Count()));
 
         PipelineSpecification PipelineSpecification;
         PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
@@ -136,6 +204,24 @@ namespace Nova
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
-        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+
+        for (size_t i = 0; i < Meshes.Count(); i++)
+        {
+            const VkCommandBuffer Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer()->GetHandle();
+            const VkDeviceSize VertexBufferOffset = Meshes[i].VertexBufferOffset;
+            const VkDeviceSize VertexBufferSize = Meshes[i].VertexBufferSize;
+            const VkDeviceSize VertexStride = sizeof(Vertex);
+            const VkBuffer VertexBuffer = m_VertexBuffer->As<VulkanVertexBuffer>()->GetHandle();
+            const PFN_vkCmdBindVertexBuffers2 vkCmdBindVertexBuffers2 = (PFN_vkCmdBindVertexBuffers2)vkGetInstanceProcAddr(Renderer->As<VulkanRenderer>()->GetInstance(), "vkCmdBindVertexBuffers2");
+            vkCmdBindVertexBuffers2(Cmd, 0, 1, &VertexBuffer, &VertexBufferOffset, &VertexBufferSize, &VertexStride);
+
+            const VkDeviceSize IndexBufferOffset = Meshes[i].VertexBufferOffset;
+            const VkDeviceSize IndexBufferSize = Meshes[i].VertexBufferSize;
+            const VkBuffer IndexBuffer = m_IndexBuffer->As<VulkanIndexBuffer>()->GetHandle();
+            const PFN_vkCmdBindIndexBuffer2 vkCmdBindIndexBuffer2 = (PFN_vkCmdBindIndexBuffer2)vkGetInstanceProcAddr(Renderer->As<VulkanRenderer>()->GetInstance(), "vkCmdBindIndexBuffer2");
+            vkCmdBindIndexBuffer2(Cmd, IndexBuffer, IndexBufferOffset, IndexBufferSize, VK_INDEX_TYPE_UINT32);
+
+            vkCmdDrawIndexed(Cmd, m_IndexBuffer->Count(), 1, 0, 0, 0);
+        }
     }
 }

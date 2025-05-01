@@ -115,4 +115,9 @@ namespace Nova
         constexpr VkDeviceSize Offsets[] = { 0 };
         vkCmdBindVertexBuffers(Cmd, 0, 1, &m_Handle, Offsets);
     }
+
+    VkBuffer VulkanVertexBuffer::GetHandle() const
+    {
+        return m_Handle;
+    }
 }

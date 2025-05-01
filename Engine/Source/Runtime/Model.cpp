@@ -117,7 +117,7 @@ namespace Nova
     
     bool Model::LoadFromFileAssimp(const Path& Filepath)
     {
-        std::string filepath = Filepath.string();
+        const std::string filepath = Filepath.string();
         Assimp::Importer Importer;
         constexpr u32 Flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices;
         const aiScene* Scene = Importer.ReadFile(Filepath.string().c_str(), Flags);
@@ -146,9 +146,9 @@ namespace Nova
                 const aiVector3D& Tangent = LoadedMesh->HasTangentsAndBitangents() ? LoadedMesh->mTangents[Indices[index]] : aiVector3D(0, 0, 0);
                 const aiVector3D& Bitangent = LoadedMesh->HasTangentsAndBitangents() ? LoadedMesh->mBitangents[Indices[index]] : aiVector3D(0, 0, 0);
 
-                const auto ToVector3 = [](const aiVector3D& In) { return Vector3(In.x, In.y, In.z); };
-                const auto ToVector2 = [](const aiVector3D& In) { return Vector2(In.x, In.y); };
-                const auto ToVector4 = [](const aiColor4D& In) { return Vector4(In.r, In.g, In.b, In.a); };
+                Vector3(* const ToVector3)(const aiVector3D&) = [](const aiVector3D& In) { return Vector3(In.x, In.y, In.z); };
+                Vector2(* const ToVector2)(const aiVector3D&) = [](const aiVector3D& In) { return Vector2(In.x, In.y); };
+                Vector4(* const ToVector4)(const aiColor4D&) = [](const aiColor4D& In) { return Vector4(In.r, In.g, In.b, In.a); };
 
                 
                 const Vertex Vertex {

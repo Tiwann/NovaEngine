@@ -196,7 +196,10 @@ namespace Nova
         {
             if(m_Count + List.size() >= m_Allocated)
             {
-                m_Allocated = Realloc(m_Allocated);
+                do
+                {
+                    m_Allocated = Realloc(m_Allocated);
+                } while (m_Allocated < m_Count + List.size());
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -210,9 +213,13 @@ namespace Nova
 
         void AddRange(const Array& Other)
         {
-            if(m_Count + Other.Count() >= m_Allocated)
+            if(m_Count + Other.m_Count >= m_Allocated)
             {
-                m_Allocated = Realloc(m_Allocated);
+                do
+                {
+                    m_Allocated = Realloc(m_Allocated);
+                } while (m_Allocated < m_Count + Other.m_Count);
+
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -228,7 +235,10 @@ namespace Nova
         {
             if(m_Count + Count >= m_Allocated)
             {
-                m_Allocated = Realloc(m_Allocated);
+                do
+                {
+                    m_Allocated = Realloc(m_Allocated);
+                } while (m_Allocated < m_Count + Count);
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];

@@ -30,7 +30,7 @@ namespace Nova
         OpenFileName.nMaxFile = MAX_PATH;
         ScopedBuffer<char> FilterString = Filters.GetFilterString();
         const i32 Length = MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), nullptr, 0);
-        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length];
+        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length]{0};
         MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), FilterWideString, Length);
 
         OpenFileName.lpstrFilter = FilterWideString;
@@ -58,7 +58,7 @@ namespace Nova
         OpenFileName.nMaxFile = MAX_PATH;
         ScopedBuffer<char> FilterString = Filters.GetFilterString();
         const i32 Length = MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), nullptr, 0);
-        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length];
+        WideString::CharacterType* FilterWideString = new WideString::CharacterType[Length] { 0 };
         MultiByteToWideChar(CP_UTF8, 0, FilterString.GetData(), FilterString.Count(), FilterWideString, Length);
 
         OpenFileName.lpstrFilter = FilterWideString;

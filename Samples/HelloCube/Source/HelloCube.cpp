@@ -1,6 +1,5 @@
 ﻿#include "HelloCube.h"
 #include "CommandLine/ArgumentParser.h"
-#include "Components/Rendering/ModelRenderer.h"
 #include "Platform/Vulkan/VulkanTexture2D.h"
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/Pipeline.h"
@@ -19,10 +18,11 @@
 #include <assimp/postprocess.h>
 
 #include "Platform/Vulkan/VulkanCommandBuffer.h"
-#include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
-#include "Platform/Vulkan/VulkanVertexBuffer.h"
-
+#include "Components/Camera.h"
+#include "Components/Transform.h"
+#include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanUniformBuffer.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
 
@@ -40,14 +40,14 @@ namespace Nova
         Configuration.AppName = "Hello Cube | Nova Engine";
         Configuration.WindowWidth = 600;
         Configuration.WindowHeight = 400;
-        Configuration.WindowResizable = false;
+        Configuration.WindowResizable = true;
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
         Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
         Configuration.Graphics.VSync = true;
-        Configuration.WithEditor = false;
+        Configuration.WithEditor = true;
         return Configuration;
     }
 
@@ -60,6 +60,7 @@ namespace Nova
     };
 
     static Array<MeshData> Meshes;
+    static EntityHandle Entity = nullptr;
 
     void HelloCube::OnInit()
     {
@@ -90,6 +91,13 @@ namespace Nova
             RequireExit(ExitCode::Error);
             throw;
         }
+
+        m_CameraEntity = GetScene()->CreateEntity("Camera");
+        m_Camera = m_CameraEntity->AddComponent<Camera>();
+        m_Camera->Settings = CameraSettings::DefaultPerspective.WithFOV(45.0f);
+
+        Entity = GetScene()->CreateEntity("Entity");
+
 
         Array<Vertex> AllVertices;
         Array<u32> AllIndices;
@@ -149,8 +157,8 @@ namespace Nova
         PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::Vector3});
         PipelineSpecification.VertexLayout.AddAttribute({"COLOR", Format::Vector4});
         PipelineSpecification.BlendEnable = false;
-        PipelineSpecification.CullMode = CullMode::None;
-        PipelineSpecification.FrontFace = FrontFace::Clockwise;
+        PipelineSpecification.CullMode = CullMode::BackFace;
+        PipelineSpecification.FrontFace = FrontFace::CounterClockwise;
         PipelineSpecification.Viewport = Viewport(0.0f, 0.0f, 600.0f, 400.0f, 0.0f, 1.0f);
         PipelineSpecification.Scissor = Scissor(0, 0, 600, 400);
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
@@ -158,20 +166,66 @@ namespace Nova
         PipelineSpecification.RasterizationSamples = 1;
         PipelineSpecification.DepthBiasEnable = false;
         PipelineSpecification.DepthClampEnable = false;
-        PipelineSpecification.DepthTestEnable = false;
-        PipelineSpecification.DepthWriteEnable = false;
+        PipelineSpecification.DepthTestEnable = true;
+        PipelineSpecification.DepthWriteEnable = true;
+        PipelineSpecification.DepthCompareOperation = CompareOperation::Less;
         PipelineSpecification.PrimitiveRestartEnable = false;
         PipelineSpecification.RasterizerDiscardEnable = false;
         PipelineSpecification.StencilTestEnable = false;
         PipelineSpecification.DynamicRendering = false;
         PipelineSpecification.ShaderProgram = m_Shader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
+
+        m_CameraUniformBuffer = new VulkanUniformBuffer(Renderer);
+        m_CameraUniformBuffer->Allocate(2 * sizeof(Matrix4));
+
+        m_EntityUniformBuffer = new VulkanUniformBuffer(Renderer);
+        m_EntityUniformBuffer->Allocate(sizeof(Matrix4));
+
+        const VkDevice Device = GetRenderer()->As<VulkanRenderer>()->GetDevice();
+        const auto& Sets = m_Shader->As<VulkanShader>()->GetDescriptorSets();
+
+
+        VkDescriptorBufferInfo BufferInfos[2] { };
+        BufferInfos[0].buffer = m_CameraUniformBuffer->As<VulkanUniformBuffer>()->GetHandle();
+        BufferInfos[0].offset = 0;
+        BufferInfos[0].range = VK_WHOLE_SIZE;
+
+        BufferInfos[1].buffer = m_EntityUniformBuffer->As<VulkanUniformBuffer>()->GetHandle();
+        BufferInfos[1].offset = 0;
+        BufferInfos[1].range = VK_WHOLE_SIZE;
+
+
+
+        VkWriteDescriptorSet CameraWriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        CameraWriteDescriptors.descriptorCount = 1;
+        CameraWriteDescriptors.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        CameraWriteDescriptors.dstSet = Sets[0];
+        CameraWriteDescriptors.dstBinding = 0;
+        CameraWriteDescriptors.pBufferInfo = &BufferInfos[0];
+
+        VkWriteDescriptorSet ModelWriteDescriptors { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        ModelWriteDescriptors.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        ModelWriteDescriptors.descriptorCount = 1;
+        ModelWriteDescriptors.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        ModelWriteDescriptors.dstSet = Sets[0];
+        ModelWriteDescriptors.dstBinding = 1;
+        ModelWriteDescriptors.pBufferInfo = &BufferInfos[1];
+
+        Array<VkWriteDescriptorSet> WriteDescriptors { ModelWriteDescriptors, CameraWriteDescriptors };
+
+        vkUpdateDescriptorSets(Device, WriteDescriptors.Count(), WriteDescriptors.Data(), 0, nullptr);
     }
 
     void HelloCube::OnExit()
     {
         delete m_VertexBuffer;
         delete m_IndexBuffer;
+
+        m_CameraUniformBuffer->Free();
+        delete m_CameraUniformBuffer;
+        m_EntityUniformBuffer->Free();
+        delete m_EntityUniformBuffer;
 
         m_Pipeline->Destroy();
         delete m_Pipeline;
@@ -193,6 +247,14 @@ namespace Nova
     void HelloCube::OnFrameStarted(Renderer* Renderer)
     {
 	    Application::OnFrameStarted(Renderer);
+
+        const Matrix4 View = m_Camera->GetViewMatrix();
+        const Matrix4 Projection = m_Camera->GetProjectionMatrix();
+        const Matrix4 Model = Entity->GetTransform()->GetWorldSpaceMatrix();
+
+        Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, 0, sizeof(Matrix4), &View);
+        Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, sizeof(Matrix4), sizeof(Matrix4), &Projection);
+        Renderer->UpdateUniformBuffer(m_EntityUniformBuffer, 0, sizeof(Matrix4), &Model);
     }
 
     void HelloCube::OnRender(Renderer* Renderer)
@@ -204,24 +266,6 @@ namespace Nova
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
-
-        for (size_t i = 0; i < Meshes.Count(); i++)
-        {
-            const VkCommandBuffer Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer()->GetHandle();
-            const VkDeviceSize VertexBufferOffset = Meshes[i].VertexBufferOffset;
-            const VkDeviceSize VertexBufferSize = Meshes[i].VertexBufferSize;
-            const VkDeviceSize VertexStride = sizeof(Vertex);
-            const VkBuffer VertexBuffer = m_VertexBuffer->As<VulkanVertexBuffer>()->GetHandle();
-            const PFN_vkCmdBindVertexBuffers2 vkCmdBindVertexBuffers2 = (PFN_vkCmdBindVertexBuffers2)vkGetInstanceProcAddr(Renderer->As<VulkanRenderer>()->GetInstance(), "vkCmdBindVertexBuffers2");
-            vkCmdBindVertexBuffers2(Cmd, 0, 1, &VertexBuffer, &VertexBufferOffset, &VertexBufferSize, &VertexStride);
-
-            const VkDeviceSize IndexBufferOffset = Meshes[i].VertexBufferOffset;
-            const VkDeviceSize IndexBufferSize = Meshes[i].VertexBufferSize;
-            const VkBuffer IndexBuffer = m_IndexBuffer->As<VulkanIndexBuffer>()->GetHandle();
-            const PFN_vkCmdBindIndexBuffer2 vkCmdBindIndexBuffer2 = (PFN_vkCmdBindIndexBuffer2)vkGetInstanceProcAddr(Renderer->As<VulkanRenderer>()->GetInstance(), "vkCmdBindIndexBuffer2");
-            vkCmdBindIndexBuffer2(Cmd, IndexBuffer, IndexBufferOffset, IndexBufferSize, VK_INDEX_TYPE_UINT32);
-
-            vkCmdDrawIndexed(Cmd, m_IndexBuffer->Count(), 1, 0, 0, 0);
-        }
+        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }
 }

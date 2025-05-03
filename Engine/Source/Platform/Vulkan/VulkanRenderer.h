@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <vk_mem_alloc.h>
+
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
@@ -22,13 +24,17 @@ namespace Nova
 
     struct VkFrameData
     {
-        VulkanCommandBuffer* CommandBuffer;
-        VkImageView ImageView;
-        VkImage Image;
+        VulkanCommandBuffer* CommandBuffer = nullptr;
+        VkImageView ColorImageView = nullptr;
+        VkImage ColorImage = nullptr;
+        VkImageView DepthImageView = nullptr;
+        VkImage DepthImage = nullptr;
+        VmaAllocation DepthImageAllocation = nullptr;
+        VmaAllocationInfo DepthImageAllocationInfo;
         VkFormat Format;
-        VkSemaphore SubmitSemaphore;
-        VkSemaphore PresentSemaphore;
-        VkFence Fence;
+        VkSemaphore SubmitSemaphore = nullptr;
+        VkSemaphore PresentSemaphore = nullptr;
+        VkFence Fence = nullptr;
     };
 
     struct VkFunctionPointers

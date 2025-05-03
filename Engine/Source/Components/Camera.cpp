@@ -41,29 +41,11 @@ namespace Nova
         }
     }
 
-#define USE_INVERSE_MATRIX 1
     
     Matrix4 Camera::GetViewMatrix() const
     {
-#if USE_INVERSE_MATRIX
         const Transform* Transform = GetTransform();
-        const Vector3 Position = Transform->GetPosition();
-        const Vector3 Rotation = Transform->GetRotation();
-        Matrix4 Result = Matrix4::Identity;
-        Result.RotateDegrees(Rotation);
-        Result.Translate(Position);
-        return Result.Inverse();
-#else
-        const Transform* Transform = m_Entity->GetTransform();
-        const Vector3& Position = Transform->GetPosition();
-        const Vector3& EulerAngles = Transform->GetRotation();
-        
-        Matrix4 Result = Matrix4::Identity;
-        Result.Rotate(-EulerAngles);
-        Result.Translate(-Position);
-        //Result.Scale(1.0f / Scale);
-        return Result;
-#endif
+        return Transform->GetWorldSpaceMatrix().Inverse();
     }
 
     Matrix4 Camera::GetProjectionMatrix() const

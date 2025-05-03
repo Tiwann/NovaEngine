@@ -18,7 +18,11 @@ namespace Nova
 {
     HelloTriangle::HelloTriangle(const Array<const char*>& Arguments) : Application(Arguments)
     {
-
+        const Quaternion Rotation = Quaternion::EulerDegrees({ 00.0f, 90.0f, 0.0f });
+        const Vector3 Vector = Vector3::Forward;
+        const Vector3 Result = Rotation * Vector;
+        
+        NOVA_BREAK();
     }
 
     ApplicationConfiguration HelloTriangle::CreateConfiguration() const
@@ -77,8 +81,9 @@ namespace Nova
         PipelineSpecification.RasterizationSamples = 1;
         PipelineSpecification.DepthBiasEnable = false;
         PipelineSpecification.DepthClampEnable = false;
-        PipelineSpecification.DepthTestEnable = false;
-        PipelineSpecification.DepthWriteEnable = false;
+        PipelineSpecification.DepthTestEnable = true;
+        PipelineSpecification.DepthWriteEnable = true;
+        PipelineSpecification.DepthCompareOperation = CompareOperation::Less;
         PipelineSpecification.PrimitiveRestartEnable = false;
         PipelineSpecification.RasterizerDiscardEnable = false;
         PipelineSpecification.StencilTestEnable = false;

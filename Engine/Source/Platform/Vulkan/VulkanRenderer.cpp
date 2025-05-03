@@ -330,7 +330,25 @@ namespace Nova
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
-        /// SAWPCHAIN POOL CREATE
+        /// ALLOCATOR CREATE
+        //////////////////////////////////////////////////////////////////////////////////////////
+        {
+            VmaAllocatorCreateInfo AllocatorCreateInfo = { 0 };
+            AllocatorCreateInfo.device = m_Device;
+            AllocatorCreateInfo.instance = m_Instance;
+            AllocatorCreateInfo.physicalDevice = m_PhysicalDevice;
+            AllocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
+
+            if (VK_FAILED(vmaCreateAllocator(&AllocatorCreateInfo, &m_Allocator)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create allocator!");
+                m_Application->RequireExit(ExitCode::Error);
+                return false;
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        /// SWAPCHAIN CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         {
             VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
@@ -387,6 +405,40 @@ namespace Nova
             {
                 const VkImage Image = SwapchainImages[i];
 
+
+                VkImageCreateInfo DepthImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+                DepthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+                DepthImageCreateInfo.extent.width = WindowWidth;
+                DepthImageCreateInfo.extent.height = WindowHeight;
+                DepthImageCreateInfo.extent.depth = 1;
+                DepthImageCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+                DepthImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                DepthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+                DepthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+                DepthImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                DepthImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                DepthImageCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
+                DepthImageCreateInfo.queueFamilyIndexCount = 1;
+                DepthImageCreateInfo.arrayLayers = 1;
+                DepthImageCreateInfo.mipLevels = 1;
+
+                VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
+                DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+                DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, &m_Frames[i].DepthImageAllocationInfo);
+
+                VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+                DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+                DepthImageViewCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+                DepthImageViewCreateInfo.image = m_Frames[i].DepthImage;
+                DepthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                DepthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+                DepthImageViewCreateInfo.subresourceRange.levelCount = 1;
+                DepthImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+                DepthImageViewCreateInfo.subresourceRange.layerCount = 1;
+                vkCreateImageView(m_Device, &DepthImageViewCreateInfo, nullptr, &m_Frames[i].DepthImageView);
+
+
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
                 ImageViewCreateInfo.image = Image;
                 ImageViewCreateInfo.components = VkComponentMapping();
@@ -398,14 +450,54 @@ namespace Nova
                 ImageViewCreateInfo.subresourceRange.levelCount = 1;
                 ImageViewCreateInfo.subresourceRange.layerCount = 1;
 
-                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
+                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ColorImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
                     m_Application->RequireExit(ExitCode::Error);
                     return false;
                 }
 
-                m_Frames[i].Image = Image;
+                VkImageMemoryBarrier DepthBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+                DepthBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                DepthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                DepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                DepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                DepthBarrier.image = m_Frames[i].DepthImage;
+                DepthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                DepthBarrier.subresourceRange.baseMipLevel = 0;
+                DepthBarrier.subresourceRange.levelCount = 1;
+                DepthBarrier.subresourceRange.baseArrayLayer = 0;
+                DepthBarrier.subresourceRange.layerCount = 1;
+                DepthBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
+                DepthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+                VulkanCommandBuffer* CommandBuffer = m_CommandPool->AllocateCommandBuffer({CommandBufferLevel::Primary})->As<VulkanCommandBuffer>();
+                if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
+                {
+                    VkFence BarrierFence = nullptr;
+                    VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+                    vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &BarrierFence);
+
+                    vkCmdPipelineBarrier(
+                    CommandBuffer->GetHandle(),
+                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+                    0, 0, nullptr, 0, nullptr, 1, &DepthBarrier);
+                    CommandBuffer->End();
+
+
+                    VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+                    SubmitInfo.commandBufferCount = 1;
+                    SubmitInfo.pCommandBuffers = CommandBuffer->GetHandlePtr();
+
+                    vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, BarrierFence);
+                    vkWaitForFences(m_Device, 1, &BarrierFence, true, U64_MAX);
+                    vkDestroyFence(m_Device, BarrierFence, nullptr);
+                    m_CommandPool->FreeCommandBuffer(CommandBuffer);
+                }
+
+
+                m_Frames[i].ColorImage = Image;
 
                 VkSemaphoreCreateInfo SemaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
                 if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].SubmitSemaphore)))
@@ -437,23 +529,7 @@ namespace Nova
             }
         }
 
-        //////////////////////////////////////////////////////////////////////////////////////////
-        /// ALLOCATOR CREATE
-        //////////////////////////////////////////////////////////////////////////////////////////
-        {
-            VmaAllocatorCreateInfo AllocatorCreateInfo = { 0 };
-            AllocatorCreateInfo.device = m_Device;
-            AllocatorCreateInfo.instance = m_Instance;
-            AllocatorCreateInfo.physicalDevice = m_PhysicalDevice;
-            AllocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
-            if (VK_FAILED(vmaCreateAllocator(&AllocatorCreateInfo, &m_Allocator)))
-            {
-                NOVA_VULKAN_ERROR("Failed to create allocator!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
-        }
 
         //////////////////////////////////////////////////////////////////////////////////////////
         /// DESCRIPTOR POOL CREATE
@@ -494,7 +570,7 @@ namespace Nova
         vkDeviceWaitIdle(m_Device);
 
         vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
-        vmaDestroyAllocator(m_Allocator);
+
 
         for (size_t i = 0; i < m_ImageCount; ++i)
         {
@@ -502,8 +578,12 @@ namespace Nova
             vkDestroyFence(m_Device, m_Frames[i].Fence, nullptr);
             vkDestroySemaphore(m_Device, m_Frames[i].SubmitSemaphore, nullptr);
             vkDestroySemaphore(m_Device, m_Frames[i].PresentSemaphore, nullptr);
-            vkDestroyImageView(m_Device, m_Frames[i].ImageView, nullptr);
+            vkDestroyImageView(m_Device, m_Frames[i].ColorImageView, nullptr);
+            vmaDestroyImage(m_Allocator, m_Frames[i].DepthImage, m_Frames[i].DepthImageAllocation);
+            vkDestroyImageView(m_Device, m_Frames[i].DepthImageView, nullptr);
         }
+
+        vmaDestroyAllocator(m_Allocator);
 
         delete m_CommandPool;
         vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
@@ -533,7 +613,9 @@ namespace Nova
             for (size_t i = 0; i < m_ImageCount; ++i)
             {
                 VkFrameData& VkFrameData = m_Frames[i];
-                vkDestroyImageView(m_Device, VkFrameData.ImageView, nullptr);
+                vkDestroyImageView(m_Device, VkFrameData.ColorImageView, nullptr);
+                vmaDestroyImage(m_Allocator, VkFrameData.DepthImage, VkFrameData.DepthImageAllocation);
+                vkDestroyImageView(m_Device, VkFrameData.DepthImageView, nullptr);
             }
 
             VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
@@ -586,10 +668,43 @@ namespace Nova
 
             for (size_t i = 0; i < m_ImageCount; i++)
             {
-                 m_Frames[i].Image = SwapchainImages[i];
+                 m_Frames[i].ColorImage = SwapchainImages[i];
+
+                VkImageCreateInfo DepthImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
+                DepthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+                DepthImageCreateInfo.extent.width = WindowWidth;
+                DepthImageCreateInfo.extent.height = WindowHeight;
+                DepthImageCreateInfo.extent.depth = 1;
+                DepthImageCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+                DepthImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                DepthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+                DepthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+                DepthImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                DepthImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                DepthImageCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
+                DepthImageCreateInfo.queueFamilyIndexCount = 1;
+                DepthImageCreateInfo.arrayLayers = 1;
+                DepthImageCreateInfo.mipLevels = 1;
+
+                VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
+                DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+                DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, &m_Frames[i].DepthImageAllocationInfo);
+
+                VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
+                DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+                DepthImageViewCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
+                DepthImageViewCreateInfo.image = m_Frames[i].DepthImage;
+                DepthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+                DepthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+                DepthImageViewCreateInfo.subresourceRange.levelCount = 1;
+                DepthImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+                DepthImageViewCreateInfo.subresourceRange.layerCount = 1;
+                vkCreateImageView(m_Device, &DepthImageViewCreateInfo, nullptr, &m_Frames[i].DepthImageView);
+
 
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                ImageViewCreateInfo.image =  m_Frames[i].Image;
+                ImageViewCreateInfo.image =  m_Frames[i].ColorImage;
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
                 ImageViewCreateInfo.format = m_SwapchainImageFormat;
@@ -599,7 +714,48 @@ namespace Nova
                 ImageViewCreateInfo.subresourceRange.levelCount = 1;
                 ImageViewCreateInfo.subresourceRange.layerCount = 1;
 
-                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ImageView)))
+                VkImageMemoryBarrier DepthBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+                DepthBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                DepthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+                DepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                DepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                DepthBarrier.image = m_Frames[i].DepthImage;
+                DepthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+                DepthBarrier.subresourceRange.baseMipLevel = 0;
+                DepthBarrier.subresourceRange.levelCount = 1;
+                DepthBarrier.subresourceRange.baseArrayLayer = 0;
+                DepthBarrier.subresourceRange.layerCount = 1;
+                DepthBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
+                DepthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+                {
+                    VulkanCommandBuffer* CommandBuffer = m_CommandPool->AllocateCommandBuffer({CommandBufferLevel::Primary})->As<VulkanCommandBuffer>();
+                     if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
+                     {
+                         VkFence BarrierFence = nullptr;
+                         VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+                         vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &BarrierFence);
+
+                         vkCmdPipelineBarrier(
+                         CommandBuffer->GetHandle(),
+                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+                         0, 0, nullptr, 0, nullptr, 1, &DepthBarrier);
+                         CommandBuffer->End();
+
+
+                         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
+                         SubmitInfo.commandBufferCount = 1;
+                         SubmitInfo.pCommandBuffers = CommandBuffer->GetHandlePtr();
+
+                         vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, BarrierFence);
+                         vkWaitForFences(m_Device, 1, &BarrierFence, true, U64_MAX);
+                         vkDestroyFence(m_Device, BarrierFence, nullptr);
+                         m_CommandPool->FreeCommandBuffer(CommandBuffer);
+                     }
+                }
+
+                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ColorImageView)))
                 {
                     NOVA_VULKAN_ERROR("Failed to create image view!");
                     m_Application->RequireExit(ExitCode::Error);
@@ -654,33 +810,42 @@ namespace Nova
         const u32 WindowHeight = Window->GetHeight<u32>();
         const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
 
-        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        Barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        Barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        Barrier.image = m_Frames[m_CurrentFrameIndex].Image;
-        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Barrier.subresourceRange.baseMipLevel = 0;
-        Barrier.subresourceRange.levelCount = 1;
-        Barrier.subresourceRange.baseArrayLayer = 0;
-        Barrier.subresourceRange.layerCount = 1;
-        Barrier.srcAccessMask = VK_ACCESS_NONE_KHR;
-        Barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        ColorBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
+        ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        ColorBarrier.subresourceRange.baseMipLevel = 0;
+        ColorBarrier.subresourceRange.levelCount = 1;
+        ColorBarrier.subresourceRange.baseArrayLayer = 0;
+        ColorBarrier.subresourceRange.layerCount = 1;
+        ColorBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
+        ColorBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+        const VkImageMemoryBarrier Barriers[] { ColorBarrier };
 
         vkCmdPipelineBarrier(
             CommandBuffer,
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &Barrier
+            0, 0, nullptr, 0, nullptr, std::size(Barriers), Barriers
         );
 
-        VkRenderingAttachmentInfo RenderingAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        RenderingAttachmentInfo.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
-        RenderingAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        RenderingAttachmentInfo.imageView = m_Frames[m_CurrentFrameIndex].ImageView;
-        RenderingAttachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        RenderingAttachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        VkRenderingAttachmentInfo ColorAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+        ColorAttachment.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
+        ColorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        ColorAttachment.imageView = m_Frames[m_CurrentFrameIndex].ColorImageView;
+        ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        VkRenderingAttachmentInfo DepthAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+        DepthAttachment.clearValue.depthStencil = VkClearDepthStencilValue(1.0f, 0);
+        DepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        DepthAttachment.imageView = m_Frames[m_CurrentFrameIndex].DepthImageView;
+        DepthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        DepthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 
 
         VkRenderingInfo RenderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
@@ -689,7 +854,8 @@ namespace Nova
         RenderingInfo.renderArea.offset = VkOffset2D{ 0, 0 };
         RenderingInfo.viewMask = 0;
         RenderingInfo.colorAttachmentCount = 1;
-        RenderingInfo.pColorAttachments = &RenderingAttachmentInfo;
+        RenderingInfo.pColorAttachments = &ColorAttachment;
+        RenderingInfo.pDepthAttachment = &DepthAttachment;
 
         vkCmdBeginRendering(CommandBuffer, &RenderingInfo);
     }
@@ -700,25 +866,27 @@ namespace Nova
 
         vkCmdEndRendering(CommandBuffer);
 
-        VkImageMemoryBarrier Barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        Barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        Barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        Barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        Barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        Barrier.image = m_Frames[m_CurrentFrameIndex].Image;
-        Barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Barrier.subresourceRange.baseMipLevel = 0;
-        Barrier.subresourceRange.levelCount = 1;
-        Barrier.subresourceRange.baseArrayLayer = 0;
-        Barrier.subresourceRange.layerCount = 1;
-        Barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        Barrier.dstAccessMask = VK_ACCESS_NONE_KHR;
+        VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        ColorBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
+        ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        ColorBarrier.subresourceRange.baseMipLevel = 0;
+        ColorBarrier.subresourceRange.levelCount = 1;
+        ColorBarrier.subresourceRange.baseArrayLayer = 0;
+        ColorBarrier.subresourceRange.layerCount = 1;
+        ColorBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        ColorBarrier.dstAccessMask = VK_ACCESS_NONE_KHR;
+
+        const VkImageMemoryBarrier Barriers[] { ColorBarrier };
 
         vkCmdPipelineBarrier(
             CommandBuffer,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &Barrier
+            0, 0, nullptr, 0, nullptr, std::size(Barriers), Barriers
         );
     }
 
@@ -797,7 +965,6 @@ namespace Nova
         ClearColorAttachment.clearValue.color = VkClearColorValue{ { Color.r, Color.g, Color.b, Color.a }};
 
         VkClearAttachment ClearDepthAttachment;
-        ClearDepthAttachment.colorAttachment = 0;
         ClearDepthAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         ClearDepthAttachment.clearValue.depthStencil = VkClearDepthStencilValue{ Depth, 0 };
 
@@ -988,12 +1155,12 @@ namespace Nova
 
     VkImage VulkanRenderer::GetCurrentImage() const
     {
-        return m_Frames[m_CurrentFrameIndex].Image;
+        return m_Frames[m_CurrentFrameIndex].ColorImage;
     }
 
     VkImageView VulkanRenderer::GetCurrentImageView() const
     {
-        return m_Frames[m_CurrentFrameIndex].ImageView;
+        return m_Frames[m_CurrentFrameIndex].ColorImageView;
     }
 
     u32 VulkanRenderer::GetImageCount() const

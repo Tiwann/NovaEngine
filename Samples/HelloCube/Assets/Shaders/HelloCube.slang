@@ -30,9 +30,11 @@ ConstantBuffer<EntityData> Entity;
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    Out.Position = ConvertToClipSpace(Camera, Entity.Model, vec4(Input.Position, 1.0));
+    mat4 ModelView = mul(Camera.View, Entity.Model);
+    mat4 ModelViewProjection = mul(Camera.Projection, ModelView);
+    Out.Position = mul(ModelViewProjection, vec4(Input.Position, 1.0));
     Out.TexCoord = Input.TexCoord;
-    Out.Normal = Input.Normal;
+    Out.Normal = remap(Input.Normal, -1.0, 1.0, 0.0, 1.0);
     Out.Color = Input.Color;
     return Out;
 }
@@ -40,5 +42,5 @@ VertexOutput VertexMain(VertexInput Input)
 [shader("fragment")]
 vec4 FragmentMain(FragmentInput Input) : SV_Target
 {
-    return vec4(Input.TexCoord, 0.0, 1.0);
+    return vec4(Input.Normal, 1.0);
 }

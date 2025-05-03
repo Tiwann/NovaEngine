@@ -43,11 +43,40 @@ public vec3 operator*(mat3 lhs, vec2 rhs)
     return mul(lhs, vec3(rhs, 1.0));
 }
 
+public float remap(float val, float inmin, float inmax, float outmin, float outmax)
+{
+    return outmin + (outmax - outmin) * ((val - inmin) / (inmax - inmin));
+}
+
+public vec2 remap(vec2 val, float inmin, float inmax, float outmin, float outmax)
+{
+    float x = remap(val.x, inmin, inmax, outmin, outmax);
+    float y = remap(val.y, inmin, inmax, outmin, outmax);
+    return vec2(x, y);
+}
+
+public vec3 remap(vec3 val, float inmin, float inmax, float outmin, float outmax)
+{
+    float x = remap(val.x, inmin, inmax, outmin, outmax);
+    float y = remap(val.y, inmin, inmax, outmin, outmax);
+    float z = remap(val.z, inmin, inmax, outmin, outmax);
+    return vec3(x, y, z);
+}
+
+public vec4 remap(vec4 val, float inmin, float inmax, float outmin, float outmax)
+{
+    float x = remap(val.x, inmin, inmax, outmin, outmax);
+    float y = remap(val.y, inmin, inmax, outmin, outmax);
+    float z = remap(val.z, inmin, inmax, outmin, outmax);
+    float w = remap(val.w, inmin, inmax, outmin, outmax);
+    return vec4(x, y, z, w);
+}
+
 
 public struct CameraData
 {
-    mat4 View;
-    mat4 Projection;
+    public mat4 View;
+    public mat4 Projection;
 }
 
 public vec4 ConvertToClipSpace(const CameraData Camera, const mat4 Transform, vec4 Position)

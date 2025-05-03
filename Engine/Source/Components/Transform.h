@@ -43,9 +43,6 @@ namespace Nova
         Vector3 GetRightVector() const;
         Vector3 GetUpVector() const;
 
-        void LookAt(const Vector3& Target, const Vector3& Up);
-
-        
         Matrix4 GetWorldSpaceMatrix() const;
         Matrix4 GetLocalSpaceMatrix() const;
         void OnInspectorGUI(const ImGuiIO& IO) override;

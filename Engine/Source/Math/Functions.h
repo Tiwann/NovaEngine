@@ -139,7 +139,7 @@ namespace Nova
         static Matrix4 RotateEulerAnglesAroundPointDegrees(const Matrix4& Mat, const Vector3& EulerAnglesDegrees, const Vector3& Point);
         static Matrix4 RotateAxisAngleAroundPoint(const Matrix4& Mat, const Vector3& Axis, f32 AngleRadians, const Vector3& Point);
         static Matrix4 RotateAxisAngleAroundPointDegrees(const Matrix4& Mat, const Vector3& Axis, f32 AngleDegrees, const Vector3& Point);
-        static Matrix4 LookAt(const Vector3& Eye, const Vector3& Center, const Vector3& Up);
+        static Matrix4 LookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
         static Matrix4 LocalToWorldNormal(const Vector3& Translation, const Vector3& EulerAnglesDegrees);
 
         static f32 Distance(const Vector2& VecA, const Vector2& VecB);

@@ -116,11 +116,6 @@ namespace Nova
         return Math::UpFromRotation(m_Rotation);
     }
 
-    void Transform::LookAt(const Vector3& Target, const Vector3& Up)
-    {
-        Matrix4 Rotation = Math::LookAt(Target, m_Position, Up);
-    }
-
     Matrix4 Transform::GetWorldSpaceMatrix() const
     {
         if(m_Entity && m_Entity->HasParent())

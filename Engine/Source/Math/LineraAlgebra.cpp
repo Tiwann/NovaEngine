@@ -81,13 +81,10 @@ namespace Nova
         return Mat * ScaleMatrix;
     }
 
-#define USE_COMBINED_ROTATION_MATRIX 1
-
     Matrix4 Math::RotateAxisAngle(const Matrix4& Mat, const Vector3& Axis, f32 AngleRadians)
     {
         const f32 C = Cos(AngleRadians);
         const f32 S = Sin(AngleRadians);
-#if USE_COMBINED_ROTATION_MATRIX
         const f32 InvC = 1.0f - C;
         const Vector3 A = Math::Normalize(Axis);
 
@@ -121,36 +118,7 @@ namespace Nova
         };
 
         const Matrix4 RotationMatrix = { Column0, Column1, Column2, Column3 };
-        return Mat * RotationMatrix;
-#else
-        const Matrix4 XRotationMatrix = {
-            { 1, 0, 0, 0 },
-            { 0, C, S, 0 },
-            { 0, -S, C,0 },
-            { 0, 0, 0, 1 },
-        };
-        
-        const Matrix4 YRotationMatrix = {
-            {  C, 0, -S, 0 },
-            {  0, 1,  0, 0 },
-            {  S, 0,  C, 0 },
-            {  0, 0,  0, 1 }
-        };
-
-        const Matrix4 ZRotationMatrix = {
-            {  C, S, 0, 0 },
-            { -S, C, 0, 0 },
-            {  0, 0, 1, 0 },
-            {  0, 0, 0, 1 }
-        };
-        
-        const Matrix4& RotMat =
-            Axis == Vector3::Right ? XRotationMatrix :
-            Axis == Vector3::Up ? YRotationMatrix :
-            Axis == Vector3::Forward ? ZRotationMatrix : Matrix4::Identity;
-        
-        return RotMat * Mat;
-#endif
+        return RotationMatrix * Mat;
     }
 
     Matrix4 Math::RotateAxisAngleDegrees(const Matrix4& Mat, const Vector3& Axis, f32 AngleDegrees)
@@ -166,7 +134,7 @@ namespace Nova
             {0.0f, 0.0f, Scale.z, 0.0f},
             {0.0f, 0.0f, 0.0f, 1.0f},
         };
-        return Mat * ScaleMatrix;
+        return ScaleMatrix * Mat;
     }
 
     Matrix4 Math::Scale(const Matrix4& Mat, f32 Scale)
@@ -177,7 +145,7 @@ namespace Nova
             {0.0f, 0.0f, Scale, 0.0f},
             {0.0f, 0.0f, 0.0f, 1.0f},
         };
-        return Mat * ScaleMatrix;
+        return ScaleMatrix * Mat;
     }
 
     Matrix4 Math::RotateEulerAngles(const Matrix4& Mat, const Vector3& EulerAnglesRadians)
@@ -186,7 +154,7 @@ namespace Nova
         Result.Rotate(Vector3::Forward, EulerAnglesRadians.z);
         Result.Rotate(Vector3::Up, EulerAnglesRadians.y);
         Result.Rotate(Vector3::Right, EulerAnglesRadians.x); 
-        return Mat * Result;
+        return Result *Mat;
     }
 
     Matrix4 Math::RotateEulerAnglesDegrees(const Matrix4& Mat, const Vector3& EulerAnglesDegrees)
@@ -220,45 +188,36 @@ namespace Nova
         return RotateAxisAngleAroundPoint(Mat, Axis, Radians(AngleDegrees), Point);
     }
     
-    Matrix4 Math::LookAt(const Vector3& Eye, const Vector3& Center, const Vector3& Up)
+    Matrix4 Math::LookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up)
     {
-        Matrix4 Result;
+        const Vector3 ZAxis = Normalize(Eye - Target);
+        const Vector3 XAxis = Normalize(Up.Cross(ZAxis));
+        const Vector3 YAxis = ZAxis.Cross(XAxis);
 
-        Vector3 Z = Eye - Center;
-        Z = Normalize(Z);
-        Vector3 Y = Up;
-        Vector3 X = Y.Cross(Z);
-        Y = Z.Cross(X);
-        X = Normalize(X);
-        Y = Normalize(Y);
+        const Matrix4 Orientation {
+            Vector4(XAxis.x, YAxis.x, ZAxis.x,     0),
+            Vector4(XAxis.y, YAxis.y, ZAxis.y,     0),
+            Vector4(XAxis.z, YAxis.z, ZAxis.z,     0),
+            Vector4(  0.0f,    0.0f,    0.0f,   1.0f)
+         };
 
-        Result[0][0] = X.x;
-        Result[1][0] = X.y;
-        Result[2][0] = X.z;
-        Result[3][0] = -X.Dot(Eye);
-        Result[0][1] = Y.x;
-        Result[1][1] = Y.y;
-        Result[2][1] = Y.z;
-        Result[3][1] = -Y.Dot(Eye);
-        Result[0][2] = Z.x;
-        Result[1][2] = Z.y;
-        Result[2][2] = Z.z;
-        Result[3][2] = -Z.Dot(Eye);
-        Result[0][3] = 0;
-        Result[1][3] = 0;
-        Result[2][3] = 0;
-        Result[3][3] = 1.0f;
-        return Result;
+        const Matrix4 Translation {
+            Vector4(1.0f, 0.0f, 0.0f, 0.0f),
+            Vector4(0.0f, 1.0f, 0.0f, 0.0f),
+            Vector4(0.0f, 0.0f, 1.0f, 0.0f),
+            Vector4(-Eye.x, -Eye.y, -Eye.z, 1.0f)
+        };
+
+        return Orientation * Translation;
     }
 
     
 
     Matrix4 Math::Translate(const Matrix4& Mat, const Vector3& Translation)
     {
-        const Vector4 Trans(Translation, 1.0f);
-        Matrix4 Result(Mat);
-        Result[3] = Trans;
-        return Result;
+        Matrix4 TranslationMatrix = Matrix4::Identity;
+        TranslationMatrix[3] = Vector4(Translation, 1.0f);
+        return TranslationMatrix * Mat;
     }
 
     Matrix4 Math::Perspective(f32 FOV, f32 AspectRatio, f32 Near, f32 Far)
@@ -276,16 +235,22 @@ namespace Nova
     
     Matrix4 Math::Orthographic(f32 Width, f32 Height, f32 Scale, f32 Near, f32 Far)
     {
-        const f32 x = Scale * 2.0f / Width;
-        const f32 y = Scale * 2.0f /  Height;
-        const f32 z = -2.0f / (Far - Near);
-        const f32 z2 = -((Far + Near) / (Far - Near));
-        return {
-            {x   , 0.0f, +0.0f, +0.0f},
-            {0.0f, y   , +0.0f, +0.0f},
-            {0.0f, 0.0f, +z   , +0.0f},
-            {0.0f, 0.0f, z2   , +1.0f},
-        };
+        const f32 HalfWidth = Width * 0.5f;
+        const f32 HalfHeight = Height * 0.5f;
+
+        const f32 Left = -HalfWidth;
+        const f32 Right = HalfWidth;
+        const f32 Bottom = -HalfHeight;
+        const f32 Top = HalfHeight;
+
+        Matrix4 Result;
+        Result[0][0] = Scale * 2.0f / (Right - Left);
+        Result[1][1] = Scale * 2.0f / (Top - Bottom);
+        Result[2][2] = Scale * 2.0f / (Far - Near);
+        Result[3][0] = - (Right + Left) / (Right - Left);
+        Result[3][1] = - (Top + Bottom) / (Top - Bottom);
+        Result[3][2] = - (Far + Near) / (Far - Near);
+        return Result;
     }
 
     Vector3 Math::ForwardFromRotation(const Vector3& EulerAngles)
@@ -314,7 +279,6 @@ namespace Nova
         Matrix4 Result = Matrix4::Identity;
         Result.RotateDegrees(EulerAnglesDegrees);
         Result = Result.Inverse();
-        Result.Translate(Translation);
         return Result;
     }
 }

@@ -1,14 +1,15 @@
 ﻿#pragma once
+#include "Runtime/Object.h"
 
 namespace Nova
 {
     class Renderer;
 
-    class UniformBuffer
+    class UniformBuffer : public Object
     {
     public:
-        explicit UniformBuffer(Renderer* Owner) : m_Owner(Owner) {}
-        virtual ~UniformBuffer() = default;
+        explicit UniformBuffer(Renderer* Owner) : Object("Uniform Buffer"), m_Owner(Owner) {}
+        ~UniformBuffer() override = default;
 
         virtual bool Allocate(size_t Size) = 0;
         virtual void Free() = 0;

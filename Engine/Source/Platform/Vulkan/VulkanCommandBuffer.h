@@ -14,6 +14,7 @@ namespace Nova
         bool End() override;
 
         VkCommandBuffer GetHandle() const;
+        const VkCommandBuffer* GetHandlePtr() const;
     private:
         VkCommandBuffer m_Handle = nullptr;
     };

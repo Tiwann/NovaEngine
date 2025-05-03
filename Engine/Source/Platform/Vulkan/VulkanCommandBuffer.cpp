@@ -42,6 +42,11 @@ namespace Nova
         return m_Handle;
     }
 
+    const VkCommandBuffer* VulkanCommandBuffer::GetHandlePtr() const
+    {
+        return &m_Handle;
+    }
+
     bool VulkanCommandBuffer::IsValid() const
     {
         return m_Handle;

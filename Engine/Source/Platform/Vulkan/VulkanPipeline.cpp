@@ -90,6 +90,8 @@ namespace Nova
         DepthStencilState.depthWriteEnable = Specification.DepthWriteEnable;
         DepthStencilState.stencilTestEnable = Specification.StencilTestEnable;
         DepthStencilState.depthCompareOp = Convertor.ConvertCompareOperation(Specification.DepthCompareOperation);
+        DepthStencilState.minDepthBounds = 0.0f;
+        DepthStencilState.maxDepthBounds = 1.0f;
 
         VkSampleMask SampleMask = 0xFFFFFFFF;
         VkPipelineMultisampleStateCreateInfo MultisampleState { VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO };

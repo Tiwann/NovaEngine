@@ -7,9 +7,9 @@ namespace Nova
     Matrix2 Matrix2::Identity = Matrix2();
     Matrix2 Matrix2::One = { Vector2::One, Vector2::One };
     
-    Matrix2::Matrix2(): m00(0.0f), m10(0.0f), m01(0.0f), m11(0.0f)
+    Matrix2::Matrix2(): m00(1.0f), m10(0.0f), m01(0.0f), m11(1.0f)
     {
-        m00 = m11 = 1.0f;
+
     }
 
     Matrix2::Matrix2(const Vector2& Col1, const Vector2& Col2)
@@ -45,9 +45,9 @@ namespace Nova
 
     Matrix2 Matrix2::Multiply(const Matrix2& Mat) const
     {
-        Vector2 Col1 { Mat.m00 * m00 + Mat.m10 * m01, Mat.m00 * m10 + Mat.m10 * m11 };
-        Vector2 Col2 { Mat.m01 * m00 + Mat.m11 * m01, Mat.m01 * m10 + Mat.m11 * m11 };
-        return { Col1, Col2 };
+        const Vector2 Col1 { Mat.m00 * m00 + Mat.m10 * m01, Mat.m00 * m10 + Mat.m10 * m11 };
+        const Vector2 Col2 { Mat.m01 * m00 + Mat.m11 * m01, Mat.m01 * m10 + Mat.m11 * m11 };
+        return Matrix2 { Col1, Col2 };
     }
 
     Matrix2 Matrix2::operator*(const Matrix2& Mat) const

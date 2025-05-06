@@ -15,10 +15,10 @@ namespace Nova
 
         constexpr Vector3() = default;
         Vector3(f32 X, f32 Y, f32 Z);
-        Vector3(f32 Value);
-        Vector3(const Vector2& Vec);
+        explicit Vector3(f32 Value);
+        explicit Vector3(const Vector2& Vec);
         Vector3(const Vector2& Vec, f32 Z);
-        Vector3(const Vector4& Vec);
+        explicit Vector3(const Vector4& Vec);
 
         f32 Magnitude() const;
         f32* ValuePtr();
@@ -52,6 +52,9 @@ namespace Nova
         bool operator==(const Vector3& Vec) const;
         Vector3 operator*(const Vector3& Other) const;
 
+        static Vector3 Cross(const Vector3& Vec1, const Vector3& Vec2);
+        static Vector3 Normalize(const Vector3& Vec);
+        static f32 Dot(const Vector3& Vec1, const Vector3& Vec2);
         static Vector3 Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha);
         static f32 Angle(const Vector3& VecA, const Vector3& VecB);
         static Vector3 MoveTowards(const Vector3& Current, const Vector3& Target, f32 MaxDelta);

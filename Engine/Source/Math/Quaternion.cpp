@@ -73,13 +73,13 @@ namespace Nova
 
     Quaternion& Quaternion::operator*=(const Quaternion& Other)
     {
-        *this = *this * Other;
+        *this = operator*(Other);
         return *this;
     }
 
     Quaternion& Quaternion::operator*=(const f32 Other)
     {
-        *this = *this * Other;
+        *this = operator*(Other);
         return *this;
     }
 
@@ -88,6 +88,18 @@ namespace Nova
         return { w / Other, x / Other, y / Other, z / Other };
     }
 
+    Vector3 Quaternion::operator*(const Vector3& Other) const
+    {
+        const Vector3 QuatVector(x, y, z);
+        const Vector3 UV(QuatVector.Cross(Other));
+        const Vector3 UUV(QuatVector.Cross(UV));
+        return Other + (UV * w + UUV) * 2.0f;
+    }
+
+    Vector4 Quaternion::operator*(const Vector4& Other)
+    {
+        return Vector4(operator*(Vector3(Other)), Other.w);
+    }
 
     Quaternion Quaternion::Euler(const Vector3& EulerAngles)
     {
@@ -160,16 +172,5 @@ namespace Nova
         return Math::Sqrt(x * Other.x + y * Other.y + z * Other.z + w * Other.w);
     }
     
-    Vector3 operator*(const Quaternion& Lhs, const Vector3& Rhs)
-    {
-        const Vector3 QuatVector(Lhs.x, Lhs.y, Lhs.z);
-        const Vector3 UV(QuatVector.Cross(Rhs));
-        const Vector3 UUV(QuatVector.Cross(UV));
-        return Rhs + (UV * Lhs.w + UUV) * 2.0f;
-    }
 
-    Vector4 operator*(const Quaternion& Lhs, const Vector4& Rhs)
-    {
-        return Vector4(Lhs * Vector3(Rhs), Rhs.w);
-    }
 }

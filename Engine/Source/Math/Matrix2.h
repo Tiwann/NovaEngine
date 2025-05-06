@@ -14,9 +14,7 @@ namespace Nova
         f32 Magnitude() const;
         f32 Determinant() const;
 
-        Vector2 Multiply(const Vector2& Vec) const;
         Vector2 operator*(const Vector2& Vec) const;
-        Matrix2 Multiply(const Matrix2& Mat) const;
         Matrix2 operator*(const Matrix2& Mat) const;
         
         Vector2& operator[](size_t i);
@@ -34,7 +32,7 @@ namespace Nova
     private:
         union
         {
-            Vector2 Columns[2]{ 0.0f, 0.0f };
+            Vector2 Columns[2]{ Vector2(0.0f), Vector2(0.0f) };
             struct { f32 m00, m10, m01, m11; };
         };
     };

@@ -23,10 +23,10 @@ static Nova::String ToString(const Nova::Quaternion& Quat)
 }
 
 
-int main(void)
-{
-    Nova::Logger Logger("Math Tests");
+static Nova::Logger Logger("Math Tests");
 
+static void QuaternionTest()
+{
     Logger.LogTrace("********** Quaternion Tests **********");
     const Nova::Quaternion Orientation = Nova::Quaternion::EulerDegrees(0.0f, 90.0f, 0.0f);
     const Nova::Quaternion InverseOrientation = Orientation.Inverted();
@@ -39,5 +39,19 @@ int main(void)
     Logger.LogTrace("Reverted Vector: {}", ToString(RevertedVector));
     Logger.LogTrace("Result: {}", OrientedForward == Nova::Vector3(1.0f, 0.0f, 0.0f) && RevertedVector == Nova::Vector3::Forward ? "Pass" : "Fail");
     Logger.LogTrace("**************************************");
+}
+
+
+static void Matrix2Test()
+{
+    Logger.LogTrace("********** Matrix2 Tests **********");
+    Nova::Matrix2 Matrix;
+    Nova::Vector2 Rotated = Nova::Vector2::Up * Matrix;
+    Logger.LogTrace("**************************************");
+}
+
+int main(void)
+{
+    QuaternionTest();
     return 0;
 }

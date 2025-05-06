@@ -15,11 +15,11 @@ namespace Nova
     Vector3 Vector3::Backward = { 0.0f, 0.0f, -1.0f };
     
 
-    Vector3::Vector3(f32 X, f32 Y, f32 Z): x(X), y(Y), z(Z)
+    Vector3::Vector3(const f32 X, const f32 Y, const f32 Z): x(X), y(Y), z(Z)
     {
     }
 
-    Vector3::Vector3(f32 Value): x(Value), y(Value), z(Value)
+    Vector3::Vector3(const f32 Value): x(Value), y(Value), z(Value)
     {
     }
 
@@ -27,7 +27,7 @@ namespace Nova
     {
     }
 
-    Vector3::Vector3(const Vector2& Vec, f32 Z) : x(Vec.x), y(Vec.y), z(Z)
+    Vector3::Vector3(const Vector2& Vec, const f32 Z) : x(Vec.x), y(Vec.y), z(Z)
     {
     }
 
@@ -119,27 +119,27 @@ namespace Nova
     }
 
 
-    Vector3 operator/(f32 Scalar, const Vector3& Vec)
+    Vector3 operator/(const f32 Scalar, const Vector3& Vec)
     {
         return {Scalar / Vec.x, Scalar / Vec.y, Scalar / Vec.z};
     }
 
-    Vector3 operator/(const Vector3& Vec, f32 Scalar)
+    Vector3 operator/(const Vector3& Vec, const f32 Scalar)
     {
         return {Vec.x / Scalar, Vec.y / Scalar, Vec.z / Scalar};
     }
 
-    Vector3 operator*(f32 Scalar, const Vector3& Vec)
+    Vector3 operator*(const f32 Scalar, const Vector3& Vec)
     {
         return {Vec.x * Scalar, Vec.y * Scalar, Vec.z * Scalar};
     }
 
-    Vector3 operator*(const Vector3& Vec, f32 Scalar)
+    Vector3 operator*(const Vector3& Vec, const f32 Scalar)
     {
         return {Vec.x * Scalar, Vec.y * Scalar, Vec.z * Scalar};
     }
 
-    Vector3& Vector3::operator*=(f32 Scalar)
+    Vector3& Vector3::operator*=(const f32 Scalar)
     {
         x *= Scalar;
         y *= Scalar;
@@ -155,7 +155,7 @@ namespace Nova
         return *this;
     }
 
-    Vector3& Vector3::operator/=(f32 Scalar)
+    Vector3& Vector3::operator/=(const f32 Scalar)
     {
         x /= Scalar;
         y /= Scalar;
@@ -183,7 +183,22 @@ namespace Nova
         return {x * Other.x, y * Other.y, z * Other.z};
     }
 
-    Vector3 Vector3::Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha)
+    Vector3 Vector3::Cross(const Vector3& Vec1, const Vector3& Vec2)
+    {
+        return Vec1.Cross(Vec2);
+    }
+
+    Vector3 Vector3::Normalize(const Vector3& Vec)
+    {
+        return Vec.Normalized();
+    }
+
+    f32 Vector3::Dot(const Vector3& Vec1, const Vector3& Vec2)
+    {
+        return Vec1.Dot(Vec2);
+    }
+
+    Vector3 Vector3::Lerp(const Vector3& VecA, const Vector3& VecB, const f32 Alpha)
     {
         return VecA + VecB * Alpha - VecA * Alpha;
     }
@@ -195,7 +210,7 @@ namespace Nova
         return Math::Acos(CosAngle);
     }
 
-    Vector3 Vector3::MoveTowards(const Vector3& Current, const Vector3& Target, f32 MaxDelta)
+    Vector3 Vector3::MoveTowards(const Vector3& Current, const Vector3& Target, const f32 MaxDelta)
     {
         const Vector3 Direction = Target - Current;
         const f32 Distance = Direction.Magnitude();
@@ -206,7 +221,7 @@ namespace Nova
     }
 
     Vector3 Vector3::SmoothDamp(const Vector3& Current, const Vector3& Target, Vector3& CurrentVelocity,
-        f32 SmoothTime, f32 Delta, f32 MaxSpeed)
+        const f32 SmoothTime, const f32 Delta, const f32 MaxSpeed)
     {
         const f32 x = Math::SmoothDamp(Current.x, Target.x, CurrentVelocity.x, SmoothTime, Delta, MaxSpeed);
         const f32 y = Math::SmoothDamp(Current.y, Target.y, CurrentVelocity.y, SmoothTime, Delta, MaxSpeed);

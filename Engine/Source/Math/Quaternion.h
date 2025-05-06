@@ -35,8 +35,8 @@ namespace Nova
         Quaternion& operator*=(const Quaternion& Other);
         Quaternion& operator*=(f32 Other);
         Quaternion operator/(f32 Other) const;
-        friend Vector3 operator*(const Quaternion& Lhs, const Vector3& Rhs);
-        friend Vector4 operator*(const Quaternion& Lhs, const Vector4& Rhs);
+        Vector3 operator*(const Vector3& Other) const;
+        Vector4 operator*(const Vector4& Other);
 
         
         static Quaternion Euler(const Vector3& EulerAngles);

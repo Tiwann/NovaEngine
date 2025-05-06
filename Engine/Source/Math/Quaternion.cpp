@@ -77,13 +77,13 @@ namespace Nova
         return *this;
     }
 
-    Quaternion& Quaternion::operator*=(f32 Other)
+    Quaternion& Quaternion::operator*=(const f32 Other)
     {
         *this = *this * Other;
         return *this;
     }
 
-    Quaternion Quaternion::operator/(f32 Other) const
+    Quaternion Quaternion::operator/(const f32 Other) const
     {
         return { w / Other, x / Other, y / Other, z / Other };
     }

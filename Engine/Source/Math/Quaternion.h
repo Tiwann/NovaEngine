@@ -9,7 +9,8 @@ namespace Nova
 
     struct CORE_API Quaternion
     {
-    public:
+        f32 w, x, y, z;
+
         Quaternion();
         Quaternion(f32 W, f32 X, f32 Y, f32 Z);
         Quaternion(const Quaternion& Other);
@@ -44,8 +45,6 @@ namespace Nova
         static Quaternion EulerDegrees(const f32 X, const f32 Y, const f32 Z);
         static Quaternion One;
         static Quaternion Identity;
-    private:
-        f32 w, x, y, z;
     };
 }
 

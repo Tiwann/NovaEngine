@@ -63,7 +63,10 @@ namespace Nova
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Reset));
             const String Message = StringFormat(Fmt, Arguments...);
-            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            if (m_CurrentCategory.IsValid())
+                std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            else
+                std::cout << StringFormat("{}[{}] {}\n", Code, m_Name, Message);
         }
 
         template<typename... Args>
@@ -71,7 +74,10 @@ namespace Nova
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Red));
             const String Message = StringFormat(Fmt, Arguments...);
-            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            if (m_CurrentCategory.IsValid())
+                std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            else
+                std::cout << StringFormat("{}[{}] {}\n", Code, m_Name, Message);
         }
 
         template<typename... Args>
@@ -79,7 +85,10 @@ namespace Nova
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Yellow));
             const String Message = StringFormat(Fmt, Arguments...);
-            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            if (m_CurrentCategory.IsValid())
+                std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            else
+                std::cout << StringFormat("{}[{}] {}\n", Code, m_Name, Message);
         }
 
         template<typename... Args>
@@ -87,7 +96,10 @@ namespace Nova
         {
             const StringView Code(GetConsoleColorCode(ConsoleColor::Green));
             const String Message = StringFormat(Fmt, Arguments...);
-            std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            if (m_CurrentCategory.IsValid())
+                std::cout << StringFormat("{}[{}] [{}] {}\n", Code, m_Name, *m_CurrentCategory, Message);
+            else
+                std::cout << StringFormat("{}[{}] {}\n", Code, m_Name, Message);
         }
 
         template<typename... Args>

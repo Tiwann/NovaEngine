@@ -18,11 +18,7 @@ namespace Nova
 {
     HelloTriangle::HelloTriangle(const Array<const char*>& Arguments) : Application(Arguments)
     {
-        const Quaternion Rotation = Quaternion::EulerDegrees({ 00.0f, 90.0f, 0.0f });
-        const Vector3 Vector = Vector3::Forward;
-        const Vector3 Result = Rotation * Vector;
-        
-        NOVA_BREAK();
+
     }
 
     ApplicationConfiguration HelloTriangle::CreateConfiguration() const

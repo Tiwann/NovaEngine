@@ -31,6 +31,7 @@ namespace Nova
             return m_Count == Other.m_Count && m_Data == Other.m_Data;
         }
 
+        bool IsValid() const { return m_Data && m_Count != 0; }
         ConstPointerType Data() const { return m_Data; }
         SizeType Count() const { return m_Count; }
         SizeType Size() const { return m_Count * sizeof(CharacterType); }

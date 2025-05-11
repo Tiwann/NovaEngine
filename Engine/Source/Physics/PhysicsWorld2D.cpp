@@ -108,7 +108,7 @@ namespace Nova
     PhysicsBody2D* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& Definition, const PhysicsMaterial& Material, PhysicsShape2D* Shape)
     {
         b2BodyDef BodyDefinition = {};
-        BodyDefinition.position = ToB2Vec2(Definition.Position);
+        BodyDefinition.position = ToB2Vec2(Vector2(Definition.Position));
         BodyDefinition.angle = Math::Radians(Definition.Rotation.z);
         BodyDefinition.type = (b2BodyType)Definition.Type;
         

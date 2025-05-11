@@ -247,12 +247,7 @@ namespace Nova
                 QueueCreateInfos.Add(PresentQueueCreateInfo);
             }
 
-
-            VkPhysicalDeviceShaderObjectFeaturesEXT ShaderObjectFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT };
-            ShaderObjectFeatures.shaderObject = true;
-
             VkPhysicalDeviceDynamicRenderingFeatures DynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
-            DynamicRenderingFeatures.pNext = &ShaderObjectFeatures;
             DynamicRenderingFeatures.dynamicRendering = true;
 
             VkDeviceCreateInfo DeviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
@@ -1087,10 +1082,10 @@ namespace Nova
         }
     }
 
-    void VulkanRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data)
+    void VulkanRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, const u64 Offset, const u64 Size, const void* Data)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        vkCmdUpdateBuffer(Cmd, dynamic_cast<VulkanUniformBuffer*>(Buffer)->GetHandle(), Offset, Size, Data);
+        vkCmdUpdateBuffer(Cmd, Buffer->As<VulkanUniformBuffer>()->GetHandle(), Offset, Size, Data);
     }
 
     VkInstance VulkanRenderer::GetInstance() const

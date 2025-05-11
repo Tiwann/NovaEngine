@@ -58,13 +58,13 @@ namespace Nova
     {
         b2Body* BodyHandle = GetHandle();
         const f32 Angle = BodyHandle->GetAngle();
-        BodyHandle->SetTransform(ToB2Vec2(Position), Angle);
+        BodyHandle->SetTransform(ToB2Vec2(Vector2(Position)), Angle);
     }
 
     Vector3 PhysicsBody2D::GetPosition() const
     {
         const b2Body* BodyHandle = GetHandle();
-        return ToVector2(BodyHandle->GetPosition());
+        return Vector3(ToVector2(BodyHandle->GetPosition()));
     }
 
     void PhysicsBody2D::SetRotation(const Vector3& Rotation)
@@ -82,7 +82,7 @@ namespace Nova
     void PhysicsBody2D::SetPositionAndRotation(const Vector3& Position, const Vector3& Rotation)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->SetTransform(ToB2Vec2(Position), Math::Radians(Rotation.z));
+        BodyHandle->SetTransform(ToB2Vec2(Vector2(Position)), Math::Radians(Rotation.z));
     }
 
     void PhysicsBody2D::SetGravityScale(f32 Scale)
@@ -94,7 +94,7 @@ namespace Nova
     void PhysicsBody2D::SetLinearVelocity(const Vector3& Velocity)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->SetLinearVelocity(ToB2Vec2(Velocity));
+        BodyHandle->SetLinearVelocity(ToB2Vec2(Vector2(Velocity)));
     }
 
     void PhysicsBody2D::SetAngularVelocity(const Vector3& AngularVelocity)
@@ -124,13 +124,13 @@ namespace Nova
     Vector3 PhysicsBody2D::GetLinearVelocity() const
     {
         const b2Body* BodyHandle = GetHandle();
-        return ToVector2(BodyHandle->GetLinearVelocity());
+        return Vector3(ToVector2(BodyHandle->GetLinearVelocity()));
     }
 
     Vector3 PhysicsBody2D::GetLinearVelocityPoint(const Vector3& Point) const
     {
         const b2Body* BodyHandle = GetHandle();
-        return ToVector2(BodyHandle->GetLinearVelocityFromLocalPoint(ToB2Vec2(Point)));
+        return Vector3(ToVector2(BodyHandle->GetLinearVelocityFromLocalPoint(ToB2Vec2(Vector2(Point)))));
     }
 
     Vector3 PhysicsBody2D::GetAngularVelocity() const
@@ -154,25 +154,25 @@ namespace Nova
     void PhysicsBody2D::AddForce(const Vector3& Force)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->ApplyForce(ToB2Vec2(Force), { 0.0f, 0.0f }, true);
+        BodyHandle->ApplyForce(ToB2Vec2(Vector2(Force)), { 0.0f, 0.0f }, true);
     }
 
     void PhysicsBody2D::AddImpulse(const Vector3& Force)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->ApplyLinearImpulse(ToB2Vec2(Force), { 0.0f, 0.0f }, true);
+        BodyHandle->ApplyLinearImpulse(ToB2Vec2(Vector2(Force)), { 0.0f, 0.0f }, true);
     }
 
     void PhysicsBody2D::AddForceAtPosition(const Vector3& Position, const Vector3& Force)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->ApplyForce(ToB2Vec2(Force), ToB2Vec2(Position), true);
+        BodyHandle->ApplyForce(ToB2Vec2(Vector2(Force)), ToB2Vec2(Vector2(Position)), true);
     }
 
     void PhysicsBody2D::AddImpulseAtPosition(const Vector3& Position, const Vector3& Force)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->ApplyLinearImpulse(ToB2Vec2(Force), ToB2Vec2(Position), true);
+        BodyHandle->ApplyLinearImpulse(ToB2Vec2(Vector2(Force)), ToB2Vec2(Vector2(Position)), true);
     }
 
     const PhysicsConstraintsFlags& PhysicsBody2D::GetConstraints() const

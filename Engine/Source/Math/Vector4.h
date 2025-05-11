@@ -16,8 +16,8 @@ namespace Nova
 
         Vector4() = default;
         Vector4(f32 X, f32 Y, f32 Z, f32 W);
-        Vector4(f32 Value);
-        Vector4(const Vector3& Vec);
+        explicit Vector4(f32 Value);
+        explicit Vector4(const Vector3& Vec);
         Vector4(const Vector3& Vec, f32 W);
         
         f32 Magnitude() const;
@@ -32,16 +32,26 @@ namespace Nova
         Vector4 operator+(const Vector4& Vec) const;
         Vector4 operator-(const Vector4& Vec) const;
         Vector4 operator-() const;
+        Vector4& operator+=(const Vector4& Vec);
+        Vector4& operator-=(const Vector4& Vec);
 
         friend Vector4 operator*(f32 Scalar, const Vector4& Vec);
         friend Vector4 operator*(const Vector4& Vec, f32 Scalar);
-        Vector4 operator*(const Vector4& Vec) const;
+        friend Vector4 operator/(const Vector4& Vec, f32 Scalar);
+
         Vector4& operator*=(f32 Scalar);
+        Vector4& operator*=(const Vector4& Vec);
+
+        Vector4& operator/=(f32 Scalar);
+        Vector4& operator/=(const Vector4& Vec);
+
         bool operator==(const Vector4& Vec) const;
-        operator Color() const;
+        Vector4 operator*(const Vector4& Vec) const;
 
         f32& operator[](u32 Index);
         const f32& operator[](u32 Index) const;
+
+        operator Color() const;
 
         static Vector4 Zero;
         static Vector4 One;

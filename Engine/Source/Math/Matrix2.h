@@ -13,14 +13,16 @@ namespace Nova
         const f32* ValuePtr() const;
         f32 Magnitude() const;
         f32 Determinant() const;
+        Matrix2 Inverted() const;
 
         Vector2 operator*(const Vector2& Vec) const;
         Matrix2 operator*(const Matrix2& Mat) const;
-        
-        Vector2& operator[](size_t i);
-
-        const Vector2& operator[](size_t i) const;
         Matrix2& operator*(f32 Scalar);
+
+        Vector2& operator[](size_t i);
+        const Vector2& operator[](size_t i) const;
+
+        Vector2 GetRow(size_t i) const;
 
         void Rotate(f32 Radians);
         void RotateDegrees(f32 Degrees);

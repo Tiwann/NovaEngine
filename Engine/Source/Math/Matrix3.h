@@ -4,6 +4,8 @@
 
 namespace Nova
 {
+    struct Vector2;
+
     class CORE_API Matrix3
     {
     public:
@@ -13,19 +15,19 @@ namespace Nova
         const f32* ValuePtr() const;
         f32 Magnitude() const;
         f32 Determinant() const;
+        Matrix3 Inverted() const;
 
-        Vector3 Multiply(const Vector3& Vec) const;
         Vector3 operator*(const Vector3& Vec) const;
-        Matrix3 Multiply(const Matrix3& Mat) const;
         Matrix3 operator*(const Matrix3& Mat) const;
-        
-        Vector3& operator[](size_t i);
-
-        const Vector3& operator[](size_t i) const;
         Matrix3& operator*(f32 Scalar);
 
-        void Rotate(f32 Radians, const Vector3& Axis);
-        void RotateDegrees(f32 Degrees, const Vector3& Axis);
+        Vector3& operator[](size_t i);
+        const Vector3& operator[](size_t i) const;
+        Vector3 GetRow(size_t i) const;
+
+        void Translate(const Vector2& Vec);
+        void Rotate(const Vector3& Axis, f32 Radians);
+        void RotateDegrees(const Vector3& Axis, f32 Degrees);
         void Scale(f32 Scalar);
         void Scale(const Vector3& Scale);
         

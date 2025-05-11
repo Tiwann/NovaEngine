@@ -17,6 +17,7 @@ namespace Nova
         TargetDesc.format = SLANG_SPIRV;
         TargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
 
+
         const Path ShaderDirs = Renderer->GetOwner()->GetEngineAssetsDirectory() / "Shaders";
         const String ShaderIncludeDirectory = ShaderDirs.string().c_str();
         Array<const char*> IncludeDirectories;
@@ -28,6 +29,7 @@ namespace Nova
         SessionDesc.targets = &TargetDesc;
         SessionDesc.searchPaths = IncludeDirectories.Data();
         SessionDesc.searchPathCount = IncludeDirectories.Count();
+        SessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
 
         if (SLANG_FAILED(Slang->createSession(SessionDesc, &m_Compiler)))
         {

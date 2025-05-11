@@ -30,19 +30,18 @@ namespace Nova
         Vector3 WithY(f32 Y) const;
         Vector3 WithZ(f32 Z) const;
         Vector3 Normalized() const;
+        Vector3 Apply(f32 (*Function)(f32)) const;
+
         Vector3 operator+(const Vector3& Vec) const;
         Vector3 operator-(const Vector3& Vec) const;
         Vector3 operator-() const;
         Vector3& operator+=(const Vector3& Vec);
         Vector3& operator-=(const Vector3& Vec);
 
-        Vector3 Apply(f32 (*Function)(f32)) const;
-
-        friend Vector3 operator/(f32 Scalar, const Vector3& Vec);
-        friend Vector3 operator/( const Vector3& Vec, f32 Scalar);
         friend Vector3 operator*(f32 Scalar, const Vector3& Vec);
         friend Vector3 operator*(const Vector3& Vec, f32 Scalar);
-        
+        friend Vector3 operator/(const Vector3& Vec, f32 Scalar);
+
         Vector3& operator*=(f32 Scalar);
         Vector3& operator*=(const Vector3& Vec);
 
@@ -52,11 +51,14 @@ namespace Nova
         bool operator==(const Vector3& Vec) const;
         Vector3 operator*(const Vector3& Other) const;
 
+        f32& operator[](u32 Index);
+        const f32& operator[](u32 Index) const;
+
+        static f32 Dot(const Vector3& Vec1, const Vector3& Vec2);
         static Vector3 Cross(const Vector3& Vec1, const Vector3& Vec2);
         static Vector3 Normalize(const Vector3& Vec);
-        static f32 Dot(const Vector3& Vec1, const Vector3& Vec2);
-        static Vector3 Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha);
         static f32 Angle(const Vector3& VecA, const Vector3& VecB);
+        static Vector3 Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha);
         static Vector3 MoveTowards(const Vector3& Current, const Vector3& Target, f32 MaxDelta);
         static Vector3 SmoothDamp(const Vector3& Current, const Vector3& Target, Vector3& CurrentVelocity, f32 SmoothTime, f32 Delta, f32 MaxSpeed);
         

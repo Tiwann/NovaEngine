@@ -6,6 +6,8 @@ namespace Nova
 {
     struct Vector3;
     struct Vector4;
+    struct Matrix4;
+    struct Matrix3;
 
     struct CORE_API Quaternion
     {
@@ -18,11 +20,10 @@ namespace Nova
         f32 Magnitude() const;
         Quaternion Normalized() const;
         Quaternion Conjugated() const;
-
         Quaternion Inverted() const;
+
         Quaternion Cross(const Quaternion& Other) const;
         f32 Dot(const Quaternion& Other) const;
-
 
         bool operator==(const Quaternion& Other) const;
         bool operator!=(const Quaternion& Other) const;
@@ -36,9 +37,12 @@ namespace Nova
         Quaternion& operator*=(f32 Other);
         Quaternion operator/(f32 Other) const;
         Vector3 operator*(const Vector3& Other) const;
-        Vector4 operator*(const Vector4& Other);
+        Vector4 operator*(const Vector4& Other) const;
+        Matrix4 operator*(const Matrix4& Other) const;
 
-        
+        Matrix4 ToMatrix4() const;
+        Matrix3 ToMatrix3() const;
+
         static Quaternion Euler(const Vector3& EulerAngles);
         static Quaternion Euler(const f32 X, const f32 Y, const f32 Z);
         static Quaternion EulerDegrees(const Vector3& EulerAnglesDegrees);

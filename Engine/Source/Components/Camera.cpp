@@ -12,6 +12,17 @@ namespace Nova
     {                             
     }
 
+
+    void Camera::OnInit()
+    {
+        Component::OnInit();
+        Transform* Transform = GetTransform();
+        Transform->OnChanged.Bind([this]
+        {
+            m_ViewMatrix.SetDirty();
+        });
+    }
+
     void Camera::OnUpdate(f32 Delta)
     {
         const Window* Window = g_Application->GetWindow();
@@ -22,50 +33,86 @@ namespace Nova
     void Camera::OnInspectorGUI(const ImGuiIO& IO)
     {
         Component::OnInspectorGUI(IO);
-        
-        UI::DragValue<f32>("Width", Settings.Width, 1, 0, 0, "%.0f");
-        UI::DragValue<f32>("Height", Settings.Height, 1, 0, 0, "%.0f");
-        UI::DragValue<f32>("Near Plane", Settings.NearPlane);
-        UI::DragValue<f32>("Far Plane", Settings.FarPlane);
+
+        if (UI::DragValue<f32>("Width", Settings.Width, 1, 0, 0, "%.0f"))
+        {
+            m_ProjectionMatrix.SetDirty();
+        }
+
+        if (UI::DragValue<f32>("Height", Settings.Height, 1, 0, 0, "%.0f"))
+        {
+            m_ProjectionMatrix.SetDirty();
+        }
+
+        if (UI::DragValue<f32>("Near Plane", Settings.NearPlane))
+        {
+            m_ProjectionMatrix.SetDirty();
+        }
+        if (UI::DragValue<f32>("Far Plane", Settings.FarPlane))
+        {
+            m_ProjectionMatrix.SetDirty();
+        }
         ImGui::ColorPicker4("Clear Color", (f32*)&ClearColor);
 
         const char* ProjectionTypes[2] = { "Perspective", "Orthographic" };
-        ImGui::Combo("Projection", (int*)&Settings.Projection, ProjectionTypes, 2);
-            
-        if(Settings.Projection == CameraProjectionType::Orthographic)
+        if (ImGui::Combo("Projection", (int*)&Settings.Projection, ProjectionTypes, 2))
         {
-            UI::DragValue<f32>("Orthographic Size", Settings.OrthoSize);
-        } else
+            m_ProjectionMatrix.SetDirty();
+        }
+
+        if (Settings.Projection == CameraProjectionType::Orthographic)
         {
-            UI::DragValue<f32>("Field Of View", Settings.FieldOfView);
+            if (UI::DragValue<f32>("Orthographic Size", Settings.OrthoSize))
+            {
+                m_ProjectionMatrix.SetDirty();
+            }
+        }
+        else
+        {
+            if (UI::DragValue<f32>("Field Of View", Settings.FieldOfView, 1.0f, 0.0f, 180.0f))
+            {
+                m_ProjectionMatrix.SetDirty();
+            }
         }
     }
 
     
-    Matrix4 Camera::GetViewMatrix() const
+    const Matrix4& Camera::GetViewMatrix()
     {
-        const Transform* Transform = GetTransform();
-        return Transform->GetWorldSpaceMatrix().Inverse();
+        const auto ComputeView = [&]() -> Matrix4
+        {
+            const Transform* Transform = GetTransform();
+            Matrix4 View = Matrix4::Identity;
+            View.Translate(-Transform->GetPosition());
+            View.Rotate(-Transform->GetRotation());
+            return View;
+        };
+
+        return m_ViewMatrix.Get(ComputeView);
     }
 
-    Matrix4 Camera::GetProjectionMatrix() const
+    const Matrix4& Camera::GetProjectionMatrix()
     {
-        const f32 AspectRatio = Settings.Width / Settings.Height;
-        const Matrix4 Projection = Settings.Projection == CameraProjectionType::Perspective ?
-            Math::Perspective(
-            Settings.FieldOfView,
-            AspectRatio,
-            Settings.NearPlane,
-            Settings.FarPlane)
+        const auto ComputeProjection = [&]() -> Matrix4
+        {
+            const f32 AspectRatio = Settings.Width / Settings.Height;
+            const Matrix4 Projection = Settings.Projection == CameraProjectionType::Perspective ?
+                Math::Perspective(
+                Settings.FieldOfView,
+                AspectRatio,
+                Settings.NearPlane,
+                Settings.FarPlane)
 
-        : Math::Orthographic(
-            Settings.Width,
-            Settings.Height,
-            Settings.OrthoSize,
-            Settings.NearPlane,
-            Settings.FarPlane);
-          
-        return Projection;
+            : Math::Orthographic(
+                Settings.Width,
+                Settings.Height,
+                Settings.OrthoSize,
+                Settings.NearPlane,
+                Settings.FarPlane);
+
+            return Projection;
+        };
+        return m_ProjectionMatrix.Get(ComputeProjection);
     }
 }
 

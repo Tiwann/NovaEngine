@@ -2,6 +2,8 @@
 #include "Runtime/Component.h"
 #include "Math/LinearAlgebra.h"
 #include "Runtime/LogCategory.h"
+#include "Containers/Lazy.h"
+#include "Containers/MulticastDelegate.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Transform, "TRANSFORM")
 
@@ -43,14 +45,18 @@ namespace Nova
         Vector3 GetRightVector() const;
         Vector3 GetUpVector() const;
 
-        Matrix4 GetWorldSpaceMatrix() const;
-        Matrix4 GetLocalSpaceMatrix() const;
+        const Matrix4& GetWorldSpaceMatrix();
+        const Matrix4& GetLocalSpaceMatrix();
         void OnInspectorGUI(const ImGuiIO& IO) override;
-        
+
+        MulticastDelegate<void()> OnChanged;
     private:
         Vector3 m_Position{Vector3::Zero};
         Vector3 m_Rotation{Vector3::Zero};
         Vector3 m_Scale{Vector3::One};
+
+        Lazy<Matrix4> m_WorldSpaceMatrix;
+        Lazy<Matrix4> m_LocalSpaceMatrix;
     };
 
     

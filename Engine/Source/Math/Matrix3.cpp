@@ -10,10 +10,9 @@ namespace Nova
     
     Matrix3::Matrix3()
     {
-        Columns[0] = {};
-        Columns[1] = {};
-        Columns[2] = {};
-        m00 = m11 = m22 = 1.0f;
+        Columns[0] = Vector3(1.0f, 0.0f, 0.0f);
+        Columns[1] = Vector3(0.0f, 1.0f, 0.0f);
+        Columns[2] = Vector3(0.0f, 0.0f, 1.0f);
     }
 
     Matrix3::Matrix3(const Vector3& Col1, const Vector3& Col2, const Vector3& Col3)
@@ -43,51 +42,38 @@ namespace Nova
         return m00 * X.Determinant() - m10 * Y.Determinant() + m20 * Z.Determinant();
     }
 
-    Vector3 Matrix3::Multiply(const Vector3& Vec) const
+    Matrix3 Matrix3::Inverted() const
     {
-        return Columns[0] * Vec.x + Columns[1] * Vec.y + Columns[2] * Vec.z;
+        return Identity;
     }
+
 
     Vector3 Matrix3::operator*(const Vector3& Vec) const
     {
-        return Multiply(Vec);
-    }
-
-    Matrix3 Matrix3::Multiply(const Matrix3& Mat) const
-    {
-        Vector3 Col1 { Mat.m00 * m00 + Mat.m01 * m10 + Mat.m02 * m20,
-                       Mat.m00 * m01 + Mat.m01 * m11 + Mat.m02 * m21,
-                       Mat.m00 * m02 + Mat.m01 * m12 + Mat.m02 * m22 };
-        
-        Vector3 Col2 { Mat.m10 * m00 + Mat.m11 * m10 + Mat.m12 * m20,
-                       Mat.m10 * m01 + Mat.m11 * m11 + Mat.m12 * m21,
-                       Mat.m10 * m02 + Mat.m11 * m12 + Mat.m12 * m22 };
-
-        Vector3 Col3 { Mat.m20 * m00 + Mat.m21 * m10 + Mat.m22 * m20,
-                       Mat.m20 * m01 + Mat.m21 * m11 + Mat.m22 * m21,
-                       Mat.m20 * m02 + Mat.m21 * m12 + Mat.m22 * m22 };
-        
-        return { Col1, Col2, Col3 };
+        const Vector3 Row0 = GetRow(0);
+        const Vector3 Row1 = GetRow(1);
+        const Vector3 Row2 = GetRow(2);
+        const Vector3 Result = {Row0.Dot(Vec), Row1.Dot(Vec), Row2.Dot(Vec)};
+        return Result;
     }
 
     Matrix3 Matrix3::operator*(const Matrix3& Mat) const
     {
-        return Multiply(Mat);
+        const Vector3 Row0 = GetRow(0);
+        const Vector3 Row1 = GetRow(1);
+        const Vector3 Row2 = GetRow(2);
+
+        const Vector3& Col0 = Mat.Columns[0];
+        const Vector3& Col1 = Mat.Columns[1];
+        const Vector3& Col2 = Mat.Columns[2];
+
+        const Vector3 NewCol0 { Row0.Dot(Col0), Row1.Dot(Col0), Row2.Dot(Col0) };
+        const Vector3 NewCol1 { Row0.Dot(Col1), Row1.Dot(Col1), Row2.Dot(Col1) };
+        const Vector3 NewCol2 { Row0.Dot(Col2), Row1.Dot(Col2), Row2.Dot(Col2) };
+        return { NewCol0, NewCol1, NewCol2 };
     }
 
-    Vector3& Matrix3::operator[](size_t i)
-    {
-        NOVA_ASSERT(i < 2, "Cannot access Mat3 element: index out of bounds.");
-        return Columns[i];
-    }
-
-    const Vector3& Matrix3::operator[](size_t i) const
-    {
-        NOVA_ASSERT(i < 2, "Cannot access Mat3 element: index out of bounds.");
-        return Columns[i];
-    }
-
-    Matrix3& Matrix3::operator*(f32 Scalar)
+    Matrix3& Matrix3::operator*(const f32 Scalar)
     {
         Columns[0] *= Scalar;
         Columns[1] *= Scalar;
@@ -95,17 +81,46 @@ namespace Nova
         return *this;
     }
 
-    void Matrix3::Rotate(f32 Radians, const Vector3& Axis)
+    Vector3& Matrix3::operator[](const size_t i)
     {
-        *this = Math::Rotate(*this, Axis, Radians);
+        NOVA_ASSERT(i < 3, "Cannot access Mat3 element: index out of bounds.");
+        return Columns[i];
     }
 
-    void Matrix3::RotateDegrees(f32 Degrees, const Vector3& Axis)
+    const Vector3& Matrix3::operator[](const size_t i) const
     {
-        *this = Math::RotateDegrees(*this, Axis, Degrees);
+        NOVA_ASSERT(i < 3, "Cannot access Mat3 element: index out of bounds.");
+        return Columns[i];
     }
 
-    void Matrix3::Scale(f32 Scalar)
+    Vector3 Matrix3::GetRow(const size_t i) const
+    {
+        NOVA_ASSERT(i < 3, "Cannot access Mat3 element: index out of bounds.");
+        switch (i)
+        {
+        case 0: return { Columns[0].x, Columns[1].x, Columns[2].x };
+        case 1: return { Columns[0].y, Columns[1].y, Columns[2].y };
+        case 2: return { Columns[0].z, Columns[1].z, Columns[2].z };
+        default: throw;
+        }
+    }
+
+    void Matrix3::Translate(const Vector2& Vec)
+    {
+        *this = Math::Translate(*this, Vec);
+    }
+
+    void Matrix3::Rotate(const Vector3& Axis, const f32 Radians)
+    {
+        *this = Math::RotateAxisAngle(*this, Axis, Radians);
+    }
+
+    void Matrix3::RotateDegrees(const Vector3& Axis, const f32 Degrees)
+    {
+        *this = Math::RotateAxisAngleDegrees(*this, Axis, Degrees);
+    }
+
+    void Matrix3::Scale(const f32 Scalar)
     {
         *this = Math::Scale(*this, Scalar);
     }

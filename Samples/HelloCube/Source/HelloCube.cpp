@@ -235,22 +235,15 @@ namespace Nova
     void HelloCube::OnUpdate(const float DeltaTime)
     {
         Application::OnUpdate(DeltaTime);
-        static f32 Timer = 0.0f;
-        Timer += DeltaTime;
-        if (Timer > 1.0f)
-        {
-            Timer = 0.0f;
-            NOVA_LOG(HelloCube, Verbosity::Info, "FPS: {}", (i32)(1.0f / DeltaTime));
-        }
     }
 
     void HelloCube::OnFrameStarted(Renderer* Renderer)
     {
 	    Application::OnFrameStarted(Renderer);
 
-        const Matrix4 View = m_Camera->GetViewMatrix();
-        const Matrix4 Projection = m_Camera->GetProjectionMatrix();
-        const Matrix4 Model = Entity->GetTransform()->GetWorldSpaceMatrix();
+        const Matrix4& View = m_Camera->GetViewMatrix();
+        const Matrix4& Projection = m_Camera->GetProjectionMatrix();
+        const Matrix4& Model = Entity->GetTransform()->GetWorldSpaceMatrix();
 
         Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, 0, sizeof(Matrix4), &View);
         Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, sizeof(Matrix4), sizeof(Matrix4), &Projection);

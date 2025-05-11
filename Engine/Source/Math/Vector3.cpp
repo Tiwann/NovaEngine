@@ -58,8 +58,9 @@ namespace Nova
     Vector3 Vector3::Cross(const Vector3& Vec) const
     {
         return { y * Vec.z - z * Vec.y,
-                    z * Vec.x - x * Vec.z,
-                    x * Vec.y - y * Vec.x };
+            z * Vec.x - x * Vec.z,
+            x * Vec.y - y * Vec.x };
+
     }
 
     Vector3 Vector3::WithX(f32 X) const
@@ -116,12 +117,6 @@ namespace Nova
     Vector3 Vector3::Apply(f32 (*Function)(f32)) const
     {
         return {Function(x), Function(y), Function(z)};
-    }
-
-
-    Vector3 operator/(const f32 Scalar, const Vector3& Vec)
-    {
-        return {Scalar / Vec.x, Scalar / Vec.y, Scalar / Vec.z};
     }
 
     Vector3 operator/(const Vector3& Vec, const f32 Scalar)
@@ -181,6 +176,16 @@ namespace Nova
     Vector3 Vector3::operator*(const Vector3& Other) const
     {
         return {x * Other.x, y * Other.y, z * Other.z};
+    }
+
+    f32& Vector3::operator[](const u32 Index)
+    {
+        return ValuePtr()[Index];
+    }
+
+    const f32& Vector3::operator[](const u32 Index) const
+    {
+        return ValuePtr()[Index];
     }
 
     Vector3 Vector3::Cross(const Vector3& Vec1, const Vector3& Vec2)

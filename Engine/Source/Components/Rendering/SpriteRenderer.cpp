@@ -105,8 +105,8 @@ namespace Nova
         const Vector2 Tiling = Flags.Contains(SpriteRendererFlagBits::TileWithScale) ? (Vector2)GetTransform()->GetScale() : m_Tiling;
         m_Shader->SetUniformFloat2("uTiling", Tiling);
         m_Shader->SetUniformFloat4("uColorTint", m_ColorTint);
-        const Matrix3 SpriteScale = m_Sprite.GetTexture() ? Math::Scale(Matrix3::Identity, m_Sprite.GetSize() / (f32)m_PixelsPerUnit) : Matrix3::Identity;
-        m_Shader->SetUniformMat3("uSpriteScale", SpriteScale);
+        const Matrix2 SpriteScale = m_Sprite.GetTexture() ? Math::Scale(Matrix2::Identity, m_Sprite.GetSize() / (f32)m_PixelsPerUnit) : Matrix2::Identity;
+        m_Shader->SetUniformMat2("uSpriteScale", SpriteScale);
         Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }
 

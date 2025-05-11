@@ -94,6 +94,15 @@ namespace Nova
     struct IsMatrix<class Matrix4> : TrueType{};
 
     template<typename T>
+    struct IsQuaternion : FalseType {};
+
+    template<>
+    struct IsQuaternion<struct Quaternion> : TrueType{};
+
+    template<typename T>
+    static constexpr bool IsQuaternionValue = IsQuaternion<T>::Value;
+
+    template<typename T>
     static constexpr bool IsMatrixValue = IsMatrix<T>::Value;
     
     template<typename Base, typename Derived>

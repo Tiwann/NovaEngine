@@ -118,17 +118,37 @@ namespace Nova
             if constexpr(IsColorValue<T>) return Color::Lerp(A, B, Alpha);
             return T();
         }
+
+        template<typename T> requires IsMatrixValue<T>
+        static T Identity()
+        {
+            return T::Identity;
+        }
+
+        template<typename T> requires IsMatrixValue<T>
+        static T Determinant(const T& Mat)
+        {
+            return Mat.Determinant();
+        }
+
+
+        template<typename T> requires IsMatrixValue<T> || IsQuaternionValue<T>
+        static T Inverse(const T& In)
+        {
+            return In.Inverted();
+        }
         
         static class Matrix2 Rotate(const Matrix2& Mat, f32 Radians);
         static Matrix2 RotateDegrees(const Matrix2& Mat, f32 Degrees);
         static Matrix2 Scale(const Matrix2& Mat, const struct Vector2& Scale);
         static Matrix2 Scale(const Matrix2& Mat, f32 Scale);
 
-        static class Matrix3 Rotate(const Matrix3& Mat, const struct Vector3& Axis, f32 Radians);
-        static Matrix3 RotateDegrees(const Matrix3& Mat, const Vector3& Axis, f32 Degrees);
+        static class Matrix3 RotateAxisAngle(const Matrix3& Mat, const struct Vector3& Axis, f32 AngleRadians);
+        static Matrix3 RotateAxisAngleDegrees(const Matrix3& Mat, const Vector3& Axis, f32 AngleDegrees);
         static Matrix3 Scale(const Matrix3& Mat, const Vector3& Scale);
         static Matrix3 Scale(const Matrix3& Mat, f32 Scale);
-        
+        static Matrix3 Translate(const Matrix3& Mat, const Vector2& Translation);
+
         static class Matrix4 RotateAxisAngle(const Matrix4& Mat, const Vector3& Axis, f32 AngleRadians); 
         static Matrix4 RotateAxisAngleDegrees(const Matrix4& Mat, const Vector3& Axis, f32 AngleDegrees);
         static Matrix4 Scale(const Matrix4& Mat, const Vector3& Scale);

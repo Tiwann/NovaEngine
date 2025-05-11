@@ -18,7 +18,7 @@ namespace Nova
         Component::OnInit();
     }
 
-    void EditorCameraController::OnUpdate(f32 Delta)
+    void EditorCameraController::OnUpdate(const f32 Delta)
     {
         Component::OnUpdate(Delta);
         if (!m_Camera) return;
@@ -72,7 +72,7 @@ namespace Nova
         {
             if (!Math::IsZero(MouseDelta.Magnitude()))
             {
-                CameraTransform->RotateAround({m_RotationSpeed * MouseDelta.y * Delta, m_RotationSpeed * MouseDelta.x * Delta, 0.0f}, m_Pivot);
+                CameraTransform->RotateAround({m_RotationSpeed * MouseDelta.y * Delta, m_RotationSpeed * MouseDelta.x * Delta, 0.0}, m_Pivot);
             }
         }
     }

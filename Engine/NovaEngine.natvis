@@ -67,17 +67,22 @@
 
     <!-- Nova::Vector2 -->
     <Type Name="Nova::Vector2">
-        <DisplayString>{{X = {x}, Y = {y}}</DisplayString>
+        <DisplayString>[{x}, {y}]</DisplayString>
     </Type>
 
     <!-- Nova::Vector3 -->
     <Type Name="Nova::Vector3">
-        <DisplayString>{{X = {x}, Y = {y}, Z = {z}}</DisplayString>
+        <DisplayString>[{x}, {y}, {z}]</DisplayString>
     </Type>
 
     <!-- Nova::Vector4 -->
     <Type Name="Nova::Vector4">
-        <DisplayString>{{X = {x}, Y = {y}, Z = {z}, W = {w}}</DisplayString>
+        <DisplayString>[{x}, {y}, {z}, {w}]</DisplayString>
+    </Type>
+
+    <!-- Nova::Quaternion -->
+    <Type Name="Nova::Quaternion">
+        <DisplayString>[{w}, {x}, {y}, {z}]</DisplayString>
     </Type>
 
     <!-- Nova::Matrix -->

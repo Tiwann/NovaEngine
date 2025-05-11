@@ -1,5 +1,7 @@
 #include "Quaternion.h"
 #include "Functions.h"
+#include "Matrix3.h"
+#include "Matrix4.h"
 #include "Vector3.h"
 #include "Vector4.h"
 
@@ -96,9 +98,64 @@ namespace Nova
         return Other + (UV * w + UUV) * 2.0f;
     }
 
-    Vector4 Quaternion::operator*(const Vector4& Other)
+    Vector4 Quaternion::operator*(const Vector4& Other) const
     {
         return Vector4(operator*(Vector3(Other)), Other.w);
+    }
+
+    Matrix4 Quaternion::operator*(const Matrix4& Other) const
+    {
+        return ToMatrix4() * Other;
+    }
+
+    Matrix4 Quaternion::ToMatrix4() const
+    {
+        const f32 xx = x * x;
+        const f32 yy = y * y;
+        const f32 zz = z * z;
+        const f32 xy = x * y;
+        const f32 xz = x * z;
+        const f32 yz = y * z;
+        const f32 wx = w * x;
+        const f32 wy = w * y;
+        const f32 wz = w * z;
+
+        Matrix4 Result = Matrix4::Identity;
+        Result[0][0] = 1.0f - 2.0f * (yy + zz);
+        Result[0][1] = 2.0f * (xy + wz);
+        Result[0][2] = 2.0f * (xz - wy);
+        Result[1][0] = 2.0f * (xy - wz);
+        Result[1][1] = 1.0f - 2.0f * (xx + zz);
+        Result[1][2] = 2.0f * (yz + wx);
+        Result[2][0] = 2.0f * (xz + wy);
+        Result[2][1] = 2.0f * (yz - wx);
+        Result[2][2] = 1.0f - 2.0f * (xx + yy);
+        return Result;
+    }
+
+    Matrix3 Quaternion::ToMatrix3() const
+    {
+        const f32 xx = x * x;
+        const f32 yy = y * y;
+        const f32 zz = z * z;
+        const f32 xy = x * y;
+        const f32 xz = x * z;
+        const f32 yz = y * z;
+        const f32 wx = w * x;
+        const f32 wy = w * y;
+        const f32 wz = w * z;
+
+        Matrix3 Result = Matrix3::Identity;
+        Result[0][0] = 1.0f - 2.0f * (yy + zz);
+        Result[0][1] = 2.0f * (xy + wz);
+        Result[0][2] = 2.0f * (xz - wy);
+        Result[1][0] = 2.0f * (xy - wz);
+        Result[1][1] = 1.0f - 2.0f * (xx + zz);
+        Result[1][2] = 2.0f * (yz + wx);
+        Result[2][0] = 2.0f * (xz + wy);
+        Result[2][1] = 2.0f * (yz - wx);
+        Result[2][2] = 1.0f - 2.0f * (xx + yy);
+        return Result;
     }
 
     Quaternion Quaternion::Euler(const Vector3& EulerAngles)

@@ -19,7 +19,7 @@ namespace Nova
     PhysicsShape2D* Box2D::CreateShape(Transform* Transform)
     {
         const Matrix4 TransformMat = Transform->GetWorldSpaceMatrix();
-        const Vector2 TransformedHalfExtents = TransformMat * Vector3(m_HalfExtents);
+        const Vector2 TransformedHalfExtents = Vector2(TransformMat * Vector3(m_HalfExtents));
         return new BoxShape2D(TransformedHalfExtents, m_Center, 0.0f);
     }
 

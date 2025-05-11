@@ -16,11 +16,11 @@ namespace Nova
     Vector4 Vector4::Backward = { 0.0f, 0.0f, -1.0f, 0.0f };
     
 
-    Vector4::Vector4(f32 X, f32 Y, f32 Z, f32 W): x(X), y(Y), z(Z), w(W)
+    Vector4::Vector4(const f32 X, const f32 Y, const f32 Z, const f32 W): x(X), y(Y), z(Z), w(W)
     {
     }
 
-    Vector4::Vector4(f32 Value): x(Value), y(Value), z(Value), w(Value)
+    Vector4::Vector4(const f32 Value): x(Value), y(Value), z(Value), w(Value)
     {
     }
 
@@ -28,7 +28,7 @@ namespace Nova
     {
     }
 
-    Vector4::Vector4(const Vector3& Vec, f32 W) : x(Vec.x), y(Vec.y), z(Vec.z), w(W)
+    Vector4::Vector4(const Vector3& Vec, const f32 W) : x(Vec.x), y(Vec.y), z(Vec.z), w(W)
     {
     }
 
@@ -87,12 +87,63 @@ namespace Nova
         return {-x, -y, -z, -w};
     }
 
-    Vector4 operator*(f32 Scalar, const Vector4& Vec)
+    Vector4& Vector4::operator+=(const Vector4& Vec)
+    {
+        x += Vec.x;
+        y += Vec.y;
+        z += Vec.z;
+        w += Vec.w;
+        return *this;
+    }
+
+    Vector4& Vector4::operator-=(const Vector4& Vec)
+    {
+        x -= Vec.x;
+        y -= Vec.y;
+        z -= Vec.z;
+        w -= Vec.w;
+        return *this;
+    }
+
+    Vector4 operator/(const Vector4& Vec, const f32 Scalar)
+    {
+        Vector4 vec(Vec);
+        return vec /= Scalar;
+    }
+
+    Vector4& Vector4::operator*=(const Vector4& Vec)
+    {
+        x *= Vec.x;
+        y *= Vec.y;
+        z *= Vec.z;
+        w *= Vec.w;
+        return *this;
+    }
+
+    Vector4& Vector4::operator/=(const f32 Scalar)
+    {
+        x /= Scalar;
+        y /= Scalar;
+        z /= Scalar;
+        w /= Scalar;
+        return *this;
+    }
+
+    Vector4& Vector4::operator/=(const Vector4& Vec)
+    {
+        x /= Vec.x;
+        y /= Vec.y;
+        z /= Vec.z;
+        w /= Vec.w;
+        return *this;
+    }
+
+    Vector4 operator*(const f32 Scalar, const Vector4& Vec)
     {
         return {Vec.x * Scalar, Vec.y * Scalar, Vec.z * Scalar, Vec.w * Scalar};
     }
 
-    Vector4 operator*(const Vector4& Vec, f32 Scalar)
+    Vector4 operator*(const Vector4& Vec, const f32 Scalar)
     {
         return {Vec.x * Scalar, Vec.y * Scalar, Vec.z * Scalar, Vec.w * Scalar};
     }
@@ -102,7 +153,7 @@ namespace Nova
         return { x * Vec.x, y * Vec.y, z * Vec.z, w * Vec.w};
     }
 
-    Vector4& Vector4::operator*=(f32 Scalar)
+    Vector4& Vector4::operator*=(const f32 Scalar)
     {
         x *= Scalar;
         y *= Scalar;
@@ -123,14 +174,14 @@ namespace Nova
         return {r, g, b, a};
     }
 
-    f32& Vector4::operator[](u32 Index)
+    f32& Vector4::operator[](const u32 Index)
     {
         NOVA_ASSERT(Index < 4, "Index out of bounds!");
         f32* AsFloat = (f32*)this;
         return AsFloat[Index];
     }
 
-    const f32& Vector4::operator[](u32 Index) const
+    const f32& Vector4::operator[](const u32 Index) const
     {
         NOVA_ASSERT(Index < 4, "Index out of bounds!");
         const f32* AsFloat = (const f32*)this;

@@ -33,58 +33,80 @@ namespace Nova
         return m00 * m11 - m01 * m10;
     }
 
-    Vector2 Matrix2::Multiply(const Vector2& Vec) const
+    Matrix2 Matrix2::Inverted() const
     {
-        return Columns[0] * Vec.x + Columns[1] * Vec.y;
+        const f32 OneOverDeterminant = 1.0f / Determinant();
+
+        const Matrix2 Inverse
+        {
+            Vector2(Columns[1].y * OneOverDeterminant, -Columns[0].y * OneOverDeterminant),
+            Vector2(-Columns[1].x * OneOverDeterminant, Columns[0].x * OneOverDeterminant),
+        };
+        return Inverse;
     }
 
     Vector2 Matrix2::operator*(const Vector2& Vec) const
     {
-        return Multiply(Vec);
-    }
-
-    Matrix2 Matrix2::Multiply(const Matrix2& Mat) const
-    {
-        const Vector2 Col1 { Mat.m00 * m00 + Mat.m10 * m01, Mat.m00 * m10 + Mat.m10 * m11 };
-        const Vector2 Col2 { Mat.m01 * m00 + Mat.m11 * m01, Mat.m01 * m10 + Mat.m11 * m11 };
-        return Matrix2 { Col1, Col2 };
+        const Vector2 Row0 = GetRow(0);
+        const Vector2 Row1 = GetRow(1);
+        const Vector2 Result = {Row0.Dot(Vec), Row1.Dot(Vec)};
+        return Result;
     }
 
     Matrix2 Matrix2::operator*(const Matrix2& Mat) const
     {
-        return Multiply(Mat);
+        const Vector2 Row0 = GetRow(0);
+        const Vector2 Row1 = GetRow(1);
+
+        const Vector2& Col0 = Mat.Columns[0];
+        const Vector2& Col1 = Mat.Columns[1];
+
+        const Vector2 NewCol0 { Row0.Dot(Col0), Row1.Dot(Col0) };
+        const Vector2 NewCol1 { Row0.Dot(Col1), Row1.Dot(Col1) };
+        return Matrix2 { NewCol0, NewCol1 };
     }
 
-    Vector2& Matrix2::operator[](size_t i)
+    Vector2& Matrix2::operator[](const size_t i)
     {
         NOVA_ASSERT(i < 2, "Cannot access Mat2 element: index out of bounds.");
         return Columns[i];
     }
 
-    const Vector2& Matrix2::operator[](size_t i) const
+    const Vector2& Matrix2::operator[](const size_t i) const
     {
         NOVA_ASSERT(i < 2, "Cannot access Mat2 element: index out of bounds.");
         return Columns[i];
     }
 
-    Matrix2& Matrix2::operator*(f32 Scalar)
+    Vector2 Matrix2::GetRow(const size_t i) const
+    {
+        NOVA_ASSERT(i < 2, "Cannot access Mat2 element: index out of bounds.");
+        switch (i)
+        {
+            case 0: return { Columns[0].x, Columns[1].x };
+            case 1: return { Columns[0].y, Columns[1].y };
+            default: throw;
+        }
+    }
+
+    Matrix2& Matrix2::operator*(const f32 Scalar)
     {
         Columns[0] *= Scalar;
         Columns[1] *= Scalar;
         return *this;
     }
 
-    void Matrix2::Rotate(f32 Radians)
+    void Matrix2::Rotate(const f32 Radians)
     {
         *this = Math::Rotate(*this, Radians);
     }
 
-    void Matrix2::RotateDegrees(f32 Degrees)
+    void Matrix2::RotateDegrees(const f32 Degrees)
     {
         *this = Math::RotateDegrees(*this, Degrees);
     }
 
-    void Matrix2::Scale(f32 Scalar)
+    void Matrix2::Scale(const f32 Scalar)
     {
         *this = Math::Scale(*this, Scalar);
     }

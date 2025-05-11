@@ -22,7 +22,7 @@ namespace Nova
     {
         m_Shape = new b2PolygonShape();
         b2PolygonShape* AsPolygonShape = dynamic_cast<b2PolygonShape*>(m_Shape);
-        const Vector3 Extents = m_HalfExtents;
+        const Vector3 Extents = Vector3(m_HalfExtents);
         AsPolygonShape->SetAsBox(Extents.x, Extents.y, { m_Center.x, m_Center.y }, m_Rotation);
     }
 

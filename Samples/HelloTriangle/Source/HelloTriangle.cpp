@@ -124,6 +124,8 @@ namespace Nova
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
-        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+        Renderer->BindVertexBuffer(m_VertexBuffer, 0);
+        Renderer->BindIndexBuffer(m_IndexBuffer, 0);
+        Renderer->DrawIndexed(3);
     }
 }

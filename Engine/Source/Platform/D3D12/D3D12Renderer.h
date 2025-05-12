@@ -45,7 +45,7 @@ namespace Nova
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) override;
+        void DrawIndexed(size_t IndexCount) override;
 
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
@@ -68,6 +68,8 @@ namespace Nova
         ID3D12CommandAllocator*     GetCurrentCommandAllocator() const;
         ID3D12CommandQueue*         GetCommandQueue() const;
         void                        WaitDeviceIdle();
+        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
+        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
 
         D3D12RendererTypeConvertor  Convertor;
     private:

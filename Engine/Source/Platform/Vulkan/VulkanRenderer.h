@@ -71,7 +71,7 @@ namespace Nova
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
         void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) override;
+        void DrawIndexed(size_t IndexCount) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
@@ -103,6 +103,8 @@ namespace Nova
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
         u32 GetCurrentFrameIndex() const;
+        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
+        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
         VulkanRendererTypeConvertor Convertor;
         static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:

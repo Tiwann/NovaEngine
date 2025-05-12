@@ -107,7 +107,7 @@ namespace Nova
         m_Shader->SetUniformFloat4("uColorTint", m_ColorTint);
         const Matrix2 SpriteScale = m_Sprite.GetTexture() ? Math::Scale(Matrix2::Identity, m_Sprite.GetSize() / (f32)m_PixelsPerUnit) : Matrix2::Identity;
         m_Shader->SetUniformMat2("uSpriteScale", SpriteScale);
-        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+        //Renderer->DrawIndexed(TODO);
     }
 
     void SpriteRenderer::OnInspectorGUI(const ImGuiIO& IO)

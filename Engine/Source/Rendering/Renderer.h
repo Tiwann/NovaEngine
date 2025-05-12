@@ -58,7 +58,7 @@ namespace Nova
         virtual void SetViewport(const Viewport& Viewport) = 0;
         virtual void SetScissor(const Scissor& Scissor) = 0;
         virtual void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) = 0;
-        virtual void DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer) = 0;
+        virtual void DrawIndexed(size_t IndexCount) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;
         virtual void SetDepthCompareOperation(CompareOperation DepthFunction) = 0;
         virtual void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) = 0;
@@ -68,6 +68,8 @@ namespace Nova
         virtual void BindPipeline(Pipeline* Pipeline) = 0;
 
         virtual void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) = 0;
+        virtual void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) = 0;
+        virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
 
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainDescription& Description);

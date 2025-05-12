@@ -11,9 +11,11 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanCommandBuffer.h"
+#include "VulkanIndexBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
 #include "VulkanUniformBuffer.h"
+#include "VulkanVertexBuffer.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Rendering/CommandBuffer.h"
 
@@ -1024,12 +1026,10 @@ namespace Nova
         vkCmdDraw(Cmd, NumVert, 1, 0, 0);
     }
 
-    void VulkanRenderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
+    void VulkanRenderer::DrawIndexed(const size_t IndexCount)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        IndexBuffer->Bind();
-        VertexBuffer->Bind();
-        vkCmdDrawIndexed(Cmd, (u32)IndexBuffer->Count(), 1, 0, 0, 0);
+        vkCmdDrawIndexed(Cmd, IndexCount, 1, 0, 0, 0);
     }
 
 
@@ -1086,6 +1086,18 @@ namespace Nova
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdUpdateBuffer(Cmd, Buffer->As<VulkanUniformBuffer>()->GetHandle(), Offset, Size, Data);
+    }
+
+    void VulkanRenderer::BindVertexBuffer(VertexBuffer* Buffer, const u64 Offset)
+    {
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
+        vkCmdBindVertexBuffers(Cmd, 0, 1, Buffer->As<VulkanVertexBuffer>()->GetHandlePtr(), &Offset);
+    }
+
+    void VulkanRenderer::BindIndexBuffer(IndexBuffer* Buffer, const u64 Offset)
+    {
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
+        vkCmdBindIndexBuffer(Cmd, Buffer->As<VulkanIndexBuffer>()->GetHandle(), Offset, VK_INDEX_TYPE_UINT32);
     }
 
     VkInstance VulkanRenderer::GetInstance() const
@@ -1187,4 +1199,6 @@ namespace Nova
     {
         return m_CurrentFrameIndex;
     }
+
+
 }

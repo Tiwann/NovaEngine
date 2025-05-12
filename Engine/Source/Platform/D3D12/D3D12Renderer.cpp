@@ -11,11 +11,13 @@
 #include <GLFW/glfw3native.h>
 #include <directx/d3dx12.h>
 
+#include "D3D12VertexBuffer.h"
+
 
 namespace Nova
 {
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-    static void DebugCallback(D3D12_MESSAGE_CATEGORY Category, D3D12_MESSAGE_SEVERITY Severity, D3D12_MESSAGE_ID ID, LPCSTR Description, void* pContext)
+    static void DebugCallback(D3D12_MESSAGE_CATEGORY Category, const D3D12_MESSAGE_SEVERITY Severity, D3D12_MESSAGE_ID ID, const LPCSTR Description, void* pContext)
     {
         switch (Severity)
         {
@@ -403,6 +405,15 @@ namespace Nova
         }
     }
 
+    void D3D12Renderer::BindVertexBuffer(VertexBuffer* Buffer, u64 Offset)
+    {
+
+    }
+
+    void D3D12Renderer::BindIndexBuffer(IndexBuffer* Buffer, u64 Offset)
+    {
+    }
+
     void D3D12Renderer::SetViewport(const Viewport& Viewport)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
@@ -421,13 +432,10 @@ namespace Nova
     {
     }
 
-    void D3D12Renderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
+    void D3D12Renderer::DrawIndexed(const size_t IndexCount)
     {
-        VertexBuffer->Bind();
-        IndexBuffer->Bind();
-
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
-        Cmd->DrawIndexedInstanced((UINT)IndexBuffer->Count(), 1, 0, 0, 0);
+        Cmd->DrawIndexedInstanced(IndexCount, 1, 0, 0, 0);
     }
 
 
@@ -475,7 +483,7 @@ namespace Nova
     }
 
 
-    ID3D12Resource* D3D12Renderer::CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const
+    ID3D12Resource* D3D12Renderer::CreateBuffer(const WideString& Name, const D3D12_HEAP_TYPE Type, const D3D12_RESOURCE_STATES ResourceStates, const size_t Size) const
     {
         const CD3DX12_HEAP_PROPERTIES HeapProps(Type);
         const CD3DX12_RESOURCE_DESC BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(Size);
@@ -496,7 +504,7 @@ namespace Nova
         return OutResource;
     }
 
-    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const
+    ID3D12Resource* D3D12Renderer::CreateTexture2D(const WideString& Name, const u32 Width, const u32 Height, const Format Format) const
     {
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)

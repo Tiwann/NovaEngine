@@ -121,13 +121,11 @@ namespace Nova
         //glDrawArrays(ConvertPolygonMode(Mode), 0, (i32)NumVert);
     }
 
-    void OpenGLRenderer::DrawIndexed(VertexBuffer* VertexBuffer, IndexBuffer* IndexBuffer)
+    void OpenGLRenderer::DrawIndexed(const size_t IndexCount)
     {
-        VertexBuffer->Bind();
-        IndexBuffer->Bind();
         const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;
         const GLenum GLTopology = Convertor.ConvertPrimitiveTopology(Topology);
-        glDrawElements(GLTopology, (GLsizei)IndexBuffer->Count(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GLTopology, IndexCount, GL_UNSIGNED_INT, nullptr);
     }
     
     void OpenGLRenderer::SetCullMode(const CullMode Mode)
@@ -352,6 +350,15 @@ namespace Nova
     }
 
     void OpenGLRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data)
+    {
+    }
+
+    void OpenGLRenderer::BindVertexBuffer(VertexBuffer* Buffer, u64 Offset)
+    {
+
+    }
+
+    void OpenGLRenderer::BindIndexBuffer(IndexBuffer* Buffer, u64 Offset)
     {
     }
 

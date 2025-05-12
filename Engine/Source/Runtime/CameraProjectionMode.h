@@ -2,7 +2,7 @@
 
 namespace Nova
 {
-    enum class CameraProjectionType
+    enum class CameraProjectionMode
     {
         Perspective,
         Orthographic

@@ -120,4 +120,9 @@ namespace Nova
     {
         return m_Handle;
     }
+
+    VkBuffer* VulkanVertexBuffer::GetHandlePtr()
+    {
+        return &m_Handle;
+    }
 }

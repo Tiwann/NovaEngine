@@ -169,13 +169,13 @@ namespace Nova
     Matrix4 Math::Perspective(const f32 FOV, const f32 AspectRatio, const f32 Near, const f32 Far)
     {
         const f32 Scale = 1.0f / Tan(Radians(FOV * 0.5f));
-        const f32 m22 = (-Near - Far) / (Near - Far);
-        const f32 m32 = 2.0f * Far * Near / (Near - Far);
+        const f32 m22 = Far / (Near - Far);
+        const f32 m32 = -(Far * Near) / (Far - Near);
 
         return {
             Vector4(Scale / AspectRatio, 0.0f,  0.0f,  0.0f),
             Vector4(0.0f,               Scale,  0.0f,  0.0f),
-            Vector4(0.0f,               0.0f,   m22,   1.0f),
+            Vector4(0.0f,               0.0f,   m22,   -1.0f),
             Vector4(0.0f,               0.0f,   m32,   0.0f)
         };
 
@@ -187,8 +187,8 @@ namespace Nova
         {
             Vector4(Scale * 2.0f / Width, 0.0f, 0.0f, 0.0f),
             Vector4(0.0f, Scale * 2.0f / Height, 0.0f, 0.0f),
-            Vector4(0.0f, 0.0f, 2.0f / (Near - Far), 0.0f),
-            Vector4(-1.0f, -1.0f, -(Far + Near) / (Near - Far), 1.0f)
+            Vector4(0.0f, 0.0f, -1.0f / (Far - Near), 0.0f),
+            Vector4(-0.0f, -0.0f, -Near / (Far - Near), 1.0f)
         };
         return Projection;
     }

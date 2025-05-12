@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "CameraProjectionType.h"
+#include "CameraProjectionMode.h"
 #include "Runtime/Types.h"
 
 namespace Nova
@@ -8,7 +8,7 @@ namespace Nova
     
     struct CameraSettings
     {
-        CameraProjectionType Projection;
+        CameraProjectionMode ProjectionMode;
         f32 Width, Height;
         f32 FieldOfView;
         f32 OrthoSize;
@@ -21,7 +21,7 @@ namespace Nova
         CameraSettings& WithDimensions(const Vector2& Dimensions);
         CameraSettings& WithFOV(f32 FOV);
         CameraSettings& WithOrthoSize(f32 OrthographicSize);
-        CameraSettings& SetType(CameraProjectionType Type);
+        CameraSettings& SetType(CameraProjectionMode Type);
         CameraSettings& WithNearFarPlanes(f32 Near, f32 Far);
         void SetDimensions(Vector2 Size);
     };    

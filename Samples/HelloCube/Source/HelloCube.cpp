@@ -21,8 +21,10 @@
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Components/Camera.h"
 #include "Components/Transform.h"
+#include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Platform/Vulkan/VulkanVertexBuffer.h"
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
 
@@ -94,7 +96,8 @@ namespace Nova
 
         m_CameraEntity = GetScene()->CreateEntity("Camera");
         m_Camera = m_CameraEntity->AddComponent<Camera>();
-        m_Camera->Settings = CameraSettings::DefaultPerspective.WithFOV(45.0f);
+        m_Camera->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
+        m_Camera->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
 
         Entity = GetScene()->CreateEntity("Entity");
 
@@ -142,8 +145,8 @@ namespace Nova
             MeshData Mesh { };
             Mesh.VertexBufferSize = Vertices.Count() * sizeof(Vertex);
             Mesh.VertexBufferOffset = MeshIndex == 0 ? 0 : Meshes[MeshIndex - 1].VertexBufferOffset + Meshes[MeshIndex - 1].VertexBufferSize;
-            Mesh.IndexBufferOffset = Indices.Count() * sizeof(u32);
-            Mesh.IndexBufferSize = MeshIndex == 0 ? 0 : Meshes[MeshIndex - 1].IndexBufferOffset + Meshes[MeshIndex - 1].IndexBufferSize;
+            Mesh.IndexBufferSize = Indices.Count() * sizeof(u32);
+            Mesh.IndexBufferOffset = MeshIndex == 0 ? 0 : Meshes[MeshIndex - 1].IndexBufferOffset + Meshes[MeshIndex - 1].IndexBufferSize;
             Meshes.Add(Mesh);
         }
 
@@ -259,6 +262,14 @@ namespace Nova
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
-        Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+
+        const auto Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer()->GetHandle();
+        for (const MeshData& Mesh : Meshes)
+        {
+            vkCmdBindVertexBuffers(Cmd, 0, 1, m_VertexBuffer->As<VulkanVertexBuffer>()->GetHandlePtr(), &Mesh.VertexBufferOffset);
+            vkCmdBindIndexBuffer(Cmd, m_IndexBuffer->As<VulkanIndexBuffer>()->GetHandle(), Mesh.IndexBufferOffset, VK_INDEX_TYPE_UINT32);
+            vkCmdDrawIndexed(Cmd, Mesh.IndexBufferSize / sizeof(u32), 1, 0, 0, 0);
+        }
+        //Renderer->DrawIndexed(m_VertexBuffer, m_IndexBuffer);
     }
 }

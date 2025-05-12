@@ -280,10 +280,9 @@ namespace Nova
         {
             const f32 Width = GetWindow()->GetWidth();
             const f32 Height = GetWindow()->GetHeight();
-            const CameraSettings Settings = CameraSettings::DefaultOrthographic.WithDimension(Width, Height);
-            EntityHandle Entity = m_Scene->CreateEntity("Camera");
+            const EntityHandle Entity = m_Scene->CreateEntity("Camera");
             Camera* Camera = Entity->AddComponent<class Camera>();
-            Camera->Settings = Settings;
+            Camera->SetSettings(CameraSettings::DefaultOrthographic.WithDimension(Width, Height));
             m_Renderer->SetCurrentCamera(Camera);
             Selection::SetEntity(Entity);
         }});

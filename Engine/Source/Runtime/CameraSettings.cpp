@@ -4,7 +4,7 @@
 namespace Nova
 {
     CameraSettings CameraSettings::DefaultPerspective = {
-        CameraProjectionType::Perspective,
+        CameraProjectionMode::Perspective,
         1920, 1080,
         60.0f,
         10.0f,
@@ -12,7 +12,7 @@ namespace Nova
     };
 
     CameraSettings CameraSettings::DefaultOrthographic = {
-        CameraProjectionType::Orthographic,
+        CameraProjectionMode::Orthographic,
         1920, 1080,
         60.0f,
         50.0f,
@@ -45,9 +45,9 @@ namespace Nova
         return *this;
     }
 
-    CameraSettings& CameraSettings::SetType(CameraProjectionType Type)
+    CameraSettings& CameraSettings::SetType(CameraProjectionMode Type)
     {
-        Projection = Type;
+        ProjectionMode = Type;
         return *this;
     }
 

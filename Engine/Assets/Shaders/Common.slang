@@ -75,11 +75,15 @@ public vec4 remap(vec4 val, float inmin, float inmax, float outmin, float outmax
 
 public struct CameraData
 {
-    public mat4 View;
-    public mat4 Projection;
+    public mat4 ViewProjection;
 }
 
 public vec4 ConvertToClipSpace(const CameraData Camera, const mat4 Transform, vec4 Position)
 {
-    return Camera.Projection * Camera.View * Transform * Position;
+    return mul(mul(Camera.ViewProjection, Transform), Position);
+}
+
+public vec4 ConvertToClipSpace(const CameraData Camera, const mat4 Transform, vec3 Position)
+{
+    return mul(mul(Camera.ViewProjection, Transform), vec4(Position, 1.0));
 }

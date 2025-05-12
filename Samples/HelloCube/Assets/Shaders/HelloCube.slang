@@ -30,9 +30,7 @@ ConstantBuffer<EntityData> Entity;
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    mat4 ViewProj = mul(Camera.Projection, Camera.View);
-    mat4 ModelViewProj = mul(ViewProj, Entity.Model);
-    Out.Position = mul(ModelViewProj, vec4(Input.Position, 1.0));
+    Out.Position = ConvertToClipSpace(Camera, Entity.Model, Input.Position);
     Out.TexCoord = Input.TexCoord;
     Out.Normal = remap(Input.Normal, -1.0, 1.0, 0.0, 1.0);
     Out.Color = Input.Color;

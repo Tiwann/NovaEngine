@@ -2,8 +2,7 @@
 
 public struct Camera
 {
-    public float4x4 View;
-    public float4x4 Projection;
+    public float4x4 ViewProjection;
 };
 
 public struct Model

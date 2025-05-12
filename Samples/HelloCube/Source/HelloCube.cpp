@@ -179,7 +179,7 @@ namespace Nova
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
 
         m_CameraUniformBuffer = new VulkanUniformBuffer(Renderer);
-        m_CameraUniformBuffer->Allocate(2 * sizeof(Matrix4));
+        m_CameraUniformBuffer->Allocate(sizeof(Matrix4));
 
         m_EntityUniformBuffer = new VulkanUniformBuffer(Renderer);
         m_EntityUniformBuffer->Allocate(sizeof(Matrix4));
@@ -245,10 +245,10 @@ namespace Nova
 
         const Matrix4& View = m_Camera->GetViewMatrix();
         const Matrix4& Projection = m_Camera->GetProjectionMatrix();
+        const Matrix4 ViewProjection = Projection * View;
         const Matrix4& Model = Entity->GetTransform()->GetWorldSpaceMatrix();
 
-        Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, 0, sizeof(Matrix4), &View);
-        Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, sizeof(Matrix4), sizeof(Matrix4), &Projection);
+        Renderer->UpdateUniformBuffer(m_CameraUniformBuffer, 0, sizeof(Matrix4), &ViewProjection);
         Renderer->UpdateUniformBuffer(m_EntityUniformBuffer, 0, sizeof(Matrix4), &Model);
     }
 
@@ -262,11 +262,11 @@ namespace Nova
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
 
-        for (const MeshData& Mesh : Meshes)
+        for (const MeshData& SubMesh : Meshes)
         {
-            Renderer->BindVertexBuffer(m_VertexBuffer, Mesh.VertexBufferOffset);
-            Renderer->BindIndexBuffer(m_IndexBuffer, Mesh.IndexBufferOffset);
-            Renderer->DrawIndexed(Mesh.IndexBufferSize / sizeof(u32));
+            Renderer->BindVertexBuffer(m_VertexBuffer, SubMesh.VertexBufferOffset);
+            Renderer->BindIndexBuffer(m_IndexBuffer, SubMesh.IndexBufferOffset);
+            Renderer->DrawIndexed(SubMesh.IndexBufferSize / sizeof(u32));
         }
     }
 }

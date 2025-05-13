@@ -8,7 +8,7 @@
 #include "Physics/PhysicsWorld2D.h"
 #include "Physics/PhysicsBody2D.h"
 #include "Physics/PhysicsContactInfo2D.h"
-#include "Physics/PhysicsShape.h"
+#include "Physics/PhysicsShape2D.h"
 
 namespace Nova
 {
@@ -39,9 +39,9 @@ namespace Nova
     void RigidBody2D::OnStart()
     {
         Component::OnStart();
-        const auto& Transform = GetTransform();
-        const auto& Position = Transform->GetPosition();
-        const auto& Rotation = Transform->GetRotation();
+        const Transform* Transform = GetTransform();
+        const Vector3& Position = Transform->GetPosition();
+        const Vector3& Rotation = Transform->GetRotation();
         m_PhysicsBody->SetPositionAndRotation(Position, Rotation);
     }
 
@@ -183,7 +183,7 @@ namespace Nova
         m_PhysicsBody->SetPosition(Position);
     }
 
-    void RigidBody2D::SetRotation(const Vector3& Rotation)
+    void RigidBody2D::SetRotation(const Quaternion& Rotation)
     {
         m_PhysicsBody->SetRotation(Rotation);
     }

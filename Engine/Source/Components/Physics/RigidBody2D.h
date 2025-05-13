@@ -44,8 +44,8 @@ namespace Nova
         void AddImpulse(const Vector3& Force) override;
         void AddForceAtPosition(const Vector3& Position, const Vector3& Force) override;
         void AddImpulseAtPosition(const Vector3& Position, const Vector3& Force) override;
-        void SetPosition(const Vector3& Position);
-        void SetRotation(const Vector3& Rotation);
+        void SetPosition(const Vector3& Position) override;
+        void SetRotation(const Quaternion& Rotation) override;
         void RecreatePhysicsState() override;
         
         const PhysicsMaterial& GetMaterial() const override;

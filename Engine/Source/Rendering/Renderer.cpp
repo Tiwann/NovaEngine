@@ -8,6 +8,7 @@
 #include "Platform/OpenGL/OpenGLPipeline.h"
 #include "Platform/OpenGL/OpenGLRenderer.h"
 #include "Platform/OpenGL/OpenGLShader.h"
+#include "Platform/OpenGL/OpenGLUniformBuffer.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
@@ -15,6 +16,7 @@
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
+#include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
 
 namespace Nova
@@ -168,6 +170,25 @@ namespace Nova
         case GraphicsApi::D3D12:    return new D3D12IndexBuffer(this, Indices.Data(), Indices.Count());
         default:                    return nullptr;
         }
+    }
+
+    UniformBuffer* Renderer::CreateUniformBuffer(const size_t Size)
+    {
+        UniformBuffer* OutBuffer = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None:     return nullptr;
+        case GraphicsApi::OpenGL:   OutBuffer = new OpenGLUniformBuffer(this); break;
+        case GraphicsApi::Vulkan:   OutBuffer = new VulkanUniformBuffer(this); break;
+        case GraphicsApi::D3D12:    return nullptr;
+        }
+
+        if (!OutBuffer->Allocate(Size))
+        {
+            delete OutBuffer;
+            return nullptr;
+        }
+        return OutBuffer;
     }
 
     void Renderer::SetCurrentCamera(Camera* Camera)

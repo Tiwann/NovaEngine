@@ -31,6 +31,10 @@ namespace Nova
     void Component::OnUpdate(f32 Delta)
     {}
 
+    void Component::OnFrameBegin(Renderer* Renderer)
+    {
+    }
+
     void Component::OnPhysicsUpdate(f32 Delta)
     {}
 

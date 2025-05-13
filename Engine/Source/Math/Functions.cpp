@@ -35,6 +35,11 @@ namespace Nova
         return atanf(Val);
     }
 
+    f32 Math::Atan2(const f32 Y, const f32 X)
+    {
+        return atan2f(Y, X);
+    }
+
     f32 Math::Abs(const f32 Value)
     {
         return Value > 0 ? Value : -Value;

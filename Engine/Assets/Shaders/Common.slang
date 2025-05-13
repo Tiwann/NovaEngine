@@ -73,17 +73,55 @@ public vec4 remap(vec4 val, float inmin, float inmax, float outmin, float outmax
 }
 
 
-public struct CameraData
+public enum LightType
+{
+    Directional,
+    Point,
+    Spot,
+    Ambient
+}
+
+
+public struct Light
+{
+    public float Intensity;
+    public vec3 Color;
+    public vec3 Direction;
+    public float Radius;
+    public LightType Type;
+};
+
+public struct DirectionalLight : Light
+{
+    
+}
+
+public struct SceneData
 {
     public mat4 ViewProjection;
+    public mat4 Model;
+    public Light Dire;
+    public vec3 CameraViewDirection;
 }
 
-public vec4 ConvertToClipSpace(const CameraData Camera, const mat4 Transform, vec4 Position)
+
+public vec4 ConvertToClipSpace(const SceneData InScene, vec4 Position)
 {
-    return mul(mul(Camera.ViewProjection, Transform), Position);
+    return mul(mul(InScene.ViewProjection, InScene.Model), Position);
 }
 
-public vec4 ConvertToClipSpace(const CameraData Camera, const mat4 Transform, vec3 Position)
+public vec4 ConvertToClipSpace(const SceneData InScene, vec3 Position)
 {
-    return mul(mul(Camera.ViewProjection, Transform), vec4(Position, 1.0));
+    return mul(mul(InScene.ViewProjection, InScene.Model), vec4(Position, 1.0));
 }
+
+public vec4 ConvertToViewSpace(const SceneData InScene, vec4 Position)
+{
+    return mul(InScene.ViewProjection, Position);
+}
+
+public vec4 ConvertToViewSpace(const SceneData InScene, vec3 Position)
+{
+    return mul(InScene.ViewProjection, vec4(Position, 1.0));
+}
+

@@ -45,6 +45,7 @@ namespace Nova
         virtual void OnEnable();
         virtual void OnDisable();
         virtual void OnUpdate(f32 Delta);
+        virtual void OnFrameBegin(Renderer* Renderer);
         virtual void OnPhysicsUpdate(f32 Delta);
         virtual void OnRender(Renderer* Renderer);
         virtual void OnInspectorGUI(const ImGuiIO& IO);

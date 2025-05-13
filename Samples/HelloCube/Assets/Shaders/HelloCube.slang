@@ -17,28 +17,37 @@ typedef struct VertexOutput
     vec4 Color;
 } FragmentInput;
 
-struct EntityData
-{
-    mat4 Model;
-}
-
-ConstantBuffer<CameraData> Camera;
-ConstantBuffer<EntityData> Entity;
-
+uniform SceneData Scene;
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    Out.Position = ConvertToClipSpace(Camera, Entity.Model, Input.Position);
+    Out.Position = ConvertToClipSpace(Scene, Input.Position);
     Out.TexCoord = Input.TexCoord;
-    Out.Normal = remap(Input.Normal, -1.0, 1.0, 0.0, 1.0);
+    Out.Normal = Input.Normal;
     Out.Color = Input.Color;
     return Out;
 }
 
+
 [shader("fragment")]
 vec4 FragmentMain(FragmentInput Input) : SV_Target
 {
-    return vec4(Input.Normal, 1.0);
+    vec3 LightColor = uDirectionalLight.color.xyz * uDirectionalLight.intensity;
+    vec3 N = normalize(Input.normal);
+    vec3 L = normalize(uDirectionalLight.direction);
+    float Diffuse = saturate(dot(N, L));
+    vec3 DiffuseLight = Diffuse * LightColor;
+    vec3 AmbientLight = uAmbientLight.color.xyz * uAmbientLight.intensity;
+
+    vec3 V = normalize(uCameraViewDirection);
+    vec3 H = normalize(L + V);
+    float Specular = saturate(dot(H, N));
+    float Glossiness = 0.5;
+    float SpecularExponent = exp2(Glossiness * 11.0) + 2.0;
+    Specular = pow(Specular, SpecularExponent);
+
+    vec3 FinalColor = AmbientLight + DiffuseLight + Specular;
+    return vec4(FinalColor, 1.0);
 }

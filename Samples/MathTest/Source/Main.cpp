@@ -32,7 +32,7 @@ static Nova::Logger Logger("Math Tests");
 static void QuaternionTest()
 {
     Logger.LogTrace("********** Quaternion Tests **********");
-    const Nova::Quaternion Orientation = Nova::Quaternion::EulerDegrees(0.0f, 90.0f, 0.0f);
+    const Nova::Quaternion Orientation = Nova::Quaternion::FromEulerDegrees(0.0f, 90.0f, 0.0f);
     const Nova::Vector3 OrientedForward = Orientation * Nova::Vector3::Forward;
     const auto MatrixRotation = Nova::Math::RotateAxisAngleDegrees(Nova::Matrix4::Identity, Nova::Vector3::Up, 90.0f);
     const Nova::Vector3 RotatedForward = MatrixRotation * Nova::Vector3::Forward;

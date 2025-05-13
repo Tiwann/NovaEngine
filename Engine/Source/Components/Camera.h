@@ -26,6 +26,7 @@ namespace Nova
         
         const Matrix4& GetViewMatrix();
         const Matrix4& GetProjectionMatrix();
+        const Matrix4& GetViewProjectionMatrix();
 
         void SetSettings(const CameraSettings& Settings);
         const CameraSettings& GetSettings() const;
@@ -33,12 +34,14 @@ namespace Nova
         void SetFieldOfView(f32 FieldOfView);
         void SetClipPlanes(f32 Near, f32 Far);
         void SetOrthographicSize(f32 Size);
+
         ClearMode ClearMode = ClearMode::Color;
         Color ClearColor = Color::Black;
     private:
         CameraSettings m_Settings;
         Lazy<Matrix4> m_ViewMatrix;
         Lazy<Matrix4> m_ProjectionMatrix;
+        Lazy<Matrix4> m_ViewProjectionMatrix;
     };
 }
 

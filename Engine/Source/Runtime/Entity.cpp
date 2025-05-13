@@ -99,6 +99,20 @@ namespace Nova
         }
     }
 
+    void Entity::OnFrameBegin(Renderer* Renderer)
+    {
+        if (!m_Enabled)
+            return;
+
+        for(Component* Component : m_Components)
+        {
+            if(!Component->m_Enabled)
+                continue;
+
+            Component->OnFrameBegin(Renderer);
+        }
+    }
+
     void Entity::OnRender(Renderer* Renderer)
     {
         if(!m_Enabled) return;

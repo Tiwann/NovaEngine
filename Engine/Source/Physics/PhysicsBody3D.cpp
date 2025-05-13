@@ -3,7 +3,8 @@
 #include "PhysicsShape3D.h"
 #include "Math/Functions.h"
 #include "PhysicsMaterial.h"
-#include "../Math/MathConversions.h"
+#include "Math/Quaternion.h"
+#include "Math/MathConversions.h"
 
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Body/Body.h>
@@ -57,15 +58,13 @@ namespace Nova
         return ToVector3(Result);
     }
 
-    void PhysicsBody3D::SetRotation(const Vector3& Rotation)
+    void PhysicsBody3D::SetRotation(const Quaternion& Rotation)
     {
         PhysicsWorld3D* World = GetWorld();
         JPH::PhysicsSystem& System = World->GetSystem();
         JPH::BodyInterface& BodyInterface = System.GetBodyInterface();
         const JPH::Body* BodyHandle = GetHandle();
-        const Vector3 EulerAngles = Rotation.Apply(Math::Radians);
-        const JPH::Vec3 ConvertedEulerAngles = { EulerAngles.x, EulerAngles.y, EulerAngles.z };
-        const JPH::Quat NewRotation = JPH::Quat::sEulerAngles(ConvertedEulerAngles);
+        const JPH::Quat NewRotation = JPH::Quat(Rotation.x, Rotation.y, Rotation.z, Rotation.w);
         BodyInterface.SetRotation(BodyHandle->GetID(), NewRotation, JPH::EActivation::Activate);
     }
 

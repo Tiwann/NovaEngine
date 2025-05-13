@@ -25,7 +25,7 @@ namespace Nova
         
         void SetPosition(const Vector3& Position) override;
         Vector3 GetPosition() const override;
-        void SetRotation(const Vector3& Rotation) override;
+        void SetRotation(const Quaternion& Rotation) override;
         Vector3 GetRotation() const override;
         void SetPositionAndRotation(const Vector3& Position, const Vector3& Rotation) override;
 

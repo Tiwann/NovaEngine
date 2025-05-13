@@ -50,5 +50,7 @@ namespace Nova
         void SetSensor(bool Sensor) override;
         PhysicsBodyType GetPhysicsBodyType() const override;
         void SetPhysicsBodyType(PhysicsBodyType Type) override;
+        void SetPosition(const Vector3& Position) override;
+        void SetRotation(const Quaternion& Rotation) override;
     };
 }

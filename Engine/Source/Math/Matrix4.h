@@ -33,6 +33,7 @@ namespace Nova
 
         void Rotate(const Vector3& Axis, f32 Radians);
         void Rotate(const Vector3& EulerAngles);
+        void Rotate(const Quaternion& Rotation);
         void RotateDegrees(const Vector3& Axis, f32 Degrees);
         void RotateDegrees(const Vector3& EulerAnglesDegrees);
         void Scale(f32 Scalar);

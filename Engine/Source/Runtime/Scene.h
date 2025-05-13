@@ -27,6 +27,7 @@ namespace Nova
          
         void OnInit();
         void OnUpdate(f32 Delta);
+        void OnFrameBegin(Renderer* Renderer);
         void OnRender(Renderer* Renderer) const;
         void OnDestroy();
 

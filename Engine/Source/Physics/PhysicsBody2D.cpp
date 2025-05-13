@@ -8,6 +8,8 @@
 #include <box2d/b2_body.h>
 #include <box2d/b2_fixture.h>
 
+#include "Math/Quaternion.h"
+
 namespace Nova
 {
     PhysicsBody2D::PhysicsBody2D(b2Body* Handle, PhysicsWorld2D& World) : PhysicsBody(Handle, World)
@@ -67,10 +69,11 @@ namespace Nova
         return Vector3(ToVector2(BodyHandle->GetPosition()));
     }
 
-    void PhysicsBody2D::SetRotation(const Vector3& Rotation)
+    void PhysicsBody2D::SetRotation(const Quaternion& Rotation)
     {
         b2Body* BodyHandle = GetHandle();
-        BodyHandle->SetTransform(BodyHandle->GetPosition(), Math::Radians(Rotation.z));
+        const Vector3 EulerAngles = Rotation.ToEuler();
+        BodyHandle->SetTransform(BodyHandle->GetPosition(), EulerAngles.z);
     }
 
     Vector3 PhysicsBody2D::GetRotation() const

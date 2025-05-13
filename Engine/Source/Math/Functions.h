@@ -26,6 +26,7 @@ namespace Nova
         static f32 Acos(f32 Val);
         static f32 Asin(f32 Val);
         static f32 Atan(f32 Val);
+        static f32 Atan2(f32 Y, f32 X);
         static f32 Abs(f32 Value);
         static u32 Fact(u32 Value);
         template<typename F> requires IsFloatingPointValue<F>

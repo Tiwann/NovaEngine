@@ -15,7 +15,7 @@ list(REMOVE_ITEM NOVA_ENGINE_SRC ${NOVA_ENGINE_PLATFORM_SRC})
 set(CMAKE_CXX_STANDARD 20)
 add_library(NovaEngine STATIC)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SRC} ${NOVA_ENGINE_PLATFORM_SRC})
-target_link_libraries(NovaEngine PUBLIC slang assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt ImGui imguizmo STB Vulkan::Vulkan miniaudio ogg vorbis vorbisenc tinygltf $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
+target_link_libraries(NovaEngine PUBLIC slang assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt ImGui imguizmo STB Vulkan::Vulkan miniaudio ogg vorbis vorbisenc $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_link_options(NovaEngine PRIVATE /NATVIS:${CMAKE_CURRENT_SOURCE_DIR}/NovaEngine.natvis)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
@@ -30,10 +30,9 @@ target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT
 )
 
 
-
-
 if(MSVC)
-    add_compile_options(/MP)
+    target_compile_options(NovaEngine PRIVATE /MP)
+    target_link_options(NovaEngine INTERFACE $<$<CONFIG:MinSizeRel>:/SUBSYSTEM:WINDOWS>)
 endif ()
 
 foreach (MODULE ${ENGINE_MODULES})

@@ -10,14 +10,14 @@
 #include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/TweenManager.h"
-#include "Components/Rendering/ModelRenderer.h"
+#include "Components/Rendering/StaticMeshRenderer.h"
 #include <vulkan/vulkan.h>
 
 NOVA_DEFINE_APPLICATION_CLASS(NovaEditor)
 
 namespace Nova
 {
-    class ModelRenderer;
+    class StaticMeshRenderer;
 
     NovaEditor::NovaEditor(const Array<const char*>& Arguments) : Application(Arguments)
     {

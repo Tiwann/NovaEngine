@@ -18,6 +18,8 @@ namespace Nova
         bool GetShowCollisions() const;
         void SetShowCollisions(bool Enabled);
 
+        virtual void SetPosition(const Vector3& Position) = 0;
+        virtual void SetRotation(const Quaternion& Rotation) = 0;
         virtual void SetGravityScale(f32 Scale) = 0;
         virtual void SetLinearVelocity(const Vector3& Velocity) = 0;
         virtual void SetAngularVelocity(const Vector3& AngularVelocity) = 0;

@@ -29,7 +29,7 @@
 #include "Editor/ViewportPanel.h"
 
 #include "Components/Camera.h"
-#include "Components/Rendering/ModelRenderer.h"
+#include "Components/Rendering/StaticMeshRenderer.h"
 #include "Editor/EditorGUI.h"
 #include "Editor/ImGuiRenderer.h"
 
@@ -296,7 +296,7 @@ namespace Nova
         auto& Tools = m_MenuBar.AddChild({ "Tools" });
         Tools.AddChild({ "Open Model", nullptr, [this]
         {
-            ModelRenderer* RendererComponent = m_Scene->GetAllComponents<ModelRenderer>()[0];
+            StaticMeshRenderer* RendererComponent = m_Scene->GetAllComponents<StaticMeshRenderer>()[0];
             RendererComponent->OpenFile();
         } });
         
@@ -348,6 +348,7 @@ namespace Nova
                 if (m_Renderer->BeginFrame() && g_ApplicationRunning)
                 {
                     OnFrameStarted(m_Renderer);
+                    m_Scene->OnFrameBegin(m_Renderer);
 
                     m_Renderer->BeginRendering();
                     OnRender(m_Renderer);
@@ -370,6 +371,7 @@ namespace Nova
                 if (m_Renderer->BeginFrame() && g_ApplicationRunning)
                 {
                     OnFrameStarted(m_Renderer);
+                    m_Scene->OnFrameBegin(m_Renderer);
 
                     m_Renderer->BeginRendering();
                     OnRender(m_Renderer);
@@ -504,6 +506,7 @@ namespace Nova
 
     void Application::OnFrameStarted(Renderer* Renderer)
     {
+
     }
 
     const ApplicationConfiguration& Application::GetConfiguration() const

@@ -14,7 +14,7 @@ namespace Nova
     {
     }
 
-    Quaternion::Quaternion(const f32 W, const f32 X, const f32 Y, const f32 Z): w(W), x(X), y(Y), z(Z){}
+    Quaternion::Quaternion(const f32 w, const f32 X, const f32 Y, const f32 Z): w(w), x(X), y(Y), z(Z){}
 
     Quaternion::Quaternion(const Quaternion& Other) : w(Other.w), x(Other.x), y(Other.y), z(Other.z)
     {
@@ -158,7 +158,29 @@ namespace Nova
         return Result;
     }
 
-    Quaternion Quaternion::Euler(const Vector3& EulerAngles)
+    Vector3 Quaternion::ToEuler() const
+    {
+        const f32 sinr_cosp = 2.0f * (w * x + y * z);
+        const f32 cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
+        const f32 EulerX = Math::Atan2(sinr_cosp, cosr_cosp);
+
+        const f32 sinp = Math::Sqrt(1.0f + 2.0f * (w * y - x * z));
+        const f32 cosp = Math::Sqrt(1.0f - 2.0f * (w * y - x * z));
+        const f32 EulerY = 2.0f * Math::Atan2(sinp, cosp) - Math::Pi * 0.5f;
+
+        const f32 siny_cosp = 2.0f * (w * z + x * y);
+        const f32 cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
+        const f32 EulerZ = Math::Atan2(siny_cosp, cosy_cosp);
+
+        return { EulerX, EulerY, EulerZ };
+    }
+
+    Vector3 Quaternion::ToEulerDegrees() const
+    {
+        return ToEuler().Apply(Math::Degrees);
+    }
+
+    Quaternion Quaternion::FromEuler(const Vector3& EulerAngles)
     {
         const f32 CosX = Math::Cos(EulerAngles.x * 0.5f);
         const f32 SinX = Math::Sin(EulerAngles.x * 0.5f);
@@ -175,19 +197,19 @@ namespace Nova
         return Result;
     }
 
-    Quaternion Quaternion::Euler(const f32 X, const f32 Y, const f32 Z)
+    Quaternion Quaternion::FromEuler(const f32 X, const f32 Y, const f32 Z)
     {
-        return Euler(Vector3(X, Y, Z));
+        return FromEuler(Vector3(X, Y, Z));
     }
 
-    Quaternion Quaternion::EulerDegrees(const Vector3& EulerAnglesDegrees)
+    Quaternion Quaternion::FromEulerDegrees(const Vector3& EulerAnglesDegrees)
     {
-        return Euler(EulerAnglesDegrees.Apply(Math::Radians));
+        return FromEuler(EulerAnglesDegrees.Apply(Math::Radians));
     }
 
-    Quaternion Quaternion::EulerDegrees(const f32 X, const f32 Y, const f32 Z)
+    Quaternion Quaternion::FromEulerDegrees(const f32 X, const f32 Y, const f32 Z)
     {
-        return Euler(Vector3(X, Y, Z).Apply(Math::Radians));
+        return FromEuler(Vector3(X, Y, Z).Apply(Math::Radians));
     }
 
     f32 Quaternion::Magnitude() const

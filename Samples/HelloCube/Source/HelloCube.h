@@ -24,18 +24,5 @@ namespace Nova
         explicit HelloCube(const Array<const char*>& Arguments);
         ApplicationConfiguration CreateConfiguration() const override;
         void OnInit() override;
-        void OnExit() override;
-        void OnUpdate(float DeltaTime) override;
-        void OnFrameStarted(Renderer* Renderer) override;
-        void OnRender(Renderer* Renderer) override;
-    private:
-        Pipeline* m_Pipeline = nullptr;
-        Shader* m_Shader = nullptr;
-        VertexBuffer* m_VertexBuffer = nullptr;
-        IndexBuffer* m_IndexBuffer = nullptr;
-        EntityHandle m_CameraEntity = nullptr;
-        Camera* m_Camera = nullptr;
-        UniformBuffer* m_CameraUniformBuffer = nullptr;
-        UniformBuffer* m_EntityUniformBuffer = nullptr;
     };
 }

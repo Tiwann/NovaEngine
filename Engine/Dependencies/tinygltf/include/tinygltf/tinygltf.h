@@ -1206,12 +1206,12 @@ struct AudioSource {
   std::string extensions_json_string;
 };
 
-class Model {
+class StaticMesh {
  public:
-  Model() = default;
-  DEFAULT_METHODS(Model)
+  StaticMesh() = default;
+  DEFAULT_METHODS(StaticMesh)
 
-  bool operator==(const Model &) const;
+  bool operator==(const StaticMesh &) const;
 
   std::vector<Accessor> accessors;
   std::vector<Animation> animations;
@@ -1418,7 +1418,7 @@ class TinyGLTF {
   /// Set warning message to `warn` for example it fails to load asserts.
   /// Returns false and set error string to `err` if there's an error.
   ///
-  bool LoadASCIIFromFile(Model *model, std::string *err, std::string *warn,
+  bool LoadASCIIFromFile(StaticMesh *model, std::string *err, std::string *warn,
                          const std::string &filename,
                          unsigned int check_sections = REQUIRE_VERSION);
 
@@ -1430,7 +1430,7 @@ class TinyGLTF {
   /// message to `warn` for example it fails to load asserts. Returns false and
   /// set error string to `err` if there's an error.
   ///
-  bool LoadASCIIFromString(Model *model, std::string *err, std::string *warn,
+  bool LoadASCIIFromString(StaticMesh *model, std::string *err, std::string *warn,
                            const char *str, const unsigned int length,
                            const std::string &base_dir,
                            unsigned int check_sections = REQUIRE_VERSION);
@@ -1440,7 +1440,7 @@ class TinyGLTF {
   /// Set warning message to `warn` for example it fails to load asserts.
   /// Returns false and set error string to `err` if there's an error.
   ///
-  bool LoadBinaryFromFile(Model *model, std::string *err, std::string *warn,
+  bool LoadBinaryFromFile(StaticMesh *model, std::string *err, std::string *warn,
                           const std::string &filename,
                           unsigned int check_sections = REQUIRE_VERSION);
 
@@ -1452,7 +1452,7 @@ class TinyGLTF {
   /// Set warning message to `warn` for example it fails to load asserts.
   /// Returns false and set error string to `err` if there's an error.
   ///
-  bool LoadBinaryFromMemory(Model *model, std::string *err, std::string *warn,
+  bool LoadBinaryFromMemory(StaticMesh *model, std::string *err, std::string *warn,
                             const unsigned char *bytes,
                             const unsigned int length,
                             const std::string &base_dir = "",
@@ -1461,13 +1461,13 @@ class TinyGLTF {
   ///
   /// Write glTF to stream, buffers and images will be embedded
   ///
-  bool WriteGltfSceneToStream(const Model *model, std::ostream &stream,
+  bool WriteGltfSceneToStream(const StaticMesh *model, std::ostream &stream,
                               bool prettyPrint, bool writeBinary);
 
   ///
   /// Write glTF to file.
   ///
-  bool WriteGltfSceneToFile(const Model *model, const std::string &filename,
+  bool WriteGltfSceneToFile(const StaticMesh *model, const std::string &filename,
                             bool embedImages, bool embedBuffers,
                             bool prettyPrint, bool writeBinary);
 
@@ -1571,7 +1571,7 @@ class TinyGLTF {
   /// Set warning message to `warn` for example it fails to load asserts
   /// Returns false and set error string to `err` if there's an error.
   ///
-  bool LoadFromString(Model *model, std::string *err, std::string *warn,
+  bool LoadFromString(StaticMesh *model, std::string *err, std::string *warn,
                       const char *str, const unsigned int length,
                       const std::string &base_dir, unsigned int check_sections);
 

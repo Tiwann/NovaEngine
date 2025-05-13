@@ -192,6 +192,12 @@ namespace Nova
     	*this = Math::RotateEulerAngles(*this, EulerAngles);
     }
 
+    void Matrix4::Rotate(const Quaternion& Rotation)
+    {
+    	const Matrix4 RotationMatrix = Rotation.ToMatrix4();
+    	*this = RotationMatrix * (*this);
+    }
+
     void Matrix4::RotateDegrees(const Vector3& EulerAnglesDegrees)
     {
         *this = Math::RotateEulerAnglesDegrees(*this, EulerAnglesDegrees);
@@ -230,7 +236,7 @@ namespace Nova
     {
     	Matrix4 Result = Matrix4::Identity;
     	Result.Scale(Scale);
-
+    	Result.Rotate(Orientation);
     	Result.Translate(Position);
     	return Result;
     }

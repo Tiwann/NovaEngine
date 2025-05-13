@@ -220,4 +220,14 @@ namespace Nova
     {
         m_PhysicsBody->SetType(Type);
     }
+
+    void RigidBody3D::SetPosition(const Vector3& Position)
+    {
+        m_PhysicsBody->SetPosition(Position);
+    }
+
+    void RigidBody3D::SetRotation(const Quaternion& Rotation)
+    {
+        m_PhysicsBody->SetRotation(Rotation);
+    }
 }

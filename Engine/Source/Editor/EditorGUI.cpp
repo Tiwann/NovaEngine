@@ -11,7 +11,7 @@
 #include "Components/Physics/Circle2D.h"
 #include "Components/Rendering/AmbientLight.h"
 #include "Components/Rendering/DirectionalLight.h"
-#include "Components/Rendering/ModelRenderer.h"
+#include "Components/Rendering/StaticMeshRenderer.h"
 #include "Components/Rendering/PointLight.h"
 #include "Components/Rendering/SpriteRenderer.h"
 #include "ResourceManager/TextureManager.h"
@@ -157,7 +157,7 @@ namespace Nova::UI
                     case 4: Entity->AddComponent<Box2D>(); break;
                     case 5: Entity->AddComponent<Circle2D>(); break;
                     case 6: Entity->AddComponent<Box3D>(); break;
-                    case 7: Entity->AddComponent<ModelRenderer>(); break;
+                    case 7: Entity->AddComponent<StaticMeshRenderer>(); break;
                     case 8: Entity->AddComponent<DirectionalLight>(); break;
                     case 9: Entity->AddComponent<PointLight>(); break;
                     case 10: Entity->AddComponent<AmbientLight>(); break;

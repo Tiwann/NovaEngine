@@ -143,6 +143,7 @@ namespace Nova
         virtual void OnInit();
         virtual void OnStart();
         virtual void OnUpdate(f32 Delta);
+        virtual void OnFrameBegin(Renderer* Renderer);
         virtual void OnRender(Renderer* Renderer);
         virtual void OnPhysicsUpdate(f32 Delta);
         virtual void OnDestroy();

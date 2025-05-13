@@ -57,6 +57,7 @@ namespace Nova
         
         virtual PopupMessageResult Show() = 0;
 
-        static ScopedPointer<PopupMessage> Create(const String& Title, const String& Message, PopupMessageResponse Response, PopupMessageIcon Icon);
+        static PopupMessage* Create(const String& Title, const String& Message, PopupMessageResponse Response,
+                                    PopupMessageIcon Icon);
     };
 }

@@ -42,11 +42,13 @@ namespace Nova
 
         Matrix4 ToMatrix4() const;
         Matrix3 ToMatrix3() const;
+        Vector3 ToEuler() const;
+        Vector3 ToEulerDegrees() const;
 
-        static Quaternion Euler(const Vector3& EulerAngles);
-        static Quaternion Euler(const f32 X, const f32 Y, const f32 Z);
-        static Quaternion EulerDegrees(const Vector3& EulerAnglesDegrees);
-        static Quaternion EulerDegrees(const f32 X, const f32 Y, const f32 Z);
+        static Quaternion FromEuler(const Vector3& EulerAngles);
+        static Quaternion FromEuler(f32 X, f32 Y, f32 Z);
+        static Quaternion FromEulerDegrees(const Vector3& EulerAnglesDegrees);
+        static Quaternion FromEulerDegrees(f32 X, f32 Y, f32 Z);
         static Quaternion One;
         static Quaternion Identity;
     };

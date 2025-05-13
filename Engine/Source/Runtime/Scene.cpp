@@ -32,6 +32,14 @@ namespace Nova
         }
     }
 
+    void Scene::OnFrameBegin(Renderer* Renderer)
+    {
+        for(Entity* Entity : m_Entities)
+        {
+            Entity->OnFrameBegin(Renderer);
+        }
+    }
+
     void Scene::OnRender(Renderer* Renderer) const
     {
         for(Entity* Entity : m_Entities)

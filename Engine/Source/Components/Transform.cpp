@@ -178,13 +178,18 @@ namespace Nova
 
     const Matrix4& Transform::GetWorldSpaceMatrix()
     {
-        const Function<Matrix4()> ComputeWorldSpaceMatrix = [&]() -> Matrix4
+        static const Function<Matrix4()> ComputeWorldSpaceMatrix = [&]() -> Matrix4
         {
+            const Matrix4& LocalMatrix = GetLocalSpaceMatrix();
+
             if(m_Entity && m_Entity->HasParent())
             {
-                return GetLocalSpaceMatrix() * m_Entity->GetParent()->GetTransform()->GetWorldSpaceMatrix() ;
+                const Entity* Parent = m_Entity->GetParent();
+                Transform* ParentTransform = Parent->GetTransform();
+                const Matrix4& ParentWorldMatrix = ParentTransform->GetWorldSpaceMatrix();
+                return ParentWorldMatrix * LocalMatrix;
             }
-            return GetLocalSpaceMatrix();
+            return LocalMatrix;
         };
 
         return m_WorldSpaceMatrix.Get(ComputeWorldSpaceMatrix);
@@ -192,7 +197,7 @@ namespace Nova
 
     const Matrix4& Transform::GetLocalSpaceMatrix()
     {
-        const Function<Matrix4()> ComputeLocalSpaceMatrix = [&]() -> Matrix4
+        static const Function<Matrix4()> ComputeLocalSpaceMatrix = [&]() -> Matrix4
         {
             return Matrix4::TRS(m_Position, m_Rotation, m_Scale);
         };
@@ -206,10 +211,10 @@ namespace Nova
         
         if(UI::DragVector3<f32>("Position", m_Position, 0.01f, 0, 0, "%.2f"))
         {
-            if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())
+            if(PhysicsComponent* Shape = m_Entity->GetComponent<PhysicsComponent>())
             {
                 Shape->SetPosition(m_Position);
-                Shape->RecreatePhysicsState();
+                //Shape->RecreatePhysicsState();
             }
 
             m_WorldSpaceMatrix.SetDirty();
@@ -221,8 +226,8 @@ namespace Nova
         {
             if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())
             {
-                Shape->SetRotation(Vector3(m_Rotation.z));
-                Shape->RecreatePhysicsState();
+                Shape->SetRotation(Quaternion::FromEuler(0.0f, 0.0f, m_Rotation.z));
+                //Shape->RecreatePhysicsState();
             }
 
             m_WorldSpaceMatrix.SetDirty();

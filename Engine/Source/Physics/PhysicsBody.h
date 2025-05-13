@@ -38,7 +38,7 @@ namespace Nova
 
         virtual void SetPosition(const Vector3& Position) = 0;
         virtual Vector3 GetPosition() const = 0;
-        virtual void SetRotation(const Vector3& Rotation) = 0;
+        virtual void SetRotation(const Quaternion& Rotation) = 0;
         virtual Vector3 GetRotation() const = 0;
         virtual void SetPositionAndRotation(const Vector3& Position, const Vector3& Rotation) = 0;
         

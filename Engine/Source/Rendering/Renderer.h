@@ -79,6 +79,7 @@ namespace Nova
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
         IndexBuffer* CreateIndexBuffer();
         IndexBuffer* CreateIndexBuffer(const BufferView<u32>& Indices);
+        UniformBuffer* CreateUniformBuffer(size_t Size);
 
         void SetCurrentCamera(Camera* Camera);
         Camera* GetCurrentCamera();

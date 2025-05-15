@@ -66,6 +66,20 @@ namespace Nova
     {
         return RotateAxisAngle(Mat, Axis, Radians(AngleDegrees));
     }
+
+    Matrix3 Math::RotateEulerAngles(const Matrix3& Mat, const Vector3& EulerAnglesRadians)
+    {
+        Matrix3 Result = Matrix3::Identity;
+        Result.Rotate(Vector3::Forward, EulerAnglesRadians.z);
+        Result.Rotate(Vector3::Up, EulerAnglesRadians.y);
+        Result.Rotate(Vector3::Right, EulerAnglesRadians.x);
+        return Result * Mat;
+    }
+
+    Matrix3 Math::RotateEulerAnglesDegrees(const Matrix3& Mat, const Vector3& EulerAnglesDegrees)
+    {
+        return RotateEulerAngles(Mat, EulerAnglesDegrees.Apply(Radians));
+    }
     
     Matrix3 Math::Scale(const Matrix3& Mat, const Vector3& Scale)
     {

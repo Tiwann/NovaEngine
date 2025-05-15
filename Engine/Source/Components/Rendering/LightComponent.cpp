@@ -12,19 +12,19 @@ namespace Nova
     void LightComponent::OnInspectorGUI(const ImGuiIO& IO)
     {
         Component::OnInspectorGUI(IO);
-        const StaticArray<const char*, 3> LightTypes
+        const char* LightTypes[4]
         {
             "Directional",
             "Point",
-            "Spot"
+            "Spot",
+            "Ambient"
         };
         ImGui::BeginDisabled();
-        ImGui::Combo("Light Type", (int*)&m_Type, LightTypes.Data(), (i32)LightTypes.Count());
+        ImGui::Combo("Light Type", (int*)&m_Type, LightTypes, std::size(LightTypes));
         ImGui::EndDisabled();
         ImGui::Separator();
         UI::DragValue("Intensity", m_Intensity, 0.1f, 0.0f, 10.0f);
         ImGui::ColorEdit3("Color", (f32*)&m_Color);
-        
     }
 
     f32 LightComponent::GetIntensity() const
@@ -37,7 +37,7 @@ namespace Nova
         m_Intensity = intensity;
     }
 
-    Color LightComponent::GetColor() const
+    const Color& LightComponent::GetColor() const
     {
         return m_Color;
     }

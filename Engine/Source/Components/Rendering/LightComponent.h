@@ -22,7 +22,7 @@ namespace Nova
         f32 GetIntensity() const;
         void SetIntensity(f32 intensity);
         
-        Color GetColor() const;
+        const Color& GetColor() const;
         void SetColor(const Color& color);
         LightType GetType() const;
 

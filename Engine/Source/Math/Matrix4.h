@@ -19,6 +19,7 @@ namespace Nova
         f32 Magnitude() const;
         f32 Determinant() const;
         Matrix4 Inverted() const;
+        Matrix4 Transposed() const;
 
         Vector4 operator*(const Vector4& Vec) const;
         Vector3 operator*(const Vector3& Vec) const;

@@ -205,6 +205,17 @@ namespace Nova
         return m_LocalSpaceMatrix.Get(ComputeLocalSpaceMatrix);
     }
 
+    const Matrix3& Transform::GetWorldSpaceNormalMatrix()
+    {
+        static const Function<Matrix3()> ComputeLocalToWorldNormalMatrix = [&]() -> Matrix3
+        {
+            const Matrix4& ModelMatrix = GetWorldSpaceMatrix();
+            return Math::Transpose(Math::Inverse(Matrix3(ModelMatrix)));
+        };
+
+        return m_WorldSpaceNormalMatrix.Get(ComputeLocalToWorldNormalMatrix);
+    }
+
     void Transform::OnInspectorGUI(const ImGuiIO& IO)
     {
         Component::OnInspectorGUI(IO);

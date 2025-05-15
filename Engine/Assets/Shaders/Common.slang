@@ -73,55 +73,64 @@ public vec4 remap(vec4 val, float inmin, float inmax, float outmin, float outmax
 }
 
 
-public enum LightType
+namespace Nova
 {
-    Directional,
-    Point,
-    Spot,
-    Ambient
+    public struct Light
+    {
+        public float Intensity;
+        public vec3 Color;
+    };
+
+    public struct DirectionalLight : Light
+    {
+        public vec3 Direction;
+    };
+
+    public struct AmbientLight : Light
+    {
+
+    };
+
+    public struct PointLight : Light
+    {
+        public float InnerRadius;
+        public float OuterRadius;
+    };
+
+    public struct Scene
+    {
+        public mat4 ModelMatrix;
+        public mat4 ViewMatrix;
+        public mat4 ProjectionMatrix;
+        public mat3 NormalMatrix;
+        public vec3 CameraViewDirection;
+        public float DirLightIntensity;
+        public vec3 DirLightColor;
+        public vec3 DirLightDir;
+        public float AmbLightIntensity;
+        public vec3 AmbLightColor;
+
+
+        public vec4 LocalToWorldPosition(vec4 Position)
+        {
+            return mul(ModelMatrix, Position);
+        }
+
+        public vec4 LocalToViewPosition(vec4 Position)
+        {
+            return mul(mul(ViewMatrix, ModelMatrix), Position);
+        }
+
+        public vec4 LocalToClipPosition(vec4 Position)
+        {
+            return mul(mul(mul(ProjectionMatrix, ViewMatrix), ModelMatrix), Position);
+        }
+
+        public vec3 LocalToWorldNormal(vec3 Normal)
+        {
+            return mul(NormalMatrix, Normal);
+        }
+    };
 }
 
-
-public struct Light
-{
-    public float Intensity;
-    public vec3 Color;
-    public vec3 Direction;
-    public float Radius;
-    public LightType Type;
-};
-
-public struct DirectionalLight : Light
-{
-    
-}
-
-public struct SceneData
-{
-    public mat4 ViewProjection;
-    public mat4 Model;
-    public Light Dire;
-    public vec3 CameraViewDirection;
-}
-
-
-public vec4 ConvertToClipSpace(const SceneData InScene, vec4 Position)
-{
-    return mul(mul(InScene.ViewProjection, InScene.Model), Position);
-}
-
-public vec4 ConvertToClipSpace(const SceneData InScene, vec3 Position)
-{
-    return mul(mul(InScene.ViewProjection, InScene.Model), vec4(Position, 1.0));
-}
-
-public vec4 ConvertToViewSpace(const SceneData InScene, vec4 Position)
-{
-    return mul(InScene.ViewProjection, Position);
-}
-
-public vec4 ConvertToViewSpace(const SceneData InScene, vec3 Position)
-{
-    return mul(InScene.ViewProjection, vec4(Position, 1.0));
-}
 

@@ -104,13 +104,25 @@ namespace Nova
 	    return Inverse * OneOverDeterminant;
     }
 
+    Matrix4 Matrix4::Transposed() const
+    {
+    	Matrix4 Result = *this;
+    	std::swap(Result[0].y, Result[1].x);
+    	std::swap(Result[0].z, Result[2].x);
+    	std::swap(Result[0].w, Result[3].x);
+    	std::swap(Result[1].z, Result[2].y);
+    	std::swap(Result[1].w, Result[3].y);
+    	std::swap(Result[2].w, Result[3].z);
+    	return Result;
+    }
+
     Vector4 Matrix4::operator*(const Vector4& Vec) const
     {
     	const Vector4 Row0 = GetRow(0);
     	const Vector4 Row1 = GetRow(1);
     	const Vector4 Row2 = GetRow(2);
     	const Vector4 Row3 = GetRow(3);
-    	const Vector4 Result = {Row0.Dot(Vec), Row1.Dot(Vec), Row2.Dot(Vec), Row3.Dot(Vec)};
+    	const Vector4 Result = { Row0.Dot(Vec), Row1.Dot(Vec), Row2.Dot(Vec), Row3.Dot(Vec) };
     	return Result;
     }
 

@@ -1,4 +1,4 @@
-﻿module HelloTriangle;
+﻿module HelloCube;
 import Common;
 
 struct VertexInput
@@ -17,15 +17,15 @@ typedef struct VertexOutput
     vec4 Color;
 } FragmentInput;
 
-uniform SceneData Scene;
+ConstantBuffer<Nova::Scene> Scene;
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)
 {
     VertexOutput Out;
-    Out.Position = ConvertToClipSpace(Scene, Input.Position);
+    Out.Position = Scene.LocalToClipPosition(vec4(Input.Position, 1.0));
     Out.TexCoord = Input.TexCoord;
-    Out.Normal = Input.Normal;
+    Out.Normal = Scene.LocalToWorldNormal(Input.Normal);
     Out.Color = Input.Color;
     return Out;
 }
@@ -34,14 +34,14 @@ VertexOutput VertexMain(VertexInput Input)
 [shader("fragment")]
 vec4 FragmentMain(FragmentInput Input) : SV_Target
 {
-    vec3 LightColor = uDirectionalLight.color.xyz * uDirectionalLight.intensity;
-    vec3 N = normalize(Input.normal);
-    vec3 L = normalize(uDirectionalLight.direction);
+    vec3 LightColor = Scene.DirLightColor * Scene.DirLightIntensity;
+    vec3 N = normalize(Input.Normal);
+    vec3 L = normalize(Scene.DirLightDir);
     float Diffuse = saturate(dot(N, L));
     vec3 DiffuseLight = Diffuse * LightColor;
-    vec3 AmbientLight = uAmbientLight.color.xyz * uAmbientLight.intensity;
+    vec3 AmbientLight = Scene.AmbLightColor * Scene.AmbLightIntensity;
 
-    vec3 V = normalize(uCameraViewDirection);
+    vec3 V = normalize(Scene.CameraViewDirection);
     vec3 H = normalize(L + V);
     float Specular = saturate(dot(H, N));
     float Glossiness = 0.5;

@@ -28,11 +28,11 @@ namespace Nova
         EntityHandle SelectedEntity = Selection::GetEntity();
         m_Pivot = SelectedEntity ? SelectedEntity->GetTransform()->GetPosition() : Vector3::Zero;
 
-        const bool IsHoveringViewport = ViewportPanel::IsMouseHoveringWindow();
-        bool TryingPan = Input::GetCombined(KeyCode::LeftShift, MouseButton::Middle) && IsHoveringViewport;
-        bool TryingZoom = Input::GetCombined(KeyCode::LeftShift, MouseButton::Middle) && IsHoveringViewport;
-        bool TryingRotate = Input::GetMouseButton(MouseButton::Middle) && IsHoveringViewport;
-        
+
+        bool TryingPan = Input::GetCombined(KeyCode::LeftShift, MouseButton::Middle);
+        bool TryingZoom = Input::GetCombined(KeyCode::LeftControl, MouseButton::Middle);
+        bool TryingRotate = Input::GetMouseButton(MouseButton::Middle);
+
         if (TryingPan)
         {
             TryingZoom = false;

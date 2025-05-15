@@ -14,6 +14,8 @@ namespace Nova
         f32 Magnitude() const;
         f32 Determinant() const;
         Matrix2 Inverted() const;
+        Matrix2 Transposed() const;
+
 
         Vector2 operator*(const Vector2& Vec) const;
         Matrix2 operator*(const Matrix2& Mat) const;

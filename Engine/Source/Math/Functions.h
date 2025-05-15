@@ -138,6 +138,12 @@ namespace Nova
         {
             return In.Inverted();
         }
+
+        template<typename T> requires IsMatrixValue<T>
+        static T Transpose(const T& In)
+        {
+            return In.Transposed();
+        }
         
         static class Matrix2 Rotate(const Matrix2& Mat, f32 Radians);
         static Matrix2 RotateDegrees(const Matrix2& Mat, f32 Degrees);
@@ -146,6 +152,8 @@ namespace Nova
 
         static class Matrix3 RotateAxisAngle(const Matrix3& Mat, const struct Vector3& Axis, f32 AngleRadians);
         static Matrix3 RotateAxisAngleDegrees(const Matrix3& Mat, const Vector3& Axis, f32 AngleDegrees);
+        static Matrix3 RotateEulerAngles(const Matrix3& Mat, const Vector3& EulerAnglesRadians);
+        static Matrix3 RotateEulerAnglesDegrees(const Matrix3& Mat, const Vector3& EulerAnglesDegrees);
         static Matrix3 Scale(const Matrix3& Mat, const Vector3& Scale);
         static Matrix3 Scale(const Matrix3& Mat, f32 Scale);
         static Matrix3 Translate(const Matrix3& Mat, const Vector2& Translation);
@@ -156,11 +164,6 @@ namespace Nova
         static Matrix4 Scale(const Matrix4& Mat, f32 Scale);
         static Matrix4 RotateEulerAngles(const Matrix4& Mat, const Vector3& EulerAnglesRadians);
         static Matrix4 RotateEulerAnglesDegrees(const Matrix4& Mat, const Vector3& EulerAnglesDegrees);
-        static Matrix4 RotateEulerAnglesAroundPoint(const Matrix4& Mat, const Vector3& EulerAnglesRadians, const Vector3& Point);
-        static Matrix4 RotateEulerAnglesAroundPointDegrees(const Matrix4& Mat, const Vector3& EulerAnglesDegrees, const Vector3& Point);
-        static Matrix4 RotateAxisAngleAroundPoint(const Matrix4& Mat, const Vector3& Axis, f32 AngleRadians, const Vector3& Point);
-        static Matrix4 RotateAxisAngleAroundPointDegrees(const Matrix4& Mat, const Vector3& Axis, f32 AngleDegrees, const Vector3& Point);
-        static Matrix4 LookAt(const Vector3& Eye, const Vector3& Target, const Vector3& Up);
         static Matrix4 LocalToWorldNormal(const Vector3& Translation, const Vector3& EulerAnglesDegrees);
 
         static f32 Distance(const Vector2& VecA, const Vector2& VecB);

@@ -1,6 +1,9 @@
 #pragma once
 #include "Runtime/Component.h"
 #include "Math/LinearAlgebra.h"
+#include "Runtime/LogCategory.h"
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(EditorCameraController, "EditorCameraController")
 
 namespace Nova
 {

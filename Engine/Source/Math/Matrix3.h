@@ -5,18 +5,22 @@
 namespace Nova
 {
     struct Vector2;
+    class Matrix4;
 
     class CORE_API Matrix3
     {
     public:
         Matrix3();
         Matrix3(const Vector3& Col1, const Vector3& Col2, const Vector3& Col3);
+        Matrix3(const Matrix4& Matrix);
         
         const f32* ValuePtr() const;
         f32 Magnitude() const;
         f32 Determinant() const;
         Matrix3 Inverted() const;
+        Matrix3 Transposed() const;
 
+        bool operator==(const Matrix3& Other) const;
         Vector3 operator*(const Vector3& Vec) const;
         Matrix3 operator*(const Matrix3& Mat) const;
         Matrix3& operator*(f32 Scalar);

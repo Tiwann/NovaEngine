@@ -47,6 +47,7 @@ namespace Nova
 
         const Matrix4& GetWorldSpaceMatrix();
         const Matrix4& GetLocalSpaceMatrix();
+        const Matrix3& GetWorldSpaceNormalMatrix();
         void OnInspectorGUI(const ImGuiIO& IO) override;
 
         MulticastDelegate<void()> OnChanged;
@@ -57,6 +58,7 @@ namespace Nova
 
         Lazy<Matrix4> m_WorldSpaceMatrix;
         Lazy<Matrix4> m_LocalSpaceMatrix;
+        Lazy<Matrix3> m_WorldSpaceNormalMatrix;
     };
 
     

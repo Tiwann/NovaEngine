@@ -114,7 +114,22 @@ static void MatrixTests()
             Logger.LogError("Matrix3::Rotate: Failed");
         }
     }
+
+    {
+
+        const Nova::Matrix3 Rotation = Nova::Math::RotateAxisAngleDegrees(Nova::Matrix3::Identity, Nova::Vector3::Up, 90.0f);
+        const Nova::Matrix3 Transpose = Nova::Math::Transpose(Rotation);
+        const Nova::Matrix3 Result = Rotation * Transpose;
+        if (Result == Nova::Matrix3::Identity)
+        {
+            Logger.LogInfo("Matrix3::Transpose: Success");
+        } else
+        {
+            Logger.LogError("Matrix3::Transpose: Failed");
+        }
+    }
 }
+
 
 int main(void)
 {

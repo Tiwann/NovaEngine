@@ -1,6 +1,7 @@
 #include "Matrix3.h"
 #include "Functions.h"
 #include "Matrix2.h"
+#include "Matrix4.h"
 #include "Runtime/Assertion.h"
 
 namespace Nova
@@ -20,6 +21,13 @@ namespace Nova
         Columns[0] = Col1;
         Columns[1] = Col2;
         Columns[2] = Col3;
+    }
+
+    Matrix3::Matrix3(const Matrix4& Matrix)
+    {
+        Columns[0] = Vector3(Matrix[0]);
+        Columns[1] = Vector3(Matrix[1]);
+        Columns[2] = Vector3(Matrix[2]);
     }
 
     const f32* Matrix3::ValuePtr() const
@@ -44,7 +52,33 @@ namespace Nova
 
     Matrix3 Matrix3::Inverted() const
     {
-        return Identity;
+        const f32 OneOverDeterminant = 1.0f / Determinant();
+
+        Matrix3 Inverse;
+        Inverse[0][0] = + (Columns[1][1] * Columns[2][2] - Columns[2][1] * Columns[1][2]) * OneOverDeterminant;
+        Inverse[1][0] = - (Columns[1][0] * Columns[2][2] - Columns[2][0] * Columns[1][2]) * OneOverDeterminant;
+        Inverse[2][0] = + (Columns[1][0] * Columns[2][1] - Columns[2][0] * Columns[1][1]) * OneOverDeterminant;
+        Inverse[0][1] = - (Columns[0][1] * Columns[2][2] - Columns[2][1] * Columns[0][2]) * OneOverDeterminant;
+        Inverse[1][1] = + (Columns[0][0] * Columns[2][2] - Columns[2][0] * Columns[0][2]) * OneOverDeterminant;
+        Inverse[2][1] = - (Columns[0][0] * Columns[2][1] - Columns[2][0] * Columns[0][1]) * OneOverDeterminant;
+        Inverse[0][2] = + (Columns[0][1] * Columns[1][2] - Columns[1][1] * Columns[0][2]) * OneOverDeterminant;
+        Inverse[1][2] = - (Columns[0][0] * Columns[1][2] - Columns[1][0] * Columns[0][2]) * OneOverDeterminant;
+        Inverse[2][2] = + (Columns[0][0] * Columns[1][1] - Columns[1][0] * Columns[0][1]) * OneOverDeterminant;
+        return Inverse;
+    }
+
+    Matrix3 Matrix3::Transposed() const
+    {
+        Matrix3 Result = *this;
+        std::swap(Result[0].y, Result[1].x);
+        std::swap(Result[0].z, Result[2].x);
+        std::swap(Result[1].z, Result[2].y);
+        return Result;
+    }
+
+    bool Matrix3::operator==(const Matrix3& Other) const
+    {
+        return Columns[0] == Other.Columns[0] && Columns[1] == Other.Columns[1] && Columns[2] == Other.Columns[2];
     }
 
 
@@ -53,7 +87,7 @@ namespace Nova
         const Vector3 Row0 = GetRow(0);
         const Vector3 Row1 = GetRow(1);
         const Vector3 Row2 = GetRow(2);
-        const Vector3 Result = {Row0.Dot(Vec), Row1.Dot(Vec), Row2.Dot(Vec)};
+        const Vector3 Result = { Row0.Dot(Vec), Row1.Dot(Vec), Row2.Dot(Vec) };
         return Result;
     }
 

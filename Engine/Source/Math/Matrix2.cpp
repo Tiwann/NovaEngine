@@ -45,11 +45,18 @@ namespace Nova
         return Inverse;
     }
 
+    Matrix2 Matrix2::Transposed() const
+    {
+        Matrix2 Result = *this;
+        std::swap(Result[0].y, Result[1].x);
+        return Result;
+    }
+
     Vector2 Matrix2::operator*(const Vector2& Vec) const
     {
         const Vector2 Row0 = GetRow(0);
         const Vector2 Row1 = GetRow(1);
-        const Vector2 Result = {Row0.Dot(Vec), Row1.Dot(Vec)};
+        const Vector2 Result = { Row0.Dot(Vec), Row1.Dot(Vec) };
         return Result;
     }
 

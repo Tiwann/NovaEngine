@@ -335,7 +335,7 @@ namespace Nova
         return m_DescriptorSets;
     }
 
-    const Array<VkDescriptorSetLayout>& VulkanShader::GetDescriptorSetLayout() const
+    const Array<VkDescriptorSetLayout>& VulkanShader::GetDescriptorSetLayouts() const
     {
         return m_DescriptorSetLayouts;
     }

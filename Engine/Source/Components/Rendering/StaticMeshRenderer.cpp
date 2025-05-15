@@ -1,6 +1,4 @@
 ﻿#include "StaticMeshRenderer.h"
-
-#include "DirectionalLight.h"
 #include "Components/Camera.h"
 #include "Components/Transform.h"
 #include "Runtime/StaticMesh.h"
@@ -10,11 +8,8 @@
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/Application.h"
 #include "Rendering/Renderer.h"
-#include "Rendering/VertexBuffer.h"
 #include "Runtime/Scene.h"
 #include "Runtime/Window.h"
-
-#include <vulkan/vulkan.h>
 
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
@@ -22,6 +17,22 @@
 
 namespace Nova
 {
+    struct SceneData
+    {
+        Matrix4 ModelMatrix;
+        Matrix4 ViewMatrix;
+        Matrix4 ProjectionMatrix;
+        Matrix3 NormalMatrix;
+        Vector3 Padding;
+        Vector3 CameraViewDirection;
+        float DirectionalLightIntensity;
+        Vector3 DirectionalLightColor;
+        float Padding2;
+        Vector3 DirectionalLightDirection;
+        float AmbientLightIntensity;
+        Vector3 AmbientLightColor;
+    };
+
     StaticMeshRenderer::StaticMeshRenderer(Entity* Owner) : Component(Owner, "Model Component")
     {
     }
@@ -67,9 +78,10 @@ namespace Nova
         PipelineSpecification.ShaderProgram = BlinnPhongShader;
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
 
-        m_SceneUniformBuffer = Renderer->CreateUniformBuffer(2 * sizeof(Matrix4));
+        m_SceneUniformBuffer = Renderer->CreateUniformBuffer(sizeof(SceneData));
 
 
+        // NEED TO ABSTRACT THIS
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
@@ -81,7 +93,6 @@ namespace Nova
             BufferInfo.offset = 0;
             BufferInfo.range = VK_WHOLE_SIZE;
 
-
             VkWriteDescriptorSet SceneWriteDescriptor { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
             SceneWriteDescriptor.descriptorCount = 1;
             SceneWriteDescriptor.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -89,8 +100,7 @@ namespace Nova
             SceneWriteDescriptor.dstBinding = 0;
             SceneWriteDescriptor.pBufferInfo = &BufferInfo;
 
-            Array<VkWriteDescriptorSet> WriteDescriptors { SceneWriteDescriptor };
-            vkUpdateDescriptorSets(Device, WriteDescriptors.Count(), WriteDescriptors.Data(), 0, nullptr);
+            vkUpdateDescriptorSets(Device, 1, &SceneWriteDescriptor, 0, nullptr);
         }
     }
 
@@ -112,21 +122,47 @@ namespace Nova
         Camera* Camera = Renderer->GetCurrentCamera();
         if (!Camera) return;
 
-        const Matrix4& ViewProjection = Camera->GetViewProjectionMatrix();
+        Entity* Owner = GetOwner();
+        Scene* Scene = Owner->GetScene();
 
-        const Entity* Owner = GetOwner();
         Transform* EntityTransform = Owner->GetTransform();
-        const Matrix4& Model = EntityTransform->GetWorldSpaceMatrix();
+        Transform* CameraTransform = Camera->GetTransform();
 
-        const struct SceneData
+        const Matrix4& ModelMatrix = EntityTransform->GetWorldSpaceMatrix();
+        const Matrix4& ViewMatrix = Camera->GetViewMatrix();
+        const Matrix4& ProjectionMatrix = Camera->GetProjectionMatrix();
+        const Matrix3& NormalMatrix = EntityTransform->GetWorldSpaceNormalMatrix();
+
+        const Vector3& CameraPosition = CameraTransform->GetPosition();
+        const Vector3& EntityPosition = EntityTransform->GetPosition();
+        const Vector3 CameraViewDirection = Math::Normalize(CameraPosition - EntityPosition);
+
+        const Array<LightComponent*> AllLights = Scene->GetAllComponents<LightComponent>();
+        LightComponent** DirectionalLight = AllLights.Where([](LightComponent* Light) { return Light->GetType() == LightType::Directional; }).First();
+        LightComponent** AmbientLight = AllLights.Where([](LightComponent* Light) { return Light->GetType() == LightType::Ambient; }).First();
+
+        const Color& DirectionalLightColor = DirectionalLight ? (*DirectionalLight)->GetColor() : Color::Black;
+        const float DirectionalLightIntensity = DirectionalLight ? (*DirectionalLight)->GetIntensity() : 0.0f;
+        const Vector3 DirectionalLightDirection = DirectionalLight ? (*DirectionalLight)->GetTransform()->GetForwardVector() : Vector3::Zero;
+        const Color& AmbientLightColor = AmbientLight ? (*AmbientLight)->GetColor() : Color::Black;
+        const float AmbientLightIntensity = AmbientLight ? (*AmbientLight)->GetIntensity() : 0.0f;
+
+        const auto ToVector3 = [](const Color& Color) -> Vector3
         {
-            Matrix4 ViewProjectionMatrix;
-            Matrix4 ModelMatrix;
-        } SceneDataInstance
-        {
-            .ViewProjectionMatrix = ViewProjection,
-            .ModelMatrix = Model
+            return Vector3(Color.r, Color.g, Color.b);
         };
+
+        SceneData SceneDataInstance;
+        SceneDataInstance.ModelMatrix = ModelMatrix;
+        SceneDataInstance.ViewMatrix = ViewMatrix;
+        SceneDataInstance.ProjectionMatrix = ProjectionMatrix;
+        SceneDataInstance.NormalMatrix = NormalMatrix;
+        SceneDataInstance.CameraViewDirection = CameraViewDirection;
+        SceneDataInstance.DirectionalLightColor = ToVector3(DirectionalLightColor);
+        SceneDataInstance.DirectionalLightIntensity = DirectionalLightIntensity;
+        SceneDataInstance.DirectionalLightDirection = DirectionalLightDirection;
+        SceneDataInstance.AmbientLightColor = ToVector3(AmbientLightColor);
+        SceneDataInstance.AmbientLightIntensity = AmbientLightIntensity;
 
         Renderer->UpdateUniformBuffer(m_SceneUniformBuffer, 0, sizeof(SceneData), &SceneDataInstance);
     }
@@ -151,12 +187,6 @@ namespace Nova
         const Camera* Camera = Renderer->GetCurrentCamera();
         if (!Camera) return;
 
-        const Transform* EntityTransform = GetTransform();
-        const Transform* CameraTransform = Camera->GetTransform();
-        const Vector3& CameraPosition = CameraTransform->GetPosition();
-        const Vector3& EntityPosition = EntityTransform->GetPosition();
-        const Vector3& EntityRotation = EntityTransform->GetRotation();
-        const Vector3 CameraViewDirection = Math::Normalize(CameraPosition - EntityPosition);
         const f32 Width = Window->GetWidth<f32>();
         const f32 Height = Window->GetHeight<f32>();
 

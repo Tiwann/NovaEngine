@@ -1,30 +1,16 @@
 ﻿#include "HelloCube.h"
 #include "CommandLine/ArgumentParser.h"
 #include "Platform/Vulkan/VulkanTexture2D.h"
-#include "Rendering/IndexBuffer.h"
-#include "Rendering/Pipeline.h"
 #include "Rendering/Shader.h"
-#include "Rendering/Vertex.h"
-#include "Rendering/VertexBuffer.h"
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/EntityHandle.h"
 #include "Runtime/EntryPoint.h"
-#include "Runtime/Log.h"
 #include "Runtime/Scene.h"
-#include "Runtime/Window.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-#include "Platform/Vulkan/VulkanCommandBuffer.h"
-#include "Platform/Vulkan/VulkanRenderer.h"
 #include "Components/Camera.h"
+#include "Components/EditorCameraController.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/StaticMeshRenderer.h"
-#include "Platform/Vulkan/VulkanShader.h"
-#include "Platform/Vulkan/VulkanUniformBuffer.h"
-
 #include "Components/Rendering/DirectionalLight.h"
 #include "Components/Rendering/AmbientLight.h"
 
@@ -43,15 +29,15 @@ namespace Nova
     {
         ApplicationConfiguration Configuration;
         Configuration.AppName = "Hello Cube | Nova Engine";
-        Configuration.WindowWidth = 600;
-        Configuration.WindowHeight = 400;
+        Configuration.WindowWidth = 1280;
+        Configuration.WindowHeight = 720;
         Configuration.WindowResizable = true;
         Configuration.Audio.SampleRate = 44100;
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
         Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
-        Configuration.Graphics.VSync = true;
+        Configuration.Graphics.VSync = false;
         Configuration.WithEditor = true;
         return Configuration;
     }
@@ -71,7 +57,8 @@ namespace Nova
         MeshEntity = Scene->CreateEntity("Model");
 
         StaticMeshRenderer* MeshRenderer = MeshEntity->AddComponent<StaticMeshRenderer>();
-        MeshEntity->GetTransform()->SetPosition(0.0f, 0.0f, 0.0f);
+        MeshEntity->GetTransform()->SetPosition(0.0f, -0.8f, -1.9f);
+        MeshEntity->GetTransform()->SetRotation(0.0f, 21.0f, 0.0f);
         MeshRenderer->OpenFile();
 
         LightEntity = Scene->CreateEntity("Light");
@@ -87,6 +74,9 @@ namespace Nova
         Camera* CameraComponent = CameraEntity->AddComponent<Camera>();
         CameraComponent->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
         CameraComponent->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
+
+        EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
+        CameraController->SetCamera(CameraComponent);
 
         Renderer* Renderer = GetRenderer();
         Renderer->SetCurrentCamera(CameraComponent);

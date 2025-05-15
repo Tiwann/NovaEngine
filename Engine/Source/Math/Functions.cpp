@@ -108,8 +108,6 @@ namespace Nova
         return Val > 0.0f ? 1.0f : Val < 0.0f ? -1.0f : 0.0f;
     }
 
-
-
     f32 Math::Distance(const Vector2& VecA, const Vector2& VecB)
     {
         return Sqrt(Pow(VecB.x - VecA.x, 2) + Pow(VecB.y - VecA.y, 2));

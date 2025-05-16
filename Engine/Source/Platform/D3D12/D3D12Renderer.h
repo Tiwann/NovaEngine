@@ -30,7 +30,7 @@ namespace Nova
     class D3D12Renderer : public Renderer
     {
     public:
-        D3D12Renderer(Application* Owner) : Renderer(Owner, GraphicsApi::D3D12) {}
+        explicit D3D12Renderer(Application* Owner) : Renderer(Owner, GraphicsApi::D3D12) {}
         ~D3D12Renderer() override = default;
 
         bool Initialize() override;
@@ -44,8 +44,7 @@ namespace Nova
         void EndFrame() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(size_t IndexCount) override;
+        void DrawIndexed(size_t IndexCount, u64 Offset) override;
 
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
@@ -53,8 +52,10 @@ namespace Nova
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void SetBlending(bool Enabled) override;
         void BindPipeline(Pipeline* Pipeline) override;
-
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
+        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
+        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
+        PresentMode GetPresentMode() override;
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
         ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
@@ -68,8 +69,7 @@ namespace Nova
         ID3D12CommandAllocator*     GetCurrentCommandAllocator() const;
         ID3D12CommandQueue*         GetCommandQueue() const;
         void                        WaitDeviceIdle();
-        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
-        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
+
 
         D3D12RendererTypeConvertor  Convertor;
     private:
@@ -82,12 +82,12 @@ namespace Nova
         D3D12ComPtr<ID3D12Device9>              m_Device = nullptr;
         D3D12ComPtr<IDXGIFactory7>              m_Factory = nullptr;
         D3D12ComPtr<IDXGIAdapter>               m_Adapter = nullptr;
-        DXGI_SWAP_EFFECT            m_PresentMode = DXGI_SWAP_EFFECT_DISCARD;
+        DXGI_SWAP_EFFECT                        m_PresentMode = DXGI_SWAP_EFFECT_DISCARD;
         D3D12ComPtr<IDXGISwapChain4>            m_Swapchain = nullptr;
         D3D12ComPtr<ID3D12CommandQueue>         m_CommandQueue = nullptr;
         D3D12ComPtr<ID3D12DescriptorHeap>       m_RenderTargetViewDescriptorHeap = nullptr;
         D3D12ComPtr<ID3D12DescriptorHeap>       m_ImGuiFontDescriptorHeap = nullptr;
-        D3D12FrameData              m_FrameData[3] = {};
-        HANDLE                      m_FenceEvent = nullptr;
+        D3D12FrameData                          m_FrameData[3] = {};
+        HANDLE                                  m_FenceEvent = nullptr;
     };
 }

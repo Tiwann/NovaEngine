@@ -18,6 +18,7 @@ typedef struct VmaAllocator_T* VmaAllocator;
 
 namespace Nova
 {
+    class VulkanSwapchain;
 
     class VulkanCommandPool;
     class VulkanCommandBuffer;
@@ -45,9 +46,6 @@ namespace Nova
         #endif
         PFN_vkCmdSetColorBlendEquationEXT   vkCmdSetColorBlendEquationEXT = nullptr;
         PFN_vkCmdSetColorBlendEnableEXT     vkCmdSetColorBlendEnableEXT = nullptr;
-        PFN_vkCreateShadersEXT              vkCreateShadersEXT = nullptr;
-        PFN_vkDestroyShaderEXT              vkDestroyShaderEXT = nullptr;
-        PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
     };
 
 
@@ -70,28 +68,31 @@ namespace Nova
         void Present() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(size_t IndexCount) override;
+        void DrawIndexed(size_t IndexCount, u64 Offset) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
-
         void BindPipeline(Pipeline* Pipeline) override;
-
+        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
+        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
+
+
+
+        PresentMode GetPresentMode() override;
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetDevice() const;
         VkQueue GetGraphicsQueue() const;
         VkQueue GetPresentQueue() const;
         VkSurfaceKHR GetSurface() const;
-        VkSwapchainKHR GetSwapchain() const;
+        VulkanSwapchain* GetSwapchain() const;
         u32 GetGraphicsQueueFamily() const;
         VmaAllocator GetAllocator() const;
-        
+
         BufferView<VkFrameData> GetFrameData() const;
         VkFrameData GetCurrentFrameData() const;
         VulkanCommandBuffer* GetCurrentCommandBuffer() const;
@@ -103,8 +104,6 @@ namespace Nova
         void WaitIdle() const;
         const VkFunctionPointers& GetFunctionPointers() const;
         u32 GetCurrentFrameIndex() const;
-        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
-        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
         VulkanRendererTypeConvertor Convertor;
         static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:
@@ -124,8 +123,8 @@ namespace Nova
         VkQueue                           m_GraphicsQueue = nullptr;
         VkQueue                           m_PresentQueue = nullptr;
         VkColorSpaceKHR                   m_ImageColorSpace;
-        VkPresentModeKHR                  m_PresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
-        VkSwapchainKHR                    m_Swapchain = nullptr;
+        PresentMode                       m_PresentMode = PresentMode::Unknown;
+        VulkanSwapchain*                  m_Swapchain = nullptr;
         VkFormat                          m_SwapchainImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
         VkFrameData                       m_Frames[3] = { };
         VmaAllocator                      m_Allocator = nullptr;

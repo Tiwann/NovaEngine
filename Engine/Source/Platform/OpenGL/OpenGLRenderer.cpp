@@ -105,23 +105,8 @@ namespace Nova
         glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
     }
 
-    void OpenGLRenderer::Draw(VertexArray* VertexArray, u32 NumVert, Shader* Shader)
-    {
-        VertexArray->Bind();
-        Shader->Bind();
-        if(m_CurrentCamera)
-        {
-            Shader->SetUniformMat4("uView", m_CurrentCamera->GetViewMatrix());
-            Shader->SetUniformMat4("uProjection", m_CurrentCamera->GetProjectionMatrix());
-        } else
-        {
-            NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
-        }
 
-        //glDrawArrays(ConvertPolygonMode(Mode), 0, (i32)NumVert);
-    }
-
-    void OpenGLRenderer::DrawIndexed(const size_t IndexCount)
+    void OpenGLRenderer::DrawIndexed(const size_t IndexCount, const u64 Offset)
     {
         const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;
         const GLenum GLTopology = Convertor.ConvertPrimitiveTopology(Topology);
@@ -296,7 +281,7 @@ namespace Nova
 
     void OpenGLRenderer::BindPipeline(Pipeline* Pipeline)
     {
-        const PipelineSpecification& Specification = Pipeline->GetSpecification();
+        const PipelineCreateInfo& Specification = Pipeline->GetSpecification();
         OpenGLPipeline* CastedPipeline = Pipeline->As<OpenGLPipeline>();
         m_BoundPipeline = CastedPipeline;
         const u32 VertexArrayObject = CastedPipeline->GetVertexArrayObject();
@@ -360,6 +345,11 @@ namespace Nova
 
     void OpenGLRenderer::BindIndexBuffer(IndexBuffer* Buffer, u64 Offset)
     {
+    }
+
+    PresentMode OpenGLRenderer::GetPresentMode()
+    {
+        return PresentMode::Unknown;
     }
 
     String OpenGLRenderer::GetDebugSourceName(const u32 Source)

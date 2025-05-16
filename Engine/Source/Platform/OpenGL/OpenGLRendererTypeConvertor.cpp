@@ -173,6 +173,10 @@ namespace Nova
         case Format::R32G32B32A32_UINT: return GL_RGBA32UI;
         case Format::R32G32B32A32_SINT: return GL_RGBA32I;
         case Format::R32G32B32A32_FLOAT: return GL_RGBA32F;
+        case Format::R8G8B8A8_SRGB: return GL_RGBA8;
+        case Format::D32_FLOAT: return GL_DEPTH;
+        case Format::D32_FLOAT_S8_UINT: return GL_DEPTH32F_STENCIL8;
+        case Format::D24_UNORM_S8_UINT: return GL_DEPTH24_STENCIL8;
         default: throw;
         }
     }

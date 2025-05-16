@@ -53,7 +53,7 @@ namespace Nova
         ShaderManager* ShaderManager = g_Application->GetShaderManager();
         Shader* BlinnPhongShader = ShaderManager->Retrieve("HelloCube");
 
-        PipelineSpecification PipelineSpecification;
+        PipelineCreateInfo PipelineSpecification;
         PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
         PipelineSpecification.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
         PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::Vector3});
@@ -198,7 +198,7 @@ namespace Nova
         {
             Renderer->BindVertexBuffer(m_StaticMesh->GetVertexBuffer(), SubMesh.VertexBufferOffset);
             Renderer->BindIndexBuffer(m_StaticMesh->GetIndexBuffer(), SubMesh.IndexBufferOffset);
-            Renderer->DrawIndexed(SubMesh.IndexBufferSize / sizeof(u32));
+            Renderer->DrawIndexed(SubMesh.IndexBufferSize / sizeof(u32), 0);
         }
 
         /*u32 PassIndex = 0;

@@ -8,16 +8,17 @@
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/VertexBuffer.h"
 #include "Rendering/Shader.h"
-#include <GLFW/glfw3.h>
-
+#include "Rendering/CommandBuffer.h"
+#include "Rendering/Swapchain.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanIndexBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanShader.h"
+#include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanVertexBuffer.h"
-#include "Platform/Vulkan/VulkanCommandPool.h"
-#include "Rendering/CommandBuffer.h"
+#include "VulkanCommandPool.h"
+#include <GLFW/glfw3.h>
 
 namespace Nova
 {
@@ -101,9 +102,6 @@ namespace Nova
 #endif
             m_FunctionPointers.vkCmdSetColorBlendEnableEXT = (PFN_vkCmdSetColorBlendEnableEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorBlendEnableEXT");
             m_FunctionPointers.vkCmdSetColorBlendEquationEXT = (PFN_vkCmdSetColorBlendEquationEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdSetColorBlendEquationEXT");
-            m_FunctionPointers.vkCreateShadersEXT = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateShadersEXT");
-            m_FunctionPointers.vkDestroyShaderEXT = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyShaderEXT");
-            m_FunctionPointers.vkCmdBindShadersEXT = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdBindShadersEXT");
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -166,8 +164,7 @@ namespace Nova
                 NOVA_VULKAN_ERROR("Failed to pick physical device!");
                 m_Application->RequireExit(ExitCode::Error);
 
-                ScopedPointer<PopupMessage> Message = PopupMessage::
-                Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
+                ScopedPointer<PopupMessage> Message = PopupMessage::Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
                 Message->Show();
                 return false;
             }
@@ -257,7 +254,7 @@ namespace Nova
             DeviceCreateInfo.queueCreateInfoCount = (u32)QueueCreateInfos.Count();
             DeviceCreateInfo.pQueueCreateInfos = QueueCreateInfos.Data();
 
-            Array<const char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME, VK_EXT_SHADER_OBJECT_EXTENSION_NAME  };
+            Array<const char*> DeviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME };
             DeviceCreateInfo.enabledExtensionCount = (u32)DeviceExtensions.Count();
             DeviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.Data();
 
@@ -295,42 +292,12 @@ namespace Nova
             }
         }
 
-        VkPhysicalDeviceSurfaceInfo2KHR SurfaceInfo = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR };
-        SurfaceInfo.surface = m_Surface;
-
-        u32 SurfaceFormatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, nullptr);
-        ScopedBuffer<VkSurfaceFormatKHR> SurfaceFormats(SurfaceFormatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, SurfaceFormats.GetData());
-
-
-        const GraphicsSettings& GraphicsSettings = m_Application->GetGraphicsSettings();
-        if (GraphicsSettings.VSync)
-        {
-            m_PresentMode = VK_PRESENT_MODE_FIFO_KHR;
-
-            u32 PresentModeCount;
-            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &PresentModeCount, nullptr);
-            ScopedBuffer<VkPresentModeKHR> PresentModes(PresentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, PresentModes.GetData());
-            for (const VkPresentModeKHR PresentMode : PresentModes)
-            {
-                if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-                {
-                    m_PresentMode = PresentMode;
-                    break;
-                }
-            }
-        } else
-        {
-            m_PresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-        }
 
         //////////////////////////////////////////////////////////////////////////////////////////
         /// ALLOCATOR CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         {
-            VmaAllocatorCreateInfo AllocatorCreateInfo = { 0 };
+            VmaAllocatorCreateInfo AllocatorCreateInfo = {  };
             AllocatorCreateInfo.device = m_Device;
             AllocatorCreateInfo.instance = m_Instance;
             AllocatorCreateInfo.physicalDevice = m_PhysicalDevice;
@@ -348,50 +315,26 @@ namespace Nova
         /// SWAPCHAIN CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         {
-            VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
-            SwapchainCreateInfo.surface = m_Surface;
-            SwapchainCreateInfo.imageFormat = m_SwapchainImageFormat;
-            SwapchainCreateInfo.imageColorSpace = m_ImageColorSpace = SurfaceFormats[0].colorSpace;
-            SwapchainCreateInfo.presentMode = m_PresentMode;
-            SwapchainCreateInfo.clipped = true;
-            SwapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            SwapchainCreateInfo.imageExtent.width = WindowWidth;
-            SwapchainCreateInfo.imageExtent.height = WindowHeight;
-            SwapchainCreateInfo.minImageCount = m_ImageCount;
-            SwapchainCreateInfo.imageArrayLayers = 1;
-            SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-            SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-            SwapchainCreateInfo.oldSwapchain = nullptr;
+            SwapchainCreateInfo SwapchainCreate;
+            SwapchainCreate.ImageCount = m_ImageCount;
+            SwapchainCreate.ImageFormat = Format::R8G8B8A8_UNORM;
+            SwapchainCreate.ImageWidth = WindowWidth;
+            SwapchainCreate.ImageHeight = WindowHeight;
+            SwapchainCreate.OldSwapchain = nullptr;
+            SwapchainCreate.ImagePresentMode = m_PresentMode = GetPresentMode();
+            SwapchainCreate.GraphicsQueueIndex = m_GraphicsQueueIndex;
+            SwapchainCreate.PresentQueueIndex = m_PresentQueueIndex;
 
-            if (m_GraphicsQueue == m_PresentQueue)
-            {
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                SwapchainCreateInfo.queueFamilyIndexCount = 1;
-                SwapchainCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
-            }
-            else
-            {
-                const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-                SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
-            }
-
-            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
+            m_Swapchain = CreateSwapchain(SwapchainCreate)->As<VulkanSwapchain>();
+            if (!m_Swapchain)
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
                 m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
-            u32 SwapchainImageCount;
-            vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
-            ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
-            if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
-            {
-                NOVA_VULKAN_ERROR("Failed to get swapchain image!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
+            u32 ImageCount;
+            StaticArray<VkImage, 3> SwapchainImages = m_Swapchain->GetImages(ImageCount);
 
             CommandPoolCreateInfo CommandPoolCreateInfo;
             CommandPoolCreateInfo.Flags = CommandPoolFlagBits::ResetCommandBuffer;
@@ -537,6 +480,7 @@ namespace Nova
                 { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 32 },
                 { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 32 }
             };
+
             VkDescriptorPoolCreateInfo DescriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
             DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
             DescriptorPoolCreateInfo.maxSets = 2;
@@ -583,7 +527,7 @@ namespace Nova
         vmaDestroyAllocator(m_Allocator);
 
         delete m_CommandPool;
-        vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
+        m_Swapchain->Destroy();
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 #ifdef NOVA_DEBUG
@@ -615,53 +559,9 @@ namespace Nova
                 vkDestroyImageView(m_Device, VkFrameData.DepthImageView, nullptr);
             }
 
-            VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
-            SwapchainCreateInfo.surface = m_Surface;
-            SwapchainCreateInfo.imageFormat = m_SwapchainImageFormat;
-            SwapchainCreateInfo.imageColorSpace = m_ImageColorSpace;
-            SwapchainCreateInfo.presentMode = m_PresentMode;
-            SwapchainCreateInfo.clipped = true;
-            SwapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-            SwapchainCreateInfo.imageExtent = VkExtent2D(WindowWidth, WindowHeight);
-            SwapchainCreateInfo.minImageCount = m_ImageCount;
-            SwapchainCreateInfo.imageArrayLayers = 1;
-            SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-            SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-            SwapchainCreateInfo.oldSwapchain = m_Swapchain;
-
-            if (m_GraphicsQueue == m_PresentQueue)
-            {
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                SwapchainCreateInfo.queueFamilyIndexCount = 1;
-                SwapchainCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
-            }
-            else
-            {
-                const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
-                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-                SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
-            }
-
-            VkSwapchainKHR NewSwapchain = nullptr;
-            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &NewSwapchain)))
-            {
-                NOVA_VULKAN_ERROR("Failed to create swapchain!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
-
-            vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
-            m_Swapchain = NewSwapchain;
-
-            u32 SwapchainImageCount;
-            vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
-            ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
-            if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
-            {
-                NOVA_VULKAN_ERROR("Failed to get swapchain image!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
+            m_Swapchain->Recreate();
+            u32 ImageCount;
+            StaticArray<VkImage, 3> SwapchainImages = m_Swapchain->GetImages(ImageCount);
 
             for (size_t i = 0; i < m_ImageCount; i++)
             {
@@ -785,7 +685,7 @@ namespace Nova
         }
 
 
-        if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain, U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
+        if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain->GetHandle(), U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
         {
             NOVA_VULKAN_ERROR("Failed to acquire next image index!");
             return false;
@@ -981,7 +881,7 @@ namespace Nova
     {
         VkPresentInfoKHR PresentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         PresentInfo.swapchainCount = 1;
-        PresentInfo.pSwapchains = &m_Swapchain;
+        PresentInfo.pSwapchains = m_Swapchain->GetHandlePtr();
         PresentInfo.pImageIndices = &m_NewFrameIndex;
         PresentInfo.waitSemaphoreCount = 1;
         PresentInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
@@ -1020,16 +920,10 @@ namespace Nova
         vkCmdSetScissor(Cmd, 0, 1, &Rect);
     }
 
-    void VulkanRenderer::Draw(VertexArray* VAO, const u32 NumVert, Shader* Shader)
+    void VulkanRenderer::DrawIndexed(const size_t IndexCount, const u64 Offset)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        vkCmdDraw(Cmd, NumVert, 1, 0, 0);
-    }
-
-    void VulkanRenderer::DrawIndexed(const size_t IndexCount)
-    {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        vkCmdDrawIndexed(Cmd, IndexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(Cmd, IndexCount, 1, 0, Offset, 0);
     }
 
 
@@ -1070,7 +964,7 @@ namespace Nova
     void VulkanRenderer::BindPipeline(Pipeline* Pipeline)
     {
         const VulkanPipeline* CastedPipeline = Pipeline->As<VulkanPipeline>();
-        const PipelineSpecification& Specification = CastedPipeline->GetSpecification();
+        const PipelineCreateInfo& Specification = CastedPipeline->GetSpecification();
         const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
@@ -1086,6 +980,42 @@ namespace Nova
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdUpdateBuffer(Cmd, Buffer->As<VulkanUniformBuffer>()->GetHandle(), Offset, Size, Data);
+    }
+
+    PresentMode VulkanRenderer::GetPresentMode()
+    {
+        VkPresentModeKHR Result;
+        const GraphicsSettings& GraphicsSettings = m_Application->GetGraphicsSettings();
+        if (GraphicsSettings.VSync)
+        {
+            Result = VK_PRESENT_MODE_FIFO_KHR;
+
+            u32 PresentModeCount;
+            VkPresentModeKHR AvailablePresentModes[4];
+            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &PresentModeCount, AvailablePresentModes);
+
+            for (size_t i = 0; i < PresentModeCount; ++i)
+            {
+                const VkPresentModeKHR PresentMode = AvailablePresentModes[i];
+                if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+                {
+                    Result = PresentMode;
+                    break;
+                }
+            }
+        } else
+        {
+            Result = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }
+
+        switch (Result)
+        {
+        case VK_PRESENT_MODE_IMMEDIATE_KHR: return PresentMode::Immediate;
+        case VK_PRESENT_MODE_MAILBOX_KHR: return PresentMode::Mailbox;
+        case VK_PRESENT_MODE_FIFO_KHR: return PresentMode::Fifo;
+        case VK_PRESENT_MODE_FIFO_RELAXED_KHR: return PresentMode::FifoRelaxed;
+        default: throw;
+        }
     }
 
     void VulkanRenderer::BindVertexBuffer(VertexBuffer* Buffer, const u64 Offset)
@@ -1130,7 +1060,7 @@ namespace Nova
         return m_Surface;
     }
 
-    VkSwapchainKHR VulkanRenderer::GetSwapchain() const
+    VulkanSwapchain* VulkanRenderer::GetSwapchain() const
     {
         return m_Swapchain;
     }

@@ -7,13 +7,16 @@
 #include "Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Platform/OpenGL/OpenGLPipeline.h"
 #include "Platform/OpenGL/OpenGLRenderer.h"
+#include "Platform/OpenGL/OpenGLRenderTarget.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLUniformBuffer.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
+#include "Platform/Vulkan/VulkanFence.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
+#include "Platform/Vulkan/VulkanRenderTarget.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
@@ -39,6 +42,46 @@ namespace Nova
         ClearDepth(Depth);
     }
 
+    Fence* Renderer::CreateFence(const FenceCreateInfo& CreateInfo)
+    {
+        Fence* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanFence(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        default: throw;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
+    }
+
+    RenderTarget* Renderer::CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo)
+    {
+        RenderTarget* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: Result = new OpenGLRenderTarget(this); break;
+        case GraphicsApi::Vulkan: Result = new VulkanRenderTarget(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        default: throw;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
+    }
+
     CommandPool* Renderer::CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)
     {
         switch (m_GraphicsApi)
@@ -51,26 +94,24 @@ namespace Nova
         }
     }
 
-    Swapchain* Renderer::CreateSwapchain(const SwapchainDescription& Description)
+    Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& CreateInfo)
     {
+        Swapchain* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return nullptr;
-        case GraphicsApi::Vulkan:
-            {
-                VulkanSwapchain* Result = new VulkanSwapchain(this);
-                if (!Result->Initialize(Description))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::D3D12:
-            return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanSwapchain(this); break;
+        case GraphicsApi::D3D12: return nullptr;
         default: throw;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Shader* Renderer::CreateShader(const String& Name, const Path& Filepath)
@@ -85,43 +126,24 @@ namespace Nova
         }
     }
 
-    Pipeline* Renderer::CreatePipeline(const PipelineSpecification& Specification)
+    Pipeline* Renderer::CreatePipeline(const PipelineCreateInfo& CreateInfo)
     {
+        Pipeline* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
-        case GraphicsApi::OpenGL:
-            {
-                Pipeline* Result = new OpenGLPipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::Vulkan:
-            {
-                Pipeline* Result = new VulkanPipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::D3D12:
-            {
-                Pipeline* Result = new D3D12Pipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
+        case GraphicsApi::OpenGL: Result = new OpenGLPipeline(this); break;
+        case GraphicsApi::Vulkan: Result = new VulkanPipeline(this); break;
+        case GraphicsApi::D3D12: Result = new D3D12Pipeline(this); break;
         default: return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     VertexBuffer* Renderer::CreateVertexBuffer()
@@ -204,6 +226,16 @@ namespace Nova
     const Camera* Renderer::GetCurrentCamera() const
     {
         return m_CurrentCamera;
+    }
+
+    RenderTarget* Renderer::GetRenderTarget() const
+    {
+        return m_RenderTarget;
+    }
+
+    void Renderer::SetRenderTarget(RenderTarget* RenderTarget)
+    {
+        m_RenderTarget = RenderTarget;
     }
 
     GraphicsApi Renderer::GetGraphicsApi() const

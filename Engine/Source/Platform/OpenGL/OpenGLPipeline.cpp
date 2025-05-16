@@ -9,7 +9,7 @@ namespace Nova
 
     }
 
-    bool OpenGLPipeline::Initialize(const PipelineSpecification& Specification)
+    bool OpenGLPipeline::Initialize(const PipelineCreateInfo& Specification)
     {
         Pipeline::Initialize(Specification);
         glCreateVertexArrays(1, &m_Handle);

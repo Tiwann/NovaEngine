@@ -10,7 +10,7 @@ namespace Nova
         explicit OpenGLPipeline(Renderer* Renderer);
         ~OpenGLPipeline() override = default;
 
-        bool Initialize(const PipelineSpecification& Specification) override;
+        bool Initialize(const PipelineCreateInfo& Specification) override;
         void Destroy() override;
 
         u32 GetVertexArrayObject() const;

@@ -25,7 +25,7 @@ namespace Nova
         m_Handle->Release();
     }
 
-    bool D3D12Pipeline::Initialize(const PipelineSpecification& Specification)
+    bool D3D12Pipeline::Initialize(const PipelineCreateInfo& Specification)
     {
         Pipeline::Initialize(Specification);
 

@@ -15,7 +15,7 @@ namespace Nova
 {
     class Shader;
 
-    struct PipelineSpecification
+    struct PipelineCreateInfo
     {
         VertexLayout VertexLayout;
         bool RasterizerDiscardEnable = true;
@@ -51,14 +51,14 @@ namespace Nova
     class Pipeline : public Object
     {
     public:
-        virtual bool Initialize(const PipelineSpecification& Specification);
+        virtual bool Initialize(const PipelineCreateInfo& Specification);
         virtual void Destroy() = 0;
 
-        const PipelineSpecification& GetSpecification() const;
+        const PipelineCreateInfo& GetSpecification() const;
     protected:
         explicit Pipeline(Renderer* Renderer);
 
         Renderer* m_Renderer = nullptr;
-        PipelineSpecification m_Specification;
+        PipelineCreateInfo m_Specification;
     };
 }

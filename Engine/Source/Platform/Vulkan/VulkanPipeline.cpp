@@ -11,7 +11,7 @@ namespace Nova
 
     }
 
-    bool VulkanPipeline::Initialize(const PipelineSpecification& Specification)
+    bool VulkanPipeline::Initialize(const PipelineCreateInfo& Specification)
     {
         Pipeline::Initialize(Specification);
 

@@ -12,7 +12,7 @@ namespace Nova
         ~VulkanPipeline() override = default;
         VkPipeline GetHandle() const;
 
-        bool Initialize(const PipelineSpecification& Specification) override;
+        bool Initialize(const PipelineCreateInfo& Specification) override;
         void Destroy() override;
 
     private:

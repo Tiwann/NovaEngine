@@ -62,7 +62,7 @@ namespace Nova
         m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
         m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
 
-        PipelineSpecification PipelineSpecification;
+        PipelineCreateInfo PipelineSpecification;
         PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
         PipelineSpecification.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
         PipelineSpecification.VertexLayout.AddAttribute({"NORMAL", Format::Vector3});
@@ -126,6 +126,6 @@ namespace Nova
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
         Renderer->BindVertexBuffer(m_VertexBuffer, 0);
         Renderer->BindIndexBuffer(m_IndexBuffer, 0);
-        Renderer->DrawIndexed(3);
+        Renderer->DrawIndexed(3, 0);
     }
 }

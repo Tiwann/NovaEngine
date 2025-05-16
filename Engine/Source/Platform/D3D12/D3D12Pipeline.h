@@ -11,7 +11,7 @@ namespace Nova
         explicit D3D12Pipeline(Renderer* Renderer);
 
         void Destroy() override;
-        bool Initialize(const PipelineSpecification& Specification) override;
+        bool Initialize(const PipelineCreateInfo& Specification) override;
 
         ID3D12PipelineState* GetHandle() const;
 

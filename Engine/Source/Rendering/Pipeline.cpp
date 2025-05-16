@@ -7,13 +7,13 @@ namespace Nova
     {
     }
 
-    bool Pipeline::Initialize(const PipelineSpecification& Specification)
+    bool Pipeline::Initialize(const PipelineCreateInfo& Specification)
     {
         m_Specification = Specification;
         return true;
     }
 
-    const PipelineSpecification& Pipeline::GetSpecification() const
+    const PipelineCreateInfo& Pipeline::GetSpecification() const
     {
         return m_Specification;
     }

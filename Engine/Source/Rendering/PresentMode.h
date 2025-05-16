@@ -8,6 +8,7 @@ namespace Nova
         Unknown = 0,
         Immediate,
         Mailbox,
-        Fifo
+        Fifo,
+        FifoRelaxed
     };
 }

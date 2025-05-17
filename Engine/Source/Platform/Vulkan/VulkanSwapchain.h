@@ -10,10 +10,10 @@ namespace Nova
     class VulkanSwapchain : public Swapchain
     {
     public:
-        explicit VulkanSwapchain(Renderer* Owner) : Swapchain(Owner) {};
+        explicit VulkanSwapchain(Renderer* Owner) : Swapchain(Owner) {}
 
         bool Initialize(const SwapchainCreateInfo& CreateInfo) override;
-        bool Resize(const i32 Width, const i32 Height) override;
+        bool Resize(i32 Width, i32 Height) override;
         bool Recreate() override;
         void Destroy() override;
 

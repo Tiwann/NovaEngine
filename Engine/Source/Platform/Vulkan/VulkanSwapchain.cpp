@@ -9,9 +9,13 @@ namespace Nova
 {
     bool VulkanSwapchain::Initialize(const SwapchainCreateInfo& CreateInfo)
     {
+        Swapchain::Initialize(CreateInfo);
         const VulkanRenderer* Renderer = GetOwner()->As<VulkanRenderer>();
         const VkSurfaceKHR Surface = Renderer->GetSurface();
         const VkPhysicalDevice PhysicalDevice = Renderer->GetPhysicalDevice();
+        const u32 GraphicsQueueIndex = Renderer->GetGraphicsQueueFamily();
+        const u32 PresentQueueIndex = Renderer->GetPresentQueueFamily();
+
         const auto& Convertor = Renderer->Convertor;
 
         u32 SurfaceFormatCount;
@@ -33,15 +37,15 @@ namespace Nova
         SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
         SwapchainCreateInfo.oldSwapchain = CreateInfo.OldSwapchain ? CreateInfo.OldSwapchain->As<VulkanSwapchain>()->GetHandle() : nullptr;
 
-        if (CreateInfo.GraphicsQueueIndex == CreateInfo.PresentQueueIndex)
+        if (GraphicsQueueIndex == PresentQueueIndex)
         {
             SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             SwapchainCreateInfo.queueFamilyIndexCount = 1;
-            SwapchainCreateInfo.pQueueFamilyIndices = &CreateInfo.GraphicsQueueIndex;
+            SwapchainCreateInfo.pQueueFamilyIndices = &GraphicsQueueIndex;
         }
         else
         {
-            const u32 QueueFamilyIndices[2] = { CreateInfo.GraphicsQueueIndex, CreateInfo.PresentQueueIndex };
+            const u32 QueueFamilyIndices[2] = { GraphicsQueueIndex, PresentQueueIndex };
             SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             SwapchainCreateInfo.queueFamilyIndexCount = std::size(QueueFamilyIndices);
             SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
@@ -104,7 +108,6 @@ namespace Nova
         const VkDevice Device = Renderer->GetDevice();
 
         StaticArray<VkImage, 3> Images;
-
         vkGetSwapchainImagesKHR(Device, m_Handle, &OutImageCount, Images.Data());
         return Images;
     }

@@ -51,7 +51,7 @@ namespace Nova
         ImageViewCreateInfo.image = m_Handle;
         ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
         ImageViewCreateInfo.format = Renderer->Convertor.ConvertFormat(Params.Format);
-        ImageViewCreateInfo.components = VulkanRenderer::DefaultComponentMapping;
+        ImageViewCreateInfo.components = VkComponentMapping(VK_COMPONENT_SWIZZLE_IDENTITY);
         ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
         ImageViewCreateInfo.subresourceRange.levelCount = 1;
@@ -232,7 +232,7 @@ namespace Nova
             ImageViewCreateInfo.image = m_Handle;
             ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
             ImageViewCreateInfo.format = Renderer->Convertor.ConvertFormat(Format);
-            ImageViewCreateInfo.components = VulkanRenderer::DefaultComponentMapping;
+            ImageViewCreateInfo.components = VkComponentMapping(VK_COMPONENT_SWIZZLE_IDENTITY);
             
             ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;

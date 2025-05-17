@@ -37,7 +37,7 @@ namespace Nova
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
         Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
-        Configuration.Graphics.VSync = false;
+        Configuration.Graphics.VSync = true;
         Configuration.WithEditor = true;
         return Configuration;
     }
@@ -80,25 +80,5 @@ namespace Nova
 
         Renderer* Renderer = GetRenderer();
         Renderer->SetCurrentCamera(CameraComponent);
-
-        RenderTargetCreateInfo RenderTargetCreateInfo;
-        RenderTargetCreateInfo.Width = 1280;
-        RenderTargetCreateInfo.Height = 720;
-        RenderTargetCreateInfo.Depth = 1;
-
-        RenderTargetAttachmentInfo ColorAttachmentInfo;
-        ColorAttachmentInfo.Name = "Color";
-        ColorAttachmentInfo.Format = Format::R8G8B8A8_UNORM;
-        ColorAttachmentInfo.AttachmentType = RenderTargetAttachmentFlagBits::Color;
-
-        RenderTargetAttachmentInfo DepthAttachmentInfo;
-        DepthAttachmentInfo.Name = "Depth";
-        DepthAttachmentInfo.Format = Format::D32_FLOAT_S8_UINT;
-        DepthAttachmentInfo.AttachmentType = RenderTargetAttachmentFlagBits::DepthStencil;
-        RenderTargetCreateInfo.AttachmentInfos.AddRange({ ColorAttachmentInfo, DepthAttachmentInfo });
-
-        RenderTarget* RenderTarget = Renderer->CreateRenderTarget(RenderTargetCreateInfo);
-        RenderTarget->Resize(1920, 1080);
-
     }
 }

@@ -311,30 +311,82 @@ namespace Nova
             }
         }
 
+        u32 SurfaceFormatCount;
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, nullptr);
+        ScopedBuffer<VkSurfaceFormatKHR> SurfaceFormats(SurfaceFormatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, SurfaceFormats.GetData());
+
+
+        const GraphicsSettings& GraphicsSettings = m_Application->GetGraphicsSettings();
+        if (GraphicsSettings.VSync)
+        {
+            m_PresentMode = VK_PRESENT_MODE_FIFO_KHR;
+
+            u32 PresentModeCount;
+            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &PresentModeCount, nullptr);
+            ScopedBuffer<VkPresentModeKHR> PresentModes(PresentModeCount);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, PresentModes.GetData());
+            for (const VkPresentModeKHR PresentMode : PresentModes)
+            {
+                if (PresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+                {
+                    m_PresentMode = PresentMode;
+                    break;
+                }
+            }
+        } else
+        {
+            m_PresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+        }
+
         //////////////////////////////////////////////////////////////////////////////////////////
         /// SWAPCHAIN CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         {
-            SwapchainCreateInfo SwapchainCreate;
-            SwapchainCreate.ImageCount = m_ImageCount;
-            SwapchainCreate.ImageFormat = Format::R8G8B8A8_UNORM;
-            SwapchainCreate.ImageWidth = WindowWidth;
-            SwapchainCreate.ImageHeight = WindowHeight;
-            SwapchainCreate.OldSwapchain = nullptr;
-            SwapchainCreate.ImagePresentMode = m_PresentMode = GetPresentMode();
-            SwapchainCreate.GraphicsQueueIndex = m_GraphicsQueueIndex;
-            SwapchainCreate.PresentQueueIndex = m_PresentQueueIndex;
+            VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
+            SwapchainCreateInfo.surface = m_Surface;
+            SwapchainCreateInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+            SwapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+            SwapchainCreateInfo.presentMode = m_PresentMode;
+            SwapchainCreateInfo.clipped = true;
+            SwapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            SwapchainCreateInfo.imageExtent.width = WindowWidth;
+            SwapchainCreateInfo.imageExtent.height = WindowHeight;
+            SwapchainCreateInfo.minImageCount = m_ImageCount;
+            SwapchainCreateInfo.imageArrayLayers = 1;
+            SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+            SwapchainCreateInfo.oldSwapchain = nullptr;
 
-            m_Swapchain = CreateSwapchain(SwapchainCreate)->As<VulkanSwapchain>();
-            if (!m_Swapchain)
+            if (m_GraphicsQueue == m_PresentQueue)
+            {
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                SwapchainCreateInfo.queueFamilyIndexCount = 1;
+                SwapchainCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
+            }
+            else
+            {
+                const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+                SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
+            }
+
+            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &m_Swapchain)))
             {
                 NOVA_VULKAN_ERROR("Failed to create swapchain!");
                 m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
 
-            u32 ImageCount;
-            StaticArray<VkImage, 3> SwapchainImages = m_Swapchain->GetImages(ImageCount);
+            u32 SwapchainImageCount;
+            vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
+            ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
+            if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
+            {
+                NOVA_VULKAN_ERROR("Failed to get swapchain image!");
+                m_Application->RequireExit(ExitCode::Error);
+                return false;
+            }
 
             CommandPoolCreateInfo CommandPoolCreateInfo;
             CommandPoolCreateInfo.Flags = CommandPoolFlagBits::ResetCommandBuffer;
@@ -343,9 +395,6 @@ namespace Nova
 
             for (size_t i = 0; i < m_ImageCount; i++)
             {
-                const VkImage Image = SwapchainImages[i];
-
-
                 VkImageCreateInfo DepthImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
                 DepthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
                 DepthImageCreateInfo.extent.width = WindowWidth;
@@ -380,10 +429,10 @@ namespace Nova
 
 
                 VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                ImageViewCreateInfo.image = Image;
+                ImageViewCreateInfo.image = SwapchainImages[i];
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = m_SwapchainImageFormat;
+                ImageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
                 ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -437,7 +486,7 @@ namespace Nova
                 }
 
 
-                m_Frames[i].ColorImage = Image;
+                m_Frames[i].ColorImage = SwapchainImages[i];
 
                 VkSemaphoreCreateInfo SemaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
                 if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].SubmitSemaphore)))
@@ -527,7 +576,7 @@ namespace Nova
         vmaDestroyAllocator(m_Allocator);
 
         delete m_CommandPool;
-        m_Swapchain->Destroy();
+        vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
 #ifdef NOVA_DEBUG
@@ -559,9 +608,53 @@ namespace Nova
                 vkDestroyImageView(m_Device, VkFrameData.DepthImageView, nullptr);
             }
 
-            m_Swapchain->Recreate();
-            u32 ImageCount;
-            StaticArray<VkImage, 3> SwapchainImages = m_Swapchain->GetImages(ImageCount);
+           VkSwapchainCreateInfoKHR SwapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
+            SwapchainCreateInfo.surface = m_Surface;
+            SwapchainCreateInfo.imageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+            SwapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+            SwapchainCreateInfo.presentMode = m_PresentMode;
+            SwapchainCreateInfo.clipped = true;
+            SwapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+            SwapchainCreateInfo.imageExtent = VkExtent2D(WindowWidth, WindowHeight);
+            SwapchainCreateInfo.minImageCount = m_ImageCount;
+            SwapchainCreateInfo.imageArrayLayers = 1;
+            SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+            SwapchainCreateInfo.oldSwapchain = m_Swapchain;
+
+            if (m_GraphicsQueue == m_PresentQueue)
+            {
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+                SwapchainCreateInfo.queueFamilyIndexCount = 1;
+                SwapchainCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
+            }
+            else
+            {
+                const u32 QueueFamilyIndices[2] = { m_GraphicsQueueIndex, m_PresentQueueIndex };
+                SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+                SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
+            }
+
+            VkSwapchainKHR NewSwapchain = nullptr;
+            if (VK_FAILED(vkCreateSwapchainKHR(m_Device, &SwapchainCreateInfo, nullptr, &NewSwapchain)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create swapchain!");
+                m_Application->RequireExit(ExitCode::Error);
+                return false;
+            }
+
+            vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
+            m_Swapchain = NewSwapchain;
+
+            u32 SwapchainImageCount;
+            vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
+            ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
+            if (VK_FAILED(vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, SwapchainImages.GetData())))
+            {
+                NOVA_VULKAN_ERROR("Failed to get swapchain image!");
+                m_Application->RequireExit(ExitCode::Error);
+                return false;
+            }
 
             for (size_t i = 0; i < m_ImageCount; i++)
             {
@@ -604,7 +697,7 @@ namespace Nova
                 ImageViewCreateInfo.image =  m_Frames[i].ColorImage;
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = m_SwapchainImageFormat;
+                ImageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
                 ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -685,7 +778,7 @@ namespace Nova
         }
 
 
-        if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain->GetHandle(), U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
+        if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain, U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
         {
             NOVA_VULKAN_ERROR("Failed to acquire next image index!");
             return false;
@@ -881,12 +974,12 @@ namespace Nova
     {
         VkPresentInfoKHR PresentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         PresentInfo.swapchainCount = 1;
-        PresentInfo.pSwapchains = m_Swapchain->GetHandlePtr();
+        PresentInfo.pSwapchains = &m_Swapchain;
         PresentInfo.pImageIndices = &m_NewFrameIndex;
         PresentInfo.waitSemaphoreCount = 1;
         PresentInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
 
-        if (VK_FAILED(vkQueuePresentKHR(m_GraphicsQueue, &PresentInfo)))
+        if (VK_FAILED(vkQueuePresentKHR(m_PresentQueue, &PresentInfo)))
         {
             NOVA_VULKAN_ERROR("Failed to present!");
             m_Application->RequireExit(ExitCode::Error);
@@ -1060,7 +1153,7 @@ namespace Nova
         return m_Surface;
     }
 
-    VulkanSwapchain* VulkanRenderer::GetSwapchain() const
+    VkSwapchainKHR VulkanRenderer::GetSwapchain() const
     {
         return m_Swapchain;
     }
@@ -1068,6 +1161,11 @@ namespace Nova
     u32 VulkanRenderer::GetGraphicsQueueFamily() const
     {
         return m_GraphicsQueueIndex;
+    }
+
+    u32 VulkanRenderer::GetPresentQueueFamily() const
+    {
+        return m_PresentQueueIndex;
     }
 
     VmaAllocator VulkanRenderer::GetAllocator() const

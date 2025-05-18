@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "RendererObject.h"
 #include "Runtime/Flags.h"
 
 namespace Nova
@@ -23,21 +23,15 @@ namespace Nova
         CommandPoolFlags Flags = CommandPoolFlagBits::None;
     };
 
-
-    class CommandPool : public Object
+    class CommandPool : public RendererObject<CommandPoolCreateInfo>
     {
     public:
-        explicit CommandPool(Renderer* Owner, const CommandPoolCreateInfo& CreateInfo);
-        ~CommandPool() override = default;
+        explicit CommandPool(Renderer* Owner) : RendererObject("Command Pool", Owner) {}
 
         virtual CommandBuffer* AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo) = 0;
         virtual void FreeCommandBuffer(CommandBuffer* CommandBuffer) = 0;
 
-        Renderer* GetRenderer() const;
     protected:
-        Renderer* m_Renderer;
-        Array<CommandBuffer*> m_AllocatedCommandBuffers;
-    private:
         CommandPoolFlags m_Flags;
     };
 }

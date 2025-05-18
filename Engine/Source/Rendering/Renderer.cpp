@@ -51,7 +51,7 @@ namespace Nova
         }
     }
 
-    Swapchain* Renderer::CreateSwapchain(const SwapchainDescription& Description)
+    Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& Description)
     {
         switch (m_GraphicsApi)
         {
@@ -148,28 +148,33 @@ namespace Nova
         }
     }
 
-    IndexBuffer* Renderer::CreateIndexBuffer()
+    IndexBuffer* Renderer::CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo)
     {
+        IndexBuffer* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLIndexBuffer(this);
-        case GraphicsApi::Vulkan:   return new VulkanIndexBuffer(this);
-        case GraphicsApi::D3D12:    return new D3D12IndexBuffer(this);
+        case GraphicsApi::OpenGL:   Result = new OpenGLIndexBuffer(this); break;
+        case GraphicsApi::Vulkan:   Result = new VulkanIndexBuffer(this); break;
+        case GraphicsApi::D3D12:    Result = new D3D12IndexBuffer(this); break;
         default:                    return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     IndexBuffer* Renderer::CreateIndexBuffer(const BufferView<u32>& Indices)
     {
-        switch (m_GraphicsApi)
-        {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLIndexBuffer(this, Indices.Data(), Indices.Count());
-        case GraphicsApi::Vulkan:   return new VulkanIndexBuffer(this, Indices.Data(), Indices.Count());
-        case GraphicsApi::D3D12:    return new D3D12IndexBuffer(this, Indices.Data(), Indices.Count());
-        default:                    return nullptr;
-        }
+        IndexBufferCreateInfo CreateInfo;
+        CreateInfo.Format = Format::R32_UINT;
+        CreateInfo.Data = Indices.Data();
+        CreateInfo.Size = Indices.Size();
+        return CreateIndexBuffer(CreateInfo);
     }
 
     UniformBuffer* Renderer::CreateUniformBuffer(const size_t Size)

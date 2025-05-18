@@ -4,8 +4,17 @@
 
 namespace Nova
 {
-    VulkanCommandPool::VulkanCommandPool(Renderer* Owner, const CommandPoolCreateInfo& CreateInfo)
-        : CommandPool(Owner, CreateInfo)
+    VulkanCommandPool::VulkanCommandPool(Renderer* Owner) : CommandPool(Owner)
+    {
+
+    }
+
+    VkCommandPool VulkanCommandPool::GetHandle() const
+    {
+        return m_Handle;
+    }
+
+    bool VulkanCommandPool::Initialize(const CommandPoolCreateInfo& CreateInfo)
     {
         VkCommandPoolCreateInfo PoolInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         if (CreateInfo.Flags.Contains(CommandPoolFlagBits::Protected))
@@ -15,38 +24,35 @@ namespace Nova
         else if (CreateInfo.Flags.Contains(CommandPoolFlagBits::ResetCommandBuffer))
             PoolInfo.flags |= VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-        const VulkanRenderer* Renderer = m_Renderer->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         PoolInfo.queueFamilyIndex = Renderer->GetGraphicsQueueFamily();
 
         if (VK_FAILED(vkCreateCommandPool(Device, &PoolInfo, nullptr, &m_Handle)))
-        {
-            throw std::runtime_error("failed to create command pool!");
-        }
+            return false;
+        return true;
     }
 
-    VulkanCommandPool::~VulkanCommandPool()
+    void VulkanCommandPool::Destroy()
     {
-        const VulkanRenderer* Renderer = m_Renderer->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         vkDestroyCommandPool(Device, m_Handle, nullptr);
     }
 
-    VkCommandPool VulkanCommandPool::GetHandle() const
+    void VulkanCommandPool::SetDebugName(const String& Name)
     {
-        return m_Handle;
+        CommandPool::SetDebugName(Name);
     }
 
     CommandBuffer* VulkanCommandPool::AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo)
     {
         VulkanCommandBuffer* Cmd = new VulkanCommandBuffer(this->As<CommandPool>(), AllocateInfo);
-        m_AllocatedCommandBuffers.Add(Cmd);
         return Cmd;
     }
 
     void VulkanCommandPool::FreeCommandBuffer(CommandBuffer* CommandBuffer)
     {
-        m_AllocatedCommandBuffers.Remove(CommandBuffer);
         delete CommandBuffer;
     }
 }

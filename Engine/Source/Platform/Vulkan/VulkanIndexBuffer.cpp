@@ -6,19 +6,39 @@
 
 namespace Nova
 {
-    VulkanIndexBuffer::VulkanIndexBuffer(Renderer* Renderer) : IndexBuffer(Renderer)
+    VulkanIndexBuffer::VulkanIndexBuffer(Renderer* Owner) : IndexBuffer(Owner)
     {
-
     }
 
-    VulkanIndexBuffer::VulkanIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count)
-    : IndexBuffer(Renderer, Indices, Count)
+
+    void VulkanIndexBuffer::Destroy()
     {
-        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        const VmaAllocator Allocator = Renderer->GetAllocator();
+        vkDeviceWaitIdle(Device);
+        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
+    }
+
+    VkBuffer VulkanIndexBuffer::GetHandle() const
+    {
+        return m_Handle;
+    }
+
+    bool VulkanIndexBuffer::Initialize(const IndexBufferCreateInfo& CreateInfo)
+    {
+        const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Owner);
+        const VmaAllocator Allocator = Renderer->GetAllocator();
+
+        if (m_Handle || m_Allocation)
+        {
+            const VkDevice Device = Renderer->GetDevice();
+            vkDeviceWaitIdle(Device);
+            vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
+        }
 
         VkBufferCreateInfo BufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        BufferCreateInfo.size = Count * sizeof(u32);
+        BufferCreateInfo.size = CreateInfo.Size;
         BufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
         BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         BufferCreateInfo.flags = 0;
@@ -38,80 +58,25 @@ namespace Nova
             &m_Allocation,
             &m_AllocationInfo)))
         {
-            NOVA_VULKAN_ERROR("Failed to create Index Buffer!");
-            return;
+            return false;
         }
 
-        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Indices, m_Allocation, 0, Count * sizeof(u32))))
+        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, CreateInfo.Data, m_Allocation, 0, CreateInfo.Size)))
         {
-            NOVA_VULKAN_ERROR("Failed to copy data into Index Buffer!");
-            return;
+            return false;
         }
+        return true;
     }
 
-    VulkanIndexBuffer::~VulkanIndexBuffer()
+    void VulkanIndexBuffer::SetDebugName(const String& Name)
     {
-        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VkDevice Device = CastedRenderer->GetDevice();
-        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
-        vkDeviceWaitIdle(Device);
-        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
-    }
-
-    void VulkanIndexBuffer::SendData(const u32* Indices, size_t Count)
-    {
-        IndexBuffer::SendData(Indices, Count);
-        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VmaAllocator Allocator = CastedRenderer->GetAllocator();
-
-        if (m_Handle || m_Allocation)
-        {
-            const VkDevice Device = CastedRenderer->GetDevice();
-            vkDeviceWaitIdle(Device);
-            vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
-        }
-
-        VkBufferCreateInfo BufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        BufferCreateInfo.size = Count * sizeof(u32);
-        BufferCreateInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-        BufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        BufferCreateInfo.flags = 0;
-        BufferCreateInfo.pQueueFamilyIndices = nullptr;
-        BufferCreateInfo.queueFamilyIndexCount = 0;
-
-        VmaAllocationCreateInfo AllocCreateInfo = {};
-        AllocCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        AllocCreateInfo.priority = 1.0f;
-        AllocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
-        AllocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-        if (VK_FAILED(vmaCreateBuffer(Allocator,
-            &BufferCreateInfo,
-            &AllocCreateInfo,
-            &m_Handle,
-            &m_Allocation,
-            &m_AllocationInfo)))
-        {
-            NOVA_VULKAN_ERROR("Failed to create Index Buffer!");
+        if constexpr(!RendererIsDebug)
             return;
-        }
-
-        if (VK_FAILED(vmaCopyMemoryToAllocation(Allocator, Indices, m_Allocation, 0, Count * sizeof(u32))))
-        {
-            NOVA_VULKAN_ERROR("Failed to copy data into Index Buffer!");
-            return;
-        }
-    }
-
-    VkBuffer VulkanIndexBuffer::GetHandle() const
-    {
-        return m_Handle;
-    }
-
-    void VulkanIndexBuffer::Bind() const
-    {
-        const VulkanRenderer* CastedRenderer = dynamic_cast<VulkanRenderer*>(m_Renderer);
-        const VkCommandBuffer Cmd = CastedRenderer->GetCurrentCommandBuffer()->GetHandle();
-        vkCmdBindIndexBuffer(Cmd, m_Handle, 0, VK_INDEX_TYPE_UINT32);
+        VkDebugUtilsObjectNameInfoEXT NameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        NameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
+        NameInfo.objectHandle = (u64)m_Handle;
+        NameInfo.pObjectName = *Name;
+        const VkDevice Device = m_Owner->As<VulkanRenderer>()->GetDevice();
+        vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
     }
 }

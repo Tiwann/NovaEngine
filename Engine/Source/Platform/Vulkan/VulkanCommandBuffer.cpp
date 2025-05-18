@@ -22,7 +22,7 @@ namespace Nova
             break;
         }
 
-        const VulkanRenderer* Renderer = m_CommandPool->GetRenderer()->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         if (VK_FAILED(vkAllocateCommandBuffers(Device, &VkAllocInfo, &m_Handle)))
         {
@@ -32,7 +32,7 @@ namespace Nova
 
     VulkanCommandBuffer::~VulkanCommandBuffer()
     {
-        const VulkanRenderer* Renderer = m_CommandPool->GetRenderer()->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         vkFreeCommandBuffers(Device, m_CommandPool->As<VulkanCommandPool>()->GetHandle(), 1, &m_Handle);
     }

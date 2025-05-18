@@ -193,7 +193,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return GL_NONE;
+        case Format::None: return GL_NONE;
         case Format::R8_UNORM: return GL_RED;
         case Format::R8_SNORM: return GL_RED;
         case Format::R16_USHORT: return GL_RED;
@@ -230,7 +230,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return 0;
+        case Format::None: return 0;
         case Format::R8_UNORM: return GL_UNSIGNED_BYTE;
         case Format::R8_SNORM: return GL_BYTE;
         case Format::R16_USHORT: return GL_UNSIGNED_SHORT;

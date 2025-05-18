@@ -12,6 +12,26 @@ namespace Nova
     {
     }
 
+    bool D3D12IndexBuffer::Initialize(const IndexBufferCreateInfo& CreateInfo)
+    {
+    }
+
+    void D3D12IndexBuffer::SetDebugName(const String& Name)
+    {
+
+    }
+
+    void D3D12IndexBuffer::Destroy()
+    {
+        if (!m_Handle)
+            return;
+
+        D3D12Renderer* Renderer = m_Owner->As<D3D12Renderer>();
+        Renderer->WaitDeviceIdle();
+        m_Handle->Release();
+        m_Handle = nullptr;
+    }
+
     D3D12IndexBuffer::D3D12IndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count) : IndexBuffer(Renderer, Indices, Count)
     {
         const D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
@@ -24,15 +44,6 @@ namespace Nova
         }
 
         D3D12IndexBuffer::SendData(Indices, Count);
-    }
-
-    D3D12IndexBuffer::~D3D12IndexBuffer()
-    {
-        D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
-        CastedRenderer->WaitDeviceIdle();
-        m_Handle->Release();
-        m_Handle = nullptr;
-        m_Ready = false;
     }
 
     void D3D12IndexBuffer::SendData(const u32* Indices, size_t Count)
@@ -102,23 +113,6 @@ namespace Nova
         UploadHeap->Release();
         Cmd->Release();
         m_Ready = true;
-    }
-
-    void D3D12IndexBuffer::Bind() const
-    {
-        if (!m_Ready)
-        {
-            NOVA_DIRECTX_ERROR("Failed to bind Index Buffer: Not Ready yet!");
-            return;
-        }
-        D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
-        ID3D12GraphicsCommandList* Cmd = CastedRenderer->GetCurrentGraphicsCommandBuffer();
-
-        D3D12_INDEX_BUFFER_VIEW BufferView;
-        BufferView.BufferLocation = m_Handle->GetGPUVirtualAddress();
-        BufferView.SizeInBytes = (UINT)m_Data.Size();
-        BufferView.Format = DXGI_FORMAT_R32_UINT;
-        Cmd->IASetIndexBuffer(&BufferView);
     }
 
     ID3D12Resource* D3D12IndexBuffer::GetHandle() const

@@ -7,6 +7,7 @@
 #include "BlendOperation.h"
 #include "BlendFactor.h"
 #include "CompareOperation.h"
+#include "IndexBuffer.h"
 #include "Scissor.h"
 #include "Containers/Buffer.h"
 #include "Vertex.h"
@@ -29,12 +30,19 @@ namespace Nova
     struct PipelineSpecification;
     class VertexBuffer;
     class Swapchain;
-    struct SwapchainDescription;
+    struct SwapchainCreateInfo;
     struct Viewport;
 
     class CommandPool;
     struct CommandPoolCreateInfo;
     class CommandBuffer;
+
+
+#if defined(NOVA_DEV) || defined(NOVA_DEBUG)
+    static constexpr bool RendererIsDebug = true;
+#else
+    static constexpr bool RendererIsDebug = false;
+#endif
 
     class Renderer : public Object
     {
@@ -72,12 +80,12 @@ namespace Nova
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
 
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
-        Swapchain* CreateSwapchain(const SwapchainDescription& Description);
+        Swapchain* CreateSwapchain(const SwapchainCreateInfo& Description);
         Shader* CreateShader(const String& Name, const Path& Filepath);
         Pipeline* CreatePipeline(const PipelineSpecification& Specification);
         VertexBuffer* CreateVertexBuffer();
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
-        IndexBuffer* CreateIndexBuffer();
+        IndexBuffer* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo);
         IndexBuffer* CreateIndexBuffer(const BufferView<u32>& Indices);
         UniformBuffer* CreateUniformBuffer(size_t Size);
 

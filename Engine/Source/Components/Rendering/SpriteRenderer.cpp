@@ -32,11 +32,11 @@ namespace Nova
 
         m_VertexArray = VertexArray::Create(Renderer->GetGraphicsApi());
         m_VertexArray->Bind();
-        
+
+        constexpr u32 Indices[6] { 0, 2, 1, 0, 3, 2 };
         m_VertexBuffer = Renderer->CreateVertexBuffer();
-        m_IndexBuffer = Renderer->CreateIndexBuffer();
-        m_IndexBuffer->SendData({ 0, 2, 1, 0, 3, 2 });
-        
+        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView<u32>{ Indices, 6 });
+
         ShaderManager* Manager = g_Application->GetShaderManager();
         m_Shader = Manager->Retrieve("Sprite");
     }

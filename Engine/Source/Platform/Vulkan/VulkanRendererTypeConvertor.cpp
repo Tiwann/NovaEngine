@@ -147,7 +147,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE:                  return VK_FORMAT_UNDEFINED;
+        case Format::None:                  return VK_FORMAT_UNDEFINED;
         case Format::R8_UNORM:              return VK_FORMAT_R8_UNORM;
         case Format::R8_SNORM:              return VK_FORMAT_R8_SNORM;
         case Format::R16_USHORT:            return VK_FORMAT_R16_UINT;

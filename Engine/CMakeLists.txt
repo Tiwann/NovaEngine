@@ -4,11 +4,18 @@ include(../AutoCopy.cmake)
 
 
 file(GLOB_RECURSE NOVA_ENGINE_SRC Source/*.cpp Source/*.h)
-file(GLOB_RECURSE NOVA_ENGINE_PLATFORM_SRC CONFIGURE_DEPENDS
-        $<$<PLATFORM_ID:Windows>:${MODULE_PATH}/Platform/Windows/*.cpp ${MODULE_PATH}/Platform/Windows/*.h>
-        $<$<PLATFORM_ID:Linux>:${MODULE_PATH}/Platform/Linux/*.cpp ${MODULE_PATH}/Platform/Linux/*.h>
-        $<$<PLATFORM_ID:Darwin>:${MODULE_PATH}/Platform/MacOS/*.cpp ${MODULE_PATH}/Platform/MacOS/*.h>
-)
+file(GLOB_RECURSE NOVA_ENGINE_WINDOWS_SRC Source/Platform/Windows/*.cpp)
+file(GLOB_RECURSE NOVA_ENGINE_LINUX_SRC Source/Platform/Linux/*.cpp)
+file(GLOB_RECURSE NOVA_ENGINE_MACOS_SRC Source/Platform/MacOS/*.cpp)
+
+
+if(WIN32)
+    list(APPEND NOVA_ENGINE_PLATFORM_SRC ${NOVA_ENGINE_WINDOWS_SRC})
+elseif (LINUX)
+    list(APPEND NOVA_ENGINE_PLATFORM_SRC ${NOVA_ENGINE_LINUX_SRC})
+elseif (DARWIN)
+    list(APPEND NOVA_ENGINE_PLATFORM_SRC ${NOVA_ENGINE_MACOS_SRC})
+endif ()
 
 list(REMOVE_ITEM NOVA_ENGINE_SRC ${NOVA_ENGINE_PLATFORM_SRC})
 

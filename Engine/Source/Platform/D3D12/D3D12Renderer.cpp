@@ -509,7 +509,7 @@ namespace Nova
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)
         {
-        case Format::NONE:
+        case Format::None:
             DXFormat =  DXGI_FORMAT_UNKNOWN;
             break;
         case Format::R8_UNORM:

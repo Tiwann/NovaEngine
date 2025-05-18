@@ -8,10 +8,10 @@ namespace Nova
     {
     public:
         explicit D3D12IndexBuffer(Renderer* Renderer);
-        explicit D3D12IndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
-        ~D3D12IndexBuffer() override;
-        void SendData(const u32* Indices, size_t Count) override;
-        void Bind() const override;
+
+        bool Initialize(const IndexBufferCreateInfo& CreateInfo) override;
+        void SetDebugName(const String& Name) override;
+        void Destroy() override;
 
         ID3D12Resource* GetHandle() const;
     private:

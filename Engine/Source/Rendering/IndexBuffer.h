@@ -1,26 +1,27 @@
 #pragma once
-#include "Containers/Buffer.h"
-#include "Runtime/Types.h"
-#include "Containers/Array.h"
-#include "Runtime/Object.h"
+#include "RendererObject.h"
+#include "Runtime/Format.h"
 
 namespace Nova
 {
     class Renderer;
 
-    class IndexBuffer : public Object
+    struct IndexBufferCreateInfo
+    {
+        Format Format;
+        const void* Data;
+        size_t Size;
+    };
+
+    class IndexBuffer : public RendererObject<IndexBufferCreateInfo>
     {
     public:
-        explicit IndexBuffer(Renderer* Renderer);
-        explicit IndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
-        ~IndexBuffer() override = default;
-        
-        virtual void Bind() const = 0;
-        virtual void SendData(const u32* Indices, size_t Count);
-        void         SendData(const Array<u32>& Indices);
-        size_t       Count() const;
+        explicit IndexBuffer(Renderer* Owner) : RendererObject("IndexBuffer", Owner) {}
+
+        size_t GetCount() const { return m_Count; }
+        size_t GetSize() const { return m_Size; }
     protected:
-        Renderer* m_Renderer = nullptr;
-        BufferView<u32> m_Data;
+        size_t m_Count = 0;
+        size_t m_Size = 0;
     };
 }

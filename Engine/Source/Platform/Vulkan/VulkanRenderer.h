@@ -77,9 +77,7 @@ namespace Nova
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
-
         void BindPipeline(Pipeline* Pipeline) override;
-
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
         VkInstance GetInstance() const;
@@ -89,9 +87,10 @@ namespace Nova
         VkQueue GetPresentQueue() const;
         VkSurfaceKHR GetSurface() const;
         VkSwapchainKHR GetSwapchain() const;
-        u32 GetGraphicsQueueFamily() const;
         VmaAllocator GetAllocator() const;
-        
+
+        u32 GetGraphicsQueueFamily() const;
+        u32 GetPresentQueueFamily() const;
         BufferView<VkFrameData> GetFrameData() const;
         VkFrameData GetCurrentFrameData() const;
         VulkanCommandBuffer* GetCurrentCommandBuffer() const;

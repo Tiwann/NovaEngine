@@ -1140,6 +1140,11 @@ namespace Nova
         return m_GraphicsQueueIndex;
     }
 
+    u32 VulkanRenderer::GetPresentQueueFamily() const
+    {
+        return m_PresentQueueIndex;
+    }
+
     VmaAllocator VulkanRenderer::GetAllocator() const
     {
         return m_Allocator;

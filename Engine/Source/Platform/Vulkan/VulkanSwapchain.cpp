@@ -40,6 +40,7 @@ namespace Nova
         {
             const u32 QueueFamilyIndices[2] = { GraphicsQueueFamily, PresentQueueFamily };
             SwapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            SwapchainCreateInfo.queueFamilyIndexCount = 2;
             SwapchainCreateInfo.pQueueFamilyIndices = QueueFamilyIndices;
         }
 
@@ -108,10 +109,9 @@ namespace Nova
         vkDestroySwapchainKHR(Device, m_Handle, nullptr);
     }
 
-    void VulkanSwapchain::GetImages(VkImage* OutImages) const
+    void VulkanSwapchain::GetImages(VkImage* OutImages)
     {
         const VkDevice Device = GetOwner()->As<VulkanRenderer>()->GetDevice();
-        u32 ImageCount = 0;
-        vkGetSwapchainImagesKHR(Device, m_Handle, &ImageCount, OutImages);
+        vkGetSwapchainImagesKHR(Device, m_Handle, &m_ImageCount, OutImages);
     }
 }

@@ -16,7 +16,7 @@ namespace Nova
         bool Recreate() override;
         void Destroy() override;
 
-        void GetImages(VkImage* OutImages) const;
+        void GetImages(VkImage* OutImages);
 
         VkSwapchainKHR GetHandle() const { return m_Handle; }
         const VkSwapchainKHR* GetHandlePtr() const { return &m_Handle; }

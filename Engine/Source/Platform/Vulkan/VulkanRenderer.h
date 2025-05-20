@@ -1,10 +1,9 @@
 ﻿#pragma once
-#include <vk_mem_alloc.h>
-
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
 #include "VulkanRendererTypeConvertor.h"
+#include <vk_mem_alloc.h>
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define NOVA_VULKAN_ERROR(str, ...) NOVA_LOG(Vulkan, Verbosity::Error, str, __VA_ARGS__)
@@ -21,6 +20,7 @@ namespace Nova
 
     class VulkanCommandPool;
     class VulkanCommandBuffer;
+    class VulkanSwapchain;
 
     struct VkFrameData
     {
@@ -81,13 +81,14 @@ namespace Nova
         void BindPipeline(Pipeline* Pipeline) override;
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
+        PresentMode GetPresentMode() const;
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetDevice() const;
         VkQueue GetGraphicsQueue() const;
         VkQueue GetPresentQueue() const;
         VkSurfaceKHR GetSurface() const;
-        VkSwapchainKHR GetSwapchain() const;
+        VulkanSwapchain* GetSwapchain() const;
         VmaAllocator GetAllocator() const;
 
         u32 GetGraphicsQueueFamily() const;
@@ -120,12 +121,11 @@ namespace Nova
         VkSurfaceKHR                      m_Surface = nullptr;
         u32                               m_GraphicsQueueIndex = U32_MAX;
         u32                               m_PresentQueueIndex = U32_MAX;
-        u32                               m_ImageCount = 0;
         VkQueue                           m_GraphicsQueue = nullptr;
         VkQueue                           m_PresentQueue = nullptr;
         VkColorSpaceKHR                   m_ImageColorSpace;
         VkPresentModeKHR                  m_PresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
-        VkSwapchainKHR                    m_Swapchain = nullptr;
+        VulkanSwapchain*                  m_Swapchain = nullptr;
         VkFormat                          m_SwapchainImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
         VkFrameData                       m_Frames[3] = { };
         VmaAllocator                      m_Allocator = nullptr;

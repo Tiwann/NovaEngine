@@ -3,6 +3,7 @@
 #include "Platform/D3D12/D3D12IndexBuffer.h"
 #include "Platform/D3D12/D3D12Pipeline.h"
 #include "Platform/D3D12/D3D12Shader.h"
+#include "Platform/D3D12/D3D12Swapchain.h"
 #include "Platform/D3D12/D3D12VertexBuffer.h"
 #include "Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Platform/OpenGL/OpenGLPipeline.h"

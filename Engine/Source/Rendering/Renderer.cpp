@@ -12,9 +12,11 @@
 #include "Platform/OpenGL/OpenGLUniformBuffer.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
+#include "Platform/Vulkan/VulkanFence.h"
 #include "Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
+#include "Platform/Vulkan/VulkanRenderTarget.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
@@ -38,6 +40,44 @@ namespace Nova
     {
         ClearColor(Color);
         ClearDepth(Depth);
+    }
+
+    Fence* Renderer::CreateFence(const FenceCreateInfo& CreateInfo)
+    {
+        Fence* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanFence(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
+    }
+
+    RenderTarget* Renderer::CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo)
+    {
+        RenderTarget* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanRenderTarget(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     CommandPool* Renderer::CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)

@@ -3,7 +3,6 @@
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
 #include "VulkanRendererTypeConvertor.h"
-#include <vk_mem_alloc.h>
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define NOVA_VULKAN_ERROR(str, ...) NOVA_LOG(Vulkan, Verbosity::Error, str, __VA_ARGS__)
@@ -11,9 +10,9 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define NOVA_VULKAN_SUCCESS(str, ...) NOVA_LOG(Vulkan, Verbosity::Info, str, __VA_ARGS__)
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 #define VK_FAILED(Res) (((VkResult)(Res)) != VK_SUCCESS)
-#define VK_CHECK_MSG(Res, Msg, ...) do { if(VK_FAILED((Res))) NOVA_VULKAN_ERROR((Msg), __VA_ARGS__); }  while(0)
 
 typedef struct VmaAllocator_T* VmaAllocator;
+typedef struct VmaAllocation_T* VmaAllocation;
 
 namespace Nova
 {
@@ -21,6 +20,7 @@ namespace Nova
     class VulkanCommandPool;
     class VulkanCommandBuffer;
     class VulkanSwapchain;
+    class VulkanRenderTarget;
 
     struct VkFrameData
     {
@@ -30,7 +30,6 @@ namespace Nova
         VkImageView DepthImageView = nullptr;
         VkImage DepthImage = nullptr;
         VmaAllocation DepthImageAllocation = nullptr;
-        VmaAllocationInfo DepthImageAllocationInfo;
         VkFormat Format;
         VkSemaphore SubmitSemaphore = nullptr;
         VkSemaphore PresentSemaphore = nullptr;
@@ -71,8 +70,7 @@ namespace Nova
         void Present() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(size_t IndexCount) override;
+        void DrawIndexed(size_t IndexCount, size_t Offset) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
@@ -80,6 +78,9 @@ namespace Nova
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void BindPipeline(Pipeline* Pipeline) override;
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
+        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
+        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
+        void WaitIdle() const override;
 
         PresentMode GetPresentMode() const;
         VkInstance GetInstance() const;
@@ -91,6 +92,7 @@ namespace Nova
         VulkanSwapchain* GetSwapchain() const;
         VmaAllocator GetAllocator() const;
 
+        u32 GetCurrentFrameIndex() const;
         u32 GetGraphicsQueueFamily() const;
         u32 GetPresentQueueFamily() const;
         BufferView<VkFrameData> GetFrameData() const;
@@ -101,13 +103,10 @@ namespace Nova
         u32 GetImageCount() const;
         VkDescriptorPool GetDescriptorPool() const;
         VulkanCommandPool* GetCommandPool() const;
-        void WaitIdle() const override;
+
         const VkFunctionPointers& GetFunctionPointers() const;
-        u32 GetCurrentFrameIndex() const;
-        void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
-        void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
+
         VulkanRendererTypeConvertor Convertor;
-        static constexpr VkComponentMapping DefaultComponentMapping = { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
     private:
         u32                               m_CurrentFrameIndex = 0;
         u32                               m_NewFrameIndex = 0;
@@ -124,12 +123,11 @@ namespace Nova
         VkQueue                           m_GraphicsQueue = nullptr;
         VkQueue                           m_PresentQueue = nullptr;
         VkColorSpaceKHR                   m_ImageColorSpace;
-        VkPresentModeKHR                  m_PresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
         VulkanSwapchain*                  m_Swapchain = nullptr;
-        VkFormat                          m_SwapchainImageFormat = VK_FORMAT_R8G8B8A8_UNORM;
+        VulkanCommandPool*                m_CommandPool = nullptr;
+        VulkanRenderTarget*               m_RenderTarget = nullptr;
         VkFrameData                       m_Frames[3] = { };
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;
-        VulkanCommandPool*                m_CommandPool = nullptr;
     };
 }

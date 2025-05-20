@@ -428,11 +428,8 @@ namespace Nova
         Cmd->RSSetScissorRects(1, &Rect);
     }
 
-    void D3D12Renderer::Draw(VertexArray* VAO, u32 NumVert, Shader* Shader)
-    {
-    }
 
-    void D3D12Renderer::DrawIndexed(const size_t IndexCount)
+    void D3D12Renderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         Cmd->DrawIndexedInstanced(IndexCount, 1, 0, 0, 0);

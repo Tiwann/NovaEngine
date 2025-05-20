@@ -16,8 +16,20 @@
 
 namespace Nova
 {
-	class UniformBuffer;
-	class Color;
+    class Fence;
+    struct FenceCreateInfo;
+}
+
+namespace Nova
+{
+    struct RenderTargetCreateInfo;
+}
+
+namespace Nova
+{
+    class RenderTarget;
+    class UniformBuffer;
+    class Color;
     class VertexArray;
     class VertexBuffer;
     class IndexBuffer;
@@ -66,8 +78,7 @@ namespace Nova
         virtual void EndFrame() = 0;
         virtual void SetViewport(const Viewport& Viewport) = 0;
         virtual void SetScissor(const Scissor& Scissor) = 0;
-        virtual void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) = 0;
-        virtual void DrawIndexed(size_t IndexCount) = 0;
+        virtual void DrawIndexed(size_t IndexCount, size_t Offset) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;
         virtual void SetDepthCompareOperation(CompareOperation DepthFunction) = 0;
         virtual void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) = 0;
@@ -81,6 +92,8 @@ namespace Nova
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
         virtual void WaitIdle() const {}
 
+        Fence* CreateFence(const FenceCreateInfo& CreateInfo);
+        RenderTarget* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo);
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& CreateInfo);
         Shader* CreateShader(const String& Name, const Path& Filepath);

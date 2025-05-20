@@ -9,6 +9,7 @@
 #include <ImGuizmo.h>
 
 #include "VulkanCommandBuffer.h"
+#include "VulkanSwapchain.h"
 
 
 namespace Nova
@@ -34,9 +35,9 @@ namespace Nova
         InitInfo.PhysicalDevice = Renderer->GetPhysicalDevice();
         InitInfo.Queue = Renderer->GetGraphicsQueue();
         InitInfo.Allocator = nullptr;
-        InitInfo.ImageCount = (u32)Renderer->GetFrameData().Count();
+        InitInfo.ImageCount = (u32)Renderer->GetSwapchain()->GetImageCount();
         InitInfo.QueueFamily = Renderer->GetGraphicsQueueFamily();
-        InitInfo.MinImageCount = (u32)Renderer->GetFrameData().Count();
+        InitInfo.MinImageCount = (u32)Renderer->GetSwapchain()->GetImageCount();
         InitInfo.DescriptorPool = Renderer->GetDescriptorPool();
         InitInfo.UseDynamicRendering = true;
         InitInfo.PipelineRenderingCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;

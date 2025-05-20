@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Multisample.h"
 #include "RendererObject.h"
 #include "Runtime/Format.h"
 #include "Runtime/Flags.h"
@@ -36,6 +37,7 @@ namespace Nova
         u32 Width;
         u32 Height;
         u32 Depth;
+        SampleCount SampleCount;
     };
 
     struct RenderTargetAttachment
@@ -57,6 +59,7 @@ namespace Nova
         u32 GetHeight() const;
     protected:
         u32 m_Width = 0, m_Height = 0;
+        SampleCount m_SampleCount;
         Array<RenderTargetAttachment*> m_Attachments;
     };
 }

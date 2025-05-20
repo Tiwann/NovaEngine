@@ -19,6 +19,8 @@
 #include "VulkanVertexBuffer.h"
 #include "Platform/Vulkan/VulkanCommandPool.h"
 #include "Rendering/CommandBuffer.h"
+#include "Rendering/Multisample.h"
+#include "Rendering/RenderTarget.h"
 #include "Rendering/Swapchain.h"
 
 namespace Nova
@@ -377,7 +379,7 @@ namespace Nova
                 VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
                 DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
                 DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, &m_Frames[i].DepthImageAllocationInfo);
+                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, nullptr);
 
                 VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
                 DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -395,7 +397,7 @@ namespace Nova
                 ImageViewCreateInfo.image = Image;
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = m_SwapchainImageFormat;
+                ImageViewCreateInfo.format = Convertor.ConvertFormat(m_Swapchain->GetFormat());
                 ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -479,6 +481,21 @@ namespace Nova
                 AllocateInfo.Level = CommandBufferLevel::Primary;
                 m_Frames[i].CommandBuffer = (VulkanCommandBuffer*)m_CommandPool->AllocateCommandBuffer(AllocateInfo);
             }
+        }
+
+        {
+            RenderTargetAttachmentInfo ColorAttachmentInfo;
+            ColorAttachmentInfo.Name = "Color";
+            ColorAttachmentInfo.Format = Format::R8G8B8A8_UNORM;
+            ColorAttachmentInfo.AttachmentType = RenderTargetAttachmentFlagBits::Color;
+
+
+            RenderTargetCreateInfo CreateInfo;
+            CreateInfo.Width = m_Swapchain->GetWidth();
+            CreateInfo.Height = m_Swapchain->GetHeight();
+            CreateInfo.SampleCount = SampleCount::Eight;
+            CreateInfo.AttachmentInfos.Add(ColorAttachmentInfo);
+            m_RenderTarget = (VulkanRenderTarget*)CreateRenderTarget(CreateInfo);
         }
 
 
@@ -600,7 +617,7 @@ namespace Nova
                 VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
                 DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
                 DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, &m_Frames[i].DepthImageAllocationInfo);
+                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, nullptr);
 
                 VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
                 DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -618,7 +635,7 @@ namespace Nova
                 ImageViewCreateInfo.image =  m_Frames[i].ColorImage;
                 ImageViewCreateInfo.components = VkComponentMapping();
                 ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = m_SwapchainImageFormat;
+                ImageViewCreateInfo.format = Convertor.ConvertFormat(m_Swapchain->GetFormat());
                 ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                 ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
                 ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -893,6 +910,9 @@ namespace Nova
 
     void VulkanRenderer::Present()
     {
+        if (!m_Swapchain)
+            return;
+
         VkPresentInfoKHR PresentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         PresentInfo.swapchainCount = 1;
         PresentInfo.pSwapchains = m_Swapchain->GetHandlePtr();
@@ -934,16 +954,11 @@ namespace Nova
         vkCmdSetScissor(Cmd, 0, 1, &Rect);
     }
 
-    void VulkanRenderer::Draw(VertexArray* VAO, const u32 NumVert, Shader* Shader)
-    {
-        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        vkCmdDraw(Cmd, NumVert, 1, 0, 0);
-    }
 
-    void VulkanRenderer::DrawIndexed(const size_t IndexCount)
+    void VulkanRenderer::DrawIndexed(const size_t IndexCount, const size_t Offset)
     {
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
-        vkCmdDrawIndexed(Cmd, IndexCount, 1, 0, 0, 0);
+        vkCmdDrawIndexed(Cmd, IndexCount, 1, 0, Offset, 0);
     }
 
 
@@ -1012,7 +1027,7 @@ namespace Nova
             Result = VK_PRESENT_MODE_FIFO_KHR;
 
             u32 PresentModeCount;
-            VkPresentModeKHR PresentModes[3];
+            VkPresentModeKHR PresentModes[8];
             vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &PresentModeCount, PresentModes);
 
             for (size_t PresentModeIndex = 0; PresentModeIndex < PresentModeCount; ++PresentModeIndex)

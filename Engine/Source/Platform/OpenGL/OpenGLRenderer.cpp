@@ -34,7 +34,6 @@ namespace Nova
             return false;
         }
 
-
         const auto Callback = [](const GLenum Source, GLenum, GLuint, const GLenum Severity, GLsizei, const GLchar *Message, const void *) -> void
         {
             const Verbosity Verbo = GetDebugVerbosity(Severity);
@@ -105,23 +104,7 @@ namespace Nova
         glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
     }
 
-    void OpenGLRenderer::Draw(VertexArray* VertexArray, u32 NumVert, Shader* Shader)
-    {
-        VertexArray->Bind();
-        Shader->Bind();
-        if(m_CurrentCamera)
-        {
-            Shader->SetUniformMat4("uView", m_CurrentCamera->GetViewMatrix());
-            Shader->SetUniformMat4("uProjection", m_CurrentCamera->GetProjectionMatrix());
-        } else
-        {
-            NOVA_LOG(OpenGL, Verbosity::Warning, "No camera component found! No view-projection matrix sent.");
-        }
-
-        //glDrawArrays(ConvertPolygonMode(Mode), 0, (i32)NumVert);
-    }
-
-    void OpenGLRenderer::DrawIndexed(const size_t IndexCount)
+    void OpenGLRenderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {
         const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;
         const GLenum GLTopology = Convertor.ConvertPrimitiveTopology(Topology);

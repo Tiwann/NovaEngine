@@ -6,6 +6,7 @@ namespace Nova
 {
     enum class FenceCreateFlagBits
     {
+        None = 0,
         Signaled = BIT(0)
     };
 

@@ -126,6 +126,6 @@ namespace Nova
         Renderer->SetScissor(Scissor(0, 0, (int)Width, (int)Height));
         Renderer->BindVertexBuffer(m_VertexBuffer, 0);
         Renderer->BindIndexBuffer(m_IndexBuffer, 0);
-        Renderer->DrawIndexed(3);
+        Renderer->DrawIndexed(3, 0);
     }
 }

@@ -35,8 +35,7 @@ namespace Nova
         void EndFrame() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void Draw(VertexArray* VAO, u32 NumVert, Shader* Shader) override;
-        void DrawIndexed(size_t IndexCount) override;
+        void DrawIndexed(size_t IndexCount, size_t Offset) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
         static GLenum ConvertFormat(Format Format);

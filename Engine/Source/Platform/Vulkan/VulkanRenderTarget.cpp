@@ -6,6 +6,10 @@
 #include "Runtime/Log.h"
 
 #include <vulkan/vulkan.h>
+#include <vk_mem_alloc.h>
+
+#include "VulkanFence.h"
+#include "Rendering/Fence.h"
 
 
 namespace Nova
@@ -19,6 +23,7 @@ namespace Nova
         m_CachedCreateInfo = CreateInfo;
         m_Width = CreateInfo.Width;
         m_Height = CreateInfo.Height;
+        m_SampleCount = CreateInfo.SampleCount;
 
         const VulkanRenderer* Renderer = GetOwner()->As<VulkanRenderer>();
         const VulkanRendererTypeConvertor& Convertor = Renderer->Convertor;
@@ -104,7 +109,7 @@ namespace Nova
                 ImageCreateInfo.extent.height = CreateInfo.Height;
                 ImageCreateInfo.extent.depth = 1;
                 ImageCreateInfo.format = Convertor.ConvertFormat(Attachment->Format);
-                ImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+                ImageCreateInfo.samples = (VkSampleCountFlagBits)CreateInfo.SampleCount;
                 ImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
                 ImageCreateInfo.usage = ConvertUsage(AttachmentCreateInfo.AttachmentType);
                 ImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -168,9 +173,7 @@ namespace Nova
                 CommandBuffer* CommandBuffer = CommandPool->AllocateCommandBuffer({CommandBufferLevel::Primary});
                 if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
                 {
-                    VkFence BarrierFence = nullptr;
-                    VkFenceCreateInfo FenceCreateInfo = {VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-                    vkCreateFence(Device, &FenceCreateInfo, nullptr, &BarrierFence);
+                    VulkanFence* BarrierFence = (VulkanFence*)m_Owner->CreateFence({ FenceCreateFlagBits::None });
 
                     vkCmdPipelineBarrier(
                         CommandBuffer->As<VulkanCommandBuffer>()->GetHandle(),
@@ -184,9 +187,10 @@ namespace Nova
                     SubmitInfo.commandBufferCount = 1;
                     SubmitInfo.pCommandBuffers = CommandBuffer->As<VulkanCommandBuffer>()->GetHandlePtr();
 
-                    vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, BarrierFence);
-                    vkWaitForFences(Device, 1, &BarrierFence, true, U64_MAX);
-                    vkDestroyFence(Device, BarrierFence, nullptr);
+                    vkQueueSubmit(GraphicsQueue, 1, &SubmitInfo, BarrierFence->GetHandle());
+                    vkWaitForFences(Device, 1, BarrierFence->GetHandlePtr(), true, U64_MAX);
+                    BarrierFence->Destroy();
+                    delete BarrierFence;
                     CommandPool->FreeCommandBuffer(CommandBuffer);
                 }
             }
@@ -215,7 +219,7 @@ namespace Nova
         const size_t ImageCount = Renderer->GetImageCount();
         const VkDevice Device = Renderer->GetDevice();
         const VmaAllocator Allocator = Renderer->GetAllocator();
-        vkDeviceWaitIdle(Device);
+        Renderer->WaitIdle();
 
         for (size_t AttachmentIndex = 0; AttachmentIndex < m_Attachments.Count(); AttachmentIndex++)
         {

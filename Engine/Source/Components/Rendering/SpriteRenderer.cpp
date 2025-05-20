@@ -35,7 +35,7 @@ namespace Nova
 
         constexpr u32 Indices[6] { 0, 2, 1, 0, 3, 2 };
         m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView<Vertex>(nullptr, 0));
-        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView<u32>{ Indices, 6 });
+        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView<u32>(Indices, 6));
 
         ShaderManager* Manager = g_Application->GetShaderManager();
         m_Shader = Manager->Retrieve("Sprite");

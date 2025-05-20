@@ -60,6 +60,7 @@ namespace Nova
         ID3D12Resource*             CreateBuffer(D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
         ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const;
         ID3D12Device9*              GetDevice() const;
+        IDXGIFactory7*              GetFactory() const;
         u32                         GetImageCount() const;
         ID3D12GraphicsCommandList*  GetCurrentGraphicsCommandBuffer() const;
         ID3D12Resource*             GetCurrentRenderTarget() const;

@@ -59,26 +59,24 @@ namespace Nova
         return Result;
     }
 
-    Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& Description)
+    Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& CreateInfo)
     {
+        Swapchain* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return nullptr;
-        case GraphicsApi::Vulkan:
-            {
-                VulkanSwapchain* Result = new VulkanSwapchain(this);
-                if (!Result->Initialize(Description))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::D3D12:
-            return nullptr;
-        default: throw;
+        case GraphicsApi::Vulkan: Result = new VulkanSwapchain(this); break;
+        case GraphicsApi::D3D12: Result = new D3D12Swapchain(this); break;
+        default: return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Shader* Renderer::CreateShader(const String& Name, const Path& Filepath)

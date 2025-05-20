@@ -606,6 +606,11 @@ namespace Nova
         return m_Device.Get();
     }
 
+    IDXGIFactory7* D3D12Renderer::GetFactory() const
+    {
+        return m_Factory.Get();
+    }
+
     u32 D3D12Renderer::GetImageCount() const
     {
         return m_ImageCount;

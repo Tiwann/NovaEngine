@@ -82,7 +82,7 @@ namespace Nova
         virtual void WaitIdle() const {}
 
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
-        Swapchain* CreateSwapchain(const SwapchainCreateInfo& Description);
+        Swapchain* CreateSwapchain(const SwapchainCreateInfo& CreateInfo);
         Shader* CreateShader(const String& Name, const Path& Filepath);
         Pipeline* CreatePipeline(const PipelineSpecification& Specification);
         VertexBuffer* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo);

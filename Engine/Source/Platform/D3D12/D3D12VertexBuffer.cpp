@@ -14,7 +14,7 @@ namespace Nova
     D3D12VertexBuffer::D3D12VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : VertexBuffer(Renderer, Data, Count)
     {
         const D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
-        m_Handle = CastedRenderer->CreateBuffer(L"Vertex Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(Vertex));
+        m_Handle = CastedRenderer->CreateBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(Vertex));
         if (!m_Handle)
         {
             NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer");
@@ -27,7 +27,7 @@ namespace Nova
     D3D12VertexBuffer::~D3D12VertexBuffer()
     {
         D3D12Renderer* CastedRenderer = dynamic_cast<D3D12Renderer*>(m_Renderer);
-        CastedRenderer->WaitDeviceIdle();
+        CastedRenderer->WaitIdle();
         if (m_Handle)
         {
             m_Handle->Release();
@@ -44,9 +44,9 @@ namespace Nova
         if (m_Handle && m_Ready)
         {
             m_Ready = false;
-            CastedRenderer->WaitDeviceIdle();
+            CastedRenderer->WaitIdle();
             m_Handle->Release();
-            m_Handle = CastedRenderer->CreateBuffer(L"Vertex Buffer", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(Vertex));
+            m_Handle = CastedRenderer->CreateBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_COPY_DEST, Count * sizeof(Vertex));
             if (!m_Handle)
             {
                 NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer");
@@ -56,7 +56,7 @@ namespace Nova
         }
 
         ID3D12Device9* Device = CastedRenderer->GetDevice();
-        ID3D12Resource* UploadHeap = CastedRenderer->CreateBuffer(L"Vertex Buffer Upload Heap", D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, Count * sizeof(Vertex));
+        ID3D12Resource* UploadHeap = CastedRenderer->CreateBuffer(D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, Count * sizeof(Vertex));
         if (!UploadHeap)
         {
             NOVA_DIRECTX_ERROR("Failed to create Vertex Buffer Upload Heap");
@@ -99,7 +99,7 @@ namespace Nova
         Queue->ExecuteCommandLists(1, Commands);
 
 
-        CastedRenderer->WaitDeviceIdle();
+        CastedRenderer->WaitIdle();
         UploadHeap->Release();
         Cmd->Release();
         m_Ready = true;

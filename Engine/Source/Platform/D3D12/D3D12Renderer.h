@@ -57,7 +57,7 @@ namespace Nova
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
 
         ID3D12GraphicsCommandList*  CreateOneTimeCommandBuffer() const;
-        ID3D12Resource*             CreateBuffer(const WideString& Name, D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
+        ID3D12Resource*             CreateBuffer(D3D12_HEAP_TYPE Type, D3D12_RESOURCE_STATES ResourceStates, size_t Size) const;
         ID3D12Resource*             CreateTexture2D(const WideString& Name, u32 Width, u32 Height, Format Format) const;
         ID3D12Device9*              GetDevice() const;
         u32                         GetImageCount() const;
@@ -67,7 +67,7 @@ namespace Nova
         ID3D12DescriptorHeap*       GetImGuiDescriptorHeap() const;
         ID3D12CommandAllocator*     GetCurrentCommandAllocator() const;
         ID3D12CommandQueue*         GetCommandQueue() const;
-        void                        WaitDeviceIdle();
+        void                        WaitIdle() const override;
         void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
         void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
 

@@ -16,6 +16,5 @@ namespace Nova
         ID3D12Resource* GetHandle() const;
     private:
         ID3D12Resource* m_Handle = nullptr;
-        bool m_Ready = false;
     };
 }

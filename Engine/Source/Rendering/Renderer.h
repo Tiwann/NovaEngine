@@ -78,6 +78,7 @@ namespace Nova
         virtual void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) = 0;
         virtual void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) = 0;
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
+        virtual void WaitIdle() const {}
 
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& Description);

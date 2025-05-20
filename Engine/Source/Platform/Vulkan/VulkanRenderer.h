@@ -99,7 +99,7 @@ namespace Nova
         u32 GetImageCount() const;
         VkDescriptorPool GetDescriptorPool() const;
         VulkanCommandPool* GetCommandPool() const;
-        void WaitIdle() const;
+        void WaitIdle() const override;
         const VkFunctionPointers& GetFunctionPointers() const;
         u32 GetCurrentFrameIndex() const;
         void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;

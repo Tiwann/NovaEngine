@@ -230,7 +230,7 @@ namespace Nova
 
     void D3D12Renderer::Destroy()
     {
-        WaitDeviceIdle();
+        WaitIdle();
 
     }
 
@@ -254,7 +254,7 @@ namespace Nova
     {
         if (ShouldRecreateSwapchain)
         {
-            WaitDeviceIdle();
+            WaitIdle();
             
             for (UINT i = 0; i < m_ImageCount; i++)
             {
@@ -392,10 +392,10 @@ namespace Nova
         FenceValue++;
     }
 
-    void D3D12Renderer::WaitDeviceIdle()
+    void D3D12Renderer::WaitIdle() const
     {
         ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence.Get();
-        UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
+        const UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
         m_CommandQueue->Signal(Fence, FenceValue);
 
         if (Fence->GetCompletedValue() < FenceValue)
@@ -483,7 +483,7 @@ namespace Nova
     }
 
 
-    ID3D12Resource* D3D12Renderer::CreateBuffer(const WideString& Name, const D3D12_HEAP_TYPE Type, const D3D12_RESOURCE_STATES ResourceStates, const size_t Size) const
+    ID3D12Resource* D3D12Renderer::CreateBuffer(const D3D12_HEAP_TYPE Type, const D3D12_RESOURCE_STATES ResourceStates, const size_t Size) const
     {
         const CD3DX12_HEAP_PROPERTIES HeapProps(Type);
         const CD3DX12_RESOURCE_DESC BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(Size);
@@ -500,7 +500,6 @@ namespace Nova
             return nullptr;
         }
 
-        OutResource->SetName(*Name);
         return OutResource;
     }
 

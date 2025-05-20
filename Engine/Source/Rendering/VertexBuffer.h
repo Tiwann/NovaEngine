@@ -1,26 +1,25 @@
 #pragma once
+#include "RendererObject.h"
 #include "Vertex.h"
-#include "Containers/Buffer.h"
-#include "Containers/Array.h"
-#include "Runtime/Object.h"
 
 namespace Nova
 {
     class Renderer;
 
-    class VertexBuffer : public Object
+    struct VertexBufferCreateInfo
+    {
+        const Vertex* Data = nullptr;
+        const size_t Count = 0;
+    };
+
+    class VertexBuffer : public RendererObject<VertexBufferCreateInfo>
     {
     public:
-        explicit VertexBuffer(Renderer* Renderer);
-        explicit VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
-        ~VertexBuffer() override = default;
-
-        virtual void Bind() const = 0;
-        virtual void SendData(const Vertex* Data, size_t Count);
-        void         SendData(const Array<Vertex>& Vertices);
+        explicit VertexBuffer(Renderer* Owner);
         size_t GetCount() const;
+        size_t GetSize() const;
     protected:
-        Renderer* m_Renderer = nullptr;
-        BufferView<Vertex> m_Data;
+        size_t m_Count = 0;
+        size_t m_Size = 0;
     };
 }

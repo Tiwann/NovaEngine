@@ -12,6 +12,11 @@
 
 namespace Nova
 {
+    D3D12Swapchain::D3D12Swapchain(Renderer* Owner) : Swapchain(Owner)
+    {
+
+    }
+
     bool D3D12Swapchain::Initialize(const SwapchainCreateInfo& CreateInfo)
     {
         const D3D12Renderer* Renderer = m_Owner->As<D3D12Renderer>();

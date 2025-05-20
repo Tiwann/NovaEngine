@@ -63,8 +63,10 @@ namespace Nova
         NameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
         NameInfo.objectHandle = (u64)m_Handle;
         NameInfo.pObjectName = *Name;
-        const VkDevice Device = m_Owner->As<VulkanRenderer>()->GetDevice();
-        vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
+
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        Renderer->GetFunctionPointers().vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
     }
 
     void VulkanVertexBuffer::Destroy()

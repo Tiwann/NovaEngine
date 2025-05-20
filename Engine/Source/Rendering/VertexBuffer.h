@@ -1,6 +1,7 @@
 #pragma once
 #include "RendererObject.h"
 #include "Vertex.h"
+#include "Containers/StaticArray.h"
 
 namespace Nova
 {
@@ -9,7 +10,7 @@ namespace Nova
     struct VertexBufferCreateInfo
     {
         const Vertex* Data = nullptr;
-        const size_t Count = 0;
+        size_t Count = 0;
     };
 
     class VertexBuffer : public RendererObject<VertexBufferCreateInfo>

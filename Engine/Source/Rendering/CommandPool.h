@@ -28,8 +28,8 @@ namespace Nova
     public:
         explicit CommandPool(Renderer* Owner) : RendererObject("Command Pool", Owner) {}
 
-        virtual CommandBuffer* AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo) = 0;
-        virtual void FreeCommandBuffer(CommandBuffer* CommandBuffer) = 0;
+        CommandBuffer* AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo);
+        void FreeCommandBuffer(CommandBuffer* CommandBuffer);
 
     protected:
         CommandPoolFlags m_Flags;

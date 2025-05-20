@@ -44,15 +44,4 @@ namespace Nova
     {
         CommandPool::SetDebugName(Name);
     }
-
-    CommandBuffer* VulkanCommandPool::AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo)
-    {
-        VulkanCommandBuffer* Cmd = new VulkanCommandBuffer(this->As<CommandPool>(), AllocateInfo);
-        return Cmd;
-    }
-
-    void VulkanCommandPool::FreeCommandBuffer(CommandBuffer* CommandBuffer)
-    {
-        delete CommandBuffer;
-    }
 }

@@ -12,10 +12,7 @@ namespace Nova
         void Destroy() override;
 
         void SetDebugName(const String& Name) override;
-        CommandBuffer* AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo) override;
-        void FreeCommandBuffer(CommandBuffer* CommandBuffer) override;
         VkCommandPool GetHandle() const;
-
     private:
         VkCommandPool m_Handle = nullptr;
     };

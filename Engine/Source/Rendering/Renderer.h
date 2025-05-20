@@ -11,6 +11,7 @@
 #include "Scissor.h"
 #include "Containers/Buffer.h"
 #include "Vertex.h"
+#include "VertexBuffer.h"
 #include "Runtime/Object.h"
 
 namespace Nova
@@ -84,7 +85,7 @@ namespace Nova
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& Description);
         Shader* CreateShader(const String& Name, const Path& Filepath);
         Pipeline* CreatePipeline(const PipelineSpecification& Specification);
-        VertexBuffer* CreateVertexBuffer();
+        VertexBuffer* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo);
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
         IndexBuffer* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo);
         IndexBuffer* CreateIndexBuffer(const BufferView<u32>& Indices);

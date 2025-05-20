@@ -2,8 +2,8 @@
 
 namespace Nova
 {
-    CommandBuffer::CommandBuffer(CommandPool* Owner, const CommandBufferAllocateInfo& AllocateInfo)
-        : Object("Command Buffer"), m_CommandPool(Owner), m_Level(AllocateInfo.Level)
+    CommandBuffer::CommandBuffer(CommandPool* Owner)
+        : Object("Command Buffer"), m_CommandPool(Owner)
     {
     }
 

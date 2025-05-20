@@ -35,6 +35,8 @@ namespace Nova
     class CommandBuffer : public Object
     {
     public:
+        virtual bool Initialize(const CommandBufferAllocateInfo& AllocateInfo) = 0;
+        virtual void Destroy() = 0;
         virtual bool Begin(const CommandBufferBeginInfo& BeginInfo) = 0;
         virtual bool End() = 0;
         virtual bool IsValid() const = 0;
@@ -42,7 +44,7 @@ namespace Nova
         CommandBufferLevel GetLevel() const;
     protected:
         friend CommandPool;
-        explicit CommandBuffer(CommandPool* Owner, const CommandBufferAllocateInfo& AllocateInfo);
+        explicit CommandBuffer(CommandPool* Owner);
         CommandPool* m_CommandPool = nullptr;
         CommandBufferLevel m_Level = CommandBufferLevel::Primary;
     };

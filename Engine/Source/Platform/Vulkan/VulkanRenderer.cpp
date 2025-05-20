@@ -104,6 +104,7 @@ namespace Nova
             m_FunctionPointers.vkCreateShadersEXT = (PFN_vkCreateShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCreateShadersEXT");
             m_FunctionPointers.vkDestroyShaderEXT = (PFN_vkDestroyShaderEXT)vkGetInstanceProcAddr(m_Instance, "vkDestroyShaderEXT");
             m_FunctionPointers.vkCmdBindShadersEXT = (PFN_vkCmdBindShadersEXT)vkGetInstanceProcAddr(m_Instance, "vkCmdBindShadersEXT");
+            m_FunctionPointers.vkSetDebugUtilsObjectNameEXT = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(m_Instance, "vkSetDebugUtilsObjectNameEXT");
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -383,6 +384,12 @@ namespace Nova
                 return false;
             }
 
+            VkDebugUtilsObjectNameInfoEXT SwapchainNameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+            SwapchainNameInfo.objectType = VK_OBJECT_TYPE_SWAPCHAIN_KHR;
+            SwapchainNameInfo.pObjectName = "Main Swapchain";
+            SwapchainNameInfo.objectHandle = (u64)m_Swapchain;
+            m_FunctionPointers.vkSetDebugUtilsObjectNameEXT(m_Device, &SwapchainNameInfo);
+
             u32 SwapchainImageCount;
             vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);
             ScopedBuffer<VkImage> SwapchainImages(SwapchainImageCount);
@@ -582,6 +589,7 @@ namespace Nova
 
         vmaDestroyAllocator(m_Allocator);
 
+        m_CommandPool->Destroy();
         delete m_CommandPool;
         vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
         vkDestroyDevice(m_Device, nullptr);
@@ -652,6 +660,12 @@ namespace Nova
 
             vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
             m_Swapchain = NewSwapchain;
+
+            VkDebugUtilsObjectNameInfoEXT SwapchainNameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+            SwapchainNameInfo.objectType = VK_OBJECT_TYPE_SWAPCHAIN_KHR;
+            SwapchainNameInfo.pObjectName = "Main Swapchain";
+            SwapchainNameInfo.objectHandle = (u64)m_Swapchain;
+            m_FunctionPointers.vkSetDebugUtilsObjectNameEXT(m_Device, &SwapchainNameInfo);
 
             u32 SwapchainImageCount;
             vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &SwapchainImageCount, nullptr);

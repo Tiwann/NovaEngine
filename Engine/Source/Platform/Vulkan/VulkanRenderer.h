@@ -48,6 +48,7 @@ namespace Nova
         PFN_vkCreateShadersEXT              vkCreateShadersEXT = nullptr;
         PFN_vkDestroyShaderEXT              vkDestroyShaderEXT = nullptr;
         PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
+        PFN_vkSetDebugUtilsObjectNameEXT    vkSetDebugUtilsObjectNameEXT = nullptr;
     };
 
 

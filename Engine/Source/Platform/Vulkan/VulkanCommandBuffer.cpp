@@ -5,9 +5,15 @@
 
 namespace Nova
 {
-    VulkanCommandBuffer::VulkanCommandBuffer(CommandPool* Owner, const CommandBufferAllocateInfo& AllocateInfo)
-        : CommandBuffer(Owner, AllocateInfo)
+    VulkanCommandBuffer::VulkanCommandBuffer(CommandPool* Owner) : CommandBuffer(Owner)
     {
+
+    }
+
+    bool VulkanCommandBuffer::Initialize(const CommandBufferAllocateInfo& AllocateInfo)
+    {
+        m_Level = AllocateInfo.Level;
+
         VkCommandBufferAllocateInfo VkAllocInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         VkAllocInfo.commandPool = m_CommandPool->As<VulkanCommandPool>()->GetHandle();
         VkAllocInfo.commandBufferCount = 1;
@@ -25,12 +31,11 @@ namespace Nova
         const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         if (VK_FAILED(vkAllocateCommandBuffers(Device, &VkAllocInfo, &m_Handle)))
-        {
-            throw std::runtime_error("Failed to allocate command buffers");
-        }
+            return false;
+        return true;
     }
 
-    VulkanCommandBuffer::~VulkanCommandBuffer()
+    void VulkanCommandBuffer::Destroy()
     {
         const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();

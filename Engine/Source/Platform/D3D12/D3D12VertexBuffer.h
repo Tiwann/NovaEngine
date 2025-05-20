@@ -8,16 +8,14 @@ namespace Nova
     class D3D12VertexBuffer : public VertexBuffer
     {
     public:
-        explicit D3D12VertexBuffer(Renderer* Renderer);
-        explicit D3D12VertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
-        ~D3D12VertexBuffer() override;
-
-        void SendData(const Vertex* Data, size_t Count) override;
-        void Bind() const override;
+        explicit D3D12VertexBuffer(Renderer* Owner);
 
         ID3D12Resource* GetHandle() const;
+        bool Initialize(const VertexBufferCreateInfo& CreateInfo) override;
+        void SetDebugName(const String& Name) override;
+        void Destroy() override;
+
     private:
         ID3D12Resource* m_Handle = nullptr;
-        bool m_Ready = false;
     };
 }

@@ -41,14 +41,22 @@ namespace Nova
 
     CommandPool* Renderer::CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)
     {
+        CommandPool* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return nullptr;
-        case GraphicsApi::Vulkan: return new VulkanCommandPool(this, CreateInfo);
+        case GraphicsApi::Vulkan: Result = new VulkanCommandPool(this); break;
         case GraphicsApi::D3D12: return nullptr;
-        default: throw;
+        default: return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& Description)
@@ -124,28 +132,32 @@ namespace Nova
         }
     }
 
-    VertexBuffer* Renderer::CreateVertexBuffer()
+    VertexBuffer* Renderer::CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo)
     {
+        VertexBuffer* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLVertexBuffer(this);
-        case GraphicsApi::Vulkan:   return new VulkanVertexBuffer(this);
-        case GraphicsApi::D3D12:    return new D3D12VertexBuffer(this);
+        case GraphicsApi::OpenGL:   Result = new OpenGLVertexBuffer(this); break;
+        case GraphicsApi::Vulkan:   Result = new VulkanVertexBuffer(this); break;
+        case GraphicsApi::D3D12:    Result = new D3D12VertexBuffer(this); break;
         default:                    return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     VertexBuffer* Renderer::CreateVertexBuffer(const BufferView<Vertex>& Vertices)
     {
-        switch (m_GraphicsApi)
-        {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLVertexBuffer(this, Vertices.Data(), Vertices.Count());
-        case GraphicsApi::Vulkan:   return new VulkanVertexBuffer(this, Vertices.Data(), Vertices.Count());
-        case GraphicsApi::D3D12:    return new D3D12VertexBuffer(this, Vertices.Data(), Vertices.Count());
-        default:                    return nullptr;
-        }
+        VertexBufferCreateInfo CreateInfo;
+        CreateInfo.Data = Vertices.Data();
+        CreateInfo.Count = Vertices.Count();
+        return CreateVertexBuffer(CreateInfo);
     }
 
     IndexBuffer* Renderer::CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo)

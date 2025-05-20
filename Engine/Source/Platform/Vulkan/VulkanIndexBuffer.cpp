@@ -11,15 +11,6 @@ namespace Nova
     }
 
 
-    void VulkanIndexBuffer::Destroy()
-    {
-        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
-        const VkDevice Device = Renderer->GetDevice();
-        const VmaAllocator Allocator = Renderer->GetAllocator();
-        vkDeviceWaitIdle(Device);
-        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
-    }
-
     VkBuffer VulkanIndexBuffer::GetHandle() const
     {
         return m_Handle;
@@ -76,7 +67,17 @@ namespace Nova
         NameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
         NameInfo.objectHandle = (u64)m_Handle;
         NameInfo.pObjectName = *Name;
-        const VkDevice Device = m_Owner->As<VulkanRenderer>()->GetDevice();
-        vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
+
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        Renderer->GetFunctionPointers().vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
+    }
+
+    void VulkanIndexBuffer::Destroy()
+    {
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        Renderer->WaitIdle();
+        const VmaAllocator Allocator = Renderer->GetAllocator();
+        vmaDestroyBuffer(Allocator, m_Handle, m_Allocation);
     }
 }

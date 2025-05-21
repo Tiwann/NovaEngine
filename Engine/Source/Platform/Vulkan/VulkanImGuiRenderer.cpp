@@ -47,6 +47,7 @@ namespace Nova
         InitInfo.PipelineRenderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
         constexpr VkFormat ColorAttachment = VK_FORMAT_R8G8B8A8_UNORM;
         InitInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &ColorAttachment;
+        InitInfo.MSAASamples = VK_SAMPLE_COUNT_8_BIT;
         
         InitInfo.CheckVkResultFn = [](VkResult Result)
         {

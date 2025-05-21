@@ -3,6 +3,7 @@
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
 #include "VulkanRendererTypeConvertor.h"
+#include "Runtime/SharedPointer.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define NOVA_VULKAN_ERROR(str, ...) NOVA_LOG(Vulkan, Verbosity::Error, str, __VA_ARGS__)
@@ -122,7 +123,6 @@ namespace Nova
         u32                               m_PresentQueueIndex = U32_MAX;
         VkQueue                           m_GraphicsQueue = nullptr;
         VkQueue                           m_PresentQueue = nullptr;
-        VkColorSpaceKHR                   m_ImageColorSpace;
         VulkanSwapchain*                  m_Swapchain = nullptr;
         VulkanCommandPool*                m_CommandPool = nullptr;
         VulkanRenderTarget*               m_RenderTarget = nullptr;

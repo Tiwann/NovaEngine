@@ -5,10 +5,10 @@ namespace Nova
     enum class SampleCount
     {
         None,
-        One,
-        Two,
-        Four,
-        Eight,
-        Sixteen,
+        S1 = 1,
+        S2 = 2,
+        S4 = 4,
+        S8 = 8,
+        S16 = 16,
     };
 }

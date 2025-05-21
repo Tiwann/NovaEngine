@@ -26,7 +26,7 @@ namespace Nova
         SwapchainCreateInfo.imageExtent.height = CreateInfo.ImageHeight;
         SwapchainCreateInfo.minImageCount = CreateInfo.ImageCount;
         SwapchainCreateInfo.imageArrayLayers = 1;
-        SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
         SwapchainCreateInfo.oldSwapchain = CreateInfo.Recycle ? m_Handle : nullptr;
 

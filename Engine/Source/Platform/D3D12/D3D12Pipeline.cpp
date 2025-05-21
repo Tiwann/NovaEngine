@@ -61,7 +61,7 @@ namespace Nova
         PipelineStateDescription.RasterizerState.FrontCounterClockwise = Specification.FrontFace == FrontFace::CounterClockwise;
 
         PipelineStateDescription.SampleMask = 0xFFFFFFFF;
-        PipelineStateDescription.SampleDesc.Count = Specification.RasterizationSamples;
+        PipelineStateDescription.SampleDesc.Count = (UINT)Specification.RasterizationSamples;
         // PipelineStateDescription.SampleDesc.Quality = ...;
 
         PipelineStateDescription.DepthStencilState.DepthEnable = Specification.DepthTestEnable;

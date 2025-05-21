@@ -9,13 +9,6 @@ namespace Nova
 {
     class Renderer;
 
-    struct VulkanRenderTargetAttachment : RenderTargetAttachment
-    {
-        VkImage Images[3] { };
-        VkImageView ImageViews[3] { };
-        VmaAllocation Allocations[3] { };
-    };
-
     class VulkanRenderTarget : public RenderTarget
     {
     public:
@@ -23,10 +16,20 @@ namespace Nova
         bool Initialize(const RenderTargetCreateInfo& CreateInfo) override;
         bool Resize(u32 Width, u32 Height) override;
         void Destroy() override;
-        void BeginRendering() override;
-        void EndRendering() override;
+        void BeginRendering() const;
+        void EndRendering() const;
 
+        VkImage GetColorImage() const;
+        VkImageView GetColorImageView() const;
+        VkImage GetDepthImage() const;
+        VkImageView GetDepthImageView() const;
     private:
         RenderTargetCreateInfo m_CachedCreateInfo;
+        VkImage m_ColorImages[3] { };
+        VkImageView m_ColorImageViews[3] { };
+        VmaAllocation m_ColorAllocations[3] { };
+        VkImage m_DepthImages[3] { };
+        VkImageView m_DepthImageViews[3] { };
+        VmaAllocation m_DepthAllocations[3] { };
     };
 }

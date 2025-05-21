@@ -65,7 +65,6 @@ namespace Nova
         PipelineSpecification.Scissor = Scissor(0, 0, (i32)Width, (i32)Height);
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
         PipelineSpecification.PrimitiveTopology = PrimitiveTopology::TriangleList;
-        PipelineSpecification.RasterizationSamples = 1;
         PipelineSpecification.DepthBiasEnable = false;
         PipelineSpecification.DepthClampEnable = false;
         PipelineSpecification.DepthTestEnable = true;
@@ -76,6 +75,9 @@ namespace Nova
         PipelineSpecification.StencilTestEnable = false;
         PipelineSpecification.DynamicRendering = false;
         PipelineSpecification.ShaderProgram = BlinnPhongShader;
+        PipelineSpecification.RasterizationSamples = SampleCount::S8;
+        PipelineSpecification.MultisampleEnable = true;
+
         m_Pipeline = Renderer->CreatePipeline(PipelineSpecification);
 
         m_SceneUniformBuffer = Renderer->CreateUniformBuffer(sizeof(SceneData));

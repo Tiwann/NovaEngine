@@ -13,6 +13,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanIndexBuffer.h"
 #include "VulkanPipeline.h"
+#include "VulkanRenderTarget.h"
 #include "VulkanShader.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
@@ -484,21 +485,20 @@ namespace Nova
         }
 
         {
-            RenderTargetAttachmentInfo ColorAttachmentInfo;
-            ColorAttachmentInfo.Name = "Color";
-            ColorAttachmentInfo.Format = Format::R8G8B8A8_UNORM;
-            ColorAttachmentInfo.AttachmentType = RenderTargetAttachmentFlagBits::Color;
-
-
             RenderTargetCreateInfo CreateInfo;
             CreateInfo.Width = m_Swapchain->GetWidth();
             CreateInfo.Height = m_Swapchain->GetHeight();
-            CreateInfo.SampleCount = SampleCount::Eight;
-            CreateInfo.AttachmentInfos.Add(ColorAttachmentInfo);
+            CreateInfo.Depth = 1;
+            CreateInfo.SampleCount = SampleCount::S8;
+            CreateInfo.ColorFormat = Format::R8G8B8A8_UNORM;
+            CreateInfo.DepthFormat = Format::D32_FLOAT_S8_UINT;
             m_RenderTarget = (VulkanRenderTarget*)CreateRenderTarget(CreateInfo);
+            if (!m_RenderTarget)
+            {
+                NOVA_VULKAN_ERROR("Failed to create render target!");
+                return false;
+            }
         }
-
-
 
         //////////////////////////////////////////////////////////////////////////////////////////
         /// DESCRIPTOR POOL CREATE
@@ -540,6 +540,8 @@ namespace Nova
 
         vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 
+        m_RenderTarget->Destroy();
+        delete m_RenderTarget;
 
         for (size_t i = 0; i < m_Swapchain->GetImageCount(); ++i)
         {
@@ -590,6 +592,7 @@ namespace Nova
             }
 
             m_Swapchain->Recreate();
+            m_RenderTarget->Resize(WindowWidth, WindowHeight);
 
             VkImage SwapchainImages[3];
             m_Swapchain->GetImages(SwapchainImages);
@@ -733,7 +736,7 @@ namespace Nova
 
     void VulkanRenderer::BeginRendering()
     {
-        const Window* Window = g_Application->GetWindow();
+        /*const Window* Window = g_Application->GetWindow();
         const u32 WindowWidth = Window->GetWidth<u32>();
         const u32 WindowHeight = Window->GetHeight<u32>();
         const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
@@ -785,37 +788,80 @@ namespace Nova
         RenderingInfo.pColorAttachments = &ColorAttachment;
         RenderingInfo.pDepthAttachment = &DepthAttachment;
 
-        vkCmdBeginRendering(CommandBuffer, &RenderingInfo);
+        vkCmdBeginRendering(CommandBuffer, &RenderingInfo);*/
+
+        m_RenderTarget->BeginRendering();
     }
 
     void VulkanRenderer::EndRendering()
     {
+        m_RenderTarget->EndRendering();
+
         const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
 
-        vkCmdEndRendering(CommandBuffer);
+        {
+            VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            ColorBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            ColorBarrier.srcAccessMask = 0;
+            ColorBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
+            ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            ColorBarrier.subresourceRange.baseMipLevel = 0;
+            ColorBarrier.subresourceRange.levelCount = 1;
+            ColorBarrier.subresourceRange.baseArrayLayer = 0;
+            ColorBarrier.subresourceRange.layerCount = 1;
 
-        VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        ColorBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
-        ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        ColorBarrier.subresourceRange.baseMipLevel = 0;
-        ColorBarrier.subresourceRange.levelCount = 1;
-        ColorBarrier.subresourceRange.baseArrayLayer = 0;
-        ColorBarrier.subresourceRange.layerCount = 1;
-        ColorBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        ColorBarrier.dstAccessMask = VK_ACCESS_NONE_KHR;
+            vkCmdPipelineBarrier(
+                CommandBuffer,
+                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                VK_PIPELINE_STAGE_TRANSFER_BIT,
+                0, 0, nullptr, 0, nullptr, 1, &ColorBarrier
+            );
+        }
 
-        const VkImageMemoryBarrier Barriers[] { ColorBarrier };
 
-        vkCmdPipelineBarrier(
-            CommandBuffer,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            0, 0, nullptr, 0, nullptr, std::size(Barriers), Barriers
-        );
+        VkImageResolve Region;
+        Region.extent.width = m_Swapchain->GetWidth();
+        Region.extent.height = m_Swapchain->GetHeight();
+        Region.extent.depth = 1;
+        Region.dstOffset = VkOffset3D{ 0, 0, 0 };
+        Region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        Region.dstSubresource.baseArrayLayer = 0;
+        Region.dstSubresource.layerCount = 1;
+        Region.dstSubresource.mipLevel = 0;
+        Region.srcOffset = VkOffset3D{ 0, 0, 0 };
+        Region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        Region.srcSubresource.baseArrayLayer = 0;
+        Region.srcSubresource.layerCount = 1;
+        Region.srcSubresource.mipLevel = 0;
+        vkCmdResolveImage(CommandBuffer, m_RenderTarget->GetColorImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_Frames[m_CurrentFrameIndex].ColorImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Region);
+
+
+        {
+            VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            ColorBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            ColorBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            ColorBarrier.dstAccessMask = VK_ACCESS_NONE;
+            ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
+            ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            ColorBarrier.subresourceRange.baseMipLevel = 0;
+            ColorBarrier.subresourceRange.levelCount = 1;
+            ColorBarrier.subresourceRange.baseArrayLayer = 0;
+            ColorBarrier.subresourceRange.layerCount = 1;
+
+            vkCmdPipelineBarrier(
+                CommandBuffer,
+                VK_PIPELINE_STAGE_TRANSFER_BIT,
+                VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                0, 0, nullptr, 0, nullptr, 1, &ColorBarrier
+            );
+        }
     }
 
     void VulkanRenderer::EndFrame()

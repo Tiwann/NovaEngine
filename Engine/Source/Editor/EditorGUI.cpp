@@ -136,7 +136,7 @@ namespace Nova::UI
                 "Box 2D",
                 "Circle 2D",
                 "Box 3D",
-                "Model Renderer",
+                "Static Mesh Renderer",
                 "Directional Light",
                 "Point Light",
                 "Ambient Light"

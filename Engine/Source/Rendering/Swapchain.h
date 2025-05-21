@@ -1,7 +1,7 @@
 ﻿#pragma once
+#include "RendererObject.h"
 #include "PresentMode.h"
 #include "Runtime/Format.h"
-#include "Runtime/Object.h"
 
 namespace Nova
 {
@@ -12,34 +12,27 @@ namespace Nova
         Format ImageFormat;
         uint32_t ImageCount;
         PresentMode ImagePresentMode;
-        i32 ImageWidth, ImageHeight;
-        class Swapchain* OldSwapchain;
+        u32 ImageWidth, ImageHeight;
+        bool Recycle;
     };
 
-    class Swapchain : public Object
+    class Swapchain : public RendererObject<SwapchainCreateInfo>
     {
     public:
-        explicit Swapchain(Renderer* Owner) : Object("Swapchain"), m_Owner(Owner) {}
+        explicit Swapchain(Renderer* Owner) : RendererObject("Swapchain", Owner){}
         ~Swapchain() override = default;
 
-        virtual bool Initialize(const SwapchainCreateInfo& CreateInfo);
-        virtual bool Resize(const i32 Width, const i32 Height) = 0;
         virtual bool Recreate() = 0;
-        virtual void Destroy() = 0;
 
-        i32 GetWidth() const;
-        i32 GetHeight() const;
-        Format GetFormat() const;
-        PresentMode GetPresentMode() const;
-        i32 GetImageCount() const;
-        Renderer* GetOwner() const;
-
+        i32 GetWidth() const { return m_ImageWidth; }
+        i32 GetHeight() const { return m_ImageHeight; }
+        Format GetFormat() const { return m_ImageFormat; }
+        PresentMode GetPresentMode() const { return m_ImagePresentMode; }
+        i32 GetImageCount() const { return m_ImageCount; }
     protected:
-        i32 m_Width = 0, m_Height = 0;
-        Format m_ImageFormat = Format::NONE;
-        i32 m_ImageCount = 0;
+        Format m_ImageFormat = Format::None;
+        u32 m_ImageCount = 0;
         PresentMode m_ImagePresentMode = PresentMode::Unknown;
-    private:
-        Renderer* m_Owner = nullptr;
+        u32 m_ImageWidth = 0, m_ImageHeight = 0;
     };
 }

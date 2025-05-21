@@ -1,11 +1,12 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "RendererObject.h"
 #include "Runtime/Flags.h"
 
 namespace Nova
 {
     enum class FenceCreateFlagBits
     {
+        None = 0,
         Signaled = BIT(0)
     };
 
@@ -18,16 +19,11 @@ namespace Nova
 
     class Renderer;
 
-    class Fence : public Object
+    class Fence : public RendererObject<FenceCreateInfo>
     {
     public:
-        explicit Fence(Renderer* Owner) : Object("Fence"), m_Owner(Owner) {}
-
-        virtual bool Initialize(const FenceCreateInfo& CreateInfo) = 0;
-        virtual void Destroy() = 0;
-
-        Renderer* GetOwner() const { return m_Owner; }
-    protected:
-        Renderer* m_Owner = nullptr;
+        explicit Fence(Renderer* Owner) : RendererObject("Fence", Owner){}
+        virtual void WaitForMe(u64 Timeout) = 0;
+        virtual void Reset() = 0;
     };
 }

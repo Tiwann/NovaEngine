@@ -7,13 +7,12 @@ namespace Nova
     class VulkanCommandPool : public CommandPool
     {
     public:
-        explicit VulkanCommandPool(Renderer* Owner, const CommandPoolCreateInfo& CreateInfo);
-        ~VulkanCommandPool() override;
+        explicit VulkanCommandPool(Renderer* Owner);
+        bool Initialize(const CommandPoolCreateInfo& CreateInfo) override;
+        void Destroy() override;
 
+        void SetDebugName(const String& Name) override;
         VkCommandPool GetHandle() const;
-        CommandBuffer* AllocateCommandBuffer(const CommandBufferAllocateInfo& AllocateInfo) override;
-        void FreeCommandBuffer(CommandBuffer* CommandBuffer) override;
-
     private:
         VkCommandPool m_Handle = nullptr;
     };

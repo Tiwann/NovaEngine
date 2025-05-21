@@ -230,7 +230,7 @@ namespace Nova
 
     void D3D12Renderer::Destroy()
     {
-        WaitDeviceIdle();
+        WaitIdle();
 
     }
 
@@ -254,7 +254,7 @@ namespace Nova
     {
         if (ShouldRecreateSwapchain)
         {
-            WaitDeviceIdle();
+            WaitIdle();
             
             for (UINT i = 0; i < m_ImageCount; i++)
             {
@@ -392,10 +392,10 @@ namespace Nova
         FenceValue++;
     }
 
-    void D3D12Renderer::WaitDeviceIdle()
+    void D3D12Renderer::WaitIdle() const
     {
         ID3D12Fence* Fence = m_FrameData[m_CurrentFrameIndex].Fence.Get();
-        UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
+        const UINT64& FenceValue = m_FrameData[m_CurrentFrameIndex].FenceValue;
         m_CommandQueue->Signal(Fence, FenceValue);
 
         if (Fence->GetCompletedValue() < FenceValue)
@@ -414,11 +414,6 @@ namespace Nova
     {
     }
 
-    PresentMode D3D12Renderer::GetPresentMode()
-    {
-        return PresentMode::Unknown;
-    }
-
     void D3D12Renderer::SetViewport(const Viewport& Viewport)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
@@ -433,7 +428,8 @@ namespace Nova
         Cmd->RSSetScissorRects(1, &Rect);
     }
 
-    void D3D12Renderer::DrawIndexed(const size_t IndexCount, const u64 Offset)
+
+    void D3D12Renderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         Cmd->DrawIndexedInstanced(IndexCount, 1, 0, 0, 0);
@@ -484,7 +480,7 @@ namespace Nova
     }
 
 
-    ID3D12Resource* D3D12Renderer::CreateBuffer(const WideString& Name, const D3D12_HEAP_TYPE Type, const D3D12_RESOURCE_STATES ResourceStates, const size_t Size) const
+    ID3D12Resource* D3D12Renderer::CreateBuffer(const D3D12_HEAP_TYPE Type, const D3D12_RESOURCE_STATES ResourceStates, const size_t Size) const
     {
         const CD3DX12_HEAP_PROPERTIES HeapProps(Type);
         const CD3DX12_RESOURCE_DESC BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(Size);
@@ -501,7 +497,6 @@ namespace Nova
             return nullptr;
         }
 
-        OutResource->SetName(*Name);
         return OutResource;
     }
 
@@ -510,7 +505,7 @@ namespace Nova
         DXGI_FORMAT DXFormat = DXGI_FORMAT_UNKNOWN;
         switch (Format)
         {
-        case Format::NONE:
+        case Format::None:
             DXFormat =  DXGI_FORMAT_UNKNOWN;
             break;
         case Format::R8_UNORM:
@@ -606,6 +601,11 @@ namespace Nova
     ID3D12Device9* D3D12Renderer::GetDevice() const
     {
         return m_Device.Get();
+    }
+
+    IDXGIFactory7* D3D12Renderer::GetFactory() const
+    {
+        return m_Factory.Get();
     }
 
     u32 D3D12Renderer::GetImageCount() const

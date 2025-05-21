@@ -7,12 +7,13 @@ namespace Nova
     class VulkanCommandBuffer : public CommandBuffer
     {
     public:
-        explicit VulkanCommandBuffer(CommandPool* Owner, const CommandBufferAllocateInfo& AllocateInfo);
-        ~VulkanCommandBuffer() override;
+        explicit VulkanCommandBuffer(CommandPool* Owner);
+        bool Initialize(const CommandBufferAllocateInfo& AllocateInfo) override;
+        void Destroy() override;
         bool IsValid() const override;
         bool Begin(const CommandBufferBeginInfo& BeginInfo) override;
         bool End() override;
-
+        void SetDebugName(const String& Name) override;
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;
     private:

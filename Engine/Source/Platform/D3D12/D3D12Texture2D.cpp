@@ -31,7 +31,7 @@ namespace Nova
         }
 
         const size_t UploadBufferSize = GetRequiredIntermediateSize(m_Handle, 0, 1);
-        ID3D12Resource* UploadHeap = Renderer->CreateBuffer(L"Texture2D Upload Heap", D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, UploadBufferSize);
+        ID3D12Resource* UploadHeap = Renderer->CreateBuffer(D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, UploadBufferSize);
         if (!UploadHeap)
         {
             NOVA_DIRECTX_ERROR("Failed to create Texture2D Upload Heap!");
@@ -64,7 +64,7 @@ namespace Nova
         ID3D12CommandList* const Commands[]{ Cmd };
         Queue->ExecuteCommandLists(1, Commands);
 
-        Renderer->WaitDeviceIdle();
+        Renderer->WaitIdle();
         UploadHeap->Release();
         Cmd->Release();
     }

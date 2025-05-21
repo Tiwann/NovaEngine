@@ -5,7 +5,7 @@ namespace Nova
 {
     enum class Format
     {
-        NONE,
+        None,
         R8_UNORM,
         R8_SNORM,
         R16_USHORT,
@@ -49,7 +49,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE:                 return 0ULL;
+        case Format::None:                 return 0ULL;
         case Format::R8G8B8A8_UNORM:       return 4ULL;
         case Format::R16G16B16A16_USHORT:  return 4ULL * 2ULL;
         case Format::R32G32B32A32_FLOAT:   return 4ULL * 4ULL;
@@ -78,10 +78,10 @@ namespace Nova
         case Format::R16G16B16A16_SHORT:   return 4ULL * 2ULL;
         case Format::R32G32B32A32_UINT:    return 4ULL * 4ULL;
         case Format::R32G32B32A32_SINT:    return 4ULL * 4ULL;
-        case Format::R8G8B8A8_SRGB:        return 1ULL * 4ULL;
+        case Format::R8G8B8A8_SRGB:        return 4ULL * 1ULL;
         case Format::D32_FLOAT:            return 4ULL;
-        case Format::D32_FLOAT_S8_UINT:    return 4ULL + 1ULL;
-        case Format::D24_UNORM_S8_UINT:    return 3ULL + 1ULL;
+        case Format::D32_FLOAT_S8_UINT:    return 5ULL;
+        case Format::D24_UNORM_S8_UINT:     return 4ULL;
         default:                           return 0ULL;
         }
     }
@@ -90,7 +90,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE:  return 0;
+        case Format::None:  return 0;
         case Format::R8_UNORM: return 1ULL;
         case Format::R8_SNORM: return 1ULL;
         case Format::R16_USHORT: return 2ULL;
@@ -121,8 +121,8 @@ namespace Nova
         case Format::R32G32B32A32_FLOAT: return 4ULL;
         case Format::R8G8B8A8_SRGB: return 1ULL;
         case Format::D32_FLOAT: return 4ULL;
-        case Format::D32_FLOAT_S8_UINT: return 0;
-        case Format::D24_UNORM_S8_UINT: return 0;
+        case Format::D32_FLOAT_S8_UINT: return 4ULL;
+        case Format::D24_UNORM_S8_UINT: return 3ULL;
         default: return 0;
         }
     }
@@ -131,7 +131,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return 0ULL;
+        case Format::None: return 0ULL;
         case Format::R8_UNORM: return 1ULL;
         case Format::R8_SNORM: return 1ULL;
         case Format::R16_USHORT: return 1ULL;

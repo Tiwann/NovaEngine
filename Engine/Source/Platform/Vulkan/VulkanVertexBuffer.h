@@ -13,12 +13,10 @@ namespace Nova
    class VulkanVertexBuffer : public VertexBuffer
    {
    public:
-      explicit VulkanVertexBuffer(Renderer* Renderer);
-      explicit VulkanVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
-      ~VulkanVertexBuffer() override;
-
-      void SendData(const Vertex* Data, size_t Count) override;
-      void Bind() const override;
+      explicit VulkanVertexBuffer(Renderer* Owner);
+      bool Initialize(const VertexBufferCreateInfo& CreateInfo) override;
+      void SetDebugName(const String& Name) override;
+      void Destroy() override;
 
       VkBuffer GetHandle() const;
       VkBuffer* GetHandlePtr();

@@ -3,11 +3,11 @@
 #include "Platform/D3D12/D3D12IndexBuffer.h"
 #include "Platform/D3D12/D3D12Pipeline.h"
 #include "Platform/D3D12/D3D12Shader.h"
+#include "Platform/D3D12/D3D12Swapchain.h"
 #include "Platform/D3D12/D3D12VertexBuffer.h"
 #include "Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Platform/OpenGL/OpenGLPipeline.h"
 #include "Platform/OpenGL/OpenGLRenderer.h"
-#include "Platform/OpenGL/OpenGLRenderTarget.h"
 #include "Platform/OpenGL/OpenGLShader.h"
 #include "Platform/OpenGL/OpenGLUniformBuffer.h"
 #include "Platform/OpenGL/OpenGLVertexBuffer.h"
@@ -17,10 +17,15 @@
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanRenderTarget.h"
+#include "Platform/Vulkan/VulkanSemaphore.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
+
+#ifdef CreateSemaphore
+#undef CreateSemaphore
+#endif
 
 namespace Nova
 {
@@ -36,10 +41,30 @@ namespace Nova
         }
     }
 
-    void Renderer::Clear(const Color& Color, float Depth)
+    void Renderer::Clear(const Color& Color, const float Depth)
     {
         ClearColor(Color);
         ClearDepth(Depth);
+    }
+
+    Semaphore* Renderer::CreateSemaphore(const SemaphoreCreateInfo& CreateInfo)
+    {
+        Semaphore* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanSemaphore(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        default: return nullptr;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Fence* Renderer::CreateFence(const FenceCreateInfo& CreateInfo)
@@ -51,7 +76,7 @@ namespace Nova
         case GraphicsApi::OpenGL: return nullptr;
         case GraphicsApi::Vulkan: Result = new VulkanFence(this); break;
         case GraphicsApi::D3D12: return nullptr;
-        default: throw;
+        default: return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -68,10 +93,10 @@ namespace Nova
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
-        case GraphicsApi::OpenGL: Result = new OpenGLRenderTarget(this); break;
+        case GraphicsApi::OpenGL: return nullptr;
         case GraphicsApi::Vulkan: Result = new VulkanRenderTarget(this); break;
         case GraphicsApi::D3D12: return nullptr;
-        default: throw;
+        default: return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -84,14 +109,22 @@ namespace Nova
 
     CommandPool* Renderer::CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)
     {
+        CommandPool* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return nullptr;
-        case GraphicsApi::Vulkan: return new VulkanCommandPool(this, CreateInfo);
+        case GraphicsApi::Vulkan: Result = new VulkanCommandPool(this); break;
         case GraphicsApi::D3D12: return nullptr;
-        default: throw;
+        default: return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Swapchain* Renderer::CreateSwapchain(const SwapchainCreateInfo& CreateInfo)
@@ -102,8 +135,8 @@ namespace Nova
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return nullptr;
         case GraphicsApi::Vulkan: Result = new VulkanSwapchain(this); break;
-        case GraphicsApi::D3D12: return nullptr;
-        default: throw;
+        case GraphicsApi::D3D12: Result = new D3D12Swapchain(this); break;
+        default: return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -126,16 +159,55 @@ namespace Nova
         }
     }
 
-    Pipeline* Renderer::CreatePipeline(const PipelineCreateInfo& CreateInfo)
+    Pipeline* Renderer::CreatePipeline(const PipelineSpecification& Specification)
     {
-        Pipeline* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
-        case GraphicsApi::OpenGL: Result = new OpenGLPipeline(this); break;
-        case GraphicsApi::Vulkan: Result = new VulkanPipeline(this); break;
-        case GraphicsApi::D3D12: Result = new D3D12Pipeline(this); break;
+        case GraphicsApi::OpenGL:
+            {
+                Pipeline* Result = new OpenGLPipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        case GraphicsApi::Vulkan:
+            {
+                Pipeline* Result = new VulkanPipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
+        case GraphicsApi::D3D12:
+            {
+                Pipeline* Result = new D3D12Pipeline(this);
+                if (!Result->Initialize(Specification))
+                {
+                    delete Result;
+                    return nullptr;
+                }
+                return Result;
+            }
         default: return nullptr;
+        }
+    }
+
+    VertexBuffer* Renderer::CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo)
+    {
+        VertexBuffer* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None:     return nullptr;
+        case GraphicsApi::OpenGL:   Result = new OpenGLVertexBuffer(this); break;
+        case GraphicsApi::Vulkan:   Result = new VulkanVertexBuffer(this); break;
+        case GraphicsApi::D3D12:    Result = new D3D12VertexBuffer(this); break;
+        default:                    return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -146,52 +218,41 @@ namespace Nova
         return Result;
     }
 
-    VertexBuffer* Renderer::CreateVertexBuffer()
-    {
-        switch (m_GraphicsApi)
-        {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLVertexBuffer(this);
-        case GraphicsApi::Vulkan:   return new VulkanVertexBuffer(this);
-        case GraphicsApi::D3D12:    return new D3D12VertexBuffer(this);
-        default:                    return nullptr;
-        }
-    }
-
     VertexBuffer* Renderer::CreateVertexBuffer(const BufferView<Vertex>& Vertices)
     {
-        switch (m_GraphicsApi)
-        {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLVertexBuffer(this, Vertices.Data(), Vertices.Count());
-        case GraphicsApi::Vulkan:   return new VulkanVertexBuffer(this, Vertices.Data(), Vertices.Count());
-        case GraphicsApi::D3D12:    return new D3D12VertexBuffer(this, Vertices.Data(), Vertices.Count());
-        default:                    return nullptr;
-        }
+        VertexBufferCreateInfo CreateInfo;
+        CreateInfo.Data = Vertices.Data();
+        CreateInfo.Count = Vertices.Count();
+        return CreateVertexBuffer(CreateInfo);
     }
 
-    IndexBuffer* Renderer::CreateIndexBuffer()
+    IndexBuffer* Renderer::CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo)
     {
+        IndexBuffer* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLIndexBuffer(this);
-        case GraphicsApi::Vulkan:   return new VulkanIndexBuffer(this);
-        case GraphicsApi::D3D12:    return new D3D12IndexBuffer(this);
+        case GraphicsApi::OpenGL:   Result = new OpenGLIndexBuffer(this); break;
+        case GraphicsApi::Vulkan:   Result = new VulkanIndexBuffer(this); break;
+        case GraphicsApi::D3D12:    Result = new D3D12IndexBuffer(this); break;
         default:                    return nullptr;
         }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     IndexBuffer* Renderer::CreateIndexBuffer(const BufferView<u32>& Indices)
     {
-        switch (m_GraphicsApi)
-        {
-        case GraphicsApi::None:     return nullptr;
-        case GraphicsApi::OpenGL:   return new OpenGLIndexBuffer(this, Indices.Data(), Indices.Count());
-        case GraphicsApi::Vulkan:   return new VulkanIndexBuffer(this, Indices.Data(), Indices.Count());
-        case GraphicsApi::D3D12:    return new D3D12IndexBuffer(this, Indices.Data(), Indices.Count());
-        default:                    return nullptr;
-        }
+        IndexBufferCreateInfo CreateInfo;
+        CreateInfo.Format = Format::R32_UINT;
+        CreateInfo.Data = Indices.Data();
+        CreateInfo.Size = Indices.Size();
+        return CreateIndexBuffer(CreateInfo);
     }
 
     UniformBuffer* Renderer::CreateUniformBuffer(const size_t Size)
@@ -203,6 +264,7 @@ namespace Nova
         case GraphicsApi::OpenGL:   OutBuffer = new OpenGLUniformBuffer(this); break;
         case GraphicsApi::Vulkan:   OutBuffer = new VulkanUniformBuffer(this); break;
         case GraphicsApi::D3D12:    return nullptr;
+        default: return nullptr;
         }
 
         if (!OutBuffer->Allocate(Size))
@@ -226,16 +288,6 @@ namespace Nova
     const Camera* Renderer::GetCurrentCamera() const
     {
         return m_CurrentCamera;
-    }
-
-    RenderTarget* Renderer::GetRenderTarget() const
-    {
-        return m_RenderTarget;
-    }
-
-    void Renderer::SetRenderTarget(RenderTarget* RenderTarget)
-    {
-        m_RenderTarget = RenderTarget;
     }
 
     GraphicsApi Renderer::GetGraphicsApi() const

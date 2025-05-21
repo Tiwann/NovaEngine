@@ -1,27 +1,27 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "GraphicsApi.h"
 #include "Containers/Buffer.h"
 #include "Containers/String.h"
 #include "Runtime/Filesystem.h"
-#include "GraphicsApi.h"
+#include "Runtime/Object.h"
 #include "CullMode.h"
 #include "BlendOperation.h"
 #include "BlendFactor.h"
 #include "CompareOperation.h"
-#include "Fence.h"
-#include "PresentMode.h"
-#include "RenderTarget.h"
 #include "Scissor.h"
 #include "Vertex.h"
 
 namespace Nova
 {
     class RenderTarget;
+    struct RenderTargetCreateInfo;
     class UniformBuffer;
-	class Color;
+    class Color;
     class VertexArray;
     class VertexBuffer;
+    struct VertexBufferCreateInfo;
     class IndexBuffer;
+    struct IndexBufferCreateInfo;
     class Shader;
     class Camera;
     class Application;
@@ -29,7 +29,7 @@ namespace Nova
     struct Vector2;
     class Sprite;
     class Pipeline;
-    struct PipelineCreateInfo;
+    struct PipelineSpecification;
     class VertexBuffer;
     class Swapchain;
     struct SwapchainCreateInfo;
@@ -38,6 +38,17 @@ namespace Nova
     class CommandPool;
     struct CommandPoolCreateInfo;
     class CommandBuffer;
+
+    class Semaphore;
+    struct SemaphoreCreateInfo;
+    class Fence;
+    struct FenceCreateInfo;
+
+#if defined(NOVA_DEV) || defined(NOVA_DEBUG)
+    static constexpr bool RendererIsDebug = true;
+#else
+    static constexpr bool RendererIsDebug = false;
+#endif
 
     class Renderer : public Object
     {
@@ -60,43 +71,45 @@ namespace Nova
         virtual void EndFrame() = 0;
         virtual void SetViewport(const Viewport& Viewport) = 0;
         virtual void SetScissor(const Scissor& Scissor) = 0;
-        virtual void DrawIndexed(size_t IndexCount, u64 Offset) = 0;
+        virtual void DrawIndexed(size_t IndexCount, size_t Offset) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;
         virtual void SetDepthCompareOperation(CompareOperation DepthFunction) = 0;
         virtual void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) = 0;
         virtual void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) = 0;
         virtual void SetBlending(bool Enabled) = 0;
+
         virtual void BindPipeline(Pipeline* Pipeline) = 0;
+
         virtual void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) = 0;
         virtual void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) = 0;
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
-        virtual PresentMode GetPresentMode() = 0;
+        virtual void WaitIdle() const {}
 
+        Semaphore* CreateSemaphore(const SemaphoreCreateInfo& CreateInfo);
         Fence* CreateFence(const FenceCreateInfo& CreateInfo);
         RenderTarget* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo);
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& CreateInfo);
         Shader* CreateShader(const String& Name, const Path& Filepath);
-        Pipeline* CreatePipeline(const PipelineCreateInfo& CreateInfo);
-        VertexBuffer* CreateVertexBuffer();
+        Pipeline* CreatePipeline(const PipelineSpecification& Specification);
+        VertexBuffer* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo);
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
-        IndexBuffer* CreateIndexBuffer();
+        IndexBuffer* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo);
         IndexBuffer* CreateIndexBuffer(const BufferView<u32>& Indices);
         UniformBuffer* CreateUniformBuffer(size_t Size);
 
         void SetCurrentCamera(Camera* Camera);
         Camera* GetCurrentCamera();
         const Camera* GetCurrentCamera() const;
-
-        RenderTarget* GetRenderTarget() const;
-        void SetRenderTarget(RenderTarget* RenderTarget);
         GraphicsApi GetGraphicsApi() const;
         Application* GetOwner();
         const Application* GetOwner() const;
+
+        template<typename RendererType> requires IsBaseOfValue<Renderer, RendererType>
+        RendererType* As() { return dynamic_cast<RendererType*>(this); }
     protected:
         Camera* m_CurrentCamera = nullptr;
         Application* m_Application = nullptr;
-        RenderTarget* m_RenderTarget = nullptr;
         GraphicsApi m_GraphicsApi;
     };
 }

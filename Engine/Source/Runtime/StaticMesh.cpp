@@ -20,8 +20,17 @@ namespace Nova
 
     StaticMesh::~StaticMesh()
     {
-        delete m_VertexBuffer;
-        delete m_IndexBuffer;
+        if (m_VertexBuffer)
+        {
+            m_VertexBuffer->Destroy();
+            delete m_VertexBuffer;
+        }
+
+        if (m_IndexBuffer)
+        {
+            m_IndexBuffer->Destroy();
+            delete m_IndexBuffer;
+        }
     }
 
 

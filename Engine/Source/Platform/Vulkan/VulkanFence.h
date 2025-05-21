@@ -13,6 +13,9 @@ namespace Nova
         explicit VulkanFence(Renderer* Owner);
 
         bool Initialize(const FenceCreateInfo& CreateInfo) override;
+        void WaitForMe(u64 Timeout = U64_MAX) override;
+        void Reset() override;
+        void SetDebugName(const String& Name) override;
         void Destroy() override;
 
         VkFence GetHandle() const;

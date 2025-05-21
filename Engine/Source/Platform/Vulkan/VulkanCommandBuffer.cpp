@@ -5,9 +5,15 @@
 
 namespace Nova
 {
-    VulkanCommandBuffer::VulkanCommandBuffer(CommandPool* Owner, const CommandBufferAllocateInfo& AllocateInfo)
-        : CommandBuffer(Owner, AllocateInfo)
+    VulkanCommandBuffer::VulkanCommandBuffer(CommandPool* Owner) : CommandBuffer(Owner)
     {
+
+    }
+
+    bool VulkanCommandBuffer::Initialize(const CommandBufferAllocateInfo& AllocateInfo)
+    {
+        m_Level = AllocateInfo.Level;
+
         VkCommandBufferAllocateInfo VkAllocInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         VkAllocInfo.commandPool = m_CommandPool->As<VulkanCommandPool>()->GetHandle();
         VkAllocInfo.commandBufferCount = 1;
@@ -22,17 +28,16 @@ namespace Nova
             break;
         }
 
-        const VulkanRenderer* Renderer = m_CommandPool->GetRenderer()->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         if (VK_FAILED(vkAllocateCommandBuffers(Device, &VkAllocInfo, &m_Handle)))
-        {
-            throw std::runtime_error("Failed to allocate command buffers");
-        }
+            return false;
+        return true;
     }
 
-    VulkanCommandBuffer::~VulkanCommandBuffer()
+    void VulkanCommandBuffer::Destroy()
     {
-        const VulkanRenderer* Renderer = m_CommandPool->GetRenderer()->As<VulkanRenderer>();
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         vkFreeCommandBuffers(Device, m_CommandPool->As<VulkanCommandPool>()->GetHandle(), 1, &m_Handle);
     }
@@ -78,5 +83,17 @@ namespace Nova
         if (VK_FAILED(vkEndCommandBuffer(m_Handle)))
             return false;
         return true;
+    }
+
+    void VulkanCommandBuffer::SetDebugName(const String& Name)
+    {
+        VkDebugUtilsObjectNameInfoEXT NameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        NameInfo.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
+        NameInfo.objectHandle = (u64)m_Handle;
+        NameInfo.pObjectName = *Name;
+
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        Renderer->GetFunctionPointers().vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
     }
 }

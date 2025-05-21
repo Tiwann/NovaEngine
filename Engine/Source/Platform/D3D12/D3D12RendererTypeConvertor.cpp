@@ -149,7 +149,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE:                         return DXGI_FORMAT_UNKNOWN;
+        case Format::None:                         return DXGI_FORMAT_UNKNOWN;
         case Format::R8_UNORM:                     return DXGI_FORMAT_R8_UNORM;
         case Format::R8_SNORM:                     return DXGI_FORMAT_R8_SNORM;
         case Format::R16_USHORT:                   return DXGI_FORMAT_R16_UINT;

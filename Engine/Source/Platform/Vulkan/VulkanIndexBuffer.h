@@ -8,12 +8,11 @@ namespace Nova
     class VulkanIndexBuffer : public IndexBuffer
     {
     public:
-        explicit VulkanIndexBuffer(Renderer* Renderer);
-        explicit VulkanIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
-        ~VulkanIndexBuffer() override;
+        explicit VulkanIndexBuffer(Renderer* Owner);
+        bool Initialize(const IndexBufferCreateInfo& CreateInfo) override;
+        void SetDebugName(const String& Name) override;
+        void Destroy() override;
 
-        void Bind() const override;
-        void SendData(const u32* Indices, size_t Count) override;
         VkBuffer GetHandle() const;
     private:
         VkBuffer            m_Handle = nullptr;

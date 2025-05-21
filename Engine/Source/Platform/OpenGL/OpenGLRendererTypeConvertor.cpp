@@ -144,7 +144,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return GL_NONE;
+        case Format::None: return GL_NONE;
         case Format::R8_UNORM: return GL_R8;
         case Format::R8_SNORM: return GL_R8_SNORM;
         case Format::R16_USHORT: return GL_R16UI;

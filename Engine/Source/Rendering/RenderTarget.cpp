@@ -2,13 +2,8 @@
 
 namespace Nova
 {
-    RenderTarget::RenderTarget(Renderer* Owner) : Object("Render Target"), m_Owner(Owner)
+    RenderTarget::RenderTarget(Renderer* Owner) : RendererObject("Render Target", Owner)
     {
-    }
-
-    Renderer* RenderTarget::GetOwner() const
-    {
-        return m_Owner;
     }
 
     u32 RenderTarget::GetWidth() const

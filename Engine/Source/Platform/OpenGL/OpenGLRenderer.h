@@ -35,7 +35,7 @@ namespace Nova
         void EndFrame() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void DrawIndexed(size_t IndexCount, u64 Offset) override;
+        void DrawIndexed(size_t IndexCount, size_t Offset) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
         static GLenum ConvertFormat(Format Format);
@@ -47,13 +47,10 @@ namespace Nova
         void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
         void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
         void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
-        PresentMode GetPresentMode() override;
         OpenGLRendererTypeConvertor Convertor;
     protected:
         static String GetDebugSourceName(u32 Source);
         static Verbosity GetDebugVerbosity(u32 Severity);
-
-
 
     protected:
         OpenGLPipeline* m_BoundPipeline = nullptr;

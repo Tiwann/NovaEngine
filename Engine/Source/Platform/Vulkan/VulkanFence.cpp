@@ -24,6 +24,34 @@ namespace Nova
         return true;
     }
 
+    void VulkanFence::WaitForMe(u64 Timeout)
+    {
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        vkWaitForFences(Device, 1, &m_Handle, true, Timeout);
+    }
+
+    void VulkanFence::Reset()
+    {
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        vkResetFences(Device, 1, &m_Handle);
+    }
+
+    void VulkanFence::SetDebugName(const String& Name)
+    {
+        if constexpr(!RendererIsDebug)
+            return;
+        VkDebugUtilsObjectNameInfoEXT NameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        NameInfo.objectType = VK_OBJECT_TYPE_FENCE;
+        NameInfo.objectHandle = (u64)m_Handle;
+        NameInfo.pObjectName = *Name;
+
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        Renderer->GetFunctionPointers().vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
+    }
+
     void VulkanFence::Destroy()
     {
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();

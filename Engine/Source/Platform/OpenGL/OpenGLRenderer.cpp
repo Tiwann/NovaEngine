@@ -34,7 +34,6 @@ namespace Nova
             return false;
         }
 
-
         const auto Callback = [](const GLenum Source, GLenum, GLuint, const GLenum Severity, GLsizei, const GLchar *Message, const void *) -> void
         {
             const Verbosity Verbo = GetDebugVerbosity(Severity);
@@ -105,8 +104,7 @@ namespace Nova
         glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
     }
 
-
-    void OpenGLRenderer::DrawIndexed(const size_t IndexCount, const u64 Offset)
+    void OpenGLRenderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {
         const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;
         const GLenum GLTopology = Convertor.ConvertPrimitiveTopology(Topology);
@@ -178,7 +176,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return GL_NONE;
+        case Format::None: return GL_NONE;
         case Format::R8_UNORM: return GL_RED;
         case Format::R8_SNORM: return GL_RED;
         case Format::R16_USHORT: return GL_RED;
@@ -215,7 +213,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE: return 0;
+        case Format::None: return 0;
         case Format::R8_UNORM: return GL_UNSIGNED_BYTE;
         case Format::R8_SNORM: return GL_BYTE;
         case Format::R16_USHORT: return GL_UNSIGNED_SHORT;
@@ -281,7 +279,7 @@ namespace Nova
 
     void OpenGLRenderer::BindPipeline(Pipeline* Pipeline)
     {
-        const PipelineCreateInfo& Specification = Pipeline->GetSpecification();
+        const PipelineSpecification& Specification = Pipeline->GetSpecification();
         OpenGLPipeline* CastedPipeline = Pipeline->As<OpenGLPipeline>();
         m_BoundPipeline = CastedPipeline;
         const u32 VertexArrayObject = CastedPipeline->GetVertexArrayObject();
@@ -345,11 +343,6 @@ namespace Nova
 
     void OpenGLRenderer::BindIndexBuffer(IndexBuffer* Buffer, u64 Offset)
     {
-    }
-
-    PresentMode OpenGLRenderer::GetPresentMode()
-    {
-        return PresentMode::Unknown;
     }
 
     String OpenGLRenderer::GetDebugSourceName(const u32 Source)

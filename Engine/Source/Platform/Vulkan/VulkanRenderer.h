@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include <vk_mem_alloc.h>
-
 #include "Rendering/Renderer.h"
 #include "Runtime/LogCategory.h"
 #include "Rendering/Vertex.h"
@@ -14,26 +12,24 @@ NOVA_DECLARE_LOG_CATEGORY_STATIC(Vulkan, "VULKAN");
 #define VK_FAILED(Res) (((VkResult)(Res)) != VK_SUCCESS)
 
 typedef struct VmaAllocator_T* VmaAllocator;
+typedef struct VmaAllocation_T* VmaAllocation;
 
 namespace Nova
 {
-    class VulkanSwapchain;
+
     class VulkanCommandPool;
     class VulkanCommandBuffer;
+    class VulkanSwapchain;
+    class VulkanRenderTarget;
+    class VulkanFence;
+    class VulkanSemaphore;
 
-    struct VkFrameData
+    struct VulkanFrameData
     {
         VulkanCommandBuffer* CommandBuffer = nullptr;
-        VkImageView ColorImageView = nullptr;
-        VkImage ColorImage = nullptr;
-        VkImageView DepthImageView = nullptr;
-        VkImage DepthImage = nullptr;
-        VmaAllocation DepthImageAllocation = nullptr;
-        VmaAllocationInfo DepthImageAllocationInfo;
-        VkFormat Format;
-        VkSemaphore SubmitSemaphore = nullptr;
-        VkSemaphore PresentSemaphore = nullptr;
-        VkFence Fence = nullptr;
+        VulkanSemaphore* SubmitSemaphore = nullptr;
+        VulkanSemaphore* PresentSemaphore = nullptr;
+        VulkanFence* Fence = nullptr;
     };
 
     struct VkFunctionPointers
@@ -44,6 +40,10 @@ namespace Nova
         #endif
         PFN_vkCmdSetColorBlendEquationEXT   vkCmdSetColorBlendEquationEXT = nullptr;
         PFN_vkCmdSetColorBlendEnableEXT     vkCmdSetColorBlendEnableEXT = nullptr;
+        PFN_vkCreateShadersEXT              vkCreateShadersEXT = nullptr;
+        PFN_vkDestroyShaderEXT              vkDestroyShaderEXT = nullptr;
+        PFN_vkCmdBindShadersEXT             vkCmdBindShadersEXT = nullptr;
+        PFN_vkSetDebugUtilsObjectNameEXT    vkSetDebugUtilsObjectNameEXT = nullptr;
     };
 
 
@@ -66,41 +66,40 @@ namespace Nova
         void Present() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
-        void DrawIndexed(size_t IndexCount, u64 Offset) override;
+        void DrawIndexed(size_t IndexCount, size_t Offset) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;
         void SetDepthCompareOperation(CompareOperation DepthFunction) override;
         void SetBlendFunction(BlendFactor ColorSource, BlendFactor ColorDest, BlendOperation ColorOperation, BlendFactor AlphaSource, BlendFactor AlphaDest, BlendOperation AlphaOperation) override;
         void SetBlendFunction(BlendFactor Source, BlendFactor Destination, BlendOperation Operation) override;
         void BindPipeline(Pipeline* Pipeline) override;
+        void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
         void BindVertexBuffer(VertexBuffer* Buffer, u64 Offset) override;
         void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) override;
-        void UpdateUniformBuffer(UniformBuffer* Buffer, u64 Offset, u64 Size, const void* Data) override;
+        void WaitIdle() const override;
 
-
-        PresentMode GetPresentMode() override;
+        PresentMode GetPresentMode() const;
         VkInstance GetInstance() const;
         VkPhysicalDevice GetPhysicalDevice() const;
         VkDevice GetDevice() const;
         VkQueue GetGraphicsQueue() const;
         VkQueue GetPresentQueue() const;
         VkSurfaceKHR GetSurface() const;
-        VkSwapchainKHR GetSwapchain() const;
-        u32 GetGraphicsQueueFamily() const;
-        u32 GetPresentQueueFamily() const;
+        VulkanSwapchain* GetSwapchain() const;
         VmaAllocator GetAllocator() const;
 
-        BufferView<VkFrameData> GetFrameData() const;
-        VkFrameData GetCurrentFrameData() const;
+        u32 GetCurrentFrameIndex() const;
+        u32 GetGraphicsQueueFamily() const;
+        u32 GetPresentQueueFamily() const;
+        BufferView<VulkanFrameData> GetFrameData() const;
+        VulkanFrameData GetCurrentFrameData() const;
         VulkanCommandBuffer* GetCurrentCommandBuffer() const;
-        VulkanCommandPool* GetCommandPool() const;
-        VkImage GetCurrentImage() const;
-        VkImageView GetCurrentImageView() const;
         u32 GetImageCount() const;
         VkDescriptorPool GetDescriptorPool() const;
-        void WaitIdle() const;
+        VulkanCommandPool* GetCommandPool() const;
+
         const VkFunctionPointers& GetFunctionPointers() const;
-        u32 GetCurrentFrameIndex() const;
+
         VulkanRendererTypeConvertor Convertor;
     private:
         u32                               m_CurrentFrameIndex = 0;
@@ -115,14 +114,13 @@ namespace Nova
         VkSurfaceKHR                      m_Surface = nullptr;
         u32                               m_GraphicsQueueIndex = U32_MAX;
         u32                               m_PresentQueueIndex = U32_MAX;
-        u32                               m_ImageCount = 0;
         VkQueue                           m_GraphicsQueue = nullptr;
         VkQueue                           m_PresentQueue = nullptr;
-        VkPresentModeKHR                  m_PresentMode;
-        VkSwapchainKHR                    m_Swapchain = nullptr;
-        VkFrameData                       m_Frames[3] = { };
+        VulkanSwapchain*                  m_Swapchain = nullptr;
+        VulkanCommandPool*                m_CommandPool = nullptr;
+        VulkanRenderTarget*               m_RenderTarget = nullptr;
+        VulkanFrameData                       m_Frames[3] = { };
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;
-        VulkanCommandPool*                m_CommandPool = nullptr;
     };
 }

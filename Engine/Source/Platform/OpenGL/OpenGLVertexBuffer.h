@@ -10,12 +10,10 @@ namespace Nova
     {
     public:
         explicit OpenGLVertexBuffer(Renderer* Renderer);
-        explicit OpenGLVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count);
-        ~OpenGLVertexBuffer() override;
-        
-        void SendData(const Vertex* Data, size_t Count) override;
-        void Bind() const override;
+        bool Initialize(const VertexBufferCreateInfo& CreateInfo) override;
+        void Destroy() override;
+
     private:
-        u32 m_Handle;
+        u32 m_Handle = U32_MAX;
     };
 }

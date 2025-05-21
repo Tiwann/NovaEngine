@@ -3,6 +3,7 @@
 #include "CompareOperation.h"
 #include "CullMode.h"
 #include "FrontFace.h"
+#include "Multisample.h"
 #include "PolygonMode.h"
 #include "PrimitiveTopology.h"
 #include "Scissor.h"
@@ -38,7 +39,7 @@ namespace Nova
         float LineWidth = 1.0f;
         Viewport Viewport;
         Scissor Scissor;
-        u8 RasterizationSamples = 1;
+        SampleCount RasterizationSamples = SampleCount::S1;
         bool BlendEnable = false;
         BlendFunction BlendFunction;
         bool DynamicRendering = false;

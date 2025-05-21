@@ -90,7 +90,7 @@ namespace Nova
         PipelineSpecification.Scissor = Scissor(0, 0, 600, 400);
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
         PipelineSpecification.PrimitiveTopology = PrimitiveTopology::TriangleList;
-        PipelineSpecification.RasterizationSamples = 1;
+        PipelineSpecification.RasterizationSamples = SampleCount::S1;
         PipelineSpecification.DepthBiasEnable = false;
         PipelineSpecification.DepthClampEnable = false;
         PipelineSpecification.DepthTestEnable = false;

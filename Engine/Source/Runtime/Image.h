@@ -25,7 +25,7 @@ namespace Nova {
 	
 	private:
 		u32 m_Width = 0, m_Height = 0;
-		Format m_Format{Format::NONE};
+		Format m_Format{Format::None};
 		void* m_Pixels = nullptr;
 	};
 }

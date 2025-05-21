@@ -5,30 +5,25 @@ namespace Nova
 {
     OpenGLVertexBuffer::OpenGLVertexBuffer(Renderer* Renderer) : VertexBuffer(Renderer)
     {
-        glCreateBuffers(1, &m_Handle);
+
     }
 
-    OpenGLVertexBuffer::OpenGLVertexBuffer(Renderer* Renderer, const Vertex* Data, size_t Count) : VertexBuffer(Renderer, Data, Count)
+    bool OpenGLVertexBuffer::Initialize(const VertexBufferCreateInfo& CreateInfo)
     {
+        if (m_Handle != U32_MAX)
+        {
+            glDeleteBuffers(1, &m_Handle);
+        }
+
         glCreateBuffers(1, &m_Handle);
         glBindBuffer(GL_ARRAY_BUFFER, m_Handle);
-        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)m_Data.Size(), m_Data.Data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(CreateInfo.Count * sizeof(Vertex)), CreateInfo.Data, GL_STATIC_DRAW);
+        return true;
     }
 
-    OpenGLVertexBuffer::~OpenGLVertexBuffer()
+    void OpenGLVertexBuffer::Destroy()
     {
         glDeleteBuffers(1, &m_Handle);
-    }
-
-    void OpenGLVertexBuffer::SendData(const Vertex* Data, size_t Count)
-    {
-        VertexBuffer::SendData(Data, Count);
-        glBindBuffer(GL_ARRAY_BUFFER, m_Handle);
-        glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)m_Data.Size(), m_Data.Data(), GL_STATIC_DRAW);
-    }
-
-    void OpenGLVertexBuffer::Bind() const
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, m_Handle);
+        m_Handle = U32_MAX;
     }
 }

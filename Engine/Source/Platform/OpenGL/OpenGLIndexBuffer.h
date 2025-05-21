@@ -7,12 +7,11 @@ namespace Nova
     {
     public:
         explicit OpenGLIndexBuffer(Renderer* Renderer);
-        explicit OpenGLIndexBuffer(Renderer* Renderer, const u32* Indices, size_t Count);
-        ~OpenGLIndexBuffer() override;
+        bool Initialize(const IndexBufferCreateInfo& CreateInfo) override;
+        void Destroy() override;
+        void SetDebugName(const String& Name) override;
 
-        void SendData(const u32* Indices, size_t Count) override;
-        void Bind() const override;
     private:
-        u32 m_Handle;
+        u32 m_Handle = U32_MAX;
     };
 }

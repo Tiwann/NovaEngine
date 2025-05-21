@@ -147,7 +147,7 @@ namespace Nova
     {
         switch (Format)
         {
-        case Format::NONE:                  return VK_FORMAT_UNDEFINED;
+        case Format::None:                  return VK_FORMAT_UNDEFINED;
         case Format::R8_UNORM:              return VK_FORMAT_R8_UNORM;
         case Format::R8_SNORM:              return VK_FORMAT_R8_SNORM;
         case Format::R16_USHORT:            return VK_FORMAT_R16_UINT;
@@ -177,9 +177,9 @@ namespace Nova
         case Format::R32G32B32A32_UINT:     return VK_FORMAT_R32G32B32A32_UINT;
         case Format::R32G32B32A32_SINT:     return VK_FORMAT_R32G32B32A32_SINT;
         case Format::R32G32B32A32_FLOAT:    return VK_FORMAT_R32G32B32A32_SFLOAT;
-        case Format::D32_FLOAT:             return VK_FORMAT_D32_SFLOAT;
-        case Format::D32_FLOAT_S8_UINT:     return VK_FORMAT_D32_SFLOAT_S8_UINT;
-        case Format::D24_UNORM_S8_UINT:     return VK_FORMAT_D24_UNORM_S8_UINT;
+        case Format::D32_FLOAT: return VK_FORMAT_D32_SFLOAT;
+        case Format::D32_FLOAT_S8_UINT: return VK_FORMAT_D32_SFLOAT_S8_UINT;
+        case Format::D24_UNORM_S8_UINT: return VK_FORMAT_D24_UNORM_S8_UINT;
         default: return VK_FORMAT_UNDEFINED;
         }
     }
@@ -192,7 +192,6 @@ namespace Nova
         case PresentMode::Immediate: return VK_PRESENT_MODE_IMMEDIATE_KHR;
         case PresentMode::Mailbox: return VK_PRESENT_MODE_MAILBOX_KHR;
         case PresentMode::Fifo: return VK_PRESENT_MODE_FIFO_KHR;
-        case PresentMode::FifoRelaxed: return VK_PRESENT_MODE_FIFO_RELAXED_KHR;
         default: throw;
         }
     }

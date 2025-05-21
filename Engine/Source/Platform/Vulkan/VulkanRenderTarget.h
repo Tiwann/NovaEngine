@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Rendering/CommandBuffer.h"
 #include "Rendering/RenderTarget.h"
 
 typedef struct VkImage_T* VkImage;
@@ -16,8 +17,8 @@ namespace Nova
         bool Initialize(const RenderTargetCreateInfo& CreateInfo) override;
         bool Resize(u32 Width, u32 Height) override;
         void Destroy() override;
-        void BeginRendering() const;
-        void EndRendering() const;
+        void BeginRendering(CommandBuffer* Cmd) const;
+        void EndRendering(CommandBuffer* Cmd) const;
 
         VkImage GetColorImage() const;
         VkImageView GetColorImageView() const;

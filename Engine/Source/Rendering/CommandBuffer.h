@@ -40,6 +40,7 @@ namespace Nova
         virtual bool Begin(const CommandBufferBeginInfo& BeginInfo) = 0;
         virtual bool End() = 0;
         virtual bool IsValid() const = 0;
+        virtual void SetDebugName(const String& Name){}
         CommandPool* GetCommandPool() const;
         CommandBufferLevel GetLevel() const;
     protected:

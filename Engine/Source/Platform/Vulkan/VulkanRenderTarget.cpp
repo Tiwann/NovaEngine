@@ -290,14 +290,13 @@ namespace Nova
         }
     }
 
-    void VulkanRenderTarget::BeginRendering() const
+    void VulkanRenderTarget::BeginRendering(CommandBuffer* Cmd) const
     {
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
-        const VkCommandBuffer CommandBuffer = Renderer->GetCurrentCommandBuffer()->GetHandle();
         const u32 FrameIndex = Renderer->GetCurrentFrameIndex();
 
         VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         ColorBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -311,7 +310,7 @@ namespace Nova
         ColorBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
         vkCmdPipelineBarrier(
-            CommandBuffer,
+            Cmd->As<VulkanCommandBuffer>()->GetHandle(),
             VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             0, 0, nullptr, 0, nullptr, 1, &ColorBarrier
@@ -340,16 +339,15 @@ namespace Nova
         RenderingInfo.pColorAttachments = &ColorAttachment;
         RenderingInfo.pDepthAttachment = &DepthAttachment;
 
-        vkCmdBeginRendering(CommandBuffer, &RenderingInfo);
+        vkCmdBeginRendering(Cmd->As<VulkanCommandBuffer>()->GetHandle(), &RenderingInfo);
     }
 
-    void VulkanRenderTarget::EndRendering() const
+    void VulkanRenderTarget::EndRendering(CommandBuffer* Cmd) const
     {
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
-        const VkCommandBuffer CommandBuffer = Renderer->GetCurrentCommandBuffer()->GetHandle();
         const u32 FrameIndex = Renderer->GetCurrentFrameIndex();
 
-        vkCmdEndRendering(CommandBuffer);
+        vkCmdEndRendering(Cmd->As<VulkanCommandBuffer>()->GetHandle());
 
         VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -367,7 +365,7 @@ namespace Nova
 
 
         vkCmdPipelineBarrier(
-            CommandBuffer,
+            Cmd->As<VulkanCommandBuffer>()->GetHandle(),
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_TRANSFER_BIT,
             0, 0, nullptr, 0, nullptr, 1, &ColorBarrier

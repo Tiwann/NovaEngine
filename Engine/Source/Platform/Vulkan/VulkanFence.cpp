@@ -24,6 +24,13 @@ namespace Nova
         return true;
     }
 
+    void VulkanFence::WaitForMe(u64 Timeout)
+    {
+        const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        vkWaitForFences(Device, 1, &m_Handle, true, Timeout);
+    }
+
     void VulkanFence::Reset()
     {
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();

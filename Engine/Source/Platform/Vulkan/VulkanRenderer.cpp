@@ -11,9 +11,11 @@
 #include <GLFW/glfw3.h>
 
 #include "VulkanCommandBuffer.h"
+#include "VulkanFence.h"
 #include "VulkanIndexBuffer.h"
 #include "VulkanPipeline.h"
 #include "VulkanRenderTarget.h"
+#include "VulkanSemaphore.h"
 #include "VulkanShader.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
@@ -172,8 +174,7 @@ namespace Nova
                 NOVA_VULKAN_ERROR("Failed to pick physical device!");
                 m_Application->RequireExit(ExitCode::Error);
 
-                ScopedPointer<PopupMessage> Message = PopupMessage::
-                Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
+                ScopedPointer<PopupMessage> Message = PopupMessage::Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
                 Message->Show();
                 return false;
             }
@@ -349,138 +350,20 @@ namespace Nova
                 return false;
             }
 
-            VkImage SwapchainImages[3] { };
-            m_Swapchain->GetImages(SwapchainImages);
-
             CommandPoolCreateInfo CommandPoolCreateInfo;
             CommandPoolCreateInfo.Flags = CommandPoolFlagBits::ResetCommandBuffer;
             m_CommandPool = (VulkanCommandPool*)CreateCommandPool(CommandPoolCreateInfo);
 
-
-            for (size_t i = 0; i < m_Swapchain->GetImageCount(); i++)
+            for (size_t i = 0; i < m_Swapchain->GetImageCount(); ++i)
             {
-                const VkImage Image = SwapchainImages[i];
+                m_Frames[i].SubmitSemaphore = (VulkanSemaphore*)CreateSemaphore({});
+                m_Frames[i].SubmitSemaphore->SetDebugName("Submit Semaphore");
+                m_Frames[i].PresentSemaphore = (VulkanSemaphore*)CreateSemaphore({});
+                m_Frames[i].PresentSemaphore->SetDebugName("Present Semaphore");
+                m_Frames[i].Fence = (VulkanFence*)CreateFence( { FenceCreateFlagBits::Signaled });
 
-                VkImageCreateInfo DepthImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
-                DepthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-                DepthImageCreateInfo.extent.width = WindowWidth;
-                DepthImageCreateInfo.extent.height = WindowHeight;
-                DepthImageCreateInfo.extent.depth = 1;
-                DepthImageCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-                DepthImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-                DepthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-                DepthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-                DepthImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                DepthImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                DepthImageCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
-                DepthImageCreateInfo.queueFamilyIndexCount = 1;
-                DepthImageCreateInfo.arrayLayers = 1;
-                DepthImageCreateInfo.mipLevels = 1;
-
-                VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
-                DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-                DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, nullptr);
-
-                VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                DepthImageViewCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-                DepthImageViewCreateInfo.image = m_Frames[i].DepthImage;
-                DepthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-                DepthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-                DepthImageViewCreateInfo.subresourceRange.levelCount = 1;
-                DepthImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-                DepthImageViewCreateInfo.subresourceRange.layerCount = 1;
-                vkCreateImageView(m_Device, &DepthImageViewCreateInfo, nullptr, &m_Frames[i].DepthImageView);
-
-
-                VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                ImageViewCreateInfo.image = Image;
-                ImageViewCreateInfo.components = VkComponentMapping();
-                ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = Convertor.ConvertFormat(m_Swapchain->GetFormat());
-                ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-                ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-                ImageViewCreateInfo.subresourceRange.levelCount = 1;
-                ImageViewCreateInfo.subresourceRange.layerCount = 1;
-
-                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ColorImageView)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create image view!");
-                    m_Application->RequireExit(ExitCode::Error);
-                    return false;
-                }
-
-                VkImageMemoryBarrier DepthBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-                DepthBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                DepthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-                DepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                DepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                DepthBarrier.image = m_Frames[i].DepthImage;
-                DepthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-                DepthBarrier.subresourceRange.baseMipLevel = 0;
-                DepthBarrier.subresourceRange.levelCount = 1;
-                DepthBarrier.subresourceRange.baseArrayLayer = 0;
-                DepthBarrier.subresourceRange.layerCount = 1;
-                DepthBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
-                DepthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-                VulkanCommandBuffer* CommandBuffer = m_CommandPool->AllocateCommandBuffer({CommandBufferLevel::Primary})->As<VulkanCommandBuffer>();
-                if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
-                {
-                    VkFence BarrierFence = nullptr;
-                    VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-                    vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &BarrierFence);
-
-                    vkCmdPipelineBarrier(
-                    CommandBuffer->GetHandle(),
-                    VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                    VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-                    0, 0, nullptr, 0, nullptr, 1, &DepthBarrier);
-                    CommandBuffer->End();
-
-
-                    VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-                    SubmitInfo.commandBufferCount = 1;
-                    SubmitInfo.pCommandBuffers = CommandBuffer->GetHandlePtr();
-
-                    vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, BarrierFence);
-                    vkWaitForFences(m_Device, 1, &BarrierFence, true, U64_MAX);
-                    vkDestroyFence(m_Device, BarrierFence, nullptr);
-                    m_CommandPool->FreeCommandBuffer(CommandBuffer);
-                }
-
-
-                m_Frames[i].ColorImage = Image;
-
-                VkSemaphoreCreateInfo SemaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
-                if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].SubmitSemaphore)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Submit Semaphore! (Image {})", i);
-                    return false;
-                }
-
-                if (VK_FAILED(vkCreateSemaphore(m_Device, &SemaphoreCreateInfo, nullptr, &m_Frames[i].PresentSemaphore)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Present Semaphore! (Image {})", i);
-                    return false;
-                }
-
-                VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-                FenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-                if (VK_FAILED(vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &m_Frames[i].Fence)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create Fence!");
-                    m_Application->RequireExit(ExitCode::Error);
-                    return false;
-                }
-
-
-                // Allocate command buffer
-                CommandBufferAllocateInfo AllocateInfo;
-                AllocateInfo.Level = CommandBufferLevel::Primary;
-                m_Frames[i].CommandBuffer = (VulkanCommandBuffer*)m_CommandPool->AllocateCommandBuffer(AllocateInfo);
+                VulkanCommandBuffer* Cmd = m_Frames[i].CommandBuffer = (VulkanCommandBuffer*)m_CommandPool->AllocateCommandBuffer({ CommandBufferLevel::Primary });
+                Cmd->SetDebugName(StringFormat("Main CommandBuffer {}", i));
             }
         }
 
@@ -546,12 +429,14 @@ namespace Nova
         for (size_t i = 0; i < m_Swapchain->GetImageCount(); ++i)
         {
             m_CommandPool->FreeCommandBuffer(m_Frames[i].CommandBuffer);
-            vkDestroyFence(m_Device, m_Frames[i].Fence, nullptr);
-            vkDestroySemaphore(m_Device, m_Frames[i].SubmitSemaphore, nullptr);
-            vkDestroySemaphore(m_Device, m_Frames[i].PresentSemaphore, nullptr);
-            vkDestroyImageView(m_Device, m_Frames[i].ColorImageView, nullptr);
-            vmaDestroyImage(m_Allocator, m_Frames[i].DepthImage, m_Frames[i].DepthImageAllocation);
-            vkDestroyImageView(m_Device, m_Frames[i].DepthImageView, nullptr);
+            m_Frames[i].Fence->Destroy();
+            delete m_Frames[i].Fence;
+
+            m_Frames[i].SubmitSemaphore->Destroy();
+            delete m_Frames[i].SubmitSemaphore;
+
+            m_Frames[i].PresentSemaphore->Destroy();
+            delete m_Frames[i].PresentSemaphore;
         }
 
         vmaDestroyAllocator(m_Allocator);
@@ -581,154 +466,22 @@ namespace Nova
 
         if (ShouldRecreateSwapchain)
         {
-            vkDeviceWaitIdle(m_Device);
-
-            for (size_t i = 0; i < m_Swapchain->GetImageCount(); ++i)
-            {
-                VkFrameData& VkFrameData = m_Frames[i];
-                vkDestroyImageView(m_Device, VkFrameData.ColorImageView, nullptr);
-                vmaDestroyImage(m_Allocator, VkFrameData.DepthImage, VkFrameData.DepthImageAllocation);
-                vkDestroyImageView(m_Device, VkFrameData.DepthImageView, nullptr);
-            }
-
+            WaitIdle();
             m_Swapchain->Recreate();
             m_RenderTarget->Resize(WindowWidth, WindowHeight);
-
-            VkImage SwapchainImages[3];
-            m_Swapchain->GetImages(SwapchainImages);
-
-            for (size_t i = 0; i < m_Swapchain->GetImageCount(); i++)
-            {
-                 m_Frames[i].ColorImage = SwapchainImages[i];
-
-                VkImageCreateInfo DepthImageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
-                DepthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-                DepthImageCreateInfo.extent.width = WindowWidth;
-                DepthImageCreateInfo.extent.height = WindowHeight;
-                DepthImageCreateInfo.extent.depth = 1;
-                DepthImageCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-                DepthImageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-                DepthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-                DepthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
-                DepthImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-                DepthImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                DepthImageCreateInfo.pQueueFamilyIndices = &m_GraphicsQueueIndex;
-                DepthImageCreateInfo.queueFamilyIndexCount = 1;
-                DepthImageCreateInfo.arrayLayers = 1;
-                DepthImageCreateInfo.mipLevels = 1;
-
-                VmaAllocationCreateInfo DepthImageAllocationCreateInfo = { };
-                DepthImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-                DepthImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-                vmaCreateImage(m_Allocator, &DepthImageCreateInfo, &DepthImageAllocationCreateInfo, &m_Frames[i].DepthImage, &m_Frames[i].DepthImageAllocation, nullptr);
-
-                VkImageViewCreateInfo DepthImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                DepthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                DepthImageViewCreateInfo.format = VK_FORMAT_D32_SFLOAT_S8_UINT;
-                DepthImageViewCreateInfo.image = m_Frames[i].DepthImage;
-                DepthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-                DepthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-                DepthImageViewCreateInfo.subresourceRange.levelCount = 1;
-                DepthImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-                DepthImageViewCreateInfo.subresourceRange.layerCount = 1;
-                vkCreateImageView(m_Device, &DepthImageViewCreateInfo, nullptr, &m_Frames[i].DepthImageView);
-
-
-                VkImageViewCreateInfo ImageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-                ImageViewCreateInfo.image =  m_Frames[i].ColorImage;
-                ImageViewCreateInfo.components = VkComponentMapping();
-                ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-                ImageViewCreateInfo.format = Convertor.ConvertFormat(m_Swapchain->GetFormat());
-                ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-                ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-                ImageViewCreateInfo.subresourceRange.levelCount = 1;
-                ImageViewCreateInfo.subresourceRange.layerCount = 1;
-
-                VkImageMemoryBarrier DepthBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-                DepthBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                DepthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-                DepthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                DepthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                DepthBarrier.image = m_Frames[i].DepthImage;
-                DepthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
-                DepthBarrier.subresourceRange.baseMipLevel = 0;
-                DepthBarrier.subresourceRange.levelCount = 1;
-                DepthBarrier.subresourceRange.baseArrayLayer = 0;
-                DepthBarrier.subresourceRange.layerCount = 1;
-                DepthBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
-                DepthBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-
-                {
-                    VulkanCommandBuffer* CommandBuffer = m_CommandPool->AllocateCommandBuffer({CommandBufferLevel::Primary})->As<VulkanCommandBuffer>();
-                     if (CommandBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
-                     {
-                         VkFence BarrierFence = nullptr;
-                         VkFenceCreateInfo FenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
-                         vkCreateFence(m_Device, &FenceCreateInfo, nullptr, &BarrierFence);
-
-                         vkCmdPipelineBarrier(
-                         CommandBuffer->GetHandle(),
-                         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                         VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-                         0, 0, nullptr, 0, nullptr, 1, &DepthBarrier);
-                         CommandBuffer->End();
-
-
-                         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-                         SubmitInfo.commandBufferCount = 1;
-                         SubmitInfo.pCommandBuffers = CommandBuffer->GetHandlePtr();
-
-                         vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, BarrierFence);
-                         vkWaitForFences(m_Device, 1, &BarrierFence, true, U64_MAX);
-                         vkDestroyFence(m_Device, BarrierFence, nullptr);
-                         m_CommandPool->FreeCommandBuffer(CommandBuffer);
-                     }
-                }
-
-                if (VK_FAILED(vkCreateImageView(m_Device, &ImageViewCreateInfo, nullptr, &m_Frames[i].ColorImageView)))
-                {
-                    NOVA_VULKAN_ERROR("Failed to create image view!");
-                    m_Application->RequireExit(ExitCode::Error);
-                    return false;
-                }
-
-                // Allocate command buffer
-                CommandBufferAllocateInfo AllocateInfo;
-                AllocateInfo.Level = CommandBufferLevel::Primary;
-                m_Frames[i].CommandBuffer = m_CommandPool->AllocateCommandBuffer(AllocateInfo)->As<VulkanCommandBuffer>();
-            }
-
             ShouldRecreateSwapchain = false;
             m_CurrentFrameIndex = 0;
             m_NewFrameIndex = 0;
             return false;
         }
 
-        const VkFence& CurrentFence = m_Frames[m_CurrentFrameIndex].Fence;
-        if (VK_FAILED(vkWaitForFences(m_Device, 1, &CurrentFence, true, U64_MAX)))
-        {
-            NOVA_VULKAN_ERROR("Failed to wait for fence {}!", m_CurrentFrameIndex);
-            return false;
-        }
+        VulkanFence* Fence = m_Frames[m_CurrentFrameIndex].Fence;
+        Fence->WaitForMe();
+        Fence->Reset();
 
-        if (VK_FAILED(vkResetFences(m_Device, 1, &CurrentFence)))
-        {
-            NOVA_VULKAN_ERROR("Failed to reset fence {}!", m_CurrentFrameIndex);
-            return false;
-        }
-
-
-        if (VK_FAILED(vkAcquireNextImageKHR(m_Device, m_Swapchain->GetHandle(), U64_MAX, m_Frames[m_CurrentFrameIndex].PresentSemaphore, nullptr, &m_NewFrameIndex)))
-        {
-            NOVA_VULKAN_ERROR("Failed to acquire next image index!");
-            return false;
-        }
-
+        m_NewFrameIndex = m_Swapchain->AcquireNextImage(m_Frames[m_CurrentFrameIndex].PresentSemaphore);
         VulkanCommandBuffer* CommandBuffer = m_Frames[m_CurrentFrameIndex].CommandBuffer;
-        CommandBufferBeginInfo BeginInfo;
-        BeginInfo.Flags = CommandBufferUsageFlagBits::OneTimeSubmit;
-        if (!CommandBuffer->Begin(BeginInfo))
+        if (!CommandBuffer->Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
         return true;
@@ -736,152 +489,35 @@ namespace Nova
 
     void VulkanRenderer::BeginRendering()
     {
-        /*const Window* Window = g_Application->GetWindow();
-        const u32 WindowWidth = Window->GetWidth<u32>();
-        const u32 WindowHeight = Window->GetHeight<u32>();
-        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
-
-        VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        ColorBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
-        ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        ColorBarrier.subresourceRange.baseMipLevel = 0;
-        ColorBarrier.subresourceRange.levelCount = 1;
-        ColorBarrier.subresourceRange.baseArrayLayer = 0;
-        ColorBarrier.subresourceRange.layerCount = 1;
-        ColorBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
-        ColorBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        const VkImageMemoryBarrier Barriers[] { ColorBarrier };
-
-        vkCmdPipelineBarrier(
-            CommandBuffer,
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            0, 0, nullptr, 0, nullptr, std::size(Barriers), Barriers
-        );
-
-        VkRenderingAttachmentInfo ColorAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        ColorAttachment.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
-        ColorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        ColorAttachment.imageView = m_Frames[m_CurrentFrameIndex].ColorImageView;
-        ColorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        ColorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-        VkRenderingAttachmentInfo DepthAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        DepthAttachment.clearValue.depthStencil = VkClearDepthStencilValue(1.0f, 0);
-        DepthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        DepthAttachment.imageView = m_Frames[m_CurrentFrameIndex].DepthImageView;
-        DepthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        DepthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-
-        VkRenderingInfo RenderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
-        RenderingInfo.layerCount = 1;
-        RenderingInfo.renderArea.extent = VkExtent2D{ WindowWidth, WindowHeight };
-        RenderingInfo.renderArea.offset = VkOffset2D{ 0, 0 };
-        RenderingInfo.viewMask = 0;
-        RenderingInfo.colorAttachmentCount = 1;
-        RenderingInfo.pColorAttachments = &ColorAttachment;
-        RenderingInfo.pDepthAttachment = &DepthAttachment;
-
-        vkCmdBeginRendering(CommandBuffer, &RenderingInfo);*/
-
-        m_RenderTarget->BeginRendering();
+        VulkanCommandBuffer* CommandBuffer = GetCurrentCommandBuffer();
+        m_RenderTarget->BeginRendering(CommandBuffer);
     }
 
     void VulkanRenderer::EndRendering()
     {
-        m_RenderTarget->EndRendering();
-
-        const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
-
-        {
-            VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            ColorBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            ColorBarrier.srcAccessMask = 0;
-            ColorBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
-            ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            ColorBarrier.subresourceRange.baseMipLevel = 0;
-            ColorBarrier.subresourceRange.levelCount = 1;
-            ColorBarrier.subresourceRange.baseArrayLayer = 0;
-            ColorBarrier.subresourceRange.layerCount = 1;
-
-            vkCmdPipelineBarrier(
-                CommandBuffer,
-                VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                VK_PIPELINE_STAGE_TRANSFER_BIT,
-                0, 0, nullptr, 0, nullptr, 1, &ColorBarrier
-            );
-        }
-
-
-        VkImageResolve Region;
-        Region.extent.width = m_Swapchain->GetWidth();
-        Region.extent.height = m_Swapchain->GetHeight();
-        Region.extent.depth = 1;
-        Region.dstOffset = VkOffset3D{ 0, 0, 0 };
-        Region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Region.dstSubresource.baseArrayLayer = 0;
-        Region.dstSubresource.layerCount = 1;
-        Region.dstSubresource.mipLevel = 0;
-        Region.srcOffset = VkOffset3D{ 0, 0, 0 };
-        Region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        Region.srcSubresource.baseArrayLayer = 0;
-        Region.srcSubresource.layerCount = 1;
-        Region.srcSubresource.mipLevel = 0;
-        vkCmdResolveImage(CommandBuffer, m_RenderTarget->GetColorImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, m_Frames[m_CurrentFrameIndex].ColorImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &Region);
-
-
-        {
-            VkImageMemoryBarrier ColorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            ColorBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            ColorBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            ColorBarrier.dstAccessMask = VK_ACCESS_NONE;
-            ColorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            ColorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            ColorBarrier.image = m_Frames[m_CurrentFrameIndex].ColorImage;
-            ColorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            ColorBarrier.subresourceRange.baseMipLevel = 0;
-            ColorBarrier.subresourceRange.levelCount = 1;
-            ColorBarrier.subresourceRange.baseArrayLayer = 0;
-            ColorBarrier.subresourceRange.layerCount = 1;
-
-            vkCmdPipelineBarrier(
-                CommandBuffer,
-                VK_PIPELINE_STAGE_TRANSFER_BIT,
-                VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                0, 0, nullptr, 0, nullptr, 1, &ColorBarrier
-            );
-        }
+        VulkanCommandBuffer* CommandBuffer = GetCurrentCommandBuffer();
+        m_RenderTarget->EndRendering(CommandBuffer);
+        m_Swapchain->Resolve(CommandBuffer, m_RenderTarget);
     }
 
     void VulkanRenderer::EndFrame()
     {
         VulkanCommandBuffer* CommandBuffer = GetCurrentCommandBuffer();
-        const VkFence& Fence = m_Frames[m_CurrentFrameIndex].Fence;
+        const VulkanFence* Fence = m_Frames[m_CurrentFrameIndex].Fence;
         CommandBuffer->End();
 
         const VkCommandBuffer SubmitCommandBuffers[1] { CommandBuffer->GetHandle() };
         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
         SubmitInfo.pWaitDstStageMask = &Flags;
         SubmitInfo.commandBufferCount = 1;
         SubmitInfo.pCommandBuffers = SubmitCommandBuffers;
         SubmitInfo.signalSemaphoreCount = 1;
-        SubmitInfo.pSignalSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
+        SubmitInfo.pSignalSemaphores = m_Frames[m_CurrentFrameIndex].SubmitSemaphore->GetHandlePtr();
         SubmitInfo.waitSemaphoreCount = 1;
-        SubmitInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].PresentSemaphore;
+        SubmitInfo.pWaitSemaphores = m_Frames[m_CurrentFrameIndex].PresentSemaphore->GetHandlePtr();
 
-        if (VK_FAILED(vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, Fence)))
+        if (VK_FAILED(vkQueueSubmit(m_GraphicsQueue, 1, &SubmitInfo, Fence->GetHandle())))
         {
             NOVA_VULKAN_ERROR("Failed to submit command buffer!");
             m_Application->RequireExit(ExitCode::Error);
@@ -964,7 +600,7 @@ namespace Nova
         PresentInfo.pSwapchains = m_Swapchain->GetHandlePtr();
         PresentInfo.pImageIndices = &m_NewFrameIndex;
         PresentInfo.waitSemaphoreCount = 1;
-        PresentInfo.pWaitSemaphores = &m_Frames[m_CurrentFrameIndex].SubmitSemaphore;
+        PresentInfo.pWaitSemaphores = m_Frames[m_CurrentFrameIndex].SubmitSemaphore->GetHandlePtr();
 
         if (VK_FAILED(vkQueuePresentKHR(m_GraphicsQueue, &PresentInfo)))
         {
@@ -1160,12 +796,12 @@ namespace Nova
         return m_Allocator;
     }
 
-    BufferView<VkFrameData> VulkanRenderer::GetFrameData() const
+    BufferView<VulkanFrameData> VulkanRenderer::GetFrameData() const
     {
         return { m_Frames, (size_t)m_Swapchain->GetImageCount() };
     }
 
-    VkFrameData VulkanRenderer::GetCurrentFrameData() const
+    VulkanFrameData VulkanRenderer::GetCurrentFrameData() const
     {
         return m_Frames[m_CurrentFrameIndex];
     }
@@ -1173,16 +809,6 @@ namespace Nova
     VulkanCommandBuffer* VulkanRenderer::GetCurrentCommandBuffer() const
     {
         return m_Frames[m_CurrentFrameIndex].CommandBuffer;
-    }
-
-    VkImage VulkanRenderer::GetCurrentImage() const
-    {
-        return m_Frames[m_CurrentFrameIndex].ColorImage;
-    }
-
-    VkImageView VulkanRenderer::GetCurrentImageView() const
-    {
-        return m_Frames[m_CurrentFrameIndex].ColorImageView;
     }
 
     u32 VulkanRenderer::GetImageCount() const

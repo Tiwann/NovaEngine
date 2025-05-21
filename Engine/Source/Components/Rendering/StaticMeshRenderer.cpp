@@ -33,7 +33,7 @@ namespace Nova
         Vector3 AmbientLightColor;
     };
 
-    StaticMeshRenderer::StaticMeshRenderer(Entity* Owner) : Component(Owner, "Model Component")
+    StaticMeshRenderer::StaticMeshRenderer(Entity* Owner) : Component(Owner, "Static Mesh Component")
     {
     }
 

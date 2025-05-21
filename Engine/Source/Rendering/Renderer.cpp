@@ -17,10 +17,15 @@
 #include "Platform/Vulkan/VulkanPipeline.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanRenderTarget.h"
+#include "Platform/Vulkan/VulkanSemaphore.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
+
+#ifdef CreateSemaphore
+#undef CreateSemaphore
+#endif
 
 namespace Nova
 {
@@ -36,10 +41,30 @@ namespace Nova
         }
     }
 
-    void Renderer::Clear(const Color& Color, float Depth)
+    void Renderer::Clear(const Color& Color, const float Depth)
     {
         ClearColor(Color);
         ClearDepth(Depth);
+    }
+
+    Semaphore* Renderer::CreateSemaphore(const SemaphoreCreateInfo& CreateInfo)
+    {
+        Semaphore* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanSemaphore(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        default: return nullptr;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Fence* Renderer::CreateFence(const FenceCreateInfo& CreateInfo)
@@ -51,6 +76,7 @@ namespace Nova
         case GraphicsApi::OpenGL: return nullptr;
         case GraphicsApi::Vulkan: Result = new VulkanFence(this); break;
         case GraphicsApi::D3D12: return nullptr;
+        default: return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -70,6 +96,7 @@ namespace Nova
         case GraphicsApi::OpenGL: return nullptr;
         case GraphicsApi::Vulkan: Result = new VulkanRenderTarget(this); break;
         case GraphicsApi::D3D12: return nullptr;
+        default: return nullptr;
         }
 
         if (!Result->Initialize(CreateInfo))
@@ -237,6 +264,7 @@ namespace Nova
         case GraphicsApi::OpenGL:   OutBuffer = new OpenGLUniformBuffer(this); break;
         case GraphicsApi::Vulkan:   OutBuffer = new VulkanUniformBuffer(this); break;
         case GraphicsApi::D3D12:    return nullptr;
+        default: return nullptr;
         }
 
         if (!OutBuffer->Allocate(Size))

@@ -84,4 +84,16 @@ namespace Nova
             return false;
         return true;
     }
+
+    void VulkanCommandBuffer::SetDebugName(const String& Name)
+    {
+        VkDebugUtilsObjectNameInfoEXT NameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        NameInfo.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
+        NameInfo.objectHandle = (u64)m_Handle;
+        NameInfo.pObjectName = *Name;
+
+        const VulkanRenderer* Renderer = m_CommandPool->GetOwner()->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+        Renderer->GetFunctionPointers().vkSetDebugUtilsObjectNameEXT(Device, &NameInfo);
+    }
 }

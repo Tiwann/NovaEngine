@@ -1,38 +1,27 @@
 ﻿#pragma once
-#include "Math/Matrix4.h"
 #include "GraphicsApi.h"
+#include "Containers/Buffer.h"
 #include "Containers/String.h"
 #include "Runtime/Filesystem.h"
+#include "Runtime/Object.h"
 #include "CullMode.h"
 #include "BlendOperation.h"
 #include "BlendFactor.h"
 #include "CompareOperation.h"
-#include "IndexBuffer.h"
 #include "Scissor.h"
-#include "Containers/Buffer.h"
 #include "Vertex.h"
-#include "VertexBuffer.h"
-#include "Runtime/Object.h"
-
-namespace Nova
-{
-    class Fence;
-    struct FenceCreateInfo;
-}
-
-namespace Nova
-{
-    struct RenderTargetCreateInfo;
-}
 
 namespace Nova
 {
     class RenderTarget;
+    struct RenderTargetCreateInfo;
     class UniformBuffer;
     class Color;
     class VertexArray;
     class VertexBuffer;
+    struct VertexBufferCreateInfo;
     class IndexBuffer;
+    struct IndexBufferCreateInfo;
     class Shader;
     class Camera;
     class Application;
@@ -50,6 +39,10 @@ namespace Nova
     struct CommandPoolCreateInfo;
     class CommandBuffer;
 
+    class Semaphore;
+    struct SemaphoreCreateInfo;
+    class Fence;
+    struct FenceCreateInfo;
 
 #if defined(NOVA_DEV) || defined(NOVA_DEBUG)
     static constexpr bool RendererIsDebug = true;
@@ -92,6 +85,7 @@ namespace Nova
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
         virtual void WaitIdle() const {}
 
+        Semaphore* CreateSemaphore(const SemaphoreCreateInfo& CreateInfo);
         Fence* CreateFence(const FenceCreateInfo& CreateInfo);
         RenderTarget* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo);
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);

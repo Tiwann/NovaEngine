@@ -13,7 +13,7 @@ namespace Nova
         bool IsValid() const override;
         bool Begin(const CommandBufferBeginInfo& BeginInfo) override;
         bool End() override;
-
+        void SetDebugName(const String& Name) override;
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;
     private:

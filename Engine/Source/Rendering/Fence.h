@@ -23,6 +23,7 @@ namespace Nova
     {
     public:
         explicit Fence(Renderer* Owner) : RendererObject("Fence", Owner){}
+        virtual void WaitForMe(u64 Timeout) = 0;
         virtual void Reset() = 0;
     };
 }

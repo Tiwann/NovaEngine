@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Rendering/Swapchain.h"
 
-
 typedef struct VkSwapchainKHR_T* VkSwapchainKHR;
 typedef struct VkImage_T* VkImage;
 typedef struct VkImageView_T* VkImageView;

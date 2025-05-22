@@ -146,7 +146,7 @@ namespace Nova
         const u32 FrameIndex = m_Owner->As<VulkanRenderer>()->GetCurrentFrameIndex();
         {
             VkImageMemoryBarrier ColorBarrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
-            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            ColorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             ColorBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             ColorBarrier.srcAccessMask = 0;
             ColorBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;

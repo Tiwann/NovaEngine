@@ -508,7 +508,7 @@ namespace Nova
 
         const VkCommandBuffer SubmitCommandBuffers[1] { CommandBuffer->GetHandle() };
         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         SubmitInfo.pWaitDstStageMask = &Flags;
         SubmitInfo.commandBufferCount = 1;
         SubmitInfo.pCommandBuffers = SubmitCommandBuffers;

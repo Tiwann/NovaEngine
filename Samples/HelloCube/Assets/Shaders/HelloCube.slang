@@ -48,6 +48,6 @@ vec4 FragmentMain(FragmentInput Input) : SV_Target
     float SpecularExponent = exp2(Glossiness * 11.0) + 2.0;
     Specular = pow(Specular, SpecularExponent);
 
-    vec3 FinalColor = AmbientLight + DiffuseLight + Specular;
+    vec3 FinalColor = AmbientLight + DiffuseLight /* + Specular */;
     return vec4(FinalColor, 1.0);
 }

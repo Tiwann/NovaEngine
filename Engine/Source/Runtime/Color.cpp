@@ -41,9 +41,10 @@ namespace Nova
         return 0;
     }
 
-    Color Color::WithLightness(f32 lightness)
+    Color Color::WithLightness(const f32 lightness)
     {
-        return { r * lightness, g * lightness, b * lightness, a };
+        const f32 l = Math::Clamp(lightness, 0.0f, 1.0f);
+        return { r * l, g * l, b * l, a };
     }
 
     Color Color::WithOpacity(f32 opacity)

@@ -66,7 +66,7 @@ namespace Nova
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        ImGui::ColorPicker4("Clear Color", (f32*)&ClearColor, ImGuiColorEditFlags_NoPicker);
+        ImGui::ColorEdit4("Clear Color", (f32*)&ClearColor);
 
         const char* ProjectionTypes[2] = { "Perspective", "Orthographic" };
         if (ImGui::Combo("Projection", (int*)&m_Settings.ProjectionMode, ProjectionTypes, 2))

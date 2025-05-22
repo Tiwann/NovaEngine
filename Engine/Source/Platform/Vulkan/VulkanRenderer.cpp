@@ -447,7 +447,7 @@ namespace Nova
         delete m_Swapchain;
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
-#ifdef NOVA_DEBUG
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         m_FunctionPointers.vkDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
 #endif
         vkDestroyInstance(m_Instance, nullptr);

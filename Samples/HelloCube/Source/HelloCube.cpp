@@ -9,6 +9,7 @@
 
 #include "Components/Camera.h"
 #include "Components/EditorCameraController.h"
+#include "Components/FreeFlyCameraComponent.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/StaticMeshRenderer.h"
 #include "Components/Rendering/DirectionalLight.h"
@@ -57,8 +58,6 @@ namespace Nova
         MeshEntity = Scene->CreateEntity("Model");
 
         StaticMeshRenderer* MeshRenderer = MeshEntity->AddComponent<StaticMeshRenderer>();
-        MeshEntity->GetTransform()->SetPosition(0.0f, -0.8f, -1.9f);
-        MeshEntity->GetTransform()->SetRotation(0.0f, 21.0f, 0.0f);
         MeshRenderer->OpenFile();
 
         LightEntity = Scene->CreateEntity("Light");
@@ -75,8 +74,11 @@ namespace Nova
         CameraComponent->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
         CameraComponent->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
 
-        EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
+        //EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
+        //CameraController->SetCamera(CameraComponent);
+        FreeFlyCameraComponent* CameraController = CameraEntity->AddComponent<FreeFlyCameraComponent>();
         CameraController->SetCamera(CameraComponent);
+        CameraController->SetFlags(ComponentFlagBits::HideInInspector);
 
         Renderer* Renderer = GetRenderer();
         Renderer->SetCurrentCamera(CameraComponent);

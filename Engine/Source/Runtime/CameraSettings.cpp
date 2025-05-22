@@ -8,7 +8,7 @@ namespace Nova
         1920, 1080,
         60.0f,
         10.0f,
-        0.01f, 1000.0f
+        1.0f, 10000.0f
     };
 
     CameraSettings CameraSettings::DefaultOrthographic = {
@@ -16,7 +16,7 @@ namespace Nova
         1920, 1080,
         60.0f,
         50.0f,
-        0.01f, 1000.0f
+        1.0f, 10000.0f
     };
 
     CameraSettings& CameraSettings::WithDimension(f32 Width, f32 Height)

@@ -30,7 +30,7 @@ namespace Nova
         static f32 Abs(f32 Value);
         static u32 Fact(u32 Value);
         template<typename F> requires IsFloatingPointValue<F>
-        static F Clamp(F Value, F Min, F Max)
+        static F Clamp(const F& Value, const F& Min, const F& Max)
         {
             return Value < Min ? Min : Value > Max ? Max : Value;
         }
@@ -174,8 +174,8 @@ namespace Nova
         static Matrix4 Translate(const Matrix4& Mat, const Vector3& Translation);
 
 
-        static Vector3 ForwardFromRotation(const Vector3& EulerAngles);
-        static Vector3 UpFromRotation(const Vector3& EulerAngles);
-        static Vector3 RightFromRotation(const Vector3& EulerAngles);
+        static Vector3 ForwardFromRotation(const Quaternion& Rotation);
+        static Vector3 UpFromRotation(const Quaternion& Rotation);
+        static Vector3 RightFromRotation(const Quaternion& Rotation);
     };
 }

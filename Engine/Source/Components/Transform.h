@@ -15,18 +15,15 @@ namespace Nova
         Transform(Entity* Owner);
         
         const Vector3& GetPosition() const;
-        const Vector3& GetRotation() const;
+        const Quaternion& GetRotation() const;
         const Vector3& GetScale() const;
         Vector3 GetLocalPosition();
         Vector3 GetLocalRotation();
         Vector3 GetLocalScale();
         
         void SetPosition(const Vector3& Position);
-        void SetPosition(f32 X, f32 Y, f32 Z);
-        void SetRotation(const Vector3& Rotation);
-        void SetRotation(f32 X, f32 Y, f32 Z);
+        void SetRotation(const Quaternion& Rotation);
         void SetScale(const Vector3& Scale);
-        void SetScale(f32 X, f32 Y, f32 Z);
         void SetScale(f32 UniformScale);
 
         void SetLocalPosition(const Vector3& Position);
@@ -36,7 +33,7 @@ namespace Nova
         
         void Translate(const Vector3& Translation);
         void Translate(f32 X, f32 Y, f32 Z);
-        void Rotate(const Vector3& EulerAngles);
+        void Rotate(const Quaternion& Rotation);
         void RotateAround(const Vector3& EulerAngles, const Vector3& Point);
         void Scale(const Vector3& Vector);
         void Scale(f32 Scalar);
@@ -52,13 +49,13 @@ namespace Nova
 
         MulticastDelegate<void()> OnChanged;
     private:
-        Vector3 m_Position{Vector3::Zero};
-        Vector3 m_Rotation{Vector3::Zero};
-        Vector3 m_Scale{Vector3::One};
+        Vector3 m_Position = Vector3::Zero;
+        Quaternion m_Rotation = Quaternion::Identity;
+        Vector3 m_Scale = Vector3::One;
 
-        Lazy<Matrix4> m_WorldSpaceMatrix;
-        Lazy<Matrix4> m_LocalSpaceMatrix;
-        Lazy<Matrix3> m_WorldSpaceNormalMatrix;
+        Lazy<Matrix4> m_WorldSpaceMatrix = Lazy(Matrix4::Identity);
+        Lazy<Matrix4> m_LocalSpaceMatrix = Lazy(Matrix4::Identity);
+        Lazy<Matrix3> m_WorldSpaceNormalMatrix = Lazy(Matrix3::Identity);
     };
 
     

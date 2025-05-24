@@ -64,7 +64,7 @@ namespace Nova
         DirectionalLight* DirLight = LightEntity->AddComponent<DirectionalLight>();
         DirLight->SetIntensity(1.0f);
         DirLight->SetColor(Color::White.WithLightness(0.5f));
-        DirLight->GetTransform()->SetRotation(Vector3(180.0f, -152.0f, 0.0f));
+        DirLight->GetTransform()->SetRotation(Quaternion::FromEulerDegrees(Vector3(45.0f, 45.0f, 0.0f)));
 
         AmbientLight* AmbLight = LightEntity->AddComponent<AmbientLight>();
         AmbLight->SetColor(Color::White.WithLightness(0.15f));
@@ -78,7 +78,6 @@ namespace Nova
         //CameraController->SetCamera(CameraComponent);
         FreeFlyCameraComponent* CameraController = CameraEntity->AddComponent<FreeFlyCameraComponent>();
         CameraController->SetCamera(CameraComponent);
-        CameraController->SetFlags(ComponentFlagBits::HideInInspector);
 
         Renderer* Renderer = GetRenderer();
         Renderer->SetCurrentCamera(CameraComponent);

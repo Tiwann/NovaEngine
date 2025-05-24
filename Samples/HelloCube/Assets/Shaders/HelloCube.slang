@@ -25,7 +25,7 @@ VertexOutput VertexMain(VertexInput Input)
     VertexOutput Out;
     Out.Position = Scene.LocalToClipPosition(vec4(Input.Position, 1.0));
     Out.TexCoord = Input.TexCoord;
-    Out.Normal = Scene.LocalToWorldNormal(Input.Normal);
+    Out.Normal = Input.Normal;
     Out.Color = Input.Color;
     return Out;
 }
@@ -44,10 +44,10 @@ vec4 FragmentMain(FragmentInput Input) : SV_Target
     vec3 V = normalize(Scene.CameraViewDirection);
     vec3 H = normalize(L + V);
     float Specular = saturate(dot(H, N));
-    float Glossiness = 0.5;
+    float Glossiness = 1.0;
     float SpecularExponent = exp2(Glossiness * 11.0) + 2.0;
     Specular = pow(Specular, SpecularExponent);
 
-    vec3 FinalColor = AmbientLight + DiffuseLight /* + Specular */;
+    vec3 FinalColor = AmbientLight + DiffuseLight + Specular;
     return vec4(FinalColor, 1.0);
 }

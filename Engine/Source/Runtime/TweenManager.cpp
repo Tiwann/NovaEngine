@@ -46,7 +46,7 @@ namespace Nova
     TweenerValue<Vector3>& TweenManager::DoRotation(Transform* Transform, Vector3 EndValue, f32 Duration)
     {
         TweenManager& Manager = TweenManager::Get();
-        TweenerValue<Vector3>* NewTween = new TweenerValue<Vector3>(&Manager, [Transform]{return Transform->GetRotation(); }, [Transform](const Vector3& EndValue) {Transform->SetRotation(EndValue); });
+        TweenerValue<Vector3>* NewTween = new TweenerValue<Vector3>(&Manager, [Transform]{return Transform->GetRotation().ToEulerDegrees(); }, [Transform](const Vector3& EndValue) {Transform->SetRotation(Quaternion::FromEulerDegrees(EndValue)); });
         NewTween->WithDuration(Duration);
         NewTween->ChangeEndValue(EndValue);
         Manager.m_Tweens.Add(NewTween);

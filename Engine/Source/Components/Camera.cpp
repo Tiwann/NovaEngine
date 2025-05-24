@@ -101,7 +101,7 @@ namespace Nova
             const Transform* Transform = GetTransform();
             Matrix4 View = Matrix4::Identity;
             View.Translate(-Transform->GetPosition());
-            View.RotateDegrees(-Transform->GetRotation());
+            View.RotateDegrees(-Transform->GetRotation().ToEulerDegrees());
             return View;
         };
 

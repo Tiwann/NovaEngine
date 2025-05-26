@@ -15,6 +15,10 @@
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 
+
+#include "Math/Matrix3x4.h"
+#include "Math/Vector3.h"
+
 namespace Nova
 {
     struct SceneData
@@ -22,8 +26,7 @@ namespace Nova
         Matrix4 ModelMatrix;
         Matrix4 ViewMatrix;
         Matrix4 ProjectionMatrix;
-        Matrix3 NormalMatrix;
-        Vector3 Padding;
+        Matrix3x4 NormalMatrix;
         Vector3 CameraViewDirection;
         float DirectionalLightIntensity;
         Vector3 DirectionalLightColor;
@@ -158,7 +161,7 @@ namespace Nova
         SceneDataInstance.ModelMatrix = ModelMatrix;
         SceneDataInstance.ViewMatrix = ViewMatrix;
         SceneDataInstance.ProjectionMatrix = ProjectionMatrix;
-        SceneDataInstance.NormalMatrix = NormalMatrix;
+        SceneDataInstance.NormalMatrix = Matrix3x4(NormalMatrix);
         SceneDataInstance.CameraViewDirection = CameraViewDirection;
         SceneDataInstance.DirectionalLightColor = ToVector3(DirectionalLightColor);
         SceneDataInstance.DirectionalLightIntensity = DirectionalLightIntensity;

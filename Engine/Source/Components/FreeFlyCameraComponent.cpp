@@ -4,7 +4,10 @@
 #include "Editor/EditorGUI.h"
 #include "Input/Input.h"
 #include "Math/Vector2.h"
+#include <GLFW/glfw3.h>
 
+#include "Runtime/Application.h"
+#include "Runtime/Window.h"
 
 namespace Nova
 {
@@ -22,11 +25,14 @@ namespace Nova
 
         if (Input::GetMouseButton(MouseButton::Right))
         {
+            m_Pitch += MouseDelta.y * m_Sensitivity;
+            m_Yaw += MouseDelta.x * m_Sensitivity;
+            m_Pitch = Math::Clamp(m_Pitch, -89.0f, 89.0f);
 
-            const Quaternion PitchRotation = Quaternion::FromEulerDegrees(MouseDelta.y * m_Sensitivity, 0.0, 0.0f);
-            const Quaternion YawRotation = Quaternion::FromEulerDegrees(0.0f, MouseDelta.x * m_Sensitivity, 0.0f);
-            CamTransform->Rotate(YawRotation);
-            CamTransform->Rotate(PitchRotation);
+            const Quaternion PitchRotation = Quaternion::FromAxisAngleDegrees(Vector3::Right, m_Pitch);
+            const Quaternion YawRotation = Quaternion::FromAxisAngleDegrees(Vector3::Up, m_Yaw);
+            const Quaternion FinalRotation = YawRotation * PitchRotation;
+            CamTransform->SetRotation(FinalRotation);
 
             const Vector3 Forward = CamTransform->GetForwardVector();
             const Vector3 Right = CamTransform->GetRightVector();
@@ -35,6 +41,8 @@ namespace Nova
             if (Input::GetKey(KeyCode::KeyS)) MoveDirection += Forward;
             if (Input::GetKey(KeyCode::KeyD)) MoveDirection += Right;
             if (Input::GetKey(KeyCode::KeyA)) MoveDirection -= Right;
+            if (Input::GetKey(KeyCode::Space)) MoveDirection += Vector3::Up;
+            if (Input::GetKey(KeyCode::LeftControl)) MoveDirection += Vector3::Down;
 
             if (Input::GetKey(KeyCode::LeftShift))
                 Speed *= 4.0f;
@@ -44,10 +52,20 @@ namespace Nova
         }
 
         const Vector3 CurrentPosition = CamTransform->GetPosition();
-        const Vector3 Translation = MoveDirection * Speed;
+        const Vector3 Translation = MoveDirection * (Speed * Delta);
         const Vector3 TargetPosition = CurrentPosition + Translation;
-        const Vector3 SmoothedPosition = Vector3::Lerp(CurrentPosition, TargetPosition, m_Smoothing * Delta);
-        CamTransform->SetPosition(SmoothedPosition);
+        CamTransform->SetPosition(TargetPosition);
+
+        GLFWwindow* Window = g_Application->GetWindow()->GetNativeWindow();
+        if (Input::GetMouseButtonDown(MouseButton::Right))
+        {
+            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+
+        if (Input::GetMouseButtonUp(MouseButton::Right))
+        {
+            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
     }
 
     void FreeFlyCameraComponent::OnInspectorGUI(const ImGuiIO& IO)

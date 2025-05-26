@@ -37,8 +37,8 @@ namespace Nova
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
-        Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
-        Configuration.Graphics.VSync = false;
+        Configuration.Graphics.Buffering = SwapchainBuffering::DoubleBuffering;
+        Configuration.Graphics.VSync = true;
         Configuration.WithEditor = true;
         return Configuration;
     }

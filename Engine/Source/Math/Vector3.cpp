@@ -37,7 +37,12 @@ namespace Nova
 
     f32 Vector3::Magnitude() const
     {
-        return Math::Sqrt(x * x + y * y + z*z);
+        return Math::Sqrt(x * x + y * y + z * z);
+    }
+
+    f32 Vector3::MagnitudeSquared() const
+    {
+        return x * x + y * y + z * z;
     }
 
     f32* Vector3::ValuePtr()
@@ -205,7 +210,7 @@ namespace Nova
 
     Vector3 Vector3::Lerp(const Vector3& VecA, const Vector3& VecB, const f32 Alpha)
     {
-        return VecA + VecB * Alpha - VecA * Alpha;
+        return VecA + Alpha * (VecB - VecA);
     }
     
 
@@ -225,12 +230,17 @@ namespace Nova
         return MovedVector;
     }
 
-    Vector3 Vector3::SmoothDamp(const Vector3& Current, const Vector3& Target, Vector3& CurrentVelocity,
-        const f32 SmoothTime, const f32 Delta, const f32 MaxSpeed)
+    Vector3 Vector3::InterpTo(const Vector3& Current, const Vector3& Target, const f32 Speed, const f32 Delta)
     {
-        const f32 x = Math::SmoothDamp(Current.x, Target.x, CurrentVelocity.x, SmoothTime, Delta, MaxSpeed);
-        const f32 y = Math::SmoothDamp(Current.y, Target.y, CurrentVelocity.y, SmoothTime, Delta, MaxSpeed);
-        const f32 z = Math::SmoothDamp(Current.z, Target.z, CurrentVelocity.z, SmoothTime, Delta, MaxSpeed);
-        return {x, y, z};
+        if(Speed <= 0.0f)
+            return Target;
+
+        const Vector3 Dist = Target - Current;
+
+        if( Dist.MagnitudeSquared() < Math::Epsilon )
+            return Target;
+
+        const Vector3 DeltaMove = Dist * Math::Saturate(Delta * Speed);
+        return Current + DeltaMove;
     }
 }

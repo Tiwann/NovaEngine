@@ -180,6 +180,22 @@ namespace Nova
         return ToEuler().Apply(Math::Degrees);
     }
 
+    Quaternion Quaternion::FromAxisAngle(const Vector3& Axis, const f32 Radians)
+    {
+        const Vector3 A = Math::Normalize(Axis);
+        Quaternion Result;
+        Result.w = Math::Cos(Radians * 0.5f);
+        Result.x = A.x * Math::Sin(Radians * 0.5f);
+        Result.y = A.y * Math::Sin(Radians * 0.5f);
+        Result.z = A.z * Math::Sin(Radians * 0.5f);
+        return Result;
+    }
+
+    Quaternion Quaternion::FromAxisAngleDegrees(const Vector3& Axis, const f32 Degrees)
+    {
+        return FromAxisAngle(Axis, Math::Radians(Degrees));
+    }
+
     Quaternion Quaternion::FromEuler(const Vector3& EulerAngles)
     {
         const f32 CosX = Math::Cos(EulerAngles.x * 0.5f);

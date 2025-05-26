@@ -19,6 +19,7 @@ namespace Nova
         static constexpr f32 PiHalf = Pi / 2.0f;
         static constexpr f32 E = std::numbers::e_v<f32>;
         static constexpr f32 Infinity = std::numeric_limits<f32>::infinity();
+        static constexpr f32 Epsilon = std::numeric_limits<f32>::epsilon();
         
         static f32 Cos(f32 Val);
         static f32 Sin(f32 Val);
@@ -34,6 +35,8 @@ namespace Nova
         {
             return Value < Min ? Min : Value > Max ? Max : Value;
         }
+
+        static f32 Saturate(f32 Value);
         static f32 Lerp(f32 A, f32 B, f32 Alpha);
         static f32 Map(f32 Value, f32 MinA, f32 MaxA, f32 MinB, f32 MaxB);
         static f32 Floor(f32 Value);

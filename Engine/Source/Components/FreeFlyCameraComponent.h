@@ -22,5 +22,7 @@ namespace Nova
         f32 m_Sensitivity = 0.1f;
         f32 m_Speed = 2.0f;
         f32 m_Smoothing = 1.0f;
+        f32 m_Yaw = 0.0f;
+        f32 m_Pitch = 0.0f;
     };
 }

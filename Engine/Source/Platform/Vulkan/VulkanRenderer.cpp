@@ -337,7 +337,7 @@ namespace Nova
 
             SwapchainCreateInfo CreateInfo;
             CreateInfo.Recycle = false;
-            CreateInfo.ImageCount = (u32)GraphicsSettings.BufferType;
+            CreateInfo.Buffering = GraphicsSettings.Buffering;
             CreateInfo.ImageFormat = Format::R8G8B8A8_UNORM;
             CreateInfo.ImageWidth = WindowWidth;
             CreateInfo.ImageHeight = WindowHeight;

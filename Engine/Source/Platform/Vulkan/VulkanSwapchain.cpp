@@ -27,7 +27,7 @@ namespace Nova
         SwapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         SwapchainCreateInfo.imageExtent.width = CreateInfo.ImageWidth;
         SwapchainCreateInfo.imageExtent.height = CreateInfo.ImageHeight;
-        SwapchainCreateInfo.minImageCount = CreateInfo.ImageCount;
+        SwapchainCreateInfo.minImageCount = (u32)CreateInfo.Buffering;
         SwapchainCreateInfo.imageArrayLayers = 1;
         SwapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         SwapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
@@ -54,16 +54,16 @@ namespace Nova
         vkDestroySwapchainKHR(Device, m_Handle, nullptr);
         m_Handle = NewSwapchain;
 
-        m_ImageCount = CreateInfo.ImageCount;
+        m_Buffering = CreateInfo.Buffering;
         m_ImageWidth = CreateInfo.ImageWidth;
         m_ImageHeight = CreateInfo.ImageHeight;
         m_ImageFormat = CreateInfo.ImageFormat;
         m_ImagePresentMode = CreateInfo.ImagePresentMode;
 
-        if (VK_FAILED(vkGetSwapchainImagesKHR(Device, m_Handle, &m_ImageCount, m_Images)))
+        if (VK_FAILED(vkGetSwapchainImagesKHR(Device, m_Handle, (u32*)&m_Buffering, m_Images)))
             return false;
 
-        for (size_t i = 0; i < m_ImageCount; i++)
+        for (size_t i = 0; i < GetImageCount(); i++)
         {
             vkDestroyImageView(Device, m_ImageViews[i], nullptr);
             VkImageViewCreateInfo ImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
@@ -120,7 +120,7 @@ namespace Nova
         CreateInfo.ImageWidth = NewWidth;
         CreateInfo.ImageHeight = NewHeight;
         CreateInfo.ImageFormat = m_ImageFormat;
-        CreateInfo.ImageCount = m_ImageCount;
+        CreateInfo.Buffering = m_Buffering;
         CreateInfo.ImagePresentMode = m_ImagePresentMode;
         CreateInfo.Recycle = true;
         return Initialize(CreateInfo);
@@ -129,7 +129,7 @@ namespace Nova
     void VulkanSwapchain::Destroy()
     {
         const VkDevice Device = GetOwner()->As<VulkanRenderer>()->GetDevice();
-        for (size_t i = 0; i < m_ImageCount; i++)
+        for (size_t i = 0; i < GetImageCount(); i++)
         {
             vkDestroyImageView(Device, m_ImageViews[i], nullptr);
         }

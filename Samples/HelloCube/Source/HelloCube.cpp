@@ -9,6 +9,7 @@
 
 #include "Components/Camera.h"
 #include "Components/EditorCameraController.h"
+#include "Components/FreeFlyCameraComponent.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/StaticMeshRenderer.h"
 #include "Components/Rendering/DirectionalLight.h"
@@ -36,7 +37,7 @@ namespace Nova
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
-        Configuration.Graphics.BufferType = SwapchainBuffering::TripleBuffering;
+        Configuration.Graphics.Buffering = SwapchainBuffering::DoubleBuffering;
         Configuration.Graphics.VSync = true;
         Configuration.WithEditor = true;
         return Configuration;
@@ -57,15 +58,13 @@ namespace Nova
         MeshEntity = Scene->CreateEntity("Model");
 
         StaticMeshRenderer* MeshRenderer = MeshEntity->AddComponent<StaticMeshRenderer>();
-        MeshEntity->GetTransform()->SetPosition(0.0f, -0.8f, -1.9f);
-        MeshEntity->GetTransform()->SetRotation(0.0f, 21.0f, 0.0f);
         MeshRenderer->OpenFile();
 
         LightEntity = Scene->CreateEntity("Light");
         DirectionalLight* DirLight = LightEntity->AddComponent<DirectionalLight>();
         DirLight->SetIntensity(1.0f);
         DirLight->SetColor(Color::White.WithLightness(0.5f));
-        DirLight->GetTransform()->SetRotation(Vector3(180.0f, -152.0f, 0.0f));
+        DirLight->GetTransform()->SetRotation(Quaternion::FromEulerDegrees(Vector3(45.0f, 45.0f, 0.0f)));
 
         AmbientLight* AmbLight = LightEntity->AddComponent<AmbientLight>();
         AmbLight->SetColor(Color::White.WithLightness(0.15f));
@@ -75,7 +74,9 @@ namespace Nova
         CameraComponent->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
         CameraComponent->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
 
-        EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
+        //EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
+        //CameraController->SetCamera(CameraComponent);
+        FreeFlyCameraComponent* CameraController = CameraEntity->AddComponent<FreeFlyCameraComponent>();
         CameraController->SetCamera(CameraComponent);
 
         Renderer* Renderer = GetRenderer();

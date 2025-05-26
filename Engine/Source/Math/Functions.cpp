@@ -52,6 +52,11 @@ namespace Nova
     }
 
 
+    f32 Math::Saturate(const f32 Value)
+    {
+        return Clamp(Value, 0.0f, 1.0f);
+    }
+
     f32 Math::Lerp(const f32 A, const f32 B, const f32 Alpha)
     {
         return A + Alpha * (B - A);

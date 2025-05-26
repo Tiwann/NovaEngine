@@ -23,7 +23,7 @@ namespace Nova
 
         Transform* Transform = GetTransform();
         const Vector3 Position = Transform->GetPosition();
-        const Vector3 Rotation = Transform->GetRotation();
+        const Vector3 Rotation = Transform->GetRotation().ToEulerDegrees();
         
         const PhysicsBodyDefinition Definition { Position, Rotation, PhysicsBodyType::Static, false };
         m_PhysicsShape = CreateShape(Transform);
@@ -41,8 +41,8 @@ namespace Nova
         Component::OnStart();
         const Transform* Transform = GetTransform();
         const Vector3& Position = Transform->GetPosition();
-        const Vector3& Rotation = Transform->GetRotation();
-        m_PhysicsBody->SetPositionAndRotation(Position, Rotation);
+        const Quaternion& Rotation = Transform->GetRotation();
+        m_PhysicsBody->SetPositionAndRotation(Position, Rotation.ToEulerDegrees());
     }
 
     void RigidBody2D::OnDestroy()
@@ -76,7 +76,7 @@ namespace Nova
         const Vector3 NewPosition = m_PhysicsBody->GetPosition();
         const Vector3 NewRotation = m_PhysicsBody->GetRotation();
         Transform->SetPosition(NewPosition);
-        Transform->SetRotation(NewRotation);
+        Transform->SetRotation(Quaternion::FromEulerDegrees(NewRotation));
     }
 
     void RigidBody2D::OnContactBegin(const PhysicsContactInfo2D& ContactInfo)

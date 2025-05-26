@@ -2,6 +2,7 @@
 #include "RendererObject.h"
 #include "PresentMode.h"
 #include "Runtime/Format.h"
+#include "Rendering/SwpchainBuffering.h"
 
 namespace Nova
 {
@@ -10,7 +11,7 @@ namespace Nova
     struct SwapchainCreateInfo
     {
         Format ImageFormat;
-        uint32_t ImageCount;
+        SwapchainBuffering Buffering;
         PresentMode ImagePresentMode;
         u32 ImageWidth, ImageHeight;
         bool Recycle;
@@ -28,10 +29,11 @@ namespace Nova
         i32 GetHeight() const { return m_ImageHeight; }
         Format GetFormat() const { return m_ImageFormat; }
         PresentMode GetPresentMode() const { return m_ImagePresentMode; }
-        i32 GetImageCount() const { return m_ImageCount; }
+        u32 GetImageCount() const { return (u32)m_Buffering; }
+
     protected:
         Format m_ImageFormat = Format::None;
-        u32 m_ImageCount = 0;
+        SwapchainBuffering m_Buffering;
         PresentMode m_ImagePresentMode = PresentMode::Unknown;
         u32 m_ImageWidth = 0, m_ImageHeight = 0;
     };

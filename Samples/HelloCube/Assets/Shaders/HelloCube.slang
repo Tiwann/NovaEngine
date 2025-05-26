@@ -37,13 +37,13 @@ vec4 FragmentMain(FragmentInput Input) : SV_Target
     vec3 LightColor = Scene.DirLightColor * Scene.DirLightIntensity;
     vec3 N = normalize(Input.Normal);
     vec3 L = normalize(Scene.DirLightDir);
-    float Diffuse = saturate(dot(N, L));
+    float Diffuse = max(dot(N, L), 0.0);
     vec3 DiffuseLight = Diffuse * LightColor;
     vec3 AmbientLight = Scene.AmbLightColor * Scene.AmbLightIntensity;
 
     vec3 V = normalize(Scene.CameraViewDirection);
     vec3 H = normalize(L + V);
-    float Specular = saturate(dot(H, N));
+    float Specular = max(dot(H, N), 0.0);
     float Glossiness = 0.5;
     float SpecularExponent = exp2(Glossiness * 11.0) + 2.0;
     Specular = pow(Specular, SpecularExponent);

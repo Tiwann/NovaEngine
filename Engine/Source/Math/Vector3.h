@@ -21,6 +21,7 @@ namespace Nova
         explicit Vector3(const Vector4& Vec);
 
         f32 Magnitude() const;
+        f32 MagnitudeSquared() const;
         f32* ValuePtr();
         const f32* ValuePtr() const;
         f32 Dot(const Vector3& Vec) const;
@@ -60,7 +61,7 @@ namespace Nova
         static f32 Angle(const Vector3& VecA, const Vector3& VecB);
         static Vector3 Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha);
         static Vector3 MoveTowards(const Vector3& Current, const Vector3& Target, f32 MaxDelta);
-        static Vector3 SmoothDamp(const Vector3& Current, const Vector3& Target, Vector3& CurrentVelocity, f32 SmoothTime, f32 Delta, f32 MaxSpeed);
+        static Vector3 InterpTo(const Vector3& Current, const Vector3& Target, f32 Speed, f32 Delta);
         
         static Vector3 Zero;
         static Vector3 One;

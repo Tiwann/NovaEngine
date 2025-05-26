@@ -7,7 +7,7 @@ namespace Nova
     struct GraphicsSettings
     {
         GraphicsApi GraphicsApi;
-        SwapchainBuffering BufferType;
+        SwapchainBuffering Buffering;
         bool VSync;
     };
 }

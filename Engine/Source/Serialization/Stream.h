@@ -14,7 +14,8 @@ namespace Nova
         using SizeType = size_t;
         using OffsetType = off_t;
         static constexpr SizeType EndOfFile = -1ULL;
-        
+
+        Stream() = default;
         Stream(const OpenModeFlags OpenMode) : m_OpenMode(OpenMode){}
         virtual ~Stream()
         {

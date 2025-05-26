@@ -27,7 +27,7 @@ namespace Nova
         const auto& Convertor = Renderer->Convertor;
 
         DXGI_SWAP_CHAIN_DESC1 Desc { };
-        Desc.BufferCount = CreateInfo.ImageCount;
+        Desc.BufferCount = (UINT)CreateInfo.Buffering;
         Desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         Desc.SampleDesc.Count = 1;
         Desc.SwapEffect = Convertor.ConvertPresentMode(CreateInfo.ImagePresentMode);

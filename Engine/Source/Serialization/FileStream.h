@@ -6,6 +6,7 @@ namespace Nova
     class FileStream : public Stream
     {
     public:
+        FileStream() = default;
         explicit FileStream(Path Filepath, OpenModeFlags OpenMode);
         
         bool Open(const Path& Filepath, OpenModeFlags OpenMode);

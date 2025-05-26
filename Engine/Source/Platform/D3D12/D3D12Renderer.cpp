@@ -35,7 +35,7 @@ namespace Nova
     
     bool D3D12Renderer::Initialize()
     {
-        m_ImageCount = (u32)m_Application->GetGraphicsSettings().BufferType;
+        m_ImageCount = (u32)m_Application->GetGraphicsSettings().Buffering;
         
         // Creating factory
         if (DX_FAILED(CreateDXGIFactory2(0, IID_PPV_ARGS(&m_Factory))))

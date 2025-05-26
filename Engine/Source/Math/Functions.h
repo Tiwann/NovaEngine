@@ -19,6 +19,7 @@ namespace Nova
         static constexpr f32 PiHalf = Pi / 2.0f;
         static constexpr f32 E = std::numbers::e_v<f32>;
         static constexpr f32 Infinity = std::numeric_limits<f32>::infinity();
+        static constexpr f32 Epsilon = std::numeric_limits<f32>::epsilon();
         
         static f32 Cos(f32 Val);
         static f32 Sin(f32 Val);
@@ -30,10 +31,12 @@ namespace Nova
         static f32 Abs(f32 Value);
         static u32 Fact(u32 Value);
         template<typename F> requires IsFloatingPointValue<F>
-        static F Clamp(F Value, F Min, F Max)
+        static F Clamp(const F& Value, const F& Min, const F& Max)
         {
             return Value < Min ? Min : Value > Max ? Max : Value;
         }
+
+        static f32 Saturate(f32 Value);
         static f32 Lerp(f32 A, f32 B, f32 Alpha);
         static f32 Map(f32 Value, f32 MinA, f32 MaxA, f32 MinB, f32 MaxB);
         static f32 Floor(f32 Value);
@@ -174,8 +177,8 @@ namespace Nova
         static Matrix4 Translate(const Matrix4& Mat, const Vector3& Translation);
 
 
-        static Vector3 ForwardFromRotation(const Vector3& EulerAngles);
-        static Vector3 UpFromRotation(const Vector3& EulerAngles);
-        static Vector3 RightFromRotation(const Vector3& EulerAngles);
+        static Vector3 ForwardFromRotation(const Quaternion& Rotation);
+        static Vector3 UpFromRotation(const Quaternion& Rotation);
+        static Vector3 RightFromRotation(const Quaternion& Rotation);
     };
 }

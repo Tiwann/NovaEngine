@@ -45,6 +45,8 @@ namespace Nova
         Vector3 ToEuler() const;
         Vector3 ToEulerDegrees() const;
 
+        static Quaternion FromAxisAngle(const Vector3& Axis, f32 Radians);
+        static Quaternion FromAxisAngleDegrees(const Vector3& Axis, f32 Degrees);
         static Quaternion FromEuler(const Vector3& EulerAngles);
         static Quaternion FromEuler(f32 X, f32 Y, f32 Z);
         static Quaternion FromEulerDegrees(const Vector3& EulerAnglesDegrees);

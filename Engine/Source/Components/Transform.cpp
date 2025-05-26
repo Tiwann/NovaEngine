@@ -16,7 +16,7 @@ namespace Nova
         return m_Position;
     }
 
-    const Vector3& Transform::GetRotation() const
+    const Quaternion& Transform::GetRotation() const
     {
         return m_Rotation;
     }
@@ -66,27 +66,12 @@ namespace Nova
         OnChanged.BroadcastChecked();
     }
 
-    void Transform::SetPosition(f32 X, f32 Y, f32 Z)
-    {
-        SetPosition({X, Y, Z});
-    }
-
-    void Transform::SetRotation(f32 X, f32 Y, f32 Z)
-    {
-        SetRotation({X, Y, Z});
-    }
-
-    void Transform::SetScale(f32 X, f32 Y, f32 Z)
-    {
-        SetScale({X, Y, Z});
-    }
-
     void Transform::SetScale(const f32 UniformScale)
     {
         SetScale(Vector3(UniformScale));
     }
 
-    void Transform::SetRotation(const Vector3& Rotation)
+    void Transform::SetRotation(const Quaternion& Rotation)
     {
         m_Rotation = Rotation;
         m_WorldSpaceMatrix.SetDirty();
@@ -107,6 +92,7 @@ namespace Nova
         if(m_Entity->GetComponent<RigidBody2D>() && Translation != Vector3::Zero)
         {
             NOVA_LOG(Transform, Verbosity::Warning, "Tried to translate an object that is controlled by physics.");
+            return;
         }
         m_Position += Translation;
         m_WorldSpaceMatrix.SetDirty();
@@ -122,16 +108,15 @@ namespace Nova
         OnChanged.BroadcastChecked();
     }
 
-    void Transform::Rotate(const Vector3& EulerAngles)
+    void Transform::Rotate(const Quaternion& Rotation)
     {
-        const Vector3 TargetRotation = m_Rotation + EulerAngles;
-        m_Rotation = Math::Wrap(TargetRotation, 0.0f, 360.0f);
+        m_Rotation = Rotation * m_Rotation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
         OnChanged.BroadcastChecked();
     }
 
-    
+
     void Transform::RotateAround(const Vector3& EulerAngles, const Vector3& Point)
     {
         Matrix4 Rotation = Matrix4::Identity;
@@ -219,7 +204,7 @@ namespace Nova
     void Transform::OnInspectorGUI(const ImGuiIO& IO)
     {
         Component::OnInspectorGUI(IO);
-        
+
         if(UI::DragVector3<f32>("Position", m_Position, 0.01f, 0, 0, "%.2f"))
         {
             if(PhysicsComponent* Shape = m_Entity->GetComponent<PhysicsComponent>())
@@ -232,12 +217,15 @@ namespace Nova
             m_LocalSpaceMatrix.SetDirty();
             OnChanged.BroadcastChecked();
         }
-        
-        if(UI::DragVector3<f32>("Rotation", m_Rotation, 0.01f, 0, 0, "%.2f"))
+
+        Vector3 EulerAngles = m_Rotation.ToEulerDegrees();
+        if(UI::DragVector3<f32>("Rotation", EulerAngles, 0.01f, 0, 0, "%.2f"))
         {
+            m_Rotation = Quaternion::FromEulerDegrees(EulerAngles);
+
             if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())
             {
-                Shape->SetRotation(Quaternion::FromEuler(0.0f, 0.0f, m_Rotation.z));
+                Shape->SetRotation(Quaternion::FromEuler(0.0f, 0.0f, EulerAngles.z));
                 //Shape->RecreatePhysicsState();
             }
 
@@ -245,7 +233,7 @@ namespace Nova
             m_LocalSpaceMatrix.SetDirty();
             OnChanged.BroadcastChecked();
         }
-        
+
         if(UI::DragVector3<f32>("Scale", m_Scale, 0.01f, 0, 0, "%.2f"))
         {
             if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())

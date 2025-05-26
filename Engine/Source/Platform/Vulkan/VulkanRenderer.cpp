@@ -337,7 +337,7 @@ namespace Nova
 
             SwapchainCreateInfo CreateInfo;
             CreateInfo.Recycle = false;
-            CreateInfo.ImageCount = (u32)GraphicsSettings.BufferType;
+            CreateInfo.Buffering = GraphicsSettings.Buffering;
             CreateInfo.ImageFormat = Format::R8G8B8A8_UNORM;
             CreateInfo.ImageWidth = WindowWidth;
             CreateInfo.ImageHeight = WindowHeight;
@@ -447,7 +447,7 @@ namespace Nova
         delete m_Swapchain;
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
-#ifdef NOVA_DEBUG
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         m_FunctionPointers.vkDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
 #endif
         vkDestroyInstance(m_Instance, nullptr);
@@ -508,7 +508,7 @@ namespace Nova
 
         const VkCommandBuffer SubmitCommandBuffers[1] { CommandBuffer->GetHandle() };
         VkSubmitInfo SubmitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
-        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+        constexpr VkPipelineStageFlags Flags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         SubmitInfo.pWaitDstStageMask = &Flags;
         SubmitInfo.commandBufferCount = 1;
         SubmitInfo.pCommandBuffers = SubmitCommandBuffers;

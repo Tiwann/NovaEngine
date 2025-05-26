@@ -207,25 +207,19 @@ namespace Nova
         return Projection;
     }
 
-    Vector3 Math::ForwardFromRotation(const Vector3& EulerAngles)
+    Vector3 Math::ForwardFromRotation(const Quaternion& Rotation)
     {
-        Matrix4 Result = Matrix4::Identity;
-        Result.RotateDegrees(EulerAngles);
-        return Result * Vector3::Forward;
+        return Rotation * Vector3::Forward;
     }
 
-    Vector3 Math::UpFromRotation(const Vector3& EulerAngles)
+    Vector3 Math::UpFromRotation(const Quaternion& Rotation)
     {
-        Matrix4 Result = Matrix4::Identity;
-        Result.RotateDegrees(EulerAngles);
-        return Result * Vector3::Up;
+        return Rotation * Vector3::Up;
     }
 
-    Vector3 Math::RightFromRotation(const Vector3& EulerAngles)
+    Vector3 Math::RightFromRotation(const Quaternion& Rotation)
     {
-        Matrix4 Result = Matrix4::Identity;
-        Result.RotateDegrees(EulerAngles);
-        return Result * Vector3::Right;  
+        return Rotation * Vector3::Right;
     }
 
     Matrix4 Math::LocalToWorldNormal(const Vector3& Translation, const Vector3& EulerAnglesDegrees)

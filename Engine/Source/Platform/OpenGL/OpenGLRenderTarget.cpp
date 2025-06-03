@@ -62,12 +62,4 @@ namespace Nova
         m_Attachments.Clear();
         glDeleteFramebuffers(1, &m_Handle);
     }
-
-    void OpenGLRenderTarget::BeginRendering()
-    {
-    }
-
-    void OpenGLRenderTarget::EndRendering()
-    {
-    }
 }

@@ -12,6 +12,7 @@
 #include <directx/d3dx12.h>
 
 #include "D3D12VertexBuffer.h"
+#include "Runtime/DesktopWindow.h"
 
 
 namespace Nova
@@ -117,8 +118,8 @@ namespace Nova
 
         // Create Swapchain
         Window* Window = g_Application->GetWindow();
-        const u32 WindowWidth = Window->GetWidth<u32>();
-        const u32 WindowHeight = Window->GetHeight<u32>();
+        const u32 WindowWidth = Window->GetWidth();
+        const u32 WindowHeight = Window->GetHeight();
 
         const GraphicsSettings& GraphicsSettings = m_Application->GetGraphicsSettings();
         if (GraphicsSettings.VSync)
@@ -148,7 +149,7 @@ namespace Nova
         SwapchainFullscreenDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
         SwapchainFullscreenDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;*/
 
-        const HWND Win32Window = glfwGetWin32Window(Window->GetNativeWindow());
+        const HWND Win32Window = glfwGetWin32Window(Window->As<DesktopWindow>()->GetHandle());
         if (DX_FAILED(m_Factory->CreateSwapChainForHwnd(m_CommandQueue.Get(), Win32Window, &SwapchainDesc, nullptr, nullptr, (IDXGISwapChain1**)m_Swapchain.GetAddressOf())))
         {
             NOVA_DIRECTX_ERROR("Failed to create Swapchain!");
@@ -241,8 +242,8 @@ namespace Nova
 
     void D3D12Renderer::ClearColor(const Color& Color)
     {
-        const LONG WindowWidth = g_Application->GetWindow()->GetWidth<LONG>();
-        const LONG WindowHeight = g_Application->GetWindow()->GetHeight<LONG>();
+        const LONG WindowWidth = g_Application->GetWindow()->GetWidth();
+        const LONG WindowHeight = g_Application->GetWindow()->GetHeight();
         ID3D12GraphicsCommandList* Cmd = GetCurrentGraphicsCommandBuffer();
         const u64 RenderTargetViewHandle = m_FrameData[m_CurrentFrameIndex].RenderTargetViewHandle;
 
@@ -266,8 +267,8 @@ namespace Nova
                 FrameData.FenceValue = 0;
             }
 
-            const UINT WindowWidth = g_Application->GetWindow()->GetWidth<UINT>();
-            const UINT WindowHeight = g_Application->GetWindow()->GetHeight<UINT>();
+            const UINT WindowWidth = g_Application->GetWindow()->GetWidth();
+            const UINT WindowHeight = g_Application->GetWindow()->GetHeight();
             
             DXGI_SWAP_CHAIN_DESC OldSwapchainDesc = {};
             m_Swapchain->GetDesc(&OldSwapchainDesc);

@@ -18,7 +18,6 @@
 
 #include "AssetDatabase.h"
 #include "CameraSettings.h"
-#include "Cursors.h"
 #include "ExitCode.h"
 #include "ScopedTimer.h"
 #include "TweenManager.h"
@@ -27,9 +26,6 @@
 #include "Editor/SceneHierarchyPanel.h"
 #include "Editor/Selection.h"
 #include "Editor/ViewportPanel.h"
-
-#include "Components/Camera.h"
-#include "Components/Rendering/StaticMeshRenderer.h"
 #include "Editor/EditorGUI.h"
 #include "Editor/ImGuiRenderer.h"
 
@@ -46,14 +42,9 @@ namespace Nova
         m_EngineAssetsDirectory = m_EngineDirectory / "Assets";
     }
 
-    static void OnGLFWError(i32 Code, const char* Message)
-    {
-        NOVA_LOG(Application, Verbosity::Warning, "[GLFW] Error {}: {}", Code, Message);
-    }
-
     bool Application::PreInitialize()
     {
-        // Init GLFW
+#if defined(NOVA_PLATFORM_WINDOWS) || defined(NOVA_PLATFORM_LINUX) || defined(NOVA_PLATFORM_MACOS)
         if(!glfwInit())
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to initialize glfw!");
@@ -61,119 +52,27 @@ namespace Nova
         }
         NOVA_LOG(Application, Verbosity::Info, "Using GLFW version {}.{}.{}", GLFW_VERSION_MAJOR, GLFW_VERSION_MINOR, GLFW_VERSION_REVISION);
 
-        glfwSetErrorCallback(OnGLFWError);
-        
-        // Create Window, set its callbacks
+        glfwSetErrorCallback([](const i32 Code, const char* Message)
+        {
+            NOVA_LOG(Application, Verbosity::Warning, "GLFW Error {}: {}", Code, Message);
+        });
+#endif
+
         NOVA_LOG(Application, Verbosity::Trace, "Creating window...");
 
         m_Configuration = CreateConfiguration();
-        m_MainWindow = new Window(m_Configuration);
 
-
-        glfwSetWindowUserPointer(m_MainWindow->GetNativeWindow(), this);
-
-        glfwSetWindowCloseCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow*)
-        {
-            g_Application->RequireExit(ExitCode::Success);
-        });
-
-        glfwSetWindowFocusCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int focus){
-            Application* application = (Application*)glfwGetWindowUserPointer(window);
-            application->m_MainWindow->m_HasFocus = (bool)focus;
-#if defined(NOVA_LOG_WINDOW_CALLBACKS)
-            const String Message = focus ? "Window focused" : "Window unfocused";
-            NOVA_LOG(Application, Verbosity::Trace, "[WINDOW] {}", Message);
-#endif
-        });
-
-        glfwSetWindowMaximizeCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int maximized){
-            Application* application = (Application*)glfwGetWindowUserPointer(window);
-            application->m_MainWindow->m_Maximized = (bool)maximized;
-            application->GetRenderer()->ShouldRecreateSwapchain = true;
-#if defined(NOVA_LOG_WINDOW_CALLBACKS)
-            if(maximized) NOVA_LOG(Application, Verbosity::Trace, "[WINDOW] maximized");
-#endif
-        });
-
-        glfwSetWindowPosCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int x, int y){
-            Application* application = (Application*)glfwGetWindowUserPointer(window);
-            application->m_MainWindow->m_PositionX = x;
-            application->m_MainWindow->m_PositionY = y;
-        });
-
-        glfwSetWindowSizeCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int width, int height){
-            const Application* application = (Application*)glfwGetWindowUserPointer(window);
-            application->m_MainWindow->m_Width = width;
-            application->m_MainWindow->m_Height = height;
-            Renderer* Renderer = application->GetRenderer();
-            //Renderer->SetViewportRect({0, 0}, {(f32)width, (f32)height});
-            Renderer->ShouldRecreateSwapchain = true;
-        });
-
-        glfwSetWindowIconifyCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int iconified)
-        {
-            Application* application = (Application*)glfwGetWindowUserPointer(window);
-            application->m_MainWindow->m_Minimized = (bool)iconified;
-#if defined(NOVA_LOG_WINDOW_CALLBACKS)
-            if(iconified) NOVA_LOG(Application, Verbosity::Trace, "[WINDOW] minimized");
-#endif
-        });
-
-        glfwSetKeyCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow* window, int key, int, int action, int)
-        {
-            switch (action)
-            {
-            case GLFW_PRESS:
-                if(ApplicationEvents::OnKeyEvent.IsBound()) ApplicationEvents::OnKeyEvent.Broadcast((KeyCode)key, InputState::Pressed);
-                Input::s_KeyStates[(KeyCode)key] = InputState::Pressed;
-                break;
-            case GLFW_RELEASE:
-                if(ApplicationEvents::OnKeyEvent.IsBound()) ApplicationEvents::OnKeyEvent.Broadcast((KeyCode)key, InputState::Released);
-                Input::s_KeyStates[(KeyCode)key] = InputState::Released;
-                break;
-            default:
-                break;
-            }
-        });
-
-        glfwSetMouseButtonCallback(m_MainWindow->GetNativeWindow(), [](GLFWwindow *window, int button, int action, int)
-        {
-            switch (action)
-            {
-            case GLFW_PRESS:
-                if(ApplicationEvents::OnMouseButtonEvent.IsBound()) ApplicationEvents::OnMouseButtonEvent.Broadcast((MouseButton)button, InputState::Pressed);
-                Input::s_MouseButtonStates[(MouseButton)button] = InputState::Pressed;
-                break;
-            case GLFW_RELEASE:
-                if(ApplicationEvents::OnMouseButtonEvent.IsBound()) ApplicationEvents::OnMouseButtonEvent.Broadcast((MouseButton)button, InputState::Released);
-                Input::s_MouseButtonStates[(MouseButton)button] = InputState::Released;
-                break;
-            }
-        });
-
-        glfwSetJoystickCallback([](const int JoystickID, const int Event)
-        {
-            if(!glfwJoystickIsGamepad(JoystickID)) return;
-            
-            if(Event == GLFW_CONNECTED)
-            {
-                const StringView GamepadName = glfwGetJoystickName(JoystickID);
-                NOVA_LOG(Application, Verbosity::Warning, "Gamepad {} connected: {}", JoystickID, GamepadName);
-            }
-            else if(Event == GLFW_DISCONNECTED)
-            {
-                const StringView GamepadName = glfwGetJoystickName(JoystickID);
-                NOVA_LOG(Application, Verbosity::Warning, "Gamepad {} connected: {}", JoystickID, GamepadName);
-            }
-        });
-
-
-        if(!m_MainWindow->IsValid())
+        WindowCreateInfo CreateInfo;
+        CreateInfo.Title = m_Configuration.AppName;
+        CreateInfo.Width = m_Configuration.WindowWidth;
+        CreateInfo.Height = m_Configuration.WindowWidth;
+        CreateInfo.Resizable = m_Configuration.WindowResizable;
+        m_MainWindow = Window::Create(this);
+        if (!m_MainWindow->Initialize(CreateInfo))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create window!");
             return false;
         }
-        NOVA_LOG(Application, Verbosity::Info, "Window successfully created!");
 
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
         m_Renderer = Renderer::Create(this, m_Configuration.Graphics.GraphicsApi);
@@ -182,8 +81,6 @@ namespace Nova
             NOVA_LOG(Application, Verbosity::Error, "Failed to create renderer!");
             return false;
         }
-        
-        NOVA_LOG(Application, Verbosity::Info, "Renderer created!");
 
         NOVA_LOG(Application, Verbosity::Trace, "Initializing Audio System...");
         m_AudioSystem = new AudioSystem(this);
@@ -216,12 +113,47 @@ namespace Nova
         return true;
     }
 
+    void Application::Update()
+    {
+        m_UnscaledTime = glfwGetTime();
+        m_Time = m_TimeScale * m_UnscaledTime;
+        ScopedTimer FrameTimer([this](const f64 Duration)
+        {
+            m_UnscaledDeltaTime = Duration;
+            m_DeltaTime = m_UnscaledDeltaTime * m_TimeScale;
+        });
+
+        m_MainWindow->Update((f32)m_UnscaledDeltaTime);
+        OnUpdate((float)m_UnscaledDeltaTime);
+    }
+
+    void Application::Render()
+    {
+        if (m_Renderer->BeginFrame() && g_ApplicationRunning)
+        {
+            OnFrameStarted(m_Renderer);
+            m_Scene->OnFrameBegin(m_Renderer);
+
+            m_Renderer->BeginRendering();
+            OnRender(m_Renderer);
+            m_Scene->OnRender(m_Renderer);
+
+            if (m_Configuration.WithEditor)
+            {
+                m_ImGuiRenderer->BeginFrame();
+                ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                OnGUI((f32)m_DeltaTime);
+                m_ImGuiRenderer->EndFrame();
+                m_ImGuiRenderer->Render();
+            }
+            m_Renderer->EndRendering();
+            m_Renderer->EndFrame();
+            m_Renderer->Present();
+        }
+    }
+
     void Application::OnInit()
     {
-        //m_ShaderManager->Load("Sprite", m_EngineAssetsDirectory / "Shaders/Sprite.slang");
-        //m_ShaderManager->Load("UniformColor", m_EngineAssetsDirectory / "Shaders/UniformColor.glsl");
-        //m_ShaderManager->Load("Circle",       m_EngineAssetsDirectory / "Shaders/Circle.glsl");
-
         JPH::RegisterDefaultAllocator();
         m_Scene = new Scene(this);
         m_Scene->SetName("Default Scene");
@@ -237,71 +169,15 @@ namespace Nova
         m_ViewportPanel->OnInit();
         m_PhysicsSettingsPanel->OnInit();
 
-        DialogFilters NovaSceneFilters;
-        NovaSceneFilters.AddFilter("Nova Scene", {"hbsn", "htscn"});
-        NovaSceneFilters.AddFilter(DialogFilters::All);
-        
         auto& File = m_MenuBar.AddChild({ "File" });
-        
-        File.AddChild({ "Open Scene" , nullptr, [this, NovaSceneFilters]
-        {
-            const Path Filepath = File::OpenFileDialog("Open Scene", "", NovaSceneFilters);
-            ApplicationEvents::OnSceneLoadEvent.Broadcast(Filepath);
-        }});
-        File.AddChild({ "Save Scene" });
-        File.AddChild({ "Save Scene As", nullptr, [this, NovaSceneFilters]
-        {
-            const Path Filepath = File::SaveFileDialog("Save scene as...", "", NovaSceneFilters);
-            ApplicationEvents::OnSceneSaveEvent.Broadcast(Filepath);
-        }});
         File.AddChild({ "Exit", nullptr, [this]{ RequireExit(ExitCode::Success); } });
 
-        auto& Edit = m_MenuBar.AddChild({ "Edit" });
-        Edit.AddChild({ "Undo" });
-        Edit.AddChild({ "Redo" });
-        Edit.AddChild({ "Preferences" });
-
-        
         auto& View = m_MenuBar.AddChild({ "View" });
         View.AddChild({ "Details Panel", m_DetailsPanel->OpenedPtr() });
         View.AddChild({ "Scene Hierarchy", m_SceneHierarchyPanel->OpenedPtr() });
         View.AddChild({ "Viewport Window", m_ViewportPanel->OpenedPtr() });
         View.AddChild({ "Physics Settings", m_PhysicsSettingsPanel->OpenedPtr() });
         View.AddChild({ "ImGui Demo Window" , &m_ShowImGuiDemoWindow});
-
-        auto& Scene = m_MenuBar.AddChild({ "Scene"});
-        Scene.AddChild({ "Rename" });
-        Scene.AddChild({ "Create Entity", nullptr, [this]
-        {
-            const EntityHandle Entity = m_Scene->CreateEntity("New Entity");
-            Selection::SetEntity(Entity);
-        }});
-        Scene.AddChild({ "Create Camera", nullptr, [this]
-        {
-            const f32 Width = GetWindow()->GetWidth();
-            const f32 Height = GetWindow()->GetHeight();
-            const EntityHandle Entity = m_Scene->CreateEntity("Camera");
-            Camera* Camera = Entity->AddComponent<class Camera>();
-            Camera->SetSettings(CameraSettings::DefaultOrthographic.WithDimension(Width, Height));
-            m_Renderer->SetCurrentCamera(Camera);
-            Selection::SetEntity(Entity);
-        }});
-        
-        auto& Misc = m_MenuBar.AddChild({ "Misc" });
-        auto& Shaders = Misc.AddChild({ "Shaders" });
-        Shaders.AddChild({ "Reload All", nullptr, [this]
-        {
-            m_ShaderManager->ReloadAll();
-        }});
-        auto& Tools = m_MenuBar.AddChild({ "Tools" });
-        Tools.AddChild({ "Open Model", nullptr, [this]
-        {
-            StaticMeshRenderer* RendererComponent = m_Scene->GetAllComponents<StaticMeshRenderer>()[0];
-            RendererComponent->OpenFile();
-        } });
-        
-        
-        ApplicationEvents::OnInitEvent.Broadcast();
     }
 
     
@@ -314,85 +190,12 @@ namespace Nova
             return;
         }
 
-        m_MainWindow->Show();
         OnInit();
 
-        static Vector2 CurrentMousePosition;
-        static Vector2 LastMousePosition;
         while(m_IsRunning)
         {
-            m_UnscaledTime = glfwGetTime();
-            m_Time = m_TimeScale * m_UnscaledTime;
-            ScopedTimer FrameTimer([this](const f64 Duration)
-            {
-                m_UnscaledDeltaTime = Duration;
-                m_DeltaTime = m_UnscaledDeltaTime * m_TimeScale;
-            });
-            
-            ApplicationEvents::OnFrameBegin.Broadcast();
-            Input::ResetInputStates();
-            Input::UpdateGamepads();
-            CurrentMousePosition = Input::GetMousePosition();
-            Input::s_DeltaMousePosition = LastMousePosition - CurrentMousePosition;
-            LastMousePosition = CurrentMousePosition;
-            glfwPollEvents();
-
-
-            OnUpdate((float)m_UnscaledDeltaTime);
-
-
-            switch (m_Renderer->GetGraphicsApi())
-            {
-            case GraphicsApi::None: return;
-            case GraphicsApi::OpenGL:
-                if (m_Renderer->BeginFrame() && g_ApplicationRunning)
-                {
-                    OnFrameStarted(m_Renderer);
-                    m_Scene->OnFrameBegin(m_Renderer);
-
-                    m_Renderer->BeginRendering();
-                    OnRender(m_Renderer);
-                    m_Scene->OnRender(m_Renderer);
-
-                    if (m_Configuration.WithEditor)
-                    {
-                        m_ImGuiRenderer->BeginFrame();
-                        ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                        OnGUI((f32)m_DeltaTime);
-                        m_ImGuiRenderer->EndFrame();
-                        m_ImGuiRenderer->Render();
-                    }
-                    m_Renderer->EndFrame();
-                    m_Renderer->Present();
-                }
-                break;
-            case GraphicsApi::Vulkan:
-            case GraphicsApi::D3D12:
-                if (m_Renderer->BeginFrame() && g_ApplicationRunning)
-                {
-                    OnFrameStarted(m_Renderer);
-                    m_Scene->OnFrameBegin(m_Renderer);
-
-                    m_Renderer->BeginRendering();
-                    OnRender(m_Renderer);
-                    m_Scene->OnRender(m_Renderer);
-
-                    if (m_Configuration.WithEditor)
-                    {
-                        m_ImGuiRenderer->BeginFrame();
-                        ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                        OnGUI((f32)m_DeltaTime);
-                        m_ImGuiRenderer->EndFrame();
-                        m_ImGuiRenderer->Render();
-                    }
-                    m_Renderer->EndRendering();
-                    m_Renderer->EndFrame();
-                    m_Renderer->Present();
-                }
-                break;
-            }
-
-            ApplicationEvents::OnFrameEnd.Broadcast();
+            Update();
+            Render();
         }
         
         OnExit();
@@ -501,7 +304,6 @@ namespace Nova
         m_MainWindow = nullptr;
         
         glfwTerminate();
-        ApplicationEvents::OnPostExitEvent.Broadcast();
     }
 
     void Application::OnFrameStarted(Renderer* Renderer)
@@ -536,19 +338,6 @@ namespace Nova
         m_IsRunning = false;
         g_ApplicationRunning = false;
         g_ExitCode = ExitCode;
-    }
-
-    void Application::RequireExitAndRestart()
-    {
-        NOVA_LOG(Application, Verbosity::Warning, "Exit required. Cleaning... Application will restart");
-        m_IsRunning = false;
-        g_ApplicationRunning = true;
-        g_ExitCode = ExitCode::Restarted;
-    }
-
-    void Application::SetCursorVisible(bool Visible) const
-    {
-        Cursor::SetCursorVisible(m_MainWindow, Visible);
     }
 
     f64 Application::GetTimeScale() const

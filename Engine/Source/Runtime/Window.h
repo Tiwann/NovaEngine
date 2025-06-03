@@ -1,70 +1,37 @@
 ﻿#pragma once
-#include "Filesystem.h"
-#include "LogCategory.h"
-#include "Types.h"
+#include "Object.h"
 #include "Containers/String.h"
-
-
-struct GLFWwindow;
 
 namespace Nova
 {
-    class Image;
-    struct Vector2;
-    struct ApplicationConfiguration;
-    
-    NOVA_DECLARE_LOG_CATEGORY_STATIC(Input, "INPUT")
-    
-    class Window
+    struct WindowCreateInfo
+    {
+        String Title;
+        u32 Width, Height;
+        bool Resizable;
+    };
+
+    class Application;
+
+    class Window : public Object
     {
     public:
-        explicit Window(const ApplicationConfiguration& Config);
-        ~Window();
-        
-        void Destroy();
-        const GLFWwindow* GetNativeWindow() const;
-        GLFWwindow* GetNativeWindow();
-        
-        bool ShouldClose() const;
-        bool IsValid() const;
+        explicit Window(Application* Owner);
+        ~Window() override = default;
+        static Window* Create(Application* Owner);
 
-        template<typename T = f32> requires IsArithmeticValue<T>
-        T GetWidth() const
-        {
-            return static_cast<T>(m_Width);
-        }
+        virtual bool Initialize(const WindowCreateInfo& CreateInfo) = 0;
+        virtual void Update(f32 Delta) = 0;
+        virtual void Destroy() = 0;
 
-        template<typename T = f32> requires IsArithmeticValue<T>
-        T GetHeight() const
-        {
-            return static_cast<T>(m_Height);
-        }
-
-        Vector2 GetSize() const;
-        Vector2 GetCenter() const;
-        
-        const String& GetName() const;
-        void SetName(String&& name);
-        void ResetName() const;
-        void SetIcon(const Path& Filepath)const;
-        void SetIcon(const Image* Image) const;
-        bool IsResizable() const;
-        
-        void Show() const;
-        void Hide() const;
-        bool IsVisible() const { return m_Visible; }
-        bool IsMinimized() const { return m_Minimized; }
-        bool IsMaximized() const { return m_Maximized; }
-
-    private:
-        friend class Application;
-        GLFWwindow* m_Handle = nullptr;
-        String m_Name;
-        u32 m_Width = 0, m_Height = 0, m_PositionX = 0, m_PositionY = 0;
-        bool m_Resizable{false};
-        bool m_HasFocus{false};
-        bool m_Maximized{false};
-        bool m_Minimized{false};
-        bool m_Visible{true};
+        void SetTitle(const String& Title);
+        const String& GetTitle() const;
+        Application* GetOwner() const;
+        u32 GetWidth() const;
+        u32 GetHeight() const;
+    protected:
+        Application* m_Owner = nullptr;
+        String m_Title;
+        u32 m_Width = 0, m_Height = 0;
     };
 }

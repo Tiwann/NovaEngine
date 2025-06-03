@@ -1,131 +1,47 @@
 ﻿#include "Window.h"
-#include "Image.h"
-#include "Filesystem.h"
-#include "Math/Vector2.h"
-#include "ApplicationConfiguration.h"
-
-#include <GLFW/glfw3.h>
-
-
+#include "DesktopWindow.h"
 
 namespace Nova
 {
-    Window::Window(const ApplicationConfiguration& Config)
-    : m_Name(Config.AppName), m_Width(Config.WindowWidth), m_Height(Config.WindowHeight), m_Resizable(Config.WindowResizable)
+    Window::Window(Application* Owner) : m_Owner(Owner)
     {
-        glfwWindowHint(GLFW_RESIZABLE, m_Resizable);
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-
-        if (Config.Graphics.GraphicsApi == GraphicsApi::OpenGL)
-        {
-            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-            glfwWindowHint(GLFW_SAMPLES, 16);
-
-            #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-            #endif
-        } else
-        {
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        }
-        m_Handle = glfwCreateWindow((int)m_Width, (int)m_Height, *m_Name, nullptr, nullptr);
     }
 
-    Window::~Window()
+    Window* Window::Create(Application* Owner)
     {
-        if(m_Handle)
-        {
-            glfwDestroyWindow(m_Handle);
-            m_Handle = nullptr;
-        }
-    }
-    
-    void Window::Destroy()
-    {
-        if(m_Handle)
-        {
-            glfwDestroyWindow(m_Handle);
-            m_Handle = nullptr;
-        }
+#if defined(NOVA_PLATFORM_WINDOWS) || defined(NOVA_PLATFORM_LINUX) || defined(NOVA_PLATFORM_MACOS)
+        return new DesktopWindow(Owner);
+#elif defined(NOVA_PLATFORM_SWITCH)
+        return nullptr;
+#elif defined(NOVA_PLATYFORM_PS5)
+        return nullptr;
+#elif defined(NOVA_PLATFORM_XBOX)
+        return nullptr;
+#endif
     }
 
-    void Window::Show() const
+    void Window::SetTitle(const String& Title)
     {
-        glfwShowWindow(m_Handle);
+        m_Title = Title;
     }
 
-    void Window::Hide() const
+    const String& Window::GetTitle() const
     {
-        glfwHideWindow(m_Handle);
+        return m_Title;
     }
 
-
-    const GLFWwindow* Window::GetNativeWindow() const
+    Application* Window::GetOwner() const
     {
-        return m_Handle;
-    }
-    
-    GLFWwindow* Window::GetNativeWindow()
-    {
-        return m_Handle;
-    }
-    
-    bool Window::ShouldClose() const
-    {
-        return glfwWindowShouldClose(m_Handle);
+        return m_Owner;
     }
 
-    bool Window::IsValid() const
+    u32 Window::GetWidth() const
     {
-        return m_Handle;
+        return m_Width;
     }
 
-
-    Vector2 Window::GetSize() const
+    u32 Window::GetHeight() const
     {
-        return { GetWidth<f32>(), GetHeight<f32>() };
-    }
-
-    Vector2 Window::GetCenter() const
-    {
-        return { (f32)m_Width / 2, (f32)m_Height / 2 };
-    }
-
-    const String& Window::GetName() const
-    {
-        return m_Name;
-    }
-
-    void Window::SetIcon(const Path& Filepath) const
-    {
-        ScopedBuffer ImageData = File::ReadToBuffer(Filepath);
-        const Image IconImage(ImageData.AsBuffer(), Format::R32G32B32A32_FLOAT);
-        const GLFWimage GLFWImage{ (int)IconImage.GetWidth(), (int)IconImage.GetHeight(), (u8*)IconImage.GetData() };
-        glfwSetWindowIcon(m_Handle, 1, &GLFWImage);
-    }
-    
-    void Window::SetIcon(const Image* Image) const
-    {
-        const GLFWimage IconImage{ (int)Image->GetWidth(), (int)Image->GetHeight(), (u8*)Image->GetData() };
-        glfwSetWindowIcon(m_Handle, 1, &IconImage);
-    }
-    
-
-    bool Window::IsResizable() const
-    {
-        return m_Resizable;
-    }
-    
-    void Window::SetName(String&& Name)
-    {
-        m_Name = std::move(Name);
-        glfwSetWindowTitle(m_Handle, *m_Name);
-    }
-
-    void Window::ResetName() const
-    {
-        glfwSetWindowTitle(m_Handle, *m_Name);
+        return m_Height;
     }
 }

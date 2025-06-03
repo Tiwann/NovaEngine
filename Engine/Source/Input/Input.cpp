@@ -7,10 +7,6 @@
 
 namespace Nova
 {
-    StaticArray<GLFWgamepadstate, NOVA_MAX_GAMEPADS> Input::s_GamepadStates;
-    StaticArray<GLFWgamepadstate, NOVA_MAX_GAMEPADS> Input::s_LastGamepadStates;
-    Vector2 Input::s_DeltaMousePosition = {0, 0};
-    
     bool Input::GetKeyDown(const KeyCode KeyCode)
     {
         return s_KeyStates[KeyCode] == InputState::Pressed;
@@ -256,53 +252,4 @@ namespace Nova
     {
         return s_GamepadAxes[ID][5];
     }
-
-    void Input::UpdateGamepads()
-    {
-        for(size_t ID = 0; ID < 16; ++ID)
-        {
-            glfwGetGamepadState((int)ID, &s_GamepadStates[ID]);
-            for(size_t Button = 0 ; Button < 15; ++Button)
-            {
-                if(s_GamepadStates[ID].buttons[Button] != s_LastGamepadStates[ID].buttons[Button])
-                {
-                    const InputState State = s_GamepadStates[ID].buttons[Button] ? InputState::Pressed : InputState::Released;
-                    s_GamepadButtons[ID][Button] = State;
-                    if(ApplicationEvents::OnGamepadButtonEvent.IsBound())
-                        ApplicationEvents::OnGamepadButtonEvent.Broadcast(ID, (GamepadButton)Button, State);
-                }
-            }
-
-            for(size_t Axis = 0 ; Axis < 6; ++Axis)
-            {
-                s_GamepadAxes[ID][Axis] = s_GamepadStates[ID].axes[Axis];
-                if(ApplicationEvents::OnGamepadAxisEvent.IsBound())
-                    ApplicationEvents::OnGamepadAxisEvent.Broadcast(ID, Axis, s_GamepadAxes[ID][Axis]);
-            }
-            
-            s_LastGamepadStates[ID] = s_GamepadStates[ID];
-        }
-    }
-    
-    void Input::ResetInputStates()
-    {
-        for(auto& [Key, State] : s_KeyStates)
-        {
-            State = InputState::None;
-        }
-
-        for(auto& [MouseButton, State] : s_MouseButtonStates)
-        {
-            State = InputState::None;
-        }
-        
-        for(auto& Gamepad : s_GamepadButtons)
-        {
-            for(size_t i = 0; i < Gamepad.Count(); ++i)
-                Gamepad[i] = InputState::None;
-        }
-
-        s_LastGamepadStates = s_GamepadStates;
-    }
-    
 }

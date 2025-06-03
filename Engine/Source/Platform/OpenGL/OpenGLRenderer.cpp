@@ -279,7 +279,7 @@ namespace Nova
 
     void OpenGLRenderer::BindPipeline(Pipeline* Pipeline)
     {
-        const PipelineSpecification& Specification = Pipeline->GetSpecification();
+        const PipelineCreateInfo& Specification = Pipeline->GetSpecification();
         OpenGLPipeline* CastedPipeline = Pipeline->As<OpenGLPipeline>();
         m_BoundPipeline = CastedPipeline;
         const u32 VertexArrayObject = CastedPipeline->GetVertexArrayObject();

@@ -29,7 +29,7 @@ namespace Nova
     struct Vector2;
     class Sprite;
     class Pipeline;
-    struct PipelineSpecification;
+    struct PipelineCreateInfo;
     class VertexBuffer;
     class Swapchain;
     struct SwapchainCreateInfo;
@@ -91,7 +91,7 @@ namespace Nova
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& CreateInfo);
         Shader* CreateShader(const String& Name, const Path& Filepath);
-        Pipeline* CreatePipeline(const PipelineSpecification& Specification);
+        Pipeline* CreatePipeline(const PipelineCreateInfo& Specification);
         VertexBuffer* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo);
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
         IndexBuffer* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo);

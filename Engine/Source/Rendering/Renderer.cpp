@@ -159,7 +159,7 @@ namespace Nova
         }
     }
 
-    Pipeline* Renderer::CreatePipeline(const PipelineSpecification& Specification)
+    Pipeline* Renderer::CreatePipeline(const PipelineCreateInfo& Specification)
     {
         switch (m_GraphicsApi)
         {

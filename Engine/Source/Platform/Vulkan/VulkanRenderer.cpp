@@ -456,8 +456,8 @@ namespace Nova
     bool VulkanRenderer::BeginFrame()
     {
         const Window* Window = g_Application->GetWindow();
-        const u32 WindowWidth = Window->GetWidth<u32>();
-        const u32 WindowHeight = Window->GetHeight<u32>();
+        const u32 WindowWidth = Window->GetWidth();
+        const u32 WindowHeight = Window->GetHeight();
 
         if (Window->IsMinimized())
         {
@@ -681,7 +681,7 @@ namespace Nova
     void VulkanRenderer::BindPipeline(Pipeline* Pipeline)
     {
         const VulkanPipeline* CastedPipeline = Pipeline->As<VulkanPipeline>();
-        const PipelineSpecification& Specification = CastedPipeline->GetSpecification();
+        const PipelineCreateInfo& Specification = CastedPipeline->GetSpecification();
         const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());

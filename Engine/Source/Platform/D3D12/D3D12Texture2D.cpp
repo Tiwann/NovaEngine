@@ -22,7 +22,7 @@ namespace Nova
         m_Width = Width;
         m_Height = Height;
         m_Params.Format = Format;
-        D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
+        D3D12Renderer* Renderer = g_Application->GetRenderer()->As<D3D12Renderer>();
         m_Handle = Renderer->CreateTexture2D(L"Texture2D", m_Width, m_Height, Format);
         if (!m_Handle)
         {

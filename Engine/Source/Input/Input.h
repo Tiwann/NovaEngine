@@ -49,18 +49,6 @@ namespace Nova
         static bool GetGamepadButton(size_t ID, GamepadButton Button);
         static Vector2 GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick, f32 Deadzone = 0);
         static f32 GetGamepadLeftShoulder(size_t ID);
-        static f32 GetGamepadRightShoulder(size_t ID);        
-    private:
-        inline static Map<KeyCode, InputState> s_KeyStates;
-        inline static Map<MouseButton, InputState> s_MouseButtonStates;
-
-        static StaticArray<GLFWgamepadstate, NOVA_MAX_GAMEPADS> s_GamepadStates;
-        static StaticArray<GLFWgamepadstate, NOVA_MAX_GAMEPADS> s_LastGamepadStates;
-        inline static StaticArray<StaticArray<InputState, 15>, NOVA_MAX_GAMEPADS> s_GamepadButtons;
-        inline static StaticArray<StaticArray<f32, 6>, NOVA_MAX_GAMEPADS> s_GamepadAxes;
-        static Vector2 s_DeltaMousePosition;
-        
-        static void UpdateGamepads();
-        static void ResetInputStates();
+        static f32 GetGamepadRightShoulder(size_t ID);
     };
 }

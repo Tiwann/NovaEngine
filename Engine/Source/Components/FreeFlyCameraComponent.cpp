@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Runtime/Application.h"
+#include "Runtime/DesktopWindow.h"
 #include "Runtime/Window.h"
 
 namespace Nova
@@ -56,15 +57,17 @@ namespace Nova
         const Vector3 TargetPosition = CurrentPosition + Translation;
         CamTransform->SetPosition(TargetPosition);
 
-        GLFWwindow* Window = g_Application->GetWindow()->GetNativeWindow();
-        if (Input::GetMouseButtonDown(MouseButton::Right))
+        DesktopWindow* Window = g_Application->GetWindow()->As<DesktopWindow>();
+        if (!Window) return;
+
+        if (Window->GetMouseButtonDown(MouseButton::Right))
         {
-            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(Window->GetHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
 
-        if (Input::GetMouseButtonUp(MouseButton::Right))
+        if (Window->GetMouseButtonUp(MouseButton::Right))
         {
-            glfwSetInputMode(Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(Window->GetHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
     }
 

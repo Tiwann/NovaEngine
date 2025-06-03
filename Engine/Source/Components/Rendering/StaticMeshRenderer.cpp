@@ -192,8 +192,8 @@ namespace Nova
         const Camera* Camera = Renderer->GetCurrentCamera();
         if (!Camera) return;
 
-        const f32 Width = Window->GetWidth<f32>();
-        const f32 Height = Window->GetHeight<f32>();
+        const f32 Width = Window->GetWidth();
+        const f32 Height = Window->GetHeight();
 
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));

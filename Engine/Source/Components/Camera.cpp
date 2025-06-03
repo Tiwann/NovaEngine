@@ -27,8 +27,8 @@ namespace Nova
     void Camera::OnUpdate(f32 Delta)
     {
         const Window* Window = g_Application->GetWindow();
-        const f32 NewWidth = Window->GetWidth<f32>();
-        const f32 NewHeight = Window->GetHeight<f32>();
+        const f32 NewWidth = Window->GetWidth();
+        const f32 NewHeight = Window->GetHeight();
         if (Math::AreDifferent(m_Settings.Width, NewWidth) || Math::AreDifferent(m_Settings.Height, NewHeight))
         {
             m_Settings.Width = NewWidth;

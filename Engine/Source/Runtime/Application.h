@@ -4,8 +4,6 @@
 #include "Containers/TreeNode.h"
 #include "Containers/String.h"
 #include "LogCategory.h"
-#include "Containers/MulticastDelegate.h"
-#include "Input/Input.h"
 #include "Editor/Menu.h"
 
 
@@ -15,77 +13,40 @@ namespace slang
 {
     struct IGlobalSession;
 }
-typedef slang::IGlobalSession SlangSession;
 
 namespace Nova
 {
-    class TextureManager;
-    class ShaderManager;
-    class Renderer;
-    class Window;
-    class Image;
-    class Scene;
-    class Entity;
-    class AudioSystem;
+    class PhysicsSettingsPanel;
+    class ImGuiRenderer;
+    class SoundManager;
+    class ModuleManager;
     class ViewportPanel;
     class DetailsPanel;
     class SceneHierarchyPanel;
-    class PhysicsSettingsPanel;
     class AssetDatabase;
-    class ModuleManager;
-    class SoundManager;
-    class ImGuiRenderer;
-    
-    struct ApplicationEvents
-    {
-        using ApplicationDelegate = MulticastDelegate<void()>;
-        static inline ApplicationDelegate OnInitEvent;
-        static inline ApplicationDelegate OnStartEvent;
-        static inline ApplicationDelegate OnStopEvent;
-        static inline ApplicationDelegate OnPreExitEvent;
-        static inline ApplicationDelegate OnPostExitEvent;
-        static inline ApplicationDelegate OnFrameBegin;
-        static inline ApplicationDelegate OnFrameEnd;
-        
-        static inline MulticastDelegate<void(Path const&)> OnSceneSaveEvent;
-        static inline MulticastDelegate<void(Path const&)> OnSceneLoadEvent;
+    class TextureManager;
+    class ShaderManager;
+    class AudioSystem;
+    class Scene;
+    class Window;
 
-        using KeyDelegate = MulticastDelegate<void(KeyCode, InputState)>;
-        static inline KeyDelegate OnKeyEvent;
-
-        static inline MulticastDelegate<void(KeyCode)> OnKeyPressedEvent;
-        static inline MulticastDelegate<void(KeyCode)> OnKeyReleasedEvent;
-
-        using MouseButtonDelegate = MulticastDelegate<void(MouseButton, InputState)>;
-        static inline MouseButtonDelegate OnMouseButtonEvent;
-
-        using GamepadButtonDelegate = MulticastDelegate<void(size_t ID, GamepadButton Button, InputState State)>;
-        static inline GamepadButtonDelegate OnGamepadButtonEvent;
-
-        using GamepadAxisDelegate = MulticastDelegate<void(size_t ID, size_t Axis, f32 Value)>;
-        static inline GamepadAxisDelegate OnGamepadAxisEvent;
-    };
-    
     class Application
     {
     public:
-        Application(Array<const char*> Arguments);
+        explicit Application(Array<const char*> Arguments);
         virtual ~Application() = default;
 
-        /* Application is not copyable nor moveable */
         Application(const Application&) = delete;
         Application(Application&&) = delete;
         Application& operator=(const Application&) = delete;
         Application& operator=(Application&&) = delete;
 
-
         void Run();
 
-        /* Application Interface */
         virtual void OnInit();
         virtual void OnStart();
         virtual void OnExit();
-        virtual void OnFrameStarted(Renderer* Renderer);
+        virtual void OnFrameStarted(class Renderer* Renderer);
         virtual void OnRender(Renderer* Renderer);
         virtual void OnUpdate(f32 Delta);
         virtual void OnGUI(f32 Delta);
@@ -96,25 +57,21 @@ namespace Nova
         const GraphicsSettings&          GetGraphicsSettings() const;
         const AudioSettings&             GetAudioSettings() const;
 
-        
-        Window*                 GetWindow() const;
+
+        Window* GetWindow() const;
         Renderer*               GetRenderer() const;
-        template<typename RendererBackendType> requires IsBaseOfValue<Renderer, RendererBackendType>
-        RendererBackendType*    GetRenderer() const { return dynamic_cast<RendererBackendType*>(GetRenderer()); }
         Scene*                  GetScene() const;
         AudioSystem*            GetAudioSystem() const;
         ShaderManager*          GetShaderManager() const;
         TextureManager*         GetTextureManager() const;
         AssetDatabase*          GetAssetDatabase() const;
-        SlangSession*           GetSlangSession() const;
+        slang::IGlobalSession*  GetSlangSession() const;
 
         SceneHierarchyPanel*    GetSceneHierarchyPanel() const;
         DetailsPanel*           GetDetailsPanel() const;
         ViewportPanel*          GetViewportPanel() const;
         
         void                    RequireExit(ExitCode ExitCode);
-        void                    RequireExitAndRestart();
-        void                    SetCursorVisible(bool Visible) const;
 
         f64                     GetTimeScale() const;
         void                    SetTimeScale(f64 TimeScale);
@@ -130,12 +87,11 @@ namespace Nova
         /// CORE COMPONENTS
         ////////////////////////////////////////////
         Window*                 m_MainWindow = nullptr;
-        Array<Window*>          m_Windows;
         Renderer*               m_Renderer = nullptr;
         Scene*                  m_Scene = nullptr;
         AudioSystem*            m_AudioSystem = nullptr;
         ModuleManager*          m_ModuleManager = nullptr;
-        SlangSession*           m_SlangSession = nullptr;
+        slang::IGlobalSession*  m_SlangSession = nullptr;
     protected:
         ////////////////////////////////////////////
         /// RESOURCES MANAGERS
@@ -171,6 +127,8 @@ namespace Nova
         Path m_EngineDirectory;
         Path m_EngineAssetsDirectory;
         bool PreInitialize();
+        void Update();
+        void Render();
     };
 
     inline Application* g_Application;

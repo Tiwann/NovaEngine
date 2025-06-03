@@ -1,6 +1,7 @@
 #include "D3D12ImGuiRenderer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Window.h"
+#include "Runtime/DesktopWindow.h"
 #include "Runtime/Application.h"
 
 #include <imgui_impl_glfw.h>
@@ -8,13 +9,14 @@
 #include <GLFW/glfw3.h>
 #include <ImGuizmo.h>
 
+
 namespace Nova
 {
     bool D3D12ImGuiRenderer::Initialize(Application* Application)
     {
         ImGuiRenderer::Initialize(Application);
-        Window* Window = Application->GetWindow();
-        GLFWwindow* NativeWindow = Window->GetNativeWindow();
+        DesktopWindow* Window = Application->GetWindow()->As<DesktopWindow>();
+        GLFWwindow* NativeWindow = Window->GetHandle();
         
         if(!ImGui_ImplGlfw_InitForOther(NativeWindow, true))
         {
@@ -22,7 +24,7 @@ namespace Nova
             return false;
         }
 
-        const D3D12Renderer* Renderer = Application->GetRenderer<D3D12Renderer>();
+        const D3D12Renderer* Renderer = Application->GetRenderer()->As<D3D12Renderer>();
         ID3D12Device9* Device = Renderer->GetDevice();
         ID3D12DescriptorHeap* DescriptorHeap = Renderer->GetImGuiDescriptorHeap();
         const u64 CPUHandle = DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr;
@@ -56,7 +58,7 @@ namespace Nova
     {
         ImGui::Render();
         ImDrawData* Data = ImGui::GetDrawData();
-        const D3D12Renderer* Renderer = g_Application->GetRenderer<D3D12Renderer>();
+        const D3D12Renderer* Renderer = g_Application->GetRenderer()->As<D3D12Renderer>();
         ID3D12GraphicsCommandList* Cmd = Renderer->GetCurrentGraphicsCommandBuffer();
         ID3D12DescriptorHeap* DescriptorHeap = Renderer->GetImGuiDescriptorHeap();
         Cmd->SetDescriptorHeaps(1, &DescriptorHeap);

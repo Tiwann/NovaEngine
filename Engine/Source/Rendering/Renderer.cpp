@@ -19,6 +19,7 @@
 #include "Platform/Vulkan/VulkanRenderTarget.h"
 #include "Platform/Vulkan/VulkanSemaphore.h"
 #include "Platform/Vulkan/VulkanShader.h"
+#include "Platform/Vulkan/VulkanSurface.h"
 #include "Platform/Vulkan/VulkanSwapchain.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Platform/Vulkan/VulkanVertexBuffer.h"
@@ -45,6 +46,26 @@ namespace Nova
     {
         ClearColor(Color);
         ClearDepth(Depth);
+    }
+
+    Surface* Renderer::CreateSurface(const SurfaceCreateInfo& CreateInfo)
+    {
+        Surface* Result = nullptr;
+        switch (m_GraphicsApi)
+        {
+        case GraphicsApi::None: return nullptr;
+        case GraphicsApi::OpenGL: return nullptr;
+        case GraphicsApi::Vulkan: Result = new VulkanSurface(this); break;
+        case GraphicsApi::D3D12: return nullptr;
+        default: return nullptr;
+        }
+
+        if (!Result->Initialize(CreateInfo))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     Semaphore* Renderer::CreateSemaphore(const SemaphoreCreateInfo& CreateInfo)

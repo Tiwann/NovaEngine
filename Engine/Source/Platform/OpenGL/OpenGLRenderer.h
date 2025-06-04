@@ -24,7 +24,7 @@ namespace Nova
         explicit OpenGLRenderer(Application* Owner) : Renderer(Owner, GraphicsApi::OpenGL) {}
         ~OpenGLRenderer() override = default;
 
-        bool Initialize() override;
+        bool Initialize(const RendererCreateInfo& CreateInfo) override;
         void Destroy() override;
         void ClearDepth(float Depth) override;
         void ClearColor(const Color& color) override;

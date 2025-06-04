@@ -9,6 +9,8 @@
 #include <commdlg.h>
 #include <processenv.h>
 
+#include "Runtime/DesktopWindow.h"
+
 namespace Nova
 {
     Path Directory::GetUserDirectory()
@@ -24,7 +26,7 @@ namespace Nova
         OPENFILENAME OpenFileName = { };
         Memory::Memzero(OpenFileName);
         WCHAR szFile[MAX_PATH] = { 0 };
-        OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
+        OpenFileName.hwndOwner = glfwGetWin32Window(Window->As<DesktopWindow>()->GetHandle());
         OpenFileName.lStructSize = sizeof(OPENFILENAME);
         OpenFileName.lpstrFile = szFile;
         OpenFileName.nMaxFile = MAX_PATH;
@@ -52,7 +54,7 @@ namespace Nova
         OPENFILENAME OpenFileName = { };
         Memory::Memzero(OpenFileName);
         WCHAR szFile[MAX_PATH] = { 0 };
-        OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
+        OpenFileName.hwndOwner = glfwGetWin32Window(Window->As<DesktopWindow>()->GetHandle());
         OpenFileName.lStructSize = sizeof(OPENFILENAME);
         OpenFileName.lpstrFile = szFile;
         OpenFileName.nMaxFile = MAX_PATH;
@@ -81,7 +83,7 @@ namespace Nova
         OPENFILENAME OpenFileName = { };
         Memory::Memzero(OpenFileName);
         WCHAR szFile[MAX_PATH] = { 0 };
-        OpenFileName.hwndOwner = glfwGetWin32Window(Window->GetNativeWindow());
+        OpenFileName.hwndOwner = glfwGetWin32Window(Window->As<DesktopWindow>()->GetHandle());
         OpenFileName.lStructSize = sizeof(OPENFILENAME);
         OpenFileName.lpstrFile = szFile;
         OpenFileName.nMaxFile = MAX_PATH;

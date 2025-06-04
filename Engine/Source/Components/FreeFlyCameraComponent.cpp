@@ -20,11 +20,15 @@ namespace Nova
     void FreeFlyCameraComponent::OnUpdate(const f32 Delta)
     {
         Transform* CamTransform = m_Camera->GetTransform();
-        const Vector2 MouseDelta = Input::GetMouseDelta();
+
+        DesktopWindow* Window = g_Application->GetWindow()->As<DesktopWindow>();
+        if (!Window) return;
+
+        const Vector2 MouseDelta = Window->GetDeltaMousePosition();
         Vector3 MoveDirection = Vector3::Zero;
         f32 Speed = m_Speed;
 
-        if (Input::GetMouseButton(MouseButton::Right))
+        if (Window->GetMouseButton(MouseButton::Right))
         {
             m_Pitch += MouseDelta.y * m_Sensitivity;
             m_Yaw += MouseDelta.x * m_Sensitivity;
@@ -38,14 +42,14 @@ namespace Nova
             const Vector3 Forward = CamTransform->GetForwardVector();
             const Vector3 Right = CamTransform->GetRightVector();
 
-            if (Input::GetKey(KeyCode::KeyW)) MoveDirection -= Forward;
-            if (Input::GetKey(KeyCode::KeyS)) MoveDirection += Forward;
-            if (Input::GetKey(KeyCode::KeyD)) MoveDirection += Right;
-            if (Input::GetKey(KeyCode::KeyA)) MoveDirection -= Right;
-            if (Input::GetKey(KeyCode::Space)) MoveDirection += Vector3::Up;
-            if (Input::GetKey(KeyCode::LeftControl)) MoveDirection += Vector3::Down;
+            if (Window->GetKey(KeyCode::KeyW)) MoveDirection -= Forward;
+            if (Window->GetKey(KeyCode::KeyS)) MoveDirection += Forward;
+            if (Window->GetKey(KeyCode::KeyD)) MoveDirection += Right;
+            if (Window->GetKey(KeyCode::KeyA)) MoveDirection -= Right;
+            if (Window->GetKey(KeyCode::Space)) MoveDirection += Vector3::Up;
+            if (Window->GetKey(KeyCode::LeftControl)) MoveDirection += Vector3::Down;
 
-            if (Input::GetKey(KeyCode::LeftShift))
+            if (Window->GetKey(KeyCode::LeftShift))
                 Speed *= 4.0f;
 
             if (!Math::IsZero(MoveDirection.Magnitude()))
@@ -57,17 +61,14 @@ namespace Nova
         const Vector3 TargetPosition = CurrentPosition + Translation;
         CamTransform->SetPosition(TargetPosition);
 
-        DesktopWindow* Window = g_Application->GetWindow()->As<DesktopWindow>();
-        if (!Window) return;
-
         if (Window->GetMouseButtonDown(MouseButton::Right))
         {
-            glfwSetInputMode(Window->GetHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            Window->SetCursorMode(CursorMode::Locked);
         }
 
         if (Window->GetMouseButtonUp(MouseButton::Right))
         {
-            glfwSetInputMode(Window->GetHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            Window->SetCursorMode(CursorMode::Hidden);
         }
     }
 

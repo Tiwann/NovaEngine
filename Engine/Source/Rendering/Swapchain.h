@@ -25,15 +25,15 @@ namespace Nova
 
         virtual bool Recreate() = 0;
 
-        i32 GetWidth() const { return m_ImageWidth; }
-        i32 GetHeight() const { return m_ImageHeight; }
-        Format GetFormat() const { return m_ImageFormat; }
-        PresentMode GetPresentMode() const { return m_ImagePresentMode; }
-        u32 GetImageCount() const { return (u32)m_Buffering; }
+        i32 GetWidth() const;
+        i32 GetHeight() const;
+        Format GetFormat() const;
+        PresentMode GetPresentMode() const;
+        u32 GetImageCount() const;
 
     protected:
         Format m_ImageFormat = Format::None;
-        SwapchainBuffering m_Buffering;
+        SwapchainBuffering m_Buffering = SwapchainBuffering::None;
         PresentMode m_ImagePresentMode = PresentMode::Unknown;
         u32 m_ImageWidth = 0, m_ImageHeight = 0;
     };

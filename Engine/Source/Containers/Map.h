@@ -39,16 +39,11 @@ namespace Nova
         const ValueType& operator[](const KeyType& Key) const
         {
             SizeType Index = FindKey(Key);
-            if(Index == -1)
-            {
-                const PairType Pair{ .Key = Key };
-                m_Data.Add(Pair);
-                return m_Data.Last().Value;
-            }
+            NOVA_ASSERT(Index != -1, "Key not found");
             return m_Data[Index].Value;
         }
 
-        SizeType FindKey(const KeyType& Key)
+        SizeType FindKey(const KeyType& Key) const
         {
             for(SizeType i = 0; i < m_Data.Count(); ++i)
             {
@@ -70,7 +65,7 @@ namespace Nova
             return -1;
         }
 
-        bool Contains(const KeyType& Key)
+        bool Contains(const KeyType& Key) const
         {
             return FindKey(Key) != -1ULL;
         }

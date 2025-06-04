@@ -1,6 +1,7 @@
 #include "OpenGLImGuiRenderer.h"
 #include "Platform/PlatformRenderer.h"
 #include "Runtime/Window.h"
+#include "Runtime/DesktopWindow.h"
 #include "Runtime/Application.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -14,13 +15,16 @@ namespace Nova
     {
         ImGuiRenderer::Initialize(Application);
         Window* Window = Application->GetWindow();
-        GLFWwindow* NativeWindow = Window->GetNativeWindow();
-        
-        if(!ImGui_ImplGlfw_InitForOpenGL(NativeWindow, true))
+
+        if (DesktopWindow* Desktop = Window->As<DesktopWindow>())
         {
-            NOVA_IMGUI_ERROR("Failed to initialize ImGui for GLFW (OpenGL)!");
-            return false;
+            if(!ImGui_ImplGlfw_InitForOpenGL(Desktop->GetHandle(), true))
+            {
+                NOVA_IMGUI_ERROR("Failed to initialize ImGui for GLFW (OpenGL)!");
+                return false;
+            }
         }
+
 
         if(!ImGui_ImplOpenGL3_Init("#version 460 core"))
         {
@@ -33,14 +37,22 @@ namespace Nova
     void OpenGLImGuiRenderer::Shutdown()
     {
         ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
+        Window* Window = m_Application->GetWindow();
+        if (DesktopWindow* Desktop = Window->As<DesktopWindow>())
+        {
+            ImGui_ImplGlfw_Shutdown();
+        }
         ImGui::DestroyContext(m_Context);
     }
 
     void OpenGLImGuiRenderer::BeginFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+        Window* Window = m_Application->GetWindow();
+        if (DesktopWindow* Desktop = Window->As<DesktopWindow>())
+        {
+            ImGui_ImplGlfw_NewFrame();
+        }
         ImGui::NewFrame();
         ImGuizmo::BeginFrame();
     }

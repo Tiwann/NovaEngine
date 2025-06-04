@@ -3,6 +3,7 @@
 #include "VulkanRenderer.h"
 #include "VulkanRenderTarget.h"
 #include "VulkanSemaphore.h"
+#include "VulkanSurface.h"
 #include "Containers/StringFormat.h"
 #include "Runtime/Application.h"
 #include "Runtime/Window.h"
@@ -12,7 +13,7 @@ namespace Nova
     bool VulkanSwapchain::Initialize(const SwapchainCreateInfo& CreateInfo)
     {
         const VulkanRenderer* Renderer = GetOwner()->As<VulkanRenderer>();
-        const VkSurfaceKHR Surface = Renderer->GetSurface();
+        const VkSurfaceKHR Surface = Renderer->GetSurface()->GetHandle();
         const VkDevice Device = Renderer->GetDevice();
         const u32 GraphicsQueueFamily = Renderer->GetGraphicsQueueFamily();
         const u32 PresentQueueFamily = Renderer->GetPresentQueueFamily();

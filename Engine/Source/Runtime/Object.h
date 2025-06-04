@@ -17,6 +17,9 @@ namespace Nova
         template <typename Derived> requires IsBaseOfValue<Object, Derived>
         Derived* As() { return dynamic_cast<Derived*>(this); }
 
+        template <typename Derived> requires IsBaseOfValue<Object, Derived>
+        const Derived* As() const { return dynamic_cast<const Derived*>(this); }
+
     protected:
         String m_Name;
     };

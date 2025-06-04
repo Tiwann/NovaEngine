@@ -23,6 +23,7 @@ namespace Nova
     class VulkanRenderTarget;
     class VulkanFence;
     class VulkanSemaphore;
+    class VulkanSurface;
 
     struct VulkanFrameData
     {
@@ -54,7 +55,7 @@ namespace Nova
         explicit VulkanRenderer(Application* Owner);
         ~VulkanRenderer() override = default;
         
-        bool Initialize() override;
+        bool Initialize(const RendererCreateInfo& CreateInfo) override;
         void Destroy() override;
         bool BeginFrame() override;
         void BeginRendering() override;
@@ -84,7 +85,7 @@ namespace Nova
         VkDevice GetDevice() const;
         VkQueue GetGraphicsQueue() const;
         VkQueue GetPresentQueue() const;
-        VkSurfaceKHR GetSurface() const;
+        VulkanSurface* GetSurface() const;
         VulkanSwapchain* GetSwapchain() const;
         VmaAllocator GetAllocator() const;
 
@@ -101,6 +102,9 @@ namespace Nova
         const VkFunctionPointers& GetFunctionPointers() const;
 
         VulkanRendererTypeConvertor Convertor;
+
+    private:
+        VkPhysicalDevice SelectPhysicalDevice(VkInstance Instance) const;
     private:
         u32                               m_CurrentFrameIndex = 0;
         u32                               m_NewFrameIndex = 0;
@@ -111,7 +115,7 @@ namespace Nova
         #endif
         VkPhysicalDevice                  m_PhysicalDevice = nullptr;
         VkDevice                          m_Device = nullptr;
-        VkSurfaceKHR                      m_Surface = nullptr;
+        VulkanSurface*                    m_Surface = nullptr;
         u32                               m_GraphicsQueueIndex = U32_MAX;
         u32                               m_PresentQueueIndex = U32_MAX;
         VkQueue                           m_GraphicsQueue = nullptr;

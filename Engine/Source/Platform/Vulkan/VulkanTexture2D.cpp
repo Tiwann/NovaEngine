@@ -13,7 +13,7 @@ namespace Nova
         {
             return;
         }
-        const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VulkanRenderer* Renderer = g_Application->GetRenderer()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         const VmaAllocator Allocator = Renderer->GetAllocator();
         
@@ -84,7 +84,7 @@ namespace Nova
 
     VulkanTexture2D::~VulkanTexture2D()
     {
-        const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VulkanRenderer* Renderer = g_Application->GetRenderer()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         const VmaAllocator Allocator = Renderer->GetAllocator();
         vmaDestroyImage(Allocator, m_Handle, m_Allocation);
@@ -99,7 +99,7 @@ namespace Nova
 
     void VulkanTexture2D::SetData(u8* Data, u32 Width, u32 Height, const Format& Format)
     {
-        const VulkanRenderer* Renderer = g_Application->GetRenderer<VulkanRenderer>();
+        const VulkanRenderer* Renderer = g_Application->GetRenderer()->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
         const VmaAllocator Allocator = Renderer->GetAllocator();
 

@@ -1,28 +1,8 @@
 #include "Input.h"
 #include "Runtime/Application.h"
-#include "Runtime/Window.h"
-#include "Math/Vector2.h"
-
-#include <GLFW/glfw3.h>
 
 namespace Nova
 {
-    bool Input::GetKeyDown(const KeyCode KeyCode)
-    {
-        return s_KeyStates[KeyCode] == InputState::Pressed;
-    }
-
-    bool Input::GetKey(KeyCode KeyCode)
-    {
-        Window* Window = g_Application->GetWindow();
-        const int State = glfwGetKey(Window->GetNativeWindow(), (int)KeyCode);
-        return State == GLFW_PRESS;
-    }
-
-    bool Input::GetKeyUp(const KeyCode KeyCode)
-    {
-        return s_KeyStates[KeyCode] == InputState::Released;
-    }
 
     String Input::GetKeyName(const KeyCode KeyCode)
     {
@@ -150,106 +130,5 @@ namespace Nova
         case KeyCode::Menu: return "Menu";
         }
         return "Unknown";
-    }
-
-    f32 Input::GetAxis(KeyCode Negative, KeyCode Positive)
-    {
-        f32 Result = 0.0f;
-        if(GetKey(Negative)) Result -= 1.0f;
-        if(GetKey(Positive)) Result += 1.0f;
-        return Result;
-    }
-
-    Vector2 Input::Get2DAxis(KeyCode Up, KeyCode Down, KeyCode Left, KeyCode Right)
-    {
-        return { GetAxis(Left, Right), GetAxis(Up, Down)};
-    }
-
-    bool Input::GetMouseButtonDown(const MouseButton MouseButton)
-    {
-        return s_MouseButtonStates[MouseButton] == InputState::Pressed;
-    }
-
-    bool Input::GetMouseButton(MouseButton MouseButton)
-    {
-        Window* Window = g_Application->GetWindow();
-        const int State = glfwGetMouseButton(Window->GetNativeWindow(), (int)MouseButton);
-        return State == GLFW_PRESS;
-    }
-
-    bool Input::GetMouseButtonUp(const MouseButton MouseButton)
-    {
-        return s_MouseButtonStates[MouseButton] == InputState::Released;
-    }
-
-    Vector2 Input::GetMousePosition()
-    {
-        GLFWwindow* NativeWindow = g_Application->GetWindow()->GetNativeWindow();
-        f64 X, Y;
-        glfwGetCursorPos(NativeWindow, &X, &Y);
-        return {(f32)X, (f32)Y};
-    }
-
-    Vector2 Input::GetMouseDelta()
-    {
-        return s_DeltaMousePosition;
-    }
-
-    bool Input::GetCombined(const Array<KeyCode>& KeyCodes, const Array<MouseButton>& MouseButtons)
-    {
-        const bool AllKeyCodes = KeyCodes.All([](const KeyCode& KeyCode) {
-            return Input::GetKey(KeyCode);
-        });
-
-        const bool AllMouseButtons = MouseButtons.All([](const MouseButton& MouseButton) {
-            return Input::GetMouseButton(MouseButton);
-        });
-        return AllKeyCodes && AllMouseButtons;
-    }
-
-    bool Input::IsGamepadConnected(const size_t ID)
-    {
-        return glfwJoystickPresent((int)ID);
-    }
-
-    BufferView<bool> Input::GetGamepadButtons(const size_t ID)
-    {
-        return BufferView(s_GamepadStates[ID].buttons, 15).As<bool>();
-    }
-
-    bool Input::GetGamepadButtonDown(const size_t ID, GamepadButton Button)
-    {
-        return IsGamepadConnected(ID) && s_GamepadButtons[ID][(size_t)Button] == InputState::Pressed;
-    }
-
-    bool Input::GetGamepadButtonUp(const size_t ID, GamepadButton Button)
-    {
-        return IsGamepadConnected(ID) && s_GamepadButtons[ID][(size_t)Button] == InputState::Released;
-    }
-
-    bool Input::GetGamepadButton(size_t ID, GamepadButton Button)
-    {
-        return IsGamepadConnected(ID) && s_GamepadStates[ID].buttons[(size_t)Button];
-    }
-
-    Vector2 Input::GetGamepadStick(size_t ID, GamepadThumbstick Thumbstick, f32 Deadzone)
-    {
-        Vector2 Axis;
-        switch (Thumbstick)
-        {
-        case GamepadThumbstick::Left: Axis = {s_GamepadAxes[ID][0], -s_GamepadAxes[ID][1]}; break;
-        case GamepadThumbstick::Right: Axis = {s_GamepadAxes[ID][2], -s_GamepadAxes[ID][3]}; break;
-        }
-        return Axis.Magnitude() < Deadzone ? Vector2::Zero : Axis;
-    }
-
-    f32 Input::GetGamepadLeftShoulder(size_t ID)
-    {
-        return s_GamepadAxes[ID][4];
-    }
-
-    f32 Input::GetGamepadRightShoulder(size_t ID)
-    {
-        return s_GamepadAxes[ID][5];
     }
 }

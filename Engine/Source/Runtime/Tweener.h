@@ -87,7 +87,7 @@ namespace Nova
             m_OnEndEvent.ClearAll();
         }
         
-        virtual void Update(float Delta) = 0;
+        virtual void Update(f32 Delta) = 0;
         
         Tweener& OnStart(const TweenDelegate::DelegateType& OnStart)
         {
@@ -142,7 +142,7 @@ namespace Nova
             m_StartValue = m_Getter();
         }
 
-        void Update(float Delta) override
+        void Update(f32 Delta) override
         {
             if (m_Finished) return;
             
@@ -206,7 +206,7 @@ namespace Nova
             return *this;
         }
 
-        void Update(float Delta) override
+        void Update(f32 Delta) override
         {
             if (m_Finished) return;
             

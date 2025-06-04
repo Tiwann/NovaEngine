@@ -34,7 +34,7 @@ namespace Nova
     }
 #endif
     
-    bool D3D12Renderer::Initialize()
+    bool D3D12Renderer::Initialize(const RendererCreateInfo& CreateInfo)
     {
         m_ImageCount = (u32)m_Application->GetGraphicsSettings().Buffering;
         

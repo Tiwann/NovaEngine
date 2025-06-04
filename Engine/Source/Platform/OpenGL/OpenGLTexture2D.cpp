@@ -16,7 +16,7 @@ namespace Nova
         glActiveTexture(GL_TEXTURE0 + Slot);
         glBindTexture(GL_TEXTURE_2D, m_Handle);
 
-        OpenGLRenderer* Renderer = g_Application->GetRenderer<OpenGLRenderer>();
+        OpenGLRenderer* Renderer = g_Application->GetRenderer()->As<OpenGLRenderer>();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));
@@ -35,7 +35,7 @@ namespace Nova
         Bind();
         m_Params = Params;
 
-        OpenGLRenderer* Renderer = g_Application->GetRenderer<OpenGLRenderer>();
+        OpenGLRenderer* Renderer = g_Application->GetRenderer()->As<OpenGLRenderer>();
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, Renderer->Convertor.ConvertFilter(m_Params.Filter));
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, Renderer->Convertor.ConvertSamplerAddressMode(m_Params.AddressMode));

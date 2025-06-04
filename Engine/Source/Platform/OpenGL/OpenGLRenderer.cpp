@@ -17,14 +17,18 @@
 #include "OpenGLPipeline.h"
 #include "OpenGLShader.h"
 #include "Rendering/Pipeline.h"
+#include "Runtime/DesktopWindow.h"
 
 
 namespace Nova
 {
-    bool OpenGLRenderer::Initialize()
+    bool OpenGLRenderer::Initialize(const RendererCreateInfo& CreateInfo)
     {
         NOVA_LOG(OpenGL, Verbosity::Trace, "Creating OpenGL context");
-        glfwMakeContextCurrent(m_Application->GetWindow()->GetNativeWindow());
+        if (DesktopWindow* Window = m_Application->GetWindow()->As<DesktopWindow>())
+        {
+            glfwMakeContextCurrent(Window->GetHandle());
+        }
         glfwSwapInterval(m_Application->GetConfiguration().Graphics.VSync);
         
         if(!gladLoadGL(glfwGetProcAddress))
@@ -73,7 +77,10 @@ namespace Nova
 
     void OpenGLRenderer::Present()
     {
-        glfwSwapBuffers(m_Application->GetWindow()->GetNativeWindow());
+        if (DesktopWindow* Window = m_Application->GetWindow()->As<DesktopWindow>())
+        {
+            glfwSwapBuffers(Window->GetHandle());
+        }
     }
 
     bool OpenGLRenderer::BeginFrame()

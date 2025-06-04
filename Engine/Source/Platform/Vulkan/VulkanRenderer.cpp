@@ -17,6 +17,7 @@
 #include "VulkanRenderTarget.h"
 #include "VulkanSemaphore.h"
 #include "VulkanShader.h"
+#include "VulkanSurface.h"
 #include "VulkanSwapchain.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanVertexBuffer.h"
@@ -24,7 +25,9 @@
 #include "Rendering/CommandBuffer.h"
 #include "Rendering/Multisample.h"
 #include "Rendering/RenderTarget.h"
+#include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
+#include "Runtime/DesktopWindow.h"
 
 namespace Nova
 {
@@ -56,10 +59,11 @@ namespace Nova
 
     }
 
-    bool VulkanRenderer::Initialize()
+    bool VulkanRenderer::Initialize(const RendererCreateInfo& CreateInfo)
     {
-        const i32 WindowWidth = g_Application->GetWindow()->GetWidth<i32>();
-        const i32 WindowHeight = g_Application->GetWindow()->GetHeight<i32>();
+        m_Window = CreateInfo.Window;
+        const i32 WindowWidth = m_Window->GetWidth();
+        const i32 WindowHeight = m_Window->GetHeight();
 
         //////////////////////////////////////////////////////////////////////////////////////////
         /// INSTANCE CREATE
@@ -140,51 +144,27 @@ namespace Nova
         /// DEVICE CREATE
         //////////////////////////////////////////////////////////////////////////////////////////
         {
-            u32 AvailableDevicesCount;
-            if (VK_FAILED(vkEnumeratePhysicalDevices(m_Instance, &AvailableDevicesCount, nullptr)))
-            {
-                NOVA_VULKAN_ERROR("Failed to enumerate physical devices!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
-
-            ScopedBuffer<VkPhysicalDevice> AvailablePhysicalDevices(AvailableDevicesCount);
-            if (VK_FAILED(vkEnumeratePhysicalDevices(m_Instance, &AvailableDevicesCount, AvailablePhysicalDevices.GetData())))
-            {
-                NOVA_VULKAN_ERROR("Failed to enumerate physical devices!");
-                m_Application->RequireExit(ExitCode::Error);
-                return false;
-            }
-
-            for (VkPhysicalDevice PhysicalDevice : AvailablePhysicalDevices)
-            {
-                VkPhysicalDeviceProperties Properties;
-                vkGetPhysicalDeviceProperties(PhysicalDevice, &Properties);
-                VkPhysicalDeviceFeatures Features;
-                vkGetPhysicalDeviceFeatures(PhysicalDevice, &Features);
-                if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && Features.samplerAnisotropy == (VkBool32)true)
-                {
-                    m_PhysicalDevice = PhysicalDevice;
-                    break;
-                }
-            }
+            m_PhysicalDevice = SelectPhysicalDevice(m_Instance);
 
             if (!m_PhysicalDevice)
             {
                 NOVA_VULKAN_ERROR("Failed to pick physical device!");
                 m_Application->RequireExit(ExitCode::Error);
-
                 ScopedPointer<PopupMessage> Message = PopupMessage::Create("Fatal Error", "No suitable GPU found!", PopupMessageResponse::OK, PopupMessageIcon::Error);
                 Message->Show();
                 return false;
             }
 
-            if (VK_FAILED(glfwCreateWindowSurface(m_Instance, m_Application->GetWindow()->GetNativeWindow(), nullptr, &m_Surface)))
+            SurfaceCreateInfo CreateInfo;
+            CreateInfo.Window = m_Window;
+            m_Surface = (VulkanSurface*)CreateSurface(CreateInfo);
+            if (!m_Surface)
             {
-                NOVA_VULKAN_ERROR("Failed to create window surface!");
+                NOVA_VULKAN_ERROR("Failed to create surface!");
                 m_Application->RequireExit(ExitCode::Error);
                 return false;
             }
+
 
             u32 QueueFamilyPropertiesCount = 0;
             vkGetPhysicalDeviceQueueFamilyProperties2(m_PhysicalDevice, &QueueFamilyPropertiesCount, nullptr);
@@ -207,7 +187,7 @@ namespace Nova
             for (u32 i = 0; i < QueueFamilyProperties.Count(); ++i)
             {
                 VkBool32 SupportsSurface = VK_FALSE;
-                vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface, &SupportsSurface);
+                vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface->GetHandle(), &SupportsSurface);
                 if (SupportsSurface)
                 {
                     m_PresentQueueIndex = i;
@@ -303,12 +283,12 @@ namespace Nova
         }
 
         VkPhysicalDeviceSurfaceInfo2KHR SurfaceInfo = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SURFACE_INFO_2_KHR };
-        SurfaceInfo.surface = m_Surface;
+        SurfaceInfo.surface = m_Surface->GetHandle();
 
-        u32 SurfaceFormatCount;
+        /*u32 SurfaceFormatCount;
         vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, nullptr);
         ScopedBuffer<VkSurfaceFormatKHR> SurfaceFormats(SurfaceFormatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, SurfaceFormats.GetData());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_PhysicalDevice, m_Surface, &SurfaceFormatCount, SurfaceFormats.GetData());*/
 
 
         //////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +426,7 @@ namespace Nova
         m_Swapchain->Destroy();
         delete m_Swapchain;
         vkDestroyDevice(m_Device, nullptr);
-        vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+        m_Surface->Destroy();
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         m_FunctionPointers.vkDestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
 #endif
@@ -455,13 +435,15 @@ namespace Nova
 
     bool VulkanRenderer::BeginFrame()
     {
-        const Window* Window = g_Application->GetWindow();
-        const u32 WindowWidth = Window->GetWidth();
-        const u32 WindowHeight = Window->GetHeight();
+        const u32 WindowWidth = m_Window->GetWidth();
+        const u32 WindowHeight = m_Window->GetHeight();
 
-        if (Window->IsMinimized())
+        if (const DesktopWindow* DesktopWindow = m_Window->As<class DesktopWindow>())
         {
-            return false;
+            if (DesktopWindow->IsMaximized())
+            {
+                return false;
+            }
         }
 
         if (ShouldRecreateSwapchain)
@@ -526,8 +508,8 @@ namespace Nova
 
     void VulkanRenderer::ClearDepth(const float Depth)
     {
-        const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
-        const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
+        const u32 WindowWidth = m_Window->GetWidth();
+        const u32 WindowHeight = m_Window->GetHeight();
 
         const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearAttachment;
@@ -545,8 +527,8 @@ namespace Nova
 
     void VulkanRenderer::ClearColor(const Color& color)
     {
-        const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
-        const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
+        const u32 WindowWidth = m_Window->GetWidth();
+        const u32 WindowHeight = m_Window->GetHeight();
 
         const VkCommandBuffer CommandBuffer = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearAttachment;
@@ -565,8 +547,8 @@ namespace Nova
 
     void VulkanRenderer::Clear(const Color& Color, const float Depth)
     {
-        const u32 WindowWidth = g_Application->GetWindow()->GetWidth<u32>();
-        const u32 WindowHeight = g_Application->GetWindow()->GetHeight<u32>();
+        const u32 WindowWidth = m_Window->GetWidth();
+        const u32 WindowHeight = m_Window->GetHeight();
 
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         VkClearAttachment ClearColorAttachment;
@@ -710,7 +692,7 @@ namespace Nova
 
             u32 PresentModeCount;
             VkPresentModeKHR PresentModes[8];
-            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface, &PresentModeCount, PresentModes);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface->GetHandle(), &PresentModeCount, PresentModes);
 
             for (size_t PresentModeIndex = 0; PresentModeIndex < PresentModeCount; ++PresentModeIndex)
             {
@@ -771,7 +753,7 @@ namespace Nova
         return m_PresentQueue;
     }
 
-    VkSurfaceKHR VulkanRenderer::GetSurface() const
+    VulkanSurface* VulkanRenderer::GetSurface() const
     {
         return m_Surface;
     }
@@ -834,6 +816,37 @@ namespace Nova
     const VkFunctionPointers& VulkanRenderer::GetFunctionPointers() const
     {
         return m_FunctionPointers;
+    }
+
+    VkPhysicalDevice VulkanRenderer::SelectPhysicalDevice(VkInstance Instance) const
+    {
+        VkPhysicalDevice SelectedPhysicalDevice = nullptr;
+        VkPhysicalDevice AvailablePhysicalDevices[32] { nullptr };
+        u32 AvailableDevicesCount = 32;
+
+        if (VK_FAILED(vkEnumeratePhysicalDevices(Instance, &AvailableDevicesCount, AvailablePhysicalDevices)))
+        {
+            NOVA_VULKAN_ERROR("Failed to enumerate physical devices!");
+            return nullptr;
+        }
+
+
+        for (size_t PhysicalDeviceIndex = 0; PhysicalDeviceIndex < AvailableDevicesCount; ++PhysicalDeviceIndex)
+        {
+            const VkPhysicalDevice& PhysicalDevice = AvailablePhysicalDevices[PhysicalDeviceIndex];
+            VkPhysicalDeviceProperties Properties;
+            vkGetPhysicalDeviceProperties(PhysicalDevice, &Properties);
+
+            VkPhysicalDeviceFeatures Features;
+            vkGetPhysicalDeviceFeatures(PhysicalDevice, &Features);
+            if (Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && Features.samplerAnisotropy == (VkBool32)true)
+            {
+                SelectedPhysicalDevice = PhysicalDevice;
+                break;
+            }
+        }
+
+        return SelectedPhysicalDevice;
     }
 
     u32 VulkanRenderer::GetCurrentFrameIndex() const

@@ -10,6 +10,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include "Runtime/DesktopWindow.h"
+
 
 namespace Nova
 {
@@ -21,8 +23,8 @@ namespace Nova
     bool D3D12Swapchain::Initialize(const SwapchainCreateInfo& CreateInfo)
     {
         const D3D12Renderer* Renderer = m_Owner->As<D3D12Renderer>();
-        Window* Window = Renderer->GetOwner()->GetWindow();
-        GLFWwindow* NativeWindow = Window->GetNativeWindow();
+        DesktopWindow* Window = Renderer->GetOwner()->GetWindow()->As<DesktopWindow>();
+        GLFWwindow* NativeWindow = Window->GetHandle();
         const HWND Hwnd = glfwGetWin32Window(NativeWindow);
         const auto& Convertor = Renderer->Convertor;
 

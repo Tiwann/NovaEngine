@@ -18,6 +18,7 @@
 
 #include "AssetDatabase.h"
 #include "CameraSettings.h"
+#include "DesktopWindow.h"
 #include "ExitCode.h"
 #include "ScopedTimer.h"
 #include "TweenManager.h"
@@ -62,21 +63,26 @@ namespace Nova
 
         m_Configuration = CreateConfiguration();
 
-        WindowCreateInfo CreateInfo;
-        CreateInfo.Title = m_Configuration.AppName;
-        CreateInfo.Width = m_Configuration.WindowWidth;
-        CreateInfo.Height = m_Configuration.WindowWidth;
-        CreateInfo.Resizable = m_Configuration.WindowResizable;
+        WindowCreateInfo WindowCreateInfo;
+        WindowCreateInfo.Title = m_Configuration.AppName;
+        WindowCreateInfo.Width = m_Configuration.WindowWidth;
+        WindowCreateInfo.Height = m_Configuration.WindowHeight;
+        WindowCreateInfo.Resizable = m_Configuration.WindowResizable;
         m_MainWindow = Window::Create(this);
-        if (!m_MainWindow->Initialize(CreateInfo))
+        if (!m_MainWindow->Initialize(WindowCreateInfo))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create window!");
             return false;
         }
 
+        if (DesktopWindow* Window = m_MainWindow->As<DesktopWindow>())
+        {
+            Window->Show();
+        }
+
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
         m_Renderer = Renderer::Create(this, m_Configuration.Graphics.GraphicsApi);
-        if(!m_Renderer->Initialize())
+        if(!m_Renderer->Initialize(RendererCreateInfo(m_MainWindow)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create renderer!");
             return false;
@@ -124,7 +130,7 @@ namespace Nova
         });
 
         m_MainWindow->Update((f32)m_UnscaledDeltaTime);
-        OnUpdate((float)m_UnscaledDeltaTime);
+        OnUpdate((f32)m_UnscaledDeltaTime);
     }
 
     void Application::Render()

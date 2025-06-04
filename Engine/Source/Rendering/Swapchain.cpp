@@ -2,24 +2,14 @@
 
 namespace Nova
 {
-    bool Swapchain::Initialize(const SwapchainCreateInfo& CreateInfo)
-    {
-        m_Width = CreateInfo.ImageWidth;
-        m_Height = CreateInfo.ImageHeight;
-        m_ImageFormat = CreateInfo.ImageFormat;
-        m_ImagePresentMode = CreateInfo.ImagePresentMode;
-        m_ImageCount = CreateInfo.ImageCount;
-        return true;
-    }
-
     i32 Swapchain::GetWidth() const
     {
-        return m_Width;
+        return m_ImageWidth;
     }
 
     i32 Swapchain::GetHeight() const
     {
-        return m_Height;
+        return m_ImageHeight;
     }
 
     Format Swapchain::GetFormat() const
@@ -32,13 +22,8 @@ namespace Nova
         return m_ImagePresentMode;
     }
 
-    i32 Swapchain::GetImageCount() const
+    u32 Swapchain::GetImageCount() const
     {
-        return m_ImageCount;
-    }
-
-    Renderer* Swapchain::GetOwner() const
-    {
-        return m_Owner;
+        return (u32)m_Buffering;
     }
 }

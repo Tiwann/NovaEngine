@@ -44,11 +44,21 @@ namespace Nova
     class Fence;
     struct FenceCreateInfo;
 
+    class Surface;
+    struct SurfaceCreateInfo;
+
+    class Window;
+
 #if defined(NOVA_DEV) || defined(NOVA_DEBUG)
     static constexpr bool RendererIsDebug = true;
 #else
     static constexpr bool RendererIsDebug = false;
 #endif
+
+    struct RendererCreateInfo
+    {
+        Window* Window = nullptr;
+    };
 
     class Renderer : public Object
     {
@@ -59,7 +69,7 @@ namespace Nova
         bool ShouldRecreateSwapchain = false;
 
         ~Renderer() override = default;
-        virtual bool Initialize() = 0;
+        virtual bool Initialize(const RendererCreateInfo& CreateInfo) = 0;
         virtual void Destroy() = 0;
         virtual void ClearDepth(float Depth) = 0;
         virtual void ClearColor(const Color& Color) = 0;
@@ -85,6 +95,7 @@ namespace Nova
         virtual void BindIndexBuffer(IndexBuffer* Buffer, u64 Offset) = 0;
         virtual void WaitIdle() const {}
 
+        Surface* CreateSurface(const SurfaceCreateInfo& CreateInfo);
         Semaphore* CreateSemaphore(const SemaphoreCreateInfo& CreateInfo);
         Fence* CreateFence(const FenceCreateInfo& CreateInfo);
         RenderTarget* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo);
@@ -110,6 +121,7 @@ namespace Nova
     protected:
         Camera* m_CurrentCamera = nullptr;
         Application* m_Application = nullptr;
-        GraphicsApi m_GraphicsApi;
+        Window* m_Window = nullptr;
+        GraphicsApi m_GraphicsApi = GraphicsApi::None;
     };
 }

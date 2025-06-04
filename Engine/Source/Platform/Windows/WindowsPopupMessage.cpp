@@ -7,6 +7,7 @@
 #include <GLFW/glfw3native.h>
 
 #include "Containers/StringConversion.h"
+#include "Runtime/DesktopWindow.h"
 
 
 namespace Nova
@@ -49,7 +50,7 @@ namespace Nova
     PopupMessageResult WindowsPopupMessage::Show()
     {
         if(OnPopupMessageOpened.IsBound()) OnPopupMessageOpened.Broadcast();
-        GLFWwindow* NativeWindow = g_Application->GetWindow()->GetNativeWindow();
+        GLFWwindow* NativeWindow = g_Application->GetWindow()->As<DesktopWindow>()->GetHandle();
         const HWND WindowHandle = glfwGetWin32Window(NativeWindow);
 
         const i32 Flags = s_ResponseConvertor[Response] | s_IconConvertor[Icon];

@@ -13,13 +13,23 @@ namespace Nova
 
     bool DesktopWindow::Initialize(const WindowCreateInfo& CreateInfo)
     {
+        if (m_Handle)
+        {
+            glfwDestroyWindow(m_Handle);
+            m_Handle = nullptr;
+        }
+
         glfwWindowHint(GLFW_RESIZABLE, CreateInfo.Resizable);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        m_Handle = glfwCreateWindow((int)m_Width, (int)m_Height, *CreateInfo.Title, nullptr, nullptr);
+        m_Handle = glfwCreateWindow(CreateInfo.Width, CreateInfo.Height, *CreateInfo.Title, nullptr, nullptr);
         if (!m_Handle)
             return false;
+
+        m_Width = CreateInfo.Width;
+        m_Height = CreateInfo.Height;
+        m_Title = CreateInfo.Title;
 
         glfwSetWindowUserPointer(m_Handle, this);
 
@@ -113,17 +123,17 @@ namespace Nova
 
         for(auto& Gamepad : m_GamepadButtons)
         {
-            for(size_t i = 0; i < 16; ++i)
+            for(size_t i = 0; i < GAMEPAD_BUTTON_COUNT; ++i)
                 Gamepad[i] = InputState::None;
         }
 
         m_LastGamepadStates = m_GamepadStates;
 
-        for(size_t ID = 0; ID < 16; ++ID)
+        for(size_t ID = 0; ID < GAMEPAD_COUNT; ++ID)
         {
             glfwGetGamepadState((int)ID, (GLFWgamepadstate*)&m_GamepadStates[ID]);
 
-            for(size_t ButtonIndex = 0 ; ButtonIndex < 15; ++ButtonIndex)
+            for(size_t ButtonIndex = 0 ; ButtonIndex < GAMEPAD_BUTTON_COUNT; ++ButtonIndex)
             {
                 if(m_GamepadStates[ID].Buttons[ButtonIndex] != m_LastGamepadStates[ID].Buttons[ButtonIndex])
                 {
@@ -132,7 +142,7 @@ namespace Nova
                 }
             }
 
-            for(size_t Axis = 0 ; Axis < 6; ++Axis)
+            for(size_t Axis = 0 ; Axis < GAMEPAD_AXIS_COUNT; ++Axis)
             {
                 m_GamepadAxes[ID][Axis] = m_GamepadStates[ID].Axes[Axis];
             }
@@ -194,9 +204,20 @@ namespace Nova
         return m_IsMaximized;
     }
 
-    void DesktopWindow::SetCursorHidden()
+    void DesktopWindow::SetCursorMode(const CursorMode& Mode) const
     {
-        glfwSetInputMode(m_Handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        switch (Mode)
+        {
+        case CursorMode::Normal:
+            glfwSetInputMode(m_Handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            break;
+        case CursorMode::Hidden:
+            glfwSetInputMode(m_Handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            break;
+        case CursorMode::Locked:
+            glfwSetInputMode(m_Handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            break;
+        }
     }
 
     Vector2 DesktopWindow::GetMousePosition() const
@@ -211,35 +232,93 @@ namespace Nova
         return m_DeltaMousePosition;
     }
 
-    bool DesktopWindow::GetKeyDown(const KeyCode KeyCode) const
+    bool DesktopWindow::GetKeyDown(const KeyCode& KeyCode) const
     {
-        return m_KeyStates[KeyCode] == InputState::Pressed;
+        return m_KeyStates.Contains(KeyCode) && m_KeyStates[KeyCode] == InputState::Pressed;
     }
 
-    bool DesktopWindow::GetKey(KeyCode KeyCode) const
+    bool DesktopWindow::GetKey(const KeyCode& KeyCode) const
     {
         const int State = glfwGetKey(m_Handle, (int)KeyCode);
         return State == GLFW_PRESS;
     }
 
-    bool DesktopWindow::GetKeyUp(const KeyCode KeyCode) const
+    bool DesktopWindow::GetKeyUp(const KeyCode& KeyCode) const
     {
-        return m_KeyStates[KeyCode] == InputState::Released;
+        return m_KeyStates.Contains(KeyCode) && m_KeyStates[KeyCode] == InputState::Released;
     }
 
-    bool DesktopWindow::GetMouseButtonDown(const MouseButton MouseButton) const
+    bool DesktopWindow::GetMouseButtonDown(const MouseButton& MouseButton) const
     {
-        return m_MouseButtonStates[MouseButton] == InputState::Pressed;
+        return m_MouseButtonStates.Contains(MouseButton) && m_MouseButtonStates[MouseButton] == InputState::Pressed;
     }
 
-    bool DesktopWindow::GetMouseButton(MouseButton MouseButton) const
+    bool DesktopWindow::GetMouseButton(const MouseButton& MouseButton) const
     {
         const int State = glfwGetMouseButton(m_Handle, (int)MouseButton);
         return State == GLFW_PRESS;
     }
 
-    bool DesktopWindow::GetMouseButtonUp(const MouseButton MouseButton) const
+    bool DesktopWindow::GetMouseButtonUp(const MouseButton& MouseButton) const
     {
-        return m_MouseButtonStates[MouseButton] == InputState::Released;
+        return m_MouseButtonStates.Contains(MouseButton) && m_MouseButtonStates[MouseButton] == InputState::Released;
+    }
+
+    bool DesktopWindow::GetCombined(const Array<KeyCode>& KeyCodes, const Array<MouseButton>& MouseButtons) const
+    {
+        const bool AllKeyCodes = KeyCodes.All([this](const KeyCode& KeyCode) {
+            return GetKey(KeyCode);
+        });
+
+        const bool AllMouseButtons = MouseButtons.All([this](const MouseButton& MouseButton) {
+            return GetMouseButton(MouseButton);
+        });
+        return AllKeyCodes && AllMouseButtons;
+    }
+
+    bool DesktopWindow::IsGamepadConnected(const size_t ID)
+    {
+        return glfwJoystickPresent((int)ID);
+    }
+
+    BufferView<bool> DesktopWindow::GetGamepadButtons(const size_t ID)
+    {
+        return BufferView(m_GamepadStates[ID].Buttons, GAMEPAD_BUTTON_COUNT).As<bool>();
+    }
+
+    bool DesktopWindow::GetGamepadButtonDown(const size_t ID, const GamepadButton& Button)
+    {
+        return IsGamepadConnected(ID) && m_GamepadButtons[ID][(size_t)Button] == InputState::Pressed;
+    }
+
+    bool DesktopWindow::GetGamepadButtonUp(const size_t ID, const GamepadButton& Button)
+    {
+        return IsGamepadConnected(ID) && m_GamepadButtons[ID][(size_t)Button] == InputState::Released;
+    }
+
+    bool DesktopWindow::GetGamepadButton(const size_t ID, const GamepadButton& Button)
+    {
+        return IsGamepadConnected(ID) && m_GamepadStates[ID].Buttons[(size_t)Button];
+    }
+
+    Vector2 DesktopWindow::GetGamepadStick(const size_t ID, const GamepadThumbstick& Thumbstick)
+    {
+        Vector2 Axis;
+        switch (Thumbstick)
+        {
+        case GamepadThumbstick::Left: Axis = {m_GamepadAxes[ID][0], -m_GamepadAxes[ID][1]}; break;
+        case GamepadThumbstick::Right: Axis = {m_GamepadAxes[ID][2], -m_GamepadAxes[ID][3]}; break;
+        }
+        return Axis;
+    }
+
+    f32 DesktopWindow::GetGamepadLeftShoulder(const size_t ID)
+    {
+        return m_GamepadAxes[ID][4];
+    }
+
+    f32 DesktopWindow::GetGamepadRightShoulder(const size_t ID)
+    {
+        return m_GamepadAxes[ID][5];
     }
 }

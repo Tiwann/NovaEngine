@@ -33,7 +33,7 @@ namespace Nova
         D3D12Renderer(Application* Owner) : Renderer(Owner, GraphicsApi::D3D12) {}
         ~D3D12Renderer() override = default;
 
-        bool Initialize() override;
+        bool Initialize(const RendererCreateInfo& CreateInfo) override;
         void Destroy() override;
         void ClearDepth(float Depth) override;
         void ClearColor(const Color& Color) override;

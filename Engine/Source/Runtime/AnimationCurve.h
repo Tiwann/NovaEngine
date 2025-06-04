@@ -22,7 +22,7 @@ namespace Nova
         
         struct KeyFrame
         {
-            float Time;
+            f32 Time;
             T Value;
             WrapMode PreWrapMode;
             WrapMode PostWrapMode;
@@ -35,7 +35,7 @@ namespace Nova
             m_KeyFrames.Add(InKeyFrame);
         }
 
-        T Evaluate(float Time)
+        T Evaluate(f32 Time)
         {
             for (KeyFrame& KeyFrame : m_KeyFrames)
             {

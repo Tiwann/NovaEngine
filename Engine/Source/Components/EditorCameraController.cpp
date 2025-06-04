@@ -6,6 +6,8 @@
 #include "Input/Input.h"
 #include "Editor/EditorGUI.h"
 #include "Editor/Selection.h"
+#include "Runtime/Application.h"
+#include "Runtime/DesktopWindow.h"
 
 namespace Nova
 {
@@ -23,15 +25,17 @@ namespace Nova
         Component::OnUpdate(Delta);
         if (!m_Camera) return;
 
-        const Vector2 MouseDelta = Input::GetMouseDelta();
+        const DesktopWindow* Window = g_Application->GetWindow()->As<DesktopWindow>();
+
+        const Vector2 MouseDelta = Window->GetDeltaMousePosition();
         Transform* CameraTransform = m_Camera->GetTransform();
         EntityHandle SelectedEntity = Selection::GetEntity();
         m_Pivot = SelectedEntity ? SelectedEntity->GetTransform()->GetPosition() : Vector3::Zero;
 
 
-        bool TryingPan = Input::GetCombined(KeyCode::LeftShift, MouseButton::Middle);
-        bool TryingZoom = Input::GetCombined(KeyCode::LeftControl, MouseButton::Middle);
-        bool TryingRotate = Input::GetMouseButton(MouseButton::Middle);
+        bool TryingPan = Window->GetCombined(KeyCode::LeftShift, MouseButton::Middle);
+        bool TryingZoom = Window->GetCombined(KeyCode::LeftControl, MouseButton::Middle);
+        bool TryingRotate = Window->GetMouseButton(MouseButton::Middle);
 
         if (TryingPan)
         {

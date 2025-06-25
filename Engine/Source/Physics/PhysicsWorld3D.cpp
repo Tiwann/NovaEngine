@@ -76,7 +76,7 @@ namespace Nova
 
     void PhysicsWorld3D::Step()
     {
-        m_System.Update(m_TimeStep * (f32)g_Application->GetTimeScale(), 2, &m_TempAllocator, &m_JobSystem);
+        m_System.Update(g_Application->GetDeltaTime(), 2, &m_TempAllocator, &m_JobSystem);
     }
 
     void PhysicsWorld3D::OnDestroy()
@@ -93,9 +93,10 @@ namespace Nova
     {
         PhysicsBody3D* BodyA = Contact->BodyA;
         PhysicsBody3D* BodyB = Contact->BodyB;
-        if(BodyA->IsSensor() || BodyB->IsSensor()) return;
 
-        
+        if(BodyA->IsSensor() || BodyB->IsSensor()) return;
+        if (!Contact->Handle) return;
+
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
 
         PhysicsContactInfo3D ContactInfoA;
@@ -118,7 +119,7 @@ namespace Nova
         PhysicsBody3D* BodyA = Contact->BodyA;
         PhysicsBody3D* BodyB = Contact->BodyB;
         if(BodyA->IsSensor() || BodyB->IsSensor()) return;
-
+        if (!Contact->Handle) return;
         
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
 
@@ -127,14 +128,14 @@ namespace Nova
         ContactInfoA.Normal = ToVector3(-WorldManifold.mWorldSpaceNormal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = true;
-        BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
+        BodyA->OnContactStayEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo3D ContactInfoB;
         ContactInfoB.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn2(0));
         ContactInfoB.Normal = ToVector3(WorldManifold.mWorldSpaceNormal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = true;
-        BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
+        BodyB->OnContactStayEvent.Broadcast(ContactInfoB);
     }
 
     void PhysicsWorld3D::OnContactEnd(const PhysicsContact3D* Contact)
@@ -142,6 +143,7 @@ namespace Nova
         PhysicsBody3D* BodyA = Contact->BodyA;
         PhysicsBody3D* BodyB = Contact->BodyB;
         if(BodyA->IsSensor() || BodyB->IsSensor()) return;
+        if (!Contact->Handle) return;
 
         
         const JPH::ContactManifold& WorldManifold = *Contact->Handle->Manifold;
@@ -151,14 +153,14 @@ namespace Nova
         ContactInfoA.Normal = ToVector3(-WorldManifold.mWorldSpaceNormal);
         ContactInfoA.OtherBody = BodyB;
         BodyA->m_IsColliding = false;
-        BodyA->OnContactBeginEvent.Broadcast(ContactInfoA);
+        BodyA->OnContactEndEvent.Broadcast(ContactInfoA);
         
         PhysicsContactInfo3D ContactInfoB;
         ContactInfoB.Point = ToVector3(WorldManifold.GetWorldSpaceContactPointOn2(0));
         ContactInfoB.Normal = ToVector3(WorldManifold.mWorldSpaceNormal);
         ContactInfoB.OtherBody = BodyA;
         BodyB->m_IsColliding = false;
-        BodyB->OnContactBeginEvent.Broadcast(ContactInfoB);
+        BodyB->OnContactEndEvent.Broadcast(ContactInfoB);
     }
 
     PhysicsBody3D* PhysicsWorld3D::CreateBody(const PhysicsBodyDefinition& Definition, const PhysicsMaterial& Material, PhysicsShape3D* Shape)
@@ -172,6 +174,8 @@ namespace Nova
         Settings.mRestitution = Material.Bounciness;
         Settings.mIsSensor = Definition.IsTrigger;
         Settings.mAllowDynamicOrKinematic = true;
+        Settings.mMassPropertiesOverride.mMass = 1.0f;
+        Settings.mOverrideMassProperties = JPH::EOverrideMassProperties::MassAndInertiaProvided;
         
         const JPH::Shape& ShapeHandle = Shape->GetHandle();
         Settings.SetShape(&ShapeHandle);
@@ -179,6 +183,7 @@ namespace Nova
         JPH::Body* BodyHandle = BodyInterface.CreateBody(Settings);
         BodyInterface.AddBody(BodyHandle->GetID(), JPH::EActivation::Activate);
         PhysicsBody3D* CreatedBody = new PhysicsBody3D(BodyHandle, *this);
+        BodyHandle->SetUserData((JPH::uint64)CreatedBody);
         m_Bodies.Add(CreatedBody);
         return CreatedBody;
     }

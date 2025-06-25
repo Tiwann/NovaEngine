@@ -2,8 +2,12 @@
 #include "Application.h"
 #include "ExitCode.h"
 #include "Rendering/Renderer.h"
+#include "Log.h"
+#include "Input/Input.h"
 
 #include <GLFW/glfw3.h>
+
+
 
 namespace Nova
 {
@@ -24,8 +28,12 @@ namespace Nova
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         m_Handle = glfwCreateWindow(CreateInfo.Width, CreateInfo.Height, *CreateInfo.Title, nullptr, nullptr);
+
         if (!m_Handle)
             return false;
+
+        if (CreateInfo.Show)
+            glfwShowWindow(m_Handle);
 
         m_Width = CreateInfo.Width;
         m_Height = CreateInfo.Height;
@@ -174,12 +182,12 @@ namespace Nova
         return m_Handle;
     }
 
-    void DesktopWindow::Show()
+    void DesktopWindow::Show() const
     {
         glfwShowWindow(m_Handle);
     }
 
-    void DesktopWindow::Hide()
+    void DesktopWindow::Hide() const
     {
         glfwHideWindow(m_Handle);
     }

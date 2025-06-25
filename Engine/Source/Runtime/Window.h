@@ -1,14 +1,19 @@
 ﻿#pragma once
 #include "Object.h"
 #include "Containers/String.h"
+#include "LogCategory.h"
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(Window, "WINDOW")
 
 namespace Nova
 {
     struct WindowCreateInfo
     {
         String Title;
-        u32 Width, Height;
+        u32 Width;
+        u32 Height;
         bool Resizable;
+        bool Show;
     };
 
     class Application;

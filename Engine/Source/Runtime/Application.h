@@ -127,7 +127,6 @@ namespace Nova
         Path m_EngineDirectory;
         Path m_EngineAssetsDirectory;
         bool PreInitialize();
-        void Update();
         void Render();
     };
 

@@ -36,8 +36,8 @@ namespace Nova
         GLFWwindow* GetHandle();
         const GLFWwindow* GetHandle() const;
 
-        void Show();
-        void Hide();
+        void Show() const;
+        void Hide() const;
         void SetPosition(i32 NewPosX, i32 NewPosY);
         bool HasFocus() const;
         bool IsMinimized() const;

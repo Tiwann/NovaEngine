@@ -3,6 +3,8 @@
 #include "CircleShape2D.h"
 #include "BoxShape3D.h"
 #include "SphereShape3D.h"
+#include "PlaneShape3D.h"
+
 
 #include <box2d/b2_shape.h>
 #include <box2d/b2_body.h>
@@ -36,22 +38,33 @@ namespace Nova
     }
 }
 
-
+#define JPH_DISABLE_CUSTOM_ALLOCATOR
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Collision/Shape/PlaneShape.h>
+
+#include "Math/MathConversions.h"
 
 namespace Nova
 {
     BoxShape3D::BoxShape3D(Vector3 Center, Vector3 HalfExtents, Vector3 Rotation)
         : m_Center(Center), m_HalfExtents(HalfExtents), m_Rotation(Rotation)
     {
-        m_Shape = new JPH::BoxShape({m_HalfExtents.x, m_HalfExtents.y, m_HalfExtents.z});
+        m_Shape = new JPH::BoxShape(ToJoltVec3(m_HalfExtents));
     }
 
     SphereShape3D::SphereShape3D(f32 Radius) : m_Radius(Radius)
     {
         m_Shape = new JPH::SphereShape(m_Radius);
     }
+
+    PlaneShape3D::PlaneShape3D(Vector3 Center, Quaternion Rotation) : m_Center(Center), m_Rotation(Rotation)
+    {
+        const Vector3 Normal = Rotation * Vector3::Up;
+        const JPH::Plane Plane = JPH::Plane::sFromPointAndNormal(ToJoltVec3(m_Center), ToJoltVec3(Normal));
+        m_Shape = new JPH::PlaneShape(Plane);
+    }
+
 }

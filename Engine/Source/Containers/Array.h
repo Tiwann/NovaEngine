@@ -394,6 +394,7 @@ namespace Nova
         PointerType Data() { return m_Data; }
 
         SizeType Count() const { return m_Count; }
+        size_t Size() const { return m_Count * sizeof(T); }
 
         bool operator==(const Array& Other) const
         {
@@ -402,6 +403,9 @@ namespace Nova
                 if(m_Data[i] != Other.m_Data[i]) return false;
             return true;
         }
+
+
+
     private:
         PointerType m_Data = nullptr;
         SizeType m_Count = 0;

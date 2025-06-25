@@ -14,11 +14,9 @@
 
 #include <GLFW/glfw3.h>
 #include <slang/slang.h>
-#include <slang/slang-com-ptr.h>
 
 #include "AssetDatabase.h"
 #include "CameraSettings.h"
-#include "DesktopWindow.h"
 #include "ExitCode.h"
 #include "ScopedTimer.h"
 #include "TweenManager.h"
@@ -68,16 +66,13 @@ namespace Nova
         WindowCreateInfo.Width = m_Configuration.WindowWidth;
         WindowCreateInfo.Height = m_Configuration.WindowHeight;
         WindowCreateInfo.Resizable = m_Configuration.WindowResizable;
+        WindowCreateInfo.Show = true;
+
         m_MainWindow = Window::Create(this);
         if (!m_MainWindow->Initialize(WindowCreateInfo))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create window!");
             return false;
-        }
-
-        if (DesktopWindow* Window = m_MainWindow->As<DesktopWindow>())
-        {
-            Window->Show();
         }
 
         NOVA_LOG(Application, Verbosity::Trace, "Creating Renderer...");
@@ -119,20 +114,6 @@ namespace Nova
         return true;
     }
 
-    void Application::Update()
-    {
-        m_UnscaledTime = glfwGetTime();
-        m_Time = m_TimeScale * m_UnscaledTime;
-        ScopedTimer FrameTimer([this](const f64 Duration)
-        {
-            m_UnscaledDeltaTime = Duration;
-            m_DeltaTime = m_UnscaledDeltaTime * m_TimeScale;
-        });
-
-        m_MainWindow->Update((f32)m_UnscaledDeltaTime);
-        OnUpdate((f32)m_UnscaledDeltaTime);
-    }
-
     void Application::Render()
     {
         if (m_Renderer->BeginFrame() && g_ApplicationRunning)
@@ -160,7 +141,6 @@ namespace Nova
 
     void Application::OnInit()
     {
-        JPH::RegisterDefaultAllocator();
         m_Scene = new Scene(this);
         m_Scene->SetName("Default Scene");
         m_Scene->OnInit();
@@ -200,7 +180,17 @@ namespace Nova
 
         while(m_IsRunning)
         {
-            Update();
+            // Ne touche plus a ça
+            m_UnscaledTime = glfwGetTime();
+            m_Time = m_TimeScale * m_UnscaledTime;
+            ScopedTimer FrameTimer([this](const f64 Duration)
+            {
+                m_UnscaledDeltaTime = Duration;
+                m_DeltaTime = m_UnscaledDeltaTime * m_TimeScale;
+            });
+
+            m_MainWindow->Update((f32)m_UnscaledDeltaTime);
+            OnUpdate((f32)m_UnscaledDeltaTime);
             Render();
         }
         
@@ -241,9 +231,18 @@ namespace Nova
         m_SceneHierarchyPanel->OnInspectorGUI(IO);
         m_PhysicsSettingsPanel->OnInspectorGUI(IO);
 
+        static float Timer = 0.0f;
+        static float FrameTime = 0.0f;
+        Timer += Delta;
+        if (Timer >= 1.0f)
+        {
+            Timer = 0.0f;
+            FrameTime = Delta * 1000.0f;
+        }
+
         if (ImGui::Begin("Stats"))
         {
-            ImGui::Text("Frame Time: %.2f ms", Delta * 1000.0f);
+            ImGui::Text("Frame Time: %.3f ms", FrameTime);
         }
         ImGui::End();
         

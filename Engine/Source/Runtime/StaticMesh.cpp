@@ -164,7 +164,7 @@ namespace Nova
 
             SubMesh SubMesh { };
             SubMesh.Name = LoadedMesh->mName.C_Str();
-            SubMesh.VertexBufferSize = Vertices.Count() * sizeof(Vertex);
+            SubMesh.VertexBufferSize = Vertices.Size();
             SubMesh.VertexBufferOffset = MeshIndex == 0 ? 0 : m_SubMeshes[MeshIndex - 1].VertexBufferOffset + m_SubMeshes[MeshIndex - 1].VertexBufferSize;
             SubMesh.IndexBufferSize = Indices.Count() * sizeof(u32);
             SubMesh.IndexBufferOffset = MeshIndex == 0 ? 0 : m_SubMeshes[MeshIndex - 1].IndexBufferOffset + m_SubMeshes[MeshIndex - 1].IndexBufferSize;

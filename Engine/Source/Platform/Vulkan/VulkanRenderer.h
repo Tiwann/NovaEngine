@@ -109,7 +109,7 @@ namespace Nova
         u32                               m_CurrentFrameIndex = 0;
         u32                               m_NewFrameIndex = 0;
         VkInstance                        m_Instance = nullptr;
-        VkFunctionPointers                m_FunctionPointers = {  };
+        VkFunctionPointers                m_FunctionPointers = { nullptr };
         #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         VkDebugUtilsMessengerEXT          m_DebugMessenger = nullptr;
         #endif

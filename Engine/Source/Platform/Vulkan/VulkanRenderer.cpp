@@ -84,9 +84,9 @@ namespace Nova
             Extensions.Add(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
             Extensions.AddRange(GlfwExtensions, GlfwExtensionsCount);
 
-            #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+            //#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
             Extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-            #endif
+            //#endif
 
             Array<const char*> Layers;
             Layers.Add(VK_LAYER_KHRONOS_VALIDATION_NAME);

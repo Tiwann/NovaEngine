@@ -23,6 +23,12 @@ namespace Nova
         size_t IndexBufferSize = 0;
     };
 
+    struct MaterialSlot
+    {
+        String Name;
+        u32 Index;
+    };
+
     class StaticMesh : public Asset
     {
     public:
@@ -42,6 +48,7 @@ namespace Nova
         Array<SubMesh> m_SubMeshes;
         VertexBuffer* m_VertexBuffer = nullptr;
         IndexBuffer* m_IndexBuffer = nullptr;
+        Array<MaterialSlot> m_MaterialSlots;
     };
     
 }

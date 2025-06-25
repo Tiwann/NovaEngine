@@ -6,8 +6,8 @@ option(GLFW_BUILD_TESTS OFF)
 option(GLFW_BUILD_EXAMPLES OFF)
 option(BUILD_SHARED_LIBS OFF)
 option(GLFW_INSTALL OFF)
-add_subdirectory(Dependencies/glfw)
-set_target_properties(glfw PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/glfw)
+set_target_properties(glfw PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
@@ -28,8 +28,8 @@ set(ASSIMP_BUILD_OBJ_IMPORTER   ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER  ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_BLEND_IMPORTER  ON CACHE BOOL "" FORCE)
 
-add_subdirectory(Dependencies/assimp)
-set_target_properties(assimp PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/assimp)
+set_target_properties(assimp PROPERTIES FOLDER Vendor)
 ###########################################################
 
 
@@ -41,36 +41,36 @@ option(BOX2D_BUILD_TESTBED OFF)
 option(BOX2D_BUILD_UNIT_TESTS OFF)
 option(BOX2D_USER_SETTINGS OFF)
 option(BUILD_SHARED_LIBS OFF)
-add_subdirectory(Dependencies/box2d)
-set_target_properties(box2d PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/box2d)
+set_target_properties(box2d PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
 #[[ JOLT ]]
 ###########################################################
 option(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
-add_subdirectory(Dependencies/Jolt/Build)
-set_target_properties(Jolt PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/Jolt/Build)
+set_target_properties(Jolt PROPERTIES FOLDER Vendor)
 
 ###########################################################
 #[[ VULKAN MEMORY ALLOCATOR ]]
 ###########################################################
-add_subdirectory(Dependencies/VulkanMemoryAllocator)
-set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/VulkanMemoryAllocator)
+set_target_properties(VulkanMemoryAllocator PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
 #[[ STB ]]
 ###########################################################
-add_subdirectory(Dependencies/stb)
-set_target_properties(STB PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/stb)
+set_target_properties(STB PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
 #[[ IMGUI ]]
 ###########################################################
 set(CMAKE_CXX_STANDARD 17)
-set(IMGUI_DIR Dependencies/imgui)
+set(IMGUI_DIR Vendor/imgui)
 add_library(ImGui STATIC
         ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/imgui.cpp
@@ -94,13 +94,13 @@ add_library(ImGui STATIC
 )
 target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 target_link_libraries(ImGui PRIVATE glfw Vulkan::Vulkan)
-set_target_properties(ImGui PROPERTIES FOLDER Dependencies)
+set_target_properties(ImGui PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
 #[[ IMGUIZMO ]]
 ###########################################################
-set(IMGUIZMO_DIR Dependencies/imguizmo)
+set(IMGUIZMO_DIR Vendor/imguizmo)
 set(IMGUIZMO_SOURCES
         ${IMGUIZMO_DIR}/GraphEditor.cpp
         ${IMGUIZMO_DIR}/GraphEditor.h
@@ -117,7 +117,7 @@ set(IMGUIZMO_SOURCES
 add_library(imguizmo STATIC ${IMGUIZMO_SOURCES})
 target_link_libraries(imguizmo PRIVATE ImGui)
 target_include_directories(imguizmo INTERFACE ${IMGUIZMO_DIR})
-set_target_properties(imguizmo PROPERTIES FOLDER Dependencies)
+set_target_properties(imguizmo PROPERTIES FOLDER Vendor)
 ###########################################################
 
 
@@ -130,47 +130,47 @@ find_package(Vulkan REQUIRED)
 ###########################################################
 ##[[ FMOD ]]
 ###########################################################
-add_subdirectory(Dependencies/FMODCore)
-add_subdirectory(Dependencies/FMODStudio)
+add_subdirectory(Vendor/FMODCore)
+add_subdirectory(Vendor/FMODStudio)
 
 ###########################################################
 ##[[ UTFCPP ]]
 ###########################################################
-add_subdirectory(Dependencies/utfcpp)
+add_subdirectory(Vendor/utfcpp)
 
 ###########################################################
 ##[[ GLAD ]]
 ###########################################################
-add_subdirectory(Dependencies/glad)
-set_target_properties(glad PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/glad)
+set_target_properties(glad PROPERTIES FOLDER Vendor)
 
 ###########################################################
 ##[[ MINIAUDIO ]]
 ###########################################################
-add_subdirectory(Dependencies/miniaudio)
-set_target_properties(miniaudio PROPERTIES FOLDER Dependencies)
+add_subdirectory(Vendor/miniaudio)
+set_target_properties(miniaudio PROPERTIES FOLDER Vendor)
 
 ###########################################################
 ##[[ VORBIS ]]
 ###########################################################
-add_subdirectory(Dependencies/ogg)
-add_subdirectory(Dependencies/vorbis)
+add_subdirectory(Vendor/ogg)
+add_subdirectory(Vendor/vorbis)
 
 ###########################################################
 ##[[ json ]]
 ###########################################################
-add_subdirectory(Dependencies/json)
+add_subdirectory(Vendor/json)
 
 ###########################################################
 ##[[ tinygltf ]]
 ###########################################################
-add_subdirectory(Dependencies/tinygltf)
+add_subdirectory(Vendor/tinygltf)
 
 
 ###########################################################
 ##[[ DirectX-Headers ]]
 ###########################################################
-add_subdirectory(Dependencies/DirectX-Headers)
+add_subdirectory(Vendor/DirectX-Headers)
 
 ###########################################################
 ##[[ SLANG ]]
@@ -182,4 +182,4 @@ option(SLANG_ENABLE_SLANG_RHI OFF)
 option(SLANG_ENABLE_TESTS OFF)
 option(SLANG_EXCLUDE_DAWN ON)
 option(SLANG_EXCLUDE_TINT ON)
-add_subdirectory(Dependencies/slang)
+add_subdirectory(Vendor/slang)

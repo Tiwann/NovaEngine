@@ -1,5 +1,5 @@
 set(ENGINE_MODULES Core)
-include(Dependencies/Dependencies.cmake)
+include(Vendor/Dependencies.cmake)
 include(../AutoCopy.cmake)
 
 

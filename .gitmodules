@@ -1,41 +1,41 @@
 [submodule "glfw"]
-	path = Engine/Dependencies/glfw
+	path = Engine/Vendor/glfw
 	url = git@github.com:glfw/glfw.git
 [submodule "box2d"]
-	path = Engine/Dependencies/box2d
+	path = Engine/Vendor/box2d
 	url = git@github.com:Tiwann/box2d.git
 	branch = nova
 [submodule "Jolt"]
-	path = Engine/Dependencies/Jolt
+	path = Engine/Vendor/Jolt
 	url = git@github.com:jrouwe/JoltPhysics.git
 [submodule "assimp"]
-	path = Engine/Dependencies/assimp
+	path = Engine/Vendor/assimp
 	url = git@github.com:assimp/assimp.git
 [submodule "VulkanMemoryAllocator"]
-	path = Engine/Dependencies/VulkanMemoryAllocator
+	path = Engine/Vendor/VulkanMemoryAllocator
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
 [submodule "imgui"]
-	path = Engine/Dependencies/imgui
+	path = Engine/Vendor/imgui
 	url = git@github.com:ocornut/imgui.git
 	branch = docking
 [submodule "imguizmo"]
-	path = Engine/Dependencies/imguizmo
+	path = Engine/Vendor/imguizmo
 	url = git@github.com:CedricGuillemet/ImGuizmo.git
 [submodule "slang"]
-	path = Engine/Dependencies/slang
+	path = Engine/Vendor/slang
 	url = git@github.com:shader-slang/slang.git
 [submodule "utfcpp"]
-	path = Engine/Dependencies/utfcpp
+	path = Engine/Vendor/utfcpp
 	url = git@github.com:nemtrif/utfcpp.git
 [submodule "vorbis"]
-	path = Engine/Dependencies/vorbis
+	path = Engine/Vendor/vorbis
 	url = git@gitlab.xiph.org:xiph/vorbis.git
 [submodule "ogg"]
-	path = Engine/Dependencies/ogg
+	path = Engine/Vendor/ogg
 	url = git@gitlab.xiph.org:xiph/ogg.git
 [submodule "json"]
-	path = Engine/Dependencies/json
+	path = Engine/Vendor/json
 	url = git@github.com:nlohmann/json.git
 [submodule "DirectX-Headers"]
-	path = Engine/Dependencies/DirectX-Headers
+	path = Engine/Vendor/DirectX-Headers
 	url = git@github.com:microsoft/DirectX-Headers.git

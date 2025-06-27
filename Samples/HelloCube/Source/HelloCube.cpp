@@ -8,16 +8,13 @@
 #include "Runtime/Scene.h"
 
 #include "Components/Camera.h"
-#include "Components/EditorCameraController.h"
 #include "Components/FreeFlyCameraComponent.h"
 #include "Components/Transform.h"
 #include "Components/Rendering/StaticMeshRenderer.h"
 #include "Components/Rendering/DirectionalLight.h"
 #include "Components/Rendering/AmbientLight.h"
 
-
 NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
-
 
 namespace Nova
 {
@@ -37,8 +34,8 @@ namespace Nova
         Configuration.Audio.BufferSize = 1024;
         Configuration.Audio.BufferCount = 4;
         Configuration.Graphics.GraphicsApi = GraphicsApi::Vulkan;
-        Configuration.Graphics.Buffering = SwapchainBuffering::DoubleBuffering;
-        Configuration.Graphics.VSync = false;
+        Configuration.Graphics.Buffering = SwapchainBuffering::TripleBuffering;
+        Configuration.Graphics.VSync = true;
         Configuration.WithEditor = true;
         return Configuration;
     }
@@ -52,10 +49,12 @@ namespace Nova
         Application::OnInit();
 
         ShaderManager* ShaderManager = GetShaderManager();
-        ShaderManager->Load("HelloCube", Path(NOVA_APPLICATION_ROOT_DIR) / "Assets/Shaders/HelloCube.slang");
+        ShaderManager->Load("HelloCube", Directory::GetApplicationDirectory() / "Assets/Shaders/HelloCube.slang");
+
 
         Scene* Scene = GetScene();
         MeshEntity = Scene->CreateEntity("Model");
+
 
         StaticMeshRenderer* MeshRenderer = MeshEntity->AddComponent<StaticMeshRenderer>();
         MeshRenderer->OpenFile();
@@ -74,8 +73,6 @@ namespace Nova
         CameraComponent->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
         CameraComponent->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
 
-        //EditorCameraController* CameraController = CameraEntity->AddComponent<EditorCameraController>();
-        //CameraController->SetCamera(CameraComponent);
         FreeFlyCameraComponent* CameraController = CameraEntity->AddComponent<FreeFlyCameraComponent>();
         CameraController->SetCamera(CameraComponent);
 

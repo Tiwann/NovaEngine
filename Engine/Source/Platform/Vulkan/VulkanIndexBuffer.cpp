@@ -63,6 +63,7 @@ namespace Nova
     {
         if constexpr(!RendererIsDebug)
             return;
+
         VkDebugUtilsObjectNameInfoEXT NameInfo { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
         NameInfo.objectType = VK_OBJECT_TYPE_BUFFER;
         NameInfo.objectHandle = (u64)m_Handle;

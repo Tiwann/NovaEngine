@@ -80,6 +80,8 @@ namespace Nova
 
     void D3D12VertexBuffer::SetDebugName(const String& Name)
     {
+        if constexpr(!RendererIsDebug)
+            return;
         if (m_Handle)
         {
             (void)m_Handle->SetName(*StringConvertToWide(Name));

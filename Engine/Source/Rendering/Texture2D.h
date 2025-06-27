@@ -2,7 +2,6 @@
 #include "Renderer.h"
 #include "Runtime/Asset.h"
 #include "Runtime/Image.h"
-#include "Runtime/SharedPointer.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/SpriteSheet.h"
 #include "Filter.h"
@@ -38,7 +37,7 @@ namespace Nova
         String GetAssetType() const override;
         virtual void SetTextureParameters(const TextureParams& Params) = 0;
         virtual void SetData(u8* Data, u32 Width, u32 Height, const Format& Format) = 0;
-        void SetData(const SharedPtr<Image>& Image);
+        void SetData(const std::shared_ptr<Image>& Image);
 
         virtual void Bind() const = 0;
         virtual void Unbind() const = 0;

@@ -1,6 +1,4 @@
 ﻿#include "Texture2D.h"
-
-#include "Containers/ScopedPointer.h"
 #include "Runtime/Assertion.h"
 #include "Platform/PlatformTexture2D.h"
 #include "Runtime/Log.h"
@@ -47,7 +45,7 @@ namespace Nova
     {
         Texture2D* Texture = Create(Name, 0, 0, Params, Slot, GraphicsApi);
         const ScopedBuffer RawImageData = File::ReadToBuffer(Filepath);
-        const SharedPtr<Image> ImageData = MakeShared<Image>(BufferView(RawImageData.AsBuffer()), Format::R8G8B8A8_UNORM);
+        const std::shared_ptr<Image> ImageData = std::make_shared<Image>(BufferView(RawImageData.AsBuffer()), Format::R8G8B8A8_UNORM);
         Texture->SetData(ImageData);
         return Texture;
     }
@@ -57,7 +55,7 @@ namespace Nova
         return "Texture2D";
     }
 
-    void Texture2D::SetData(const SharedPtr<Image>& Image)
+    void Texture2D::SetData(const std::shared_ptr<Image>& Image)
     {
         SetData((u8*)Image->GetData(), Image->GetWidth(), Image->GetHeight(), Image->GetFormat());
     }

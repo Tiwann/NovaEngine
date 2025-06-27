@@ -66,6 +66,7 @@ namespace Nova
         WindowCreateInfo.Width = m_Configuration.WindowWidth;
         WindowCreateInfo.Height = m_Configuration.WindowHeight;
         WindowCreateInfo.Resizable = m_Configuration.WindowResizable;
+        WindowCreateInfo.GraphicsApi = m_Configuration.Graphics.GraphicsApi;
         WindowCreateInfo.Show = true;
 
         m_MainWindow = Window::Create(this);
@@ -114,33 +115,11 @@ namespace Nova
         return true;
     }
 
-    void Application::Render()
-    {
-        if (m_Renderer->BeginFrame() && g_ApplicationRunning)
-        {
-            OnFrameStarted(m_Renderer);
-            m_Scene->OnFrameBegin(m_Renderer);
 
-            m_Renderer->BeginRendering();
-            OnRender(m_Renderer);
-            m_Scene->OnRender(m_Renderer);
-
-            if (m_Configuration.WithEditor)
-            {
-                m_ImGuiRenderer->BeginFrame();
-                ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-                OnGUI((f32)m_DeltaTime);
-                m_ImGuiRenderer->EndFrame();
-                m_ImGuiRenderer->Render();
-            }
-            m_Renderer->EndRendering();
-            m_Renderer->EndFrame();
-            m_Renderer->Present();
-        }
-    }
 
     void Application::OnInit()
     {
+        JPH::RegisterDefaultAllocator();
         m_Scene = new Scene(this);
         m_Scene->SetName("Default Scene");
         m_Scene->OnInit();
@@ -166,12 +145,37 @@ namespace Nova
         View.AddChild({ "ImGui Demo Window" , &m_ShowImGuiDemoWindow});
     }
 
+    void Application::Render()
+    {
+        if (m_Renderer->BeginFrame() && g_ApplicationRunning)
+        {
+            OnFrameStarted(m_Renderer);
+            m_Scene->OnFrameBegin(m_Renderer);
+
+            m_Renderer->BeginRendering();
+            OnRender(m_Renderer);
+            m_Scene->OnRender(m_Renderer);
+
+            if (m_Configuration.WithEditor)
+            {
+                m_ImGuiRenderer->BeginFrame();
+                ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+                OnGUI((f32)m_DeltaTime);
+                m_ImGuiRenderer->EndFrame();
+                m_ImGuiRenderer->Render();
+            }
+            m_Renderer->EndRendering();
+            m_Renderer->EndFrame();
+            m_Renderer->Present();
+        }
+    }
+
     
     void Application::Run()
     {
         if(!PreInitialize())
         {
-            NOVA_LOG(Application, Verbosity::Error, "Failed to init Nova Framework Core!");
+            NOVA_LOG(Application, Verbosity::Error, "Failed to initialize application");
             RequireExit(ExitCode::Error);
             return;
         }

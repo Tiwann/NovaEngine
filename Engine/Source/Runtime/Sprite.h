@@ -1,6 +1,5 @@
 #pragma once
 #include "Math/Vector2.h"
-#include "SharedPointer.h"
 
 namespace Nova
 {

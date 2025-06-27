@@ -5,6 +5,8 @@
 #include "Runtime/Flags.h"
 #include <CoreExport.h>
 
+#include "Object.h"
+
 
 namespace Nova
 {
@@ -23,7 +25,7 @@ namespace Nova
 
     NOVA_DECLARE_FLAGS(ComponentFlagBits, ComponentFlags)
 
-    class CORE_API Component
+    class CORE_API Component : public Object
     {
     public:
         Component(Entity* Owner, String Name);
@@ -31,7 +33,7 @@ namespace Nova
         Component(Component&&) = delete;
         Component& operator=(const Component&) = delete;
         Component& operator=(Component&&) = delete;
-        virtual ~Component();
+        ~Component() override = default;
 
         const String& GetName() const;
         Transform* GetTransform() const;

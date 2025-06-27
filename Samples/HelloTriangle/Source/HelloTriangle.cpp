@@ -9,6 +9,7 @@
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/EntryPoint.h"
 #include "Runtime/Log.h"
+#include "Runtime/Utils.h"
 #include "Runtime/Window.h"
 
 
@@ -49,18 +50,18 @@ namespace Nova
             return;
         }
 
-        const Array<Vertex> Vertices
+        const Vertex Vertices[]
         {
             Vertex({ -0.5f, -0.5f, 0.0f }, { 0.0f, 0.0f }, Vector3::Zero, Color::Red),
             Vertex({ +0.0f, +0.5f, 0.0f }, { 0.0f, 1.0f }, Vector3::Zero, Color::Green),
             Vertex({ +0.5f, -0.5f, 0.0f }, { 1.0f, 1.0f }, Vector3::Zero, Color::Blue),
         };
 
-        const Array<u32> Indices { 0, 1, 2 };
+        const u32 Indices[] { 0, 1, 2 };
 
         Renderer* Renderer = GetRenderer();
-        m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices.Data(), Vertices.Count()));
-        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices.Data(), Indices.Count()));
+        m_VertexBuffer = Renderer->CreateVertexBuffer(BufferView(Vertices, ArrayCount(Vertices)));
+        m_IndexBuffer = Renderer->CreateIndexBuffer(BufferView(Indices, ArrayCount(Indices)));
 
         PipelineCreateInfo PipelineSpecification;
         PipelineSpecification.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
@@ -74,7 +75,7 @@ namespace Nova
         PipelineSpecification.Scissor = Scissor(0, 0, 600, 400);
         PipelineSpecification.PolygonMode = PolygonMode::Fill;
         PipelineSpecification.PrimitiveTopology = PrimitiveTopology::TriangleList;
-        PipelineSpecification.RasterizationSamples = 1;
+        PipelineSpecification.RasterizationSamples = SampleCount::S8;
         PipelineSpecification.DepthBiasEnable = false;
         PipelineSpecification.DepthClampEnable = false;
         PipelineSpecification.DepthTestEnable = true;
@@ -118,8 +119,8 @@ namespace Nova
     void HelloTriangle::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
-        const f32 Width = GetWindow()->GetWidth<f32>();
-        const f32 Height = GetWindow()->GetHeight<f32>();
+        const f32 Width = GetWindow()->GetWidth();
+        const f32 Height = GetWindow()->GetHeight();
 
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));

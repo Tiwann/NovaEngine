@@ -49,6 +49,7 @@ set_target_properties(box2d PROPERTIES FOLDER Vendor)
 #[[ JOLT ]]
 ###########################################################
 option(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF)
+option(DISABLE_CUSTOM_ALLOCATOR ON)
 add_subdirectory(Vendor/Jolt/Build)
 set_target_properties(Jolt PROPERTIES FOLDER Vendor)
 
@@ -71,8 +72,7 @@ set_target_properties(STB PROPERTIES FOLDER Vendor)
 ###########################################################
 set(CMAKE_CXX_STANDARD 17)
 set(IMGUI_DIR Vendor/imgui)
-add_library(ImGui STATIC
-        ${IMGUI_DIR}/imconfig.h
+set(IMGUI_SRC ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/imgui.cpp
         ${IMGUI_DIR}/imgui.h
         ${IMGUI_DIR}/imgui_demo.cpp
@@ -83,18 +83,23 @@ add_library(ImGui STATIC
         ${IMGUI_DIR}/imstb_rectpack.h
         ${IMGUI_DIR}/imstb_textedit.h
         ${IMGUI_DIR}/imstb_truetype.h
-        ${IMGUI_DIR}/backends/imgui_impl_dx12.h
-        ${IMGUI_DIR}/backends/imgui_impl_dx12.cpp
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
         ${IMGUI_DIR}/backends/imgui_impl_vulkan.h
         ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp
         ${IMGUI_DIR}/backends/imgui_impl_glfw.h
-        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
-)
-target_include_directories(ImGui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
-target_link_libraries(ImGui PRIVATE glfw Vulkan::Vulkan)
-set_target_properties(ImGui PROPERTIES FOLDER Vendor)
+        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
+
+set(IMGUI_WIN32_SRC ${IMGUI_DIR}/backends/imgui_impl_dx12.h  ${IMGUI_DIR}/backends/imgui_impl_dx12.cpp)
+
+add_library(imgui STATIC)
+target_sources(imgui PRIVATE ${IMGUI_SRC})
+if(WIN32)
+    target_sources(imgui PRIVATE ${IMGUI_WIN32_SRC})
+endif ()
+target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
+target_link_libraries(imgui PRIVATE glfw Vulkan::Vulkan)
+set_target_properties(imgui PROPERTIES FOLDER Vendor)
 ###########################################################
 
 ###########################################################
@@ -115,7 +120,7 @@ set(IMGUIZMO_SOURCES
         ${IMGUIZMO_DIR}/ImZoomSlider.h
 )
 add_library(imguizmo STATIC ${IMGUIZMO_SOURCES})
-target_link_libraries(imguizmo PRIVATE ImGui)
+target_link_libraries(imguizmo PRIVATE imgui)
 target_include_directories(imguizmo INTERFACE ${IMGUIZMO_DIR})
 set_target_properties(imguizmo PROPERTIES FOLDER Vendor)
 ###########################################################
@@ -124,7 +129,7 @@ set_target_properties(imguizmo PROPERTIES FOLDER Vendor)
 ###########################################################
 ##[[ VULKAN ]]
 ###########################################################
-find_package(Vulkan REQUIRED)
+find_package(Vulkan REQUIRED COMPONENTS slang)
 
 
 ###########################################################
@@ -173,13 +178,7 @@ add_subdirectory(Vendor/tinygltf)
 add_subdirectory(Vendor/DirectX-Headers)
 
 ###########################################################
-##[[ SLANG ]]
+##[[ msdfgen ]]
 ###########################################################
-option(SLANG_ENABLE_EXAMPLES OFF)
-option(SLANG_ENABLE_GFX OFF)
-option(SLANG_ENABLE_SLANGC OFF)
-option(SLANG_ENABLE_SLANG_RHI OFF)
-option(SLANG_ENABLE_TESTS OFF)
-option(SLANG_EXCLUDE_DAWN ON)
-option(SLANG_EXCLUDE_TINT ON)
-add_subdirectory(Vendor/slang)
+add_subdirectory(Vendor/msdfgen)
+

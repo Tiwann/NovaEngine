@@ -62,7 +62,7 @@ namespace Nova
         static Vector3 Lerp(const Vector3& VecA, const Vector3& VecB, f32 Alpha);
         static Vector3 MoveTowards(const Vector3& Current, const Vector3& Target, f32 MaxDelta);
         static Vector3 InterpTo(const Vector3& Current, const Vector3& Target, f32 Speed, f32 Delta);
-        
+
         static Vector3 Zero;
         static Vector3 One;
         static Vector3 Right;

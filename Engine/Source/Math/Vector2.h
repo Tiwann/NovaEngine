@@ -15,7 +15,7 @@ namespace Nova
         Vector2(f32 X, f32 Y);
         explicit Vector2(f32 Value);
         explicit Vector2(const Vector3& Vec);
-        
+
         f32 Magnitude() const;
         f32* ValuePtr();
         const f32* ValuePtr() const;

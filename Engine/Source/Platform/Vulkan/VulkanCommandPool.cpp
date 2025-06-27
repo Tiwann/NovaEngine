@@ -42,6 +42,7 @@ namespace Nova
 
     void VulkanCommandPool::SetDebugName(const String& Name)
     {
-        CommandPool::SetDebugName(Name);
+        if constexpr(!RendererIsDebug)
+            return;
     }
 }

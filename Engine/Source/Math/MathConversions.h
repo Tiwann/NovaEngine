@@ -6,7 +6,6 @@
 
 #include <box2d/b2_math.h>
 
-#define JPH_DISABLE_CUSTOM_ALLOCATOR
 #include <Jolt/Jolt.h>
 #include <Jolt/Math/Vec3.h>
 #include <Jolt/Math/Vec4.h>

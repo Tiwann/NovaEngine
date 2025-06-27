@@ -4,18 +4,18 @@
 
 namespace Nova
 {
-    
-    Component::Component(Entity* Owner, String Name) : m_Name(std::move(Name)), m_Enabled(true), m_Entity(Owner)
+    Component::Component(Entity* Owner, String Name) : Object(Name), m_Name(std::move(Name)), m_Enabled(true),
+                                                       m_Entity(Owner)
     {
     }
 
-    Component::~Component() = default;
-
     void Component::OnInit()
-    {}
+    {
+    }
 
     void Component::OnStart()
-    {}
+    {
+    }
 
     void Component::OnDestroy()
     {
@@ -23,23 +23,28 @@ namespace Nova
     }
 
     void Component::OnEnable()
-    {}
+    {
+    }
 
     void Component::OnDisable()
-    {}
+    {
+    }
 
     void Component::OnUpdate(f32 Delta)
-    {}
+    {
+    }
 
     void Component::OnFrameBegin(Renderer* Renderer)
     {
     }
 
     void Component::OnPhysicsUpdate(f32 Delta)
-    {}
+    {
+    }
 
     void Component::OnRender(Renderer* Renderer)
-    {}
+    {
+    }
 
     void Component::OnInspectorGUI(const ImGuiIO& IO)
     {
@@ -74,7 +79,7 @@ namespace Nova
 
     void Component::SetEnabled(bool Enabled)
     {
-        if(m_Enabled == Enabled)
+        if (m_Enabled == Enabled)
             return;
         m_Enabled = Enabled;
     }

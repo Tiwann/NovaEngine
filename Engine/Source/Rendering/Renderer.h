@@ -96,18 +96,95 @@ namespace Nova
         virtual void WaitIdle() const {}
 
         Surface* CreateSurface(const SurfaceCreateInfo& CreateInfo);
+        template<typename SurfaceType> requires IsBaseOf<Surface, SurfaceType>::Value
+        SurfaceType* CreateSurface(const SurfaceCreateInfo& CreateInfo)
+        {
+            return (SurfaceType*)CreateSurface(CreateInfo);
+        }
+
         Semaphore* CreateSemaphore(const SemaphoreCreateInfo& CreateInfo);
+        template<typename SemaphoreType> requires IsBaseOf<Semaphore, SemaphoreType>::Value
+        SemaphoreType* CreateSurface(const SemaphoreCreateInfo& CreateInfo)
+        {
+            return (SemaphoreType*)CreateSemaphore(CreateInfo);
+        }
+
         Fence* CreateFence(const FenceCreateInfo& CreateInfo);
+        template<typename FenceType> requires IsBaseOf<Fence, FenceType>::Value
+        FenceType* CreateFence(const FenceCreateInfo& CreateInfo)
+        {
+            return (FenceType*)CreateFence(CreateInfo);
+        }
+
         RenderTarget* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo);
+        template<typename RenderTargetType> requires IsBaseOf<RenderTarget, RenderTargetType>::Value
+        RenderTargetType* CreateRenderTarget(const RenderTargetCreateInfo& CreateInfo)
+        {
+            return (RenderTargetType*)CreateRenderTarget(CreateInfo);
+        }
+
         CommandPool* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo);
+        template<typename CommandPoolType> requires IsBaseOf<CommandPool, CommandPoolType>::Value
+        CommandPoolType* CreateCommandPool(const CommandPoolCreateInfo& CreateInfo)
+        {
+            return (CommandPoolType*)CreateCommandPool(CreateInfo);
+        }
+
         Swapchain* CreateSwapchain(const SwapchainCreateInfo& CreateInfo);
+        template<typename SwapchainType> requires IsBaseOf<Swapchain, SwapchainType>::Value
+        SwapchainType* CreateSwapchain(const SwapchainCreateInfo& CreateInfo)
+        {
+            return (SwapchainType*)CreateSwapchain(CreateInfo);
+        }
+
         Shader* CreateShader(const String& Name, const Path& Filepath);
+        template<typename ShaderType> requires IsBaseOf<Shader, ShaderType>::Value
+        ShaderType* CreateShader(const String& Name, const Path& Filepath)
+        {
+            return (ShaderType*)CreateShader(Name, Filepath);
+        }
+
         Pipeline* CreatePipeline(const PipelineCreateInfo& Specification);
+        template<typename PipelineType> requires IsBaseOf<Pipeline, PipelineType>::Value
+        PipelineType* CreatePipeline(const PipelineCreateInfo& CreateInfo)
+        {
+            return (PipelineType*)CreatePipeline(CreateInfo);
+        }
+
         VertexBuffer* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo);
+        template<typename VertexBufferType> requires IsBaseOf<VertexBuffer, VertexBufferType>::Value
+        VertexBufferType* CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo)
+        {
+            return (VertexBufferType*)CreateVertexBuffer(CreateInfo);
+        }
+
         VertexBuffer* CreateVertexBuffer(const BufferView<Vertex>& Vertices);
+        template<typename VertexBufferType> requires IsBaseOf<VertexBuffer, VertexBufferType>::Value
+        VertexBufferType* CreateVertexBuffer(const BufferView<Vertex>& Vertices)
+        {
+            return (VertexBufferType*)CreateVertexBuffer(Vertices);
+        }
+
         IndexBuffer* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo);
+        template<typename IndexBufferType> requires IsBaseOf<IndexBuffer, IndexBufferType>::Value
+        IndexBufferType* CreateIndexBuffer(const IndexBufferCreateInfo& CreateInfo)
+        {
+            return (IndexBufferType*)CreateIndexBuffer(CreateInfo);
+        }
+
         IndexBuffer* CreateIndexBuffer(const BufferView<u32>& Indices);
+        template<typename IndexBufferType> requires IsBaseOf<IndexBuffer, IndexBufferType>::Value
+        IndexBufferType* CreateIndexBuffer(const BufferView<u32>& Indices)
+        {
+            return (IndexBufferType*)CreateIndexBuffer(Indices);
+        }
+
         UniformBuffer* CreateUniformBuffer(size_t Size);
+        template<typename UniformBufferType> requires IsBaseOf<UniformBuffer, UniformBufferType>::Value
+        UniformBufferType* CreateUniformBuffer(const size_t Size)
+        {
+            return (UniformBufferType*)CreateUniformBuffer(Size);
+        }
 
         void SetCurrentCamera(Camera* Camera);
         Camera* GetCurrentCamera();

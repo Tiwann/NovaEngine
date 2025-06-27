@@ -77,6 +77,8 @@ namespace Nova
 
     void D3D12IndexBuffer::SetDebugName(const String& Name)
     {
+        if constexpr(!RendererIsDebug)
+            return;
         (void)m_Handle->SetName(*StringConvertToWide(Name));
     }
 

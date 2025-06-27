@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include "PhysicsWorld.h"
 
-// Need to see where to put this so I don't have to define it everytime!
-#define JPH_DISABLE_CUSTOM_ALLOCATOR
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/TempAllocator.h>
 #include <Jolt/Core/JobSystemThreadPool.h>

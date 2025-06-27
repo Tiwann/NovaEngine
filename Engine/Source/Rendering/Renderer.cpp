@@ -182,41 +182,22 @@ namespace Nova
 
     Pipeline* Renderer::CreatePipeline(const PipelineCreateInfo& Specification)
     {
+        Pipeline* Result = nullptr;
         switch (m_GraphicsApi)
         {
         case GraphicsApi::None: return nullptr;
-        case GraphicsApi::OpenGL:
-            {
-                Pipeline* Result = new OpenGLPipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::Vulkan:
-            {
-                Pipeline* Result = new VulkanPipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
-        case GraphicsApi::D3D12:
-            {
-                Pipeline* Result = new D3D12Pipeline(this);
-                if (!Result->Initialize(Specification))
-                {
-                    delete Result;
-                    return nullptr;
-                }
-                return Result;
-            }
+        case GraphicsApi::OpenGL:Result = new OpenGLPipeline(this); break;
+        case GraphicsApi::Vulkan: Result = new VulkanPipeline(this); break;
+        case GraphicsApi::D3D12:Result = new D3D12Pipeline(this); break;
         default: return nullptr;
         }
+
+        if (!Result->Initialize(Specification))
+        {
+            delete Result;
+            return nullptr;
+        }
+        return Result;
     }
 
     VertexBuffer* Renderer::CreateVertexBuffer(const VertexBufferCreateInfo& CreateInfo)

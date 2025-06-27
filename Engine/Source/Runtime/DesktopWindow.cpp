@@ -2,7 +2,6 @@
 #include "Application.h"
 #include "ExitCode.h"
 #include "Rendering/Renderer.h"
-#include "Log.h"
 #include "Input/Input.h"
 
 #include <GLFW/glfw3.h>
@@ -25,7 +24,9 @@ namespace Nova
 
         glfwWindowHint(GLFW_RESIZABLE, CreateInfo.Resizable);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+        if (CreateInfo.GraphicsApi != GraphicsApi::OpenGL)
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         m_Handle = glfwCreateWindow(CreateInfo.Width, CreateInfo.Height, *CreateInfo.Title, nullptr, nullptr);
 

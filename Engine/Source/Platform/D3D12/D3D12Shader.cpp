@@ -23,9 +23,18 @@ namespace Nova
         TargetDesc.format = SLANG_SPIRV;
         TargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
 
+        const Path ShaderDirs = Renderer->GetOwner()->GetEngineAssetsDirectory() / "Shaders";
+        const String ShaderIncludeDirectory = ShaderDirs.string().c_str();
+        Array<const char*> IncludeDirectories;
+        IncludeDirectories.Add(*ShaderIncludeDirectory);
+
         slang::SessionDesc SessionDesc = {};
         SessionDesc.targetCount = 1;
         SessionDesc.targets = &TargetDesc;
+        SessionDesc.searchPaths = IncludeDirectories.Data();
+        SessionDesc.searchPathCount = IncludeDirectories.Count();
+        SessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
+
         if (SLANG_FAILED(Slang->createSession(SessionDesc, &m_Compiler)))
         {
             NOVA_LOG(Application, Verbosity::Error, "Failed to create Slang session!");
@@ -96,6 +105,72 @@ namespace Nova
                 return false;
             }
         }
+
+
+
+
+        /*slang::ProgramLayout* Layout = m_LinkedProgram->getLayout();
+        slang::VariableLayoutReflection* Globals = Layout->getGlobalParamsVarLayout();
+        slang::TypeLayoutReflection* Reflection = Globals->getTypeLayout();
+
+        for (u32 SetIndex = 0; SetIndex < Reflection->getDescriptorSetCount(); ++SetIndex)
+        {
+            const u32 RangeCount = Reflection->getDescriptorSetDescriptorRangeCount(SetIndex);
+            Array<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings;
+            for (u32 BindingIndex = 0; BindingIndex < RangeCount; ++BindingIndex)
+            {
+                const slang::BindingType BindingType = Reflection->getDescriptorSetDescriptorRangeType(SetIndex, BindingIndex);
+
+                VkDescriptorSetLayoutBinding Binding { };
+                Binding.binding = BindingIndex;
+                Binding.descriptorCount = 1;
+                Binding.descriptorType = SlangConvertTypeReflectionKind(BindingType);
+                Binding.stageFlags = GetShaderStages();
+
+
+                DescriptorSetLayoutBindings.Add(Binding);
+            }
+
+            VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+            DescriptorSetLayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
+            DescriptorSetLayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
+
+
+            VkDescriptorSetLayout SetLayout = nullptr;
+            if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &DescriptorSetLayoutCreateInfo, nullptr, &SetLayout)))
+            {
+                NOVA_VULKAN_ERROR("Failed to create descriptor set layout!");
+                return false;
+            }
+            m_DescriptorSetLayouts.Add(SetLayout);
+        }
+
+        if (m_DescriptorSetLayouts.Count() > 0)
+        {
+            m_DescriptorSets = Array<VkDescriptorSet>(m_DescriptorSetLayouts.Count());
+
+            VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+
+            DescriptorSetAllocateInfo.descriptorPool = Renderer->GetDescriptorPool();
+            DescriptorSetAllocateInfo.descriptorSetCount = m_DescriptorSetLayouts.Count();
+            DescriptorSetAllocateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+            if (VK_FAILED(vkAllocateDescriptorSets(Device, &DescriptorSetAllocateInfo, m_DescriptorSets.Data())))
+            {
+                NOVA_VULKAN_ERROR("Failed to allocate descriptor sets!");
+                return false;
+            }
+        }
+
+        VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        PipelineLayoutCreateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+        PipelineLayoutCreateInfo.setLayoutCount = m_DescriptorSetLayouts.Count();
+        PipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        PipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        if (VK_FAILED(vkCreatePipelineLayout(Device, &PipelineLayoutCreateInfo, nullptr, &m_PipelineLayout)))
+        {
+            NOVA_VULKAN_ERROR("Failed to create pipeline layout!");
+            return false;
+        }*/
         return true;
     }
 
@@ -142,12 +217,7 @@ namespace Nova
 
     const D3D12ShaderModule* D3D12Shader::GetShaderModule(ShaderStage Stage) const
     {
-        for (const D3D12ShaderModule& Module : m_ShaderModules)
-        {
-            if (Module.Stage == Stage)
-                return &Module;
-        }
-        return nullptr;
+        return m_ShaderModules.Single([&Stage](const D3D12ShaderModule& Module) { return Module.Stage == Stage; });
     }
 
     const D3D12ShaderModule* D3D12Shader::GetVertexShaderModule() const

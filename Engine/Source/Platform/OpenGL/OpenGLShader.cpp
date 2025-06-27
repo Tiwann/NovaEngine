@@ -20,20 +20,22 @@ namespace Nova
     OpenGLShader::OpenGLShader(Renderer* Renderer, const String& Name, Path Filepath)
         : Shader(Renderer, Name, std::move(Filepath))
     {
-
-        Array<slang::CompilerOptionEntry> CompileOptions;
-
-
         slang::IGlobalSession* Slang = m_Renderer->GetOwner()->GetSlangSession();
         slang::TargetDesc TargetDesc = {};
         TargetDesc.format = SLANG_SPIRV;
         TargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
-        TargetDesc.compilerOptionEntries = CompileOptions.Data();
-        TargetDesc.compilerOptionEntryCount = CompileOptions.Count();
+
+        const Path ShaderDirs = Renderer->GetOwner()->GetEngineAssetsDirectory() / "Shaders";
+        const String ShaderIncludeDirectory = ShaderDirs.string().c_str();
+        Array<const char*> IncludeDirectories;
+        IncludeDirectories.Add(*ShaderIncludeDirectory);
 
         slang::SessionDesc SessionDesc = {};
         SessionDesc.targetCount = 1;
         SessionDesc.targets = &TargetDesc;
+        SessionDesc.searchPaths = IncludeDirectories.Data();
+        SessionDesc.searchPathCount = IncludeDirectories.Count();
+        SessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
 
         if (SLANG_FAILED(Slang->createSession(SessionDesc, &m_Session)))
         {

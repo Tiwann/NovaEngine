@@ -21,7 +21,7 @@
 
 namespace Nova
 {
-    struct SceneData
+    struct alignas(16) SceneData
     {
         Matrix4 ModelMatrix;
         Matrix4 ViewMatrix;

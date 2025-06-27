@@ -31,7 +31,7 @@ namespace Nova
     NOVA_DECLARE_FLAGS(EntityHideFlagBits, EntityHideFlags)
     
     
-    class Entity
+    class Entity : public Object
     {
     public:
         using ComponentArray = Array<Component*>;
@@ -43,7 +43,7 @@ namespace Nova
         friend class DetailsPanel;
         Entity();
         Entity(String Name, Scene* Owner);
-        virtual ~Entity() = default;
+        ~Entity() override = default;
         
         template<typename T> requires IsBaseOfValue<Component, T>
         T* GetComponent() const

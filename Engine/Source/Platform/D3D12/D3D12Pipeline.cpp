@@ -31,7 +31,7 @@ namespace Nova
 
         const D3D12RendererTypeConvertor& Convertor = m_Renderer->As<D3D12Renderer>()->Convertor;
 
-        D3D12_GRAPHICS_PIPELINE_STATE_DESC PipelineStateDescription = {};
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC PipelineStateDescription = { 0 };
 
         Array<D3D12_INPUT_ELEMENT_DESC> InputElementDescriptions;
         for (size_t i = 0; i < Specification.VertexLayout.Count(); i++)
@@ -74,6 +74,8 @@ namespace Nova
             return false;
 
         const D3D12Shader* ShaderProgram = Specification.ShaderProgram->As<D3D12Shader>();
+
+        //PipelineStateDescription.pRootSignature = ShaderProgram->GetRootSignature();
         if (const D3D12ShaderModule* VertexModule = ShaderProgram->GetVertexShaderModule())
         {
             slang::IBlob* CompiledCode = VertexModule->CompiledCode;

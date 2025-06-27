@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Containers/String.h"
 #include "LogCategory.h"
+#include "Rendering/GraphicsApi.h"
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Window, "WINDOW")
 
@@ -14,6 +15,7 @@ namespace Nova
         u32 Height;
         bool Resizable;
         bool Show;
+        GraphicsApi GraphicsApi;
     };
 
     class Application;

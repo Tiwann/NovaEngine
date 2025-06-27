@@ -27,6 +27,9 @@ namespace Nova
 
     void VulkanSemaphore::SetDebugName(const String& Name)
     {
+        if constexpr(!RendererIsDebug)
+            return;
+
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
         const VkDevice Device = Renderer->GetDevice();
 

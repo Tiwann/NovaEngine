@@ -60,8 +60,8 @@ namespace Nova
         }
 
 
-        const i32 Width = GetWindow()->GetWidth<i32>();
-        const i32 Height = GetWindow()->GetHeight<i32>();
+        const i32 Width = GetWindow()->GetWidth();
+        const i32 Height = GetWindow()->GetHeight();
         const f32 AspectRatio = (f32)Width / (f32)Height;
 
         const Array<Vertex> Vertices
@@ -154,8 +154,8 @@ namespace Nova
     void HelloTexture::OnRender(Renderer* Renderer)
     {
         Application::OnRender(Renderer);
-        const f32 Width = GetWindow()->GetWidth<f32>();
-        const f32 Height = GetWindow()->GetHeight<f32>();
+        const f32 Width = GetWindow()->GetWidth();
+        const f32 Height = GetWindow()->GetHeight();
 
         Renderer->BindPipeline(m_Pipeline);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));

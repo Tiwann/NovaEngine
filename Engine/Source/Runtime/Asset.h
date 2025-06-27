@@ -9,12 +9,15 @@ namespace Nova
     {
     public:
         Asset() = default;
-        Asset(const String& Name);
+        explicit Asset(const String& Name);
         ~Asset() override = default;
 
         virtual String GetAssetType() const = 0;
-        UUID GetGuid() const { return m_GUID; }
-        void SetGUID(const UUID& Value) { m_GUID = Value; }
+        UUID GetUUID() const { return m_GUID; }
+        void SetUUID(const UUID& Value) { m_GUID = Value; }
+
+        virtual bool Serialize(class MemoryStream& Stream) { return false; }
+        virtual bool Deserialize(class MemoryStream& Stream) { return false; }
     private:
         UUID m_GUID;
     };

@@ -113,6 +113,11 @@ namespace Nova
         return m_IndexBuffer;
     }
 
+    void StaticMesh::BindMaterial(size_t SubMeshIndex, size_t SlotIndex, Material* Material)
+    {
+        //m_SubMeshes[SubMeshIndex].MaterialSlotBindings.Single([](const MaterialSlotBinding& Binding))
+    }
+
     bool StaticMesh::LoadFromFileAssimp(const Path& Filepath)
     {
         const std::string filepath = Filepath.string();
@@ -123,6 +128,15 @@ namespace Nova
         
         Array<Vertex> AllVertices;
         Array<u32> AllIndices;
+
+        for (size_t MaterialSlotIndex = 0; MaterialSlotIndex < LoadedScene->mNumMaterials; MaterialSlotIndex++)
+        {
+            const aiMaterial* Material = LoadedScene->mMaterials[MaterialSlotIndex];
+            MaterialSlot Slot;
+            Slot.Name = Material->GetName().C_Str();
+            u32 NumAllocated = Material->mNumAllocated;
+            u32 NumProperties = Material->mNumProperties;
+        }
 
         for (size_t MeshIndex = 0; MeshIndex < LoadedScene->mNumMeshes; MeshIndex++)
         {

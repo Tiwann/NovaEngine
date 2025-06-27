@@ -1,7 +1,7 @@
 ﻿file(GLOB_RECURSE SOURCES *.cpp *.h)
 
-set(CMAKE_CXX_STANDARD 20)
 add_executable(HelloTexture ${SOURCES})
+set_target_properties(HelloTexture PROPERTIES CXX_STANDARD 20)
 target_link_libraries(HelloTexture PRIVATE NovaEngine)
 target_compile_definitions(HelloTexture PRIVATE NOVA_APPLICATION_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 target_include_directories(HelloTexture PRIVATE Source)

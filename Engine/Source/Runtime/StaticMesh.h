@@ -13,7 +13,19 @@ namespace Nova
     class VertexArray;
     class VertexBuffer;
     class IndexBuffer;
-    
+
+    struct MaterialSlot
+    {
+        String Name;
+        size_t Index;
+    };
+
+    struct MaterialSlotBinding
+    {
+        MaterialSlot* Slot = nullptr;
+        class Material* Material = nullptr;
+    };
+
     struct SubMesh
     {
         String Name = "Empty Mesh";
@@ -21,13 +33,9 @@ namespace Nova
         size_t VertexBufferSize = 0;
         size_t IndexBufferOffset = 0;
         size_t IndexBufferSize = 0;
+        Array<MaterialSlotBinding> MaterialSlotBindings;
     };
 
-    struct MaterialSlot
-    {
-        String Name;
-        u32 Index;
-    };
 
     class StaticMesh : public Asset
     {
@@ -42,6 +50,8 @@ namespace Nova
         const Array<SubMesh>& GetSubMeshes() const;
         VertexBuffer* GetVertexBuffer() const;
         IndexBuffer* GetIndexBuffer() const;
+
+        void BindMaterial(size_t SubMeshIndex, size_t SlotIndex, Material* Material);
     private:
         bool LoadFromFileAssimp(const Path& Filepath);
     private:

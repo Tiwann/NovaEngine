@@ -21,9 +21,6 @@
 [submodule "imguizmo"]
 	path = Engine/Vendor/imguizmo
 	url = git@github.com:CedricGuillemet/ImGuizmo.git
-[submodule "slang"]
-	path = Engine/Vendor/slang
-	url = git@github.com:shader-slang/slang.git
 [submodule "utfcpp"]
 	path = Engine/Vendor/utfcpp
 	url = git@github.com:nemtrif/utfcpp.git

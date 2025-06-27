@@ -7,9 +7,9 @@
     #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         #define NOVA_LOG(CategoryName, InVerbosity, ...) \
         do { \
-            Nova::Logger& Logger = Nova::Log::GetCoreLogger(); \
-            Logger.SetCurrentCategory(CategoryName##LogCategory::s_CategoryName);\
-            Logger.Log(InVerbosity, __VA_ARGS__);\
+            Nova::Logger& _Logger = Nova::Log::GetCoreLogger(); \
+            _Logger.SetCurrentCategory(CategoryName##LogCategory::s_CategoryName);\
+            _Logger.Log(InVerbosity, __VA_ARGS__);\
         } \
         while(0)
     #else

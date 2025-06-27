@@ -58,6 +58,7 @@ namespace Nova
             if(!Where)
             {
                 NOVA_ASSERT(false, "BumpAllocator::New No space available");
+                return nullptr;
             }
             return std::construct_at(Where, std::forward<Args>(Arguments)...);
         }

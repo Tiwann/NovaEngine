@@ -5,7 +5,6 @@
 #include "SphereShape3D.h"
 #include "PlaneShape3D.h"
 
-
 #include <box2d/b2_shape.h>
 #include <box2d/b2_body.h>
 #include <box2d/b2_polygon_shape.h>
@@ -38,7 +37,7 @@ namespace Nova
     }
 }
 
-#define JPH_DISABLE_CUSTOM_ALLOCATOR
+
 #include <Jolt/Jolt.h>
 #include <Jolt/Physics/Collision/Shape/Shape.h>
 #include <Jolt/Physics/Collision/Shape/BoxShape.h>

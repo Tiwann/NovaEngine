@@ -9,7 +9,7 @@ namespace Nova
         {
         case GraphicsApi::None: return nullptr;
         case GraphicsApi::OpenGL: return new OpenGLVertexArray();
-        case GraphicsApi::Vulkan: return new VulkanVertexArray();
+        case GraphicsApi::Vulkan: return nullptr;
         case GraphicsApi::D3D12: return new D3D12VertexArray();
         default: return nullptr;
         }

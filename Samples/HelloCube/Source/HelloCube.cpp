@@ -14,6 +14,8 @@
 #include "Components/Rendering/DirectionalLight.h"
 #include "Components/Rendering/AmbientLight.h"
 
+#include <msdfgen/msdfgen.h>
+
 NOVA_DEFINE_APPLICATION_CLASS(HelloCube)
 
 namespace Nova

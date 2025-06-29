@@ -36,3 +36,9 @@
 [submodule "DirectX-Headers"]
 	path = Engine/Vendor/DirectX-Headers
 	url = git@github.com:microsoft/DirectX-Headers.git
+[submodule "Engine/Vendor/freetype"]
+	path = Engine/Vendor/freetype
+	url = git@ssh.gitlab.freedesktop.org:freetype/freetype.git
+[submodule "Engine/Vendor/msdf-atlas-gen"]
+	path = Engine/Vendor/msdf-atlas-gen
+	url = git@github.com:Chlumsky/msdf-atlas-gen.git

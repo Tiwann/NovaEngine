@@ -22,7 +22,7 @@ list(REMOVE_ITEM NOVA_ENGINE_SRC ${NOVA_ENGINE_PLATFORM_SRC})
 add_library(NovaEngine STATIC)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SRC} ${NOVA_ENGINE_PLATFORM_SRC})
 set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 20)
-target_link_libraries(NovaEngine PUBLIC msdfgen-core msdfgen-ext assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt imgui imguizmo STB Vulkan::Vulkan Vulkan::slang miniaudio ogg vorbis vorbisenc $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
+target_link_libraries(NovaEngine PUBLIC msdf-atlas-gen assimp utf8cpp fmod-core fmod-studio glfw glad VulkanMemoryAllocator box2d Jolt imgui imguizmo STB Vulkan::Vulkan Vulkan::slang miniaudio ogg vorbis vorbisenc $<$<PLATFORM_ID:Windows>:d3d12 dxgi dxguid DirectX-Headers>)
 target_include_directories(NovaEngine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 target_link_options(NovaEngine PRIVATE /NATVIS:${CMAKE_CURRENT_SOURCE_DIR}/NovaEngine.natvis)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT

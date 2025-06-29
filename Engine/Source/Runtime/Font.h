@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "Asset.h"
 #include "Filesystem.h"
+#include "Containers/ArrayView.h"
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(Font, "FONT")
 
 namespace Nova
 {
@@ -16,23 +19,28 @@ namespace Nova
         MSDF,
         MTSDF,
     };
+
+    struct CharacterSetRange
+    {
+        u32 Begin = 0, End = 0;
+    };
     
     struct FontParams
     {
         FontAtlasType AtlasType;
-        
+        ArrayView<CharacterSetRange> CharacterSetRanges;
     };
 
     
     class Font : public Asset
     {
     public:
-        Font(const String& Name);
+        explicit Font(const String& Name);
         ~Font() override = default;
 
         String GetAssetType() const override;
-        bool LoadFromFile(const Path& Filepath);
+        bool LoadFromFile(const Path& Filepath, const FontParams& Params);
     private:
-        Texture2D* m_FontAtlas = nullptr;
+        Texture2D* m_AtlasTexture = nullptr;
     };
 }

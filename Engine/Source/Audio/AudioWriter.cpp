@@ -151,6 +151,7 @@ namespace Nova
 
     bool Mp3Writer::Write(BufferView<u8> Samples, Stream& OutStream)
     {
+
         return false;
     }
 }

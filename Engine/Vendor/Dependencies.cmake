@@ -180,5 +180,18 @@ add_subdirectory(Vendor/DirectX-Headers)
 ###########################################################
 ##[[ msdfgen ]]
 ###########################################################
-add_subdirectory(Vendor/msdfgen)
+include(FetchContent)
 
+add_subdirectory(Vendor/freetype)
+
+set(MSDF_ATLAS_BUILD_STANDALONE OFF)
+set(MSDF_ATLAS_DYNAMIC_RUNTIME ON)
+set(MSDF_ATLAS_INSTALL OFF)
+set(MSDF_ATLAS_USE_SKIA OFF)
+set(MSDF_ATLAS_USE_VCPKG OFF)
+
+set(MSDFGEN_BUILD_STANDALONE OFF)
+set(MSDFGEN_DISABLE_PNG ON)
+set(MSDFGEN_DISABLE_SVG ON)
+
+add_subdirectory(Vendor/msdf-atlas-gen)

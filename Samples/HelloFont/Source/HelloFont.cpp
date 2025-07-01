@@ -1,4 +1,6 @@
 ﻿#include "HelloFont.h"
+#include "Editor/Font.h"
+#include "ResourceManager/ShaderManager.h"
 #include "Runtime/AssetDatabase.h"
 #include "Runtime/EntryPoint.h"
 #include "Runtime/Font.h"
@@ -31,16 +33,21 @@ void HelloFont::OnInit()
 {
     Application::OnInit();
 
+    ShaderManager* ShaderManager = GetShaderManager();
+    const Path FontShader = PathCombine(GetEngineShadersDirectory(), "Font.slang");
+    ShaderManager->Load("Font", FontShader);
+
     AssetDatabase* AssetDatabase = GetAssetDatabase();
     Font* FontAsset = AssetDatabase->CreateAsset<Font>("Font");
-    const Path FontPath = R"(D:\Dev\NovaEngine\Engine\Assets\Fonts\JetbrainsMono\JetBrainsMono-Regular.ttf)";
+    const Path FontPath = GetFontPath(JetBrainsMono_Italic);
     const Array<CharacterSetRange> CharacterSetRanges = { { 0x0020, 0x00FF }};
-    const FontParams FontParams { FontAtlasType::MTSDF, { ArrayView<CharacterSetRange>(CharacterSetRanges) }};
+    const FontParams FontParams { FontAtlasType::MTSDF, { ArrayView(CharacterSetRanges) }};
     if (!FontAsset->LoadFromFile(FontPath, FontParams))
     {
         RequireExit(ExitCode::Error);
         return;
     }
+
 }
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloFont);

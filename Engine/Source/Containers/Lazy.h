@@ -11,6 +11,8 @@ namespace Nova
         Lazy() = default;
         explicit Lazy(const T& Value) : m_Value(Value) { }
 
+        template<typename U = T> requires std::is_pointer<U>::value
+        Lazy(std::nullptr_t) : m_Value(nullptr) { }
 
         const T& Get(const Function<T()>& GetFunc)
         {

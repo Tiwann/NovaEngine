@@ -21,5 +21,6 @@ namespace Nova
         {
             delete Data.Value;
         }
+        m_Data.Clear();
     }
 }

@@ -48,7 +48,7 @@ namespace Nova
                 if (Component->GetFlags().Contains(ComponentFlagBits::HideInInspector))
                     return;
                 
-                ImGui::PushID(Component->GetGuid());
+                ImGui::PushID(Component->GetUuid());
                 if (ImGui::TreeNode(*Component->GetName()))
                 {
                     Component->OnInspectorGUI(IO);

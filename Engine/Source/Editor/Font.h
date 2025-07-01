@@ -1,6 +1,8 @@
 #pragma once
 #include <imgui.h>
 
+#include "Runtime/Application.h"
+
 namespace Nova
 {
     enum FontNames
@@ -21,7 +23,8 @@ namespace Nova
 
         NumFonts
     };
-    
+
+
     inline const char* FontsPaths[NumFonts]
     {
         // Open Sans
@@ -38,6 +41,11 @@ namespace Nova
         "Fonts/JetBrainsMono/JetBrainsMono-SemiBold.ttf",
         "Fonts/JetBrainsMono/JetBrainsMono-ExtraBold.ttf",
     };
+
+    inline Path GetFontPath(const FontNames Name)
+    {
+        return g_Application->GetEngineAssetsDirectory() / FontsPaths[Name];
+    }
 
     inline ImFont* Fonts[NumFonts];
 }

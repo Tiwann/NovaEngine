@@ -55,7 +55,7 @@ namespace Nova
         bool IsEnabled() const;
         void SetEnabled(bool Enabled);
 
-        UUID GetGuid() const;
+        UUID GetUuid() const;
         void SetFlags(ComponentFlags Flags);
         ComponentFlags GetFlags() const;
     protected:

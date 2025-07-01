@@ -6,6 +6,7 @@
 
 namespace Nova {
 
+	// TODO: Change this API !!!
 	class CORE_API Image
 	{
 	public:

@@ -11,8 +11,14 @@
 
 namespace Nova
 {
-    Font::Font(const String& Name) : Asset(Name)
+
+    Font::Font(const String& Name) : Asset(Name), m_FontData(std::make_shared<FontData>())
     {
+    }
+
+    Font::~Font()
+    {
+        delete m_AtlasTexture;
     }
 
     String Font::GetAssetType() const
@@ -36,61 +42,151 @@ namespace Nova
             return false;
         }
 
-        std::vector<msdf_atlas::GlyphGeometry> Glyphs;
-        msdf_atlas::FontGeometry FontGeometry(&Glyphs);
+        m_FontData.GlyphGeometry = std::make_shared<std::vector<msdf_atlas::GlyphGeometry>>();
+        m_FontData.FontGeometry = std::make_shared<msdf_atlas::FontGeometry>(m_FontData.GlyphGeometry.get());
 
-        /*msdf_atlas::Charset CharacterSet;
+
+        msdf_atlas::Charset CharacterSet;
         for (const CharacterSetRange& Range : Params.CharacterSetRanges)
             for (u32 CodePoint = Range.Begin; CodePoint <= Range.End; CodePoint++)
-                CharacterSet.add(CodePoint);*/
+                CharacterSet.add(CodePoint);
 
-        const i32 LoadedGlyphs = FontGeometry.loadCharset(Font, 1.0, msdf_atlas::Charset::ASCII);
+        const i32 LoadedGlyphs = loadCharset(Font, 1.0, CharacterSet);
         if (LoadedGlyphs <= 0)
         {
             NOVA_LOG(Font, Verbosity::Error, "No glyphs loaded from: {}", Filepath.string());
             return false;
         }
-        if (LoadedGlyphs != msdf_atlas::Charset::ASCII.size())
+        if (LoadedGlyphs != CharacterSet.size())
         {
             NOVA_LOG(Font, Verbosity::Warning, "{} glyphs loaded. Expected {}.", LoadedGlyphs,
                      msdf_atlas::Charset::ASCII.size());
+        } else
+        {
+            NOVA_LOG(Font, Verbosity::Info, "All {} glyphs loaded.", LoadedGlyphs, CharacterSet.size());
         }
-        NOVA_LOG(Font, Verbosity::Info, "All {} glyphs loaded.", LoadedGlyphs, msdf_atlas::Charset::ASCII.size());
 
 
-        const double maxCornerAngle = 3.0;
-        for (msdf_atlas::GlyphGeometry& glyph : Glyphs)
-            glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
+        //TODO: Need to create a function that generate atlas based on specified parameters
+        constexpr double MaxCornerAngle = 3.0;
+        for (msdf_atlas::GlyphGeometry& Glyph : m_FontData.GlyphGeometry)
+            Glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MaxCornerAngle, 0);
 
-        msdf_atlas::TightAtlasPacker packer;
-        packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
-        packer.setScale(48);
-        packer.setPixelRange(2.0);
-        packer.setMiterLimit(1.0);
-        packer.pack(Glyphs.data(), Glyphs.size());
-        // Get final atlas dimensions
-        int width = 0, height = 0;
-        packer.getDimensions(width, height);
-
-        msdf_atlas::ImmediateAtlasGenerator<float,3,msdf_atlas::msdfGenerator,msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 3>> generator(width, height);
-        msdf_atlas::GeneratorAttributes attributes;
-        generator.setAttributes(attributes);
-        generator.setThreadCount(8);
-        generator.generate(Glyphs.data(), Glyphs.size());
-
-        msdfgen::saveBmp(generator.atlasStorage(), "atlas.bmp");
-
+        msdf_atlas::TightAtlasPacker Packer;
+        Packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
+        Packer.setScale(48);
+        Packer.setPixelRange(2.0);
+        Packer.setMiterLimit(1.0);
+        Packer.pack(m_FontData.GlyphGeometry->data(), m_FontData.GlyphGeometry->size());
+        int Width = 0, Height = 0;
+        Packer.getDimensions(Width, Height);
 
         Renderer* Renderer = g_Application->GetRenderer();
-        if (!m_AtlasTexture)
-        {
-            m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
-            if (!m_AtlasTexture)
-                return false;
 
-            const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(width, height, Format::R8G8B8)
-            m_AtlasTexture->SetData(std::make_shared<>())
+        switch (Params.AtlasType)
+        {
+        case FontAtlasType::SDF:
+            {
+                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::sdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 1>> Generator(Width, Height);
+                msdf_atlas::GeneratorAttributes Attributes;
+                Attributes.scanlinePass = true;
+                Generator.setAttributes(Attributes);
+                Generator.setThreadCount(8);
+                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+
+                const msdfgen::BitmapConstRef<u8, 1>& Bitmap = Generator.atlasStorage();
+
+                if (!m_AtlasTexture)
+                {
+                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    if (!m_AtlasTexture)
+                        return false;
+
+                    const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(Width, Height, Format::R8_UNORM, Bitmap.pixels);
+                    m_AtlasTexture->SetData(AtlasImage);
+                }
+            }
+            break;
+        case FontAtlasType::PSDF:
+            {
+                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::psdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 1>> Generator(Width, Height);
+                msdf_atlas::GeneratorAttributes Attributes;
+                Attributes.scanlinePass = true;
+                Generator.setAttributes(Attributes);
+                Generator.setThreadCount(8);
+                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+
+                const msdfgen::BitmapConstRef<u8, 1>& Bitmap = Generator.atlasStorage();
+
+                if (!m_AtlasTexture)
+                {
+                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    if (!m_AtlasTexture)
+                        return false;
+
+                    const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(Width, Height, Format::R8_UNORM, Bitmap.pixels);
+                    m_AtlasTexture->SetData(AtlasImage);
+                }
+            }
+            break;
+        case FontAtlasType::MSDF:
+            {
+                msdf_atlas::ImmediateAtlasGenerator<float, 3, msdf_atlas::msdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 3>> Generator(Width, Height);
+                msdf_atlas::GeneratorAttributes Attributes;
+                Attributes.scanlinePass = true;
+                Generator.setAttributes(Attributes);
+                Generator.setThreadCount(8);
+                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+
+                const msdfgen::BitmapConstRef<u8, 3>& Bitmap = Generator.atlasStorage();
+
+                if (!m_AtlasTexture)
+                {
+                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    if (!m_AtlasTexture)
+                        return false;
+
+                    const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(Width, Height, Format::R8G8B8_UNORM, Bitmap.pixels);
+                    m_AtlasTexture->SetData(AtlasImage);
+                }
+            }
+            break;
+        case FontAtlasType::MTSDF:
+            {
+                msdf_atlas::ImmediateAtlasGenerator<float, 4, msdf_atlas::mtsdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 4>> Generator(Width, Height);
+                msdf_atlas::GeneratorAttributes Attributes;
+                Attributes.scanlinePass = true;
+                Generator.setAttributes(Attributes);
+                Generator.setThreadCount(8);
+                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+
+                const msdfgen::BitmapConstRef<u8, 4>& Bitmap = Generator.atlasStorage();
+
+                if (!m_AtlasTexture)
+                {
+                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    if (!m_AtlasTexture)
+                        return false;
+
+                    const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(Width, Height, Format::R8G8B8A8_UNORM, Bitmap.pixels);
+                    m_AtlasTexture->SetData(AtlasImage);
+                }
+            }
+            break;
         }
+
+        msdfgen::destroyFont(Font);
+        msdfgen::deinitializeFreetype(Freetype);
         return true;
+    }
+
+    const Texture2D* Font::GetAtlasTexture() const
+    {
+        return m_AtlasTexture;
+    }
+
+    const FontData& Font::GetFontData() const
+    {
+        return m_FontData;
     }
 }

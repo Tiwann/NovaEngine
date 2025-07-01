@@ -84,7 +84,7 @@ namespace Nova
         m_Enabled = Enabled;
     }
 
-    UUID Component::GetGuid() const
+    UUID Component::GetUuid() const
     {
         return m_UUID;
     }

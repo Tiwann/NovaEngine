@@ -15,6 +15,7 @@
 #include "Components/Rendering/StaticMeshRenderer.h"
 #include "Components/Rendering/PointLight.h"
 #include "Components/Rendering/SpriteRenderer.h"
+#include "Components/Rendering/TextRenderer.h"
 #include "ResourceManager/TextureManager.h"
 
 namespace Nova::UI
@@ -134,6 +135,7 @@ namespace Nova::UI
                 "Sound Emitter",
                 "Sound Listener",
                 "Sprite Renderer",
+                "Text Renderer",
                 "Box 2D",
                 "Circle 2D",
                 "Box 3D",
@@ -156,14 +158,15 @@ namespace Nova::UI
                     case 1: Entity->AddComponent<SoundEmitter>(); break;
                     case 2: Entity->AddComponent<SoundListener>(); break;
                     case 3: Entity->AddComponent<SpriteRenderer>(); break;
-                    case 4: Entity->AddComponent<Box2D>(); break;
-                    case 5: Entity->AddComponent<Circle2D>(); break;
-                    case 6: Entity->AddComponent<Box3D>(); break;
-                    case 7: Entity->AddComponent<Plane3D>(); break;
-                    case 8: Entity->AddComponent<StaticMeshRenderer>(); break;
-                    case 9: Entity->AddComponent<DirectionalLight>(); break;
-                    case 10: Entity->AddComponent<PointLight>(); break;
-                    case 11: Entity->AddComponent<AmbientLight>(); break;
+                    case 4: Entity->AddComponent<TextRenderer>(); break;
+                    case 5: Entity->AddComponent<Box2D>(); break;
+                    case 6: Entity->AddComponent<Circle2D>(); break;
+                    case 7: Entity->AddComponent<Box3D>(); break;
+                    case 8: Entity->AddComponent<Plane3D>(); break;
+                    case 9: Entity->AddComponent<StaticMeshRenderer>(); break;
+                    case 10: Entity->AddComponent<DirectionalLight>(); break;
+                    case 11: Entity->AddComponent<PointLight>(); break;
+                    case 12: Entity->AddComponent<AmbientLight>(); break;
                     }
                     ShowListBox = false;
                 }

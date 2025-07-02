@@ -1,4 +1,5 @@
 ﻿module Font;
+import Common;
 
 struct VertexInput
 {
@@ -37,8 +38,19 @@ VertexOutput VertexMain(VertexInput Input)
 
 float median(float r, float g, float b)
 {
-  return max(min(r, g), min(max(r, g), b));
+    return max(min(r, g), min(max(r, g), b));
 }
+
+float median(float3 a)
+{
+    return max(min(a.r, a.g), min(max(a.r, a.g), a.b));
+}
+
+float median(float4 a)
+{
+    return median(a.rgb);
+}
+
 
 float ScreenPixelRange(float PixelRange, float2 TexCoord)
 {
@@ -54,7 +66,7 @@ float ScreenPixelRange(float PixelRange, float2 TexCoord)
 float4 FragmentMain(FragmentInput Input) : SV_Target
 {
 	float4 sampledAtlas = AtlasTexture.Sample(Input.TexCoord);
-	float sd = median(sampledAtlas.r, sampledAtlas.g, sampledAtlas.b);
+	float sd = median(sampledAtlas);
 	float screenPxDistance = ScreenPixelRange(1.0, Input.TexCoord) * (sd - 0.5);
 	float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
 	return lerp(float4(0.0), float4(1.0), opacity);

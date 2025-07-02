@@ -12,7 +12,7 @@
 namespace Nova
 {
 
-    Font::Font(const String& Name) : Asset(Name), m_FontData(std::make_shared<FontData>())
+    Font::Font(const String& Name) : Asset(Name)
     {
     }
 
@@ -42,8 +42,7 @@ namespace Nova
             return false;
         }
 
-        m_FontData.GlyphGeometry = std::make_shared<std::vector<msdf_atlas::GlyphGeometry>>();
-        m_FontData.FontGeometry = std::make_shared<msdf_atlas::FontGeometry>(m_FontData.GlyphGeometry.get());
+        m_FontData.FontGeometry = msdf_atlas::FontGeometry(&m_FontData.Glyphs);
 
 
         msdf_atlas::Charset CharacterSet;
@@ -51,7 +50,7 @@ namespace Nova
             for (u32 CodePoint = Range.Begin; CodePoint <= Range.End; CodePoint++)
                 CharacterSet.add(CodePoint);
 
-        const i32 LoadedGlyphs = loadCharset(Font, 1.0, CharacterSet);
+        const i32 LoadedGlyphs = m_FontData.FontGeometry.loadCharset(Font, 1.0, CharacterSet);
         if (LoadedGlyphs <= 0)
         {
             NOVA_LOG(Font, Verbosity::Error, "No glyphs loaded from: {}", Filepath.string());
@@ -69,7 +68,7 @@ namespace Nova
 
         //TODO: Need to create a function that generate atlas based on specified parameters
         constexpr double MaxCornerAngle = 3.0;
-        for (msdf_atlas::GlyphGeometry& Glyph : m_FontData.GlyphGeometry)
+        for (msdf_atlas::GlyphGeometry& Glyph : m_FontData.Glyphs)
             Glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MaxCornerAngle, 0);
 
         msdf_atlas::TightAtlasPacker Packer;
@@ -77,7 +76,7 @@ namespace Nova
         Packer.setScale(48);
         Packer.setPixelRange(2.0);
         Packer.setMiterLimit(1.0);
-        Packer.pack(m_FontData.GlyphGeometry->data(), m_FontData.GlyphGeometry->size());
+        Packer.pack(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
         int Width = 0, Height = 0;
         Packer.getDimensions(Width, Height);
 
@@ -92,7 +91,7 @@ namespace Nova
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
                 Generator.setThreadCount(8);
-                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+                Generator.generate(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
 
                 const msdfgen::BitmapConstRef<u8, 1>& Bitmap = Generator.atlasStorage();
 
@@ -114,7 +113,7 @@ namespace Nova
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
                 Generator.setThreadCount(8);
-                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+                Generator.generate(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
 
                 const msdfgen::BitmapConstRef<u8, 1>& Bitmap = Generator.atlasStorage();
 
@@ -136,7 +135,7 @@ namespace Nova
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
                 Generator.setThreadCount(8);
-                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+                Generator.generate(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
 
                 const msdfgen::BitmapConstRef<u8, 3>& Bitmap = Generator.atlasStorage();
 
@@ -158,7 +157,7 @@ namespace Nova
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
                 Generator.setThreadCount(8);
-                Generator.generate(m_FontData.GlyphGeometry.data(), m_FontData.GlyphGeometry.size());
+                Generator.generate(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
 
                 const msdfgen::BitmapConstRef<u8, 4>& Bitmap = Generator.atlasStorage();
 

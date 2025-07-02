@@ -26,7 +26,7 @@ namespace Nova
     {
         Component::OnInit();
         const Entity* Owner = GetOwner();
-        const Scene* CurrentScene = Owner->GetScene();
+        const Scene* CurrentScene = Owner->GetOwner();
         const Application* CurrentApplication = CurrentScene->GetOwner();
         Renderer* Renderer = CurrentApplication->GetRenderer();
 

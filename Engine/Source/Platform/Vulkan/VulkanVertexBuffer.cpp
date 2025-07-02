@@ -14,6 +14,9 @@ namespace Nova
 
     bool VulkanVertexBuffer::Initialize(const VertexBufferCreateInfo& CreateInfo)
     {
+        if (CreateInfo.Data == nullptr && CreateInfo.Count == 0)
+            return true;
+
         const VulkanRenderer* Renderer = m_Owner->As<VulkanRenderer>();
         const VmaAllocator Allocator = Renderer->GetAllocator();
 

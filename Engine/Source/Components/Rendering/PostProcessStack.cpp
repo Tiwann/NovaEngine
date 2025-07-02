@@ -10,7 +10,7 @@ namespace Nova
 {
     void PostProcessStack::OnInit()
     {
-        const Scene* Scene = m_Entity->GetScene();
+        const Scene* Scene = m_Entity->GetOwner();
         const Application* App = Scene->GetOwner();
         Renderer* Renderer = App->GetRenderer();
 

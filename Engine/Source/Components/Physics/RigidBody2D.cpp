@@ -18,7 +18,7 @@ namespace Nova
     {
         Component::OnInit();
         
-        Scene* Scene = m_Entity->GetScene();
+        Scene* Scene = m_Entity->GetOwner();
         PhysicsWorld2D& World = Scene->GetPhysicsWorld2D();
 
         Transform* Transform = GetTransform();
@@ -47,7 +47,7 @@ namespace Nova
 
     void RigidBody2D::OnDestroy()
     {
-        Scene* Scene = m_Entity->GetScene();
+        Scene* Scene = m_Entity->GetOwner();
         PhysicsWorld2D& World = Scene->GetPhysicsWorld2D();
 
         m_PhysicsBody->OnContactBeginEvent.ClearAll();

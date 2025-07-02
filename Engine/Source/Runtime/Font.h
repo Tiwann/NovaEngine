@@ -2,14 +2,10 @@
 #include "Asset.h"
 #include "Filesystem.h"
 #include "Containers/ArrayView.h"
+#include <msdf-atlas-gen/FontGeometry.h>
+#include <msdf-atlas-gen/GlyphGeometry.h>
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(Font, "FONT")
-
-namespace msdf_atlas
-{
-    class FontGeometry;
-    class GlyphGeometry;
-}
 
 namespace Nova
 {
@@ -38,8 +34,8 @@ namespace Nova
 
     struct FontData
     {
-        std::shared_ptr<std::vector<msdf_atlas::GlyphGeometry>> GlyphGeometry = nullptr;
-        std::shared_ptr<msdf_atlas::FontGeometry> FontGeometry = nullptr;
+        std::vector<msdf_atlas::GlyphGeometry> Glyphs;
+        msdf_atlas::FontGeometry FontGeometry;
     };
 
     

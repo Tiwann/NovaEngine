@@ -390,7 +390,7 @@ namespace Nova
         return m_EngineAssetsDirectory;
     }
 
-    Path const& Application::GetEngineShadersDirectory() const
+    Path Application::GetEngineShadersDirectory() const
     {
         return PathCombine(m_EngineAssetsDirectory, "Shaders");
     }

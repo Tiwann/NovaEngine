@@ -46,7 +46,7 @@ namespace Nova
         m_StaticMesh = new StaticMesh("TransientModel");
 
         const Entity* Owner = GetOwner();
-        const Scene* Scene = Owner->GetScene();
+        const Scene* Scene = Owner->GetOwner();
         const Application* Application = Scene->GetOwner();
         const Window* Window = Application->GetWindow();
         const f32 Width = Window->GetWidth();
@@ -86,7 +86,7 @@ namespace Nova
         m_SceneUniformBuffer = Renderer->CreateUniformBuffer(sizeof(SceneData));
 
 
-        // NEED TO ABSTRACT THIS
+        // NEED TO ABSTRACT THIS; THIS NEEDS TO BE DONE EVERY FRAMES
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
@@ -128,7 +128,7 @@ namespace Nova
         if (!Camera) return;
 
         Entity* Owner = GetOwner();
-        Scene* Scene = Owner->GetScene();
+        Scene* Scene = Owner->GetOwner();
 
         Transform* EntityTransform = Owner->GetTransform();
         Transform* CameraTransform = Camera->GetTransform();
@@ -183,7 +183,7 @@ namespace Nova
 
         // THIS NEEDS TO BE OPTIMIZED BY FILTER THE AVAILABLE LIGHTS
         Entity* Owner = GetOwner();
-        Scene* Scene = Owner->GetScene();
+        Scene* Scene = Owner->GetOwner();
         const Application* Application = Scene->GetOwner();
         const Window* Window = Application->GetWindow();
 

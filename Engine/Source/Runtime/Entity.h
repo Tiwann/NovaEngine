@@ -113,8 +113,8 @@ namespace Nova
         Entity* GetParent() const;
         Transform* GetTransform() const;
 
-        Scene* GetScene();
-        const Scene* GetScene() const;
+        Scene* GetOwner();
+        const Scene* GetOwner() const;
 
         void SetName(const String& Name);
         const String& GetName() const { return m_Name; }
@@ -156,7 +156,7 @@ namespace Nova
         Array<Entity*> m_Children;
         Entity* m_Parent = nullptr;
         Transform* m_Transform = nullptr;
-        Scene* m_Scene = nullptr;
+        Scene* m_Owner = nullptr;
         EntityHideFlags m_HideFlags;
     };
 

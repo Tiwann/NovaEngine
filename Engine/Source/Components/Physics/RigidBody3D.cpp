@@ -41,7 +41,7 @@ namespace Nova
     {
         Component::OnInit();
 
-        Scene* Scene = m_Entity->GetScene();
+        Scene* Scene = m_Entity->GetOwner();
         PhysicsWorld3D& World = Scene->GetPhysicsWorld3D();
         
         Transform* Transform = GetTransform();
@@ -67,7 +67,7 @@ namespace Nova
     {
         PhysicsComponent::OnDestroy();
         
-        Scene* Scene = m_Entity->GetScene();
+        Scene* Scene = m_Entity->GetOwner();
         PhysicsWorld3D& World = Scene->GetPhysicsWorld3D();
 
         m_PhysicsBody->OnContactBeginEvent.ClearAll();

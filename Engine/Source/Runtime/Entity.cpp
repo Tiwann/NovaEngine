@@ -13,7 +13,7 @@ namespace Nova
         
     }
 
-    Entity::Entity(String Name, Scene* Owner) : Object(Name), m_Name(std::move(Name)), m_Scene(Owner)
+    Entity::Entity(String Name, Scene* Owner) : Object(Name), m_Name(std::move(Name)), m_Owner(Owner)
     {
         m_Transform = AddComponent<Transform>();
     }
@@ -67,14 +67,14 @@ namespace Nova
         return m_Transform;
     }
 
-    Scene* Entity::GetScene() 
+    Scene* Entity::GetOwner() 
     {
-        return m_Scene;
+        return m_Owner;
     }
 
-    const Scene* Entity::GetScene() const
+    const Scene* Entity::GetOwner() const
     {
-        return m_Scene;
+        return m_Owner;
     }
 
 

@@ -82,7 +82,7 @@ namespace Nova
 
         Path const&             GetEngineDirectory() const;
         Path const&             GetEngineAssetsDirectory() const;
-        Path const&             GetEngineShadersDirectory() const;
+        Path GetEngineShadersDirectory() const;
 
     private:
         ////////////////////////////////////////////

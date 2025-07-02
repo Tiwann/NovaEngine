@@ -8,7 +8,6 @@ target_include_directories(HelloFont PRIVATE Source)
 copy_imported_shared_lib(fmod-core HelloFont)
 copy_imported_shared_lib(fmod-studio HelloFont)
 
-
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
     set_target_properties(HelloFont PROPERTIES WIN32_EXECUTABLE TRUE)
 endif ()

@@ -18,6 +18,9 @@ namespace Nova
 
     bool VulkanIndexBuffer::Initialize(const IndexBufferCreateInfo& CreateInfo)
     {
+        if (CreateInfo.Data == nullptr && CreateInfo.Size == 0)
+            return true;
+
         const VulkanRenderer* Renderer = dynamic_cast<VulkanRenderer*>(m_Owner);
         const VmaAllocator Allocator = Renderer->GetAllocator();
 

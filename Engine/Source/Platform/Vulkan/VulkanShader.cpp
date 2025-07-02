@@ -63,7 +63,8 @@ namespace Nova
     {
         if (!m_Compiler)
             return false;
-        
+
+
         m_ShaderModule = m_Compiler->loadModuleFromSource(*m_Name, m_Filepath.string().c_str(), nullptr, &Diagnostic);
         if (!m_ShaderModule)
         {

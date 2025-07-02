@@ -74,7 +74,7 @@ namespace Nova
 
     Scene* Component::GetScene() const
     {
-        return m_Entity->GetScene();
+        return m_Entity->GetOwner();
     }
 
     void Component::SetEnabled(bool Enabled)

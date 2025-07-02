@@ -34,7 +34,7 @@ void HelloFont::OnInit()
     Application::OnInit();
 
     ShaderManager* ShaderManager = GetShaderManager();
-    const Path FontShader = PathCombine(GetEngineShadersDirectory(), "Font.slang");
+    const Path FontShader = PathCombine(Directory::GetApplicationDirectory(), "Shaders", "Font.slang");
     ShaderManager->Load("Font", FontShader);
 
     AssetDatabase* AssetDatabase = GetAssetDatabase();

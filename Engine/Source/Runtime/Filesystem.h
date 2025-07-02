@@ -59,6 +59,6 @@ namespace Nova
     template<typename... PathArgs>
     Path PathCombine(const Path& CurrentPath, PathArgs&&... Paths)
     {
-        return (CurrentPath / ... / (Path)std::forward<PathArgs>(Paths));
+        return std::filesystem::weakly_canonical((CurrentPath / ... / (Path)std::forward<PathArgs>(Paths)));
     }
 }

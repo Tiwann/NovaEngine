@@ -111,6 +111,10 @@ namespace Nova
         glScissor(Scissor.X, Scissor.Y, Scissor.Width, Scissor.Height);
     }
 
+    void OpenGLRenderer::Draw(size_t VertexCount, size_t FirstVertex)
+    {
+    }
+
     void OpenGLRenderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {
         const PrimitiveTopology& Topology = m_BoundPipeline->GetSpecification().PrimitiveTopology;

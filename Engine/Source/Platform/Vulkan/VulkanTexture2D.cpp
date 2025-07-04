@@ -103,7 +103,7 @@ namespace Nova
         const VkDevice Device = Renderer->GetDevice();
         const VmaAllocator Allocator = Renderer->GetAllocator();
 
-        if (Width != m_Width || Height != m_Height)
+
         {
             m_Width = Width;
             m_Height = Height;

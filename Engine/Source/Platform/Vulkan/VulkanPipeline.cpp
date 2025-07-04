@@ -81,10 +81,7 @@ namespace Nova
         VkPipelineColorBlendStateCreateInfo ColorBlendState { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
         ColorBlendState.pAttachments = &ColorBlendAttachmentState;
         ColorBlendState.attachmentCount = 1;
-        ColorBlendState.logicOpEnable = false;
-        // ColorBlendState.logicOp = ...;
-        // ColorBlendState.blendConstants = ...;
-        //ColorBlendState.blendConstants = ... ;
+    
 
         VkPipelineDepthStencilStateCreateInfo DepthStencilState { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
         DepthStencilState.depthTestEnable = Specification.DepthTestEnable;

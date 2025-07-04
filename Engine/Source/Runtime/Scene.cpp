@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "Application.h"
 #include "Entity.h"
+#include "Components/Camera.h"
+#include "Rendering/Renderer.h"
 
 
 namespace Nova
@@ -42,6 +44,10 @@ namespace Nova
 
     void Scene::OnRender(Renderer* Renderer) const
     {
+        if (Camera* Camera = Renderer->GetCurrentCamera())
+        {
+            Renderer->ClearColor(Camera->ClearColor);
+        }
         for(Entity* Entity : m_Entities)
         {
             Entity->OnRender(Renderer);

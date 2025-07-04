@@ -214,7 +214,7 @@ namespace Nova
             VkDescriptorSetLayoutCreateInfo DescriptorSetLayoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
             DescriptorSetLayoutCreateInfo.bindingCount = DescriptorSetLayoutBindings.Count();
             DescriptorSetLayoutCreateInfo.pBindings = DescriptorSetLayoutBindings.Data();
-
+            DescriptorSetLayoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
 
             VkDescriptorSetLayout SetLayout = nullptr;
             if (VK_FAILED(vkCreateDescriptorSetLayout(Device, &DescriptorSetLayoutCreateInfo, nullptr, &SetLayout)))
@@ -241,11 +241,17 @@ namespace Nova
             }
         }
 
+        const VkDescriptorBindingFlags flags = VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT;
+        VkDescriptorSetLayoutBindingFlagsCreateInfo FlagsCreateInfo { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO };
+        FlagsCreateInfo.pBindingFlags = &flags;
+
         VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
         PipelineLayoutCreateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
         PipelineLayoutCreateInfo.setLayoutCount = m_DescriptorSetLayouts.Count();
         PipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
         PipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        PipelineLayoutCreateInfo.pNext = &FlagsCreateInfo;
+
         if (VK_FAILED(vkCreatePipelineLayout(Device, &PipelineLayoutCreateInfo, nullptr, &m_PipelineLayout)))
         {
             NOVA_VULKAN_ERROR("Failed to create pipeline layout!");

@@ -238,8 +238,14 @@ namespace Nova
                 QueueCreateInfos.Add(PresentQueueCreateInfo);
             }
 
+            VkPhysicalDeviceDescriptorIndexingFeatures DescriptorIndexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
+            DescriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind = true;
+
+
             VkPhysicalDeviceDynamicRenderingFeatures DynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
             DynamicRenderingFeatures.dynamicRendering = true;
+            DynamicRenderingFeatures.pNext = &DescriptorIndexingFeatures;
+
 
             VkDeviceCreateInfo DeviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
             DeviceCreateInfo.pNext = &DynamicRenderingFeatures;
@@ -375,7 +381,7 @@ namespace Nova
                 { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 32 }
             };
             VkDescriptorPoolCreateInfo DescriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-            DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+            DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
             DescriptorPoolCreateInfo.maxSets = 2;
             DescriptorPoolCreateInfo.poolSizeCount = (u32)std::size(PoolSizes);
             DescriptorPoolCreateInfo.pPoolSizes = PoolSizes;
@@ -620,6 +626,12 @@ namespace Nova
         vkCmdSetScissor(Cmd, 0, 1, &Rect);
     }
 
+    void VulkanRenderer::Draw(const size_t VertexCount, const size_t FirstVertex)
+    {
+        const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
+        vkCmdDraw(Cmd, VertexCount, 1, FirstVertex, 0);
+    }
+
 
     void VulkanRenderer::DrawIndexed(const size_t IndexCount, const size_t Offset)
     {
@@ -820,7 +832,7 @@ namespace Nova
         return m_FunctionPointers;
     }
 
-    VkPhysicalDevice VulkanRenderer::SelectPhysicalDevice(VkInstance Instance) const
+    VkPhysicalDevice VulkanRenderer::SelectPhysicalDevice(const VkInstance Instance) const
     {
         VkPhysicalDevice SelectedPhysicalDevice = nullptr;
         VkPhysicalDevice AvailablePhysicalDevices[32] { nullptr };

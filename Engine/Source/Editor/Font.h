@@ -44,7 +44,7 @@ namespace Nova
 
     inline Path GetFontPath(const FontNames Name)
     {
-        return g_Application->GetEngineAssetsDirectory() / FontsPaths[Name];
+        return PathCombine(g_Application->GetEngineAssetsDirectory(), FontsPaths[Name]);
     }
 
     inline ImFont* Fonts[NumFonts];

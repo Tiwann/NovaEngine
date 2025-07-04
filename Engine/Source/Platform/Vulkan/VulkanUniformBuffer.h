@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Rendering/UniformBuffer.h"
 #include <vk_mem_alloc.h>
-#include <vulkan/vulkan.h>
 
 namespace Nova
 {
@@ -14,6 +13,8 @@ namespace Nova
         void Free() override;
         void Copy(const void* Dest, size_t DestSize, size_t Offset) override;
         VkBuffer GetHandle() const { return m_Handle; }
+
+        VkDescriptorBufferInfo GetDescriptorInfo(size_t Offset, size_t Range = VK_WHOLE_SIZE) const;
     private:
         VmaAllocation m_Allocation = nullptr;
         VmaAllocationInfo m_AllocationInfo;

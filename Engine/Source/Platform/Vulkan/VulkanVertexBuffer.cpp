@@ -54,6 +54,7 @@ namespace Nova
         {
             return false;
         }
+        m_Count = CreateInfo.Count;
         return true;
     }
 

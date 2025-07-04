@@ -28,6 +28,7 @@ namespace Nova
 
     bool Font::LoadFromFile(const Path& Filepath, const FontParams& Params)
     {
+
         msdfgen::FreetypeHandle* Freetype = msdfgen::initializeFreetype();
         if (!Freetype)
         {
@@ -72,8 +73,8 @@ namespace Nova
             Glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MaxCornerAngle, 0);
 
         msdf_atlas::TightAtlasPacker Packer;
-        Packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
-        Packer.setScale(48);
+        Packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::POWER_OF_TWO_SQUARE);
+        Packer.setDimensions(1024, 1024);
         Packer.setPixelRange(2.0);
         Packer.setMiterLimit(1.0);
         Packer.pack(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
@@ -86,7 +87,7 @@ namespace Nova
         {
         case FontAtlasType::SDF:
             {
-                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::sdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 1>> Generator(Width, Height);
+                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::sdfGenerator, msdf_atlas::BitmapAtlasStorage<u8, 1>> Generator(Width, Height);
                 msdf_atlas::GeneratorAttributes Attributes;
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
@@ -97,7 +98,8 @@ namespace Nova
 
                 if (!m_AtlasTexture)
                 {
-                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    const TextureParams TextureParams { Filter::Linear, SamplerAddressMode::Repeat, Format::R8_UNORM };
+                    m_AtlasTexture = Texture2D::Create("Font", Width, Height, TextureParams, 0, Renderer->GetGraphicsApi());
                     if (!m_AtlasTexture)
                         return false;
 
@@ -108,7 +110,7 @@ namespace Nova
             break;
         case FontAtlasType::PSDF:
             {
-                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::psdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 1>> Generator(Width, Height);
+                msdf_atlas::ImmediateAtlasGenerator<float, 1, msdf_atlas::psdfGenerator, msdf_atlas::BitmapAtlasStorage<u8, 1>> Generator(Width, Height);
                 msdf_atlas::GeneratorAttributes Attributes;
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
@@ -119,7 +121,8 @@ namespace Nova
 
                 if (!m_AtlasTexture)
                 {
-                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    const TextureParams TextureParams { Filter::Linear, SamplerAddressMode::Repeat, Format::R8_UNORM };
+                    m_AtlasTexture = Texture2D::Create("Font", Width, Height, TextureParams, 0, Renderer->GetGraphicsApi());
                     if (!m_AtlasTexture)
                         return false;
 
@@ -130,7 +133,7 @@ namespace Nova
             break;
         case FontAtlasType::MSDF:
             {
-                msdf_atlas::ImmediateAtlasGenerator<float, 3, msdf_atlas::msdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 3>> Generator(Width, Height);
+                msdf_atlas::ImmediateAtlasGenerator<float, 3, msdf_atlas::msdfGenerator, msdf_atlas::BitmapAtlasStorage<u8, 3>> Generator(Width, Height);
                 msdf_atlas::GeneratorAttributes Attributes;
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
@@ -141,7 +144,8 @@ namespace Nova
 
                 if (!m_AtlasTexture)
                 {
-                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    const TextureParams TextureParams { Filter::Linear, SamplerAddressMode::Repeat, Format::R8G8B8_UNORM };
+                    m_AtlasTexture = Texture2D::Create("Font", Width, Height, TextureParams, 0, Renderer->GetGraphicsApi());
                     if (!m_AtlasTexture)
                         return false;
 
@@ -152,8 +156,10 @@ namespace Nova
             break;
         case FontAtlasType::MTSDF:
             {
-                msdf_atlas::ImmediateAtlasGenerator<float, 4, msdf_atlas::mtsdfGenerator, msdf_atlas::BitmapAtlasStorage<msdfgen::byte, 4>> Generator(Width, Height);
+                msdf_atlas::ImmediateAtlasGenerator<float, 4, msdf_atlas::mtsdfGenerator, msdf_atlas::BitmapAtlasStorage<u8, 4>> Generator(Width, Height);
                 msdf_atlas::GeneratorAttributes Attributes;
+                Attributes.config.errorCorrection.mode = msdfgen::ErrorCorrectionConfig::INDISCRIMINATE;
+                Attributes.config.errorCorrection.distanceCheckMode = msdfgen::ErrorCorrectionConfig::ALWAYS_CHECK_DISTANCE;
                 Attributes.scanlinePass = true;
                 Generator.setAttributes(Attributes);
                 Generator.setThreadCount(8);
@@ -163,7 +169,8 @@ namespace Nova
 
                 if (!m_AtlasTexture)
                 {
-                    m_AtlasTexture = Texture2D::Create("Font", Renderer->GetGraphicsApi());
+                    const TextureParams TextureParams { Filter::Linear, SamplerAddressMode::Repeat, Format::R8G8B8A8_UNORM };
+                    m_AtlasTexture = Texture2D::Create("Font", Width, Height, TextureParams, 0, Renderer->GetGraphicsApi());
                     if (!m_AtlasTexture)
                         return false;
 

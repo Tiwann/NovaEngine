@@ -1,9 +1,21 @@
 ﻿#include "HelloFont.h"
+
+#include "Components/Camera.h"
+#include "Components/FreeFlyCameraComponent.h"
+#include "Components/Transform.h"
+#include "Components/Rendering/TextRenderer.h"
 #include "Editor/Font.h"
 #include "ResourceManager/ShaderManager.h"
 #include "Runtime/AssetDatabase.h"
+#include "Runtime/EntityHandle.h"
 #include "Runtime/EntryPoint.h"
 #include "Runtime/Font.h"
+#include "Runtime/Scene.h"
+
+namespace Nova
+{
+    class FreeFlyCameraComponent;
+}
 
 using namespace Nova;
 
@@ -29,25 +41,30 @@ ApplicationConfiguration HelloFont::CreateConfiguration() const
     return Configuration;
 }
 
+
+static EntityHandle CameraEntity = nullptr;
+
 void HelloFont::OnInit()
 {
     Application::OnInit();
 
     ShaderManager* ShaderManager = GetShaderManager();
-    const Path FontShader = PathCombine(Directory::GetApplicationDirectory(), "Shaders", "Font.slang");
+    const Path FontShader = PathCombine(GetEngineShadersDirectory(), "Font.slang");
     ShaderManager->Load("Font", FontShader);
 
-    AssetDatabase* AssetDatabase = GetAssetDatabase();
-    Font* FontAsset = AssetDatabase->CreateAsset<Font>("Font");
-    const Path FontPath = GetFontPath(JetBrainsMono_Italic);
-    const Array<CharacterSetRange> CharacterSetRanges = { { 0x0020, 0x00FF }};
-    const FontParams FontParams { FontAtlasType::MTSDF, { ArrayView(CharacterSetRanges) }};
-    if (!FontAsset->LoadFromFile(FontPath, FontParams))
-    {
-        RequireExit(ExitCode::Error);
-        return;
-    }
+    CameraEntity = GetScene()->CreateEntity("Camera");
+    Camera* CameraComponent = CameraEntity->AddComponent<Camera>();
+    CameraComponent->SetSettings(CameraSettings::DefaultPerspective.WithFOV(45.0f));
+    CameraComponent->GetTransform()->SetPosition({ 0.0f, 0.0f, 1.0f });
 
+
+    FreeFlyCameraComponent* CameraController = CameraEntity->AddComponent<FreeFlyCameraComponent>();
+    CameraController->SetCamera(CameraComponent);
+
+    Renderer* Renderer = GetRenderer();
+    Renderer->SetCurrentCamera(CameraComponent);
+
+    GetScene()->CreateEntity("Text")->AddComponent<TextRenderer>();
 }
 
 NOVA_DEFINE_APPLICATION_CLASS(HelloFont);

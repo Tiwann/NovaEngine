@@ -429,6 +429,10 @@ namespace Nova
         Cmd->RSSetScissorRects(1, &Rect);
     }
 
+    void D3D12Renderer::Draw(size_t VertexCount, size_t FirstVertex)
+    {
+    }
+
 
     void D3D12Renderer::DrawIndexed(const size_t IndexCount, size_t Offset)
     {

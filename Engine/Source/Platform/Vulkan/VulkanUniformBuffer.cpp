@@ -52,4 +52,9 @@ namespace Nova
         const VmaAllocator Allocator = m_Owner->As<VulkanRenderer>()->GetAllocator();
         vmaCopyMemoryToAllocation(Allocator, Src, m_Allocation, Offset, Size);
     }
+
+    VkDescriptorBufferInfo VulkanUniformBuffer::GetDescriptorInfo(size_t Offset, size_t Range) const
+    {
+        return VkDescriptorBufferInfo(m_Handle, Offset, Range);
+    }
 }

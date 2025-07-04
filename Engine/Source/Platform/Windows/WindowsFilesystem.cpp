@@ -103,4 +103,9 @@ namespace Nova
         GetCurrentDirectoryW(MAX_PATH, CurrentDir);
         return CurrentDir;
     }
+
+    Path Directory::GetEngineDirectory()
+    {
+        return Path(NOVA_ENGINE_ROOT_DIR);
+    }
 }

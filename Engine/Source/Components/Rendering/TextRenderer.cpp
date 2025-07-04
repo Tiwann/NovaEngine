@@ -16,10 +16,13 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Editor/Font.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
 #include "Platform/Vulkan/VulkanTexture2D.h"
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Runtime/AssetDatabase.h"
+#include "Editor/EditorGUI.h"
 
 namespace Nova
 {
@@ -32,8 +35,16 @@ namespace Nova
 
     void TextRenderer::OnInit()
     {
-
-        OnTextChangedEvent.BindMember(this, &TextRenderer::OnTextChanged);
+        AssetDatabase* AssetDatabase = g_Application->GetAssetDatabase();
+        m_Font = AssetDatabase->CreateAsset<Font>("Font");
+        const Path FontPath = GetFontPath(OpenSans_Italic);
+        const Array<CharacterSetRange> CharacterSetRanges = { { 0x0020, 0x00FF }};
+        const FontParams FontParams { FontAtlasType::MTSDF, { ArrayView(CharacterSetRanges) }};
+        if (!m_Font->LoadFromFile(FontPath, FontParams))
+        {
+            NOVA_BREAK();
+            return;
+        }
 
         const Entity* Owner = GetOwner();
         const Scene* Scene = Owner->GetOwner();
@@ -52,7 +63,9 @@ namespace Nova
         PipelineCreateInfo.VertexLayout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
         PipelineCreateInfo.VertexLayout.AddAttribute({"NORMAL", Format::Vector3});
         PipelineCreateInfo.VertexLayout.AddAttribute({"COLOR", Format::Vector4});
-        PipelineCreateInfo.BlendEnable = false;
+        PipelineCreateInfo.BlendEnable = true;
+        PipelineCreateInfo.BlendFunction = AlphaBlend;
+
         PipelineCreateInfo.CullMode = CullMode::BackFace;
         PipelineCreateInfo.FrontFace = FrontFace::CounterClockwise;
         PipelineCreateInfo.Viewport = Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f);
@@ -61,8 +74,8 @@ namespace Nova
         PipelineCreateInfo.PrimitiveTopology = PrimitiveTopology::TriangleList;
         PipelineCreateInfo.DepthBiasEnable = false;
         PipelineCreateInfo.DepthClampEnable = false;
-        PipelineCreateInfo.DepthTestEnable = true;
-        PipelineCreateInfo.DepthWriteEnable = true;
+        PipelineCreateInfo.DepthTestEnable = false;
+        PipelineCreateInfo.DepthWriteEnable = false;
         PipelineCreateInfo.DepthCompareOperation = CompareOperation::Less;
         PipelineCreateInfo.PrimitiveRestartEnable = false;
         PipelineCreateInfo.RasterizerDiscardEnable = false;
@@ -79,6 +92,43 @@ namespace Nova
         m_IndexBuffer = Renderer->CreateIndexBuffer(IndexBufferCreateInfo(Format::None, nullptr, 0));
         m_UniformBuffer = Renderer->CreateUniformBuffer(sizeof(SceneData));
 
+        m_ResourcesDirty = true;
+    }
+
+    void TextRenderer::OnDestroy()
+    {
+        Component::OnDestroy();
+        m_VertexBuffer->Destroy();
+        delete m_VertexBuffer;
+        m_IndexBuffer->Destroy();
+        delete m_IndexBuffer;
+        delete m_Font;
+    }
+
+    void TextRenderer::OnUpdate(f32 Delta)
+    {
+        Component::OnUpdate(Delta);
+        if (m_ResourcesDirty)
+        {
+            UpdateResources();
+            m_ResourcesDirty = false;
+        }
+    }
+
+    void TextRenderer::OnFrameBegin(Renderer* Renderer)
+    {
+        Component::OnFrameBegin(Renderer);
+
+        Camera* Camera = Renderer->GetCurrentCamera();
+        if (!Camera) return;
+
+        const Entity* Entity = GetOwner();
+        const Scene* Scene = Entity->GetOwner();
+        const Application* Application = Scene->GetOwner();
+
+        ShaderManager* ShaderManager = Application->GetShaderManager();
+        Shader* FontShader = ShaderManager->Retrieve("Font");
+
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
@@ -92,19 +142,19 @@ namespace Nova
                 .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
             };
 
-            VkDescriptorBufferInfo BufferInfo { };
-            BufferInfo.buffer = m_UniformBuffer->As<VulkanUniformBuffer>()->GetHandle();
-            BufferInfo.offset = 0;
-            BufferInfo.range = VK_WHOLE_SIZE;
+            const VkDescriptorBufferInfo BufferInfo = m_UniformBuffer->As<VulkanUniformBuffer>()->GetDescriptorInfo(0);
 
-            VkWriteDescriptorSet WriteDescriptors[2] { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
 
+            VkWriteDescriptorSet WriteDescriptors[2] {  };
+
+            WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[0].descriptorCount = 1;
             WriteDescriptors[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             WriteDescriptors[0].dstSet = Sets[0];
             WriteDescriptors[0].dstBinding = 0;
             WriteDescriptors[0].pBufferInfo = &BufferInfo;
 
+            WriteDescriptors[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[1].descriptorCount = 1;
             WriteDescriptors[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             WriteDescriptors[1].dstSet = Sets[0];
@@ -113,35 +163,7 @@ namespace Nova
 
             vkUpdateDescriptorSets(Device, ArrayCount(WriteDescriptors), WriteDescriptors, 0, nullptr);
         }
-    }
 
-    void TextRenderer::OnDestroy()
-    {
-        Component::OnDestroy();
-        m_VertexBuffer->Destroy();
-        delete m_VertexBuffer;
-        m_IndexBuffer->Destroy();
-        delete m_IndexBuffer;
-    }
-
-    void TextRenderer::OnUpdate(f32 Delta)
-    {
-        Component::OnUpdate(Delta);
-        if (m_Text != m_LastText)
-        {
-            if (OnTextChangedEvent.IsBound())
-                OnTextChangedEvent.Broadcast(m_Text);
-        }
-    }
-
-    void TextRenderer::OnFrameBegin(Renderer* Renderer)
-    {
-        Component::OnFrameBegin(Renderer);
-
-        Camera* Camera = Renderer->GetCurrentCamera();
-        if (!Camera) return;
-
-        const Entity* Entity = GetOwner();
 
         Transform* EntityTransform = Entity->GetTransform();
 
@@ -158,6 +180,12 @@ namespace Nova
     void TextRenderer::OnRender(Renderer* Renderer)
     {
         Component::OnRender(Renderer);
+
+        if (m_Text.IsEmpty())
+            return;
+
+        if (!m_Font)
+            return;
 
         Entity* Entity = GetOwner();
         const Scene* Scene = Entity->GetOwner();
@@ -180,16 +208,30 @@ namespace Nova
         Component::OnInspectorGUI(IO);
 
         static char Buffer[256] = {0};
-        if (ImGui::InputTextMultiline("Text", Buffer, ArrayCount(Buffer), ImVec2(0, 0),
-                                      ImGuiInputTextFlags_EnterReturnsTrue))
+
+        Memory::Memzero(Buffer);
+        memcpy(Buffer, m_Text.Data(), m_Text.Size());
+
+        if (ImGui::InputTextMultiline("Text", Buffer, ArrayCount(Buffer), ImVec2(0, 0), 0, nullptr, this))
         {
-            m_Text = String(Buffer);
+            SetText(Buffer);
+        }
+
+        if (UI::DragValue("Line spacing", m_LineSpacing))
+        {
+            m_ResourcesDirty = true;
+        }
+
+        if (UI::DragValue("Character Spacing", m_CharacterSpacing))
+        {
+            m_ResourcesDirty = true;
         }
     }
 
     void TextRenderer::SetText(const String& NewText)
     {
         m_Text = NewText;
+        m_ResourcesDirty = true;
     }
 
     const String& TextRenderer::GetText() const
@@ -200,6 +242,7 @@ namespace Nova
     void TextRenderer::SetFont(Font* Font)
     {
         m_Font = Font;
+        m_ResourcesDirty = true;
     }
 
     Font* TextRenderer::GetFont() const
@@ -210,6 +253,7 @@ namespace Nova
     void TextRenderer::SetTextAlignment(TextAlignment NewTextAlignment)
     {
         m_TextAlignment = NewTextAlignment;
+        m_ResourcesDirty = true;
     }
 
     TextAlignment TextRenderer::GetTextAlignment() const
@@ -220,6 +264,7 @@ namespace Nova
     void TextRenderer::SetTextStyle(TextStyleFlags NewTextStyleFlags)
     {
         m_StyleFlags = NewTextStyleFlags;
+        m_ResourcesDirty = true;
     }
 
     TextStyleFlags TextRenderer::GetTextStyle() const
@@ -227,112 +272,89 @@ namespace Nova
         return m_StyleFlags;
     }
 
-    void TextRenderer::OnTextChanged(const String& NewText)
+    void TextRenderer::UpdateResources()
     {
+        if (m_Text.IsEmpty())
+            return;
+
         Array<Vertex> Vertices;
         Array<u32> Indices;
         GetTextQuads(Vertices, Indices);
 
         m_VertexBuffer->Initialize(VertexBufferCreateInfo(Vertices.Data(), Vertices.Count()));
-        m_IndexBuffer->Initialize(IndexBufferCreateInfo(Format::R32_UINT, Indices.Data(), Indices.Count()));
+        m_IndexBuffer->Initialize(IndexBufferCreateInfo(Format::R32_UINT, Indices.Data(), Indices.Size()));
     }
 
     void TextRenderer::GetTextQuads(Array<Vertex>& OutVertices, Array<u32>& OutIndices)
     {
+        using namespace msdf_atlas;
         const auto& FontData = m_Font->GetFontData();
         const auto& FontGeometry = FontData.FontGeometry;
         const auto& Metrics = FontGeometry.getMetrics();
-        const Texture2D* FontAtlasTexture = m_Font->GetAtlasTexture();
 
         OutVertices.Clear();
         OutIndices.Clear();
 
-        f64 X = 0.0;
-        const f64 FsScale = 1.0 / (Metrics.ascenderY - Metrics.descenderY);
-        f64 Y = 0.0;
+        f32 PositionX = 0.0f, PositionY = 0.0f;
 
-        const f32 SpaceGlyphAdvance = FontGeometry.getGlyph(' ')->getAdvance();
-
-        for (size_t CharacterIndex = 0; CharacterIndex < m_Text.Count(); CharacterIndex++)
+        for (size_t Index = 0; Index < m_Text.Count(); Index++)
         {
-            const String::CharacterType Character = m_Text[CharacterIndex];
+            const String::CharacterType Character = m_Text[Index];
+
+            const GlyphGeometry* Glyph = FontGeometry.getGlyph(Character) ? FontGeometry.getGlyph(Character) : FontGeometry.getGlyph('?') ? FontGeometry.getGlyph('?') : nullptr;
+            if (!Glyph) continue;
 
             if (Character == '\r')
                 continue;
 
-            if (Character == '\n')
-            {
-                X = 0;
-                Y -= FsScale * Metrics.lineHeight; // + TextParams.LineSpacing
-                continue;
-            }
-
-            if (Character == ' ')
-            {
-                f32 Advance = SpaceGlyphAdvance;
-                if (CharacterIndex < m_Text.Count() - 1)
-                {
-                    const String::CharacterType NextCharacter = m_Text[CharacterIndex + 1];
-                    f64 DAdvance;
-                    FontGeometry.getAdvance(DAdvance, Character, NextCharacter);
-                    Advance = static_cast<f32>(DAdvance);
-                }
-
-                X += FsScale * Advance; // + TextParams.Kerning
-                continue;
-            }
 
             if (Character == '\t')
             {
-                X += 4.0f * (FsScale * SpaceGlyphAdvance); // + TextParams.Kerning
+                PositionX += 4.0f * FontGeometry.getGlyph(' ')->getAdvance();
                 continue;
             }
 
-            auto Glyph = FontGeometry.getGlyph(Character);
-            if (!Glyph)
-                Glyph = FontGeometry.getGlyph('?');
-
-            if (!Glyph)
+            if (Character == '\n')
+            {
+                PositionX = 0.0f;
+                PositionY -= m_LineSpacing;
                 continue;
+            }
 
-            f64 Al, Ab, Ar, At;
-            Glyph->getQuadAtlasBounds(Al, Ab, Ar, At);
-            Vector2 TexCoordMin(Al, Ab);
-            Vector2 TexCoordMax(Ar, At);
 
-            f64 Pl, Pb, Pr, Pt;
-            Glyph->getQuadPlaneBounds(Pl, Pb, Pr, Pt);
-            Vector2 QuadMin(Pl, Pb);
-            Vector2 QuadMax(Pr, Pt);
+            f64 TexCoordLeft, TexCoordBottom, TexCoordRight, TexCoordTop;
+            Glyph->getQuadAtlasBounds(TexCoordLeft, TexCoordBottom, TexCoordRight, TexCoordTop);
 
-            QuadMin *= FsScale;
-            QuadMax *= FsScale;
-            QuadMin += Vector2(X, Y);
-            QuadMax += Vector2(X, Y);
+            f64 PosLeft, PosBottom, PosRight, PosTop;
+            Glyph->getQuadPlaneBounds(PosLeft, PosBottom, PosRight, PosTop);
 
-            const f32 TexelWidth = 1.0f / FontAtlasTexture->GetWidth();
-            const f32 TexelHeight = 1.0f / FontAtlasTexture->GetHeight();
-            TexCoordMin *= Vector2(TexelWidth, TexelHeight);
-            TexCoordMax *= Vector2(TexelWidth, TexelHeight);
+            TexCoordLeft *= 1.0f / m_Font->GetAtlasTexture()->GetWidth();
+            TexCoordRight *= 1.0f / m_Font->GetAtlasTexture()->GetWidth();
+            TexCoordBottom *= 1.0f / m_Font->GetAtlasTexture()->GetHeight();
+            TexCoordTop *= 1.0f / m_Font->GetAtlasTexture()->GetHeight();
 
             OutVertices.AddRange({
-                Vertex({QuadMin, 0.0f}, TexCoordMin, Vector3::Zero, Color::White),
-                Vertex({QuadMin.x, QuadMax.y, 0.0f}, {TexCoordMin.x, TexCoordMax.y}, Vector3::Zero, Color::White),
-                Vertex({QuadMax, 0.0f}, TexCoordMax, Vector3::Zero, Color::White),
-                Vertex({QuadMax.x, QuadMin.y, 0.0f}, {TexCoordMax.x, TexCoordMin.y}, Vector3::Zero, Color::White),
+                Vertex(Vector3(PositionX + PosLeft, PositionY + PosBottom, 0.0f), Vector2(TexCoordLeft, TexCoordBottom), Vector3::Zero, Color::White),
+                Vertex(Vector3(PositionX + PosLeft, PositionY + PosTop, 0.0f), Vector2(TexCoordLeft, TexCoordTop), Vector3::Zero, Color::White),
+                Vertex(Vector3(PositionX + PosRight, PositionY + PosTop, 0.0f), Vector2(TexCoordRight, TexCoordTop), Vector3::Zero, Color::White),
+                Vertex(Vector3(PositionX + PosRight, PositionY + PosBottom, 0.0f), Vector2(TexCoordRight, TexCoordBottom), Vector3::Zero, Color::White)
             });
 
             OutIndices.AddRange({
-                0 + 4 * (u32)CharacterIndex, 2 + 4 * (u32)CharacterIndex, 1 + 4 * (u32)CharacterIndex, 0 + 4 * (u32)CharacterIndex, 3 + 4 * (u32)CharacterIndex, 2 + 4 * (u32)CharacterIndex
+                0 + 4 * (u32)Index,
+                2 + 4 * (u32)Index,
+                1 + 4 * (u32)Index,
+                0 + 4 * (u32)Index,
+                3 + 4 * (u32)Index,
+                2 + 4 * (u32)Index
             });
 
-            if (CharacterIndex < m_Text.Count() - 1)
+            if (Index != m_Text.Count() - 1)
             {
-                f64 Advance = Glyph->getAdvance();
-                const char NextCharacter = m_Text[CharacterIndex + 1];
+                const String::CharacterType NextCharacter = m_Text[Index + 1];
+                f64 Advance = 0.0;
                 FontGeometry.getAdvance(Advance, Character, NextCharacter);
-
-                X += FsScale * Advance; // + TextParams.Kerning
+                PositionX += Advance + m_CharacterSpacing;
             }
         }
     }

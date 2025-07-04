@@ -59,6 +59,8 @@ namespace Nova
         {
             return false;
         }
+
+        m_Count = CreateInfo.Size / GetFormatBytesPerChannel(CreateInfo.Format);
         return true;
     }
 

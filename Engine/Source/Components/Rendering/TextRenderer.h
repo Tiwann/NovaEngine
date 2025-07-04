@@ -57,17 +57,18 @@ namespace Nova
         void SetTextStyle(TextStyleFlags NewTextStyleFlags);
         TextStyleFlags GetTextStyle() const;
 
-        MulticastDelegate<void(const String&)> OnTextChangedEvent;
 
     private:
-    void OnTextChanged(const String& NewText);
+        void UpdateResources();
         void GetTextQuads(Array<Vertex>& OutVertices, Array<u32>& OutIndices);
     private:
-        String m_Text;
-        String m_LastText;
+        String m_Text = "Enter Text...";
+        bool m_ResourcesDirty = false;
         Font* m_Font = nullptr;
         TextStyleFlags m_StyleFlags = TextStyleFlagBits::None;
         TextAlignment m_TextAlignment = TextAlignment::Left;
+        f32 m_LineSpacing = 1.0f;
+        f32 m_CharacterSpacing = 0.0f;
         class Pipeline* m_Pipeline = nullptr;
         class VertexBuffer* m_VertexBuffer = nullptr;
         class IndexBuffer* m_IndexBuffer = nullptr;

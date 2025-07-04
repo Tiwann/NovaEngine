@@ -81,6 +81,7 @@ namespace Nova
         virtual void EndFrame() = 0;
         virtual void SetViewport(const Viewport& Viewport) = 0;
         virtual void SetScissor(const Scissor& Scissor) = 0;
+        virtual void Draw(size_t VertexCount, size_t FirstVertex = 0) = 0;
         virtual void DrawIndexed(size_t IndexCount, size_t Offset) = 0;
         virtual void SetCullMode(CullMode Mode) = 0;
         virtual void SetDepthCompareOperation(CompareOperation DepthFunction) = 0;

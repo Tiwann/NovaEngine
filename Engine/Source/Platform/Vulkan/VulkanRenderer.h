@@ -67,6 +67,7 @@ namespace Nova
         void Present() override;
         void SetViewport(const Viewport& Viewport) override;
         void SetScissor(const Scissor& Scissor) override;
+        void Draw(size_t VertexCount, size_t FirstVertex) override;
         void DrawIndexed(size_t IndexCount, size_t Offset) override;
         void SetBlending(bool Enabled) override;
         void SetCullMode(CullMode Mode) override;

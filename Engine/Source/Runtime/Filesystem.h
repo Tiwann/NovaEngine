@@ -46,6 +46,7 @@ namespace Nova
         static Path         GetImagesDirectory();
         static Path         GetVideosDirectory();
         static Path         GetCurrentWorkingDirectory();
+        static Path         GetEngineDirectory();
 
 #ifdef NOVA_CLIENT
         static Path GetApplicationDirectory()

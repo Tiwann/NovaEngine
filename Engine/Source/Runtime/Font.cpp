@@ -4,7 +4,8 @@
 #include <msdfgen.h>
 #include <msdfgen-ext.h>
 #include <msdf-atlas-gen/msdf-atlas-gen.h>
-
+#include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 
 #include "Application.h"
 #include "Log.h"
@@ -176,10 +177,25 @@ namespace Nova
 
                     const std::shared_ptr<Image> AtlasImage = std::make_shared<Image>(Width, Height, Format::R8G8B8A8_UNORM, Bitmap.pixels);
                     m_AtlasTexture->SetData(AtlasImage);
+
+                    const Path AtlasCacheFilepath = PathCombine(Directory::GetEngineDirectory(), "Cache", "Font", *StringFormat("{}_CachedAtlas.png", m_Name));
+                    if (!Directory::Exists( PathCombine(Directory::GetEngineDirectory(), "Cache")))
+                    {
+                       Directory::Create(PathCombine(Directory::GetEngineDirectory(), "Cache"));
+                    }
+
+                    if (!Directory::Exists( PathCombine(Directory::GetEngineDirectory(), "Cache", "Font")))
+                    {
+                        Directory::Create(PathCombine(Directory::GetEngineDirectory(), "Cache", "Font"));
+                    }
+                    stbi_flip_vertically_on_write(true);
+                    int a = stbi_write_png(AtlasCacheFilepath.string().c_str(), Width, Height, 4, Bitmap.pixels, Width * 4 );
+
                 }
             }
             break;
         }
+
 
         msdfgen::destroyFont(Font);
         msdfgen::deinitializeFreetype(Freetype);

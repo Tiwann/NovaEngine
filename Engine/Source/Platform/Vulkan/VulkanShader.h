@@ -36,6 +36,7 @@ namespace Nova
         VkShaderStageFlags GetShaderStages() const;
         const Array<VkDescriptorSet>& GetDescriptorSets() const;
         const Array<VkDescriptorSetLayout>& GetDescriptorSetLayouts() const;
+        Array<VkDescriptorSet> AllocateDescriptorSets() const;
     private:
         bool FindShaderStage(const StringView& Name, ShaderStage Stage);
 

@@ -23,6 +23,7 @@
 #include "Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Runtime/AssetDatabase.h"
 #include "Editor/EditorGUI.h"
+#include "Platform/Vulkan/VulkanCommandBuffer.h"
 
 namespace Nova
 {
@@ -86,12 +87,14 @@ namespace Nova
         PipelineCreateInfo.MultisampleEnable = true;
 
         m_Pipeline = Renderer->CreatePipeline(PipelineCreateInfo);
-
-
         m_VertexBuffer = Renderer->CreateVertexBuffer(VertexBufferCreateInfo(nullptr, 0));
         m_IndexBuffer = Renderer->CreateIndexBuffer(IndexBufferCreateInfo(Format::None, nullptr, 0));
         m_UniformBuffer = Renderer->CreateUniformBuffer(sizeof(SceneData));
 
+        if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
+        {
+            m_DescriptorSets = FontShader->As<VulkanShader>()->AllocateDescriptorSets();
+        }
         m_ResourcesDirty = true;
     }
 
@@ -113,26 +116,11 @@ namespace Nova
             UpdateResources();
             m_ResourcesDirty = false;
         }
-    }
 
-    void TextRenderer::OnFrameBegin(Renderer* Renderer)
-    {
-        Component::OnFrameBegin(Renderer);
-
-        Camera* Camera = Renderer->GetCurrentCamera();
-        if (!Camera) return;
-
-        const Entity* Entity = GetOwner();
-        const Scene* Scene = Entity->GetOwner();
-        const Application* Application = Scene->GetOwner();
-
-        ShaderManager* ShaderManager = Application->GetShaderManager();
-        Shader* FontShader = ShaderManager->Retrieve("Font");
-
+        Renderer* Renderer = g_Application->GetRenderer();
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
-            const Array<VkDescriptorSet>& Sets = FontShader->As<VulkanShader>()->GetDescriptorSets();
             const Texture2D* FontAtlasTexture = m_Font->GetAtlasTexture();
 
             const VkDescriptorImageInfo ImageInfo
@@ -150,19 +138,36 @@ namespace Nova
             WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[0].descriptorCount = 1;
             WriteDescriptors[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            WriteDescriptors[0].dstSet = Sets[0];
+            WriteDescriptors[0].dstSet = m_DescriptorSets.First();
             WriteDescriptors[0].dstBinding = 0;
             WriteDescriptors[0].pBufferInfo = &BufferInfo;
 
             WriteDescriptors[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[1].descriptorCount = 1;
             WriteDescriptors[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-            WriteDescriptors[1].dstSet = Sets[0];
+            WriteDescriptors[1].dstSet = m_DescriptorSets.First();
             WriteDescriptors[1].dstBinding = 1;
             WriteDescriptors[1].pImageInfo = &ImageInfo;
 
             vkUpdateDescriptorSets(Device, ArrayCount(WriteDescriptors), WriteDescriptors, 0, nullptr);
         }
+
+    }
+
+    void TextRenderer::OnFrameBegin(Renderer* Renderer)
+    {
+        Component::OnFrameBegin(Renderer);
+
+        Camera* Camera = Renderer->GetCurrentCamera();
+        if (!Camera) return;
+
+        const Entity* Entity = GetOwner();
+        const Scene* Scene = Entity->GetOwner();
+        const Application* Application = Scene->GetOwner();
+
+        ShaderManager* ShaderManager = Application->GetShaderManager();
+        Shader* FontShader = ShaderManager->Retrieve("Font");
+
 
 
         Transform* EntityTransform = Entity->GetTransform();
@@ -194,7 +199,12 @@ namespace Nova
         const f32 Width = Window->GetWidth();
         const f32 Height = Window->GetHeight();
 
+        ShaderManager* ShaderManager = Application->GetShaderManager();
+        Shader* FontShader = ShaderManager->Retrieve("Font");
+
         Renderer->BindPipeline(m_Pipeline);
+        VulkanCommandBuffer* Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer();
+        vkCmdBindDescriptorSets(Cmd->GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, FontShader->As<VulkanShader>()->GetPipelineLayout(), 0, m_DescriptorSets.Count(), m_DescriptorSets.Data(), 0, nullptr);
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (i32)Width, (i32)Height));
 
@@ -223,6 +233,12 @@ namespace Nova
         }
 
         if (UI::DragValue("Character Spacing", m_CharacterSpacing))
+        {
+            m_ResourcesDirty = true;
+        }
+
+        const char* const Names[] = { "Left", "Center", "Right" };
+        if (ImGui::Combo("Alignment", (int*)&m_TextAlignment, Names, ArrayCount(Names)))
         {
             m_ResourcesDirty = true;
         }
@@ -272,6 +288,37 @@ namespace Nova
         return m_StyleFlags;
     }
 
+    float TextRenderer::CalculateTextWidth() const
+    {
+        using namespace msdf_atlas;
+        const auto& FontData = m_Font->GetFontData();
+        const auto& FontGeometry = FontData.FontGeometry;
+        const auto& Metrics = FontGeometry.getMetrics();
+
+        float Result = 0.0f;
+        for (size_t Index = 0; Index < m_Text.Count(); Index++)
+        {
+            const String::CharacterType Character = m_Text[Index];
+            const GlyphGeometry* Glyph = FontGeometry.getGlyph(Character) ? FontGeometry.getGlyph(Character) : FontGeometry.getGlyph('?') ? FontGeometry.getGlyph('?') : nullptr;
+
+            if (Character == '\t')
+            {
+                Result += 4.0f * FontGeometry.getGlyph(' ')->getAdvance();
+                continue;
+            }
+
+            if (Index != m_Text.Count() - 1)
+            {
+                const String::CharacterType NextCharacter = m_Text[Index + 1];
+                f64 Advance = 0.0;
+                FontGeometry.getAdvance(Advance, Character, NextCharacter);
+                Result += Advance + m_CharacterSpacing;
+            }
+        }
+
+        return Result;
+    }
+
     void TextRenderer::UpdateResources()
     {
         if (m_Text.IsEmpty())
@@ -296,6 +343,19 @@ namespace Nova
         OutIndices.Clear();
 
         f32 PositionX = 0.0f, PositionY = 0.0f;
+
+        switch (m_TextAlignment)
+        {
+        case TextAlignment::Left:
+            PositionX = 0.0f;
+            break;
+        case TextAlignment::Center:
+            PositionX = -0.5f * CalculateTextWidth();
+            break;
+        case TextAlignment::Right:
+            PositionX = CalculateTextWidth();
+            break;
+        }
 
         for (size_t Index = 0; Index < m_Text.Count(); Index++)
         {

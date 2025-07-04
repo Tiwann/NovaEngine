@@ -1,9 +1,10 @@
 ﻿#pragma once
 #include "Containers/Lazy.h"
-#include "Containers/MulticastDelegate.h"
 #include "Rendering/Vertex.h"
 #include "Runtime/Component.h"
 #include "Runtime/Flags.h"
+
+typedef struct VkDescriptorSet_T* VkDescriptorSet;
 
 namespace Nova
 {
@@ -57,7 +58,7 @@ namespace Nova
         void SetTextStyle(TextStyleFlags NewTextStyleFlags);
         TextStyleFlags GetTextStyle() const;
 
-
+        float CalculateTextWidth() const;
     private:
         void UpdateResources();
         void GetTextQuads(Array<Vertex>& OutVertices, Array<u32>& OutIndices);
@@ -73,5 +74,6 @@ namespace Nova
         class VertexBuffer* m_VertexBuffer = nullptr;
         class IndexBuffer* m_IndexBuffer = nullptr;
         class UniformBuffer* m_UniformBuffer = nullptr;
+        Array<VkDescriptorSet> m_DescriptorSets;
     };
 }

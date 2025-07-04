@@ -238,14 +238,8 @@ namespace Nova
                 QueueCreateInfos.Add(PresentQueueCreateInfo);
             }
 
-            VkPhysicalDeviceDescriptorIndexingFeatures DescriptorIndexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
-            DescriptorIndexingFeatures.descriptorBindingUniformBufferUpdateAfterBind = true;
-
-
             VkPhysicalDeviceDynamicRenderingFeatures DynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
             DynamicRenderingFeatures.dynamicRendering = true;
-            DynamicRenderingFeatures.pNext = &DescriptorIndexingFeatures;
-
 
             VkDeviceCreateInfo DeviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
             DeviceCreateInfo.pNext = &DynamicRenderingFeatures;
@@ -381,8 +375,8 @@ namespace Nova
                 { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 32 }
             };
             VkDescriptorPoolCreateInfo DescriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
-            DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT;
-            DescriptorPoolCreateInfo.maxSets = 2;
+            DescriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+            DescriptorPoolCreateInfo.maxSets = 8;
             DescriptorPoolCreateInfo.poolSizeCount = (u32)std::size(PoolSizes);
             DescriptorPoolCreateInfo.pPoolSizes = PoolSizes;
 
@@ -448,7 +442,7 @@ namespace Nova
 
         if (const DesktopWindow* DesktopWindow = m_Window->As<class DesktopWindow>())
         {
-            if (DesktopWindow->IsMaximized())
+            if (DesktopWindow->IsMinimized())
             {
                 return false;
             }
@@ -681,12 +675,6 @@ namespace Nova
         const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
-
-        const Array<VkDescriptorSet>& DescriptorSets = Shader->GetDescriptorSets();
-        if (DescriptorSets.Count() > 0)
-        {
-            vkCmdBindDescriptorSets(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, Shader->GetPipelineLayout(), 0, DescriptorSets.Count(), DescriptorSets.Data(), 0, nullptr);
-        }
     }
 
     void VulkanRenderer::UpdateUniformBuffer(UniformBuffer* Buffer, const u64 Offset, const u64 Size, const void* Data)

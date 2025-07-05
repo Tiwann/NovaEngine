@@ -52,4 +52,15 @@ namespace Nova::Memory
     {
         NOVA_FREE(Ptr);
     }
+
+    template<typename SourceType, typename DestType>
+    void Memcpy(DestType* Dest, const SourceType* Src, size_t Size)
+    {
+        memcpy(Dest, Src, Size);
+    }
+
+    inline bool Memcmp(const void* Lhs, const void* Rhs, size_t Size)
+    {
+        return memcmp(Lhs, Rhs, Size) == 0;
+    }
 }

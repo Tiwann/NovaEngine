@@ -1,4 +1,5 @@
 #pragma once
+#include "Runtime/Memory.h"
 
 namespace Nova
 {
@@ -15,6 +16,15 @@ namespace Nova
         bool operator!=(const T& Other) const
         {
             return !Equals(Other);
+        }
+    };
+
+    template<typename T>
+    struct IStructEquatable : IEquatable<T>
+    {
+        bool Equals(const T& Other) const override
+        {
+            return Memory::Memcmp(this, &Other, sizeof(T));
         }
     };
 }

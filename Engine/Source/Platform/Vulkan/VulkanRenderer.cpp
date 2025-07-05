@@ -671,8 +671,6 @@ namespace Nova
     void VulkanRenderer::BindPipeline(Pipeline* Pipeline)
     {
         const VulkanPipeline* CastedPipeline = Pipeline->As<VulkanPipeline>();
-        const PipelineCreateInfo& Specification = CastedPipeline->GetSpecification();
-        const VulkanShader* Shader = Specification.ShaderProgram->As<VulkanShader>();
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindPipeline(Cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, CastedPipeline->GetHandle());
     }

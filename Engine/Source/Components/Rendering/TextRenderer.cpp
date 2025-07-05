@@ -94,32 +94,7 @@ namespace Nova
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
             m_DescriptorSets = FontShader->As<VulkanShader>()->AllocateDescriptorSets();
-        }
-        m_ResourcesDirty = true;
-    }
 
-    void TextRenderer::OnDestroy()
-    {
-        Component::OnDestroy();
-        m_VertexBuffer->Destroy();
-        delete m_VertexBuffer;
-        m_IndexBuffer->Destroy();
-        delete m_IndexBuffer;
-        delete m_Font;
-    }
-
-    void TextRenderer::OnUpdate(f32 Delta)
-    {
-        Component::OnUpdate(Delta);
-        if (m_ResourcesDirty)
-        {
-            UpdateResources();
-            m_ResourcesDirty = false;
-        }
-
-        Renderer* Renderer = g_Application->GetRenderer();
-        if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
-        {
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
             const Texture2D* FontAtlasTexture = m_Font->GetAtlasTexture();
 
@@ -151,6 +126,29 @@ namespace Nova
 
             vkUpdateDescriptorSets(Device, ArrayCount(WriteDescriptors), WriteDescriptors, 0, nullptr);
         }
+        m_ResourcesDirty = true;
+    }
+
+    void TextRenderer::OnDestroy()
+    {
+        Component::OnDestroy();
+        m_VertexBuffer->Destroy();
+        delete m_VertexBuffer;
+        m_IndexBuffer->Destroy();
+        delete m_IndexBuffer;
+        delete m_Font;
+    }
+
+    void TextRenderer::OnUpdate(f32 Delta)
+    {
+        Component::OnUpdate(Delta);
+        if (m_ResourcesDirty)
+        {
+            UpdateResources();
+            m_ResourcesDirty = false;
+        }
+
+
 
     }
 

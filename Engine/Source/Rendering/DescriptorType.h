@@ -9,6 +9,6 @@ namespace Nova
         SampledImage,
         StorageImage,
         UniformBuffer,
-        StorageBuffer
+        StorageBuffer,
     };
 }

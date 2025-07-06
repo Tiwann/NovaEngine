@@ -26,4 +26,10 @@ namespace Nova
         }
         return Set;
     }
+
+    void DescriptorPool::FreeDescriptorSet(DescriptorSet* DescriptorSet)
+    {
+        DescriptorSet->Destroy();
+        delete DescriptorSet;
+    }
 }

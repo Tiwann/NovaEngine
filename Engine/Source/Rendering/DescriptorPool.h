@@ -19,5 +19,6 @@ namespace Nova
         }
 
         class DescriptorSet* AllocateDescriptorSet(const struct DescriptorSetAllocateInfo& AllocateInfo);
+        void FreeDescriptorSet(DescriptorSet* DescriptorSet);
     };
 }

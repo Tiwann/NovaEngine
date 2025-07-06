@@ -14,9 +14,13 @@ namespace Nova
 
     bool VulkanDescriptorSet::Initialize(const DescriptorSetAllocateInfo& AllocateInfo)
     {
-        const VkDevice Device = m_Owner->As<VulkanRenderer>()->GetDevice();
+        VulkanDescriptorPool* Owner = m_Pool->As<VulkanDescriptorPool>();
+        const VulkanRenderer* Renderer = Owner->GetOwner()->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
         VkDescriptorSetAllocateInfo DescriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
-        DescriptorSetAllocateInfo.descriptorPool = m_Owner->As<VulkanDescriptorPool>()->
+        DescriptorSetAllocateInfo.descriptorPool = Owner->GetHandle();
+        DescriptorSetAllocateInfo.descriptorSetCount = 1;
+        DescriptorSetAllocateInfo.
         vkAllocateDescriptorSets(Device, )
     }
 

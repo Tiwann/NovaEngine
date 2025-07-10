@@ -194,8 +194,6 @@ namespace Nova
         Application* GetOwner();
         const Application* GetOwner() const;
 
-        template<typename RendererType> requires IsBaseOfValue<Renderer, RendererType>
-        RendererType* As() { return dynamic_cast<RendererType*>(this); }
     protected:
         Camera* m_CurrentCamera = nullptr;
         Application* m_Application = nullptr;

@@ -124,7 +124,7 @@ namespace Nova
         VulkanSwapchain*                  m_Swapchain = nullptr;
         VulkanCommandPool*                m_CommandPool = nullptr;
         VulkanRenderTarget*               m_RenderTarget = nullptr;
-        VulkanFrameData                       m_Frames[3] = { };
+        VulkanFrameData                   m_Frames[3] = { nullptr };
         VmaAllocator                      m_Allocator = nullptr;
         VkDescriptorPool                  m_DescriptorPool = nullptr;
     };

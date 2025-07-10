@@ -17,7 +17,7 @@ namespace Nova
         GLenum ConvertPolygonMode(const PolygonMode Mode) const override;
         GLenum ConvertPrimitiveTopology(const PrimitiveTopology Topology) const override;
         GLenum ConvertSamplerAddressMode(const SamplerAddressMode Address) const override;
-        GLenum ConvertShaderStage(const ShaderStage Stage) const override;
+        GLenum ConvertShaderStage(const ShaderStageFlagBits Stage) const override;
         GLenum ConvertCompareOperation(const CompareOperation Operation) const override;
         GLenum ConvertFormat(const Format Format) const override;
         GLenum ConvertPresentMode(const PresentMode PresentMode) const override;

@@ -37,8 +37,10 @@ namespace Nova
         const Array<VkDescriptorSet>& GetDescriptorSets() const;
         const Array<VkDescriptorSetLayout>& GetDescriptorSetLayouts() const;
         Array<VkDescriptorSet> AllocateDescriptorSets() const;
+
+        VkPipelineLayout CreatePipelineLayout(const Array<VkDescriptorSetLayout>& DescriptorSetLayouts, const Array<VkPushConstantRange>& PushContantRanges) const;
     private:
-        bool FindShaderStage(const StringView& Name, ShaderStage Stage);
+        bool FindShaderStage(const StringView& Name, ShaderStageFlagBits Stage);
 
     private:
         slang::ISession* m_Compiler = nullptr;

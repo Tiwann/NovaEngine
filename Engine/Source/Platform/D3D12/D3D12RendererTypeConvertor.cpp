@@ -113,18 +113,18 @@ namespace Nova
         }
     }
 
-    D3D12_SHADER_VISIBILITY D3D12RendererTypeConvertor::ConvertShaderStage(const ShaderStage Stage) const
+    D3D12_SHADER_VISIBILITY D3D12RendererTypeConvertor::ConvertShaderStage(const ShaderStageFlagBits Stage) const
     {
         switch (Stage)
         {
-        case ShaderStage::None:              throw;
-        case ShaderStage::Vertex:            return D3D12_SHADER_VISIBILITY_VERTEX;
-        case ShaderStage::Geometry:          return D3D12_SHADER_VISIBILITY_GEOMETRY;
-        case ShaderStage::Fragment:          return D3D12_SHADER_VISIBILITY_PIXEL;
-        case ShaderStage::Compute:           throw;
-        case ShaderStage::RayGeneration:     throw;
-        case ShaderStage::Tessellation:      throw;
-        case ShaderStage::Mesh:              return D3D12_SHADER_VISIBILITY_MESH;
+        case ShaderStageFlagBits::None:              throw;
+        case ShaderStageFlagBits::Vertex:            return D3D12_SHADER_VISIBILITY_VERTEX;
+        case ShaderStageFlagBits::Geometry:          return D3D12_SHADER_VISIBILITY_GEOMETRY;
+        case ShaderStageFlagBits::Fragment:          return D3D12_SHADER_VISIBILITY_PIXEL;
+        case ShaderStageFlagBits::Compute:           throw;
+        case ShaderStageFlagBits::RayGeneration:     throw;
+        case ShaderStageFlagBits::Tessellation:      throw;
+        case ShaderStageFlagBits::Mesh:              return D3D12_SHADER_VISIBILITY_MESH;
         default: throw;
         }
     }

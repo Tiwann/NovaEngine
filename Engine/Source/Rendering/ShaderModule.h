@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ShaderStage.h"
+#include "ShaderStageFlagBits.h"
 #include <type_traits>
 
 
@@ -20,7 +20,7 @@ namespace Nova
     template<typename HandleType> requires std::is_convertible_v<HandleType, void*>
     struct ShaderModule
     {
-        ShaderStage Stage = ShaderStage::None;
+        ShaderStageFlagBits Stage = ShaderStageFlagBits::None;
         slang::IEntryPoint* EntryPoint = nullptr;
         slang::IBlob* CompiledCode = nullptr;
         HandleType Handle = nullptr;

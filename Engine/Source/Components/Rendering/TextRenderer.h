@@ -5,6 +5,7 @@
 #include "Runtime/Flags.h"
 
 typedef struct VkDescriptorSet_T* VkDescriptorSet;
+typedef struct VkPipelineLayout_T* VkPipelineLayout;
 
 namespace Nova
 {
@@ -75,5 +76,6 @@ namespace Nova
         class IndexBuffer* m_IndexBuffer = nullptr;
         class UniformBuffer* m_UniformBuffer = nullptr;
         Array<VkDescriptorSet> m_DescriptorSets;
+        VkPipelineLayout m_PipelineLayout = nullptr;
     };
 }

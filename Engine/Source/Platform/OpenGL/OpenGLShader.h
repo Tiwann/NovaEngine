@@ -19,7 +19,7 @@ namespace Nova
     struct OpenGLShaderModule
     {
         u32 Handle = -1;
-        ShaderStage Stage = ShaderStage::None;
+        ShaderStageFlagBits Stage = ShaderStageFlagBits::None;
         slang::IEntryPoint* EntryPoint = nullptr;
         slang::IBlob* CompiledCode;
     };
@@ -37,7 +37,7 @@ namespace Nova
         bool Bind() override;
         void Delete() override;
 
-        bool FindShaderStage(const StringView& Name, ShaderStage Stage);
+        bool FindShaderStage(const StringView& Name, ShaderStageFlagBits Stage);
     protected:
         slang::ISession* m_Session = nullptr;
         slang::IModule* m_Module = nullptr;

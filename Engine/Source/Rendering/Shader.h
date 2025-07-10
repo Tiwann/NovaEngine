@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Renderer.h"
-#include "ShaderStage.h"
+#include "ShaderStageFlagBits.h"
 #include "Runtime/Filesystem.h"
 #include "Runtime/LogCategory.h"
 #include "Math/LinearAlgebra.h"
@@ -84,7 +84,7 @@ namespace Nova
         Renderer* m_Renderer = nullptr;
         Path m_Filepath;
         String m_Source;
-        Array<ShaderStage> m_Stages;
+        Array<ShaderStageFlagBits> m_Stages;
 
         bool Compiled{false};
         bool Linked{false};

@@ -112,14 +112,14 @@ namespace Nova
         }
     }
 
-    GLenum OpenGLRendererTypeConvertor::ConvertShaderStage(const ShaderStage Stage) const
+    GLenum OpenGLRendererTypeConvertor::ConvertShaderStage(const ShaderStageFlagBits Stage) const
     {
         switch (Stage)
         {
-        case ShaderStage::Vertex: return GL_VERTEX_SHADER;
-        case ShaderStage::Fragment: return GL_FRAGMENT_SHADER;
-        case ShaderStage::Geometry: return GL_GEOMETRY_SHADER;
-        case ShaderStage::Compute: return GL_COMPUTE_SHADER;
+        case ShaderStageFlagBits::Vertex: return GL_VERTEX_SHADER;
+        case ShaderStageFlagBits::Fragment: return GL_FRAGMENT_SHADER;
+        case ShaderStageFlagBits::Geometry: return GL_GEOMETRY_SHADER;
+        case ShaderStageFlagBits::Compute: return GL_COMPUTE_SHADER;
         default: throw;
         }
     }

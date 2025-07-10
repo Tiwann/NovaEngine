@@ -43,7 +43,7 @@ namespace Nova
         const VkDevice Device = Renderer->GetDevice();
         for (VulkanShaderModule& Module : m_ShaderModules)
         {
-            Module.Stage = ShaderStage::None;
+            Module.Stage = ShaderStageFlagBits::None;
             Module.CompiledCode->release();
             Module.EntryPoint->release();
             vkDestroyShaderModule(Device, Module.Handle, nullptr);
@@ -73,9 +73,9 @@ namespace Nova
             return false;
         }
 
-        FindShaderStage("VertexMain", ShaderStage::Vertex);
-        FindShaderStage("GeometryMain", ShaderStage::Geometry);
-        FindShaderStage("FragmentMain", ShaderStage::Fragment);
+        FindShaderStage("VertexMain", ShaderStageFlagBits::Vertex);
+        FindShaderStage("GeometryMain", ShaderStageFlagBits::Geometry);
+        FindShaderStage("FragmentMain", ShaderStageFlagBits::Fragment);
 
         if (m_ShaderModules.IsEmpty())
         {
@@ -127,7 +127,7 @@ namespace Nova
         case slang::BindingType::VaryingInput: throw;
         case slang::BindingType::VaryingOutput: throw;
         case slang::BindingType::ExistentialValue: throw;
-        case slang::BindingType::PushConstant: throw;
+        case slang::BindingType::PushConstant: break;
         case slang::BindingType::MutableFlag: throw;
         case slang::BindingType::MutableTexture: throw;
         case slang::BindingType::MutableTypedBuffer: throw;
@@ -193,13 +193,16 @@ namespace Nova
         slang::VariableLayoutReflection* Globals = Layout->getGlobalParamsVarLayout();
         slang::TypeLayoutReflection* Reflection = Globals->getTypeLayout();
 
-        for (u32 SetIndex = 0; SetIndex < Reflection->getDescriptorSetCount(); ++SetIndex)
+        const u32 SetCount = Reflection->getDescriptorSetCount();
+        for (u32 SetIndex = 0; SetIndex < SetCount; ++SetIndex)
         {
             const u32 RangeCount = Reflection->getDescriptorSetDescriptorRangeCount(SetIndex);
             Array<VkDescriptorSetLayoutBinding> DescriptorSetLayoutBindings;
             for (u32 BindingIndex = 0; BindingIndex < RangeCount; ++BindingIndex)
             {
                 const slang::BindingType BindingType = Reflection->getDescriptorSetDescriptorRangeType(SetIndex, BindingIndex);
+                if (BindingType == slang::BindingType::PushConstant)
+                    continue;
 
                 VkDescriptorSetLayoutBinding Binding { };
                 Binding.binding = BindingIndex;
@@ -289,22 +292,22 @@ namespace Nova
         return Shader::GetAssetType();
     }
 
-    static SlangStage ConvertShaderStage(ShaderStage Stage)
+    static SlangStage ConvertShaderStage(ShaderStageFlagBits Stage)
     {
         switch (Stage) {
-        case ShaderStage::None: return SLANG_STAGE_FRAGMENT;
-        case ShaderStage::Vertex: return SLANG_STAGE_VERTEX;
-        case ShaderStage::Geometry: return SLANG_STAGE_GEOMETRY;
-        case ShaderStage::Fragment: return SLANG_STAGE_FRAGMENT;
-        case ShaderStage::Compute: return SLANG_STAGE_COMPUTE;
-        case ShaderStage::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
-        case ShaderStage::Tessellation: return SLANG_STAGE_HULL;
-        case ShaderStage::Mesh: return SLANG_STAGE_MESH;
+        case ShaderStageFlagBits::None: return SLANG_STAGE_FRAGMENT;
+        case ShaderStageFlagBits::Vertex: return SLANG_STAGE_VERTEX;
+        case ShaderStageFlagBits::Geometry: return SLANG_STAGE_GEOMETRY;
+        case ShaderStageFlagBits::Fragment: return SLANG_STAGE_FRAGMENT;
+        case ShaderStageFlagBits::Compute: return SLANG_STAGE_COMPUTE;
+        case ShaderStageFlagBits::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
+        case ShaderStageFlagBits::Tessellation: return SLANG_STAGE_HULL;
+        case ShaderStageFlagBits::Mesh: return SLANG_STAGE_MESH;
         default: throw;
         }
     }
 
-    bool VulkanShader::FindShaderStage(const StringView& Name, ShaderStage Stage)
+    bool VulkanShader::FindShaderStage(const StringView& Name, ShaderStageFlagBits Stage)
     {
         slang::IEntryPoint* EntryPoint = nullptr;
         if (SLANG_FAILED(m_ShaderModule->findAndCheckEntryPoint(*Name, ConvertShaderStage(Stage), &EntryPoint, nullptr)))
@@ -363,5 +366,26 @@ namespace Nova
         }
 
         return DescriptorSets;
+    }
+
+    VkPipelineLayout VulkanShader::CreatePipelineLayout(const Array<VkDescriptorSetLayout>& DescriptorSetLayouts, const Array<VkPushConstantRange>& PushContantRanges) const
+    {
+        const VulkanRenderer* Renderer = g_Application->GetRenderer()->As<VulkanRenderer>();
+        const VkDevice Device = Renderer->GetDevice();
+
+        VkPipelineLayout PipelineLayout = nullptr;
+        VkPipelineLayoutCreateInfo PipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        PipelineLayoutCreateInfo.pSetLayouts = m_DescriptorSetLayouts.Data();
+        PipelineLayoutCreateInfo.setLayoutCount = m_DescriptorSetLayouts.Count();
+        PipelineLayoutCreateInfo.pPushConstantRanges = PushContantRanges.Data();
+        PipelineLayoutCreateInfo.pushConstantRangeCount = PushContantRanges.Count();
+
+        if (VK_FAILED(vkCreatePipelineLayout(Device, &PipelineLayoutCreateInfo, nullptr, &PipelineLayout)))
+        {
+            NOVA_VULKAN_ERROR("Failed to create pipeline layout!");
+            return nullptr;
+        }
+
+        return PipelineLayout;
     }
 }

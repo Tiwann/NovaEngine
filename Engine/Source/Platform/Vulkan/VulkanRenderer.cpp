@@ -8,8 +8,6 @@
 #include "Rendering/IndexBuffer.h"
 #include "Rendering/VertexBuffer.h"
 #include "Rendering/Shader.h"
-#include <GLFW/glfw3.h>
-
 #include "VulkanCommandBuffer.h"
 #include "VulkanFence.h"
 #include "VulkanIndexBuffer.h"
@@ -28,6 +26,8 @@
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
 #include "Runtime/DesktopWindow.h"
+
+#include <GLFW/glfw3.h>
 
 namespace Nova
 {
@@ -388,6 +388,17 @@ namespace Nova
             }
         }
 
+
+        /*{
+            DescriptorPoolCreateInfo DescriptorPoolCreateInfo;
+            DescriptorPoolCreateInfo.PoolSizes[DescriptorType::CombinedImageSampler] = 32;
+            DescriptorPoolCreateInfo.PoolSizes[DescriptorType::UniformBuffer] = 32;
+            DescriptorPoolCreateInfo.PoolSizes[DescriptorType::Sampler] = 32;
+            DescriptorPoolCreateInfo.MaxDescriptorSets = 16;
+
+            DescriptorPool* Pool = CreateDescriptorPool<VulkanDescriptorPool>(DescriptorPoolCreateInfo);
+        }*/
+
         VkPhysicalDeviceProperties2 PhysicalDeviceProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
         vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &PhysicalDeviceProperties);
         char* PhysicalDeviceName = PhysicalDeviceProperties.properties.deviceName;
@@ -727,6 +738,7 @@ namespace Nova
         const VkCommandBuffer Cmd = GetCurrentCommandBuffer()->GetHandle();
         vkCmdBindIndexBuffer(Cmd, Buffer->As<VulkanIndexBuffer>()->GetHandle(), Offset, VK_INDEX_TYPE_UINT32);
     }
+
 
     VkInstance VulkanRenderer::GetInstance() const
     {

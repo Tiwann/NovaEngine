@@ -22,8 +22,10 @@ public struct SceneData
   public float4x4 Projection;
 }
 
-ConstantBuffer<SceneData> Scene;
-Sampler2D AtlasTexture;
+
+[[vk::binding(0, 0)]] ConstantBuffer<SceneData> Scene;
+[[vk::binding(1, 0)]] Sampler2D AtlasTexture;
+
 
 [shader("vertex")]
 VertexOutput VertexMain(VertexInput Input)

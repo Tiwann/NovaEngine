@@ -26,11 +26,11 @@ namespace Nova
         bool Bind() override;
         void Delete() override;
 
-        const D3D12ShaderModule* GetShaderModule(ShaderStage Stage) const;
+        const D3D12ShaderModule* GetShaderModule(ShaderStageFlagBits Stage) const;
         const D3D12ShaderModule* GetVertexShaderModule() const;
         const D3D12ShaderModule* GetFragmentShaderModule() const;
     private:
-        bool FindShaderStage(const StringView& Name, ShaderStage Stage);
+        bool FindShaderStage(const StringView& Name, ShaderStageFlagBits Stage);
     private:
         slang::ISession* m_Compiler = nullptr;
         slang::IModule* m_ShaderModule = nullptr;

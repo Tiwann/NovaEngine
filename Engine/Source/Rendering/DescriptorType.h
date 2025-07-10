@@ -10,5 +10,10 @@ namespace Nova
         StorageImage,
         UniformBuffer,
         StorageBuffer,
+        InputAttachment,
+        InlineUniformBlock,
+        AccelerationStructure,
+        StorageTexelBuffer,
+        UniformTexelBuffer,
     };
 }

@@ -163,7 +163,7 @@ namespace Nova
         PipelineCreateInfo.renderPass = nullptr;
         PipelineCreateInfo.pStages = ShaderStages.Data();
         PipelineCreateInfo.stageCount = ShaderStages.Count();
-        PipelineCreateInfo.layout = ((VulkanShader*)Specification.ShaderProgram)->GetPipelineLayout();
+        PipelineCreateInfo.layout = (VkPipelineLayout)Specification.VulkanPipelineLayout;
 
         if (VK_FAILED(vkCreateGraphicsPipelines(Device, nullptr, 1, &PipelineCreateInfo, nullptr, &m_Handle)))
         {

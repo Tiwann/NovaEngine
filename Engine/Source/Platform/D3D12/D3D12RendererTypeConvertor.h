@@ -20,7 +20,7 @@ namespace Nova
         D3D12_FILL_MODE ConvertPolygonMode(const PolygonMode Mode) const override;
         D3D12_PRIMITIVE_TOPOLOGY_TYPE ConvertPrimitiveTopology(const PrimitiveTopology Topology) const override;
         D3D12_TEXTURE_ADDRESS_MODE ConvertSamplerAddressMode(const SamplerAddressMode Address) const override;
-        D3D12_SHADER_VISIBILITY ConvertShaderStage(const ShaderStage Stage) const override;
+        D3D12_SHADER_VISIBILITY ConvertShaderStage(const ShaderStageFlagBits Stage) const override;
         D3D12_COMPARISON_FUNC ConvertCompareOperation(const CompareOperation Operation) const override;
         DXGI_FORMAT ConvertFormat(const Format Format) const override;
         DXGI_SWAP_EFFECT ConvertPresentMode(const PresentMode PresentMode) const override;

@@ -90,7 +90,7 @@ namespace Nova
             PipelineStateDescription.PS.BytecodeLength = CompiledCode->getBufferSize();
         }
 
-        if (const D3D12ShaderModule* GeometryModule = ShaderProgram->GetShaderModule(ShaderStage::Geometry))
+        if (const D3D12ShaderModule* GeometryModule = ShaderProgram->GetShaderModule(ShaderStageFlagBits::Geometry))
         {
             slang::IBlob* CompiledCode = GeometryModule->CompiledCode;
             PipelineStateDescription.GS.pShaderBytecode = CompiledCode->getBufferPointer();

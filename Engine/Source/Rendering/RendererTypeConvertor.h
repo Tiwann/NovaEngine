@@ -9,7 +9,7 @@
 #include "PresentMode.h"
 #include "PrimitiveTopology.h"
 #include "SamplerAddressMode.h"
-#include "ShaderStage.h"
+#include "ShaderStageFlagBits.h"
 #include "Runtime/Format.h"
 
 namespace Nova
@@ -37,7 +37,7 @@ namespace Nova
         virtual PolygonModeType ConvertPolygonMode(const PolygonMode Mode) const = 0;
         virtual PrimitiveTopologyType ConvertPrimitiveTopology(const PrimitiveTopology Topology) const = 0;
         virtual SamplerAddressModeType ConvertSamplerAddressMode(const SamplerAddressMode Address) const = 0;
-        virtual ShaderStageType ConvertShaderStage(const ShaderStage Stage) const = 0;
+        virtual ShaderStageType ConvertShaderStage(const ShaderStageFlagBits Stage) const = 0;
         virtual CompareOperationType ConvertCompareOperation(const CompareOperation Operation) const = 0;
         virtual FormatType ConvertFormat(const Format Format) const = 0;
         virtual PresentModeType ConvertPresentMode(const PresentMode PresentMode) const = 0;

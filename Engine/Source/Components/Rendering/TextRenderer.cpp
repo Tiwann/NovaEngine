@@ -38,7 +38,7 @@ namespace Nova
     {
         AssetDatabase* AssetDatabase = g_Application->GetAssetDatabase();
         m_Font = AssetDatabase->CreateAsset<Font>("Font");
-        const Path FontPath = GetFontPath(OpenSans_Italic);
+        const Path FontPath = GetFontPath(OpenSans_ExtraBold);
         const Array<CharacterSetRange> CharacterSetRanges = { { 0x0020, 0x00FF }};
         const FontParams FontParams { FontAtlasType::MTSDF, { ArrayView(CharacterSetRanges) }};
         if (!m_Font->LoadFromFile(FontPath, FontParams))
@@ -58,6 +58,12 @@ namespace Nova
 
         ShaderManager* ShaderManager = Application->GetShaderManager();
         Shader* FontShader = ShaderManager->Retrieve("Font");
+
+        if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
+        {
+            VulkanShader* Shader = FontShader->As<VulkanShader>();
+            m_PipelineLayout = FontShader->As<VulkanShader>()->CreatePipelineLayout(Shader->GetDescriptorSetLayouts(), Array<VkPushConstantRange>());
+        }
 
         PipelineCreateInfo PipelineCreateInfo;
         PipelineCreateInfo.VertexLayout.AddAttribute({"POSITION", Format::Vector3});
@@ -85,6 +91,7 @@ namespace Nova
         PipelineCreateInfo.ShaderProgram = FontShader;
         PipelineCreateInfo.RasterizationSamples = SampleCount::S8;
         PipelineCreateInfo.MultisampleEnable = true;
+        PipelineCreateInfo.VulkanPipelineLayout = m_PipelineLayout;
 
         m_Pipeline = Renderer->CreatePipeline(PipelineCreateInfo);
         m_VertexBuffer = Renderer->CreateVertexBuffer(VertexBufferCreateInfo(nullptr, 0));
@@ -93,7 +100,8 @@ namespace Nova
 
         if (Renderer->GetGraphicsApi() == GraphicsApi::Vulkan)
         {
-            m_DescriptorSets = FontShader->As<VulkanShader>()->AllocateDescriptorSets();
+            VulkanShader* Shader = FontShader->As<VulkanShader>();
+            m_DescriptorSets = Shader->AllocateDescriptorSets();
 
             const VkDevice Device = Renderer->As<VulkanRenderer>()->GetDevice();
             const Texture2D* FontAtlasTexture = m_Font->GetAtlasTexture();
@@ -108,16 +116,14 @@ namespace Nova
             const VkDescriptorBufferInfo BufferInfo = m_UniformBuffer->As<VulkanUniformBuffer>()->GetDescriptorInfo(0);
 
 
-            VkWriteDescriptorSet WriteDescriptors[2] {  };
+            VkWriteDescriptorSet WriteDescriptors[2] { { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET }, { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET } };
 
-            WriteDescriptors[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[0].descriptorCount = 1;
             WriteDescriptors[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             WriteDescriptors[0].dstSet = m_DescriptorSets.First();
             WriteDescriptors[0].dstBinding = 0;
             WriteDescriptors[0].pBufferInfo = &BufferInfo;
 
-            WriteDescriptors[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             WriteDescriptors[1].descriptorCount = 1;
             WriteDescriptors[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             WriteDescriptors[1].dstSet = m_DescriptorSets.First();
@@ -147,37 +153,11 @@ namespace Nova
             UpdateResources();
             m_ResourcesDirty = false;
         }
-
-
-
     }
 
     void TextRenderer::OnFrameBegin(Renderer* Renderer)
     {
         Component::OnFrameBegin(Renderer);
-
-        Camera* Camera = Renderer->GetCurrentCamera();
-        if (!Camera) return;
-
-        const Entity* Entity = GetOwner();
-        const Scene* Scene = Entity->GetOwner();
-        const Application* Application = Scene->GetOwner();
-
-        ShaderManager* ShaderManager = Application->GetShaderManager();
-        Shader* FontShader = ShaderManager->Retrieve("Font");
-
-
-
-        Transform* EntityTransform = Entity->GetTransform();
-
-        const SceneData SceneDataInstance
-        {
-            EntityTransform->GetWorldSpaceMatrix(),
-            Camera->GetViewMatrix(),
-            Camera->GetProjectionMatrix()
-        };
-
-        Renderer->UpdateUniformBuffer(m_UniformBuffer, 0, sizeof(SceneData), &SceneDataInstance);
     }
 
     void TextRenderer::OnRender(Renderer* Renderer)
@@ -197,15 +177,31 @@ namespace Nova
         const f32 Width = Window->GetWidth();
         const f32 Height = Window->GetHeight();
 
-        ShaderManager* ShaderManager = Application->GetShaderManager();
-        Shader* FontShader = ShaderManager->Retrieve("Font");
+        const VulkanCommandBuffer* Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer();
+
+        Camera* Camera = Renderer->GetCurrentCamera();
+        if (!Camera) return;
+
+        Transform* EntityTransform = Entity->GetTransform();
+
+
+        const Matrix4& WorldSpaceMatrix = EntityTransform->GetWorldSpaceMatrix();
+        
+        const SceneData SceneDataInstance
+        {
+            WorldSpaceMatrix,
+            Camera->GetViewMatrix(),
+            Camera->GetProjectionMatrix()
+        };
+
+        Renderer->UpdateUniformBuffer(m_UniformBuffer, 0, sizeof(SceneData), &SceneDataInstance);
+
 
         Renderer->BindPipeline(m_Pipeline);
-        VulkanCommandBuffer* Cmd = Renderer->As<VulkanRenderer>()->GetCurrentCommandBuffer();
-        vkCmdBindDescriptorSets(Cmd->GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, FontShader->As<VulkanShader>()->GetPipelineLayout(), 0, m_DescriptorSets.Count(), m_DescriptorSets.Data(), 0, nullptr);
+        vkCmdBindDescriptorSets(Cmd->GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, m_DescriptorSets.Count(), m_DescriptorSets.Data(), 0, nullptr);
+
         Renderer->SetViewport(Viewport(0.0f, 0.0f, Width, Height, 0.0f, 1.0f));
         Renderer->SetScissor(Scissor(0, 0, (i32)Width, (i32)Height));
-
         Renderer->BindVertexBuffer(m_VertexBuffer, 0);
         Renderer->BindIndexBuffer(m_IndexBuffer, 0);
         Renderer->DrawIndexed(m_IndexBuffer->GetCount(), 0);
@@ -289,9 +285,8 @@ namespace Nova
     float TextRenderer::CalculateTextWidth() const
     {
         using namespace msdf_atlas;
-        const auto& FontData = m_Font->GetFontData();
-        const auto& FontGeometry = FontData.FontGeometry;
-        const auto& Metrics = FontGeometry.getMetrics();
+        const FontData& FontData = m_Font->GetFontData();
+        const FontGeometry& FontGeometry = FontData.FontGeometry;
 
         float Result = 0.0f;
         for (size_t Index = 0; Index < m_Text.Count(); Index++)

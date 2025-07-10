@@ -163,7 +163,7 @@ namespace Nova
 
     const Matrix4& Transform::GetWorldSpaceMatrix()
     {
-        static const Function<Matrix4()> ComputeWorldSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> ComputeWorldSpaceMatrix = [&]() -> Matrix4
         {
             const Matrix4& LocalMatrix = GetLocalSpaceMatrix();
 
@@ -182,7 +182,7 @@ namespace Nova
 
     const Matrix4& Transform::GetLocalSpaceMatrix()
     {
-        static const Function<Matrix4()> ComputeLocalSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> ComputeLocalSpaceMatrix = [&]() -> Matrix4
         {
             return Matrix4::TRS(m_Position, m_Rotation, m_Scale);
         };
@@ -192,7 +192,7 @@ namespace Nova
 
     const Matrix3& Transform::GetWorldSpaceNormalMatrix()
     {
-        static const Function<Matrix3()> ComputeLocalToWorldNormalMatrix = [&]() -> Matrix3
+        const Function<Matrix3()> ComputeLocalToWorldNormalMatrix = [&]() -> Matrix3
         {
             const Matrix4& ModelMatrix = GetWorldSpaceMatrix();
             return Math::Transpose(Math::Inverse(Matrix3(ModelMatrix)));
@@ -218,6 +218,7 @@ namespace Nova
             OnChanged.BroadcastChecked();
         }
 
+        // This creates a gimbal lock bug
         Vector3 EulerAngles = m_Rotation.ToEulerDegrees();
         if(UI::DragVector3<f32>("Rotation", EulerAngles, 0.01f, 0, 0, "%.2f"))
         {

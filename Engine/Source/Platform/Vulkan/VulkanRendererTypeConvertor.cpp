@@ -111,17 +111,17 @@ namespace Nova
         throw;
     }
 
-    VkShaderStageFlagBits VulkanRendererTypeConvertor::ConvertShaderStage(const ShaderStage Stage) const
+    VkShaderStageFlagBits VulkanRendererTypeConvertor::ConvertShaderStage(const ShaderStageFlagBits Stage) const
     {
         switch (Stage) {
-        case ShaderStage::None: throw;
-        case ShaderStage::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
-        case ShaderStage::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case ShaderStage::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case ShaderStage::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
-        case ShaderStage::RayGeneration: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-        case ShaderStage::Tessellation: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
-        case ShaderStage::Mesh: return VK_SHADER_STAGE_MESH_BIT_EXT;
+        case ShaderStageFlagBits::None: throw;
+        case ShaderStageFlagBits::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderStageFlagBits::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case ShaderStageFlagBits::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderStageFlagBits::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+        case ShaderStageFlagBits::RayGeneration: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        case ShaderStageFlagBits::Tessellation: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        case ShaderStageFlagBits::Mesh: return VK_SHADER_STAGE_MESH_BIT_EXT;
         default: throw;
         }
 

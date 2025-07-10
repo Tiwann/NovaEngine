@@ -1,49 +1,74 @@
 ﻿#pragma once
 #include "SlangConversions.h"
+#include "Containers/Map.h"
+#include "Rendering/DescriptorType.h"
+#include <vulkan/vulkan.h>
+#include <slang/slang.h>
 
 namespace Nova
 {
-    VkDescriptorType ConvertSlangDescriptorType(const slang::BindingType BindingType)
+
+
+    static Map<slang::BindingType, VkDescriptorType> ToVulkanDescriptorTypeMap
     {
-        switch (BindingType)
-        {
-        case slang::BindingType::PushConstant:
-        default: throw;
-        case slang::BindingType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
-        case slang::BindingType::CombinedTextureSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        case slang::BindingType::Texture: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        case slang::BindingType::MutableTexture: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        case slang::BindingType::TypedBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-        case slang::BindingType::MutableTypedBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-        case slang::BindingType::RawBuffer:
-        case slang::BindingType::MutableRawBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        case slang::BindingType::InputRenderTarget: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-        case slang::BindingType::InlineUniformData: return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK_EXT;
-        case slang::BindingType::RayTracingAccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-        case slang::BindingType::ConstantBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        }
+        { slang::BindingType::Sampler, VK_DESCRIPTOR_TYPE_SAMPLER },
+        { slang::BindingType::CombinedTextureSampler, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER },
+        { slang::BindingType::Texture, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE },
+        { slang::BindingType::MutableTexture, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE },
+        { slang::BindingType::TypedBuffer, VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER },
+        { slang::BindingType::MutableTypedBuffer, VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER },
+        { slang::BindingType::RawBuffer, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER },
+        { slang::BindingType::MutableRawBuffer, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER },
+        { slang::BindingType::InputRenderTarget, VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT },
+        { slang::BindingType::InlineUniformData, VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK_EXT },
+        { slang::BindingType::RayTracingAccelerationStructure, VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR },
+        { slang::BindingType::ConstantBuffer, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER },
+    };
+
+    static Map<slang::BindingType, DescriptorType> ToNovaDescriptorTypeMap
+    {
+            { slang::BindingType::Sampler, DescriptorType::Sampler },
+            { slang::BindingType::CombinedTextureSampler, DescriptorType::CombinedImageSampler },
+            { slang::BindingType::Texture, DescriptorType::SampledImage },
+            { slang::BindingType::MutableTexture, DescriptorType::StorageImage },
+            { slang::BindingType::TypedBuffer, DescriptorType::UniformTexelBuffer },
+            { slang::BindingType::MutableTypedBuffer, DescriptorType::StorageTexelBuffer },
+            { slang::BindingType::RawBuffer, DescriptorType::StorageBuffer },
+            { slang::BindingType::MutableRawBuffer, DescriptorType::StorageBuffer },
+            { slang::BindingType::InputRenderTarget, DescriptorType::InputAttachment },
+            { slang::BindingType::InlineUniformData, DescriptorType::InlineUniformBlock },
+            { slang::BindingType::RayTracingAccelerationStructure, DescriptorType::AccelerationStructure },
+            { slang::BindingType::ConstantBuffer, DescriptorType::UniformBuffer },
+        };
+
+    static Map<SlangStage, VkShaderStageFlags> ToVulkanSlangStage
+    {
+        { SLANG_STAGE_NONE, 0 },
+        { SLANG_STAGE_VERTEX, VK_SHADER_STAGE_VERTEX_BIT },
+        { SLANG_STAGE_GEOMETRY, VK_SHADER_STAGE_GEOMETRY_BIT },
+        { SLANG_STAGE_FRAGMENT, VK_SHADER_STAGE_FRAGMENT_BIT },
+        { SLANG_STAGE_COMPUTE, VK_SHADER_STAGE_COMPUTE_BIT },
+        { SLANG_STAGE_RAY_GENERATION, VK_SHADER_STAGE_RAYGEN_BIT_KHR },
+        { SLANG_STAGE_INTERSECTION, VK_SHADER_STAGE_INTERSECTION_BIT_KHR },
+        { SLANG_STAGE_ANY_HIT, VK_SHADER_STAGE_ANY_HIT_BIT_KHR },
+        { SLANG_STAGE_CLOSEST_HIT, VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR },
+        { SLANG_STAGE_MISS, VK_SHADER_STAGE_MISS_BIT_KHR },
+        { SLANG_STAGE_CALLABLE, VK_SHADER_STAGE_CALLABLE_BIT_KHR },
+        { SLANG_STAGE_MESH, VK_SHADER_STAGE_MESH_BIT_EXT },
+    };
+
+    VkDescriptorType ToVulkanDescriptorType(const slang::BindingType BindingType)
+    {
+        return ToVulkanDescriptorTypeMap[BindingType];
     }
 
-    VkShaderStageFlags ConvertSlangShaderStage(const SlangStage Stage)
+    VkShaderStageFlags ToVulkanShaderStage(const SlangStage Stage)
     {
-        switch (Stage)
-        {
-        case SLANG_STAGE_NONE: throw;
-        case SLANG_STAGE_VERTEX: return VK_SHADER_STAGE_VERTEX_BIT;
-        case SLANG_STAGE_HULL: throw;
-        case SLANG_STAGE_DOMAIN: throw;
-        case SLANG_STAGE_GEOMETRY: return VK_SHADER_STAGE_GEOMETRY_BIT;
-        case SLANG_STAGE_FRAGMENT: return VK_SHADER_STAGE_FRAGMENT_BIT;
-        case SLANG_STAGE_COMPUTE: return VK_SHADER_STAGE_COMPUTE_BIT;
-        case SLANG_STAGE_RAY_GENERATION: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-        case SLANG_STAGE_INTERSECTION: return VK_SHADER_STAGE_INTERSECTION_BIT_KHR;
-        case SLANG_STAGE_ANY_HIT: return VK_SHADER_STAGE_ANY_HIT_BIT_KHR;
-        case SLANG_STAGE_CLOSEST_HIT: return VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
-        case SLANG_STAGE_MISS: return VK_SHADER_STAGE_MISS_BIT_KHR;
-        case SLANG_STAGE_CALLABLE: return VK_SHADER_STAGE_CALLABLE_BIT_KHR;
-        case SLANG_STAGE_MESH: return VK_SHADER_STAGE_MESH_BIT_EXT;
-        case SLANG_STAGE_AMPLIFICATION: throw;
-        default: throw;
-        }
+        return ToVulkanSlangStage[Stage];
+    }
+
+    DescriptorType ToNovaDescriptorType(const slang::BindingType BindingType)
+    {
+        return ToNovaDescriptorTypeMap[BindingType];
     }
 }

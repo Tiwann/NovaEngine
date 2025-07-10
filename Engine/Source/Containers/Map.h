@@ -65,6 +65,14 @@ namespace Nova
             return -1;
         }
 
+        KeyType GetKey(const ValueType& Value) const
+        {
+            SizeType Index = FindKey(Value);
+            if (Index == -1)
+                return {};
+            return m_Data[Index].Key;
+        }
+
         bool Contains(const KeyType& Key) const
         {
             return FindKey(Key) != -1ULL;

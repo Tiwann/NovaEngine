@@ -1,5 +1,7 @@
 ﻿#include "Font.h"
 #include "Rendering/Texture2D.h"
+#include "Application.h"
+#include "Log.h"
 
 #include <msdfgen.h>
 #include <msdfgen-ext.h>
@@ -7,8 +9,6 @@
 #include <stb/stb_image.h>
 #include <stb/stb_image_write.h>
 
-#include "Application.h"
-#include "Log.h"
 
 namespace Nova
 {
@@ -73,14 +73,13 @@ namespace Nova
         for (msdf_atlas::GlyphGeometry& Glyph : m_FontData.Glyphs)
             Glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, MaxCornerAngle, 0);
 
+        constexpr i32 Dimension = 256, Width = Dimension, Height = Dimension;
         msdf_atlas::TightAtlasPacker Packer;
         Packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::POWER_OF_TWO_SQUARE);
-        Packer.setDimensions(1024, 1024);
+        Packer.setDimensions(256, 256);
         Packer.setPixelRange(2.0);
         Packer.setMiterLimit(1.0);
         Packer.pack(m_FontData.Glyphs.data(), m_FontData.Glyphs.size());
-        int Width = 0, Height = 0;
-        Packer.getDimensions(Width, Height);
 
         Renderer* Renderer = g_Application->GetRenderer();
 

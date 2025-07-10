@@ -16,7 +16,7 @@ namespace Nova
         VkPolygonMode ConvertPolygonMode(const PolygonMode Mode) const override;
         VkPrimitiveTopology ConvertPrimitiveTopology(const PrimitiveTopology Topology) const override;
         VkSamplerAddressMode ConvertSamplerAddressMode(const SamplerAddressMode Address) const override;
-        VkShaderStageFlagBits ConvertShaderStage(const ShaderStage Stage) const override;
+        VkShaderStageFlagBits ConvertShaderStage(const ShaderStageFlagBits Stage) const override;
         VkCompareOp ConvertCompareOperation(const CompareOperation Operation) const override;
         VkFormat ConvertFormat(const Format Format) const override;
         VkPresentModeKHR ConvertPresentMode(const PresentMode PresentMode) const override;

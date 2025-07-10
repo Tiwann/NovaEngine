@@ -45,6 +45,7 @@ namespace Nova
         bool DynamicRendering = false;
         Shader* ShaderProgram = nullptr;
         bool MultisampleEnable = false;
+        void* VulkanPipelineLayout = nullptr;
     };
 
     class Renderer;

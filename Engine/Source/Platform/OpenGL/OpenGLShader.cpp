@@ -66,9 +66,9 @@ namespace Nova
             return false;
         }
 
-        FindShaderStage("VertexMain", ShaderStage::Vertex);
-        FindShaderStage("GeometryMain", ShaderStage::Geometry);
-        FindShaderStage("FragmentMain", ShaderStage::Fragment);
+        FindShaderStage("VertexMain", ShaderStageFlagBits::Vertex);
+        FindShaderStage("GeometryMain", ShaderStageFlagBits::Geometry);
+        FindShaderStage("FragmentMain", ShaderStageFlagBits::Fragment);
 
         if (m_ShaderModules.IsEmpty())
         {
@@ -153,22 +153,22 @@ namespace Nova
         glDeleteProgram(m_ProgramHandle);
     }
 
-    static SlangStage ConvertShaderStage(ShaderStage Stage)
+    static SlangStage ConvertShaderStage(ShaderStageFlagBits Stage)
     {
         switch (Stage) {
-        case ShaderStage::None: return SLANG_STAGE_FRAGMENT;
-        case ShaderStage::Vertex: return SLANG_STAGE_VERTEX;
-        case ShaderStage::Geometry: return SLANG_STAGE_GEOMETRY;
-        case ShaderStage::Fragment: return SLANG_STAGE_FRAGMENT;
-        case ShaderStage::Compute: return SLANG_STAGE_COMPUTE;
-        case ShaderStage::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
-        case ShaderStage::Tessellation: return SLANG_STAGE_HULL;
-        case ShaderStage::Mesh: return SLANG_STAGE_MESH;
+        case ShaderStageFlagBits::None: return SLANG_STAGE_FRAGMENT;
+        case ShaderStageFlagBits::Vertex: return SLANG_STAGE_VERTEX;
+        case ShaderStageFlagBits::Geometry: return SLANG_STAGE_GEOMETRY;
+        case ShaderStageFlagBits::Fragment: return SLANG_STAGE_FRAGMENT;
+        case ShaderStageFlagBits::Compute: return SLANG_STAGE_COMPUTE;
+        case ShaderStageFlagBits::RayGeneration: return SLANG_STAGE_RAY_GENERATION;
+        case ShaderStageFlagBits::Tessellation: return SLANG_STAGE_HULL;
+        case ShaderStageFlagBits::Mesh: return SLANG_STAGE_MESH;
         default: throw;
         }
     }
 
-    bool OpenGLShader::FindShaderStage(const StringView& Name, ShaderStage Stage)
+    bool OpenGLShader::FindShaderStage(const StringView& Name, ShaderStageFlagBits Stage)
     {
         slang::IEntryPoint* EntryPoint = nullptr;
         if (SLANG_FAILED(m_Module->findAndCheckEntryPoint(*Name, ConvertShaderStage(Stage), &EntryPoint, nullptr)))

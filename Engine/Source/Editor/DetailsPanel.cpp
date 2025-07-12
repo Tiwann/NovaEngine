@@ -27,7 +27,7 @@ namespace Nova
             char Buffer[256] = {};
             std::copy(SelectedEntity->GetName().begin(), SelectedEntity->GetName().end(), Buffer);
 
-            ImGui::PushID(SelectedEntity->GetGuid());
+            ImGui::PushID(SelectedEntity->GetUUID());
             ImGui::PushItemWidth(200);
             if (ImGui::InputText("##", Buffer, 256, ImGuiInputTextFlags_EnterReturnsTrue))
             {
@@ -41,7 +41,7 @@ namespace Nova
             ImGui::Checkbox("Enabled", &SelectedEntity->m_Enabled);
             ImGui::PopID();
 
-            UI::Text(StringFormat("UUID: {}", SelectedEntity->GetGuid().GetString()));
+            UI::Text(StringFormat("UUID: {}", SelectedEntity->GetUUID().GetString()));
             static bool ShowContextMenu;
             SelectedEntity->ForEach([&IO](Component* Component)
             {

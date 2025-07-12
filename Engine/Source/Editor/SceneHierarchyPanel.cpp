@@ -24,7 +24,8 @@ namespace Nova
             return;
         
         const char* Name = Entity->GetName().IsEmpty() ? "##" : *Entity->GetName();
-        
+
+        ImGui::PushID(Entity->GetUUID());
         if(ImGui::TreeNode(Name))
         {
             if(Entity->HasChildren())
@@ -34,6 +35,7 @@ namespace Nova
             }
             ImGui::TreePop();
         }
+        ImGui::PopID();
     }
     
     void SceneHierarchyPanel::OnInspectorGUI(const ImGuiIO& IO)

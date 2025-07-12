@@ -58,7 +58,7 @@ namespace Nova
     {
         for(const Entity* Entity : m_Entities)
         {
-            EntityHandle Handle = Entity->GetGuid();
+            EntityHandle Handle = Entity->GetUUID();
             DestroyEntity(Handle);
         }
         m_PhysicsWorld2D.OnDestroy();
@@ -71,7 +71,7 @@ namespace Nova
         Entity->m_Enabled = true;
         Entity->OnInit();
         m_Entities.Add(Entity);
-        return Entity->GetGuid();
+        return Entity->GetUUID();
     }
 
     bool Scene::DestroyEntity(EntityHandle& Handle)
@@ -90,7 +90,7 @@ namespace Nova
     {
         for(Entity* Entity : m_Entities)
         {
-            const EntityHandle Handle = Entity->GetGuid();
+            const EntityHandle Handle = Entity->GetUUID();
             Delegate.Call(Handle);
         }
     }

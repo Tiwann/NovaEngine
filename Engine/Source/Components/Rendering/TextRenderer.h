@@ -64,7 +64,7 @@ namespace Nova
         void UpdateResources();
         void GetTextQuads(Array<Vertex>& OutVertices, Array<u32>& OutIndices);
     private:
-        String m_Text = "Enter Text...";
+        String m_Text = "Éh ça. user@mail.com. #éè";
         bool m_ResourcesDirty = false;
         Font* m_Font = nullptr;
         TextStyleFlags m_StyleFlags = TextStyleFlagBits::None;

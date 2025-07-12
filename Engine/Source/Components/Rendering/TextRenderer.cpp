@@ -16,6 +16,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Containers/StringConversion.h"
 #include "Editor/Font.h"
 #include "Platform/Vulkan/VulkanRenderer.h"
 #include "Platform/Vulkan/VulkanShader.h"
@@ -186,7 +187,7 @@ namespace Nova
 
 
         const Matrix4& WorldSpaceMatrix = EntityTransform->GetWorldSpaceMatrix();
-        
+
         const SceneData SceneDataInstance
         {
             WorldSpaceMatrix,
@@ -213,7 +214,7 @@ namespace Nova
 
         static char Buffer[256] = {0};
 
-        Memory::Memzero(Buffer);
+        Memory::Memset(Buffer, 0, sizeof(Buffer));
         memcpy(Buffer, m_Text.Data(), m_Text.Size());
 
         if (ImGui::InputTextMultiline("Text", Buffer, ArrayCount(Buffer), ImVec2(0, 0), 0, nullptr, this))
@@ -350,9 +351,11 @@ namespace Nova
             break;
         }
 
-        for (size_t Index = 0; Index < m_Text.Count(); Index++)
+        WideString WideText = StringConvertToWide(m_Text);
+
+        for (size_t Index = 0; Index < WideText.Count(); Index++)
         {
-            const String::CharacterType Character = m_Text[Index];
+            const WideString::CharacterType Character = m_Text[Index];
 
             const GlyphGeometry* Glyph = FontGeometry.getGlyph(Character) ? FontGeometry.getGlyph(Character) : FontGeometry.getGlyph('?') ? FontGeometry.getGlyph('?') : nullptr;
             if (!Glyph) continue;

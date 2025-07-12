@@ -17,7 +17,7 @@ namespace Nova
         
         Array<UUID> EntitiesGuids;
         for (const Entity* Entity : Entities)
-            EntitiesGuids.Add(Entity->GetGuid());
+            EntitiesGuids.Add(Entity->GetUUID());
         
         for (const UUID& ID : EntitiesGuids)
         {
@@ -36,7 +36,7 @@ namespace Nova
         const Array<Entity*> Entities = Scene->GetEntities();
         Entity** Result = Entities.Single([this](const Entity* Entity)
         {
-            return m_EntityID == Entity->GetGuid();
+            return m_EntityID == Entity->GetUUID();
         });
         return Result ? *Result : nullptr;
     }

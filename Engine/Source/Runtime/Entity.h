@@ -130,7 +130,7 @@ namespace Nova
                 Delegate(Component);
         }
 
-        UUID GetGuid() const { return m_UUID; }
+        UUID GetUUID() const { return m_UUID; }
     
         bool IsEnabled() const;
         void SetEnabled(bool Enabled);

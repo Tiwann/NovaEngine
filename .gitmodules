@@ -1,0 +1,6 @@
+[submodule "Engine/Vendor/miniaudio"]
+	path = Engine/Vendor/miniaudio
+	url = git@github.com:mackron/miniaudio.git
+[submodule "Engine/Vendor/glfw"]
+	path = Engine/Vendor/glfw
+	url = git@github.com:glfw/glfw.git

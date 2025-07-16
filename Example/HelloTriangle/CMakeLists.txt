@@ -1,4 +1,4 @@
-﻿file(GLOB_RECURSE SOURCE *.cpp *.h)
+﻿file(GLOB_RECURSE SOURCE Source/*.cpp Source/*.h)
 
 add_executable(HelloTriangle)
 set_target_properties(HelloTriangle PROPERTIES CXX_STANDARD 23)

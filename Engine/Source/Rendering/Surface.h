@@ -27,6 +27,8 @@ namespace Nova::Rendering
 
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
+
+        bool IsAvailable() const;
     protected:
         Device* m_Device = nullptr;
         Window* m_Window = nullptr;

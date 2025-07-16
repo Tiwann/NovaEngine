@@ -28,7 +28,7 @@ namespace Nova
         Color WithGreen(float green);
         Color WithBlue(float blue);
 
-        static Color Lerp(Color A, Color B, float Alpha);
+        static Color Lerp(Color a, Color b, float t);
 
         static Color Red;
         static Color Green;

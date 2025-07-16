@@ -75,6 +75,7 @@ namespace Nova::Vulkan
         for (size_t i = 0; i < GetImageCount(); i++)
         {
             vkDestroyImageView(deviceHandle, m_ImageViews[i], nullptr);
+
             VkImageViewCreateInfo ImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
             ImageViewCreateInfo.format = Convert<Format, VkFormat>(m_ImageFormat);
@@ -94,6 +95,13 @@ namespace Nova::Vulkan
 
     void Swapchain::Destroy()
     {
+        const Device* device = dynamic_cast<Device*>(m_Device);
+        const VkDevice deviceHandle = device->GetHandle();
+
+        for (size_t i = 0; i < GetImageCount(); i++)
+            vkDestroyImageView(deviceHandle, m_ImageViews[i], nullptr);
+
+        vkDestroySwapchainKHR(deviceHandle, m_Handle, nullptr);
     }
 
     bool Swapchain::Recreate()

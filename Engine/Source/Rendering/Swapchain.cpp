@@ -1,8 +1,5 @@
 ﻿#include "Swapchain.h"
-
 #include "Surface.h"
-#include "Runtime/DesktopWindow.h"
-#include "Runtime/Window.h"
 
 namespace Nova::Rendering
 {
@@ -48,15 +45,6 @@ namespace Nova::Rendering
 
     bool Swapchain::IsValid() const
     {
-        const Window* window = m_Surface->GetWindow();
-        const DesktopWindow* desktopWindow = dynamic_cast<const DesktopWindow*>(window);
-        if (desktopWindow)
-        {
-            const bool minimized = desktopWindow->IsMinimized();
-            return m_Valid && !minimized;
-        } else
-        {
-            return m_Valid;
-        }
+        return m_Valid;
     }
 }

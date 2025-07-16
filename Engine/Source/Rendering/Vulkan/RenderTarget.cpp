@@ -187,6 +187,7 @@ namespace Nova::Vulkan
         const VkDevice deviceHandle = device->GetHandle();
         const VmaAllocator allocatorHandle = device->GetAllocator();
 
+        device->WaitIdle();
         for (size_t imageIndex = 0; imageIndex < swapchain->GetImageCount(); imageIndex++)
         {
             vkDestroyImageView(deviceHandle, m_ColorImageViews[imageIndex], nullptr);
@@ -277,6 +278,27 @@ namespace Nova::Vulkan
             VK_PIPELINE_STAGE_TRANSFER_BIT,
             0, 0, nullptr, 0, nullptr, 1, &colorBarrier
         );
+    }
+
+    bool RenderTarget::Resize(const uint32_t newWidth, const uint32_t newHeight)
+    {
+        if (m_Width == newWidth && m_Height == newHeight)
+            return true;
+
+        if (newWidth == 0 || newHeight == 0)
+            return false;
+
+        Destroy();
+
+        Rendering::RenderTargetCreateInfo createInfo;
+        createInfo.device = m_Device;
+        createInfo.width = newWidth;
+        createInfo.height = newHeight;
+        createInfo.depth = m_Depth;
+        createInfo.colorFormat = m_ColorFormat;
+        createInfo.depthFormat = m_DepthFormat;
+        createInfo.sampleCount = m_SampleCount;
+        return Initialize(createInfo);
     }
 
     void RenderTarget::Clear(const Color& color)

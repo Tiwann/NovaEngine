@@ -27,7 +27,7 @@ namespace Nova
         ~Window() override = default;
 
         virtual bool Initialize(const WindowCreateInfo& createInfo) = 0;
-        virtual void Update() = 0;
+        virtual void PollEvents() = 0;
         virtual void Destroy() = 0;
 
         void SetTitle(const String& title);

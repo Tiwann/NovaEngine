@@ -112,7 +112,7 @@ namespace Nova
         return true;
     }
 
-    void DesktopWindow::Update()
+    void DesktopWindow::PollEvents()
     {
         for(auto& [key, state] : m_KeyStates)
         {

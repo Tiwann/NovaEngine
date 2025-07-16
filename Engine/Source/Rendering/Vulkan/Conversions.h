@@ -1,6 +1,14 @@
 ﻿#pragma once
 #include <vulkan/vulkan.h>
 
+#include "Rendering/BlendFactor.h"
+#include "Rendering/BlendOperation.h"
+#include "Rendering/CompareOperation.h"
+#include "Rendering/CullMode.h"
+#include "Rendering/FrontFace.h"
+#include "Rendering/PolygonMode.h"
+#include "Rendering/PrimitiveTopology.h"
+#include "Rendering/SamplerAddressMode.h"
 #include "Runtime/Format.h"
 
 namespace Nova::Vulkan
@@ -72,5 +80,128 @@ namespace Nova::Vulkan
         case Filter::Linear: return VK_FILTER_LINEAR;
         default: return VK_FILTER_NEAREST;
         }
+    }
+
+    template<>
+    inline VkPrimitiveTopology Convert<PrimitiveTopology, VkPrimitiveTopology>(const PrimitiveTopology& value)
+    {
+        switch (value)
+        {
+        case PrimitiveTopology::PointList: return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case PrimitiveTopology::LineList: return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case PrimitiveTopology::LineStrip: return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case PrimitiveTopology::TriangleList: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case PrimitiveTopology::TriangleStrip: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PrimitiveTopology::TriangleFan: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkCullModeFlags Convert<CullMode, VkCullModeFlags>(const CullMode& value)
+    {
+        switch (value)
+        {
+        case CullMode::FrontFace:           return VK_CULL_MODE_FRONT_BIT;
+        case CullMode::BackFace:            return VK_CULL_MODE_BACK_BIT;
+        case CullMode::FrontAndBackFaces:   return VK_CULL_MODE_FRONT_BIT | VK_CULL_MODE_BACK_BIT;
+        case CullMode::None:                return VK_CULL_MODE_NONE;
+        default: return VK_CULL_MODE_NONE;
+        }
+    }
+
+    template<>
+    inline VkFrontFace Convert<FrontFace, VkFrontFace>(const FrontFace& value)
+    {
+        switch (value)
+        {
+        case FrontFace::Clockwise: return VK_FRONT_FACE_CLOCKWISE;
+        case FrontFace::CounterClockwise: return VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkPolygonMode Convert<PolygonMode, VkPolygonMode>(const PolygonMode& value)
+    {
+        switch (value)
+        {
+        case PolygonMode::Fill:; return VK_POLYGON_MODE_FILL;
+        case PolygonMode::Line: return VK_POLYGON_MODE_LINE;
+        case PolygonMode::Point: return VK_POLYGON_MODE_POINT;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkCompareOp Convert<CompareOperation, VkCompareOp>(const CompareOperation& value)
+    {
+        switch (value)
+        {
+        case CompareOperation::Always:         return VK_COMPARE_OP_ALWAYS;
+        case CompareOperation::Never:          return VK_COMPARE_OP_NEVER;
+        case CompareOperation::Less:           return VK_COMPARE_OP_LESS;
+        case CompareOperation::LessOrEqual:    return VK_COMPARE_OP_LESS_OR_EQUAL;
+        case CompareOperation::Equal:          return VK_COMPARE_OP_EQUAL;
+        case CompareOperation::NotEqual:       return VK_COMPARE_OP_NOT_EQUAL;
+        case CompareOperation::Greater:        return VK_COMPARE_OP_GREATER;
+        case CompareOperation::GreaterOrEqual: return VK_COMPARE_OP_GREATER_OR_EQUAL;
+        }
+        throw;
+    }
+
+    template<>
+    inline VkSamplerAddressMode Convert<SamplerAddressMode, VkSamplerAddressMode>(const SamplerAddressMode& value)
+    {
+        switch (value)
+        {
+        case SamplerAddressMode::Repeat: return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+        case SamplerAddressMode::MirroredRepeat: return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+        case SamplerAddressMode::ClampToEdge: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        case SamplerAddressMode::ClampToBorder: return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+        case SamplerAddressMode::MirrorClampToEdge: return VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+        }
+        throw;
+    }
+
+    template<>
+    inline VkBlendOp Convert<BlendOperation, VkBlendOp>(const BlendOperation& value)
+    {
+        switch (value)
+        {
+        case BlendOperation::Add: return VK_BLEND_OP_ADD;
+        case BlendOperation::Min: return VK_BLEND_OP_MIN;
+        case BlendOperation::Max: return VK_BLEND_OP_MAX;
+        case BlendOperation::Subtract: return VK_BLEND_OP_SUBTRACT;
+        case BlendOperation::ReverseSubtract: return VK_BLEND_OP_REVERSE_SUBTRACT;
+        }
+        throw;
+    }
+
+    template<>
+    inline VkBlendFactor Convert<BlendFactor, VkBlendFactor>(const BlendFactor& value)
+    {
+        switch (value) {
+        case BlendFactor::Zero: return VK_BLEND_FACTOR_ZERO;
+        case BlendFactor::One: return VK_BLEND_FACTOR_ONE;
+        case BlendFactor::SourceColor: return VK_BLEND_FACTOR_SRC_COLOR;
+        case BlendFactor::OneMinusSourceColor: return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+        case BlendFactor::DestColor: return VK_BLEND_FACTOR_DST_COLOR;
+        case BlendFactor::OneMinusDestColor: return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+        case BlendFactor::SourceAlpha: return VK_BLEND_FACTOR_SRC_ALPHA;
+        case BlendFactor::OneMinusSourceAlpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor::DestAlpha: return VK_BLEND_FACTOR_DST_ALPHA;
+        case BlendFactor::OneMinusDestAlpha: return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        case BlendFactor::ConstantColor: return VK_BLEND_FACTOR_CONSTANT_COLOR;
+        case BlendFactor::OnMinusConstantColor: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::ConstantAlpha: return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+        case BlendFactor::OneMinusConstantAlpha: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+        case BlendFactor::SourceAlphaSaturated: return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+        case BlendFactor::Source1Color: return VK_BLEND_FACTOR_SRC1_COLOR;
+        case BlendFactor::OneMinusSource1Color: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+        case BlendFactor::Source1Alpha: return VK_BLEND_FACTOR_SRC1_ALPHA;
+        case BlendFactor::OneMinusSource1Alpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        }
+        throw;
     }
 }

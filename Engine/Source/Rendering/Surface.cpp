@@ -1,4 +1,5 @@
 ﻿#include "Surface.h"
+#include "Runtime/DesktopWindow.h"
 #include "Runtime/Window.h"
 
 namespace Nova::Rendering
@@ -21,5 +22,16 @@ namespace Nova::Rendering
     uint32_t Surface::GetHeight() const
     {
         return m_Window->GetHeight();
+    }
+
+    bool Surface::IsAvailable() const
+    {
+        if (const DesktopWindow* desktopWindow = dynamic_cast<DesktopWindow*>(m_Window))
+        {
+            if (desktopWindow->IsMinimized())
+                return false;
+        }
+
+        return true;
     }
 }

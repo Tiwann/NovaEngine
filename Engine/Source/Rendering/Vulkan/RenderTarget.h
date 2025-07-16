@@ -16,6 +16,7 @@ namespace Nova::Vulkan
         void BeginRendering(Rendering::CommandBuffer& commandBuffer) override;
         void EndRendering() override;
 
+        bool Resize(uint32_t newWidth, uint32_t newHeight) override;
         void Clear(const Color& color) override;
         void Clear(float depth, uint8_t stencil) override;
 

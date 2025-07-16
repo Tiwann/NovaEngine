@@ -31,6 +31,7 @@ namespace Nova::Rendering
         virtual void BeginRendering(CommandBuffer& commandBuffer) = 0;
         virtual void EndRendering() = 0;
 
+        virtual bool Resize(uint32_t newX, uint32_t newY) = 0;
         virtual void Clear(const Color& color) = 0;
         virtual void Clear(float depth, uint8_t stencil) = 0;
 

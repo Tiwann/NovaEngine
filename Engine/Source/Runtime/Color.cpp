@@ -67,9 +67,9 @@ namespace Nova
         return { r, g, blue, a };
     }
 
-    Color Color::Lerp(Color A, Color B, float Alpha)
+    Color Color::Lerp(const Color a, const Color b, float t)
     {
-        return {Math::Lerp(A.r, B.r, Alpha), Math::Lerp(A.g, B.g, Alpha), Math::Lerp(A.b, B.b, Alpha), Math::Lerp(A.a, B.a, Alpha)};
+        return {Math::Lerp(a.r, b.r, t), Math::Lerp(a.g, b.g, t), Math::Lerp(a.b, b.b, t), Math::Lerp(a.a, b.a, t)};
     }
 
     Color Color::Red        { 0xFF0000FF };

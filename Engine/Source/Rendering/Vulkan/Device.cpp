@@ -358,12 +358,28 @@ namespace Nova::Vulkan
 
     void Device::Destroy()
     {
+        for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
+        {
+            m_Frames[imageIndex].submitSemaphore.Destroy();
+            m_Frames[imageIndex].presentSemaphore.Destroy();
+            m_Frames[imageIndex].fence.Destroy();
+            m_Frames[imageIndex].commandBuffer.Free();
+        }
+
+        m_CommandPool.Destroy();
+        m_Swapchain.Destroy();
+        vmaDestroyAllocator(m_Allocator);
+        m_Surface.Destroy();
+        vkDestroyDevice(m_Handle, nullptr);
         vkDestroyInstance(m_Instance, nullptr);
     }
 
 
     bool Device::BeginFrame()
     {
+        if (!m_Surface.IsAvailable())
+            return false;
+
         if (!m_Swapchain.IsValid())
         {
             WaitIdle();
@@ -380,9 +396,7 @@ namespace Nova::Vulkan
         const Semaphore& presentSemaphore = m_Frames[m_CurrentFrameIndex].presentSemaphore;
         m_NewFrameIndex = m_Swapchain.AcquireNextImage(&presentSemaphore);
         if (m_NewFrameIndex == 0xFFFFFFFF)
-        {
             return false;
-        }
 
         CommandBuffer& commandBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
         if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))

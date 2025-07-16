@@ -6,12 +6,12 @@ namespace Nova
 {
     struct BlendFunction
     {
-        BlendFactor ColorSource;
-        BlendFactor ColorDest;
-        BlendOperation ColorOperation;
-        BlendFactor AlphaSource;
-        BlendFactor AlphaDest;
-        BlendOperation AlphaOperation;
+        BlendFactor colorSource;
+        BlendFactor colorDest;
+        BlendOperation colorOp;
+        BlendFactor alphaSource;
+        BlendFactor alphaDest;
+        BlendOperation alphaOp;
     };
 
     constexpr BlendFunction AlphaBlend = { BlendFactor::SourceAlpha,
@@ -21,7 +21,6 @@ namespace Nova
             BlendFactor::Zero,
             BlendOperation::Add };
 
-
     /*constexpr BlendFunction AdditiveBlend = { BlendFactor::SourceAlpha,
             BlendFactor::OneMinusSourceAlpha,
             BlendOperation::Add,
@@ -29,7 +28,7 @@ namespace Nova
             BlendFactor::Zero,
             BlendOperation::Add };*/
 
-    inline BlendFunction MakeBlendFunction(BlendFactor Source, BlendFactor Dest, BlendOperation Operation)
+    constexpr BlendFunction MakeBlendFunction(BlendFactor Source, BlendFactor Dest, BlendOperation Operation)
     {
         return { Source, Dest, Operation, Source, Dest, Operation };
     }

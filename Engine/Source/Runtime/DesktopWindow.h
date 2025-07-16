@@ -31,7 +31,7 @@ namespace Nova
     {
     public:
         bool Initialize(const WindowCreateInfo& createInfo) override;
-        void Update() override;
+        void PollEvents() override;
         void Destroy() override;
 
         GLFWwindow* GetHandle();

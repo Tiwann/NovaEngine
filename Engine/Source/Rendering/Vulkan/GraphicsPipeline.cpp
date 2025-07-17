@@ -9,7 +9,7 @@ namespace Nova::Vulkan
 {
     bool GraphicsPipeline::Initialize(const Rendering::GraphicsPipelineCreateInfo& createInfo)
     {
-        m_Device = dynamic_cast<Device*>(createInfo.device);
+        m_Device = static_cast<Device*>(createInfo.device);
         VkDevice deviceHandle = m_Device->GetHandle();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };

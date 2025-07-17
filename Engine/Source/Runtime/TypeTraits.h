@@ -4,10 +4,10 @@
 
 namespace Nova
 {
-    template<bool Val>
+    template<bool v>
     struct BooleanConstant
     {
-        static constexpr bool Value = Val;
+        static constexpr bool value = v;
     };
     
     struct TrueType : BooleanConstant<true> {};
@@ -47,7 +47,7 @@ namespace Nova
     
 
     template<typename T>
-    static inline constexpr bool IsIntegerValue = IsInteger<T>::Value;
+    static inline constexpr bool IsIntegerValue = IsInteger<T>::value;
 
 
     template<typename T>
@@ -60,7 +60,7 @@ namespace Nova
     struct IsFloatingPoint<double> : TrueType{};
 
     template<typename T>
-    static inline constexpr bool IsFloatingPointValue = IsFloatingPoint<T>::Value;
+    static inline constexpr bool IsFloatingPointValue = IsFloatingPoint<T>::value;
 
     template<typename T>
     static inline constexpr bool IsArithmeticValue = IsIntegerValue<T> || IsFloatingPointValue<T>;
@@ -79,7 +79,7 @@ namespace Nova
     struct IsVector<struct Vector4> : TrueType{};
 
     template<typename T>
-    static constexpr bool IsVectorValue = IsVector<T>::Value;
+    static constexpr bool IsVectorValue = IsVector<T>::value;
 
     template<typename T>
     struct IsMatrix : FalseType {};
@@ -100,22 +100,22 @@ namespace Nova
     struct IsQuaternion<struct Quaternion> : TrueType{};
 
     template<typename T>
-    static constexpr bool IsQuaternionValue = IsQuaternion<T>::Value;
+    static constexpr bool IsQuaternionValue = IsQuaternion<T>::value;
 
     template<typename T>
-    static constexpr bool IsMatrixValue = IsMatrix<T>::Value;
+    static constexpr bool IsMatrixValue = IsMatrix<T>::value;
     
     template<typename Base, typename Derived>
     struct IsBaseOf : BooleanConstant<__is_base_of(Base, Derived)> {};
 
     template<typename Base, typename Derived>
-    static constexpr bool IsBaseOfValue = IsBaseOf<Base, Derived>::Value;
+    static constexpr bool IsBaseOfValue = IsBaseOf<Base, Derived>::value;
 
     template<typename T>
     struct IsEnum : BooleanConstant<__is_enum(T)> {};
 
     template<typename T>
-    static constexpr bool IsEnumValue = IsEnum<T>::Value;
+    static constexpr bool IsEnumValue = IsEnum<T>::value;
     
     template<typename T>
     struct IsCharacter : FalseType {};
@@ -136,7 +136,7 @@ namespace Nova
     struct IsCharacter<wchar_t> : TrueType {};
     
     template<typename T>
-    static inline constexpr bool IsCharacterValue = IsCharacter<T>::Value;
+    static inline constexpr bool IsCharacterValue = IsCharacter<T>::value;
 
 
     template <typename, typename>
@@ -155,7 +155,7 @@ namespace Nova
     struct IsColor<Color> : TrueType {};
 
     template<typename T>
-    static constexpr bool IsColorValue = IsColor<T>::Value;
+    static constexpr bool IsColorValue = IsColor<T>::value;
 
     template<typename From, typename To>
     static constexpr bool IsConvertible = __is_convertible_to(From, To);

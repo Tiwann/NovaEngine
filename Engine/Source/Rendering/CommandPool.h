@@ -14,10 +14,12 @@ namespace Nova::Rendering
     typedef Flags<CommandPoolCreateFlagBits> CommandPoolCreateFlags;
 
     class Device;
+    class Queue;
 
     struct CommandPoolCreateInfo
     {
         Device* device;
+        Queue* queue;
         CommandPoolCreateFlags flags;
     };
 
@@ -32,6 +34,7 @@ namespace Nova::Rendering
 
         virtual bool Initialize(const CommandPoolCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
+        virtual void Reset() = 0;
     protected:
         Device* m_Device = nullptr;
     };

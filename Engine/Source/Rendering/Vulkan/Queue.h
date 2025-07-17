@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Containers/Array.h"
+#include "Rendering/Queue.h"
 #include <cstdint>
 
 typedef struct VkQueue_T* VkQueue;
@@ -11,12 +11,12 @@ namespace Nova::Vulkan
     class Fence;
     class Swapchain;
 
-    class Queue
+    class Queue : public Rendering::Queue
     {
     public:
-        void Submit(CommandBuffer* commandBuffer, Semaphore* waitSemaphore, Semaphore* signalSemaphore, Fence* fence = nullptr, uint32_t waitStagesMask = 0) const;
-        void Submit(const Array<CommandBuffer*>& commandBuffers, const Array<Semaphore*>& waitSemaphores, const Array<Semaphore*>& signalSemaphores, Fence* fence = nullptr, uint32_t waitStagesMask = 0) const;
-        bool Present(const Swapchain& swapchain, const Semaphore& waitSemaphore, uint32_t imageIndex);
+        void Submit(Rendering::CommandBuffer* commandBuffer, Rendering::Semaphore* waitSemaphore, Rendering::Semaphore* signalSemaphore, Rendering::Fence* fence = nullptr, uint32_t waitStagesMask = 0) const override;
+        void Submit(const Array<Rendering::CommandBuffer*>& commandBuffers, const Array<Rendering::Semaphore*>& waitSemaphores, const Array<Rendering::Semaphore*>& signalSemaphores, Rendering::Fence* fence, uint32_t waitStagesMask) const override;
+        bool Present(const Rendering::Swapchain& swapchain, const Rendering::Semaphore& waitSemaphore, uint32_t imageIndex) const override;
 
         VkQueue GetHandle() const;
         VkQueue* GetHandlePtr();

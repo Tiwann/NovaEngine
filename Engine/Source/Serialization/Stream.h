@@ -13,7 +13,7 @@ namespace Nova
         using SizeType = size_t;
         using OffsetType = off_t;
 
-        static constexpr SizeType EndOfFile = -1;
+        static constexpr SizeType EndOfFile = ~0;
 
         Stream() = default;
         explicit Stream(const OpenModeFlags openMode) : m_OpenMode(openMode) {}
@@ -43,9 +43,9 @@ namespace Nova
         SizeType ReadDouble(double& outDouble);
 
         template<typename Type>
-        SizeType ReadBuffer(Buffer<Type>& outBuffer, SizeType count)
+        SizeType ReadBuffer(BufferView<Type>& outBuffer, SizeType count)
         {
-            outBuffer = Buffer<Type>(count);
+            outBuffer = BufferView<Type>(count);
             return Read(outBuffer.Data(), count * sizeof(Type));
         }
 

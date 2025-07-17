@@ -1,15 +1,18 @@
 ﻿#pragma once
-#include <vulkan/vulkan.h>
-
 #include "Rendering/BlendFactor.h"
 #include "Rendering/BlendOperation.h"
 #include "Rendering/CompareOperation.h"
 #include "Rendering/CullMode.h"
+#include "Rendering/DescriptorType.h"
 #include "Rendering/FrontFace.h"
 #include "Rendering/PolygonMode.h"
 #include "Rendering/PrimitiveTopology.h"
 #include "Rendering/SamplerAddressMode.h"
+#include "Rendering/PresentMode.h"
+#include "Rendering/Filter.h"
 #include "Runtime/Format.h"
+
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
@@ -203,5 +206,37 @@ namespace Nova::Vulkan
         case BlendFactor::OneMinusSource1Alpha: return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
         }
         throw;
+    }
+
+    template<>
+    inline VkIndexType Convert<Format, VkIndexType>(const Format& value)
+    {
+        switch (value)
+        {
+        case Format::R32_UINT: return VK_INDEX_TYPE_UINT32;
+        case Format::R16_USHORT : return VK_INDEX_TYPE_UINT16;
+        case Format::R8_UNORM : return VK_INDEX_TYPE_UINT8;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkDescriptorType Convert<DescriptorType, VkDescriptorType>(const DescriptorType& value)
+    {
+        switch (value)
+        {
+        case DescriptorType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
+        case DescriptorType::CombinedImageSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case DescriptorType::SampledImage: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case DescriptorType::StorageImage: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        case DescriptorType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case DescriptorType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case DescriptorType::InputAttachment: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+        case DescriptorType::InlineUniformBlock: return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK;
+        case DescriptorType::AccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        case DescriptorType::StorageTexelBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+        case DescriptorType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+        default: throw;
+        }
     }
 }

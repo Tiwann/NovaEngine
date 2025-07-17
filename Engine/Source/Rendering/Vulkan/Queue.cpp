@@ -8,34 +8,39 @@
 
 namespace Nova::Vulkan
 {
-    void Queue::Submit(CommandBuffer* commandBuffer, Semaphore* waitSemaphore, Semaphore* signalSemaphore, Fence* fence, uint32_t waitStagesMask) const
+    void Queue::Submit(Rendering::CommandBuffer* commandBuffer, Rendering::Semaphore* waitSemaphore, Rendering::Semaphore* signalSemaphore, Rendering::Fence* fence, const uint32_t waitStagesMask) const
     {
+        const CommandBuffer* vkCmdBuff = (CommandBuffer*)commandBuffer;
+        const Semaphore* vkWaitSem = (Semaphore*)waitSemaphore;
+        const Semaphore* vkSignalSem = (Semaphore*)signalSemaphore;
+        const Fence* vkFence = (Fence*)fence;
+
         VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = commandBuffer->GetHandlePtr();
-        submitInfo.waitSemaphoreCount = waitSemaphore ? 1 : 0;
-        submitInfo.pWaitSemaphores = waitSemaphore ? waitSemaphore->GetHandlePtr() : nullptr;
-        submitInfo.signalSemaphoreCount = signalSemaphore ? 1 : 0;
-        submitInfo.pSignalSemaphores = signalSemaphore ? signalSemaphore->GetHandlePtr() : nullptr;
+        submitInfo.pCommandBuffers = vkCmdBuff->GetHandlePtr();
+        submitInfo.waitSemaphoreCount = vkWaitSem ? 1 : 0;
+        submitInfo.pWaitSemaphores = vkWaitSem ? vkWaitSem->GetHandlePtr() : nullptr;
+        submitInfo.signalSemaphoreCount = vkSignalSem ? 1 : 0;
+        submitInfo.pSignalSemaphores = vkSignalSem ? vkSignalSem->GetHandlePtr() : nullptr;
         submitInfo.pWaitDstStageMask = &waitStagesMask;
 
-        vkQueueSubmit(m_Handle, 1, &submitInfo, fence ? fence->GetHandle() : nullptr);
+        vkQueueSubmit(m_Handle, 1, &submitInfo, vkFence ? vkFence->GetHandle() : nullptr);
     }
 
-    void Queue::Submit(const Array<CommandBuffer*>& commandBuffers, const Array<Semaphore*>& waitSemaphores, const Array<Semaphore*>& signalSemaphores, Fence* fence, uint32_t waitStagesMask) const
+    void Queue::Submit(const Array<Rendering::CommandBuffer*>& commandBuffers, const Array<Rendering::Semaphore*>& waitSemaphores, const Array<Rendering::Semaphore*>& signalSemaphores, Rendering::Fence* fence, const uint32_t waitStagesMask) const
     {
         Array<VkCommandBuffer> cmdBuffs;
         Array<VkSemaphore> waitSems;
         Array<VkSemaphore> signalSems;
 
-        for (const CommandBuffer* commandBuffer : commandBuffers)
-            cmdBuffs.Add(commandBuffer->GetHandle());
+        for (const Rendering::CommandBuffer* commandBuffer : commandBuffers)
+            cmdBuffs.Add(((const CommandBuffer*)commandBuffer)->GetHandle());
 
-        for (const Semaphore* waitSemaphore : waitSemaphores)
-            waitSems.Add(waitSemaphore->GetHandle());
+        for (const Rendering::Semaphore* waitSemaphore : waitSemaphores)
+            waitSems.Add(((const Semaphore*)waitSemaphore)->GetHandle());
 
-        for (const Semaphore* signalSemaphore : signalSemaphores)
-            signalSems.Add(signalSemaphore->GetHandle());
+        for (const Rendering::Semaphore* signalSemaphore : signalSemaphores)
+            signalSems.Add(((const Semaphore*)signalSemaphore)->GetHandle());
 
         VkSubmitInfo submitInfo = { VK_STRUCTURE_TYPE_SUBMIT_INFO };
         submitInfo.commandBufferCount = cmdBuffs.Count();
@@ -46,17 +51,18 @@ namespace Nova::Vulkan
         submitInfo.pSignalSemaphores = signalSems.Data();
         submitInfo.pWaitDstStageMask = &waitStagesMask;
 
-        vkQueueSubmit(m_Handle, 1, &submitInfo, fence ? fence->GetHandle() : nullptr);
+        vkQueueSubmit(m_Handle, 1, &submitInfo, fence ? ((Fence*)fence)->GetHandle() : nullptr);
     }
 
-    bool Queue::Present(const Swapchain& swapchain, const Semaphore& waitSemaphore, const uint32_t imageIndex)
+    bool Queue::Present(const Rendering::Swapchain& swapchain, const Rendering::Semaphore& waitSemaphore, const uint32_t imageIndex) const
     {
+
         VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = swapchain.GetHandlePtr();
+        presentInfo.pSwapchains = ((Swapchain&)swapchain).GetHandlePtr();
         presentInfo.pImageIndices = &imageIndex;
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = waitSemaphore.GetHandlePtr();
+        presentInfo.pWaitSemaphores = ((Semaphore&)waitSemaphore).GetHandlePtr();
 
         if (vkQueuePresentKHR(m_Handle, &presentInfo) != VK_SUCCESS)
             return false;
@@ -78,7 +84,7 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    void Queue::SetIndex(uint32_t index)
+    void Queue::SetIndex(const uint32_t index)
     {
         m_Index = index;
     }

@@ -14,6 +14,7 @@ namespace Nova::Vulkan
     public:
         bool Initialize(const Rendering::CommandPoolCreateInfo& createInfo) override;
         void Destroy() override;
+        void Reset() override;
 
         VkCommandPool GetHandle();
         const VkCommandPool* GetHandle() const;

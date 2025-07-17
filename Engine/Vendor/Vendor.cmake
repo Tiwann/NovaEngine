@@ -1,4 +1,4 @@
-﻿find_package(Vulkan REQUIRED COMPONENTS volk)
+﻿find_package(Vulkan REQUIRED COMPONENTS volk slang)
 
 add_subdirectory(Vendor/miniaudio)
 

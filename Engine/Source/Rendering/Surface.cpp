@@ -26,7 +26,7 @@ namespace Nova::Rendering
 
     bool Surface::IsAvailable() const
     {
-        if (const DesktopWindow* desktopWindow = dynamic_cast<DesktopWindow*>(m_Window))
+        if (const DesktopWindow* desktopWindow = static_cast<DesktopWindow*>(m_Window))
         {
             if (desktopWindow->IsMinimized())
                 return false;

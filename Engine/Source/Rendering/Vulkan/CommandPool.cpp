@@ -7,12 +7,12 @@ namespace Nova::Vulkan
 {
     bool CommandPool::Initialize(const Rendering::CommandPoolCreateInfo& createInfo)
     {
-        Device* device = dynamic_cast<Device*>(createInfo.device);
+        Device* device = static_cast<Device*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
-        const Queue* graphicsQueue = device->GetGraphicsQueue();
+
         VkCommandPoolCreateInfo poolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         poolCreateInfo.flags = createInfo.flags;
-        poolCreateInfo.queueFamilyIndex = graphicsQueue->GetIndex();
+        poolCreateInfo.queueFamilyIndex = ((Queue*)createInfo.queue)->GetIndex();
 
         if (vkCreateCommandPool(deviceHandle, &poolCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;
@@ -25,6 +25,12 @@ namespace Nova::Vulkan
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
         vkDestroyCommandPool(deviceHandle, m_Handle, nullptr);
+    }
+
+    void CommandPool::Reset()
+    {
+        const VkDevice deviceHandle = m_Device->GetHandle();
+        vkResetCommandPool(deviceHandle, m_Handle, 0);
     }
 
     VkCommandPool CommandPool::GetHandle()

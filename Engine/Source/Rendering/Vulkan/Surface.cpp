@@ -14,10 +14,10 @@ namespace Nova::Vulkan
 
         m_Device = createInfo.device;
         m_Window = createInfo.window;
-        const Device* device = dynamic_cast<Device*>(createInfo.device);
+        const Device* device = static_cast<Device*>(createInfo.device);
         const VkInstance instance = device->GetInstance();
 
-        if (DesktopWindow* window = dynamic_cast<DesktopWindow*>(createInfo.window))
+        if (DesktopWindow* window = static_cast<DesktopWindow*>(createInfo.window))
         {
             GLFWwindow* windowHandle = window->GetHandle();
             if (glfwCreateWindowSurface(instance, windowHandle, nullptr, &m_Handle) != VK_SUCCESS)
@@ -30,7 +30,7 @@ namespace Nova::Vulkan
 
     void Surface::Destroy()
     {
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        const Device* device = static_cast<Device*>(m_Device);
         const VkInstance instance = device->GetInstance();
         vkDestroySurfaceKHR(instance, m_Handle, nullptr);
     }

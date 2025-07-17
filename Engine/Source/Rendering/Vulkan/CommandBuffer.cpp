@@ -1,9 +1,11 @@
 ﻿#include "CommandBuffer.h"
 #include "Rendering/CommandBuffer.h"
 #include "CommandPool.h"
-#include <vulkan/vulkan.h>
-
+#include "Buffer.h"
 #include "Device.h"
+#include "Conversions.h"
+
+#include <vulkan/vulkan.h>
 
 
 namespace Nova::Vulkan
@@ -11,12 +13,12 @@ namespace Nova::Vulkan
 
     bool CommandBuffer::Allocate(const Rendering::CommandBufferAllocateInfo& allocateInfo)
     {
-        Device* device = dynamic_cast<Device*>(allocateInfo.device);
+        Device* device = static_cast<Device*>(allocateInfo.device);
         m_CommandPool = allocateInfo.commandPool;
         m_Level = allocateInfo.level;
         m_Device = device;
 
-        CommandPool* pool = dynamic_cast<CommandPool*>(m_CommandPool);
+        CommandPool* pool = static_cast<CommandPool*>(m_CommandPool);
 
         VkCommandBufferAllocateInfo info { VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         info.commandPool = pool->GetHandle();
@@ -41,7 +43,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::Free()
     {
-        CommandPool* pool = dynamic_cast<CommandPool*>(m_CommandPool);
+        CommandPool* pool = static_cast<CommandPool*>(m_CommandPool);
         const VkDevice deviceHandle = m_Device->GetHandle();
         const VkCommandPool commandPoolHandle = pool->GetHandle();
         vkFreeCommandBuffers(deviceHandle, commandPoolHandle, 1, &m_Handle);
@@ -75,6 +77,20 @@ namespace Nova::Vulkan
 
     void CommandBuffer::ClearDepth(float depth, uint8_t stencil)
     {
+    }
+
+    void CommandBuffer::BindVertexBuffer(const Rendering::Buffer& vertexBuffer, const size_t offset)
+    {
+        const Buffer& vertexBuff = (const Buffer&)vertexBuffer;
+        const VkCommandBuffer cmdBuff = GetHandle();
+        vkCmdBindVertexBuffers(cmdBuff, 0, 1, vertexBuff.GetHandlePtr(), &offset);
+    }
+
+    void CommandBuffer::BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat)
+    {
+        const Buffer& indexBuff = (const Buffer&)indexBuffer;
+        const VkCommandBuffer cmdBuff = GetHandle();
+        vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
     }
 
     VkCommandBuffer CommandBuffer::GetHandle() const

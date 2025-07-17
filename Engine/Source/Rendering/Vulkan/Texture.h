@@ -19,6 +19,9 @@ namespace Nova::Vulkan
         void Destroy() override;
         bool IsValid() override;
 
+        VkImage GetImage() const;
+        VkImageView GetImageView() const;
+        VmaAllocation GetAllocation() const;
     private:
         Device* m_Device = nullptr;
         VkImage m_Image = nullptr;

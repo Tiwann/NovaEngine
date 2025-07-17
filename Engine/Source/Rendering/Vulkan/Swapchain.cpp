@@ -12,8 +12,8 @@ namespace Nova::Vulkan
 {
     bool Swapchain::Initialize(const Rendering::SwapchainCreateInfo& createInfo)
     {
-        Device* device = dynamic_cast<Device*>(createInfo.device);
-        const Surface* surface = dynamic_cast<const Surface*>(createInfo.surface);
+        Device* device = static_cast<Device*>(createInfo.device);
+        const Surface* surface = static_cast<const Surface*>(createInfo.surface);
         const VkSurfaceKHR surfaceHandle = surface->GetHandle();
         const VkDevice deviceHandle = device->GetHandle();
         const Queue* graphicsQueue = device->GetGraphicsQueue();
@@ -95,7 +95,7 @@ namespace Nova::Vulkan
 
     void Swapchain::Destroy()
     {
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        const Device* device = static_cast<Device*>(m_Device);
         const VkDevice deviceHandle = device->GetHandle();
 
         for (size_t i = 0; i < GetImageCount(); i++)
@@ -122,7 +122,7 @@ namespace Nova::Vulkan
     uint32_t Swapchain::AcquireNextImage(const Semaphore* semaphore)
     {
         uint32_t nextFrameIndex = 0;
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        const Device* device = static_cast<Device*>(m_Device);
         const VkDevice deviceHandle = device->GetHandle();
         if (vkAcquireNextImageKHR(deviceHandle, m_Handle, 0xFF, semaphore->GetHandle(), nullptr, &nextFrameIndex) != VK_SUCCESS)
             return 0xFFFFFFFF;
@@ -131,7 +131,7 @@ namespace Nova::Vulkan
 
     void Swapchain::ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget)
     {
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        const Device* device = static_cast<Device*>(m_Device);
         const uint32_t frameIndex = device->GetCurrentFrameIndex();
 
         VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };

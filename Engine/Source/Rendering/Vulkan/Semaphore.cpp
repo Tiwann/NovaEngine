@@ -7,7 +7,7 @@ namespace Nova::Vulkan
     bool Semaphore::Initialize(const Rendering::SemaphoreCreateInfo& createInfo)
     {
 
-        Device* device = dynamic_cast<Device*>(createInfo.device);
+        Device* device = static_cast<Device*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
         constexpr VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
         if (vkCreateSemaphore(deviceHandle, &semaphoreCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)

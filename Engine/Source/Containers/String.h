@@ -3,7 +3,7 @@
 #include "Runtime/Iterator.h"
 #include "Runtime/Assertion.h"
 #include "Runtime/TypeTraits.h"
-#include "Containers/Buffer.h"
+#include "Containers/BufferView.h"
 #include <string_view>
 #include <iostream>
 
@@ -34,7 +34,7 @@ namespace Nova
         using Iterator = Iterator<T>;
         using ConstIterator = ConstIterator<T>;
         using ArrayType = Array<CharacterType>;
-        using BufferType = Buffer<CharacterType>;
+        using BufferType = BufferView<CharacterType>;
         
         static inline const SizeType CharacterSize = sizeof(CharacterType);
         

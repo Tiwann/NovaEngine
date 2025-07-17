@@ -24,70 +24,70 @@ namespace Nova
         Map& operator=(Map&&) = default;
 
 
-        ValueType& operator[](const KeyType& Key)
+        ValueType& operator[](const KeyType& key)
         {
-            SizeType Index = FindKey(Key);
-            if(Index == -1)
+            SizeType index = FindKey(key);
+            if(index == ~0)
             {
-                const PairType Pair{ .Key = Key };
-                m_Data.Add(Pair);
-                return m_Data.Last().Value;
+                const PairType pair{ .key = key };
+                m_Data.Add(pair);
+                return m_Data.Last().value;
             }
-            return m_Data[Index].Value;
+            return m_Data[index].value;
         }
 
-        const ValueType& operator[](const KeyType& Key) const
+        const ValueType& operator[](const KeyType& key) const
         {
-            SizeType Index = FindKey(Key);
-            NOVA_ASSERT(Index != -1, "Key not found");
-            return m_Data[Index].Value;
+            SizeType index = FindKey(key);
+            NOVA_ASSERT(index != ~0, "Key not found");
+            return m_Data[index].value;
         }
 
-        SizeType FindKey(const KeyType& Key) const
+        SizeType FindKey(const KeyType& key) const
         {
             for(SizeType i = 0; i < m_Data.Count(); ++i)
             {
-                const PairType& Pair = m_Data.GetAt(i);
-                if(Key == Pair.Key)
+                const PairType& pair = m_Data.GetAt(i);
+                if(key == pair.key)
                     return i;
             }
             return -1;
         }
 
-        SizeType FindValue(const ValueType& Value)
+        SizeType FindValue(const ValueType& value)
         {
             for(SizeType i = 0; i < m_Data.Count(); ++i)
             {
-                const PairType& Pair = m_Data.GetAt(i);
-                if(Value == Pair.Value)
+                const PairType& pair = m_Data.GetAt(i);
+                if(value == pair.value)
                     return i;
             }
             return -1;
         }
 
-        KeyType GetKey(const ValueType& Value) const
+        KeyType GetKey(const ValueType& value) const
         {
-            SizeType Index = FindKey(Value);
-            if (Index == -1)
+            SizeType index = FindKey(value);
+            if (index == -1)
                 return {};
-            return m_Data[Index].Key;
+            return m_Data[index].key;
         }
 
-        bool Contains(const KeyType& Key) const
+        bool Contains(const KeyType& key) const
         {
-            return FindKey(Key) != -1ULL;
+            return FindKey(key) != ~0;
         }
 
         SizeType Count() const { return m_Data.Count(); }
 
-        PairType& GetAt(SizeType Index)
+        PairType& GetAt(SizeType index)
         {
-            return m_Data.GetAt(Index);
+            return m_Data.GetAt(index);
         }
 
-        const PairType& GetAt(SizeType Index) const
+        const PairType& GetAt(SizeType index) const
         {
-            return m_Data.GetAt(Index);
+            return m_Data.GetAt(index);
         }
 
         void Clear()
@@ -95,19 +95,19 @@ namespace Nova
             m_Data.Clear();
         }
 
-        bool Remove(const PairType& Pair)
+        bool Remove(const PairType& pair)
         {
-            if(m_Data.Contains(Pair))
+            if(m_Data.Contains(pair))
             {
-                m_Data.Remove(Pair);
+                m_Data.Remove(pair);
                 return true;
             }
             return false;
         }
 
-        bool operator==(const Map& Other) const
+        bool operator==(const Map& other) const
         {
-            return m_Data == Other.m_Data;
+            return m_Data == other.m_Data;
         }
 
 

@@ -33,8 +33,10 @@ namespace Nova::Vulkan
         void EndFrame() override;
         void Present() override;
         void WaitIdle() override;
-        void ResolveRenderTarget(Rendering::RenderTarget& renderTarget) override;
-        void BlitRenderTarget(Rendering::RenderTarget& renderTarget, Filter filter) override;
+
+        void ResolveToSwapchain(Rendering::RenderTarget& renderTarget) override;
+        void BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter) override;
+        void BlitToRenderTarget(Rendering::Texture& srcTexture, Rendering::RenderTarget& destRenderTarget, uint32_t x, uint32_t y) override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

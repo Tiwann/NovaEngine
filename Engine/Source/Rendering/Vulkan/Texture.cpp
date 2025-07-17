@@ -16,7 +16,7 @@ namespace Nova::Vulkan
         if (createInfo.data == nullptr || createInfo.dataSize == 0)
             return false;
 
-        Device* device = dynamic_cast<Device*>(createInfo.device);
+        Device* device = static_cast<Device*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
         const VkDevice deviceHandle = device->GetHandle();
 
@@ -33,7 +33,7 @@ namespace Nova::Vulkan
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
@@ -175,5 +175,20 @@ namespace Nova::Vulkan
     bool Texture::IsValid()
     {
         return m_Device && m_Image && m_ImageView && m_Allocation;
+    }
+
+    VkImage Texture::GetImage() const
+    {
+        return m_Image;
+    }
+
+    VkImageView Texture::GetImageView() const
+    {
+        return m_ImageView;
+    }
+
+    VmaAllocation Texture::GetAllocation() const
+    {
+        return m_Allocation;
     }
 }

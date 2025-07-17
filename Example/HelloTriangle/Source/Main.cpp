@@ -1,20 +1,20 @@
 ﻿#include "Runtime/EntryPoint.h"
 #include "Runtime/DesktopWindow.h"
-#include "Audio/AudioSystem.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
-#include "Rendering/GraphicsPipeline.h"
-#include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/Vulkan/Texture.h"
-
-#include <cstdlib>
-#include <chrono>
+#include "Containers/StringView.h"
+#include "Rendering/Vertex.h"
+#include "Rendering/Vulkan/Buffer.h"
+#include "Rendering/DescriptorPool.h"
+#include "Rendering/Vulkan/DescriptorPool.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <External/stb_image.h>
 
-#include "Containers/StringView.h"
-
+#include <slang/slang.h>
+#include <cstdlib>
+#include <chrono>
 
 static bool g_Running = true;
 
@@ -29,8 +29,7 @@ namespace Nova
         windowCreateInfo.show = true;
 
         DesktopWindow window;
-        if (!window.Initialize(windowCreateInfo))
-            return EXIT_FAILURE;
+        window.Initialize(windowCreateInfo);
 
         Rendering::DeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.applicationName = "Hello Triangle";
@@ -49,7 +48,7 @@ namespace Nova
         renderTargetCreateInfo.depth = 1;
         renderTargetCreateInfo.colorFormat = Format::R8G8B8A8_UNORM;
         renderTargetCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
-        renderTargetCreateInfo.sampleCount = 8;
+        renderTargetCreateInfo.sampleCount = 1;
 
         Vulkan::RenderTarget renderTarget;
         if (!renderTarget.Initialize(renderTargetCreateInfo))
@@ -70,6 +69,8 @@ namespace Nova
 
             renderTarget.Resize(newX, newY);
         });
+
+
 
         /*Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = &device;
@@ -133,6 +134,53 @@ namespace Nova
         if (!texture.Initialize(textureCreateInfo))
             return EXIT_FAILURE;
 
+        stbi_image_free(pixels);
+
+
+        const Vertex vertices[]
+        {
+            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Vector2(0.0f, 0.0f), Vector3::Zero, Color::Red),
+            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Vector2(0.0f, 1.0f), Vector3::Zero, Color::Green),
+            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Vector2(1.0f, 1.0f), Vector3::Zero, Color::Blue),
+        };
+
+        Rendering::BufferCreateInfo stagingBufferCreateInfo;
+        stagingBufferCreateInfo.device = &device;
+        stagingBufferCreateInfo.size = sizeof(vertices);
+        stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
+
+        Vulkan::Buffer stagingBuffer;
+        if (!stagingBuffer.Initialize(stagingBufferCreateInfo))
+            return EXIT_FAILURE;
+
+        stagingBuffer.CopyData(vertices, 0, sizeof(vertices));
+
+
+        Rendering::BufferCreateInfo vertexBufferCreateInfo;
+        vertexBufferCreateInfo.device = &device;
+        vertexBufferCreateInfo.size = sizeof(vertices);
+        vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
+
+        Vulkan::Buffer vertexBuffer;
+        if (!vertexBuffer.Initialize(vertexBufferCreateInfo))
+            return EXIT_FAILURE;
+
+        stagingBuffer.CopyTo(vertexBuffer, 0, 0, sizeof(vertices));
+
+
+        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        descriptorPoolCreateInfo.device = &device;
+        descriptorPoolCreateInfo.sizes[DescriptorType::UniformBuffer] = 8;
+        descriptorPoolCreateInfo.sizes[DescriptorType::CombinedImageSampler] = 8;
+        descriptorPoolCreateInfo.sizes[DescriptorType::SampledImage] = 8;
+        descriptorPoolCreateInfo.maxSets = 8;
+
+        Vulkan::DescriptorPool descriptorPool;
+        if (!descriptorPool.Initialize(descriptorPoolCreateInfo))
+            return EXIT_FAILURE;
+
+
+
         while (g_Running)
         {
             window.PollEvents();
@@ -141,15 +189,17 @@ namespace Nova
             {
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 renderTarget.BeginRendering(commandBuffer);
-                renderTarget.Clear(Color::Blue);
+                renderTarget.Clear(Color::Orange);
                 renderTarget.EndRendering();
 
-                device.ResolveRenderTarget(renderTarget);
+                device.BlitToSwapchain(renderTarget, Filter::Nearest);
                 device.EndFrame();
                 device.Present();
             }
         }
 
+        vertexBuffer.Destroy();
+        stagingBuffer.Destroy();
         texture.Destroy();
         renderTarget.Destroy();
         device.Destroy();

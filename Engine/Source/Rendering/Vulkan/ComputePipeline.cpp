@@ -7,7 +7,7 @@ namespace Nova::Vulkan
 {
     bool ComputePipeline::Initialize(const Rendering::ComputePipelineCreateInfo& createInfo)
     {
-        m_Device = dynamic_cast<Device*>(createInfo.device);
+        m_Device = static_cast<Device*>(createInfo.device);
 
         VkComputePipelineCreateInfo computeCreateInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
         return true;

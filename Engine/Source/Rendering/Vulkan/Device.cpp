@@ -8,6 +8,7 @@
 
 #include "Conversions.h"
 #include "RenderTarget.h"
+#include "Texture.h"
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
 
@@ -15,29 +16,6 @@
 
 namespace Nova::Vulkan
 {
-
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-    static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugMessageCallback(
-        const VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-        const VkDebugUtilsMessageTypeFlagsEXT type,
-        const VkDebugUtilsMessengerCallbackDataEXT* data,
-        void*)
-    {
-        if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
-        {
-            std::println(std::cerr, "Vulkan Error: {}", data->pMessage);
-            return false;
-        }
-
-        if (severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-        {
-            std::println(std::cout, "Vulkan Warning: {}", data->pMessage);
-            return false;
-        }
-        return true;
-    }
-#endif
-
     bool Device::Initialize(const Rendering::DeviceCreateInfo& createInfo)
     {
         if (!createInfo.window)
@@ -55,19 +33,17 @@ namespace Nova::Vulkan
 
         Array<const char*> Extensions;
         Extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
-        Extensions.Add(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         Extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
-        if (dynamic_cast<DesktopWindow*>(createInfo.window))
+        if (static_cast<DesktopWindow*>(createInfo.window))
         {
             uint32_t GlfwExtensionCount;
             const char** GlfwExtensions = glfwGetRequiredInstanceExtensions(&GlfwExtensionCount);
             Extensions.AddRange(GlfwExtensions, GlfwExtensionCount);
         }
-
 
         VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
@@ -199,7 +175,6 @@ namespace Nova::Vulkan
 
         Array<const char*> DeviceExtensions;
         DeviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
-        DeviceExtensions.Add(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
 
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
         dynamicRenderingFeatures.dynamicRendering = true;
@@ -328,6 +303,7 @@ namespace Nova::Vulkan
         Rendering::CommandPoolCreateInfo commandPoolCreateInfo;
         commandPoolCreateInfo.device = this;
         commandPoolCreateInfo.flags = Rendering::CommandPoolCreateFlagBits::ResetCommandBuffer;
+        commandPoolCreateInfo.queue = &m_GraphicsQueue;
         if (!m_CommandPool.Initialize(commandPoolCreateInfo))
         {
             std::println(std::cerr, "Failed to create command pool!");
@@ -428,11 +404,11 @@ namespace Nova::Vulkan
         vkDeviceWaitIdle(m_Handle);
     }
 
-    void Device::ResolveRenderTarget(Rendering::RenderTarget& renderTarget)
+    void Device::ResolveToSwapchain(Rendering::RenderTarget& renderTarget)
     {
         const VkImage swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
         const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
-        const RenderTarget& rt = dynamic_cast<RenderTarget&>(renderTarget);
+        const RenderTarget& rt = static_cast<RenderTarget&>(renderTarget);
 
         VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -497,11 +473,11 @@ namespace Nova::Vulkan
         );
     }
 
-    void Device::BlitRenderTarget(Rendering::RenderTarget& renderTarget, Filter filter)
+    void Device::BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter)
     {
         const VkImage swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
         const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
-        const RenderTarget& rt = dynamic_cast<RenderTarget&>(renderTarget);
+        const RenderTarget& rt = static_cast<RenderTarget&>(renderTarget);
 
         VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -566,6 +542,122 @@ namespace Nova::Vulkan
             VK_PIPELINE_STAGE_TRANSFER_BIT,
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &presentBarrier
+        );
+    }
+
+    void Device::BlitToRenderTarget(Rendering::Texture& srcTexture, Rendering::RenderTarget& destRenderTarget, uint32_t x, uint32_t y)
+    {
+        const Texture& src = static_cast<Texture&>(srcTexture);
+        const RenderTarget& dest = static_cast<RenderTarget&>(destRenderTarget);
+
+        const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
+
+        VkImageMemoryBarrier srcToTransferSourceBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        srcToTransferSourceBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        srcToTransferSourceBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        srcToTransferSourceBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        srcToTransferSourceBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        srcToTransferSourceBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        srcToTransferSourceBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        srcToTransferSourceBarrier.image = src.GetImage();
+        srcToTransferSourceBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        srcToTransferSourceBarrier.subresourceRange.baseMipLevel = 0;
+        srcToTransferSourceBarrier.subresourceRange.levelCount = src.GetMips();
+        srcToTransferSourceBarrier.subresourceRange.baseArrayLayer = 0;
+        srcToTransferSourceBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &srcToTransferSourceBarrier
+        );
+
+        VkImageMemoryBarrier destToTransferDestBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        destToTransferDestBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        destToTransferDestBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        destToTransferDestBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        destToTransferDestBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        destToTransferDestBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        destToTransferDestBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        destToTransferDestBarrier.image = dest.GetColorImage(m_CurrentFrameIndex);
+        destToTransferDestBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        destToTransferDestBarrier.subresourceRange.baseMipLevel = 0;
+        destToTransferDestBarrier.subresourceRange.levelCount = 1;
+        destToTransferDestBarrier.subresourceRange.baseArrayLayer = 0;
+        destToTransferDestBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &destToTransferDestBarrier
+        );
+
+        const int32_t srcWidth = src.GetWidth();
+        const int32_t srcHeight = src.GetHeight();
+        const int32_t dstWidth = dest.GetWidth();
+        const int32_t dstHeight = dest.GetHeight();
+
+        VkImageBlit blit;
+        blit.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+        blit.srcOffsets[1] = VkOffset3D{ srcWidth, srcHeight, 1 };
+        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.baseArrayLayer = 0;
+        blit.srcSubresource.layerCount = 1;
+        blit.srcSubresource.mipLevel = 0;
+        blit.dstOffsets[0] = VkOffset3D{ (int32_t)x, (int32_t)y, 0 };
+        blit.dstOffsets[1] = VkOffset3D{ srcWidth, srcHeight, 1 };
+        blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.dstSubresource.baseArrayLayer = 0;
+        blit.dstSubresource.layerCount = 1;
+        blit.dstSubresource.mipLevel = 0;
+
+        const VkCommandBuffer cmdBuff = commandBuffer.GetHandle();
+        const VkImage srcImage = src.GetImage();
+        const VkImage dstImage = dest.GetColorImage(m_CurrentFrameIndex);
+        vkCmdBlitImage(cmdBuff, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, Convert<Filter, VkFilter>(Filter::Nearest));
+
+        VkImageMemoryBarrier srcToShaderReadBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        srcToShaderReadBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        srcToShaderReadBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        srcToShaderReadBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        srcToShaderReadBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        srcToShaderReadBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        srcToShaderReadBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        srcToShaderReadBarrier.image = src.GetImage();
+        srcToShaderReadBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        srcToShaderReadBarrier.subresourceRange.baseMipLevel = 0;
+        srcToShaderReadBarrier.subresourceRange.levelCount = src.GetMips();
+        srcToShaderReadBarrier.subresourceRange.baseArrayLayer = 0;
+        srcToShaderReadBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &srcToShaderReadBarrier
+        );
+
+        VkImageMemoryBarrier destToTransferSourceBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        destToTransferSourceBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        destToTransferSourceBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        destToTransferSourceBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        destToTransferSourceBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        destToTransferSourceBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        destToTransferSourceBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        destToTransferSourceBarrier.image = dest.GetColorImage(m_CurrentFrameIndex);
+        destToTransferSourceBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        destToTransferSourceBarrier.subresourceRange.baseMipLevel = 0;
+        destToTransferSourceBarrier.subresourceRange.levelCount = 1;
+        destToTransferSourceBarrier.subresourceRange.baseArrayLayer = 0;
+        destToTransferSourceBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &destToTransferSourceBarrier
         );
     }
 

@@ -5,12 +5,12 @@ namespace Nova
     template<typename KeyType, typename ValueType>
     struct Pair
     {
-        KeyType Key;
-        ValueType Value;
+        KeyType key;
+        ValueType value;
 
-        bool operator==(const Pair& Other) const
+        bool operator==(const Pair& other) const
         {
-            return Key == Other.Key && Value == Other.Value;
+            return key == other.key && value == other.value;
         }
     };
 }

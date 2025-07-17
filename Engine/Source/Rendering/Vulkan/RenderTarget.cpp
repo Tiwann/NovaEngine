@@ -20,7 +20,7 @@ namespace Nova::Vulkan
         m_ColorFormat = createInfo.colorFormat;
         m_DepthFormat = createInfo.depthFormat;
 
-        Device* device = dynamic_cast<Device*>(m_Device);
+        Device* device = static_cast<Device*>(m_Device);
         Swapchain* swapchain = device->GetSwapchain();
         CommandPool* commandPool = device->GetCommandPool();
         const VkDevice deviceHandle = device->GetHandle();
@@ -39,7 +39,7 @@ namespace Nova::Vulkan
             colorImageCreateInfo.format = Convert<Format, VkFormat>(m_ColorFormat);
             colorImageCreateInfo.samples = (VkSampleCountFlagBits)m_SampleCount;
             colorImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-            colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+            colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
             colorImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             colorImageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             colorImageCreateInfo.pQueueFamilyIndices = graphicsQueue->GetIndexPtr();
@@ -182,7 +182,7 @@ namespace Nova::Vulkan
 
     void RenderTarget::Destroy()
     {
-        Device* device = dynamic_cast<Device*>(m_Device);
+        Device* device = static_cast<Device*>(m_Device);
         const Swapchain* swapchain = device->GetSwapchain();
         const VkDevice deviceHandle = device->GetHandle();
         const VmaAllocator allocatorHandle = device->GetAllocator();
@@ -199,8 +199,8 @@ namespace Nova::Vulkan
 
     void RenderTarget::BeginRendering(Rendering::CommandBuffer& commandBuffer)
     {
-        m_CommandBuffer = dynamic_cast<CommandBuffer*>(&commandBuffer);
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        m_CommandBuffer = static_cast<CommandBuffer*>(&commandBuffer);
+        const Device* device = static_cast<Device*>(m_Device);
         const uint32_t frameIndex = device->GetCurrentFrameIndex();
 
         VkImageMemoryBarrier colorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
@@ -252,7 +252,7 @@ namespace Nova::Vulkan
 
     void RenderTarget::EndRendering()
     {
-        const Device* device = dynamic_cast<Device*>(m_Device);
+        const Device* device = static_cast<Device*>(m_Device);
         const uint32_t frameIndex = device->GetCurrentFrameIndex();
 
         vkCmdEndRendering(m_CommandBuffer->GetHandle());

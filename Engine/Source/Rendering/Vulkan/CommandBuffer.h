@@ -18,6 +18,8 @@ namespace Nova::Vulkan
 
         void ClearColor(const Color& color) override;
         void ClearDepth(float depth, uint8_t stencil) override;
+        void BindVertexBuffer(const Rendering::Buffer& vertexBuffer, size_t offset) override;
+        void BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat) override;
 
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;

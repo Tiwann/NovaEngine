@@ -1,6 +1,7 @@
 ﻿cmake_minimum_required(VERSION 4.0)
 project(NovaEngine)
 
+include(CMake/FindVulkan.cmake)
 option(NOVA_ENGINE_BUILD_EXAMPLES "Build example projects that uses Nova Engine" ON)
 option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a custom entry point" ON)
 

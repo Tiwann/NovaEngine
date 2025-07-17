@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Stream.h"
-#include "Containers/Buffer.h"
+#include "Containers/BufferView.h"
 
 namespace Nova
 {

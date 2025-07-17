@@ -6,7 +6,7 @@ namespace Nova::Vulkan
 {
     bool Fence::Initialize(const Rendering::FenceCreateInfo& createInfo)
     {
-        Device* device = dynamic_cast<Device*>(createInfo.device);
+        Device* device = static_cast<Device*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
 
         VkFenceCreateInfo fenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };

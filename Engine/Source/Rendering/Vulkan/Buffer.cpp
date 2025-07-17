@@ -21,6 +21,43 @@ namespace Nova::Vulkan
         }
     }
 
+    Buffer::Buffer(Buffer&& other) noexcept
+    {
+        if (this == &other)
+            return;
+
+        m_Handle = other.m_Handle;
+        m_Allocation = other.m_Allocation;
+        m_Device = other.m_Device;
+        m_Size = other.m_Size;
+        m_Usage = other.m_Usage;
+
+        other.m_Handle = nullptr;
+        other.m_Allocation = nullptr;
+        other.m_Device = nullptr;
+        other.m_Size = 0;
+        other.m_Usage = Rendering::BufferUsage::None;
+    }
+
+    Buffer& Buffer::operator=(Buffer&& other) noexcept
+    {
+        if (this == &other)
+            return *this;
+
+        m_Handle = other.m_Handle;
+        m_Allocation = other.m_Allocation;
+        m_Device = other.m_Device;
+        m_Size = other.m_Size;
+        m_Usage = other.m_Usage;
+
+        other.m_Handle = nullptr;
+        other.m_Allocation = nullptr;
+        other.m_Device = nullptr;
+        other.m_Size = 0;
+        other.m_Usage = Rendering::BufferUsage::None;
+        return *this;
+    }
+
     bool Buffer::Initialize(const Rendering::BufferCreateInfo& createInfo)
     {
         VkBufferCreateInfo bufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
@@ -47,6 +84,7 @@ namespace Nova::Vulkan
 
         Device* device = static_cast<Device*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
+        vmaDestroyBuffer(allocatorHandle, m_Handle, m_Allocation);
         const VkResult result = vmaCreateBuffer(allocatorHandle, &bufferCreateInfo, &bufferAllocationCreateInfo, &m_Handle, &m_Allocation, nullptr);
         if (result != VK_SUCCESS)
             return false;

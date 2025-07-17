@@ -14,6 +14,7 @@ namespace Nova::Rendering
     class Device;
     class CommandPool;
     class Buffer;
+    class GraphicsPipeline;
 
     struct CommandBufferAllocateInfo
     {
@@ -51,10 +52,13 @@ namespace Nova::Rendering
 
 
         virtual void ClearColor(const Color& color) = 0;
-        virtual void ClearDepth(float depth, uint8_t stencil) = 0;
-        virtual void Clear(const Color& color, float depth, uint8_t stencil) { ClearColor(color); ClearDepth(depth, stencil); }
+        virtual void ClearDepth(float depth, uint32_t stencil) = 0;
+        virtual void BindGraphicsPipeline(const GraphicsPipeline& pipeline) = 0;
         virtual void BindVertexBuffer(const Buffer& vertexBuffer, size_t offset) = 0;
         virtual void BindIndexBuffer(const Buffer& indexBuffer, size_t offset, Format indexFormat) = 0;
+        virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
+        virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
+        virtual void DrawIndexed(size_t count, size_t offset) = 0;
 
         CommandPool* GetCommandPool() const { return m_CommandPool; }
         CommandBufferLevel GetLevel() const { return m_Level; }

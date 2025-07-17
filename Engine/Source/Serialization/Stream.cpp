@@ -112,11 +112,11 @@ namespace Nova
 
     Stream::SizeType Stream::ReadString(String& str, const SizeType count)
     {
-        String::CharacterType* Characters = new String::CharacterType[count];
-        const SizeType ReadChars = Read(Characters, count);
-        str = String(Characters, count);
-        delete[] Characters;
-        return ReadChars;
+        String::CharacterType* characters = new String::CharacterType[count];
+        const SizeType readChars = Read(characters, count);
+        str = String(characters, count);
+        delete[] characters;
+        return readChars;
     }
 
     Stream::SizeType Stream::WriteChar(const char value)

@@ -82,6 +82,9 @@ namespace Nova::Rendering
         } scissorInfo;
 
         Device* device;
+        void* pipelineLayout = nullptr;
+        const void* shaderStages = nullptr;
+        size_t shaderStagesCount = 0;
     };
 
     class GraphicsPipeline

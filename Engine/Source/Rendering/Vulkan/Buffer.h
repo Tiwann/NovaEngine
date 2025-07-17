@@ -12,6 +12,10 @@ namespace Nova::Vulkan
     class Buffer : public Rendering::Buffer
     {
     public:
+        Buffer() : Rendering::Buffer() {}
+        Buffer(Buffer&& other) noexcept;
+        Buffer& operator=(Buffer&& other) noexcept;
+
         bool Initialize(const Rendering::BufferCreateInfo& createInfo) override;
         void Destroy() override;
         bool Resize(size_t newSize, bool keepData) override;

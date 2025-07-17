@@ -7,6 +7,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "GraphicsPipeline.h"
+
 
 namespace Nova::Vulkan
 {
@@ -75,8 +77,13 @@ namespace Nova::Vulkan
 
     }
 
-    void CommandBuffer::ClearDepth(float depth, uint8_t stencil)
+    void CommandBuffer::ClearDepth(float depth, uint32_t stencil)
     {
+    }
+
+    void CommandBuffer::BindGraphicsPipeline(const Rendering::GraphicsPipeline& pipeline)
+    {
+        vkCmdBindPipeline(m_Handle, VK_PIPELINE_BIND_POINT_GRAPHICS, ((const GraphicsPipeline&)pipeline).GetHandle());
     }
 
     void CommandBuffer::BindVertexBuffer(const Rendering::Buffer& vertexBuffer, const size_t offset)
@@ -86,11 +93,38 @@ namespace Nova::Vulkan
         vkCmdBindVertexBuffers(cmdBuff, 0, 1, vertexBuff.GetHandlePtr(), &offset);
     }
 
-    void CommandBuffer::BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat)
+    void CommandBuffer::BindIndexBuffer(const Rendering::Buffer& indexBuffer, const size_t offset, const Format indexFormat)
     {
         const Buffer& indexBuff = (const Buffer&)indexBuffer;
         const VkCommandBuffer cmdBuff = GetHandle();
         vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
+    }
+
+    void CommandBuffer::SetViewport(const float x, const float y, const float width, const float height, const float minDepth, const float maxDepth)
+    {
+        VkViewport viewport { };
+        viewport.x = x;
+        viewport.y = y + height;
+        viewport.width = width;
+        viewport.height = -height;
+        viewport.minDepth = minDepth;
+        viewport.maxDepth = maxDepth;
+        vkCmdSetViewport(m_Handle, 0, 1, &viewport);
+    }
+
+    void CommandBuffer::SetScissor(const int32_t x, const int32_t y, const int32_t width, const int32_t height)
+    {
+        VkRect2D rect { };
+        rect.offset.x = x;
+        rect.offset.y = y;
+        rect.extent.width = width;
+        rect.extent.height = height;
+        vkCmdSetScissor(m_Handle, 0, 1, &rect);
+    }
+
+    void CommandBuffer::DrawIndexed(const size_t count, const size_t offset)
+    {
+        vkCmdDrawIndexed(m_Handle, count, 1, 0, offset, 0);
     }
 
     VkCommandBuffer CommandBuffer::GetHandle() const

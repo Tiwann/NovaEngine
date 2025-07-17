@@ -2,20 +2,19 @@
 #include "Runtime/DesktopWindow.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
-#include "Rendering/Vulkan/Texture.h"
 #include "Containers/StringView.h"
 #include "Rendering/Vertex.h"
 #include "Rendering/Vulkan/Buffer.h"
-#include "Rendering/DescriptorPool.h"
-#include "Rendering/Vulkan/DescriptorPool.h"
+#include "Rendering/GraphicsPipeline.h"
+#include "Rendering/Vulkan/GraphicsPipeline.h"
+#include "ShaderUtils.h"
+#include "BufferUtils.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <External/stb_image.h>
-
-#include <slang/slang.h>
+#include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <chrono>
 
+static constexpr uint32_t SAMPLE_COUNT = 8;
 static bool g_Running = true;
 
 namespace Nova
@@ -48,7 +47,7 @@ namespace Nova
         renderTargetCreateInfo.depth = 1;
         renderTargetCreateInfo.colorFormat = Format::R8G8B8A8_UNORM;
         renderTargetCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
-        renderTargetCreateInfo.sampleCount = 1;
+        renderTargetCreateInfo.sampleCount = SAMPLE_COUNT;
 
         Vulkan::RenderTarget renderTarget;
         if (!renderTarget.Initialize(renderTargetCreateInfo))
@@ -71,13 +70,55 @@ namespace Nova
         });
 
 
+        Array<uint32_t> vertSpirv, fragSpirv;
+        CompileShaderToSpirV(R"(Shaders/HelloTriangle.slang)", vertSpirv, fragSpirv);
 
-        /*Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
+        VkShaderModule vertexShaderModule = nullptr, fragmentShaderModule = nullptr;
+        VkShaderModuleCreateInfo vertShaderModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+        vertShaderModuleCreateInfo.codeSize = vertSpirv.Size();
+        vertShaderModuleCreateInfo.pCode = vertSpirv.Data();
+        VkResult result = vkCreateShaderModule(device.GetHandle(), &vertShaderModuleCreateInfo, nullptr, &vertexShaderModule);
+        if (result != VK_SUCCESS)
+            return EXIT_FAILURE;
+
+        VkShaderModuleCreateInfo fragShaderModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+        fragShaderModuleCreateInfo.codeSize = fragSpirv.Size();
+        fragShaderModuleCreateInfo.pCode = fragSpirv.Data();
+        result = vkCreateShaderModule(device.GetHandle(), &fragShaderModuleCreateInfo, nullptr, &fragmentShaderModule);
+        if (result != VK_SUCCESS)
+            return EXIT_FAILURE;
+
+        VkPipelineShaderStageCreateInfo vertexShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+        vertexShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertexShaderStageCreateInfo.module = vertexShaderModule;
+        vertexShaderStageCreateInfo.pName = "main";
+
+        VkPipelineShaderStageCreateInfo fragmentShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+        fragmentShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragmentShaderStageCreateInfo.module = fragmentShaderModule;
+        fragmentShaderStageCreateInfo.pName = "main";
+
+
+        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+        pipelineLayoutCreateInfo.setLayoutCount = 0;
+        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+
+        VkPipelineLayout pipelineLayout;
+        result = vkCreatePipelineLayout(device.GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+        if (result != VK_SUCCESS)
+            return EXIT_FAILURE;
+
+
+        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = &device;
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "a_Position", Format::Vector3 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "a_TexCoords", Format::Vector2 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "a_Normal", Format::Vector3 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "a_Color", Format::Vector4 });
+        pipelineCreateInfo.pipelineLayout = pipelineLayout;
+
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector3 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Normal", Format::Vector3 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Color", Format::Vector4 });
 
         pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
         pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
@@ -99,7 +140,7 @@ namespace Nova
         pipelineCreateInfo.multisampleInfo.alphaToOneEnable = false;
         pipelineCreateInfo.multisampleInfo.sampleShadingEnable = false;
         pipelineCreateInfo.multisampleInfo.alphaToCoverageEnable = false;
-        pipelineCreateInfo.multisampleInfo.sampleCount = 8;
+        pipelineCreateInfo.multisampleInfo.sampleCount = SAMPLE_COUNT;
 
         pipelineCreateInfo.viewportInfo.x = 0;
         pipelineCreateInfo.viewportInfo.y = 0;
@@ -111,31 +152,13 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.width = window.GetWidth();
         pipelineCreateInfo.scissorInfo.height = window.GetHeight();
 
+        const VkPipelineShaderStageCreateInfo shaderStages[] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
+        pipelineCreateInfo.shaderStages = shaderStages;
+        pipelineCreateInfo.shaderStagesCount = 2;
+
         Vulkan::GraphicsPipeline pipeline;
         if (!pipeline.Initialize(pipelineCreateInfo))
-            return EXIT_FAILURE;*/
-
-        const StringView filepath = R"(D:\Dev\HydroRenderer\HydroGame\Assets\Textures\Characters\MaskDude\Jump32.png)";
-        stbi_set_flip_vertically_on_load(true);
-        int32_t width, height, channels;
-        uint8_t* pixels = stbi_load(*filepath, &width, &height, &channels, STBI_rgb_alpha);
-
-        Rendering::TextureCreateInfo textureCreateInfo;
-        textureCreateInfo.device = &device;
-        textureCreateInfo.format = Format::R8G8B8A8_UNORM;
-        textureCreateInfo.width = width;
-        textureCreateInfo.height = height;
-        textureCreateInfo.mips = 1;
-        textureCreateInfo.sampleCount = 1;
-        textureCreateInfo.data = pixels;
-        textureCreateInfo.dataSize = width * height * 4 * sizeof(uint8_t);
-
-        Vulkan::Texture texture;
-        if (!texture.Initialize(textureCreateInfo))
             return EXIT_FAILURE;
-
-        stbi_image_free(pixels);
-
 
         const Vertex vertices[]
         {
@@ -144,42 +167,10 @@ namespace Nova
             Vertex(Vector3(+0.5f, -0.5f, 0.0f), Vector2(1.0f, 1.0f), Vector3::Zero, Color::Blue),
         };
 
-        Rendering::BufferCreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.device = &device;
-        stagingBufferCreateInfo.size = sizeof(vertices);
-        stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
+        const uint32_t indices[] { 0, 2, 1 };
 
-        Vulkan::Buffer stagingBuffer;
-        if (!stagingBuffer.Initialize(stagingBufferCreateInfo))
-            return EXIT_FAILURE;
-
-        stagingBuffer.CopyData(vertices, 0, sizeof(vertices));
-
-
-        Rendering::BufferCreateInfo vertexBufferCreateInfo;
-        vertexBufferCreateInfo.device = &device;
-        vertexBufferCreateInfo.size = sizeof(vertices);
-        vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
-
-        Vulkan::Buffer vertexBuffer;
-        if (!vertexBuffer.Initialize(vertexBufferCreateInfo))
-            return EXIT_FAILURE;
-
-        stagingBuffer.CopyTo(vertexBuffer, 0, 0, sizeof(vertices));
-
-
-        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
-        descriptorPoolCreateInfo.device = &device;
-        descriptorPoolCreateInfo.sizes[DescriptorType::UniformBuffer] = 8;
-        descriptorPoolCreateInfo.sizes[DescriptorType::CombinedImageSampler] = 8;
-        descriptorPoolCreateInfo.sizes[DescriptorType::SampledImage] = 8;
-        descriptorPoolCreateInfo.maxSets = 8;
-
-        Vulkan::DescriptorPool descriptorPool;
-        if (!descriptorPool.Initialize(descriptorPoolCreateInfo))
-            return EXIT_FAILURE;
-
-
+        Vulkan::Buffer vertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
+        Vulkan::Buffer indexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
         while (g_Running)
         {
@@ -189,18 +180,24 @@ namespace Nova
             {
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 renderTarget.BeginRendering(commandBuffer);
-                renderTarget.Clear(Color::Orange);
+                renderTarget.Clear(0x101010FF);
+                commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
+                commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+                commandBuffer.BindGraphicsPipeline(pipeline);
+                commandBuffer.BindVertexBuffer(vertexBuffer, 0);
+                commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::R32_UINT);
+                commandBuffer.DrawIndexed(3, 0);
                 renderTarget.EndRendering();
 
-                device.BlitToSwapchain(renderTarget, Filter::Nearest);
+                device.ResolveToSwapchain(renderTarget);
+                //device.BlitToSwapchain(renderTarget, Filter::Nearest);
                 device.EndFrame();
                 device.Present();
             }
         }
 
         vertexBuffer.Destroy();
-        stagingBuffer.Destroy();
-        texture.Destroy();
+        indexBuffer.Destroy();
         renderTarget.Destroy();
         device.Destroy();
         window.Destroy();

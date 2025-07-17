@@ -138,14 +138,12 @@ namespace Nova::Vulkan
         pipelineCreateInfo.pDynamicState = &dynamicState;
         pipelineCreateInfo.pMultisampleState = &multisampleState;
         pipelineCreateInfo.renderPass = nullptr;
-        //pipelineCreateInfo.pStages = ShaderStages.Data();
-        //pipelineCreateInfo.stageCount = ShaderStages.Count();
-        //pipelineCreateInfo.layout = (VkPipelineLayout)Specification.VulkanPipelineLayout;
+        pipelineCreateInfo.pStages = (const VkPipelineShaderStageCreateInfo*)createInfo.shaderStages;
+        pipelineCreateInfo.stageCount = createInfo.shaderStagesCount;
+        pipelineCreateInfo.layout = (VkPipelineLayout)createInfo.pipelineLayout;
 
         if (vkCreateGraphicsPipelines(deviceHandle, nullptr, 1, &pipelineCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
-
             return false;
-
         return true;
     }
 

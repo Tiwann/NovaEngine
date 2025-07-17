@@ -1,15 +1,15 @@
 ﻿#pragma once
 #include "Stream.h"
-#include <filesystem>
+#include "Containers/StringView.h"
 namespace Nova
 {
     class FileStream : public Stream
     {
     public:
         FileStream() = default;
-        explicit FileStream(std::filesystem::path filepath, OpenModeFlags openMode);
+        explicit FileStream(StringView filepath, OpenModeFlags openMode);
         
-        bool Open(const std::filesystem::path& filepath, OpenModeFlags openMode);
+        bool Open(const StringView& filepath, OpenModeFlags openMode);
         SizeType Read(void* outBuffer, SizeType count) override;
         SizeType Write(const void* inBuffer, SizeType count) override;
         bool Seek(Nova::Seek seekMode, OffsetType offset) override;
@@ -20,7 +20,7 @@ namespace Nova
         
 
     private:
-        std::filesystem::path m_Filepath;
+        StringView m_Filepath;
         FILE* m_Handle = nullptr;
     };
 

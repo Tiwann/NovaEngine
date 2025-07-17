@@ -18,19 +18,19 @@ namespace Nova
         }
     }
     
-    FileStream::FileStream(std::filesystem::path filepath, const OpenModeFlags openMode): Stream(openMode), m_Filepath(std::move(filepath))
+    FileStream::FileStream(StringView filepath, const OpenModeFlags openMode): Stream(openMode), m_Filepath(std::move(filepath))
     {
-        m_Handle = fopen(m_Filepath.string().c_str(), GetMode(openMode));
+        m_Handle = fopen(*m_Filepath, GetMode(openMode));
         m_Opened = m_Handle;
     }
 
-    bool FileStream::Open(const std::filesystem::path& filepath, const OpenModeFlags openMode)
+    bool FileStream::Open(const StringView& filepath, const OpenModeFlags openMode)
     {
         if(m_Opened) Close();
         m_Filepath = filepath;
         m_OpenMode = openMode;
 
-        m_Handle = fopen(m_Filepath.string().c_str(), GetMode(openMode));
+        m_Handle = fopen(*m_Filepath, GetMode(openMode));
         return m_Opened = m_Handle;
     }
 

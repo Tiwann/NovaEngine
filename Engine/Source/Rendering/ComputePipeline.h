@@ -1,16 +1,15 @@
 ﻿#pragma once
-#include <cstdint>
-
-typedef uint32_t VkPipelineCreateFlags;
 
 namespace Nova::Rendering
 {
     class Device;
+    class ShaderModule;
 
     struct ComputePipelineCreateInfo
     {
         Device* device;
-        VkPipelineCreateFlags flags;
+        ShaderModule* shaderModule;
+        void* pipelineLayout;
     };
 
     class ComputePipeline

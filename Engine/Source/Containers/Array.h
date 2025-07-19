@@ -250,6 +250,21 @@ namespace Nova
             m_Count += Count;
         }
 
+        void Emplace(T&& element)
+        {
+            if(m_Count >= m_Allocated)
+            {
+                m_Allocated = Realloc(m_Allocated);
+                PointerType Realloc = Memory::Calloc<T>(m_Allocated);
+                for(SizeType i = 0; i < m_Count; ++i)
+                    Realloc[i] = m_Data[i];
+                Memory::Free(m_Data);
+                m_Data = Realloc;
+            }
+
+            m_Data[m_Count++] = std::move(element);
+        }
+
         Array Union(const Array& Other)
         {
             Array Result = *this;

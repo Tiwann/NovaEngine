@@ -71,6 +71,6 @@ namespace Nova::Vulkan
         Frame m_Frames[3];
 
         uint32_t m_CurrentFrameIndex = 0;
-        uint32_t m_NewFrameIndex = 0;
+        uint32_t m_LastFrameIndex = 0;
     };
 }

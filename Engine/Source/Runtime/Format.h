@@ -51,6 +51,7 @@ namespace Nova
         Vector2 = R32G32_FLOAT,
         Vector3 = R32G32B32_FLOAT,
         Vector4 = R32G32B32A32_FLOAT,
+        Uint32 = R32_UINT,
     };
 
     static size_t GetFormatSize(const Format Format)

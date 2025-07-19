@@ -235,6 +235,23 @@ namespace Nova
         return m_DeltaMousePosition;
     }
 
+    void DesktopWindow::SetFullscreen(bool enabled)
+    {
+        if (enabled)
+        {
+            GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+            const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
+            m_CachedPosX = m_PosX;
+            m_CachedPosY = m_PosY;
+            m_CachedWidth = m_Width;
+            m_CachedHeight = m_Height;
+            glfwSetWindowMonitor(m_Handle, monitor, 0, 0, vidmode->width, vidmode->height, vidmode->refreshRate);
+        } else
+        {
+            glfwSetWindowMonitor(m_Handle, nullptr, m_CachedPosX, m_CachedPosY, m_CachedWidth, m_CachedHeight, GLFW_DONT_CARE);
+        }
+    }
+
 
     bool DesktopWindow::GetKeyDown(const KeyCode& keyCode) const
     {

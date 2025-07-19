@@ -16,5 +16,5 @@ endfunction()
 add_subdirectory(Engine)
 
 if(NOVA_ENGINE_BUILD_EXAMPLES)
-add_subdirectory(Example/HelloTriangle)
+    add_subdirectory(Example/HelloTriangle)
 endif ()

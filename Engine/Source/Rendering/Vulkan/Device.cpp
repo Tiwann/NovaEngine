@@ -176,8 +176,12 @@ namespace Nova::Vulkan
         Array<const char*> DeviceExtensions;
         DeviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
+        VkPhysicalDeviceIndexTypeUint8Features uint8Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES };
+        uint8Features.indexTypeUint8 = true;
+
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
         dynamicRenderingFeatures.dynamicRendering = true;
+        dynamicRenderingFeatures.pNext = &uint8Features;
 
         VkPhysicalDeviceFeatures features = {};
         features.samplerAnisotropy = true;
@@ -361,17 +365,17 @@ namespace Nova::Vulkan
             WaitIdle();
             m_Swapchain.Recreate();
             m_CurrentFrameIndex = 0;
-            m_NewFrameIndex = 0;
+            m_LastFrameIndex = 0;
             return false;
         }
 
-        Fence& Fence = m_Frames[m_CurrentFrameIndex].fence;
-        Fence.Wait();
-        Fence.Reset();
+        Fence& fence = m_Frames[m_LastFrameIndex].fence;
+        fence.Wait();
+        fence.Reset();
 
         const Semaphore& presentSemaphore = m_Frames[m_CurrentFrameIndex].presentSemaphore;
-        m_NewFrameIndex = m_Swapchain.AcquireNextImage(&presentSemaphore);
-        if (m_NewFrameIndex == 0xFFFFFFFF)
+        m_CurrentFrameIndex = m_Swapchain.AcquireNextImage(&presentSemaphore, nullptr, m_CurrentFrameIndex);
+        if (m_CurrentFrameIndex == 0xFFFFFFFF)
             return false;
 
         CommandBuffer& commandBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
@@ -386,7 +390,7 @@ namespace Nova::Vulkan
         CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
         Fence& fence = GetCurrentFence();
         Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
-        Semaphore& presentSemaphore = GetCurrentPresentSemaphore();
+        Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
         commandBuffer.End();
 
         m_GraphicsQueue.Submit(&commandBuffer, &presentSemaphore, &submitSemaphore, &fence, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
@@ -395,8 +399,8 @@ namespace Nova::Vulkan
     void Device::Present()
     {
         const Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
-        m_GraphicsQueue.Present(m_Swapchain, submitSemaphore, m_NewFrameIndex);
-        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_Swapchain.GetImageCount();
+        (void)m_GraphicsQueue.Present(m_Swapchain, submitSemaphore, m_CurrentFrameIndex);
+        m_LastFrameIndex = m_CurrentFrameIndex;
     }
 
     void Device::WaitIdle()

@@ -119,14 +119,24 @@ namespace Nova::Vulkan
         return Initialize(createInfo);
     }
 
-    uint32_t Swapchain::AcquireNextImage(const Semaphore* semaphore)
+    bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex)
     {
-        uint32_t nextFrameIndex = 0;
+        if (!semaphore)
+        {
+            frameIndex = 0xFFFFFFFF;
+            return false;
+        }
+
         const Device* device = static_cast<Device*>(m_Device);
         const VkDevice deviceHandle = device->GetHandle();
-        if (vkAcquireNextImageKHR(deviceHandle, m_Handle, 0xFF, semaphore->GetHandle(), nullptr, &nextFrameIndex) != VK_SUCCESS)
-            return 0xFFFFFFFF;
-        return nextFrameIndex;
+        const VkResult result = vkAcquireNextImageKHR(deviceHandle, m_Handle, 0xFFFFFFFF, semaphore->GetHandle(), fence ? fence->GetHandle() : nullptr, &frameIndex);
+        if (result != VK_SUCCESS)
+        {
+            frameIndex = 0xFFFFFFFF;
+            return false;
+        }
+
+        return true;
     }
 
     void Swapchain::ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget)

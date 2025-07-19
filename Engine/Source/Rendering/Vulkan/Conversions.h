@@ -14,6 +14,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Rendering/ShaderStage.h"
+
 namespace Nova::Vulkan
 {
     template<typename NovaType, typename VulkanType>
@@ -238,5 +240,27 @@ namespace Nova::Vulkan
         case DescriptorType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
         default: throw;
         }
+    }
+
+    template<>
+    inline VkShaderStageFlags Convert<ShaderStageFlags, VkShaderStageFlags>(const ShaderStageFlags& value)
+    {
+        VkShaderStageFlags result = 0;
+        const uint32_t val = value;
+        if (val & (uint32_t)ShaderStageFlagBits::Vertex)
+            result |= VK_SHADER_STAGE_VERTEX_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::Fragment)
+            result |= VK_SHADER_STAGE_FRAGMENT_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::Geometry)
+            result |= VK_SHADER_STAGE_GEOMETRY_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::Tessellation)
+            result |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::Mesh)
+            result |= VK_SHADER_STAGE_MESH_BIT_EXT;
+        if (val & (uint32_t)ShaderStageFlagBits::Compute)
+            result |= VK_SHADER_STAGE_COMPUTE_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::RayGeneration)
+            result |= VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        return result;
     }
 }

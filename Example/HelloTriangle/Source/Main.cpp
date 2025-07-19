@@ -3,16 +3,22 @@
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
 #include "Containers/StringView.h"
-#include "Rendering/Vertex.h"
 #include "Rendering/Vulkan/Buffer.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Rendering/Vulkan/GraphicsPipeline.h"
+#include "Rendering/ShaderModule.h"
+#include "Rendering/Vulkan/ShaderModule.h"
+
 #include "ShaderUtils.h"
 #include "BufferUtils.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <chrono>
+
+#include "Math/Vector3.h"
+#include "Math/Vector4.h"
+
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
 static bool g_Running = true;
@@ -71,31 +77,32 @@ namespace Nova
 
 
         Array<uint32_t> vertSpirv, fragSpirv;
-        CompileShaderToSpirV(R"(Shaders/HelloTriangle.slang)", vertSpirv, fragSpirv);
+        CompileShaderToSpirV(R"(D:\Dev\NovaEngine\Example\HelloTriangle\Shaders\HelloTriangle.slang)", vertSpirv, fragSpirv);
 
-        VkShaderModule vertexShaderModule = nullptr, fragmentShaderModule = nullptr;
-        VkShaderModuleCreateInfo vertShaderModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+        Rendering::ShaderModuleCreateInfo vertShaderModuleCreateInfo;
+        vertShaderModuleCreateInfo.device = &device;
+        vertShaderModuleCreateInfo.stage = ShaderStageFlagBits::Vertex;
+        vertShaderModuleCreateInfo.code = vertSpirv.Data();
         vertShaderModuleCreateInfo.codeSize = vertSpirv.Size();
-        vertShaderModuleCreateInfo.pCode = vertSpirv.Data();
-        VkResult result = vkCreateShaderModule(device.GetHandle(), &vertShaderModuleCreateInfo, nullptr, &vertexShaderModule);
-        if (result != VK_SUCCESS)
-            return EXIT_FAILURE;
+        Vulkan::ShaderModule vertShaderModule;
+        vertShaderModule.Initialize(vertShaderModuleCreateInfo);
 
-        VkShaderModuleCreateInfo fragShaderModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
+        Rendering::ShaderModuleCreateInfo fragShaderModuleCreateInfo;
+        fragShaderModuleCreateInfo.device = &device;
+        fragShaderModuleCreateInfo.stage = ShaderStageFlagBits::Fragment;
+        fragShaderModuleCreateInfo.code = fragSpirv.Data();
         fragShaderModuleCreateInfo.codeSize = fragSpirv.Size();
-        fragShaderModuleCreateInfo.pCode = fragSpirv.Data();
-        result = vkCreateShaderModule(device.GetHandle(), &fragShaderModuleCreateInfo, nullptr, &fragmentShaderModule);
-        if (result != VK_SUCCESS)
-            return EXIT_FAILURE;
+        Vulkan::ShaderModule fragShaderModule;
+        fragShaderModule.Initialize(fragShaderModuleCreateInfo);
 
         VkPipelineShaderStageCreateInfo vertexShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         vertexShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertexShaderStageCreateInfo.module = vertexShaderModule;
+        vertexShaderStageCreateInfo.module = vertShaderModule.GetHandle();
         vertexShaderStageCreateInfo.pName = "main";
 
         VkPipelineShaderStageCreateInfo fragmentShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         fragmentShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragmentShaderStageCreateInfo.module = fragmentShaderModule;
+        fragmentShaderStageCreateInfo.module = fragShaderModule.GetHandle();
         fragmentShaderStageCreateInfo.pName = "main";
 
 
@@ -106,7 +113,7 @@ namespace Nova
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 
         VkPipelineLayout pipelineLayout;
-        result = vkCreatePipelineLayout(device.GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+        VkResult result = vkCreatePipelineLayout(device.GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
         if (result != VK_SUCCESS)
             return EXIT_FAILURE;
 
@@ -116,8 +123,6 @@ namespace Nova
         pipelineCreateInfo.pipelineLayout = pipelineLayout;
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector3 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Normal", Format::Vector3 });
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Color", Format::Vector4 });
 
         pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
@@ -160,11 +165,17 @@ namespace Nova
         if (!pipeline.Initialize(pipelineCreateInfo))
             return EXIT_FAILURE;
 
+        struct Vertex
+        {
+            Vector3 position;
+            Vector4 color;
+        };
+
         const Vertex vertices[]
         {
-            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Vector2(0.0f, 0.0f), Vector3::Zero, Color::Red),
-            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Vector2(0.0f, 1.0f), Vector3::Zero, Color::Green),
-            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Vector2(1.0f, 1.0f), Vector3::Zero, Color::Blue),
+            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Color::Red),
+            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Color::Green),
+            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Color::Blue),
         };
 
         const uint32_t indices[] { 0, 2, 1 };
@@ -185,7 +196,7 @@ namespace Nova
                 commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
                 commandBuffer.BindVertexBuffer(vertexBuffer, 0);
-                commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::R32_UINT);
+                commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
                 commandBuffer.DrawIndexed(3, 0);
                 renderTarget.EndRendering();
 
@@ -195,6 +206,9 @@ namespace Nova
                 device.Present();
             }
         }
+
+        fragShaderModule.Destroy();
+        vertShaderModule.Destroy();
 
         vertexBuffer.Destroy();
         indexBuffer.Destroy();

@@ -7,6 +7,12 @@ namespace Nova::Rendering
 {
     class Device;
 
+    enum class TextureUsage
+    {
+        Sampled,
+        Storage,
+    };
+
     struct TextureCreateInfo
     {
         Device* device;

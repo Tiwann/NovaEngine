@@ -46,6 +46,7 @@ namespace Nova
         void SetCursorMode(const CursorMode& mode) const;
         Vector2 GetMousePosition() const;
         Vector2 GetDeltaMousePosition() const;
+        void SetFullscreen(bool enabled);
 
         bool GetKeyDown(const KeyCode& keyCode) const;
         bool GetKey(const KeyCode& keyCode) const;
@@ -67,6 +68,8 @@ namespace Nova
     private:
         GLFWwindow* m_Handle = nullptr;
         uint32_t m_PosX = 0, m_PosY = 0;
+        uint32_t m_CachedPosX = 0, m_CachedPosY = 0;
+        uint32_t m_CachedWidth = 0, m_CachedHeight = 0;
         bool m_HasFocus = false;
         bool m_IsMinimized = false;
         bool m_IsMaximized = false;

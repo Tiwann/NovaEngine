@@ -1,5 +1,6 @@
 ﻿#include "ComputePipeline.h"
 #include "Device.h"
+#include "ShaderModule.h"
 
 #include <vulkan/vulkan.h>
 
@@ -7,9 +8,24 @@ namespace Nova::Vulkan
 {
     bool ComputePipeline::Initialize(const Rendering::ComputePipelineCreateInfo& createInfo)
     {
-        m_Device = static_cast<Device*>(createInfo.device);
+        Device* device = (Device*)createInfo.device;
+
+        VkPipelineShaderStageCreateInfo shaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+        shaderStageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+        shaderStageCreateInfo.pName = "main";
+        shaderStageCreateInfo.module = ((ShaderModule*)createInfo.shaderModule)->GetHandle();
 
         VkComputePipelineCreateInfo computeCreateInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
+        computeCreateInfo.layout = (VkPipelineLayout)createInfo.pipelineLayout;
+        computeCreateInfo.stage = shaderStageCreateInfo;
+        computeCreateInfo.basePipelineHandle = nullptr;
+
+        const VkDevice deviceHandle = device->GetHandle();
+        const VkResult result = vkCreateComputePipelines(deviceHandle, nullptr, 1, &computeCreateInfo, nullptr, &m_Handle);
+        if (result != VK_SUCCESS)
+            return false;
+
+        m_Device = device;
         return true;
     }
 

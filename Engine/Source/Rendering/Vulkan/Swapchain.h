@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Fence.h"
 #include "Rendering/Swapchain.h"
 
 typedef struct VkSwapchainKHR_T* VkSwapchainKHR;
@@ -19,7 +20,7 @@ namespace Nova::Vulkan
         void Destroy() override;
         bool Recreate() override;
 
-        uint32_t AcquireNextImage(const Semaphore* semaphore);
+        bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex);
         void ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget);
 
         VkSwapchainKHR GetHandle() const;

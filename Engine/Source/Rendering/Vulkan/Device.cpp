@@ -38,7 +38,7 @@ namespace Nova::Vulkan
         Extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
-        if (static_cast<DesktopWindow*>(createInfo.window))
+        if (dynamic_cast<DesktopWindow*>(createInfo.window))
         {
             uint32_t GlfwExtensionCount;
             const char** GlfwExtensions = glfwGetRequiredInstanceExtensions(&GlfwExtensionCount);
@@ -368,7 +368,7 @@ namespace Nova::Vulkan
             return false;
         }
 
-        Fence& fence = GetCurrentFence();
+        Fence& fence = m_Frames[m_LastFrameIndex].fence;
         fence.Wait(1000000000);
         fence.Reset();
 
@@ -390,7 +390,7 @@ namespace Nova::Vulkan
     void Device::EndFrame()
     {
         CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
-        Fence& fence = GetCurrentFence();
+        Fence& fence = m_Frames[m_LastFrameIndex].fence;
         Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
         Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
         commandBuffer.End();

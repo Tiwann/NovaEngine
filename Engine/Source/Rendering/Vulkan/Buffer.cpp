@@ -154,7 +154,7 @@ namespace Nova::Vulkan
 
             const Queue* graphicsQueue = m_Device->GetGraphicsQueue();
             graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-            fence.Wait();
+            fence.Wait(~0);
             commandBuffer.Free();
             fence.Destroy();
         } else return false;

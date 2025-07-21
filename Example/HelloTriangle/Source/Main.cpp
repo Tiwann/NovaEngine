@@ -193,6 +193,8 @@ namespace Nova
             }
         }
 
+        device.WaitIdle();
+        vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);
         pipeline.Destroy();
         fragShaderModule.Destroy();
         vertShaderModule.Destroy();

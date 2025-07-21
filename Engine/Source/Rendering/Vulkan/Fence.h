@@ -9,11 +9,10 @@ namespace Nova::Vulkan
 
     class Fence : public Rendering::Fence
     {
-        constexpr static uint64_t WAIT_INFINITE = 0xFFFFFFFFFFFFFFFF;
     public:
         bool Initialize(const Rendering::FenceCreateInfo& createInfo) override;
         void Destroy() override;
-        void Wait(uint64_t timeout = WAIT_INFINITE) override;
+        void Wait(uint64_t timeout) override;
         void Reset() override;
 
         VkFence GetHandle() const;

@@ -28,7 +28,7 @@ namespace Nova::Rendering
 
         virtual bool Initialize(const FenceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
-        virtual void Wait(uint64_t timeout = 0xFF) = 0;
+        virtual void Wait(uint64_t timeout) = 0;
         virtual void Reset() = 0;
     };
 }

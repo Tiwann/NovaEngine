@@ -173,7 +173,7 @@ namespace Nova::Vulkan
 
             graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence, 0);
 
-            fence.Wait();
+            fence.Wait(~0);
             fence.Destroy();
             commandBuffer.Free();
         }

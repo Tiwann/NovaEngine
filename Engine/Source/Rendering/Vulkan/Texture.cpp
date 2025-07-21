@@ -132,7 +132,7 @@ namespace Nova::Vulkan
 
         Queue* graphicsQueue = device->GetGraphicsQueue();
         graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-        fence.Wait();
+        fence.Wait(~0);
         fence.Destroy();
         commandBuffer.Free();
 

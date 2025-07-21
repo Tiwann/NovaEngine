@@ -5,7 +5,6 @@
 #include "CullMode.h"
 #include "FrontFace.h"
 #include "PolygonMode.h"
-#include "Containers/Array.h"
 #include "PrimitiveTopology.h"
 #include "VertexLayout.h"
 
@@ -88,7 +87,7 @@ namespace Nova::Rendering
         void* pipelineLayout = nullptr;
         const void* shaderStages = nullptr;
         size_t shaderStagesCount = 0;
-        Array<Rendering::RenderTarget*> renderTargets;
+        RenderTarget* renderTarget = nullptr;
     };
 
     class GraphicsPipeline

@@ -19,6 +19,7 @@ namespace Nova::Vulkan
         }
 
         VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
+        descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
         descriptorPoolCreateInfo.maxSets = createInfo.maxSets;
         descriptorPoolCreateInfo.pPoolSizes = poolSizes.Data();
         descriptorPoolCreateInfo.poolSizeCount = poolSizes.Count();
@@ -36,6 +37,7 @@ namespace Nova::Vulkan
 
     void DescriptorPool::Destroy()
     {
+        vkDestroyDescriptorPool(m_Device->GetHandle(), m_Handle, nullptr);
     }
 
     VkDescriptorPool DescriptorPool::GetHandle() const

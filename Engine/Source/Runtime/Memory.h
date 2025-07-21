@@ -25,7 +25,7 @@ namespace Nova::Memory
     template<typename T>
     T* Memset(T* Ptr, int32_t Value, size_t Count = 1)
     {
-        return (T*)NOVA_MEMSET(Ptr, Value, Count * sizeof(T));
+        return (T*)NOVA_MEMSET((void*)Ptr, Value, Count * sizeof(T));
     }
 
     template<typename T>

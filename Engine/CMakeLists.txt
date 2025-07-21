@@ -16,7 +16,7 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC Vulkan::Vulkan Vulkan::slang miniaudio PRIVATE glfw imgui)
+target_link_libraries(NovaEngine PUBLIC Vulkan::Vulkan Vulkan::slang miniaudio imgui PRIVATE glfw)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
@@ -37,7 +37,7 @@ endif ()
 
 
 if(WIN32)
-    target_compile_definitions(NovaEngine PUBLIC UNICODE _UNICODE NOVA_PLATFORM_WINDOWS)
+    target_compile_definitions(NovaEngine PUBLIC UNICODE _UNICODE NOVA_PLATFORM_WINDOWS _CRT_SECURE_NO_WARNINGS)
 elseif (LINUX)
     target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_LINUX)
 endif ()

@@ -241,13 +241,13 @@ namespace Nova::Vulkan
         }
 
 
-        VmaAllocatorCreateInfo AllocatorCreateInfo = { 0 };
-        AllocatorCreateInfo.device = m_Handle;
-        AllocatorCreateInfo.instance = m_Instance;
-        AllocatorCreateInfo.physicalDevice = m_PhysicalDevice;
-        AllocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
+        VmaAllocatorCreateInfo allocatorCreateInfo = { 0 };
+        allocatorCreateInfo.device = m_Handle;
+        allocatorCreateInfo.instance = m_Instance;
+        allocatorCreateInfo.physicalDevice = m_PhysicalDevice;
+        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
-        if (vmaCreateAllocator(&AllocatorCreateInfo, &m_Allocator) != VK_SUCCESS)
+        if (vmaCreateAllocator(&allocatorCreateInfo, &m_Allocator) != VK_SUCCESS)
         {
             std::println(std::cerr, "Failed to create allocator!");
             return false;
@@ -265,9 +265,9 @@ namespace Nova::Vulkan
                 VkPresentModeKHR presentModes[8];
                 vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, presentModes);
 
-                for (size_t PresentModeIndex = 0; PresentModeIndex < presentModeCount; ++PresentModeIndex)
+                for (size_t presentModeIdx = 0; presentModeIdx < presentModeCount; ++presentModeIdx)
                 {
-                    const VkPresentModeKHR presentMode = presentModes[PresentModeIndex];
+                    const VkPresentModeKHR presentMode = presentModes[presentModeIdx];
                     if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
                     {
                         result = presentMode;
@@ -373,7 +373,6 @@ namespace Nova::Vulkan
         fence.Reset();
 
         const Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
-        //TODO: FIX THIS
         if (!m_Swapchain.AcquireNextImage(&presentSemaphore, nullptr, m_CurrentFrameIndex))
         {
             m_Swapchain.Invalidate();
@@ -680,6 +679,11 @@ namespace Nova::Vulkan
     VmaAllocator Device::GetAllocator() const
     {
         return m_Allocator;
+    }
+
+    VkPhysicalDevice Device::GetPhysicalDevice() const
+    {
+        return m_PhysicalDevice;
     }
 
     Surface* Device::GetSurface()

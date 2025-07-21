@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
 #include <cstdint>
-#include <format>
 
 namespace Nova::Rendering
 {
@@ -41,10 +40,10 @@ namespace Nova::Rendering
         uint32_t GetMips() const { return m_Mips; }
         uint32_t GetSamples() const { return m_Samples; }
     protected:
-        Format m_Format;
-        uint32_t m_Width;
-        uint32_t m_Height;
-        uint32_t m_Mips;
-        uint32_t m_Samples;
+        Format m_Format = Format::None;
+        uint32_t m_Width = 0;
+        uint32_t m_Height = 0;
+        uint32_t m_Mips = 0;
+        uint32_t m_Samples = 0;
     };
 }

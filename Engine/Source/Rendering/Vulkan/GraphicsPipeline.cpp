@@ -120,17 +120,13 @@ namespace Nova::Vulkan
         dynamicState.dynamicStateCount = dynamicStates.Count();
         dynamicState.pDynamicStates =  dynamicStates.Data();
 
-        const Array<VkFormat> formats = createInfo.renderTargets.Transform<VkFormat>([](const auto& rt) -> VkFormat
-        {
-            return Convert<Format, VkFormat>(rt->GetColorFormat());
-        });
-
+        const VkFormat formats[1] = { Convert<Format, VkFormat>(createInfo.renderTarget->GetColorFormat()) };
         VkPipelineRenderingCreateInfo renderingInfo { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         renderingInfo.viewMask = 0;
-        renderingInfo.colorAttachmentCount = createInfo.renderTargets.Count();
-        renderingInfo.pColorAttachmentFormats = formats.Data();
-        renderingInfo.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-        renderingInfo.stencilAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
+        renderingInfo.colorAttachmentCount = 1;
+        renderingInfo.pColorAttachmentFormats = formats;
+        renderingInfo.depthAttachmentFormat = Convert<Format, VkFormat>(createInfo.renderTarget->GetDepthFormat());
+        renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(createInfo.renderTarget->GetDepthFormat());
 
         VkGraphicsPipelineCreateInfo pipelineCreateInfo { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
         pipelineCreateInfo.pNext = &renderingInfo;

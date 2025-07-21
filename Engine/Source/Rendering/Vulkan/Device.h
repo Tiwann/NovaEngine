@@ -41,6 +41,7 @@ namespace Nova::Vulkan
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
+        VkPhysicalDevice GetPhysicalDevice() const;
         Surface* GetSurface();
         Swapchain* GetSwapchain();
         CommandPool* GetCommandPool();

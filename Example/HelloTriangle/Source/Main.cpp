@@ -12,6 +12,10 @@
 #include "BufferUtils.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
+#include "Containers/StringFormat.h"
+#include "Rendering/Vulkan/Conversions.h"
+#include "Rendering/Vulkan/DescriptorPool.h"
+#include "Runtime/Time.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
@@ -23,12 +27,17 @@ static bool g_Running = true;
 
 namespace Nova
 {
+    static String GetAssetPath(const StringView filepath)
+    {
+        return StringFormat("{}/{}", APPLICATION_DIR, filepath);
+    }
+
     int GuardedMain(int, char**)
     {
         WindowCreateInfo windowCreateInfo;
         windowCreateInfo.title = "Hello Triangle";
-        windowCreateInfo.width = 1600;
-        windowCreateInfo.height = 900;
+        windowCreateInfo.width = 600;
+        windowCreateInfo.height = 400;
         windowCreateInfo.show = true;
 
         DesktopWindow window;
@@ -69,13 +78,11 @@ namespace Nova
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-
             renderTarget.Resize(newX, newY);
         });
 
-
         Array<uint32_t> vertSpirv, fragSpirv;
-        CompileShaderToSpirV(R"(D:\Dev\NovaEngine\Example\HelloTriangle\Shaders\HelloTriangle.slang)", vertSpirv, fragSpirv);
+        CompileShaderToSpirV(GetAssetPath("Shaders/HelloTriangle.slang"), vertSpirv, fragSpirv);
 
         Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
         Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);
@@ -141,7 +148,7 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = window.GetWidth();
         pipelineCreateInfo.scissorInfo.height = window.GetHeight();
-        pipelineCreateInfo.renderTargets.Add(&renderTarget);
+        pipelineCreateInfo.renderTarget = &renderTarget;
 
         const VkPipelineShaderStageCreateInfo shaderStages[] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
         pipelineCreateInfo.shaderStages = shaderStages;
@@ -169,15 +176,28 @@ namespace Nova
         Vulkan::Buffer vertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
         Vulkan::Buffer indexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
+        double lastTime = 0.0f;
         while (g_Running)
         {
+            double currentTime = Time::Get();
+            double deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            static double timer = 0.0f;
+            timer += deltaTime;
+            if (timer > 1.0)
+            {
+                const uint32_t fps = 1.0 / deltaTime;
+                std::println(std::cout, "Frame Time: {:.2f}ms | FPS: {}", deltaTime * 1000.0, fps);
+                timer = 0.0f;
+            }
+
             window.PollEvents();
 
             if (device.BeginFrame())
             {
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 renderTarget.BeginRendering(commandBuffer);
-                renderTarget.Clear(0x101010FF);
+                renderTarget.Clear(0x060606FF);
                 commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
                 commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
@@ -186,12 +206,17 @@ namespace Nova
                 commandBuffer.DrawIndexed(3, 0);
                 renderTarget.EndRendering();
 
-                device.ResolveToSwapchain(renderTarget);
-                //device.BlitToSwapchain(renderTarget, Filter::Nearest);
+                if constexpr (SAMPLE_COUNT > 1)
+                {
+                    device.ResolveToSwapchain(renderTarget);
+                } else {
+                    device.BlitToSwapchain(renderTarget, Filter::Nearest);
+                }
                 device.EndFrame();
                 device.Present();
             }
         }
+
 
         device.WaitIdle();
         vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);

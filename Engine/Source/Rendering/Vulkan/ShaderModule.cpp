@@ -18,6 +18,10 @@ namespace Nova::Vulkan
         m_Device = other.m_Device;
         m_Handle = other.m_Handle;
         m_Stage = other.m_Stage;
+
+        other.m_Handle = nullptr;
+        other.m_Device = nullptr;
+        other.m_Stage = ShaderStageFlagBits::None;
     }
 
     ShaderModule& ShaderModule::operator=(ShaderModule&& other) noexcept

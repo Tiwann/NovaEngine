@@ -8,16 +8,14 @@
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/ShaderModule.h"
 #include "Rendering/Vulkan/ShaderModule.h"
-
 #include "ShaderUtils.h"
 #include "BufferUtils.h"
+#include "Math/Vector3.h"
+#include "Math/Vector4.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <chrono>
-
-#include "Math/Vector3.h"
-#include "Math/Vector4.h"
 
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
@@ -79,21 +77,8 @@ namespace Nova
         Array<uint32_t> vertSpirv, fragSpirv;
         CompileShaderToSpirV(R"(D:\Dev\NovaEngine\Example\HelloTriangle\Shaders\HelloTriangle.slang)", vertSpirv, fragSpirv);
 
-        Rendering::ShaderModuleCreateInfo vertShaderModuleCreateInfo;
-        vertShaderModuleCreateInfo.device = &device;
-        vertShaderModuleCreateInfo.stage = ShaderStageFlagBits::Vertex;
-        vertShaderModuleCreateInfo.code = vertSpirv.Data();
-        vertShaderModuleCreateInfo.codeSize = vertSpirv.Size();
-        Vulkan::ShaderModule vertShaderModule;
-        vertShaderModule.Initialize(vertShaderModuleCreateInfo);
-
-        Rendering::ShaderModuleCreateInfo fragShaderModuleCreateInfo;
-        fragShaderModuleCreateInfo.device = &device;
-        fragShaderModuleCreateInfo.stage = ShaderStageFlagBits::Fragment;
-        fragShaderModuleCreateInfo.code = fragSpirv.Data();
-        fragShaderModuleCreateInfo.codeSize = fragSpirv.Size();
-        Vulkan::ShaderModule fragShaderModule;
-        fragShaderModule.Initialize(fragShaderModuleCreateInfo);
+        Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
+        Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);
 
         VkPipelineShaderStageCreateInfo vertexShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         vertexShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -156,6 +141,7 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = window.GetWidth();
         pipelineCreateInfo.scissorInfo.height = window.GetHeight();
+        pipelineCreateInfo.renderTargets.Add(&renderTarget);
 
         const VkPipelineShaderStageCreateInfo shaderStages[] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
         pipelineCreateInfo.shaderStages = shaderStages;
@@ -207,6 +193,7 @@ namespace Nova
             }
         }
 
+        pipeline.Destroy();
         fragShaderModule.Destroy();
         vertShaderModule.Destroy();
 

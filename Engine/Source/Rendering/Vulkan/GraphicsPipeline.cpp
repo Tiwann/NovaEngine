@@ -3,6 +3,7 @@
 #include "Conversions.h"
 #include <vulkan/vulkan.h>
 
+#include "Rendering/RenderTarget.h"
 
 
 namespace Nova::Vulkan
@@ -119,11 +120,15 @@ namespace Nova::Vulkan
         dynamicState.dynamicStateCount = dynamicStates.Count();
         dynamicState.pDynamicStates =  dynamicStates.Data();
 
-        constexpr VkFormat Formats[] { VK_FORMAT_R8G8B8A8_UNORM };
+        const Array<VkFormat> formats = createInfo.renderTargets.Transform<VkFormat>([](const auto& rt) -> VkFormat
+        {
+            return Convert<Format, VkFormat>(rt->GetColorFormat());
+        });
+
         VkPipelineRenderingCreateInfo renderingInfo { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         renderingInfo.viewMask = 0;
-        renderingInfo.colorAttachmentCount = 1;
-        renderingInfo.pColorAttachmentFormats = Formats;
+        renderingInfo.colorAttachmentCount = createInfo.renderTargets.Count();
+        renderingInfo.pColorAttachmentFormats = formats.Data();
         renderingInfo.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
         renderingInfo.stencilAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
 

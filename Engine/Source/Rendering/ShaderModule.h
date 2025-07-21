@@ -2,6 +2,8 @@
 #include "Rendering/ShaderStage.h"
 #include <cstdint>
 
+#include "Containers/Array.h"
+
 namespace Nova::Rendering
 {
     class Device;
@@ -9,9 +11,9 @@ namespace Nova::Rendering
     struct ShaderModuleCreateInfo
     {
         Device* device = nullptr;
-        uint32_t* code = nullptr;
+        const uint32_t* code = nullptr;
         size_t codeSize = 0;
-        ShaderStageFlags stage = ShaderStageFlagBits::None;
+        ShaderStageFlagBits stage = ShaderStageFlagBits::None;
     };
 
     class ShaderModule
@@ -22,6 +24,20 @@ namespace Nova::Rendering
 
         virtual bool Initialize(const ShaderModuleCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
+
+        template<typename ShaderModuleType> requires IsBaseOf<ShaderModule, ShaderModuleType>::value
+        static ShaderModuleType Create(Device& device, ShaderStageFlagBits stage, const Array<uint32_t>& spirvCode)
+        {
+            Rendering::ShaderModuleCreateInfo createInfo;
+            createInfo.device = &device;
+            createInfo.stage = stage;
+            createInfo.code = spirvCode.Data();
+            createInfo.codeSize = spirvCode.Size();
+
+            ShaderModuleType shaderModule;
+            shaderModule.Initialize(createInfo);
+            return std::move(shaderModule);
+        }
 
         ShaderStageFlags GetStageFlags() const { return m_Stage; }
     protected:

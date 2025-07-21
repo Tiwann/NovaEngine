@@ -365,18 +365,20 @@ namespace Nova::Vulkan
             WaitIdle();
             m_Swapchain.Recreate();
             m_CurrentFrameIndex = 0;
-            m_LastFrameIndex = 0;
             return false;
         }
 
-        Fence& fence = m_Frames[m_LastFrameIndex].fence;
-        fence.Wait();
+        Fence& fence = GetCurrentFence();
+        fence.Wait(1000000000);
         fence.Reset();
 
-        const Semaphore& presentSemaphore = m_Frames[m_CurrentFrameIndex].presentSemaphore;
-        m_CurrentFrameIndex = m_Swapchain.AcquireNextImage(&presentSemaphore, nullptr, m_CurrentFrameIndex);
-        if (m_CurrentFrameIndex == 0xFFFFFFFF)
+        const Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
+        //TODO: FIX THIS
+        if (!m_Swapchain.AcquireNextImage(&presentSemaphore, nullptr, m_CurrentFrameIndex))
+        {
+            m_Swapchain.Invalidate();
             return false;
+        }
 
         CommandBuffer& commandBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
         if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))

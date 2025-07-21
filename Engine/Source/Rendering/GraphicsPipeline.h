@@ -12,6 +12,7 @@
 namespace Nova::Rendering
 {
     class Device;
+    class RenderTarget;
 
     struct GraphicsPipelineCreateInfo
     {
@@ -82,9 +83,12 @@ namespace Nova::Rendering
         } scissorInfo;
 
         Device* device;
+
+        //TODO: THIS IS TEMPORARY
         void* pipelineLayout = nullptr;
         const void* shaderStages = nullptr;
         size_t shaderStagesCount = 0;
+        Array<Rendering::RenderTarget*> renderTargets;
     };
 
     class GraphicsPipeline

@@ -38,6 +38,8 @@ namespace Nova
         D32_FLOAT,
         D32_FLOAT_S8_UINT,
         D24_UNORM_S8_UINT,
+
+        // Astc formats
         ASTC_4X4_UNORM,
         ASTC_6X6_UNORM,
         ASTC_8X8_UNORM,
@@ -47,11 +49,14 @@ namespace Nova
         ASTC_8X8_SRGB,
         ASTC_12X12_SRGB,
 
+        // Aliases
         Float = R32_FLOAT,
         Vector2 = R32G32_FLOAT,
         Vector3 = R32G32B32_FLOAT,
         Vector4 = R32G32B32A32_FLOAT,
         Uint32 = R32_UINT,
+        Uint16 = R16_USHORT,
+        Uint8 = R8_UNORM,
     };
 
     static size_t GetFormatSize(const Format Format)

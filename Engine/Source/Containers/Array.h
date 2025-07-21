@@ -399,6 +399,18 @@ namespace Nova
             //std::ranges::sort(m_Data, m_Data + m_Count, Predicate);
         }
 
+        template<typename U>
+        Array<U> Transform(const Function<U(ConstReferenceType)>& predicate) const
+        {
+            Array<U> result;
+            for (size_t index = 0; index < m_Count; ++index)
+            {
+                const T& element = m_Data[index];
+                result.Add(predicate(element));
+            }
+            return result;
+        }
+
         Iterator begin() override { return m_Data; }
         Iterator end() override { return m_Data + m_Count; }
 

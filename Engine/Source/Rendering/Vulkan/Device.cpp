@@ -550,6 +550,78 @@ namespace Nova::Vulkan
         );
     }
 
+    void Device::BlitToSwapchain(Rendering::Texture& texture, Filter filter)
+    {
+        const VkImage swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
+        const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
+        Texture& tex = (Texture&)texture;
+
+        VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        transferBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        transferBarrier.srcAccessMask = 0;
+        transferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        transferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        transferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        transferBarrier.image = swapchainImage;
+        transferBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        transferBarrier.subresourceRange.baseMipLevel = 0;
+        transferBarrier.subresourceRange.levelCount = 1;
+        transferBarrier.subresourceRange.baseArrayLayer = 0;
+        transferBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &transferBarrier
+        );
+
+        const int32_t srcWidth = tex.GetWidth();
+        const int32_t srcHeight = tex.GetHeight();
+        const int32_t dstWidth = m_Swapchain.GetWidth();
+        const int32_t dstHeight = m_Swapchain.GetHeight();
+        VkImageBlit blit;
+        blit.srcOffsets[0] = VkOffset3D{ 0, 0, 0 };
+        blit.srcOffsets[1] = VkOffset3D{ srcWidth, srcHeight, 1 };
+        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.baseArrayLayer = 0;
+        blit.srcSubresource.layerCount = 1;
+        blit.srcSubresource.mipLevel = 0;
+        blit.dstOffsets[0] = VkOffset3D{ 0, 0, 0 };
+        blit.dstOffsets[1] = VkOffset3D{ dstWidth, dstHeight, 1 };
+        blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.dstSubresource.baseArrayLayer = 0;
+        blit.dstSubresource.layerCount = 1;
+        blit.dstSubresource.mipLevel = 0;
+
+        const VkCommandBuffer cmdBuff = commandBuffer.GetHandle();
+        const VkImage srcImage = tex.GetImage();
+        const VkImage dstImage = swapchainImage;
+        vkCmdBlitImage(cmdBuff, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, Convert<Filter, VkFilter>(filter));
+
+        VkImageMemoryBarrier presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+        presentBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        presentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        presentBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        presentBarrier.dstAccessMask = VK_ACCESS_NONE;
+        presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        presentBarrier.image = swapchainImage;
+        presentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        presentBarrier.subresourceRange.baseMipLevel = 0;
+        presentBarrier.subresourceRange.levelCount = 1;
+        presentBarrier.subresourceRange.baseArrayLayer = 0;
+        presentBarrier.subresourceRange.layerCount = 1;
+
+        vkCmdPipelineBarrier(
+            commandBuffer.GetHandle(),
+            VK_PIPELINE_STAGE_TRANSFER_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &presentBarrier
+        );
+    }
+
     void Device::BlitToRenderTarget(Rendering::Texture& srcTexture, Rendering::RenderTarget& destRenderTarget, uint32_t x, uint32_t y)
     {
         const Texture& src = static_cast<Texture&>(srcTexture);

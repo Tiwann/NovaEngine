@@ -34,9 +34,9 @@ namespace Nova
         return m_Opened = m_Handle;
     }
 
-    Stream::SizeType FileStream::Read(void* outBuffer, const SizeType count)
+    Stream::SizeType FileStream::Read(void* outBuffer, const SizeType size)
     {
-        return fread(outBuffer, 1, count, m_Handle);
+        return fread(outBuffer, 1, size, m_Handle);
     }
 
     Stream::SizeType FileStream::Write(const void* inBuffer, const SizeType count)
@@ -90,7 +90,7 @@ namespace Nova
         m_Opened = m_Handle;
     }
 
-    Stream::SizeType StandardStream::Read(void* outBuffer, SizeType count)
+    Stream::SizeType StandardStream::Read(void* outBuffer, SizeType size)
     {
         return -1;
     }

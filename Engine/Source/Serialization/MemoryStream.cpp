@@ -7,12 +7,12 @@ namespace Nova
         m_Opened = true;
     }
 
-    Stream::SizeType MemoryStream::Read(void* outBuffer, const SizeType count)
+    Stream::SizeType MemoryStream::Read(void* outBuffer, const SizeType size)
     {
         if(!m_Opened) return EndOfFile;
-        memcpy(outBuffer, &m_Buffer[m_Position], count);
-        m_Position += (OffsetType)count;
-        return count;
+        memcpy(outBuffer, &m_Buffer[m_Position], size);
+        m_Position += (OffsetType)size;
+        return size;
     }
 
     Stream::SizeType MemoryStream::Write(const void* inBuffer, const SizeType count)

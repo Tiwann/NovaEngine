@@ -2,26 +2,32 @@
 #include "Runtime/Format.h"
 #include <cstdint>
 
+#include "Runtime/Flags.h"
+
 namespace Nova::Rendering
 {
     class Device;
 
-    enum class TextureUsage
+    enum class TextureUsageFlagBits
     {
+        None = 0,
         Sampled,
         Storage,
     };
 
+    typedef Flags<TextureUsageFlagBits> TextureUsageFlags;
+
     struct TextureCreateInfo
     {
-        Device* device;
-        Format format;
-        uint32_t width;
-        uint32_t height;
-        uint32_t mips;
-        uint32_t sampleCount;
-        uint8_t* data;
-        size_t dataSize;
+        Device* device = nullptr;
+        TextureUsageFlags usageFlags = TextureUsageFlagBits::None;
+        Format format = Format::None;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t mips = 0;
+        uint32_t sampleCount = 0;
+        uint8_t* data = nullptr;
+        size_t dataSize = 0;
     };
 
     class Texture
@@ -45,5 +51,6 @@ namespace Nova::Rendering
         uint32_t m_Height = 0;
         uint32_t m_Mips = 0;
         uint32_t m_Samples = 0;
+        TextureUsageFlags m_UsageFlags = TextureUsageFlagBits::None;
     };
 }

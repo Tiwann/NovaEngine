@@ -4,5 +4,6 @@
 
 namespace Nova
 {
-    void CompileShaderToSpirV(StringView filepath, Array<uint32_t>& vertSpirv, Array<uint32_t>& fragSpirv);
+    void CompileShaderToSpirv(StringView filepath, StringView moduleName, Array<uint32_t>& vertSpirv, Array<uint32_t>& fragSpirv);
+    void CompileShaderToSpirv(StringView filepath, StringView moduleName, Array<uint32_t>& computeSpirv);
 }

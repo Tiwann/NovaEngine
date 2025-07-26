@@ -1,33 +1,19 @@
-﻿module HelloTriangle;
+﻿module HelloCompute;
 
-struct VertexInput
+RWTexture2D<float4> screen;
+
+[shader("compute")]
+[numthreads(16, 16, 1)]
+void computeMain(uint3 threadId : SV_DispatchThreadID)
 {
-  float3 position;
-  float4 color;
+    uint2 screenPos = threadId.xy;
+    uint texWidth = 0, texHeight = 0;
+    screen.GetDimensions(texWidth, texHeight);
+    if (screenPos.x >= texWidth || screenPos.y >= texHeight)
+        return;
+
+    float2 texSize = float2((float)texWidth, (float)texHeight);
+    float2 normalizedCoord = float2((float)screenPos.x, (float)screenPos.y) / texSize;
+    float4 color = float4(normalizedCoord, 0.0, 1.0);
+    screen[screenPos] = color;
 }
-
-struct VertexOutput
-{
-  float4 position : SV_Position;
-  float4 color;
-}
-
-typedef VertexOutput FragmentInput;
-
-[shader("vertex")]
-VertexOutput vert(VertexInput input)
-{
-    VertexOutput out;
-    out.position = float4(input.position, 1.0);
-    out.color = input.color;
-    return out;
-}
-
-[shader("fragment")]
-float4 frag(FragmentInput input) : SV_Target
-{
-    return input.color;
-}
-
-
-

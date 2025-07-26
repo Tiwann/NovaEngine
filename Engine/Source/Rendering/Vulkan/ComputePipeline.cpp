@@ -9,11 +9,12 @@ namespace Nova::Vulkan
     bool ComputePipeline::Initialize(const Rendering::ComputePipelineCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
+        const ShaderModule* shaderModule = (ShaderModule*)createInfo.shaderModule;
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         shaderStageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;
         shaderStageCreateInfo.pName = "main";
-        shaderStageCreateInfo.module = ((ShaderModule*)createInfo.shaderModule)->GetHandle();
+        shaderStageCreateInfo.module = shaderModule->GetHandle();
 
         VkComputePipelineCreateInfo computeCreateInfo = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
         computeCreateInfo.layout = (VkPipelineLayout)createInfo.pipelineLayout;

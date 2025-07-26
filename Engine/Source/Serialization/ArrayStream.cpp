@@ -22,13 +22,13 @@ namespace Nova
         return true;
     }
 
-    Stream::SizeType ArrayStream::Read(void* outBuffer, SizeType count)
+    Stream::SizeType ArrayStream::Read(void* outBuffer, SizeType size)
     {
         if(!m_Opened) return -1ULL;
-        if (m_Position + count > m_Count) return -1ULL;
-        memcpy(outBuffer, &m_Data[m_Position], count);
-        m_Position += (OffsetType)count;
-        return count;
+        if (m_Position + size > m_Count) return -1ULL;
+        memcpy(outBuffer, &m_Data[m_Position], size);
+        m_Position += (OffsetType)size;
+        return size;
     }
 
     Stream::SizeType ArrayStream::Write(const void* inBuffer, SizeType count)

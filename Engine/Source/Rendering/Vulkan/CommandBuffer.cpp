@@ -86,6 +86,11 @@ namespace Nova::Vulkan
         vkCmdBindPipeline(m_Handle, VK_PIPELINE_BIND_POINT_GRAPHICS, ((const GraphicsPipeline&)pipeline).GetHandle());
     }
 
+    void CommandBuffer::BindComputePipeline(const Rendering::ComputePipeline& pipeline)
+    {
+        vkCmdBindPipeline(m_Handle, VK_PIPELINE_BIND_POINT_COMPUTE, ((const GraphicsPipeline&)pipeline).GetHandle());
+    }
+
     void CommandBuffer::BindVertexBuffer(const Rendering::Buffer& vertexBuffer, const size_t offset)
     {
         const Buffer& vertexBuff = (const Buffer&)vertexBuffer;
@@ -125,6 +130,11 @@ namespace Nova::Vulkan
     void CommandBuffer::DrawIndexed(const size_t count, const size_t offset)
     {
         vkCmdDrawIndexed(m_Handle, count, 1, 0, offset, 0);
+    }
+
+    void CommandBuffer::Dispatch(const uint32_t groupCountX, const uint32_t groupCountY, const uint32_t groupCountZ)
+    {
+        vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
     VkCommandBuffer CommandBuffer::GetHandle() const

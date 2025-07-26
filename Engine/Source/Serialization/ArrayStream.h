@@ -15,7 +15,7 @@ namespace Nova
         ArrayStream& operator=(ArrayStream&&) = delete;
 
         bool IsGood() const override;
-        SizeType Read(void* outBuffer, SizeType count) override;
+        SizeType Read(void* outBuffer, SizeType size) override;
         SizeType Write(const void* inBuffer, SizeType count) override;
         bool Seek(Nova::Seek seekMode, OffsetType offset) override;
         OffsetType Tell() const override;

@@ -36,6 +36,7 @@ namespace Nova::Vulkan
 
         void ResolveToSwapchain(Rendering::RenderTarget& renderTarget) override;
         void BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter) override;
+        void BlitToSwapchain(Rendering::Texture& texture, Filter filter) override;
         void BlitToRenderTarget(Rendering::Texture& srcTexture, Rendering::RenderTarget& destRenderTarget, uint32_t x, uint32_t y) override;
 
         VkInstance GetInstance() const;

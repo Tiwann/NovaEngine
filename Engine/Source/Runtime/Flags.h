@@ -23,6 +23,8 @@ namespace Nova
 
         constexpr operator uint32_t() const { return (uint32_t)m_Value; }
 
+        constexpr bool operator==(const Flags& other) const { return m_Value == other.m_Value; }
+
         constexpr Flags operator|(const Enum& other) const { return Flags(m_Value | (uint32_t)other); };
         constexpr Flags operator&(const Enum& other) const { return Flags(m_Value & (uint32_t)other); };
         constexpr Flags operator^(const Enum& other) const { return Flags(m_Value ^ (uint32_t)other); };
@@ -33,7 +35,7 @@ namespace Nova
         template<typename T> requires std::is_same_v<T, std::underlying_type_t<Enum>>
         T As() const { return (T)m_Value; }
 
-        bool Contains(const Enum& other) const { return m_Value & (uint32_t)other; }
+        constexpr bool Contains(const Enum& other) const { return ((uint32_t)m_Value & (uint32_t)other) != 0; }
     private:
         Enum m_Value = (Enum)0;
     };

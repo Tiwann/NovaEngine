@@ -11,13 +11,13 @@ namespace Nova::Rendering
 
     struct RenderTargetCreateInfo
     {
-        Device* device;
-        uint32_t width;
-        uint32_t height;
-        uint32_t depth;
-        Format colorFormat;
-        Format depthFormat;
-        uint32_t sampleCount;
+        Device* device = nullptr;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint32_t depth = 0;
+        Format colorFormat = Format::None;
+        Format depthFormat = Format::None;
+        uint32_t sampleCount = 0;
     };
 
     class RenderTarget

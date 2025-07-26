@@ -7,9 +7,9 @@ namespace Nova::Rendering
 
     struct ComputePipelineCreateInfo
     {
-        Device* device;
-        ShaderModule* shaderModule;
-        void* pipelineLayout;
+        Device* device = nullptr;
+        ShaderModule* shaderModule = nullptr;
+        void* pipelineLayout = nullptr;
     };
 
     class ComputePipeline

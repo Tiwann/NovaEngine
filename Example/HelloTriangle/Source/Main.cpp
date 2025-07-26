@@ -82,7 +82,7 @@ namespace Nova
         });
 
         Array<uint32_t> vertSpirv, fragSpirv;
-        CompileShaderToSpirV(GetAssetPath("Shaders/HelloTriangle.slang"), vertSpirv, fragSpirv);
+        CompileShaderToSpirv(GetAssetPath("Shaders/HelloTriangle.slang"), "HelloTriangle", vertSpirv, fragSpirv);
 
         Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
         Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);

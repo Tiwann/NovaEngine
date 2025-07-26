@@ -20,6 +20,7 @@
 #include "Rendering/Vulkan/DescriptorPool.h"
 #include "Rendering/Vulkan/ShaderModule.h"
 #include "Rendering/Vulkan/Texture.h"
+#include "Runtime/ScopedTimer.h"
 #include "Serialization/FileStream.h"
 
 
@@ -75,11 +76,11 @@ namespace Nova
             swapchain->Invalidate();
         });
 
-        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newX, const int32_t newY)
+        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newWidth, const int32_t newHeight)
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-            renderTarget.Resize(newX, newY);
+            renderTarget.Resize(newWidth, newHeight);
         });
 
         Rendering::TextureCreateInfo texCreateInfo;
@@ -95,8 +96,17 @@ namespace Nova
         Vulkan::Texture texture;
         texture.Initialize(texCreateInfo);
 
+        window.resizeEvent.Bind([&texture, &texCreateInfo](const int32_t newWidth, const int32_t newHeight)
+        {
+            Rendering::TextureCreateInfo createInfo = texCreateInfo;
+            createInfo.width = newWidth;
+            createInfo.height = newHeight;
+            texture.Initialize(createInfo);
+        });
+
+        // Don't know why but Slang compiler can't compile the compute shader to Spirv 1.5
 #if 1
-        FileStream stream("HelloCompute.slang.spv", OpenModeFlagBits::ReadBinary);
+        FileStream stream(GetAssetPath("Shaders/HelloCompute.slang.spv"), OpenModeFlagBits::ReadBinary);
         if (!stream.IsOpened())
             return EXIT_FAILURE;
 
@@ -111,6 +121,7 @@ namespace Nova
         stream.Write(computeSpirv.Data(), computeSpirv.Size());
         stream.Close();
 #endif
+
         Vulkan::ShaderModule shaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Compute, computeSpirv);
 
 
@@ -180,12 +191,8 @@ namespace Nova
 
         vkUpdateDescriptorSets(device.GetHandle(), 1, &descriptorWrite, 0, nullptr);
 
-        double lastTime = 0.0f;
-        while (g_Running)
+        const auto timerFunc = [](double deltaTime)
         {
-            const double currentTime = Time::Get();
-            const double deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
             static double timer = 0.0f;
             timer += deltaTime;
             if (timer > 1.0)
@@ -194,6 +201,11 @@ namespace Nova
                 std::println(std::cout, "Frame Time: {:.2f}ms | FPS: {}", deltaTime * 1000.0, fps);
                 timer = 0.0f;
             }
+        };
+
+        while (g_Running)
+        {
+            const ScopedTimer timer = ScopedTimer(timerFunc);
 
             window.PollEvents();
 
@@ -218,7 +230,12 @@ namespace Nova
 
 
         device.WaitIdle();
+        vkFreeDescriptorSets(device.GetHandle(), descriptorPool.GetHandle(), 1, &descriptorSet);
+        vkDestroyDescriptorSetLayout(device.GetHandle(), descriptorSetLayout, nullptr);
         vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);
+        computePipeline.Destroy();
+        descriptorPool.Destroy();
+        texture.Destroy();
         renderTarget.Destroy();
         device.Destroy();
         window.Destroy();

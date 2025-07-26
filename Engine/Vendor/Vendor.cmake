@@ -1,6 +1,4 @@
-﻿find_package(Vulkan REQUIRED COMPONENTS slang)
-
-add_subdirectory(Vendor/miniaudio)
+﻿add_subdirectory(Vendor/miniaudio)
 
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_INSTALL OFF)

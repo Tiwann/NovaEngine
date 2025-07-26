@@ -11,12 +11,12 @@ elseif(LINUX)
 endif ()
 
 
-add_library(NovaEngine)
+add_library(NovaEngine STATIC)
 set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC Vulkan::Vulkan Vulkan::slang miniaudio imgui PRIVATE glfw)
+target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui PRIVATE glfw)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)

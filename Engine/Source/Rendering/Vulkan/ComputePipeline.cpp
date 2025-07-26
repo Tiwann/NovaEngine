@@ -32,6 +32,7 @@ namespace Nova::Vulkan
 
     void ComputePipeline::Destroy()
     {
+        vkDestroyPipeline(m_Device->GetHandle(), m_Handle, nullptr);
     }
 
     VkPipeline ComputePipeline::GetHandle() const

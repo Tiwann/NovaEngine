@@ -323,7 +323,7 @@ namespace Nova::Vulkan
 
             Rendering::FenceCreateInfo fenceCreateInfo;
             fenceCreateInfo.device = this;
-            fenceCreateInfo.flags = Rendering::FenceCreateFlagBits::Signaled;
+            fenceCreateInfo.flags = Rendering::FenceCreateFlagBits::None;
             m_Frames[imageIndex].fence.Initialize(fenceCreateInfo);
 
             Rendering::CommandBufferAllocateInfo allocateInfo;
@@ -389,7 +389,7 @@ namespace Nova::Vulkan
     void Device::EndFrame()
     {
         CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
-        Fence& fence = m_Frames[m_LastFrameIndex].fence;
+        Fence& fence = GetCurrentFence();
         Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
         Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
         commandBuffer.End();

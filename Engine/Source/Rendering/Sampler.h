@@ -1,44 +1,50 @@
 ﻿#pragma once
-#include "Runtime/Format.h"
-#include <cstdint>
-#include <format>
+#include "CompareOperation.h"
+#include "Filter.h"
+#include "SamplerAddressMode.h"
+
 
 namespace Nova::Rendering
 {
     class Device;
 
-    struct TextureCreateInfo
+    struct SamplerCreateInfo
     {
-        Device* device;
-        Format format;
-        uint32_t width;
-        uint32_t height;
-        uint32_t mips;
-        uint32_t sampleCount;
-        uint8_t* data;
-        size_t dataSize;
+        Device* device = nullptr;
+        SamplerAddressMode addressModeU = SamplerAddressMode::Repeat;
+        SamplerAddressMode addressModeV = SamplerAddressMode::Repeat;
+        SamplerAddressMode addressModeW = SamplerAddressMode::Repeat;
+        Filter minFilter = Filter::Nearest;
+        Filter magFilter = Filter::Nearest;
+        bool anisotropyEnable = false;
+        bool compareEnable = false;
+        CompareOperation compareOp = CompareOperation::Always;
+        bool unnormalizedCoordinates = false;
+        float minLod = 0.0f;
+        float maxLod = 1.0f;
+        Filter mipmapFilter = Filter::Nearest;
     };
 
-    class Texture
+    class Sampler
     {
     public:
-        Texture() = default;
-        virtual ~Texture() = default;
+        Sampler() = default;
+        virtual ~Sampler() = default;
 
-        virtual bool Initialize(const TextureCreateInfo& createInfo) = 0;
+        virtual bool Initialize(const SamplerCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
-        virtual bool IsValid() = 0;
-
-        Format GetFormat() const { return m_Format; }
-        uint32_t GetWidth() const { return m_Width; }
-        uint32_t GetHeight() const { return m_Height; }
-        uint32_t GetMips() const { return m_Mips; }
-        uint32_t GetSamples() const { return m_Samples; }
     protected:
-        Format m_Format;
-        uint32_t m_Width;
-        uint32_t m_Height;
-        uint32_t m_Mips;
-        uint32_t m_Samples;
+        SamplerAddressMode m_AddressModeU = SamplerAddressMode::Repeat;
+        SamplerAddressMode m_AddressModeV = SamplerAddressMode::Repeat;
+        SamplerAddressMode m_AddressModeW = SamplerAddressMode::Repeat;
+        Filter m_MinFilter = Filter::Nearest;
+        Filter m_MagFilter = Filter::Nearest;
+        bool m_AnisotropyEnable = false;
+        bool m_CompareEnable = false;
+        CompareOperation m_CompareOp = CompareOperation::Always;
+        bool m_UnnormalizedCoordinates = false;
+        float m_MinLod = 0.0f;
+        float m_MaxLod = 1.0f;
+        Filter m_MipmapFilter = Filter::Nearest;
     };
 }

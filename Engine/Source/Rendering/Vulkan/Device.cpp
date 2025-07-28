@@ -28,29 +28,29 @@ namespace Nova::Vulkan
         applicationInfo.pApplicationName = *createInfo.applicationName;
         applicationInfo.applicationVersion = 0;
 
-        Array<const char*> Layers;
-        Layers.Add(VK_LAYER_KHRONOS_VALIDATION_NAME);
+        Array<const char*> layers;
+        layers.Add(VK_LAYER_KHRONOS_VALIDATION_NAME);
 
-        Array<const char*> Extensions;
-        Extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
+        Array<const char*> extensions;
+        extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
 
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        Extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #endif
 
         if (dynamic_cast<DesktopWindow*>(createInfo.window))
         {
             uint32_t GlfwExtensionCount;
             const char** GlfwExtensions = glfwGetRequiredInstanceExtensions(&GlfwExtensionCount);
-            Extensions.AddRange(GlfwExtensions, GlfwExtensionCount);
+            extensions.AddRange(GlfwExtensions, GlfwExtensionCount);
         }
 
         VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
         instanceCreateInfo.pApplicationInfo = &applicationInfo;
-        instanceCreateInfo.ppEnabledLayerNames = Layers.Data();
-        instanceCreateInfo.enabledLayerCount = Layers.Count();
-        instanceCreateInfo.ppEnabledExtensionNames = Extensions.Data();
-        instanceCreateInfo.enabledExtensionCount = Extensions.Count();
+        instanceCreateInfo.ppEnabledLayerNames = layers.Data();
+        instanceCreateInfo.enabledLayerCount = layers.Count();
+        instanceCreateInfo.ppEnabledExtensionNames = extensions.Data();
+        instanceCreateInfo.enabledExtensionCount = extensions.Count();
 
         if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) != VK_SUCCESS)
         {
@@ -173,8 +173,8 @@ namespace Nova::Vulkan
         queueCreateInfos.Add(transferQueueCreateInfo);
 
 
-        Array<const char*> DeviceExtensions;
-        DeviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        Array<const char*> deviceExtensions;
+        deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
         VkPhysicalDeviceIndexTypeUint8Features uint8Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES };
         uint8Features.indexTypeUint8 = true;
@@ -189,8 +189,8 @@ namespace Nova::Vulkan
         VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
         deviceCreateInfo.pNext = &dynamicRenderingFeatures;
         deviceCreateInfo.pEnabledFeatures = &features;
-        deviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.Data();
-        deviceCreateInfo.enabledExtensionCount = DeviceExtensions.Count();
+        deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.Data();
+        deviceCreateInfo.enabledExtensionCount = deviceExtensions.Count();
         deviceCreateInfo.enabledLayerCount = 0;
         deviceCreateInfo.ppEnabledLayerNames = nullptr;
         deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.Count();

@@ -137,6 +137,11 @@ namespace Nova::Vulkan
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
+    void CommandBuffer::PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values,void* layout)
+    {
+        vkCmdPushConstants(m_Handle, (VkPipelineLayout)layout, stageFlags, offset, size, values);
+    }
+
     VkCommandBuffer CommandBuffer::GetHandle() const
     {
         return m_Handle;

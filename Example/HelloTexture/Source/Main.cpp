@@ -18,9 +18,15 @@
 #include "Runtime/Time.h"
 #include "Runtime/ScopedTimer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <External/stb_image.h>
 #include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <chrono>
+
+#include "Rendering/Sampler.h"
+#include "Rendering/Vulkan/Sampler.h"
+#include "Rendering/Vulkan/Texture.h"
 
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
@@ -82,8 +88,34 @@ namespace Nova
             renderTarget.Resize(newX, newY);
         });
 
+        int32_t textureWidth = 0, textureHeight = 0;
+        stbi_set_flip_vertically_on_load(true);
+        stbi_uc* pixels = stbi_load(*GetAssetPath("Assets/Checker.png"), &textureWidth, &textureHeight, nullptr, STBI_rgb_alpha);
+
+        Rendering::TextureCreateInfo texCreateInfo;
+        texCreateInfo.device = &device;
+        texCreateInfo.usageFlags = Rendering::TextureUsageFlagBits::Sampled;
+        texCreateInfo.format = Format::R8G8B8A8_UNORM;
+        texCreateInfo.width = textureWidth;
+        texCreateInfo.height = textureHeight;
+        texCreateInfo.sampleCount = 1;
+        texCreateInfo.mips = 1;
+        texCreateInfo.data = pixels;
+        texCreateInfo.dataSize = textureWidth * textureHeight * 4 * sizeof(stbi_uc);
+
+        Vulkan::Texture texture;
+        texture.Initialize(texCreateInfo);
+
+        Rendering::SamplerCreateInfo samplerCreateInfo;
+        samplerCreateInfo.device =  &device;
+        Vulkan::Sampler sampler;
+        sampler.Initialize(samplerCreateInfo);
+
+
+        stbi_image_free(pixels);
+
         Array<uint32_t> vertSpirv, fragSpirv;
-        CompileShaderToSpirv(GetAssetPath("Shaders/HelloTriangle.slang"), "HelloTriangle", vertSpirv, fragSpirv);
+        CompileShaderToSpirv(GetAssetPath("Shaders/HelloTexture.slang"), "HelloTexture", vertSpirv, fragSpirv);
 
         Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
         Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);
@@ -99,21 +131,89 @@ namespace Nova
         fragmentShaderStageCreateInfo.pName = "main";
 
 
+        VkDescriptorSetLayoutBinding layoutBindings[2]
+        {
+            VkDescriptorSetLayoutBinding {
+                .binding = 0,
+                .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                .pImmutableSamplers = nullptr,
+            },
+            VkDescriptorSetLayoutBinding {
+                .binding = 1,
+                .descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                .pImmutableSamplers = nullptr,
+            },
+        };
+
+        VkDescriptorSetLayoutCreateInfo dslCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+        dslCreateInfo.bindingCount = std::size(layoutBindings);
+        dslCreateInfo.pBindings = layoutBindings;
+
+
+        VkDescriptorSetLayout descriptorSetLayout = nullptr;
+        VkResult result = vkCreateDescriptorSetLayout(device.GetHandle(), &dslCreateInfo, nullptr, &descriptorSetLayout);
+        if (result != VK_SUCCESS)
+            return EXIT_FAILURE;
+
         VkPushConstantRange range;
         range.offset = 0;
         range.size = sizeof(float);
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
+        pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutCreateInfo.setLayoutCount = 1;
         pipelineLayoutCreateInfo.pPushConstantRanges = &range;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
 
         VkPipelineLayout pipelineLayout;
-        VkResult result = vkCreatePipelineLayout(device.GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
+        result = vkCreatePipelineLayout(device.GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
         if (result != VK_SUCCESS)
             return EXIT_FAILURE;
+
+
+        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        descriptorPoolCreateInfo.device = &device;
+        descriptorPoolCreateInfo.sizes[DescriptorType::SampledImage] = 1;
+        descriptorPoolCreateInfo.sizes[DescriptorType::Sampler] = 1;
+        descriptorPoolCreateInfo.maxSets = 1;
+        Vulkan::DescriptorPool descriptorPool;
+        if (!descriptorPool.Initialize(descriptorPoolCreateInfo))
+            return EXIT_FAILURE;
+
+        VkDescriptorSetAllocateInfo dsAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+        dsAllocateInfo.descriptorPool = descriptorPool.GetHandle();
+        dsAllocateInfo.pSetLayouts = &descriptorSetLayout;
+        dsAllocateInfo.descriptorSetCount = 1;
+        VkDescriptorSet descriptorSet = nullptr;
+        vkAllocateDescriptorSets(device.GetHandle(), &dsAllocateInfo, &descriptorSet);
+
+
+        VkDescriptorImageInfo imageInfo;
+        imageInfo.sampler = sampler.GetHandle();
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = texture.GetImageView();
+
+        VkWriteDescriptorSet samplerDescriptorWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        samplerDescriptorWrite.dstSet = descriptorSet;
+        samplerDescriptorWrite.dstBinding = 0;
+        samplerDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+        samplerDescriptorWrite.descriptorCount = 1;
+        samplerDescriptorWrite.pImageInfo = &imageInfo;
+
+        VkWriteDescriptorSet imageDescriptorWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        imageDescriptorWrite.dstSet = descriptorSet;
+        imageDescriptorWrite.dstBinding = 1;
+        imageDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        imageDescriptorWrite.descriptorCount = 1;
+        imageDescriptorWrite.pImageInfo = &imageInfo;
+
+        const VkWriteDescriptorSet writeDescriptors[2] { samplerDescriptorWrite, imageDescriptorWrite };
+        vkUpdateDescriptorSets(device.GetHandle(), std::size(writeDescriptors), writeDescriptors, 0, nullptr);
 
 
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
@@ -121,7 +221,7 @@ namespace Nova
         pipelineCreateInfo.pipelineLayout = pipelineLayout;
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector3 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Color", Format::Vector4 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
 
         pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
         pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
@@ -164,23 +264,26 @@ namespace Nova
         if (!pipeline.Initialize(pipelineCreateInfo))
             return EXIT_FAILURE;
 
+
         struct Vertex
         {
             Vector3 position;
-            Vector4 color;
+            Vector2 texCoords;
         };
 
         const Vertex vertices[]
         {
-            Vertex(Vector3(-0.5f, -0.5f, 0.0f), Color::Red),
-            Vertex(Vector3(+0.0f, +0.5f, 0.0f), Color::Green),
-            Vertex(Vector3(+0.5f, -0.5f, 0.0f), Color::Blue),
+            { Vector3(-0.5f, -0.5f, 0.0f), Vector2(0.0f, 0.0f) },
+            { Vector3(-0.5f, +0.5f, 0.0f), Vector2(0.0f, 1.0f) },
+            { Vector3(+0.5f, +0.5f, 0.0f), Vector2(1.0f, 1.0f) },
+            { Vector3(+0.5f, -0.5f, 0.0f), Vector2(1.0f, 0.0f) }
         };
 
-        const uint32_t indices[] { 0, 2, 1 };
+        const uint32_t indices[] { 0, 2, 1, 0, 3, 2 };
 
         Vulkan::Buffer vertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
         Vulkan::Buffer indexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
+
 
         const auto onTimer = [](double deltaTime)
         {
@@ -197,7 +300,6 @@ namespace Nova
         while (g_Running)
         {
             const ScopedTimer timer(onTimer);
-            float currentTime = (float)Time::Get();
 
             window.PollEvents();
 
@@ -211,8 +313,8 @@ namespace Nova
                 commandBuffer.BindGraphicsPipeline(pipeline);
                 commandBuffer.BindVertexBuffer(vertexBuffer, 0);
                 commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
-                commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(float), &currentTime, pipelineLayout);
-                commandBuffer.DrawIndexed(3, 0);
+                vkCmdBindDescriptorSets(commandBuffer.GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
+                commandBuffer.DrawIndexed(6, 0);
                 renderTarget.EndRendering();
 
                 if constexpr (SAMPLE_COUNT > 1)
@@ -228,6 +330,11 @@ namespace Nova
 
 
         device.WaitIdle();
+        vkFreeDescriptorSets(device.GetHandle(), descriptorPool.GetHandle(), 1, &descriptorSet);
+        descriptorPool.Destroy();
+        sampler.Destroy();
+        texture.Destroy();
+        vkDestroyDescriptorSetLayout(device.GetHandle(), descriptorSetLayout, nullptr);
         vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);
         pipeline.Destroy();
         fragShaderModule.Destroy();

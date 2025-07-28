@@ -12,14 +12,14 @@ namespace Nova::Rendering
 
     struct SwapchainCreateInfo
     {
-        Device* device;
-        Surface* surface;
-        Format format;
-        SwapchainBuffering buffering;
-        PresentMode presentMode;
-        uint32_t width;
-        uint32_t height;
-        bool recycle;
+        Device* device = nullptr;
+        Surface* surface = nullptr;
+        Format format = Format::None;
+        SwapchainBuffering buffering = SwapchainBuffering::None;
+        PresentMode presentMode = PresentMode::Unknown;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        bool recycle = false;
     };
 
     class Swapchain

@@ -12,7 +12,7 @@ namespace Nova::Vulkan
     public:
         bool Initialize(const Rendering::FenceCreateInfo& createInfo) override;
         void Destroy() override;
-        void Wait(uint64_t timeout) override;
+        void Wait(uint64_t timeoutNs) override;
         void Reset() override;
 
         VkFence GetHandle() const;

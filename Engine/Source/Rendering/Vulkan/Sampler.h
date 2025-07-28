@@ -1,16 +1,21 @@
-﻿//
-// Created by Tiwann on 16/07/2025.
-//
+﻿#pragma once
+#include "Rendering/Sampler.h"
 
-#ifndef SAMPLER_H
-#define SAMPLER_H
+typedef struct VkSampler_T* VkSampler;
 
+namespace Nova::Vulkan
+{
+    class Device;
 
+    class Sampler : public Rendering::Sampler
+    {
+    public:
+        bool Initialize(const Rendering::SamplerCreateInfo& createInfo) override;
+        void Destroy() override;
 
-class Sampler {
-
-};
-
-
-
-#endif //SAMPLER_H
+        VkSampler GetHandle() const;
+    private:
+        Device* m_Device = nullptr;
+        VkSampler m_Handle = nullptr;
+    };
+}

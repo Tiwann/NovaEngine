@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Rendering/CommandBuffer.h"
+#include "Rendering/ShaderStage.h"
 
 typedef struct VkCommandBuffer_T* VkCommandBuffer;
 
@@ -26,6 +27,7 @@ namespace Nova::Vulkan
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void DrawIndexed(size_t count, size_t offset) override;
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
+        void PushConstants(ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values, void* layout);
 
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;

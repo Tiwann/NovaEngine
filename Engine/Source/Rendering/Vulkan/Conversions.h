@@ -11,10 +11,10 @@
 #include "Rendering/PresentMode.h"
 #include "Rendering/Filter.h"
 #include "Runtime/Format.h"
+#include "Rendering/ShaderStage.h"
 
 #include <vulkan/vulkan.h>
 
-#include "Rendering/ShaderStage.h"
 
 namespace Nova::Vulkan
 {
@@ -238,6 +238,17 @@ namespace Nova::Vulkan
         case DescriptorType::AccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
         case DescriptorType::StorageTexelBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
         case DescriptorType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkSamplerMipmapMode Convert<Filter, VkSamplerMipmapMode>(const Filter& value)
+    {
+        switch (value)
+        {
+        case Filter::Nearest: return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+        case Filter::Linear: return VK_SAMPLER_MIPMAP_MODE_LINEAR;
         default: throw;
         }
     }

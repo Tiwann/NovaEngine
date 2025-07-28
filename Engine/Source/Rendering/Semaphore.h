@@ -6,7 +6,7 @@ namespace Nova::Rendering
 
     struct SemaphoreCreateInfo
     {
-        Device* device;
+        Device* device = nullptr;
     };
 
     class Semaphore

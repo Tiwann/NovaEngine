@@ -1,9 +1,9 @@
 ﻿#include "AudioSystem.h"
+#include "AudioClip.h"
 #include <cstdlib>
 #include <cstring>
 #include <print>
 
-#include "AudioClip.h"
 
 #define MA_FAILED(result) (result != MA_SUCCESS)
 
@@ -41,17 +41,19 @@ static void OnProcess(void* userData, float* framesOut, ma_uint64 frameCount)
 
 namespace Nova
 {
+    AudioSystem* AudioSystem::s_Instance = nullptr;
+
     AudioSystem::AudioSystem()
     {
         memset(&m_Engine, 0, sizeof(ma_engine));
     }
 
-    bool AudioSystem::Initialize(const uint32_t Channels, const uint32_t SampleRate, const uint32_t ListenerCount)
+    bool AudioSystem::Initialize(const uint32_t channels, const uint32_t sampleRate, const uint32_t listenerCount)
     {
         ma_engine_config config = ma_engine_config_init();
-        config.channels = Channels;
-        config.sampleRate = SampleRate;
-        config.listenerCount = ListenerCount;
+        config.channels = channels;
+        config.sampleRate = sampleRate;
+        config.listenerCount = listenerCount;
         config.allocationCallbacks = ma_allocation_callbacks(this, OnMalloc, OnRealloc, OnFree);
         config.dataCallback = AudioDataProc;
         config.notificationCallback = OnNotification;
@@ -65,16 +67,46 @@ namespace Nova
         result = ma_engine_start(&m_Engine);
         if (result != MA_SUCCESS) return false;
 
+        if (!s_Instance)
+        {
+            s_Instance = this;
+        }
         return true;
     }
 
-    void AudioSystem::Shutdown()
+    bool AudioSystem::Initialize(AudioSystemCreateInfo createInfo)
+    {
+        ma_engine_config config = ma_engine_config_init();
+        config.channels = createInfo.channels;
+        config.sampleRate = createInfo.sampleRate;
+        config.listenerCount = createInfo.listenerCount;
+        config.allocationCallbacks = ma_allocation_callbacks(this, OnMalloc, OnRealloc, OnFree);
+        config.dataCallback = AudioDataProc;
+        config.notificationCallback = OnNotification;
+        config.onProcess = OnProcess;
+        config.pProcessUserData = this;
+        config.noAutoStart = true;
+
+        ma_result result = ma_engine_init(&config, &m_Engine);
+        if (result != MA_SUCCESS) return false;
+
+        result = ma_engine_start(&m_Engine);
+        if (result != MA_SUCCESS) return false;
+
+        if (!s_Instance)
+        {
+            s_Instance = this;
+        }
+        return true;
+    }
+
+    void AudioSystem::Destroy()
     {
         ma_engine_stop(&m_Engine);
         ma_engine_uninit(&m_Engine);
     }
 
-    AudioClip* AudioSystem::CreateClipFromFile(const char* filepath)
+    AudioClip* AudioSystem::CreateClipFromFile(StringView filepath)
     {
         AudioClip* clip = new AudioClip(this);
         if (!clip->LoadFromFile(filepath))
@@ -106,8 +138,8 @@ namespace Nova
         ma_sound_stop(clip->GetHandle());
     }
 
-    void AudioSystem::PauseAudioClip(AudioClip* clip)
+    AudioSystem* AudioSystem::GetInstance()
     {
-        ma_sound_stop(clip->GetHandle());
+        return s_Instance;
     }
 }

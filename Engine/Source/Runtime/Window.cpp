@@ -1,5 +1,4 @@
 ﻿#include "Window.h"
-#include "DesktopWindow.h"
 
 namespace Nova
 {

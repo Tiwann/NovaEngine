@@ -42,7 +42,7 @@ namespace Nova
     int GuardedMain(int, char**)
     {
         WindowCreateInfo windowCreateInfo;
-        windowCreateInfo.title = "Hello Triangle";
+        windowCreateInfo.title = "Hello Texture";
         windowCreateInfo.width = 600;
         windowCreateInfo.height = 400;
         windowCreateInfo.show = true;
@@ -51,7 +51,7 @@ namespace Nova
         window.Initialize(windowCreateInfo);
 
         Rendering::DeviceCreateInfo deviceCreateInfo;
-        deviceCreateInfo.applicationName = "Hello Triangle";
+        deviceCreateInfo.applicationName = "Hello Texture";
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
@@ -308,8 +308,8 @@ namespace Nova
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 renderTarget.BeginRendering(commandBuffer);
                 renderTarget.Clear(0x060606FF);
-                commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
-                commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+                commandBuffer.SetViewport(0, 0, (float)renderTarget.GetWidth(), (float)renderTarget.GetHeight(), 0.0f, 1.0f);
+                commandBuffer.SetScissor(0, 0, (float)renderTarget.GetWidth(), (float)renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
                 commandBuffer.BindVertexBuffer(vertexBuffer, 0);
                 commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);

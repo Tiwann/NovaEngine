@@ -1,8 +1,9 @@
 ﻿#pragma once
-#include <random>
 #include "Color.h"
-#include "TypeTraits.h"
 #include "Math/Vector2.h"
+#include <random>
+#include <limits>
+#include <type_traits>
 
 namespace Nova
 {
@@ -11,17 +12,17 @@ namespace Nova
     public:
         static Color Color();
         static float Float(float min, float max);
-        static int32_t Integer(int32_t min, int32_t max);
 
-        template<typename T> requires IsIntegerValue<T>
-        static T Int(T min, T max)
+        template<typename T> requires std::is_integral<T>::value
+        static T Integer(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
         {
-            std::uniform_int_distribution<T> Distribution(min, max - 1);
-            return Distribution(s_RandomDevice);
+            std::uniform_int_distribution<T> distribution(min, max);
+            return distribution(s_RandomDevice);
         }
-        
+
         static Vector2 Vector2(float xMin, float yMin, float xMax, float yMax);
     private:
         static std::random_device s_RandomDevice;
+        static std::mt19937 s_RandomEngine;
     };
 }

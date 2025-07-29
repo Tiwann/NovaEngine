@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Containers/String.h"
-#include "Export.h"
 
 namespace Nova
 {
@@ -8,16 +7,16 @@ namespace Nova
     {
     public:
         Object();
-        explicit Object(String Name);
+        explicit Object(String name);
         virtual ~Object() = default;
 
         const String& GetObjectName() const;
-        void SetObjectName(const String& NewName);
+        void SetObjectName(const String& newName);
 
-        template <typename Derived> requires IsBaseOfValue<Object, Derived>
+        template <typename Derived> requires std::is_base_of_v<Object, Derived>
         Derived* As() { return dynamic_cast<Derived*>(this); }
 
-        template <typename Derived> requires IsBaseOfValue<Object, Derived>
+        template <typename Derived> requires std::is_base_of_v<Object, Derived>
         const Derived* As() const { return dynamic_cast<const Derived*>(this); }
 
     protected:

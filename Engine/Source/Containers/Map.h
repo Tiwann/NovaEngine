@@ -105,6 +105,11 @@ namespace Nova
             return false;
         }
 
+        void RemoveAt(const size_t index)
+        {
+            m_Data.RemoveAt(index);
+        }
+
         bool operator==(const Map& other) const
         {
             return m_Data == other.m_Data;

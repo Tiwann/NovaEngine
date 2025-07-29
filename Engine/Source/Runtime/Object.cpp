@@ -7,7 +7,7 @@ namespace Nova
         
     }
 
-    Object::Object(String Name) : m_Name(std::move(Name))
+    Object::Object(String name) : m_Name(std::move(name))
     {
     }
 
@@ -16,8 +16,8 @@ namespace Nova
         return m_Name;
     }
 
-    void Object::SetObjectName(const String& NewName)
+    void Object::SetObjectName(const String& newName)
     {
-        m_Name = NewName;
+        m_Name = newName;
     }
 }

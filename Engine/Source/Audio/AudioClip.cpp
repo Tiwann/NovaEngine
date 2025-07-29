@@ -7,10 +7,10 @@ namespace Nova
     {
     }
 
-    bool AudioClip::LoadFromFile(const char* filepath)
+    bool AudioClip::LoadFromFile(StringView filepath)
     {
         ma_engine* engine = m_System->GetHandle();
-        const ma_result result = ma_sound_init_from_file(engine, filepath, 0, nullptr, nullptr, &m_Handle);
+        const ma_result result = ma_sound_init_from_file(engine, *filepath, 0, nullptr, nullptr, &m_Handle);
         if (result != MA_SUCCESS)
             return false;
         return true;
@@ -19,6 +19,11 @@ namespace Nova
     bool AudioClip::LoadFromMemory(const void* data, size_t size)
     {
         return false;
+    }
+
+    String AudioClip::GetAssetType() const
+    {
+        return "Audio Clip";
     }
 
     ma_sound* AudioClip::GetHandle()

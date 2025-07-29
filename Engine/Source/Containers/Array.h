@@ -415,7 +415,7 @@ namespace Nova
         Iterator end() override { return m_Data + m_Count; }
 
         ConstIterator begin() const override{ return m_Data; }
-        ConstIterator end() const override { return (PointerType)(&m_Data[0] + m_Count); }
+        ConstIterator end() const override { return (PointerType)(m_Data + m_Count); }
 
         ConstPointerType Data() const { return m_Data; }
         PointerType Data() { return m_Data; }

@@ -46,6 +46,7 @@ namespace Nova::Vulkan
         Surface* GetSurface();
         Swapchain* GetSwapchain();
         CommandPool* GetCommandPool();
+        CommandPool* GetTransferCommandPool();
         Queue* GetGraphicsQueue();
         Queue* GetPresentQueue();
         Queue* GetComputeQueue();
@@ -65,6 +66,7 @@ namespace Nova::Vulkan
         Surface m_Surface;
         Swapchain m_Swapchain;
         CommandPool m_CommandPool;
+        CommandPool m_TransferCommandPool;
 
         Queue m_GraphicsQueue;
         Queue m_PresentQueue;

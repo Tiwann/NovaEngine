@@ -23,6 +23,9 @@ namespace Nova::Vulkan
         VkImageView GetImageView() const;
         VmaAllocation GetAllocation() const;
     private:
+        friend class Swapchain;
+        friend class RenderTarget;
+
         Device* m_Device = nullptr;
         VkImage m_Image = nullptr;
         VkImageView m_ImageView = nullptr;

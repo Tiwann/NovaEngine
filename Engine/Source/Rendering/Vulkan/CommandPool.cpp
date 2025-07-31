@@ -43,4 +43,15 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
+    CommandBuffer CommandPool::AllocateCommandBuffer(Rendering::CommandBufferLevel level)
+    {
+        Rendering::CommandBufferAllocateInfo allocateInfo;
+        allocateInfo.commandPool = this;
+        allocateInfo.device = m_Device;
+        allocateInfo.level = level;
+
+        CommandBuffer cmdBuff;
+        cmdBuff.Allocate(allocateInfo);
+        return cmdBuff;
+    }
 }

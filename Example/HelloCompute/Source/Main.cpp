@@ -50,6 +50,7 @@ namespace Nova
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
+        deviceCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
@@ -175,7 +176,6 @@ namespace Nova
         dsAllocateInfo.descriptorSetCount = 1;
         VkDescriptorSet descriptorSet = nullptr;
         vkAllocateDescriptorSets(device.GetHandle(), &dsAllocateInfo, &descriptorSet);
-
 
         VkDescriptorImageInfo imageInfo;
         imageInfo.sampler = nullptr;

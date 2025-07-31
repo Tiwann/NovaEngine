@@ -1,8 +1,8 @@
 ﻿#pragma once
+#include "Containers/Array.h"
 #include "Rendering/ShaderStage.h"
 #include <cstdint>
 
-#include "Containers/Array.h"
 
 namespace Nova::Rendering
 {

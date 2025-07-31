@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Rendering/CommandBuffer.h"
 #include "Rendering/CommandPool.h"
 
 typedef struct VkCommandPool_T* VkCommandPool;
@@ -18,6 +19,8 @@ namespace Nova::Vulkan
 
         VkCommandPool GetHandle();
         const VkCommandPool* GetHandle() const;
+
+        CommandBuffer AllocateCommandBuffer(Rendering::CommandBufferLevel level);
     private:
         Device* m_Device = nullptr;
         VkCommandPool m_Handle = nullptr;

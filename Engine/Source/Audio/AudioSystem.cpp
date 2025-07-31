@@ -108,7 +108,7 @@ namespace Nova
 
     AudioClip* AudioSystem::CreateClipFromFile(StringView filepath)
     {
-        AudioClip* clip = new AudioClip(this);
+        AudioClip* clip = new AudioClip();
         if (!clip->LoadFromFile(filepath))
         {
             delete clip;
@@ -119,7 +119,7 @@ namespace Nova
 
     AudioClip* AudioSystem::CreateClipFromMemory(const uint8_t* data, size_t size)
     {
-        AudioClip* clip = new AudioClip(this);
+        AudioClip* clip = new AudioClip();
         if (!clip->LoadFromMemory(data, size))
         {
             delete clip;

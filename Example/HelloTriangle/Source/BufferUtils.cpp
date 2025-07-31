@@ -13,7 +13,7 @@ namespace Nova
 
         Vulkan::Buffer stagingBuffer;
         stagingBuffer.Initialize(stagingBufferCreateInfo);
-        stagingBuffer.CopyData(data, 0, size);
+        stagingBuffer.CPUCopy(data, 0, size);
 
         Rendering::BufferCreateInfo vertexBufferCreateInfo;
         vertexBufferCreateInfo.device = &device;
@@ -22,7 +22,7 @@ namespace Nova
 
         Vulkan::Buffer vertexBuffer;
         vertexBuffer.Initialize(vertexBufferCreateInfo);
-        stagingBuffer.CopyTo(vertexBuffer, 0, 0, size);
+        stagingBuffer.GPUCopy(vertexBuffer, 0, 0, size);
         stagingBuffer.Destroy();
         return std::move(vertexBuffer);
     }
@@ -36,7 +36,7 @@ namespace Nova
 
         Vulkan::Buffer stagingBuffer;
         stagingBuffer.Initialize(stagingBufferCreateInfo);
-        stagingBuffer.CopyData(data, 0, size);
+        stagingBuffer.CPUCopy(data, 0, size);
 
         Rendering::BufferCreateInfo indexBufferCreateInfo;
         indexBufferCreateInfo.device = &device;
@@ -45,7 +45,7 @@ namespace Nova
 
         Vulkan::Buffer indexBuffer;
         indexBuffer.Initialize(indexBufferCreateInfo);
-        stagingBuffer.CopyTo(indexBuffer, 0, 0, size);
+        stagingBuffer.GPUCopy(indexBuffer, 0, 0, size);
         stagingBuffer.Destroy();
         return std::move(indexBuffer);
     }

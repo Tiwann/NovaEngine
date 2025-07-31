@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Containers/String.h"
+#include "SwpchainBuffering.h"
 #include "Filter.h"
 #include <cstdint>
+
 
 namespace Nova
 {
@@ -14,7 +16,8 @@ namespace Nova::Rendering
     {
         String applicationName;
         uint16_t versionMajor, versionMinor;
-        Window* window;
+        Window* window = nullptr;
+        SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
     };
 
     class RenderTarget;

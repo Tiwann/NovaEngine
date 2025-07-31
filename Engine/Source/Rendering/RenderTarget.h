@@ -41,6 +41,7 @@ namespace Nova::Rendering
         Format GetColorFormat() const { return m_ColorFormat; }
         Format GetDepthFormat() const { return m_DepthFormat; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
+        uint32_t GetImageCount() const { return m_ImageCount; }
     protected:
         Device* m_Device = nullptr;
         uint32_t m_Width = 0;
@@ -49,5 +50,6 @@ namespace Nova::Rendering
         Format m_ColorFormat = Format::None;
         Format m_DepthFormat = Format::None;
         uint32_t m_SampleCount = 0;
+        uint32_t m_ImageCount = 0;
     };
 }

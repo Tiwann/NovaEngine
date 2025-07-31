@@ -21,17 +21,17 @@ namespace Nova
 
 		bool IsBound() const { return !m_Subscribers.IsEmpty(); }
 		
-		void Bind(DelegateType Subscriber)
+		void Bind(DelegateType subscriber)
 		{
-			m_Subscribers.Add(Subscriber);
+			m_Subscribers.Add(subscriber);
 		}
 
 		template<typename Class>
-		void BindMember(Class* Instance, MemberPointerType<Class> MemberFunc)
+		void BindMember(Class* instance, MemberPointerType<Class> memberFunction)
 		{
-			DelegateType Subscriber;
-			Subscriber.BindMember(Instance, MemberFunc);
-			m_Subscribers.Add(Subscriber);
+			DelegateType subscriber;
+			subscriber.BindMember(instance, memberFunction);
+			m_Subscribers.Add(subscriber);
 		}
 
 		void operator+=(DelegateType Subscriber)

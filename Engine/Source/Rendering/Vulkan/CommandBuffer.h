@@ -17,7 +17,7 @@ namespace Nova::Vulkan
         bool Begin(const Rendering::CommandBufferBeginInfo& beginInfo) override;
         void End() override;
 
-        void ClearColor(const Color& color) override;
+        void ClearColor(const Color& color, uint32_t attachmentIndex) override;
         void ClearDepth(float depth, uint32_t stencil) override;
         void BindGraphicsPipeline(const Rendering::GraphicsPipeline& pipeline) override;
         void BindComputePipeline(const Rendering::ComputePipeline& pipeline) override;
@@ -28,6 +28,10 @@ namespace Nova::Vulkan
         void DrawIndexed(size_t count, size_t offset) override;
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
         void PushConstants(ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values, void* layout);
+        void CopyBuffer(Rendering::Buffer& src, Rendering::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
+
+        void BeginRenderPass(const Rendering::RenderPass& renderPass) override;
+        void EndRenderPass() override;
 
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;

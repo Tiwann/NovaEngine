@@ -4,6 +4,7 @@
 #include "Vector3.h"
 #include "Quaternion.h"
 #include "Runtime/Assertion.h"
+#include <algorithm>
 
 namespace Nova
 {

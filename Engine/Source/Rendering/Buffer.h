@@ -34,8 +34,8 @@ namespace Nova::Rendering
         virtual void Destroy() = 0;
 
         virtual bool Resize(size_t newSize, bool keepData = true) = 0;
-        virtual bool CopyData(const void* src, size_t offset, size_t size) = 0;
-        virtual bool CopyTo(const Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
+        virtual bool CPUCopy(const void* src, size_t offset, size_t size) = 0;
+        virtual bool GPUCopy(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
     protected:
         size_t m_Size = 0;
         BufferUsage m_Usage = BufferUsage::None;

@@ -1,26 +1,18 @@
 ﻿#include "RenderTarget.h"
 #include "Device.h"
 #include "Conversions.h"
+#include "CommandBuffer.h"
+#include "Rendering/CommandBuffer.h"
 
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
-#include "CommandBuffer.h"
-#include "Rendering/CommandBuffer.h"
 
 namespace Nova::Vulkan
 {
     bool RenderTarget::Initialize(const Rendering::RenderTargetCreateInfo& createInfo)
     {
-        m_Device = createInfo.device;
-        m_Width = createInfo.width;
-        m_Height = createInfo.height;
-        m_Depth = createInfo.depth;
-        m_SampleCount = createInfo.sampleCount;
-        m_ColorFormat = createInfo.colorFormat;
-        m_DepthFormat = createInfo.depthFormat;
-
-        Device* device = static_cast<Device*>(m_Device);
+        Device* device = (Device*)createInfo.device;
         Swapchain* swapchain = device->GetSwapchain();
         CommandPool* commandPool = device->GetCommandPool();
         const VkDevice deviceHandle = device->GetHandle();
@@ -29,15 +21,18 @@ namespace Nova::Vulkan
 
         Array<VkImageMemoryBarrier> barriers;
 
-        for (size_t ImageIndex = 0; ImageIndex < swapchain->GetImageCount(); ImageIndex++)
+        for (size_t imageIndex = 0; imageIndex < swapchain->GetImageCount(); imageIndex++)
         {
+            m_ColorTextures[imageIndex].SetDirty();
+            m_DepthTextures[imageIndex].SetDirty();
+
             VkImageCreateInfo colorImageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
             colorImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-            colorImageCreateInfo.extent.width = m_Width;
-            colorImageCreateInfo.extent.height = m_Height;
-            colorImageCreateInfo.extent.depth = m_Depth;
-            colorImageCreateInfo.format = Convert<Format, VkFormat>(m_ColorFormat);
-            colorImageCreateInfo.samples = (VkSampleCountFlagBits)m_SampleCount;
+            colorImageCreateInfo.extent.width = createInfo.width;
+            colorImageCreateInfo.extent.height = createInfo.height;
+            colorImageCreateInfo.extent.depth = createInfo.depth;
+            colorImageCreateInfo.format = Convert<Format, VkFormat>(createInfo.colorFormat);
+            colorImageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
             colorImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
             colorImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -54,14 +49,14 @@ namespace Nova::Vulkan
             if (vmaCreateImage(allocatorHandle,
                 &colorImageCreateInfo,
                 &colorImageAllocationCreateInfo,
-                &m_ColorImages[ImageIndex],
-                &m_ColorAllocations[ImageIndex], nullptr) != VK_SUCCESS)
+                &m_ColorImages[imageIndex],
+                &m_ColorAllocations[imageIndex], nullptr) != VK_SUCCESS)
                 return false;
 
             VkImageViewCreateInfo colorImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             colorImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            colorImageViewCreateInfo.format = Convert<Format, VkFormat>(m_ColorFormat);
-            colorImageViewCreateInfo.image = m_ColorImages[ImageIndex];
+            colorImageViewCreateInfo.format = Convert<Format, VkFormat>(createInfo.colorFormat);
+            colorImageViewCreateInfo.image = m_ColorImages[imageIndex];
             colorImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             colorImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
             colorImageViewCreateInfo.subresourceRange.levelCount = 1;
@@ -70,7 +65,7 @@ namespace Nova::Vulkan
 
             if (vkCreateImageView(deviceHandle,
                 &colorImageViewCreateInfo,
-                nullptr,&m_ColorImageViews[ImageIndex]) != VK_SUCCESS)
+                nullptr,&m_ColorImageViews[imageIndex]) != VK_SUCCESS)
                 return false;
 
             VkImageMemoryBarrier colorBarrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
@@ -78,7 +73,7 @@ namespace Nova::Vulkan
             colorBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             colorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             colorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            colorBarrier.image = m_ColorImages[ImageIndex];
+            colorBarrier.image = m_ColorImages[imageIndex];
             colorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             colorBarrier.subresourceRange.baseMipLevel = 0;
             colorBarrier.subresourceRange.levelCount = 1;
@@ -91,11 +86,11 @@ namespace Nova::Vulkan
 
             VkImageCreateInfo depthImageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
             depthImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-            depthImageCreateInfo.extent.width = m_Width;
-            depthImageCreateInfo.extent.height = m_Height;
-            depthImageCreateInfo.extent.depth = m_Depth;
-            depthImageCreateInfo.format = Convert<Format, VkFormat>(m_DepthFormat);
-            depthImageCreateInfo.samples = (VkSampleCountFlagBits)m_SampleCount;
+            depthImageCreateInfo.extent.width = createInfo.width;
+            depthImageCreateInfo.extent.height = createInfo.height;
+            depthImageCreateInfo.extent.depth = createInfo.depth;
+            depthImageCreateInfo.format = Convert<Format, VkFormat>(createInfo.depthFormat);
+            depthImageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
             depthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             depthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
             depthImageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -112,14 +107,14 @@ namespace Nova::Vulkan
             if (vmaCreateImage(allocatorHandle,
                 &depthImageCreateInfo,
                 &depthImageAllocationCreateInfo,
-                &m_DepthImages[ImageIndex],
-                &m_DepthAllocations[ImageIndex], nullptr) != VK_SUCCESS)
+                &m_DepthImages[imageIndex],
+                &m_DepthAllocations[imageIndex], nullptr) != VK_SUCCESS)
                 return false;
 
             VkImageViewCreateInfo depthImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             depthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            depthImageViewCreateInfo.format = Convert<Format, VkFormat>(m_DepthFormat);
-            depthImageViewCreateInfo.image = m_DepthImages[ImageIndex];
+            depthImageViewCreateInfo.format = Convert<Format, VkFormat>(createInfo.depthFormat);
+            depthImageViewCreateInfo.image = m_DepthImages[imageIndex];
             depthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
             depthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
             depthImageViewCreateInfo.subresourceRange.levelCount = 1;
@@ -127,7 +122,7 @@ namespace Nova::Vulkan
             depthImageViewCreateInfo.subresourceRange.layerCount = 1;
             if (vkCreateImageView(deviceHandle,
                 &depthImageViewCreateInfo,
-                nullptr, &m_DepthImageViews[ImageIndex]))
+                nullptr, &m_DepthImageViews[imageIndex]))
                 return false;
 
             VkImageMemoryBarrier depthBarrier = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
@@ -135,7 +130,7 @@ namespace Nova::Vulkan
             depthBarrier.newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
             depthBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-            depthBarrier.image = m_DepthImages[ImageIndex];
+            depthBarrier.image = m_DepthImages[imageIndex];
             depthBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
             depthBarrier.subresourceRange.baseMipLevel = 0;
             depthBarrier.subresourceRange.levelCount = 1;
@@ -146,12 +141,7 @@ namespace Nova::Vulkan
             barriers.Add(depthBarrier);
         }
 
-        Rendering::CommandBufferAllocateInfo allocateInfo;
-        allocateInfo.device = device;
-        allocateInfo.level = Rendering::CommandBufferLevel::Primary;
-        allocateInfo.commandPool = commandPool;
-        CommandBuffer commandBuffer;
-        commandBuffer.Allocate(allocateInfo);
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
 
         if (commandBuffer.Begin({Rendering::CommandBufferUsageFlagBits::OneTimeSubmit}))
         {
@@ -177,6 +167,15 @@ namespace Nova::Vulkan
             fence.Destroy();
             commandBuffer.Free();
         }
+
+        m_Device = createInfo.device;
+        m_Width = createInfo.width;
+        m_Height = createInfo.height;
+        m_Depth = createInfo.depth;
+        m_SampleCount = createInfo.sampleCount;
+        m_ColorFormat = createInfo.colorFormat;
+        m_DepthFormat = createInfo.depthFormat;
+        m_ImageCount = swapchain->GetImageCount();
         return true;
     }
 
@@ -334,6 +333,49 @@ namespace Nova::Vulkan
         clearRect.baseArrayLayer = 0;
 
         vkCmdClearAttachments(commandBuffer, 1, &clearAttachment, 1, &clearRect);
+    }
+
+    const Texture& RenderTarget::GetColorTexture(size_t index)
+    {
+        const auto createTexture = [this, &index] -> Texture
+        {
+            Texture texture;
+            texture.m_Device = (Device*)m_Device;
+            texture.m_Image = m_ColorImages[index];
+            texture.m_ImageView = m_ColorImageViews[index];
+            texture.m_Width = m_Width;
+            texture.m_Height = m_Height;
+            texture.m_Allocation = m_ColorAllocations[index];
+            texture.m_Samples = m_SampleCount;
+            texture.m_Mips = 1;
+            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_Format = m_ColorFormat;
+
+            return texture;
+        };
+
+        return m_ColorTextures[index].Get(createTexture);
+    }
+
+    const Texture& RenderTarget::GetDepthTexture(size_t index)
+    {
+        const auto createTexture = [this, &index] -> Texture
+        {
+            Texture texture;
+            texture.m_Device = (Device*)m_Device;
+            texture.m_Image = m_DepthImages[index];
+            texture.m_ImageView = m_DepthImageViews[index];
+            texture.m_Width = m_Width;
+            texture.m_Height = m_Height;
+            texture.m_Allocation = m_DepthAllocations[index];
+            texture.m_Samples = m_SampleCount;
+            texture.m_Mips = 1;
+            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_Format = m_DepthFormat;
+            return texture;
+        };
+
+        return m_DepthTextures[index].Get(createTexture);
     }
 
     VkImage RenderTarget::GetColorImage(size_t index) const

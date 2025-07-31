@@ -13,6 +13,7 @@ namespace Nova::Rendering
         None = 0,
         Sampled,
         Storage,
+        Attachment
     };
 
     typedef Flags<TextureUsageFlagBits> TextureUsageFlags;

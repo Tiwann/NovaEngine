@@ -19,8 +19,8 @@ namespace Nova::Vulkan
         bool Initialize(const Rendering::BufferCreateInfo& createInfo) override;
         void Destroy() override;
         bool Resize(size_t newSize, bool keepData) override;
-        bool CopyData(const void* src, size_t offset, size_t size) override;
-        bool CopyTo(const Rendering::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
+        bool CPUCopy(const void* src, size_t offset, size_t size) override;
+        bool GPUCopy(Rendering::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
 
 
         VkBuffer GetHandle() const;

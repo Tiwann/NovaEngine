@@ -15,6 +15,9 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Rendering/LoadOperation.h"
+#include "Rendering/StoreOperation.h"
+
 
 namespace Nova::Vulkan
 {
@@ -252,6 +255,30 @@ namespace Nova::Vulkan
         default: throw;
         }
     }
+
+    template<>
+    inline VkAttachmentLoadOp Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(const Rendering::LoadOperation& value)
+    {
+        switch (value)
+        {
+        case Rendering::LoadOperation::Load: return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case Rendering::LoadOperation::Clear: return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case Rendering::LoadOperation::DontCare: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        default: throw;
+        }
+    }
+
+    template<>
+    inline VkAttachmentStoreOp Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(const Rendering::StoreOperation& value)
+    {
+        switch (value)
+        {
+        case Rendering::StoreOperation::Store: return VK_ATTACHMENT_STORE_OP_STORE;
+        case Rendering::StoreOperation::DontCare: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        default: throw;
+        }
+    }
+
 
     template<>
     inline VkShaderStageFlags Convert<ShaderStageFlags, VkShaderStageFlags>(const ShaderStageFlags& value)

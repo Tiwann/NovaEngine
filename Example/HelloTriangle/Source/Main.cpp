@@ -14,16 +14,16 @@
 #include "Math/Vector4.h"
 #include "Containers/StringFormat.h"
 #include "Rendering/Vulkan/Conversions.h"
-#include "Rendering/Vulkan/DescriptorPool.h"
 #include "Runtime/Time.h"
 #include "Runtime/ScopedTimer.h"
+#include "Rendering/RenderPass.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
 #include <chrono>
 
 
-static constexpr uint32_t SAMPLE_COUNT = 8;
+static constexpr uint32_t SAMPLE_COUNT = 1;
 static bool g_Running = true;
 
 namespace Nova
@@ -49,6 +49,7 @@ namespace Nova
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
+        deviceCreateInfo.buffering = SwapchainBuffering::TripleBuffering;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
@@ -75,11 +76,11 @@ namespace Nova
             swapchain->Invalidate();
         });
 
-        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newX, const int32_t newY)
+        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newWidth, const int32_t newHeight)
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-            renderTarget.Resize(newX, newY);
+            renderTarget.Resize(newWidth, newHeight);
         });
 
         Array<uint32_t> vertSpirv, fragSpirv;
@@ -194,6 +195,30 @@ namespace Nova
             }
         };
 
+        Rendering::RenderPassAttachment colorAttachment;
+        colorAttachment.type = Rendering::AttachmentType::Color;
+        colorAttachment.loadOp = Rendering::LoadOperation::Load;
+        colorAttachment.storeOp = Rendering::StoreOperation::Store;
+        colorAttachment.clearValue.color = Color::Black;
+        colorAttachment.textures[0] = &renderTarget.GetColorTexture(0);
+        colorAttachment.textures[1] = &renderTarget.GetColorTexture(1);
+        colorAttachment.textures[2] = &renderTarget.GetColorTexture(2);
+
+        Rendering::RenderPassAttachment depthAttachment;
+        depthAttachment.type = Rendering::AttachmentType::Depth;
+        depthAttachment.loadOp = Rendering::LoadOperation::Load;
+        depthAttachment.storeOp = Rendering::StoreOperation::Store;
+        depthAttachment.clearValue.depth = 1.0f;
+        depthAttachment.clearValue.stencil = 0;
+        depthAttachment.textures[0] = &renderTarget.GetDepthTexture(0);
+        depthAttachment.textures[1] = &renderTarget.GetDepthTexture(1);
+        depthAttachment.textures[2] = &renderTarget.GetDepthTexture(2);
+
+
+        Rendering::RenderPass renderPass(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+        renderPass.AddAttachment(colorAttachment);
+        renderPass.AddAttachment(depthAttachment);
+
         while (g_Running)
         {
             const ScopedTimer timer(onTimer);
@@ -204,8 +229,10 @@ namespace Nova
             if (device.BeginFrame())
             {
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
-                renderTarget.BeginRendering(commandBuffer);
-                renderTarget.Clear(0x060606FF);
+                commandBuffer.BeginRenderPass(renderPass);
+
+                //commandBuffer.ClearColor(0x06'06'06'FF, 0);
+                //renderTarget.Clear(0x060606FF);
                 commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
                 commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
@@ -213,7 +240,8 @@ namespace Nova
                 commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
                 commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(float), &currentTime, pipelineLayout);
                 commandBuffer.DrawIndexed(3, 0);
-                renderTarget.EndRendering();
+
+                commandBuffer.EndRenderPass();
 
                 if constexpr (SAMPLE_COUNT > 1)
                 {

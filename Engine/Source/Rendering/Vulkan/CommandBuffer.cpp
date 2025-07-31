@@ -4,14 +4,15 @@
 #include "Buffer.h"
 #include "Device.h"
 #include "Conversions.h"
+#include "GraphicsPipeline.h"
+#include "Rendering/RenderPass.h"
 
 #include <vulkan/vulkan.h>
 
-#include "GraphicsPipeline.h"
-
-
 namespace Nova::Vulkan
 {
+
+    static const Rendering::RenderPass* CurrentRenderPass = nullptr;
 
     bool CommandBuffer::Allocate(const Rendering::CommandBufferAllocateInfo& allocateInfo)
     {
@@ -38,7 +39,7 @@ namespace Nova::Vulkan
 
 
         const VkDevice deviceHandle = device->GetHandle();
-        if (vkAllocateCommandBuffers(deviceHandle, &info, &m_Handle))
+        if (vkAllocateCommandBuffers(deviceHandle, &info, &m_Handle) != VK_SUCCESS)
             return false;
         return true;
     }
@@ -54,7 +55,7 @@ namespace Nova::Vulkan
     bool CommandBuffer::Begin(const Rendering::CommandBufferBeginInfo& beginInfo)
     {
         VkCommandBufferBeginInfo info { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
-        info.flags = beginInfo.Flags;
+        info.flags = beginInfo.flags;
 
         if (m_Level == Rendering::CommandBufferLevel::Secondary)
         {
@@ -62,7 +63,7 @@ namespace Nova::Vulkan
             // TODO: Write api for secondary command buffers
         }
 
-        if (vkBeginCommandBuffer(m_Handle, &info))
+        if (vkBeginCommandBuffer(m_Handle, &info) != VK_SUCCESS)
             return false;
         return true;
     }
@@ -72,9 +73,19 @@ namespace Nova::Vulkan
         vkEndCommandBuffer(m_Handle);
     }
 
-    void CommandBuffer::ClearColor(const Color& color)
+    void CommandBuffer::ClearColor(const Color& color, const uint32_t attachmentIndex)
     {
+        VkClearAttachment clearAttachment;
+        clearAttachment.colorAttachment = attachmentIndex;
+        clearAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        clearAttachment.clearValue.color = VkClearColorValue{ { color.r, color.g, color.b, color.a }};
 
+        VkClearRect clearRect;
+        clearRect.rect.extent = VkExtent2D{ CurrentRenderPass->GetWidth(), CurrentRenderPass->GetHeight() };
+        clearRect.rect.offset = VkOffset2D{ (int32_t)CurrentRenderPass->GetOffsetX(), (int32_t)CurrentRenderPass->GetOffsetY() };
+        clearRect.baseArrayLayer = 0;
+        clearRect.layerCount = 1;
+        vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
     }
 
     void CommandBuffer::ClearDepth(float depth, uint32_t stencil)
@@ -137,9 +148,86 @@ namespace Nova::Vulkan
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
-    void CommandBuffer::PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values,void* layout)
+    void CommandBuffer::PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values, void* layout)
     {
         vkCmdPushConstants(m_Handle, (VkPipelineLayout)layout, stageFlags, offset, size, values);
+    }
+
+    void CommandBuffer::CopyBuffer(Rendering::Buffer& src, Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
+    {
+        VkBufferCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_COPY_2 };
+        region.srcOffset = srcOffset;
+        region.dstOffset = destOffset;
+        region.size = size;
+
+        VkCopyBufferInfo2 copyInfo { VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2 };
+        copyInfo.srcBuffer = ((Buffer&)src).GetHandle();
+        copyInfo.dstBuffer = ((Buffer&)dest).GetHandle();
+        copyInfo.regionCount = 1;
+        copyInfo.pRegions = &region;
+        vkCmdCopyBuffer2(m_Handle, &copyInfo);
+    }
+
+    void CommandBuffer::BeginRenderPass(const Rendering::RenderPass& renderPass)
+    {
+        Array<VkRenderingAttachmentInfo> colorAttachments;
+        const uint32_t frameIndex = m_Device->GetCurrentFrameIndex();
+
+        for (const Rendering::RenderPassAttachment& attachment : renderPass)
+        {
+            if (attachment.type == Rendering::AttachmentType::Depth)
+                continue;
+
+            const Texture* texture = (const Texture*)attachment.textures[frameIndex];
+            const Color& clearColor = attachment.clearValue.color;
+
+            VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
+            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
+            colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            colorAttachmentInfo.imageView = texture->GetImageView();
+            colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
+            // TODO: Handle resolve. Do we need to resolve to swapchain directly ?
+            //colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+            //colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            //colorAttachmentInfo.resolveImageView
+
+            colorAttachments.Add(colorAttachmentInfo);
+        }
+
+
+        const Rendering::RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
+        const Texture* texture = (const Texture*)depthAttachment->textures[frameIndex];
+        const Color& clearColor = depthAttachment->clearValue.color;
+
+        VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+        depthAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
+        depthAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
+        depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachmentInfo.imageView = texture->GetImageView();
+        depthAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
+
+        // TODO: Handle resolve. Do we need to resolve to swapchain directly ?
+        //info.resolveMode
+        //info.resolveImageLayout
+        //info.resolveImageView
+
+        VkRenderingInfo renderingInfo { VK_STRUCTURE_TYPE_RENDERING_INFO };
+        renderingInfo.layerCount = 1;
+        renderingInfo.viewMask = 0;
+        renderingInfo.renderArea.extent = { renderPass.GetWidth(), renderPass.GetHeight() };
+        renderingInfo.renderArea.offset = { (int32_t)renderPass.GetOffsetX(), (int32_t)renderPass.GetOffsetY() };
+        renderingInfo.colorAttachmentCount = renderPass.GetColorAttachmentCount();
+        renderingInfo.pColorAttachments = colorAttachments.Data();
+        renderingInfo.pDepthAttachment = renderPass.HasDepthAttachment() ? &depthAttachmentInfo : nullptr;
+        vkCmdBeginRendering(m_Handle, &renderingInfo);
+
+        CurrentRenderPass = &renderPass;
+    }
+
+    void CommandBuffer::EndRenderPass()
+    {
+        vkCmdEndRendering(m_Handle);
     }
 
     VkCommandBuffer CommandBuffer::GetHandle() const

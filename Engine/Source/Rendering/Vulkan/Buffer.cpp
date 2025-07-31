@@ -4,6 +4,8 @@
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
+#include "Rendering/Scoped.h"
+
 
 namespace Nova::Vulkan
 {
@@ -102,12 +104,26 @@ namespace Nova::Vulkan
         vmaDestroyBuffer(allocatorHandle, m_Handle, m_Allocation);
     }
 
-    bool Buffer::Resize(size_t newSize, bool keepData)
+    bool Buffer::Resize(const size_t newSize, bool keepData)
     {
+        Rendering::BufferCreateInfo bufferCreateInfo;
+        bufferCreateInfo.size = newSize;
+        bufferCreateInfo.device = m_Device;
+        bufferCreateInfo.usage = m_Usage;
+
+        Buffer newBuffer;
+        newBuffer.Initialize(bufferCreateInfo);
+
+        if (!GPUCopy(newBuffer, 0, 0, newSize))
+            return false;
+
+        Destroy();
+
+        *this = std::move(newBuffer);
         return false;
     }
 
-    bool Buffer::CopyData(const void* src, const size_t offset, const size_t size)
+    bool Buffer::CPUCopy(const void* src, const size_t offset, const size_t size)
     {
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         const VkResult result = vmaCopyMemoryToAllocation(allocatorHandle, src, m_Allocation, offset, size);
@@ -116,48 +132,25 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool Buffer::CopyTo(const Rendering::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
+    bool Buffer::GPUCopy(Rendering::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
-        Rendering::CommandBufferAllocateInfo allocateInfo;
-        allocateInfo.commandPool = m_Device->GetCommandPool();;
-        allocateInfo.device = m_Device;
-        allocateInfo.level = Rendering::CommandBufferLevel::Primary;
+        CommandPool* commandPool = m_Device->GetTransferCommandPool();
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
 
-        CommandBuffer commandBuffer;
-        if (!commandBuffer.Allocate(allocateInfo))
+        if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
-        Rendering::CommandBufferBeginInfo beginInfo;
-        beginInfo.Flags = Rendering::CommandBufferUsageFlagBits::OneTimeSubmit;
+        commandBuffer.CopyBuffer(*this, other, srcOffset, destOffset, size);
+        commandBuffer.End();
 
-        if (commandBuffer.Begin(beginInfo))
-        {
-            const VkCommandBuffer cmdBuff = commandBuffer.GetHandle();
-            const VkBuffer src = m_Handle;
-            const VkBuffer dst = static_cast<const Buffer&>(other).m_Handle;
+        Rendering::Scoped<Fence> fence = Rendering::FenceCreateInfo(m_Device);
 
-            VkBufferCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_COPY_2 };
-            region.srcOffset = srcOffset;
-            region.dstOffset = destOffset;
-            region.size = size;
+        const Queue* transferQueue = m_Device->GetTransferQueue();
+        transferQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
 
-            VkCopyBufferInfo2 copyInfo { VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2 };
-            copyInfo.srcBuffer = src;
-            copyInfo.dstBuffer = dst;
-            copyInfo.regionCount = 1;
-            copyInfo.pRegions = &region;
-            vkCmdCopyBuffer2(cmdBuff, &copyInfo);
-            commandBuffer.End();
+        fence->Wait(~0);
 
-            Fence fence;
-            fence.Initialize(Rendering::FenceCreateInfo(m_Device));
-
-            const Queue* graphicsQueue = m_Device->GetGraphicsQueue();
-            graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-            fence.Wait(~0);
-            commandBuffer.Free();
-            fence.Destroy();
-        } else return false;
+        commandBuffer.Free();
 
         return true;
     }

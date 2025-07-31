@@ -87,6 +87,8 @@ namespace Nova::Vulkan
             ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 
             vkCreateImageView(deviceHandle, &ImageViewCreateInfo, nullptr, &m_ImageViews[i]);
+
+            m_Textures[i].SetDirty();
         }
 
         m_Valid = true;
@@ -201,6 +203,27 @@ namespace Nova::Vulkan
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
             0, 0, nullptr, 0, nullptr, 1, &presentBarrier
         );
+    }
+
+    const Texture& Swapchain::GetTexture(const uint32_t index)
+    {
+        const auto createTexture = [this, &index] -> Texture
+        {
+            Texture texture;
+            texture.m_Device = (Device*)m_Device;
+            texture.m_Image = m_Images[index];
+            texture.m_ImageView = m_ImageViews[index];
+            texture.m_Width = m_ImageWidth;
+            texture.m_Height = m_ImageHeight;
+            texture.m_Allocation = nullptr;
+            texture.m_Samples = 1;
+            texture.m_Mips = 1;
+            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::None;
+            texture.m_Format = m_ImageFormat;
+
+            return texture;
+        };
+        return m_Textures[index].Get(createTexture);
     }
 
     VkSwapchainKHR Swapchain::GetHandle() const

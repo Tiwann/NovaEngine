@@ -135,6 +135,7 @@ namespace Nova
     {
         AudioSystem* audioSystem = AudioSystem::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
+        ma_sound_set_start_time_in_pcm_frames(m_Clip->GetHandle(), 0);
         onStoppedEvent.Broadcast(m_Clip, false);
     }
 

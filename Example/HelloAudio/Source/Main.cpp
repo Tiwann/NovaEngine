@@ -5,7 +5,6 @@
 #include "Audio/AudioClip.h"
 #include "Audio/AudioSystem.h"
 
-
 static bool g_Running = true;
 
 namespace Nova
@@ -25,7 +24,6 @@ namespace Nova
 
         DesktopWindow window;
         window.Initialize(windowCreateInfo);
-
         window.closeEvent.Bind([] { g_Running = false; });
 
         AudioSystem audioSystem;
@@ -39,11 +37,6 @@ namespace Nova
         while (g_Running)
         {
             window.PollEvents();
-
-            if (window.GetKeyDown(KeyCode::Space))
-            {
-                audioSystem.PlayAudioClip(audioClip);
-            }
         }
 
         audioSystem.Destroy();

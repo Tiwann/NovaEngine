@@ -175,9 +175,17 @@ namespace Nova::Vulkan
 
         Array<const char*> deviceExtensions;
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+
+        VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
+        indexingFeatures.runtimeDescriptorArray = true;
+        indexingFeatures.descriptorBindingVariableDescriptorCount = true;
+        indexingFeatures.descriptorBindingPartiallyBound = true;
+        indexingFeatures.shaderSampledImageArrayNonUniformIndexing = true;
 
         VkPhysicalDeviceIndexTypeUint8Features uint8Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES };
         uint8Features.indexTypeUint8 = true;
+        uint8Features.pNext = &indexingFeatures;
 
         VkPhysicalDeviceDynamicRenderingFeatures dynamicRenderingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES };
         dynamicRenderingFeatures.dynamicRendering = true;
@@ -292,7 +300,7 @@ namespace Nova::Vulkan
         swapchainCreateInfo.device = this;
         swapchainCreateInfo.surface = &m_Surface;
         swapchainCreateInfo.recycle = false;
-        swapchainCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
+        swapchainCreateInfo.buffering = createInfo.buffering;
         swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
         swapchainCreateInfo.width = createInfo.window->GetWidth();
         swapchainCreateInfo.height = createInfo.window->GetHeight();
@@ -310,7 +318,14 @@ namespace Nova::Vulkan
         commandPoolCreateInfo.queue = &m_GraphicsQueue;
         if (!m_CommandPool.Initialize(commandPoolCreateInfo))
         {
-            std::println(std::cerr, "Failed to create command pool!");
+            std::println(std::cerr, "Failed to create graphics command pool!");
+            return false;
+        }
+
+        commandPoolCreateInfo.queue = &m_TransferQueue;
+        if (!m_TransferCommandPool.Initialize(commandPoolCreateInfo))
+        {
+            std::println(std::cerr, "Failed to create transfer command pool!");
             return false;
         }
 
@@ -347,6 +362,7 @@ namespace Nova::Vulkan
         }
 
         m_CommandPool.Destroy();
+        m_TransferCommandPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);
         m_Surface.Destroy();
@@ -478,7 +494,7 @@ namespace Nova::Vulkan
         );
     }
 
-    void Device::BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter)
+    void Device::BlitToSwapchain(Rendering::RenderTarget& renderTarget, const Filter filter)
     {
         const VkImage swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
         const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
@@ -550,11 +566,11 @@ namespace Nova::Vulkan
         );
     }
 
-    void Device::BlitToSwapchain(Rendering::Texture& texture, Filter filter)
+    void Device::BlitToSwapchain(Rendering::Texture& texture, const Filter filter)
     {
         const VkImage swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
         const CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
-        Texture& tex = (Texture&)texture;
+        const Texture& tex = (Texture&)texture;
 
         VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -771,6 +787,11 @@ namespace Nova::Vulkan
     CommandPool* Device::GetCommandPool()
     {
         return &m_CommandPool;
+    }
+
+    CommandPool* Device::GetTransferCommandPool()
+    {
+        return &m_TransferCommandPool;
     }
 
     Queue* Device::GetGraphicsQueue()

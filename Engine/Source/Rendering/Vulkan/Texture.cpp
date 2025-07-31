@@ -10,13 +10,15 @@ namespace Nova::Vulkan
 {
     bool Texture::Initialize(const Rendering::TextureCreateInfo& createInfo)
     {
+        using namespace Nova::Rendering;
+
         if (createInfo.width == 0 || createInfo.height == 0)
             return false;
 
-        if (createInfo.usageFlags == Rendering::TextureUsageFlagBits::None)
+        if (createInfo.usageFlags == TextureUsageFlagBits::None)
             return false;
 
-        if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(Rendering::TextureUsageFlagBits::Storage))
+        if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
             return false;
 
         Device* device = static_cast<Device*>(createInfo.device);
@@ -37,10 +39,10 @@ namespace Nova::Vulkan
         imageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
-        if (createInfo.usageFlags.Contains(Rendering::TextureUsageFlagBits::Sampled))
+        if (createInfo.usageFlags.Contains(TextureUsageFlagBits::Sampled))
             imageCreateInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
 
-        if (createInfo.usageFlags.Contains(Rendering::TextureUsageFlagBits::Storage))
+        if (createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
             imageCreateInfo.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
 
 
@@ -86,20 +88,20 @@ namespace Nova::Vulkan
             if (result != VK_SUCCESS)
                 return false;
 
-            Rendering::CommandBufferAllocateInfo cmdBuffAllocateInfo;
+            CommandBufferAllocateInfo cmdBuffAllocateInfo;
             cmdBuffAllocateInfo.device = device;
             cmdBuffAllocateInfo.commandPool = device->GetCommandPool();
-            cmdBuffAllocateInfo.level = Rendering::CommandBufferLevel::Primary;
+            cmdBuffAllocateInfo.level = CommandBufferLevel::Primary;
 
             CommandBuffer commandBuffer;
             if (!commandBuffer.Allocate(cmdBuffAllocateInfo))
                 return false;
 
             Fence fence;
-            if (!fence.Initialize({device, Rendering::FenceCreateFlagBits::None}))
+            if (!fence.Initialize({device, FenceCreateFlagBits::None}))
                 return false;
 
-            if (commandBuffer.Begin({Rendering::CommandBufferUsageFlagBits::OneTimeSubmit}))
+            if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
             {
                 VkImageMemoryBarrier toTransferBarrier{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
                 toTransferBarrier.image = m_Image;

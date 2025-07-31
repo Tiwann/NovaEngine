@@ -4,6 +4,8 @@
 #include "Matrix4.h"
 #include "Runtime/Assertion.h"
 
+#include <algorithm>
+
 namespace Nova
 {
     Matrix3 Matrix3::Identity = Matrix3();

@@ -297,6 +297,8 @@ namespace Nova
             }
         };
 
+
+
         while (g_Running)
         {
             const ScopedTimer timer(onTimer);

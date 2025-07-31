@@ -1,5 +1,7 @@
 ﻿#pragma once
+#include "Containers/Lazy.h"
 #include "Rendering/RenderTarget.h"
+#include "Texture.h"
 
 typedef struct VkImage_T* VkImage;
 typedef struct VkImageView_T* VkImageView;
@@ -8,6 +10,7 @@ typedef struct VmaAllocation_T* VmaAllocation;
 namespace Nova::Vulkan
 {
     class CommandBuffer;
+
     class RenderTarget : public Rendering::RenderTarget
     {
     public:
@@ -19,6 +22,9 @@ namespace Nova::Vulkan
         bool Resize(uint32_t newWidth, uint32_t newHeight) override;
         void Clear(const Color& color) override;
         void Clear(float depth, uint8_t stencil) override;
+
+        const Texture& GetColorTexture(size_t index);
+        const Texture& GetDepthTexture(size_t index);
 
         VkImage GetColorImage(size_t index) const;
         VkImageView GetColorImageView(size_t index) const;
@@ -34,5 +40,7 @@ namespace Nova::Vulkan
         VkImageView m_DepthImageViews[3] { nullptr, nullptr, nullptr };
         VmaAllocation m_DepthAllocations[3] { nullptr, nullptr, nullptr };
         CommandBuffer* m_CommandBuffer = nullptr;
+        Lazy<Texture> m_ColorTextures[3];
+        Lazy<Texture> m_DepthTextures[3];
     };
 }

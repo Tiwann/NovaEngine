@@ -2,8 +2,6 @@
 project(NovaEngine)
 
 include(CMake/Vulkan.cmake)
-##include(CMake/FindVulkan.cmake)
-##list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
 option(NOVA_ENGINE_BUILD_EXAMPLES "Build example projects that uses Nova Engine" ON)
 option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a custom entry point" ON)
 
@@ -15,4 +13,5 @@ if(NOVA_ENGINE_BUILD_EXAMPLES)
     add_subdirectory(Example/HelloCompute)
     add_subdirectory(Example/HelloTexture)
     add_subdirectory(Example/HelloAudio)
+    add_subdirectory(Example/HelloRenderer2D)
 endif ()

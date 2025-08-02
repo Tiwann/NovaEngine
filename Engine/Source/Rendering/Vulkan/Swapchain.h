@@ -26,6 +26,7 @@ namespace Nova::Vulkan
         void ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget);
 
         const Texture& GetTexture(uint32_t index);
+        const Texture& GetCurrentTexture();
 
         VkSwapchainKHR GetHandle() const;
         const VkSwapchainKHR* GetHandlePtr() const;

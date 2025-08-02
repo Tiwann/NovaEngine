@@ -18,6 +18,7 @@ namespace Nova::Rendering
         uint16_t versionMajor, versionMinor;
         Window* window = nullptr;
         SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
+        bool vSync = false;
     };
 
     class RenderTarget;

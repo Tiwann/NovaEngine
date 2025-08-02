@@ -1,0 +1,34 @@
+﻿#include "VulkanUtils.h"
+
+namespace Nova::Vulkan
+{
+    VkAccessFlags2 GetSourceAccessFlags(const VkImageLayout layout)
+    {
+        switch (layout)
+        {
+        case VK_IMAGE_LAYOUT_UNDEFINED: return VK_ACCESS_2_NONE;
+        case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: return VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+        case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+        case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL: return VK_ACCESS_2_TRANSFER_READ_BIT;
+        case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: return VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL: return VK_ACCESS_2_SHADER_READ_BIT;
+        case VK_IMAGE_LAYOUT_GENERAL: return VK_ACCESS_2_NONE;
+        default: return VK_ACCESS_2_NONE;
+        }
+    }
+
+    VkAccessFlags2 GetDestAccessFlags(const VkImageLayout layout)
+    {
+        switch (layout)
+        {
+        case VK_IMAGE_LAYOUT_UNDEFINED: return VK_ACCESS_2_NONE;
+        case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: return VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT;
+        case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return VK_ACCESS_2_COLOR_ATTACHMENT_READ_BIT;
+        case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL: return VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: return VK_ACCESS_2_TRANSFER_READ_BIT;
+        case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL: return VK_ACCESS_2_SHADER_WRITE_BIT;
+        case VK_IMAGE_LAYOUT_GENERAL: return VK_ACCESS_2_NONE;
+        default: return VK_ACCESS_2_NONE;
+        }
+    }
+}

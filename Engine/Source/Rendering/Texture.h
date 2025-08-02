@@ -45,13 +45,13 @@ namespace Nova::Rendering
         uint32_t GetWidth() const { return m_Width; }
         uint32_t GetHeight() const { return m_Height; }
         uint32_t GetMips() const { return m_Mips; }
-        uint32_t GetSamples() const { return m_Samples; }
+        uint32_t GetSampleCount() const { return m_SampleCount; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;
         uint32_t m_Height = 0;
         uint32_t m_Mips = 0;
-        uint32_t m_Samples = 0;
+        uint32_t m_SampleCount = 0;
         TextureUsageFlags m_UsageFlags = TextureUsageFlagBits::None;
     };
 }

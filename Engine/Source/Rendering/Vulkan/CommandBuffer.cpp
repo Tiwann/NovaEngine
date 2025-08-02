@@ -9,6 +9,9 @@
 
 #include <vulkan/vulkan.h>
 
+#include "VulkanUtils.h"
+#include "Rendering/BlitRegion.h"
+
 namespace Nova::Vulkan
 {
 
@@ -71,6 +74,19 @@ namespace Nova::Vulkan
     void CommandBuffer::End()
     {
         vkEndCommandBuffer(m_Handle);
+    }
+
+    void CommandBuffer::ExecuteCommandBuffers(const Array<Rendering::CommandBuffer*>& commandBuffers)
+    {
+        const auto toHandles = [](const Rendering::CommandBuffer* commandBuffer) -> VkCommandBuffer
+        {
+            const CommandBuffer* cmdBuff = (const CommandBuffer*)commandBuffer;
+            return cmdBuff->GetHandle();
+        };
+
+        Array<VkCommandBuffer> cmdBuffs = commandBuffers.Transform<VkCommandBuffer>(toHandles);
+
+        vkCmdExecuteCommands(m_Handle, cmdBuffs.Count(), cmdBuffs.Data());
     }
 
     void CommandBuffer::ClearColor(const Color& color, const uint32_t attachmentIndex)
@@ -148,12 +164,17 @@ namespace Nova::Vulkan
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
+    void CommandBuffer::DispatchIndirect(const Rendering::Buffer& buffer, const size_t offset)
+    {
+        vkCmdDispatchIndirect(m_Handle, ((const Buffer&)buffer).GetHandle(), offset);
+    }
+
     void CommandBuffer::PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values, void* layout)
     {
         vkCmdPushConstants(m_Handle, (VkPipelineLayout)layout, stageFlags, offset, size, values);
     }
 
-    void CommandBuffer::CopyBuffer(Rendering::Buffer& src, Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
+    void CommandBuffer::BufferCopy(Rendering::Buffer& src, Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
         VkBufferCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_COPY_2 };
         region.srcOffset = srcOffset;
@@ -168,49 +189,166 @@ namespace Nova::Vulkan
         vkCmdCopyBuffer2(m_Handle, &copyInfo);
     }
 
+    void CommandBuffer::Blit(const Rendering::Texture& src, const Rendering::BlitRegion& srcRegion, const Rendering::Texture& dest, const Rendering::BlitRegion& destRegion, const Filter filter)
+    {
+        const Texture& source = (Texture&)src;
+        const Texture& destination = (Texture&)dest;
+        //NOVA_ASSERT(source.GetFormat() != destination.GetFormat(), "Source and destination textures must have the same format");
+
+        const VkImageLayout sourceInitialLayout = (VkImageLayout)source.GetImageLayout();
+        const VkImageLayout destInitialLayout = (VkImageLayout)destination.GetImageLayout();
+
+        VkImageMemoryBarrier2 inBarriers[2] = {  };
+        inBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        inBarriers[0].oldLayout = sourceInitialLayout;
+        inBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        inBarriers[0].srcAccessMask = GetSourceAccessFlags(sourceInitialLayout);
+        inBarriers[0].dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
+        inBarriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        inBarriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        inBarriers[0].image = source.GetImage();
+        inBarriers[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        inBarriers[0].subresourceRange.baseMipLevel = 0;
+        inBarriers[0].subresourceRange.levelCount = 1;
+        inBarriers[0].subresourceRange.baseArrayLayer = 0;
+        inBarriers[0].subresourceRange.layerCount = 1;
+
+        inBarriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        inBarriers[1].oldLayout = destInitialLayout;
+        inBarriers[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        inBarriers[1].srcAccessMask = GetDestAccessFlags(destInitialLayout);
+        inBarriers[1].dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        inBarriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        inBarriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        inBarriers[1].image = destination.GetImage();
+        inBarriers[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        inBarriers[1].subresourceRange.baseMipLevel = 0;
+        inBarriers[1].subresourceRange.levelCount = 1;
+        inBarriers[1].subresourceRange.baseArrayLayer = 0;
+        inBarriers[1].subresourceRange.layerCount = 1;
+
+        VkDependencyInfo inDependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        inDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+        inDependency.imageMemoryBarrierCount = std::size(inBarriers);
+        inDependency.pImageMemoryBarriers = inBarriers;
+        vkCmdPipelineBarrier2(m_Handle, &inDependency);
+
+        VkImageBlit2 region = { VK_STRUCTURE_TYPE_IMAGE_BLIT_2 };
+        region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.srcSubresource.layerCount = 1;
+        region.srcSubresource.baseArrayLayer = 0;
+        region.srcSubresource.mipLevel = srcRegion.mipLevel;
+
+        region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.dstSubresource.layerCount = 1;
+        region.dstSubresource.baseArrayLayer = 0;
+        region.dstSubresource.mipLevel = destRegion.mipLevel;
+
+        region.srcOffsets[0] = VkOffset3D { (int32_t)srcRegion.x, (int32_t)srcRegion.y, 0 };
+        region.srcOffsets[1] = VkOffset3D { (int32_t)srcRegion.width, (int32_t)srcRegion.height, 1 };
+        region.dstOffsets[0] = VkOffset3D { (int32_t)destRegion.x, (int32_t)destRegion.y, 0 };
+        region.dstOffsets[1] = VkOffset3D { (int32_t)destRegion.width, (int32_t)destRegion.height, 1 };
+
+        VkBlitImageInfo2 blitInfo = { VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2 };
+        blitInfo.filter = Convert<Filter, VkFilter>(filter);
+        blitInfo.srcImage = source.GetImage();
+        blitInfo.dstImage = destination.GetImage();
+        blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        blitInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        blitInfo.regionCount = 1;
+        blitInfo.pRegions = &region;
+        vkCmdBlitImage2(m_Handle, &blitInfo);
+
+        VkImageMemoryBarrier2 outBarriers[2] = {  };
+        outBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        outBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        outBarriers[0].newLayout = sourceInitialLayout;
+        outBarriers[0].srcAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
+        outBarriers[0].dstAccessMask = GetDestAccessFlags(sourceInitialLayout);
+        outBarriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        outBarriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        outBarriers[0].image = source.GetImage();
+        outBarriers[0].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        outBarriers[0].subresourceRange.baseMipLevel = 0;
+        outBarriers[0].subresourceRange.levelCount = 1;
+        outBarriers[0].subresourceRange.baseArrayLayer = 0;
+        outBarriers[0].subresourceRange.layerCount = 1;
+
+        outBarriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        outBarriers[1].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        outBarriers[1].newLayout = destInitialLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_IMAGE_LAYOUT_GENERAL : destInitialLayout;
+        outBarriers[1].srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        outBarriers[1].dstAccessMask = GetDestAccessFlags(destInitialLayout);
+        outBarriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        outBarriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        outBarriers[1].image = destination.GetImage();
+        outBarriers[1].subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        outBarriers[1].subresourceRange.baseMipLevel = 0;
+        outBarriers[1].subresourceRange.levelCount = 1;
+        outBarriers[1].subresourceRange.baseArrayLayer = 0;
+        outBarriers[1].subresourceRange.layerCount = 1;
+
+        VkDependencyInfo outDependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        outDependency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+        outDependency.imageMemoryBarrierCount = std::size(outBarriers);
+        outDependency.pImageMemoryBarriers = outBarriers;
+        vkCmdPipelineBarrier2(m_Handle, &outDependency);
+    }
+
+    void CommandBuffer::Blit(const Rendering::Texture& src, const Rendering::Texture& dest, const Filter filter)
+    {
+        const Rendering::BlitRegion srcRegion = { 0, 0, src.GetWidth(), src.GetHeight(), 0 };
+        const Rendering::BlitRegion destRegion = { 0, 0, dest.GetWidth(), dest.GetHeight(), 0 };
+        Blit(src, srcRegion, dest, destRegion, filter);
+    }
+
     void CommandBuffer::BeginRenderPass(const Rendering::RenderPass& renderPass)
     {
         Array<VkRenderingAttachmentInfo> colorAttachments;
-        const uint32_t frameIndex = m_Device->GetCurrentFrameIndex();
 
-        for (const Rendering::RenderPassAttachment& attachment : renderPass)
+        for (const Rendering::RenderPassAttachment* attachment : renderPass)
         {
-            if (attachment.type == Rendering::AttachmentType::Depth)
+            if (attachment->type == Rendering::AttachmentType::Depth)
                 continue;
 
-            const Texture* texture = (const Texture*)attachment.textures[frameIndex];
-            const Color& clearColor = attachment.clearValue.color;
+            const Color& clearColor = attachment->clearValue.color;
 
             VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
-            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
+            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment->loadOp);
+            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment->storeOp);
             colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachmentInfo.imageView = texture->GetImageView();
+            colorAttachmentInfo.imageView = ((Texture*)attachment->texture)->GetImageView();
             colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
-            // TODO: Handle resolve. Do we need to resolve to swapchain directly ?
-            //colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
-            //colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            //colorAttachmentInfo.resolveImageView
+            if (attachment->resolveTexture)
+            {
+                colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+                colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                colorAttachmentInfo.resolveImageView = ((Texture*)attachment->resolveTexture)->GetImageView();
+            }
+
 
             colorAttachments.Add(colorAttachmentInfo);
         }
 
 
         const Rendering::RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
-        const Texture* texture = (const Texture*)depthAttachment->textures[frameIndex];
         const Color& clearColor = depthAttachment->clearValue.color;
 
         VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        depthAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
-        depthAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
-        depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        depthAttachmentInfo.imageView = texture->GetImageView();
-        depthAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
-
-        // TODO: Handle resolve. Do we need to resolve to swapchain directly ?
-        //info.resolveMode
-        //info.resolveImageLayout
-        //info.resolveImageView
+        if (renderPass.HasDepthAttachment())
+        {
+            depthAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
+            depthAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
+            depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depthAttachmentInfo.imageView = ((Texture*)depthAttachment->texture)->GetImageView();
+            depthAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
+            if (depthAttachment->resolveTexture)
+            {
+                depthAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+                depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
+                depthAttachmentInfo.resolveImageView = ((Texture*)depthAttachment->resolveTexture)->GetImageView();
+            }
+        }
 
         VkRenderingInfo renderingInfo { VK_STRUCTURE_TYPE_RENDERING_INFO };
         renderingInfo.layerCount = 1;

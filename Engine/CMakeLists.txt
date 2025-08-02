@@ -23,6 +23,10 @@ if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
 target_compile_definitions(NovaEngine PUBLIC NOVA_CUSTOM_ENTRY_POINT)
 endif ()
 
+if(NOVA_ENGINE_INCLUDE_AUDIO)
+target_include_directories(NovaEngine PUBLIC NOVA_HAS_AUDIO)
+endif ()
+
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     target_compile_definitions(NovaEngine PUBLIC NOVA_DEBUG)
 elseif (CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)

@@ -23,8 +23,7 @@
 #include "Runtime/ScopedTimer.h"
 #include "Serialization/FileStream.h"
 
-
-static constexpr uint32_t SAMPLE_COUNT = 8;
+static constexpr uint32_t SAMPLE_COUNT = 1;
 static bool g_Running = true;
 
 namespace Nova
@@ -56,19 +55,6 @@ namespace Nova
         if (!device.Initialize(deviceCreateInfo))
             return EXIT_FAILURE;
 
-        Rendering::RenderTargetCreateInfo renderTargetCreateInfo;
-        renderTargetCreateInfo.device = &device;
-        renderTargetCreateInfo.width = window.GetWidth();
-        renderTargetCreateInfo.height = window.GetHeight();
-        renderTargetCreateInfo.depth = 1;
-        renderTargetCreateInfo.colorFormat = Format::R8G8B8A8_UNORM;
-        renderTargetCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
-        renderTargetCreateInfo.sampleCount = SAMPLE_COUNT;
-
-        Vulkan::RenderTarget renderTarget;
-        if (!renderTarget.Initialize(renderTargetCreateInfo))
-            return EXIT_FAILURE;
-
         window.closeEvent.Bind([] { g_Running = false; });
 
         window.maximizeEvent.Bind([&device]
@@ -77,11 +63,10 @@ namespace Nova
             swapchain->Invalidate();
         });
 
-        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newWidth, const int32_t newHeight)
+        window.resizeEvent.Bind([&device](const int32_t newWidth, const int32_t newHeight)
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-            renderTarget.Resize(newWidth, newHeight);
         });
 
         Rendering::TextureCreateInfo texCreateInfo;
@@ -99,10 +84,10 @@ namespace Nova
 
         window.resizeEvent.Bind([&texture, &texCreateInfo](const int32_t newWidth, const int32_t newHeight)
         {
-            Rendering::TextureCreateInfo createInfo = texCreateInfo;
-            createInfo.width = newWidth;
-            createInfo.height = newHeight;
-            texture.Initialize(createInfo);
+            //Rendering::TextureCreateInfo createInfo = texCreateInfo;
+            //createInfo.width = newWidth;
+            //createInfo.height = newHeight;
+            //texture.Initialize(createInfo);
         });
 
         // Don't know why but Slang compiler can't compile the compute shader to Spirv 1.5
@@ -179,7 +164,7 @@ namespace Nova
 
         VkDescriptorImageInfo imageInfo;
         imageInfo.sampler = nullptr;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
         imageInfo.imageView = texture.GetImageView();
 
         VkWriteDescriptorSet descriptorWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
@@ -222,7 +207,12 @@ namespace Nova
 
                 commandBuffer.Dispatch(numGroupsX, numGroupsY, 1);
 
-                device.BlitToSwapchain(texture, Filter::Nearest);
+                const uint32_t frameIndex = device.GetCurrentFrameIndex();
+
+                Vulkan::Swapchain* swapchain = device.GetSwapchain();
+                const Vulkan::Texture& swapchainTexture = swapchain->GetTexture(frameIndex);
+                commandBuffer.Blit(texture, swapchainTexture, Filter::Linear);
+
                 device.EndFrame();
                 device.Present();
             }
@@ -230,13 +220,13 @@ namespace Nova
 
 
         device.WaitIdle();
+        shaderModule.Destroy();
         vkFreeDescriptorSets(device.GetHandle(), descriptorPool.GetHandle(), 1, &descriptorSet);
         vkDestroyDescriptorSetLayout(device.GetHandle(), descriptorSetLayout, nullptr);
         vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);
         computePipeline.Destroy();
         descriptorPool.Destroy();
         texture.Destroy();
-        renderTarget.Destroy();
         device.Destroy();
         window.Destroy();
         return 0;

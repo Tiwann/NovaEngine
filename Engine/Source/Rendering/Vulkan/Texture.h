@@ -22,6 +22,7 @@ namespace Nova::Vulkan
         VkImage GetImage() const;
         VkImageView GetImageView() const;
         VmaAllocation GetAllocation() const;
+        uint32_t GetImageLayout() const;
     private:
         friend class Swapchain;
         friend class RenderTarget;
@@ -30,5 +31,6 @@ namespace Nova::Vulkan
         VkImage m_Image = nullptr;
         VkImageView m_ImageView = nullptr;
         VmaAllocation m_Allocation = nullptr;
+        uint32_t m_ImageLayout = 0;
     };
 }

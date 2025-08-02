@@ -20,10 +20,8 @@
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
-#include <chrono>
 
-
-static constexpr uint32_t SAMPLE_COUNT = 1;
+static constexpr uint32_t SAMPLE_COUNT = 8;
 static bool g_Running = true;
 
 namespace Nova
@@ -44,12 +42,15 @@ namespace Nova
         DesktopWindow window;
         window.Initialize(windowCreateInfo);
 
+        window.closeEvent.Bind([] { g_Running = false; });
+
         Rendering::DeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.applicationName = "Hello Triangle";
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
-        deviceCreateInfo.buffering = SwapchainBuffering::TripleBuffering;
+        deviceCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
+        deviceCreateInfo.vSync = true;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
@@ -67,8 +68,6 @@ namespace Nova
         Vulkan::RenderTarget renderTarget;
         if (!renderTarget.Initialize(renderTargetCreateInfo))
             return EXIT_FAILURE;
-
-        window.closeEvent.Bind([] { g_Running = false; });
 
         window.maximizeEvent.Bind([&device]
         {
@@ -183,7 +182,7 @@ namespace Nova
         Vulkan::Buffer vertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
         Vulkan::Buffer indexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
-        const auto onTimer = [](double deltaTime)
+        const auto onTimer = [](const double deltaTime)
         {
             static double timer = 0.0f;
             timer += deltaTime;
@@ -200,9 +199,6 @@ namespace Nova
         colorAttachment.loadOp = Rendering::LoadOperation::Load;
         colorAttachment.storeOp = Rendering::StoreOperation::Store;
         colorAttachment.clearValue.color = Color::Black;
-        colorAttachment.textures[0] = &renderTarget.GetColorTexture(0);
-        colorAttachment.textures[1] = &renderTarget.GetColorTexture(1);
-        colorAttachment.textures[2] = &renderTarget.GetColorTexture(2);
 
         Rendering::RenderPassAttachment depthAttachment;
         depthAttachment.type = Rendering::AttachmentType::Depth;
@@ -210,14 +206,11 @@ namespace Nova
         depthAttachment.storeOp = Rendering::StoreOperation::Store;
         depthAttachment.clearValue.depth = 1.0f;
         depthAttachment.clearValue.stencil = 0;
-        depthAttachment.textures[0] = &renderTarget.GetDepthTexture(0);
-        depthAttachment.textures[1] = &renderTarget.GetDepthTexture(1);
-        depthAttachment.textures[2] = &renderTarget.GetDepthTexture(2);
-
 
         Rendering::RenderPass renderPass(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
         renderPass.AddAttachment(colorAttachment);
         renderPass.AddAttachment(depthAttachment);
+
 
         while (g_Running)
         {
@@ -228,11 +221,14 @@ namespace Nova
 
             if (device.BeginFrame())
             {
+                renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
+                renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
+                renderPass.SetAttachmentResolveTexture(0, device.GetSwapchain()->GetCurrentTexture());
+
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 commandBuffer.BeginRenderPass(renderPass);
 
-                //commandBuffer.ClearColor(0x06'06'06'FF, 0);
-                //renderTarget.Clear(0x060606FF);
+                commandBuffer.ClearColor(0x030303FF, 0);
                 commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
                 commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
@@ -242,13 +238,6 @@ namespace Nova
                 commandBuffer.DrawIndexed(3, 0);
 
                 commandBuffer.EndRenderPass();
-
-                if constexpr (SAMPLE_COUNT > 1)
-                {
-                    device.ResolveToSwapchain(renderTarget);
-                } else {
-                    device.BlitToSwapchain(renderTarget, Filter::Nearest);
-                }
                 device.EndFrame();
                 device.Present();
             }
@@ -260,7 +249,6 @@ namespace Nova
         pipeline.Destroy();
         fragShaderModule.Destroy();
         vertShaderModule.Destroy();
-
         vertexBuffer.Destroy();
         indexBuffer.Destroy();
         renderTarget.Destroy();

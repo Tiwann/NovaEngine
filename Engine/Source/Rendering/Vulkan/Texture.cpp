@@ -62,6 +62,9 @@ namespace Nova::Vulkan
         if (result != VK_SUCCESS)
         return false;
 
+        Fence fence;
+        if (!fence.Initialize({device, FenceCreateFlagBits::None}))
+            return false;
 
         if (createInfo.data && createInfo.dataSize > 0)
         {
@@ -70,40 +73,29 @@ namespace Nova::Vulkan
             stagingBufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
             VmaAllocationCreateInfo stagingBufferAllocateInfo = {};
-            stagingBufferAllocateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT |
-                VMA_ALLOCATION_CREATE_MAPPED_BIT;
+            stagingBufferAllocateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
             stagingBufferAllocateInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-            stagingBufferAllocateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            stagingBufferAllocateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 
             VkBuffer stagingBuffer = nullptr;
             VmaAllocation stagingBufferAllocation = nullptr;
-            result = vmaCreateBuffer(allocatorHandle, &stagingBufferCreateInfo, &stagingBufferAllocateInfo,
-                                     &stagingBuffer, &stagingBufferAllocation, nullptr);
+            result = vmaCreateBuffer(allocatorHandle, &stagingBufferCreateInfo, &stagingBufferAllocateInfo,&stagingBuffer, &stagingBufferAllocation, nullptr);
             if (result != VK_SUCCESS)
                 return false;
 
-            result = vmaCopyMemoryToAllocation(allocatorHandle, createInfo.data, stagingBufferAllocation, 0,
-                                               createInfo.dataSize);
+            result = vmaCopyMemoryToAllocation(allocatorHandle, createInfo.data, stagingBufferAllocation, 0, createInfo.dataSize);
             if (result != VK_SUCCESS)
                 return false;
 
-            CommandBufferAllocateInfo cmdBuffAllocateInfo;
-            cmdBuffAllocateInfo.device = device;
-            cmdBuffAllocateInfo.commandPool = device->GetCommandPool();
-            cmdBuffAllocateInfo.level = CommandBufferLevel::Primary;
 
-            CommandBuffer commandBuffer;
-            if (!commandBuffer.Allocate(cmdBuffAllocateInfo))
-                return false;
+            CommandPool* commandPool = device->GetCommandPool();
+            CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
-            Fence fence;
-            if (!fence.Initialize({device, FenceCreateFlagBits::None}))
-                return false;
+
 
             if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
             {
-                VkImageMemoryBarrier toTransferBarrier{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                VkImageMemoryBarrier toTransferBarrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
                 toTransferBarrier.image = m_Image;
                 toTransferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
                 toTransferBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -145,10 +137,9 @@ namespace Nova::Vulkan
                 toReadBarrier.subresourceRange.layerCount = 1;
                 toReadBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
                 toReadBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-                vkCmdPipelineBarrier(commandBuffer.GetHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1,
-                                     &toReadBarrier);
+                vkCmdPipelineBarrier(commandBuffer.GetHandle(), VK_PIPELINE_STAGE_TRANSFER_BIT,VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &toReadBarrier);
 
+                m_ImageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 commandBuffer.End();
             }
             else return false;
@@ -159,6 +150,38 @@ namespace Nova::Vulkan
             fence.Destroy();
             commandBuffer.Free();
             vmaDestroyBuffer(allocatorHandle, stagingBuffer, stagingBufferAllocation);
+        }
+        else
+        {
+            CommandPool* commandPool = device->GetCommandPool();
+            CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
+
+            if (!commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
+                return false;
+
+            VkImageMemoryBarrier toGeneralBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+            toGeneralBarrier.image = m_Image;
+            toGeneralBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            toGeneralBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+            toGeneralBarrier.srcAccessMask = VK_ACCESS_NONE;
+            toGeneralBarrier.dstAccessMask = VK_ACCESS_NONE;
+            toGeneralBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            toGeneralBarrier.subresourceRange.baseMipLevel = 0;
+            toGeneralBarrier.subresourceRange.levelCount = createInfo.mips;
+            toGeneralBarrier.subresourceRange.baseArrayLayer = 0;
+            toGeneralBarrier.subresourceRange.layerCount = 1;
+            toGeneralBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            toGeneralBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            vkCmdPipelineBarrier(commandBuffer.GetHandle(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &toGeneralBarrier);
+
+            commandBuffer.End();
+
+            const Queue* graphicsQueue = device->GetGraphicsQueue();
+            graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
+            fence.Wait(~0);
+            fence.Destroy();
+            commandBuffer.Free();
+            m_ImageLayout = VK_IMAGE_LAYOUT_GENERAL;
         }
 
 
@@ -183,7 +206,7 @@ namespace Nova::Vulkan
         m_Width = createInfo.width;
         m_Height = createInfo.height;
         m_Mips = createInfo.mips;
-        m_Samples = createInfo.sampleCount;
+        m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;
         return true;
     }
@@ -215,5 +238,10 @@ namespace Nova::Vulkan
     VmaAllocation Texture::GetAllocation() const
     {
         return m_Allocation;
+    }
+
+    uint32_t Texture::GetImageLayout() const
+    {
+        return m_ImageLayout;
     }
 }

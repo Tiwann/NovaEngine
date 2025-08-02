@@ -59,7 +59,7 @@ namespace Nova
             m_Data = new CharacterType[m_Count + 1]{};
             memcpy(m_Data, Data, m_Count * CharacterSize);
         }
-        
+
         StringBase(const StringBase& Other)
         {
             delete[] m_Data;

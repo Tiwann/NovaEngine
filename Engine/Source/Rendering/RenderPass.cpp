@@ -1,5 +1,7 @@
 ﻿#include "RenderPass.h"
 
+#include "RenderTarget.h"
+
 namespace Nova::Rendering
 {
     RenderPass::RenderPass(const uint32_t offsetX, const uint32_t offsetY, const uint32_t width, const uint32_t height) :
@@ -7,11 +9,11 @@ namespace Nova::Rendering
     {
     }
 
-    void RenderPass::AddAttachment(const RenderPassAttachment& attachment)
+    void RenderPass::AddAttachment(RenderPassAttachment& attachment)
     {
         if (GetDepthAttachmentCount() > 0 && attachment.type == AttachmentType::Depth)
             NOVA_ASSERT(false, "Only one depth attachment is allowed");
-        m_Attachments.Add(attachment);
+        m_Attachments.Add(&attachment);
     }
 
     uint32_t RenderPass::GetOffsetX() const
@@ -42,9 +44,9 @@ namespace Nova::Rendering
     uint32_t RenderPass::GetColorAttachmentCount() const
     {
         uint32_t result = 0;
-        for (const RenderPassAttachment& attachment : m_Attachments)
+        for (const RenderPassAttachment* attachment : m_Attachments)
         {
-            if (attachment.type == AttachmentType::Color)
+            if (attachment->type == AttachmentType::Color)
                 result++;
         }
         return result;
@@ -53,9 +55,9 @@ namespace Nova::Rendering
     uint32_t RenderPass::GetDepthAttachmentCount() const
     {
         uint32_t result = 0;
-        for (const RenderPassAttachment& attachment : m_Attachments)
+        for (const RenderPassAttachment* attachment : m_Attachments)
         {
-            if (attachment.type == AttachmentType::Depth)
+            if (attachment->type == AttachmentType::Depth)
                 result++;
         }
         return result;
@@ -63,10 +65,22 @@ namespace Nova::Rendering
 
     RenderPassAttachment* RenderPass::GetDepthAttachment() const
     {
-        return m_Attachments.Single([](const RenderPassAttachment& attachment)
+        RenderPassAttachment** result = m_Attachments.Single([](const RenderPassAttachment* attachment)
         {
-            return attachment.type == AttachmentType::Depth;
+            return attachment->type == AttachmentType::Depth;
         });
+
+        return result ? *result : nullptr;
+    }
+
+    void RenderPass::SetAttachmentTexture(const size_t attachmentIndex, const Texture& texture)
+    {
+        m_Attachments[attachmentIndex]->texture = &texture;
+    }
+
+    void RenderPass::SetAttachmentResolveTexture(const size_t attachmentIndex, const Texture& resolveTexture)
+    {
+        m_Attachments[attachmentIndex]->resolveTexture = &resolveTexture;
     }
 
     bool RenderPass::HasDepthAttachment() const
@@ -79,22 +93,22 @@ namespace Nova::Rendering
         return false;
     }
 
-    Array<RenderPassAttachment>::Iterator RenderPass::begin()
+    Array<RenderPassAttachment*>::Iterator RenderPass::begin()
     {
         return m_Attachments.begin();
     }
 
-    Array<RenderPassAttachment>::Iterator RenderPass::end()
+    Array<RenderPassAttachment*>::Iterator RenderPass::end()
     {
         return m_Attachments.end();
     }
 
-    Array<RenderPassAttachment>::ConstIterator RenderPass::begin() const
+    Array<RenderPassAttachment*>::ConstIterator RenderPass::begin() const
     {
         return m_Attachments.begin();
     }
 
-    Array<RenderPassAttachment>::ConstIterator RenderPass::end() const
+    Array<RenderPassAttachment*>::ConstIterator RenderPass::end() const
     {
         return m_Attachments.end();
     }

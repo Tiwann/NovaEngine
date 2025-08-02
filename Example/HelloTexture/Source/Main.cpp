@@ -55,6 +55,8 @@ namespace Nova
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
+        deviceCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
+        deviceCreateInfo.vSync = true;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))

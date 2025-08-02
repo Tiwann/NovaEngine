@@ -1,10 +1,9 @@
 ﻿#include "Buffer.h"
 #include "Device.h"
+#include "Rendering/Scoped.h"
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
-
-#include "Rendering/Scoped.h"
 
 
 namespace Nova::Vulkan
@@ -140,7 +139,7 @@ namespace Nova::Vulkan
         if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
-        commandBuffer.CopyBuffer(*this, other, srcOffset, destOffset, size);
+        commandBuffer.BufferCopy(*this, other, srcOffset, destOffset, size);
         commandBuffer.End();
 
         Rendering::Scoped<Fence> fence = Rendering::FenceCreateInfo(m_Device);

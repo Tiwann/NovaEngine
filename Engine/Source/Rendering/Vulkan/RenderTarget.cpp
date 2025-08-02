@@ -23,9 +23,6 @@ namespace Nova::Vulkan
 
         for (size_t imageIndex = 0; imageIndex < swapchain->GetImageCount(); imageIndex++)
         {
-            m_ColorTextures[imageIndex].SetDirty();
-            m_DepthTextures[imageIndex].SetDirty();
-
             VkImageCreateInfo colorImageCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
             colorImageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
             colorImageCreateInfo.extent.width = createInfo.width;
@@ -335,48 +332,52 @@ namespace Nova::Vulkan
         vkCmdClearAttachments(commandBuffer, 1, &clearAttachment, 1, &clearRect);
     }
 
-    const Texture& RenderTarget::GetColorTexture(size_t index)
+    const Texture& RenderTarget::GetColorTexture()
     {
-        const auto createTexture = [this, &index] -> Texture
+        const size_t imageIndex = ((Device*)m_Device)->GetCurrentFrameIndex();
+        const auto createTexture = [this, &imageIndex]() -> Texture
         {
             Texture texture;
-            texture.m_Device = (Device*)m_Device;
-            texture.m_Image = m_ColorImages[index];
-            texture.m_ImageView = m_ColorImageViews[index];
             texture.m_Width = m_Width;
             texture.m_Height = m_Height;
-            texture.m_Allocation = m_ColorAllocations[index];
-            texture.m_Samples = m_SampleCount;
-            texture.m_Mips = 1;
-            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_Image = m_ColorImages[imageIndex];
+            texture.m_ImageView = m_ColorImageViews[imageIndex];
+            texture.m_SampleCount = m_SampleCount;
+            texture.m_Device = (Device*)m_Device;
             texture.m_Format = m_ColorFormat;
-
-            return texture;
-        };
-
-        return m_ColorTextures[index].Get(createTexture);
-    }
-
-    const Texture& RenderTarget::GetDepthTexture(size_t index)
-    {
-        const auto createTexture = [this, &index] -> Texture
-        {
-            Texture texture;
-            texture.m_Device = (Device*)m_Device;
-            texture.m_Image = m_DepthImages[index];
-            texture.m_ImageView = m_DepthImageViews[index];
-            texture.m_Width = m_Width;
-            texture.m_Height = m_Height;
-            texture.m_Allocation = m_DepthAllocations[index];
-            texture.m_Samples = m_SampleCount;
+            texture.m_Allocation = m_ColorAllocations[imageIndex];
             texture.m_Mips = 1;
             texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
-            texture.m_Format = m_DepthFormat;
+            texture.m_SampleCount = m_SampleCount;
             return texture;
         };
 
-        return m_DepthTextures[index].Get(createTexture);
+        return m_ColorTexture.Get(createTexture);
     }
+
+    const Texture& RenderTarget::GetDepthTexture()
+    {
+        const size_t imageIndex = ((Device*)m_Device)->GetCurrentFrameIndex();
+        const auto createTexture = [this, &imageIndex]() -> Texture
+        {
+            Texture texture;
+            texture.m_Width = m_Width;
+            texture.m_Height = m_Height;
+            texture.m_Image = m_DepthImages[imageIndex];
+            texture.m_ImageView = m_DepthImageViews[imageIndex];
+            texture.m_SampleCount = m_SampleCount;
+            texture.m_Device = (Device*)m_Device;
+            texture.m_Format = m_ColorFormat;
+            texture.m_Allocation = m_DepthAllocations[imageIndex];
+            texture.m_Mips = 1;
+            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_SampleCount = m_SampleCount;
+            return texture;
+        };
+
+        return m_DepthTexture.Get(createTexture);
+    }
+
 
     VkImage RenderTarget::GetColorImage(size_t index) const
     {

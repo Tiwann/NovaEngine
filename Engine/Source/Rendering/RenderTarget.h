@@ -8,6 +8,7 @@ namespace Nova::Rendering
 {
     class Device;
     class CommandBuffer;
+    class Texture;
 
     struct RenderTargetCreateInfo
     {
@@ -42,6 +43,7 @@ namespace Nova::Rendering
         Format GetDepthFormat() const { return m_DepthFormat; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
         uint32_t GetImageCount() const { return m_ImageCount; }
+
     protected:
         Device* m_Device = nullptr;
         uint32_t m_Width = 0;

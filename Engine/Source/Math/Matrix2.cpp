@@ -1,6 +1,7 @@
 #include "Matrix2.h"
 #include "Functions.h"
 #include "Runtime/Assertion.h"
+#include <algorithm>
 
 namespace Nova
 {

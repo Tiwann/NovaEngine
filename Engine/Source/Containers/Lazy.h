@@ -9,17 +9,14 @@ namespace Nova
     public:
 
         Lazy() = default;
-        explicit Lazy(const T& Value) : m_Value(Value) { }
+        explicit Lazy(const T& value) : m_Value(value) { }
 
-        template<typename U = T> requires std::is_pointer<U>::value
-        Lazy(std::nullptr_t) : m_Value(nullptr) { }
-
-        const T& Get(const Function<T()>& GetFunc)
+        const T& Get(const Function<T()>& getter)
         {
             if (!m_IsDirty)
                 return m_Value;
 
-            m_Value = GetFunc();
+            m_Value = getter();
             m_IsDirty = false;
             return m_Value;
         }
@@ -33,6 +30,8 @@ namespace Nova
         {
             return m_IsDirty;
         }
+
+        T& operator*() const { return m_Value; }
     private:
         T m_Value;
         bool m_IsDirty = true;

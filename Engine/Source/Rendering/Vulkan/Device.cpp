@@ -1,18 +1,19 @@
 ﻿#include "Device.h"
 #include "Runtime/Window.h"
 #include "Runtime/DesktopWindow.h"
-
-#include <vulkan/vulkan.h>
-#include <GLFW/glfw3.h>
-#include <vma/vk_mem_alloc.h>
-
 #include "Conversions.h"
 #include "RenderTarget.h"
 #include "Texture.h"
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
 
+#include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+#include <vma/vk_mem_alloc.h>
+
+#ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
+#endif
 
 namespace Nova::Vulkan
 {
@@ -177,7 +178,12 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
+        VkPhysicalDeviceSynchronization2Features synchronization2Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES };
+        synchronization2Features.synchronization2 = true;
+
+
         VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
+        indexingFeatures.pNext = &synchronization2Features;
         indexingFeatures.runtimeDescriptorArray = true;
         indexingFeatures.descriptorBindingVariableDescriptorCount = true;
         indexingFeatures.descriptorBindingPartiallyBound = true;
@@ -248,67 +254,14 @@ namespace Nova::Vulkan
             return false;
         }
 
-
         VmaAllocatorCreateInfo allocatorCreateInfo = { 0 };
         allocatorCreateInfo.device = m_Handle;
         allocatorCreateInfo.instance = m_Instance;
         allocatorCreateInfo.physicalDevice = m_PhysicalDevice;
         allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
-
         if (vmaCreateAllocator(&allocatorCreateInfo, &m_Allocator) != VK_SUCCESS)
         {
             std::println(std::cerr, "Failed to create allocator!");
-            return false;
-        }
-
-        const auto GetPresentMode = [&](const bool vSync) -> PresentMode
-        {
-            VkPresentModeKHR result;
-
-            if (vSync)
-            {
-                result = VK_PRESENT_MODE_FIFO_KHR;
-
-                uint32_t presentModeCount;
-                VkPresentModeKHR presentModes[8];
-                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, presentModes);
-
-                for (size_t presentModeIdx = 0; presentModeIdx < presentModeCount; ++presentModeIdx)
-                {
-                    const VkPresentModeKHR presentMode = presentModes[presentModeIdx];
-                    if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-                    {
-                        result = presentMode;
-                        break;
-                    }
-                }
-            } else
-            {
-                result = VK_PRESENT_MODE_IMMEDIATE_KHR;
-            }
-
-            switch (result)
-            {
-            case VK_PRESENT_MODE_IMMEDIATE_KHR: return PresentMode::Immediate;
-            case VK_PRESENT_MODE_MAILBOX_KHR: return PresentMode::Mailbox;
-            case VK_PRESENT_MODE_FIFO_KHR: return PresentMode::Fifo;
-            default: return PresentMode::Immediate;
-            };
-        };
-
-        Rendering::SwapchainCreateInfo swapchainCreateInfo;
-        swapchainCreateInfo.device = this;
-        swapchainCreateInfo.surface = &m_Surface;
-        swapchainCreateInfo.recycle = false;
-        swapchainCreateInfo.buffering = createInfo.buffering;
-        swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
-        swapchainCreateInfo.width = createInfo.window->GetWidth();
-        swapchainCreateInfo.height = createInfo.window->GetHeight();
-        swapchainCreateInfo.presentMode = GetPresentMode(false);
-
-        if (!m_Swapchain.Initialize(swapchainCreateInfo))
-        {
-            std::println(std::cerr, "Failed to create swapchain!");
             return false;
         }
 
@@ -326,6 +279,52 @@ namespace Nova::Vulkan
         if (!m_TransferCommandPool.Initialize(commandPoolCreateInfo))
         {
             std::println(std::cerr, "Failed to create transfer command pool!");
+            return false;
+        }
+
+        const auto GetPresentMode = [&](const bool vSync) -> PresentMode
+        {
+            VkPresentModeKHR result;
+
+            if (vSync)
+            {
+                result = VK_PRESENT_MODE_FIFO_KHR;
+
+                uint32_t presentModeCount;
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, nullptr);
+                Array<VkPresentModeKHR> presentModes(presentModeCount);
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, presentModes.Data());
+
+                if (presentModes.Contains(VK_PRESENT_MODE_MAILBOX_KHR))
+                    result = VK_PRESENT_MODE_MAILBOX_KHR;
+            } else
+            {
+                result = VK_PRESENT_MODE_IMMEDIATE_KHR;
+            }
+
+            switch (result)
+            {
+            case VK_PRESENT_MODE_IMMEDIATE_KHR: return PresentMode::Immediate;
+            case VK_PRESENT_MODE_MAILBOX_KHR: return PresentMode::Mailbox;
+            case VK_PRESENT_MODE_FIFO_KHR: return PresentMode::Fifo;
+            case VK_PRESENT_MODE_FIFO_RELAXED_KHR: return PresentMode::FifoRelaxed;
+            default: return PresentMode::Unknown;
+            };
+        };
+
+        Rendering::SwapchainCreateInfo swapchainCreateInfo;
+        swapchainCreateInfo.device = this;
+        swapchainCreateInfo.surface = &m_Surface;
+        swapchainCreateInfo.recycle = false;
+        swapchainCreateInfo.buffering = createInfo.buffering;
+        swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
+        swapchainCreateInfo.width = createInfo.window->GetWidth();
+        swapchainCreateInfo.height = createInfo.window->GetHeight();
+        swapchainCreateInfo.presentMode = GetPresentMode(createInfo.vSync);
+
+        if (!m_Swapchain.Initialize(swapchainCreateInfo))
+        {
+            std::println(std::cerr, "Failed to create swapchain!");
             return false;
         }
 
@@ -399,12 +398,60 @@ namespace Nova::Vulkan
         if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
+
+        VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+        barrier.srcAccessMask = VK_ACCESS_2_NONE;
+        barrier.dstAccessMask = VK_ACCESS_2_NONE;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = m_Swapchain.GetImage(m_CurrentFrameIndex);
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+        barrier.srcStageMask = 0;
+        barrier.dstStageMask = 0;
+
+        VkDependencyInfo dependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        dependency.dependencyFlags = 0;
+        dependency.imageMemoryBarrierCount = 1;
+        dependency.pImageMemoryBarriers = &barrier;
+        vkCmdPipelineBarrier2(commandBuffer.GetHandle(), &dependency);
+
         return true;
     }
 
     void Device::EndFrame()
     {
         CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
+
+        VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        barrier.srcAccessMask = VK_ACCESS_2_NONE;
+        barrier.dstAccessMask = VK_ACCESS_2_NONE;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = m_Swapchain.GetImage(m_CurrentFrameIndex);
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+        barrier.srcStageMask = 0;
+        barrier.dstStageMask = 0;
+
+        VkDependencyInfo inDependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        inDependency.dependencyFlags = 0;
+        inDependency.imageMemoryBarrierCount = 1;
+        inDependency.pImageMemoryBarriers = &barrier;
+        vkCmdPipelineBarrier2(commandBuffer.GetHandle(), &inDependency);
+
         Fence& fence = GetCurrentFence();
         Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
         Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
@@ -575,7 +622,7 @@ namespace Nova::Vulkan
         VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         transferBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        transferBarrier.srcAccessMask = 0;
+        transferBarrier.srcAccessMask = VK_ACCESS_NONE;
         transferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         transferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         transferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -614,7 +661,7 @@ namespace Nova::Vulkan
         const VkCommandBuffer cmdBuff = commandBuffer.GetHandle();
         const VkImage srcImage = tex.GetImage();
         const VkImage dstImage = swapchainImage;
-        vkCmdBlitImage(cmdBuff, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, Convert<Filter, VkFilter>(filter));
+        vkCmdBlitImage(cmdBuff, srcImage, (VkImageLayout)tex.GetImageLayout(), dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &blit, Convert<Filter, VkFilter>(filter));
 
         VkImageMemoryBarrier presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
         presentBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;

@@ -10,6 +10,7 @@
 namespace Nova::Rendering
 {
     class Texture;
+    class RenderTarget;
 
     struct RenderPassCreateInfo
     {
@@ -38,7 +39,8 @@ namespace Nova::Rendering
         ClearValue clearValue = ClearValue();
         LoadOperation loadOp = LoadOperation::DontCare;
         StoreOperation storeOp = StoreOperation::DontCare;
-        const Texture* textures[3];
+        const Texture* texture = nullptr;
+        const Texture* resolveTexture = nullptr;
     };
 
     class RenderPass
@@ -46,7 +48,7 @@ namespace Nova::Rendering
     public:
         RenderPass(uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height);
 
-        void AddAttachment(const RenderPassAttachment& attachment);
+        void AddAttachment(RenderPassAttachment& attachment);
 
         uint32_t GetOffsetX() const;
         uint32_t GetOffsetY() const;
@@ -57,16 +59,19 @@ namespace Nova::Rendering
         uint32_t GetDepthAttachmentCount() const;
         RenderPassAttachment* GetDepthAttachment() const;
 
+        void SetAttachmentTexture(size_t attachmentIndex, const Texture& texture);
+        void SetAttachmentResolveTexture(size_t attachmentIndex, const Texture& resolveTexture);
+
         bool HasDepthAttachment() const;
         bool HasStencilAttachment() const;
 
-        Array<RenderPassAttachment>::Iterator begin();
-        Array<RenderPassAttachment>::Iterator end();
-        Array<RenderPassAttachment>::ConstIterator begin() const;
-        Array<RenderPassAttachment>::ConstIterator end() const;
+        Array<RenderPassAttachment*>::Iterator begin();
+        Array<RenderPassAttachment*>::Iterator end();
+        Array<RenderPassAttachment*>::ConstIterator begin() const;
+        Array<RenderPassAttachment*>::ConstIterator end() const;
 
     private:
-        Array<RenderPassAttachment> m_Attachments;
+        Array<RenderPassAttachment*> m_Attachments;
         uint32_t m_OffsetX = 0;
         uint32_t m_OffsetY = 0;
         uint32_t m_Width = 0;

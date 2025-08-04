@@ -12,6 +12,8 @@
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
 
+#include "Containers/StringFormat.h"
+
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 #endif
@@ -336,8 +338,7 @@ namespace Nova::Vulkan
 
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
-            Rendering::SemaphoreCreateInfo semaphoreCreateInfo;
-            semaphoreCreateInfo.device = this;
+            Rendering::SemaphoreCreateInfo semaphoreCreateInfo(this);
             m_Frames[imageIndex].submitSemaphore.Initialize(semaphoreCreateInfo);
             m_Frames[imageIndex].presentSemaphore.Initialize(semaphoreCreateInfo);
 
@@ -351,7 +352,9 @@ namespace Nova::Vulkan
             allocateInfo.level = Rendering::CommandBufferLevel::Primary;
             allocateInfo.commandPool = &m_CommandPool;
 
-            m_Frames[imageIndex].commandBuffer.Allocate(allocateInfo);
+            CommandBuffer commandBuffer = m_CommandPool.AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
+            commandBuffer.SetName(StringFormat("Main Commander Buffer ({})", imageIndex));
+            m_Frames[imageIndex].commandBuffer = commandBuffer;
         }
 
         return true;

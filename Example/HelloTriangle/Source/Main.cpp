@@ -17,13 +17,14 @@
 #include "Runtime/Time.h"
 #include "Runtime/ScopedTimer.h"
 #include "Rendering/RenderPass.h"
-
-#include <vulkan/vulkan.h>
-#include <cstdlib>
-
 #include "Components/Camera.h"
 #include "Game/Scene.h"
 #include "Components/Transform.h"
+#include "Rendering/Vulkan/ImGuiRenderer.h"
+
+#include <vulkan/vulkan.h>
+#include <imgui.h>
+#include <cstdlib>
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
 static bool g_Running = true;
@@ -86,6 +87,13 @@ namespace Nova
             swapchain->Invalidate();
             renderTarget.Resize(newWidth, newHeight);
         });
+
+        Rendering::ImGuiRendererCreateInfo imguiCreateInfo;
+        imguiCreateInfo.device = &device;
+        imguiCreateInfo.window = &window;
+        imguiCreateInfo.sampleCount = SAMPLE_COUNT;
+        Vulkan::ImGuiRenderer imgui;
+        imgui.Initialize(imguiCreateInfo);
 
         Array<uint32_t> vertSpirv, fragSpirv;
         CompileShaderToSpirv(GetAssetPath("Shaders/HelloTriangle.slang"), "HelloTriangle", vertSpirv, fragSpirv);
@@ -201,13 +209,13 @@ namespace Nova
 
         Rendering::RenderPassAttachment colorAttachment;
         colorAttachment.type = Rendering::AttachmentType::Color;
-        colorAttachment.loadOp = Rendering::LoadOperation::Load;
+        colorAttachment.loadOp = Rendering::LoadOperation::Clear;
         colorAttachment.storeOp = Rendering::StoreOperation::Store;
         colorAttachment.clearValue.color = Color::Black;
 
         Rendering::RenderPassAttachment depthAttachment;
         depthAttachment.type = Rendering::AttachmentType::Depth;
-        depthAttachment.loadOp = Rendering::LoadOperation::Load;
+        depthAttachment.loadOp = Rendering::LoadOperation::Clear;
         depthAttachment.storeOp = Rendering::StoreOperation::Store;
         depthAttachment.clearValue.depth = 1.0f;
         depthAttachment.clearValue.stencil = 0;
@@ -244,13 +252,19 @@ namespace Nova
             Transform* transform = triangleEntity->GetComponent<Transform>();
             transform->Rotate(Quaternion::FromEulerDegrees(0.0f, 0.0f, 5.0f * deltaTime));
             const Matrix4& viewProj = camera->GetViewProjectionMatrix();
-            const Matrix4 mvp = transform->GetWorldSpaceMatrix();
+            const Matrix4 mvp = viewProj * transform->GetWorldSpaceMatrix();
 
             if (device.BeginFrame())
             {
                 renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
                 renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
                 renderPass.SetAttachmentResolveTexture(0, device.GetSwapchain()->GetCurrentTexture());
+
+                imgui.BeginFrame();
+                static bool opened = true;
+                ImGui::ShowDemoWindow(&opened);
+                imgui.EndFrame();
+
 
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
                 commandBuffer.BeginRenderPass(renderPass);
@@ -264,6 +278,7 @@ namespace Nova
                 commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, pipelineLayout);
                 commandBuffer.DrawIndexed(3, 0);
 
+                imgui.Render(commandBuffer);
                 commandBuffer.EndRenderPass();
                 device.EndFrame();
                 device.Present();
@@ -272,6 +287,7 @@ namespace Nova
 
 
         device.WaitIdle();
+        imgui.Destroy();
         vkDestroyPipelineLayout(device.GetHandle(), pipelineLayout, nullptr);
         pipeline.Destroy();
         fragShaderModule.Destroy();

@@ -17,6 +17,7 @@ namespace Nova::Vulkan
 
         bool Allocate(const Rendering::CommandBufferAllocateInfo& allocateInfo) override;
         void Free() override;
+        void SetName(StringView name) override;
         bool Begin(const Rendering::CommandBufferBeginInfo& beginInfo) override;
         void End() override;
 

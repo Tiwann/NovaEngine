@@ -1,6 +1,8 @@
 ﻿option(MINIAUDIO_NO_EXTRA_NODES ON)
 add_subdirectory(Vendor/miniaudio)
 
+add_subdirectory(Vendor/box2d)
+
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_INSTALL OFF)
 add_subdirectory(Vendor/glfw)

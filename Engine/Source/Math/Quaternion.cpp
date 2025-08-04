@@ -14,98 +14,98 @@ namespace Nova
     {
     }
 
-    Quaternion::Quaternion(const float w, const float X, const float Y, const float Z): w(w), x(X), y(Y), z(Z){}
+    Quaternion::Quaternion(const float w, const float x, const float y, const float z): w(w), x(x), y(y), z(z){}
 
-    Quaternion::Quaternion(const Quaternion& Other) : w(Other.w), x(Other.x), y(Other.y), z(Other.z)
+    Quaternion::Quaternion(const Quaternion& other) : w(other.w), x(other.x), y(other.y), z(other.z)
     {
 
     }
 
-    bool Quaternion::operator!=(const Quaternion& Other) const
+    bool Quaternion::operator!=(const Quaternion& other) const
     {
-        return !operator==(Other);
+        return !operator==(other);
     }
 
-    bool Quaternion::operator==(const Quaternion& Other) const
+    bool Quaternion::operator==(const Quaternion& other) const
     {
-        return x == Other.x && y == Other.y && z == Other.z;
+        return x == other.x && y == other.y && z == other.z;
     }
 
-    Quaternion Quaternion::operator+(const Quaternion& Other) const
+    Quaternion Quaternion::operator+(const Quaternion& other) const
     {
-        return { w + Other.w, x + Other.x, y + Other.y, z + Other.z };
+        return { w + other.w, x + other.x, y + other.y, z + other.z };
     }
 
-    Quaternion Quaternion::operator-(const Quaternion& Other) const
+    Quaternion Quaternion::operator-(const Quaternion& other) const
     {
-        return { w - Other.w, x - Other.x, y - Other.y, z - Other.z };
+        return { w - other.w, x - other.x, y - other.y, z - other.z };
     }
     
 
-    Quaternion& Quaternion::operator+=(const Quaternion& Other)
+    Quaternion& Quaternion::operator+=(const Quaternion& other)
     {
-        w += Other.w;
-        x += Other.x;
-        y += Other.y;
-        z += Other.z;
+        w += other.w;
+        x += other.x;
+        y += other.y;
+        z += other.z;
         return *this;
     }
 
-    Quaternion& Quaternion::operator-=(const Quaternion& Other)
+    Quaternion& Quaternion::operator-=(const Quaternion& other)
     {
-        w -= Other.w;
-        x -= Other.x;
-        y -= Other.y;
-        z -= Other.z;
+        w -= other.w;
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
         return *this;
     }
 
-    Quaternion Quaternion::operator*(const Quaternion& Other) const
+    Quaternion Quaternion::operator*(const Quaternion& other) const
     {
-        return {  w * Other.w - x * Other.x - y * Other.y - z * Other.z,
-                    w * Other.x + x * Other.w + y * Other.z - z * Other.y,
-                    w * Other.y - x * Other.z + y * Other.w + z * Other.x,
-                    w * Other.z + x * Other.y - y * Other.x + z * Other.w };
+        return {  w * other.w - x * other.x - y * other.y - z * other.z,
+                    w * other.x + x * other.w + y * other.z - z * other.y,
+                    w * other.y - x * other.z + y * other.w + z * other.x,
+                    w * other.z + x * other.y - y * other.x + z * other.w };
     }
 
-    Quaternion Quaternion::operator*(const float Other) const
+    Quaternion Quaternion::operator*(const float other) const
     {
-        return { w * Other, x * Other, y * Other, z * Other };
+        return { w * other, x * other, y * other, z * other };
     }
 
-    Quaternion& Quaternion::operator*=(const Quaternion& Other)
+    Quaternion& Quaternion::operator*=(const Quaternion& other)
     {
-        *this = operator*(Other);
+        *this = operator*(other);
         return *this;
     }
 
-    Quaternion& Quaternion::operator*=(const float Other)
+    Quaternion& Quaternion::operator*=(const float other)
     {
-        *this = operator*(Other);
+        *this = operator*(other);
         return *this;
     }
 
-    Quaternion Quaternion::operator/(const float Other) const
+    Quaternion Quaternion::operator/(const float other) const
     {
-        return { w / Other, x / Other, y / Other, z / Other };
+        return { w / other, x / other, y / other, z / other };
     }
 
-    Vector3 Quaternion::operator*(const Vector3& Other) const
+    Vector3 Quaternion::operator*(const Vector3& other) const
     {
         const Vector3 QuatVector(x, y, z);
-        const Vector3 UV(QuatVector.Cross(Other));
+        const Vector3 UV(QuatVector.Cross(other));
         const Vector3 UUV(QuatVector.Cross(UV));
-        return Other + (UV * w + UUV) * 2.0f;
+        return other + (UV * w + UUV) * 2.0f;
     }
 
-    Vector4 Quaternion::operator*(const Vector4& Other) const
+    Vector4 Quaternion::operator*(const Vector4& other) const
     {
-        return Vector4(operator*(Vector3(Other)), Other.w);
+        return Vector4(operator*(Vector3(other)), other.w);
     }
 
-    Matrix4 Quaternion::operator*(const Matrix4& Other) const
+    Matrix4 Quaternion::operator*(const Matrix4& other) const
     {
-        return ToMatrix4() * Other;
+        return ToMatrix4() * other;
     }
 
     Matrix4 Quaternion::ToMatrix4() const
@@ -180,52 +180,42 @@ namespace Nova
         return ToEuler().Apply(Math::Degrees);
     }
 
-    Quaternion Quaternion::FromAxisAngle(const Vector3& Axis, const float Radians)
+    Quaternion Quaternion::FromAxisAngle(const Vector3& axis, const float radians)
     {
-        const Vector3 A = Math::Normalize(Axis);
-        Quaternion Result;
-        Result.w = Math::Cos(Radians * 0.5f);
-        Result.x = A.x * Math::Sin(Radians * 0.5f);
-        Result.y = A.y * Math::Sin(Radians * 0.5f);
-        Result.z = A.z * Math::Sin(Radians * 0.5f);
-        return Result;
+        const Vector3 a = Math::Normalize(axis);
+        Quaternion result;
+        result.w = Math::Cos(radians * 0.5f);
+        result.x = a.x * Math::Sin(radians * 0.5f);
+        result.y = a.y * Math::Sin(radians * 0.5f);
+        result.z = a.z * Math::Sin(radians * 0.5f);
+        return result;
     }
 
-    Quaternion Quaternion::FromAxisAngleDegrees(const Vector3& Axis, const float Degrees)
+    Quaternion Quaternion::FromAxisAngleDegrees(const Vector3& axis, const float degrees)
     {
-        return FromAxisAngle(Axis, Math::Radians(Degrees));
+        return FromAxisAngle(axis, Math::Radians(degrees));
     }
 
-    Quaternion Quaternion::FromEuler(const Vector3& EulerAngles)
+    Quaternion Quaternion::FromEuler(const Vector3& eulerAngles)
     {
-        const float CosX = Math::Cos(EulerAngles.x * 0.5f);
-        const float SinX = Math::Sin(EulerAngles.x * 0.5f);
-        const float CosY = Math::Cos(EulerAngles.y * 0.5f);
-        const float SinY = Math::Sin(EulerAngles.y * 0.5f);
-        const float CosZ = Math::Cos(EulerAngles.z * 0.5f);
-        const float SinZ = Math::Sin(EulerAngles.z * 0.5f);
+        const float cosX = Math::Cos(eulerAngles.x * 0.5f);
+        const float sinX = Math::Sin(eulerAngles.x * 0.5f);
+        const float cosY = Math::Cos(eulerAngles.y * 0.5f);
+        const float sinY = Math::Sin(eulerAngles.y * 0.5f);
+        const float cosZ = Math::Cos(eulerAngles.z * 0.5f);
+        const float sinZ = Math::Sin(eulerAngles.z * 0.5f);
 
-        Quaternion Result;
-        Result.w = CosX * CosY * CosZ + SinX * SinY * SinZ;
-        Result.x = SinX * CosY * CosZ - CosX * SinY * SinZ;
-        Result.y = CosX * SinY * CosZ + SinX * CosY * SinZ;
-        Result.z = CosX * CosY * SinZ - SinX * SinY * CosZ;
-        return Result;
+        Quaternion result;
+        result.w = cosX * cosY * cosZ + sinX * sinY * sinZ;
+        result.x = sinX * cosY * cosZ - cosX * sinY * sinZ;
+        result.y = cosX * sinY * cosZ + sinX * cosY * sinZ;
+        result.z = cosX * cosY * sinZ - sinX * sinY * cosZ;
+        return result;
     }
 
-    Quaternion Quaternion::FromEuler(const float X, const float Y, const float Z)
+    Quaternion Quaternion::FromEulerDegrees(const Vector3& eulerAnglesDegrees)
     {
-        return FromEuler(Vector3(X, Y, Z));
-    }
-
-    Quaternion Quaternion::FromEulerDegrees(const Vector3& EulerAnglesDegrees)
-    {
-        return FromEuler(EulerAnglesDegrees.Apply(Math::Radians));
-    }
-
-    Quaternion Quaternion::FromEulerDegrees(const float X, const float Y, const float Z)
-    {
-        return FromEuler(Vector3(X, Y, Z).Apply(Math::Radians));
+        return FromEuler(eulerAnglesDegrees.Apply(Math::Radians));
     }
 
     float Quaternion::Magnitude() const
@@ -235,10 +225,10 @@ namespace Nova
 
     Quaternion Quaternion::Normalized() const
     {
-        const float CachedMagnitude = Magnitude();
-        if (CachedMagnitude <= 0) return Quaternion();
-        const float InverseMagnitude = 1.0f / CachedMagnitude;
-        return { w * InverseMagnitude, y * InverseMagnitude, z * InverseMagnitude, x * InverseMagnitude };
+        const float magnitude = Magnitude();
+        if (magnitude <= 0) return Quaternion();
+        const float inverseMagnitude = 1.0f / magnitude;
+        return { w * inverseMagnitude, y * inverseMagnitude, z * inverseMagnitude, x * inverseMagnitude };
     }
 
     Quaternion Quaternion::Conjugated() const
@@ -253,18 +243,18 @@ namespace Nova
         return Conjugate / Dot;
     }
 
-    Quaternion Quaternion::Cross(const Quaternion& Other) const
+    Quaternion Quaternion::Cross(const Quaternion& other) const
     {
         return Quaternion(
-            w * Other.w - x * Other.x - y * Other.y - z * Other.z,
-            w * Other.x + x * Other.w + y * Other.z - z * Other.y,
-            w * Other.y + y * Other.w + z * Other.x - x * Other.z,
-            w * Other.z + z * Other.w + x * Other.y - y * Other.x);
+            w * other.w - x * other.x - y * other.y - z * other.z,
+            w * other.x + x * other.w + y * other.z - z * other.y,
+            w * other.y + y * other.w + z * other.x - x * other.z,
+            w * other.z + z * other.w + x * other.y - y * other.x);
     }
 
-    float Quaternion::Dot(const Quaternion& Other) const
+    float Quaternion::Dot(const Quaternion& other) const
     {
-        return Math::Sqrt(x * Other.x + y * Other.y + z * Other.z + w * Other.w);
+        return Math::Sqrt(x * other.x + y * other.y + z * other.z + w * other.w);
     }
     
 

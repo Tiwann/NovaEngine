@@ -6,9 +6,10 @@ namespace Nova
 {
     void Scene::OnInit()
     {
-#ifdef NOVA_HAS_PHYSICS2D
-        m_PhysicsWorld2D.OnInit(this);
+#ifdef NOVA_HAS_PHYSICS
+        m_PhysicsWorld2D.Initialize(PhysicsWorldCreateInfo(this));
 #endif
+
 #ifdef NOVA_HAS_PHYSICS3D
         m_PhysicsWorld3D.OnInit(this);
 #endif
@@ -25,9 +26,10 @@ namespace Nova
             entity->OnUpdate(deltaTime);
         }
 
-#ifdef NOVA_HAS_PHYSICS2D
+#ifdef NOVA_HAS_PHYSICS
         m_PhysicsWorld2D.Step();
 #endif
+        
 #ifdef NOVA_HAS_PHYSICS3D
         m_PhysicsWorld3D.Step();
 #endif
@@ -57,8 +59,8 @@ namespace Nova
             EntityHandle handle = EntityHandle(entity->GetUUID(), this);
             DestroyEntity(handle);
         }
-#ifdef NOVA_HAS_PHYSICS2D
-        m_PhysicsWorld2D.OnDestroy();
+#ifdef NOVA_HAS_PHYSICS
+        m_PhysicsWorld2D.Destroy();
 #endif
         #ifdef NOVA_HAS_PHYSICS3D
         m_PhysicsWorld3D.OnDestroy();
@@ -76,6 +78,9 @@ namespace Nova
 
     bool Scene::DestroyEntity(EntityHandle& handle)
     {
+        if (handle == nullptr)
+            return false;
+
         Entity* entity = handle.GetEntity();
         if(!m_Entities.Contains(entity)) return false;
 
@@ -100,7 +105,7 @@ namespace Nova
         m_Name = name;
     }
 
-#ifdef NOVA_HAS_PHYSICS2D
+#ifdef NOVA_HAS_PHYSICS
     const PhysicsWorld2D& Scene::GetPhysicsWorld2D() const
     {
         return m_PhysicsWorld2D;

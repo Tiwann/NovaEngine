@@ -1,16 +1,15 @@
 ﻿#include "CommandBuffer.h"
 #include "Rendering/CommandBuffer.h"
+#include "Rendering/BlitRegion.h"
 #include "CommandPool.h"
 #include "Buffer.h"
 #include "Device.h"
 #include "Conversions.h"
 #include "GraphicsPipeline.h"
 #include "Rendering/RenderPass.h"
-
-#include <vulkan/vulkan.h>
-
+#include "VulkanExtensions.h"
 #include "VulkanUtils.h"
-#include "Rendering/BlitRegion.h"
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
@@ -53,6 +52,18 @@ namespace Nova::Vulkan
         const VkDevice deviceHandle = m_Device->GetHandle();
         const VkCommandPool commandPoolHandle = pool->GetHandle();
         vkFreeCommandBuffers(deviceHandle, commandPoolHandle, 1, &m_Handle);
+    }
+
+    void CommandBuffer::SetName(StringView name)
+    {
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        const VkDevice deviceHandle = m_Device->GetHandle();
+        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        info.objectHandle = (uint64_t)m_Handle;
+        info.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
+        info.pObjectName = *name;
+        vkSetDebugUtilsObjectName(deviceHandle, &info);
+#endif
     }
 
     bool CommandBuffer::Begin(const Rendering::CommandBufferBeginInfo& beginInfo)

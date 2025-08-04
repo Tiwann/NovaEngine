@@ -4,6 +4,7 @@
 #include "Runtime/Flags.h"
 #include "Runtime/Format.h"
 #include "ShaderStage.h"
+#include "Containers/StringView.h"
 
 namespace Nova { struct Color; }
 
@@ -55,6 +56,7 @@ namespace Nova::Rendering
 
         virtual bool Allocate(const CommandBufferAllocateInfo& allocateInfo) = 0;
         virtual void Free() = 0;
+        virtual void SetName(StringView name) = 0;
 
         virtual bool Begin(const CommandBufferBeginInfo& beginInfo) = 0;
         virtual void End() = 0;

@@ -5,8 +5,7 @@ include(CMake/Vulkan.cmake)
 option(NOVA_ENGINE_BUILD_EXAMPLES "Build example projects that uses Nova Engine" ON)
 option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a custom entry point" ON)
 option(NOVA_ENGINE_INCLUDE_AUDIO "Compile engine with audio support" ON)
-
-
+option(NOVA_ENGINE_INCLUDE_PHYSICS "Compile engine with physics support" ON)
 add_subdirectory(Engine)
 
 if(NOVA_ENGINE_BUILD_EXAMPLES)
@@ -14,5 +13,4 @@ if(NOVA_ENGINE_BUILD_EXAMPLES)
     add_subdirectory(Example/HelloCompute)
     add_subdirectory(Example/HelloTexture)
     add_subdirectory(Example/HelloAudio)
-    add_subdirectory(Example/HelloRenderer2D)
 endif ()

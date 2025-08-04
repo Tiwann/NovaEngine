@@ -35,11 +35,6 @@ namespace Nova::Vulkan
         void WaitIdle() override;
         void SetName(StringView name) override;
 
-        void ResolveToSwapchain(Rendering::RenderTarget& renderTarget) override;
-        void BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter) override;
-        void BlitToSwapchain(Rendering::Texture& texture, Filter filter) override;
-        void BlitToRenderTarget(Rendering::Texture& srcTexture, Rendering::RenderTarget& destRenderTarget, uint32_t x, uint32_t y) override;
-
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;

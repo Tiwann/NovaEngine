@@ -367,7 +367,7 @@ namespace Nova::Vulkan
             texture.m_ImageView = m_DepthImageViews[imageIndex];
             texture.m_SampleCount = m_SampleCount;
             texture.m_Device = (Device*)m_Device;
-            texture.m_Format = m_ColorFormat;
+            texture.m_Format = m_DepthFormat;
             texture.m_Allocation = m_DepthAllocations[imageIndex];
             texture.m_Mips = 1;
             texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;

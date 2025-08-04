@@ -19,7 +19,7 @@ namespace Nova
     {
     protected:
         using CloseDelegate = MulticastDelegate<void()>;
-        using ResizeDelegate = MulticastDelegate<void(int32_t, int32_t)>;
+        using ResizeDelegate = MulticastDelegate<void(uint32_t, uint32_t)>;
         using MinimizeDelegate = MulticastDelegate<void()>;
         using MaximizeDelegate = MulticastDelegate<void()>;
     public:

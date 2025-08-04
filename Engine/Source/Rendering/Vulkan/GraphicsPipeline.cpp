@@ -1,10 +1,10 @@
 ﻿#include "GraphicsPipeline.h"
 #include "Device.h"
 #include "Conversions.h"
-#include <vulkan/vulkan.h>
-
+#include "Rendering/RenderPass.h"
 #include "Rendering/RenderTarget.h"
 
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
@@ -120,13 +120,28 @@ namespace Nova::Vulkan
         dynamicState.dynamicStateCount = dynamicStates.Count();
         dynamicState.pDynamicStates =  dynamicStates.Data();
 
-        const VkFormat formats[1] = { Convert<Format, VkFormat>(createInfo.renderTarget->GetColorFormat()) };
+        Array<VkFormat> colorAttachmentFormats;
+        for (size_t attachmentIndex = 0; attachmentIndex < createInfo.renderPass->GetAttachmentCount(); attachmentIndex++)
+        {
+            Rendering::RenderPassAttachment* attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
+            if (attachment->type != Rendering::AttachmentType::Color)
+                continue;
+            colorAttachmentFormats.Add(Convert<Format, VkFormat>(attachment->texture->GetFormat()));
+        }
+
+
         VkPipelineRenderingCreateInfo renderingInfo { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         renderingInfo.viewMask = 0;
-        renderingInfo.colorAttachmentCount = 1;
-        renderingInfo.pColorAttachmentFormats = formats;
-        renderingInfo.depthAttachmentFormat = Convert<Format, VkFormat>(createInfo.renderTarget->GetDepthFormat());
-        renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(createInfo.renderTarget->GetDepthFormat());
+        renderingInfo.colorAttachmentCount = createInfo.renderPass->GetColorAttachmentCount();
+        renderingInfo.pColorAttachmentFormats = colorAttachmentFormats.Data();
+        if (createInfo.renderPass->HasDepthAttachment())
+        {
+            const Rendering::RenderPassAttachment* depthAttachment = createInfo.renderPass->GetDepthAttachment();
+            const Rendering::Texture* depthTexture = depthAttachment->texture;
+            renderingInfo.depthAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
+            renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
+        }
+
 
         VkGraphicsPipelineCreateInfo pipelineCreateInfo { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
         pipelineCreateInfo.pNext = &renderingInfo;

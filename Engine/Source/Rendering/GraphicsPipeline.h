@@ -11,6 +11,7 @@
 namespace Nova::Rendering
 {
     class Device;
+    class RenderPass;
     class RenderTarget;
 
     struct GraphicsPipelineCreateInfo
@@ -33,7 +34,7 @@ namespace Nova::Rendering
             PolygonMode polygonMode = PolygonMode::Fill;
             bool discardEnable = false;
             bool depthClampEnable = false;
-            bool depthBiasEnable = false;;
+            bool depthBiasEnable = false;
             float depthBiasClamp = 0.0f;
             float depthBiasConstantFactor = 0.0f;
             float depthBiasSlopeFactor = 0.0f;
@@ -65,29 +66,29 @@ namespace Nova::Rendering
 
         struct ViewportInfo
         {
-            uint32_t x;
-            uint32_t y;
-            uint32_t width;
-            uint32_t height;
-            float minDepth;
-            float maxDepth;
+            uint32_t x = 0;
+            uint32_t y = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
+            float minDepth = 0.0f;
+            float maxDepth = 1.0f;
         } viewportInfo;
 
         struct ScissorInfo
         {
-            uint32_t x;
-            uint32_t y;
-            uint32_t width;
-            uint32_t height;
+            uint32_t x = 0;
+            uint32_t y = 0;
+            uint32_t width = 0;
+            uint32_t height = 0;
         } scissorInfo;
 
-        Device* device;
+        Device* device = nullptr;
+        RenderPass* renderPass = nullptr;
 
         //TODO: THIS IS TEMPORARY
         void* pipelineLayout = nullptr;
         const void* shaderStages = nullptr;
         size_t shaderStagesCount = 0;
-        RenderTarget* renderTarget = nullptr;
     };
 
     class GraphicsPipeline

@@ -210,7 +210,6 @@ namespace Nova::Rendering
             pipelineCreateInfo.scissorInfo.y = 0;
             pipelineCreateInfo.scissorInfo.width = renderTarget.GetWidth();
             pipelineCreateInfo.scissorInfo.height = renderTarget.GetHeight();
-            pipelineCreateInfo.renderTarget = &renderTarget;
 
             const VkPipelineShaderStageCreateInfo shaderStages[2] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
             pipelineCreateInfo.shaderStages = shaderStages;

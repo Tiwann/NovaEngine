@@ -11,19 +11,19 @@
 namespace Nova::Memory
 {
     template<typename T>
-    T* Malloc(size_t Count = 1)
+    T* Malloc(const size_t Count = 1)
     {
         return (T*)NOVA_MALLOC(Count * sizeof(T));
     }
     
     template<typename T>
-    T* Realloc(T* Ptr, size_t Count = 1)
+    T* Realloc(T* Ptr, const size_t Count = 1)
     {
         return (T*)NOVA_REALLOC(Ptr, Count * sizeof(T));
     }
 
     template<typename T>
-    T* Memset(T* Ptr, int32_t Value, size_t Count = 1)
+    T* Memset(T* Ptr, const int32_t Value, const size_t Count = 1)
     {
         return (T*)NOVA_MEMSET((void*)Ptr, Value, Count * sizeof(T));
     }
@@ -55,13 +55,13 @@ namespace Nova::Memory
     }
 
     template<typename SourceType, typename DestType>
-    void Memcpy(DestType* Dest, const SourceType* Src, size_t Size)
+    void Memcpy(DestType* Dest, const SourceType* Src, const size_t Size)
     {
         memcpy(Dest, Src, Size);
     }
 
-    inline bool Memcmp(const void* Lhs, const void* Rhs, size_t Size)
+    inline bool Memcmp(const void* lhs, const void* rhs, const size_t size)
     {
-        return memcmp(Lhs, Rhs, Size) == 0;
+        return memcmp(lhs, rhs, size) == 0;
     }
 }

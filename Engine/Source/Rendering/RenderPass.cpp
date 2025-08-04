@@ -63,6 +63,11 @@ namespace Nova::Rendering
         return result;
     }
 
+    RenderPassAttachment* RenderPass::GetAttachment(const uint32_t index) const
+    {
+        return m_Attachments[index];
+    }
+
     RenderPassAttachment* RenderPass::GetDepthAttachment() const
     {
         RenderPassAttachment** result = m_Attachments.Single([](const RenderPassAttachment* attachment)
@@ -111,5 +116,11 @@ namespace Nova::Rendering
     Array<RenderPassAttachment*>::ConstIterator RenderPass::end() const
     {
         return m_Attachments.end();
+    }
+
+    void RenderPass::Resize(const uint32_t newWidth, const uint32_t newHeight)
+    {
+        m_Width = newWidth;
+        m_Height = newHeight;
     }
 }

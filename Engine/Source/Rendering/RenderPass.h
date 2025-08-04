@@ -57,6 +57,8 @@ namespace Nova::Rendering
         uint32_t GetAttachmentCount() const;
         uint32_t GetColorAttachmentCount() const;
         uint32_t GetDepthAttachmentCount() const;
+
+        RenderPassAttachment* GetAttachment(uint32_t index) const;
         RenderPassAttachment* GetDepthAttachment() const;
 
         void SetAttachmentTexture(size_t attachmentIndex, const Texture& texture);
@@ -70,6 +72,7 @@ namespace Nova::Rendering
         Array<RenderPassAttachment*>::ConstIterator begin() const;
         Array<RenderPassAttachment*>::ConstIterator end() const;
 
+        void Resize(uint32_t newWidth, uint32_t newHeight);
     private:
         Array<RenderPassAttachment*> m_Attachments;
         uint32_t m_OffsetX = 0;

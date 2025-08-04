@@ -39,10 +39,6 @@ namespace Nova::Rendering
         virtual void EndFrame() = 0;
         virtual void Present() = 0;
         virtual void WaitIdle() = 0;
-        virtual void ResolveToSwapchain(RenderTarget& renderTarget) = 0;
-        virtual void BlitToSwapchain(RenderTarget& renderTarget, Filter filter) = 0;
-        virtual void BlitToSwapchain(Texture& texture, Filter filter) = 0;
-        virtual void BlitToRenderTarget(Texture& srcTexture, RenderTarget& destRenderTarget, uint32_t x, uint32_t y) = 0;
         virtual void SetName(StringView name) = 0;
     };
 }

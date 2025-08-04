@@ -6,7 +6,7 @@
 #include "Containers/String.h"
 #include "Containers/BumpAllocator.h"
 
-#ifdef NOVA_HAS_PHYSICS2D
+#ifdef NOVA_HAS_PHYSICS
 #include "Physics/PhysicsWorld2D.h"
 #endif
 
@@ -27,7 +27,6 @@ namespace Nova
          
         void OnInit();
         void OnUpdate(float deltaTime);
-        //void OnRender(Renderer* Renderer) const;
         void OnDestroy();
 
         template <typename ComponentType>
@@ -52,7 +51,7 @@ namespace Nova
         void ForEach(const Function<void(const EntityHandle&)>& function);
 
 
-#ifdef NOVA_HAS_PHYSICS2D
+#ifdef NOVA_HAS_PHYSICS
         const PhysicsWorld2D& GetPhysicsWorld2D() const;
         PhysicsWorld2D& GetPhysicsWorld2D();
 #endif
@@ -72,7 +71,7 @@ namespace Nova
         String m_Name;
         BumpAllocator<Entity, 32> m_EntityPool;
         Array<Entity*> m_Entities;
-#ifdef NOVA_HAS_PHYSICS2D
+#ifdef NOVA_HAS_PHYSICS
         PhysicsWorld2D m_PhysicsWorld2D;
 #endif
 #ifdef NOVA_HAS_PHYSICS3D

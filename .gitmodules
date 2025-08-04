@@ -7,3 +7,6 @@
 [submodule "Engine/Vendor/imgui"]
 	path = Engine/Vendor/imgui
 	url = git@github.com:ocornut/imgui.git
+[submodule "Engine/Vendor/box2d"]
+	path = Engine/Vendor/box2d
+	url = git@github.com:erincatto/box2d.git

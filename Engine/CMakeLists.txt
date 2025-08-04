@@ -16,15 +16,19 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui PRIVATE glfw)
+target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui PRIVATE glfw box2d)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
-target_compile_definitions(NovaEngine PUBLIC NOVA_CUSTOM_ENTRY_POINT)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_CUSTOM_ENTRY_POINT)
 endif ()
 
 if(NOVA_ENGINE_INCLUDE_AUDIO)
-target_include_directories(NovaEngine PUBLIC NOVA_HAS_AUDIO)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_HAS_AUDIO)
+endif ()
+
+if(NOVA_ENGINE_INCLUDE_PHYSICS)
+    target_compile_definitions(NovaEngine PUBLIC NOVA_HAS_PHYSICS)
 endif ()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)

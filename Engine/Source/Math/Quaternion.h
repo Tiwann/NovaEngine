@@ -13,43 +13,41 @@ namespace Nova
         float w, x, y, z;
 
         Quaternion();
-        Quaternion(float W, float X, float Y, float Z);
-        Quaternion(const Quaternion& Other);
+        Quaternion(float w, float x, float y, float z);
+        Quaternion(const Quaternion& other);
         
         float Magnitude() const;
         Quaternion Normalized() const;
         Quaternion Conjugated() const;
         Quaternion Inverted() const;
 
-        Quaternion Cross(const Quaternion& Other) const;
-        float Dot(const Quaternion& Other) const;
+        Quaternion Cross(const Quaternion& other) const;
+        float Dot(const Quaternion& other) const;
 
-        bool operator==(const Quaternion& Other) const;
-        bool operator!=(const Quaternion& Other) const;
-        Quaternion operator+(const Quaternion& Other) const;
-        Quaternion operator-(const Quaternion& Other) const;
-        Quaternion& operator+=(const Quaternion& Other);
-        Quaternion& operator-=(const Quaternion& Other);
-        Quaternion operator*(const Quaternion& Other) const;
-        Quaternion operator*(float Other) const;
-        Quaternion& operator*=(const Quaternion& Other);
-        Quaternion& operator*=(float Other);
-        Quaternion operator/(float Other) const;
-        Vector3 operator*(const Vector3& Other) const;
-        Vector4 operator*(const Vector4& Other) const;
-        Matrix4 operator*(const Matrix4& Other) const;
+        bool operator==(const Quaternion& other) const;
+        bool operator!=(const Quaternion& other) const;
+        Quaternion operator+(const Quaternion& other) const;
+        Quaternion operator-(const Quaternion& other) const;
+        Quaternion& operator+=(const Quaternion& other);
+        Quaternion& operator-=(const Quaternion& other);
+        Quaternion operator*(const Quaternion& other) const;
+        Quaternion operator*(float other) const;
+        Quaternion& operator*=(const Quaternion& other);
+        Quaternion& operator*=(float other);
+        Quaternion operator/(float other) const;
+        Vector3 operator*(const Vector3& other) const;
+        Vector4 operator*(const Vector4& other) const;
+        Matrix4 operator*(const Matrix4& other) const;
 
         Matrix4 ToMatrix4() const;
         Matrix3 ToMatrix3() const;
         Vector3 ToEuler() const;
         Vector3 ToEulerDegrees() const;
 
-        static Quaternion FromAxisAngle(const Vector3& Axis, float Radians);
-        static Quaternion FromAxisAngleDegrees(const Vector3& Axis, float Degrees);
-        static Quaternion FromEuler(const Vector3& EulerAngles);
-        static Quaternion FromEuler(float X, float Y, float Z);
-        static Quaternion FromEulerDegrees(const Vector3& EulerAnglesDegrees);
-        static Quaternion FromEulerDegrees(float X, float Y, float Z);
+        static Quaternion FromAxisAngle(const Vector3& axis, float radians);
+        static Quaternion FromAxisAngleDegrees(const Vector3& axis, float degrees);
+        static Quaternion FromEuler(const Vector3& eulerAngles);
+        static Quaternion FromEulerDegrees(const Vector3& eulerAnglesDegrees);
         static Quaternion One;
         static Quaternion Identity;
     };

@@ -40,8 +40,8 @@ namespace Nova
     {
         WindowCreateInfo windowCreateInfo;
         windowCreateInfo.title = "Hello Triangle";
-        windowCreateInfo.width = 600;
-        windowCreateInfo.height = 400;
+        windowCreateInfo.width = 1280;
+        windowCreateInfo.height = 720;
         windowCreateInfo.show = true;
 
         DesktopWindow window;
@@ -55,7 +55,7 @@ namespace Nova
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
         deviceCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
-        deviceCreateInfo.vSync = true;
+        deviceCreateInfo.vSync = false;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
@@ -85,7 +85,6 @@ namespace Nova
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-            renderTarget.Resize(newWidth, newHeight);
         });
 
         Rendering::ImGuiRendererCreateInfo imguiCreateInfo;
@@ -129,8 +128,31 @@ namespace Nova
             return EXIT_FAILURE;
 
 
+        Rendering::RenderPassAttachment colorAttachment;
+        colorAttachment.type = Rendering::AttachmentType::Color;
+        colorAttachment.loadOp = Rendering::LoadOperation::Clear;
+        colorAttachment.storeOp = Rendering::StoreOperation::Store;
+        colorAttachment.clearValue.color = Color::Black;
+
+        Rendering::RenderPassAttachment depthAttachment;
+        depthAttachment.type = Rendering::AttachmentType::Depth;
+        depthAttachment.loadOp = Rendering::LoadOperation::Clear;
+        depthAttachment.storeOp = Rendering::StoreOperation::Store;
+        depthAttachment.clearValue.depth = 1.0f;
+        depthAttachment.clearValue.stencil = 0;
+
+        Rendering::RenderPass renderPass(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+        renderPass.AddAttachment(colorAttachment);
+        renderPass.AddAttachment(depthAttachment);
+
+        renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
+        renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
+
+        window.resizeEvent.BindMember(&renderPass, &Rendering::RenderPass::Resize);
+
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = &device;
+        pipelineCreateInfo.renderPass = &renderPass;
         pipelineCreateInfo.pipelineLayout = pipelineLayout;
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector3 });
@@ -167,7 +189,6 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = window.GetWidth();
         pipelineCreateInfo.scissorInfo.height = window.GetHeight();
-        pipelineCreateInfo.renderTarget = &renderTarget;
 
         const VkPipelineShaderStageCreateInfo shaderStages[] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
         pipelineCreateInfo.shaderStages = shaderStages;
@@ -195,38 +216,11 @@ namespace Nova
         Vulkan::Buffer vertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
         Vulkan::Buffer indexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
-        const auto onTimer = [](const double deltaTime)
-        {
-            static double timer = 0.0f;
-            timer += deltaTime;
-            if (timer > 1.0)
-            {
-                const uint32_t fps = 1.0 / deltaTime;
-                std::println(std::cout, "Frame Time: {:.2f}ms | FPS: {}", deltaTime * 1000.0, fps);
-                timer = 0.0f;
-            }
-        };
-
-        Rendering::RenderPassAttachment colorAttachment;
-        colorAttachment.type = Rendering::AttachmentType::Color;
-        colorAttachment.loadOp = Rendering::LoadOperation::Clear;
-        colorAttachment.storeOp = Rendering::StoreOperation::Store;
-        colorAttachment.clearValue.color = Color::Black;
-
-        Rendering::RenderPassAttachment depthAttachment;
-        depthAttachment.type = Rendering::AttachmentType::Depth;
-        depthAttachment.loadOp = Rendering::LoadOperation::Clear;
-        depthAttachment.storeOp = Rendering::StoreOperation::Store;
-        depthAttachment.clearValue.depth = 1.0f;
-        depthAttachment.clearValue.stencil = 0;
-
-        Rendering::RenderPass renderPass(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
-        renderPass.AddAttachment(colorAttachment);
-        renderPass.AddAttachment(depthAttachment);
-
         Scene scene("My Scene");
         EntityHandle cameraEntity = scene.CreateEntity("Camera");
         Camera* camera = cameraEntity->AddComponent<Camera>();
+        Transform* cameraTransform = cameraEntity->GetComponent<Transform>();
+        cameraTransform->SetPosition(Vector3(0.0f, 0.0f, 1.0f));
         camera->SetDimensions(renderTarget.GetWidth(), renderTarget.GetHeight());
         camera->SetClipPlanes(0.001f, 1000.0f);
         camera->SetProjectionMode(CameraProjectionMode::Orthographic);
@@ -235,14 +229,33 @@ namespace Nova
         EntityHandle triangleEntity = scene.CreateEntity("Triangle");
         scene.OnInit();
 
+        const auto drawTransform = [](const StringView name, Transform* transform)
+        {
+            ImGui::PushID((const char*)transform->GetUuid().GetValues(), (const char*)(transform->GetUuid().GetValues() + 1));
+            if (ImGui::TreeNode(*name))
+            {
+                Vector3 position = transform->GetPosition();
+                if ((ImGui::DragFloat3("Position", position.ValuePtr(), 0.01f, 0, 0, "%.2f")))
+                    transform->SetPosition(position);
+
+                Vector3 eulerAngles = transform->GetRotation().ToEulerDegrees();
+                if ((ImGui::DragFloat3("Rotation", eulerAngles.ValuePtr(), 0.01f, 0, 0, "%.2f")))
+                    transform->SetRotation(Quaternion::FromEulerDegrees(eulerAngles));
+
+                Vector3 scale = transform->GetScale();
+                if ((ImGui::DragFloat3("Scale", scale.ValuePtr(), 0.01f, 0, 0, "%.2f")))
+                    transform->SetScale(scale);
+
+                ImGui::TreePop();
+            }
+            ImGui::PopID();
+        };
 
 
         float lastTime = 0.0;
         while (g_Running)
         {
-            const ScopedTimer timer(onTimer);
             float currentTime = (float)Time::Get();
-
             float deltaTime = currentTime - lastTime;
             lastTime = currentTime;
 
@@ -256,6 +269,49 @@ namespace Nova
 
             if (device.BeginFrame())
             {
+                imgui.BeginFrame();
+                ImGui::ShowDemoWindow();
+                if (ImGui::Begin("Settings"))
+                {
+                    drawTransform("Camera", cameraTransform);
+                    drawTransform("Triangle", transform);
+
+                    float orthoSize = camera->GetOrthographicSize();
+                    if ((ImGui::SliderFloat("Ortho Size", &orthoSize, -300, 300, "%.1f")))
+                        camera->SetOrthographicSize(orthoSize);
+
+
+                }
+                ImGui::End();
+
+                ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
+
+
+                ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove |
+                    ImGuiWindowFlags_NoNav |
+                    ImGuiWindowFlags_NoDecoration |
+                    ImGuiWindowFlags_NoInputs |
+                    ImGuiWindowFlags_AlwaysAutoResize;
+
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
+                if (ImGui::Begin("FPS counter", nullptr, flags))
+                {
+                    static char str[9] = { 0 };
+                    static float timer = 0.0f;
+                    timer += deltaTime;
+                    if (timer > 0.5f)
+                    {
+                        const uint32_t fps = 1.0f / deltaTime;
+                        std::format_to(str, "{:04} fps", fps);
+                        timer = 0.0f;
+                    }
+                    ImGui::Text(str);
+                }
+                ImGui::End();
+                ImGui::PopStyleVar();
+                imgui.EndFrame();
+
+
                 renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
                 renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
                 renderPass.SetAttachmentResolveTexture(0, device.GetSwapchain()->GetCurrentTexture());
@@ -265,21 +321,21 @@ namespace Nova
                 ImGui::ShowDemoWindow(&opened);
                 imgui.EndFrame();
 
+                Vulkan::CommandBuffer& cmdBuffer = device.GetCurrentCommandBuffer();
+                cmdBuffer.BeginRenderPass(renderPass);
 
-                Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
-                commandBuffer.BeginRenderPass(renderPass);
+                cmdBuffer.ClearColor(0x030303FF, 0);
+                cmdBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
+                cmdBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+                cmdBuffer.BindGraphicsPipeline(pipeline);
+                cmdBuffer.BindVertexBuffer(vertexBuffer, 0);
+                cmdBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
+                cmdBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, pipelineLayout);
+                cmdBuffer.DrawIndexed(3, 0);
 
-                commandBuffer.ClearColor(0x030303FF, 0);
-                commandBuffer.SetViewport(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight(), 0.0f, 1.0f);
-                commandBuffer.SetScissor(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
-                commandBuffer.BindGraphicsPipeline(pipeline);
-                commandBuffer.BindVertexBuffer(vertexBuffer, 0);
-                commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
-                commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, pipelineLayout);
-                commandBuffer.DrawIndexed(3, 0);
+                imgui.Render(cmdBuffer);
+                cmdBuffer.EndRenderPass();
 
-                imgui.Render(commandBuffer);
-                commandBuffer.EndRenderPass();
                 device.EndFrame();
                 device.Present();
             }

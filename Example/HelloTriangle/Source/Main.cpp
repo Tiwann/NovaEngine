@@ -55,7 +55,7 @@ namespace Nova
         deviceCreateInfo.versionMinor = 0;
         deviceCreateInfo.window = &window;
         deviceCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
-        deviceCreateInfo.vSync = false;
+        deviceCreateInfo.vSync = true;
 
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
@@ -85,6 +85,7 @@ namespace Nova
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
+            renderTarget.Resize(newWidth, newHeight);
         });
 
         Rendering::ImGuiRendererCreateInfo imguiCreateInfo;
@@ -263,14 +264,13 @@ namespace Nova
             scene.OnUpdate(deltaTime);
 
             Transform* transform = triangleEntity->GetComponent<Transform>();
-            transform->Rotate(Quaternion::FromEulerDegrees(0.0f, 0.0f, 5.0f * deltaTime));
+            transform->Rotate(Quaternion::FromEulerDegrees({0.0f, 0.0f, 5.0f * deltaTime}));
             const Matrix4& viewProj = camera->GetViewProjectionMatrix();
             const Matrix4 mvp = viewProj * transform->GetWorldSpaceMatrix();
 
             if (device.BeginFrame())
             {
                 imgui.BeginFrame();
-                ImGui::ShowDemoWindow();
                 if (ImGui::Begin("Settings"))
                 {
                     drawTransform("Camera", cameraTransform);
@@ -279,8 +279,6 @@ namespace Nova
                     float orthoSize = camera->GetOrthographicSize();
                     if ((ImGui::SliderFloat("Ortho Size", &orthoSize, -300, 300, "%.1f")))
                         camera->SetOrthographicSize(orthoSize);
-
-
                 }
                 ImGui::End();
 
@@ -296,7 +294,7 @@ namespace Nova
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10.0f);
                 if (ImGui::Begin("FPS counter", nullptr, flags))
                 {
-                    static char str[9] = { 0 };
+                    static char str[9] = "0000 fps";
                     static float timer = 0.0f;
                     timer += deltaTime;
                     if (timer > 0.5f)
@@ -315,11 +313,6 @@ namespace Nova
                 renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
                 renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
                 renderPass.SetAttachmentResolveTexture(0, device.GetSwapchain()->GetCurrentTexture());
-
-                imgui.BeginFrame();
-                static bool opened = true;
-                ImGui::ShowDemoWindow(&opened);
-                imgui.EndFrame();
 
                 Vulkan::CommandBuffer& cmdBuffer = device.GetCurrentCommandBuffer();
                 cmdBuffer.BeginRenderPass(renderPass);

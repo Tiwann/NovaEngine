@@ -11,7 +11,7 @@ namespace Nova
         void Step() override;
         void Destroy() override;
 
-        PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material, const PhysicsShape* shape) override;
+        PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material) override;
         void DestroyBody(PhysicsBody* body) override;
 
         b2WorldId GetHandle() const;

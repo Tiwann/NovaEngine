@@ -7,8 +7,7 @@
 
 namespace Nova
 {
-    PhysicsBody2D::PhysicsBody2D(const b2BodyId handle, const PhysicsWorld2D& world,
-                                 const PhysicsShape2D& shape) : PhysicsBody(world), m_Handle(handle), m_Shape(&shape)
+    PhysicsBody2D::PhysicsBody2D(const b2BodyId handle, const PhysicsWorld2D& world) : PhysicsBody(world), m_Handle(handle)
     {
     }
 
@@ -155,6 +154,7 @@ namespace Nova
 
     bool PhysicsBody2D::IsSensor()
     {
+        return false;
     }
 
     void PhysicsBody2D::SetIsSensor(bool isSensor)

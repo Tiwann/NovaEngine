@@ -43,6 +43,8 @@ namespace Nova
         Matrix3 ToMatrix3() const;
         Vector3 ToEuler() const;
         Vector3 ToEulerDegrees() const;
+        void ToAxisAngle(Vector3& axis, float& radians) const;
+        void ToAxisAngleDegrees(Vector3& axis, float& degrees) const;
 
         static Quaternion FromAxisAngle(const Vector3& axis, float radians);
         static Quaternion FromAxisAngleDegrees(const Vector3& axis, float degrees);

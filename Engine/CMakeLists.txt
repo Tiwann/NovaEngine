@@ -16,7 +16,7 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui PRIVATE glfw box2d)
+target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d PRIVATE glfw)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)

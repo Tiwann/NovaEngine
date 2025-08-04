@@ -7,7 +7,9 @@ namespace Nova
     void Scene::OnInit()
     {
 #ifdef NOVA_HAS_PHYSICS
-        m_PhysicsWorld2D.Initialize(PhysicsWorldCreateInfo(this));
+        PhysicsWorldCreateInfo physics2DCreateInfo;
+        physics2DCreateInfo.scene = this;
+        m_PhysicsWorld2D.Initialize(physics2DCreateInfo);
 #endif
 
 #ifdef NOVA_HAS_PHYSICS3D
@@ -62,7 +64,8 @@ namespace Nova
 #ifdef NOVA_HAS_PHYSICS
         m_PhysicsWorld2D.Destroy();
 #endif
-        #ifdef NOVA_HAS_PHYSICS3D
+
+#ifdef NOVA_HAS_PHYSICS3D
         m_PhysicsWorld3D.OnDestroy();
 #endif
     }

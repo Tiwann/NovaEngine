@@ -7,6 +7,7 @@
 #include "CommandBuffer.h"
 #include "Fence.h"
 #include "Semaphore.h"
+#include "Containers/MulticastDelegate.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
@@ -54,6 +55,8 @@ namespace Nova::Vulkan
         CommandBuffer& GetCurrentCommandBuffer();
 
         uint32_t GetCurrentFrameIndex() const;
+
+        MulticastDelegate<void(uint32_t, uint32_t)> swapchainResizeEvent;
     private:
         VkInstance m_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;
@@ -72,5 +75,6 @@ namespace Nova::Vulkan
 
         uint32_t m_CurrentFrameIndex = 0;
         uint32_t m_LastFrameIndex = 0;
+
     };
 }

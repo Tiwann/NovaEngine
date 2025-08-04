@@ -27,7 +27,7 @@ namespace Nova
         virtual void Step() = 0;
         virtual void Destroy() = 0;
         
-        virtual PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material, const PhysicsShape* shape) = 0;
+        virtual PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material) = 0;
         virtual void DestroyBody(PhysicsBody* body) = 0;
     protected:
         Scene* m_Owner = nullptr;

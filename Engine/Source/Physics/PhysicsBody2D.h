@@ -6,12 +6,11 @@ namespace Nova
 {
     class PhysicsWorld2D;
     struct PhysicsContactInfo2D;
-    class PhysicsShape2D;
     
     class PhysicsBody2D : public PhysicsBody
     {
     public:
-        PhysicsBody2D(b2BodyId handle, const PhysicsWorld2D& world, const PhysicsShape2D& shape);
+        explicit PhysicsBody2D(b2BodyId handle, const PhysicsWorld2D& world);
 
         void SetPosition(const Vector3& position) override;
         Vector3 GetPosition() const override;
@@ -51,6 +50,5 @@ namespace Nova
 
     private:
         b2BodyId m_Handle = b2_nullBodyId;
-        const PhysicsShape2D* m_Shape = nullptr;
     };
 }

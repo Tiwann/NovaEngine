@@ -11,7 +11,7 @@ namespace Nova
         worldDef.gravity = b2Vec2(createInfo.gravity.x, createInfo.gravity.y);
         worldDef.userData = this;
         m_Handle = b2CreateWorld(&worldDef);
-        if (!Memory::Memcmp(&m_Handle, &b2_nullWorldId, sizeof(b2WorldId)))
+        if (Memory::Memcmp(&m_Handle, &b2_nullWorldId, sizeof(b2WorldId)))
             return false;
 
         m_Owner = createInfo.scene;
@@ -30,7 +30,7 @@ namespace Nova
         b2DestroyWorld(m_Handle);
     }
 
-    PhysicsBody* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material, const PhysicsShape* shape)
+    PhysicsBody* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material)
     {
         b2BodyDef bodyDefinition = b2DefaultBodyDef();
         bodyDefinition.position = b2Vec2(definition.position.x, definition.position.y);
@@ -38,7 +38,7 @@ namespace Nova
         bodyDefinition.type = (b2BodyType)definition.type;
 
         const b2BodyId handle = b2CreateBody(m_Handle, &bodyDefinition);
-        PhysicsBody2D* createdBody = new PhysicsBody2D(handle, *this, *shape);
+        PhysicsBody2D* createdBody = new PhysicsBody2D(handle, *this);
         b2Body_SetUserData(handle, this);
         m_Bodies.Add(createdBody);
         return createdBody;

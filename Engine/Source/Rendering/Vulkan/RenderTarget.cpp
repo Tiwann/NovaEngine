@@ -165,6 +165,8 @@ namespace Nova::Vulkan
             commandBuffer.Free();
         }
 
+        m_ColorTexture.SetDirty();
+        m_DepthTexture.SetDirty();
         m_Device = createInfo.device;
         m_Width = createInfo.width;
         m_Height = createInfo.height;

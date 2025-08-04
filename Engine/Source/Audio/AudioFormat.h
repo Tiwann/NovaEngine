@@ -67,12 +67,12 @@ namespace Nova
         }
 
 
-        AudioFrame<T, C> GetFrame(size_t Index)
+        AudioFrame<T, C> GetFrame(size_t index)
         {
             AudioFrame<T, C> frame;
             if constexpr (C == AudioChannels::Mono)
             {
-                frame.center = m_Data[Index];
+                frame.center = m_Data[index];
                 return frame;
             }
 
@@ -80,8 +80,8 @@ namespace Nova
             {
                 if (m_Format.interleaving == SampleInterleaving::Interleaved)
                 {
-                    frame.left = m_Data[Index * sizeof(T)];
-                    frame.right = m_Data[Index * sizeof(T) + 1];
+                    frame.left = m_Data[index * sizeof(T)];
+                    frame.right = m_Data[index * sizeof(T) + 1];
                     return frame;
                 }
             }

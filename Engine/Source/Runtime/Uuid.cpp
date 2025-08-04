@@ -5,12 +5,6 @@ namespace Nova
 {
 
     Uuid Uuid::Zero = Uuid(0, 0);
-    
-    Uuid::Uuid()
-    {
-        m_Values[0] = Random::Integer<uint64_t>();
-        m_Values[1] = Random::Integer<uint64_t>();
-    }
 
     Uuid::Uuid(const Uuid& uuid) : m_Values { uuid.m_Values[0], uuid.m_Values[1] }
     {
@@ -19,6 +13,14 @@ namespace Nova
 
     Uuid::Uuid(const uint64_t low, const uint64_t high) : m_Values{ low, high }
     {
+    }
+
+    Uuid Uuid::Generate()
+    {
+        Uuid result;
+        result.m_Values[0] = Random::Integer<uint64_t>();
+        result.m_Values[1] = Random::Integer<uint64_t>();
+        return result;
     }
 
     const uint64_t* Uuid::GetValues() const

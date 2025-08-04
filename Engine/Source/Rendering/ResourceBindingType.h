@@ -2,12 +2,12 @@
 
 namespace Nova
 {
-    enum class DescriptorType
+    enum class ResourceBindingType
     {
         Sampler,
-        CombinedImageSampler,
-        SampledImage,
-        StorageImage,
+        CombinedTextureSampler,
+        SampledTexture,
+        StorageTexture,
         UniformBuffer,
         StorageBuffer,
         InputAttachment,

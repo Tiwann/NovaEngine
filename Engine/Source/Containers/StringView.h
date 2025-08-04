@@ -17,10 +17,11 @@ namespace Nova
         using ConstIterator = typename StringType::ConstIterator;
     public:
         StringViewBase() = default;
-        StringViewBase(const StringType& Str) : m_Data(Str.Data()), m_Count(Str.Count()){}
-        StringViewBase(ConstPointerType Data) : m_Data(Data), m_Count(StringLength(Data)){}
-        StringViewBase(ConstPointerType Data, SizeType Count) : m_Data(Data), m_Count(Count){}
+        StringViewBase(const StringType& string) : m_Data(string.Data()), m_Count(string.Count()) { }
+        StringViewBase(ConstPointerType data) : m_Data(data), m_Count(StringLength(data)){}
+        StringViewBase(ConstPointerType data, SizeType count) : m_Data(data), m_Count(count){}
         StringViewBase(std::nullptr_t) : m_Data(nullptr), m_Count(0){}
+
         StringViewBase(const StringViewBase&) = default;
         StringViewBase(StringViewBase&&) noexcept = default;
         StringViewBase& operator=(const StringViewBase&) = default;
@@ -39,18 +40,20 @@ namespace Nova
         ConstIterator begin() const { return m_Data; }
         ConstIterator end() const { return m_Data + m_Count; }
 
+        bool IsEmpty() const { return m_Data == nullptr || m_Count == 0; }
+
         operator const CharacterType*() const { return m_Data; }
         const CharacterType* operator*() const { return m_Data; }
 
-        const CharacterType& operator[](SizeType Index) const
+        const CharacterType& operator[](SizeType index) const
         {
-            NOVA_ASSERT(Index < m_Count, "Index out of bounds!");
-            return m_Data[Index];
+            NOVA_ASSERT(index < m_Count, "Index out of bounds!");
+            return m_Data[index];
         }
 
-        friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringViewBase& Str)
+        friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringViewBase& string)
         {
-            os.write(Str.m_Data, Str.m_Count);
+            os.write(string.m_Data, string.m_Count);
             os.flush();
             return os;
         }

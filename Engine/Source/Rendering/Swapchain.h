@@ -5,6 +5,8 @@
 
 #include <cstdint>
 
+#include "Containers/StringView.h"
+
 namespace Nova::Rendering
 {
     class Device;
@@ -31,6 +33,7 @@ namespace Nova::Rendering
         virtual bool Initialize(const SwapchainCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
         virtual bool Recreate() = 0;
+        virtual void SetName(StringView name) = 0;
 
 
         int32_t GetWidth() const;

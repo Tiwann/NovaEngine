@@ -33,6 +33,7 @@ namespace Nova::Vulkan
         void EndFrame() override;
         void Present() override;
         void WaitIdle() override;
+        void SetName(StringView name) override;
 
         void ResolveToSwapchain(Rendering::RenderTarget& renderTarget) override;
         void BlitToSwapchain(Rendering::RenderTarget& renderTarget, Filter filter) override;

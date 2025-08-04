@@ -6,21 +6,21 @@
 #include "Assets/Sprite.h"
 #include "Texture.h"
 #include "RenderTarget.h"
-#include "Vulkan/Buffer.h"
-#include "Vulkan/Sampler.h"
-#include "Vulkan/GraphicsPipeline.h"
-#include <cstdint>
-#include <vulkan/vulkan.h>
-
 #include "DescriptorPool.h"
 #include "Components/Camera.h"
 #include "Containers/StringFormat.h"
-#include "Vulkan/CommandBuffer.h"
 #include "Vulkan/Device.h"
+#include "Vulkan/Buffer.h"
+#include "Vulkan/Sampler.h"
+#include "Vulkan/GraphicsPipeline.h"
+#include "Vulkan/CommandBuffer.h"
 #include "Vulkan/ShaderModule.h"
-#include "External/ShaderUtils.h"
 #include "Vulkan/DescriptorPool.h"
 #include "Vulkan/Texture.h"
+#include "External/ShaderUtils.h"
+
+#include <cstdint>
+#include <vulkan/vulkan.h>
 
 namespace Nova::Rendering
 {
@@ -128,7 +128,7 @@ namespace Nova::Rendering
 
             DescriptorPoolCreateInfo descriptorPoolCreateInfo;
             descriptorPoolCreateInfo.device = &device;
-            descriptorPoolCreateInfo.sizes[DescriptorType::CombinedImageSampler] = 32;
+            descriptorPoolCreateInfo.sizes[ResourceBindingType::CombinedTextureSampler] = 32;
             descriptorPoolCreateInfo.maxSets = 1;
             Vulkan::DescriptorPool descriptorPool;
             if (!descriptorPool.Initialize(descriptorPoolCreateInfo))

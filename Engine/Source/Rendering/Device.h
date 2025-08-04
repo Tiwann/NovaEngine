@@ -4,6 +4,8 @@
 #include "Filter.h"
 #include <cstdint>
 
+#include "Containers/StringView.h"
+
 
 namespace Nova
 {
@@ -41,5 +43,6 @@ namespace Nova::Rendering
         virtual void BlitToSwapchain(RenderTarget& renderTarget, Filter filter) = 0;
         virtual void BlitToSwapchain(Texture& texture, Filter filter) = 0;
         virtual void BlitToRenderTarget(Texture& srcTexture, RenderTarget& destRenderTarget, uint32_t x, uint32_t y) = 0;
+        virtual void SetName(StringView name) = 0;
     };
 }

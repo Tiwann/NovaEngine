@@ -5,12 +5,12 @@
 
 namespace Nova
 {
-    Entity::Entity()
+    Entity::Entity() : m_Uuid(Uuid::Generate())
     {
 
     }
 
-    Entity::Entity(const String& name, Scene* owner) : Object(name), m_Owner(owner)
+    Entity::Entity(const String& name, Scene* owner) : Object(name), m_Owner(owner), m_Uuid(Uuid::Generate())
     {
         m_Transform = AddComponent<Transform>();
     }

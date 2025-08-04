@@ -6,6 +6,7 @@
 
 #include "CommandBuffer.h"
 #include "RenderTarget.h"
+#include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
 
 
@@ -129,6 +130,12 @@ namespace Nova::Vulkan
 
         commandBuffer.Free();
 
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        if (!m_Name.IsEmpty())
+        {
+            SetName(m_Name);
+        }
+#endif
         m_Valid = true;
         return true;
     }
@@ -157,6 +164,18 @@ namespace Nova::Vulkan
         createInfo.presentMode = m_ImagePresentMode;
         createInfo.recycle = true;
         return Initialize(createInfo);
+    }
+
+    void Swapchain::SetName(StringView name)
+    {
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        const VkDevice deviceHandle = ((Device*)m_Device)->GetHandle();
+        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        info.objectHandle = (uint64_t)m_Handle;
+        info.objectType = VK_OBJECT_TYPE_SWAPCHAIN_KHR;
+        info.pObjectName = *name;
+        vkSetDebugUtilsObjectName(deviceHandle, &info);
+#endif
     }
 
     bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex)

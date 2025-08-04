@@ -17,7 +17,7 @@ namespace Nova::Vulkan
         const Device* device = static_cast<Device*>(createInfo.device);
         const VkInstance instance = device->GetInstance();
 
-        if (DesktopWindow* window = static_cast<DesktopWindow*>(createInfo.window))
+        if (DesktopWindow* window = dynamic_cast<DesktopWindow*>(createInfo.window))
         {
             GLFWwindow* windowHandle = window->GetHandle();
             if (glfwCreateWindowSurface(instance, windowHandle, nullptr, &m_Handle) != VK_SUCCESS)

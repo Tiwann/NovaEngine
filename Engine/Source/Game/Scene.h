@@ -70,7 +70,7 @@ namespace Nova
     private:
         Uuid m_Uuid;
         String m_Name;
-        BumpAllocator<Entity, 8192> m_EntityPool;
+        BumpAllocator<Entity, 32> m_EntityPool;
         Array<Entity*> m_Entities;
 #ifdef NOVA_HAS_PHYSICS2D
         PhysicsWorld2D m_PhysicsWorld2D;

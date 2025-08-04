@@ -40,48 +40,48 @@ namespace Nova
             m_Count = 0;
         }
 
-        Array(ConstReferenceType First)
+        Array(ConstReferenceType first)
         {
             m_Allocated = 1;
             m_Data = Memory::Calloc<T>(m_Allocated);
             m_Count = 1;
-            m_Data[0] = First;
+            m_Data[0] = first;
         }
 
-        Array(SizeType Count)
+        Array(const SizeType count)
         {
-            m_Allocated = Math::NearestPowerOfTwo<SizeType>(Count);
+            m_Allocated = Math::NearestPowerOfTwo<SizeType>(count);
             m_Data = Memory::Calloc<T>(m_Allocated);
-            m_Count = Count;
+            m_Count = count;
         }
 
-        Array(const std::initializer_list<T>& List) : m_Count(List.size()), m_Allocated(List.size())
-        {
-            m_Data = Memory::Calloc<T>(m_Allocated);
-            std::copy(List.begin(), List.end(), m_Data);
-        }
-
-        Array(ConstPointerType Data, SizeType Count) : m_Count(Count), m_Allocated(Count)
+        Array(const std::initializer_list<T>& list) : m_Count(list.size()), m_Allocated(list.size())
         {
             m_Data = Memory::Calloc<T>(m_Allocated);
-            std::copy(Data, Data + Count, m_Data);
+            std::copy(list.begin(), list.end(), m_Data);
         }
 
-        Array(const Array& Other) : m_Count(Other.m_Count), m_Allocated(Other.m_Allocated)
+        Array(ConstPointerType data, SizeType count) : m_Count(count), m_Allocated(count)
         {
             m_Data = Memory::Calloc<T>(m_Allocated);
-            std::copy(Other.begin(), Other.end(), m_Data);
+            std::copy(data, data + count, m_Data);
         }
 
-        Array(Array&& Other) noexcept
+        Array(const Array& other) : m_Count(other.m_Count), m_Allocated(other.m_Allocated)
         {
-            m_Data = Other.m_Data;
-            m_Count = Other.m_Count;
-            m_Allocated = Other.m_Allocated;
+            m_Data = Memory::Calloc<T>(m_Allocated);
+            std::copy(other.begin(), other.end(), m_Data);
+        }
 
-            Other.m_Data = nullptr;
-            Other.m_Count = 0;
-            Other.m_Allocated = 0;
+        Array(Array&& other) noexcept
+        {
+            m_Data = other.m_Data;
+            m_Count = other.m_Count;
+            m_Allocated = other.m_Allocated;
+
+            other.m_Data = nullptr;
+            other.m_Count = 0;
+            other.m_Allocated = 0;
         }
 
         ~Array() override
@@ -89,62 +89,62 @@ namespace Nova
             Memory::Free(m_Data);
         }
 
-        Array& operator=(const Array& Other)
+        Array& operator=(const Array& other)
         {
-            if(this == &Other)
+            if(this == &other)
                 return *this;
 
-            m_Allocated = Other.m_Allocated;
-            m_Count = Other.m_Count;
+            m_Allocated = other.m_Allocated;
+            m_Count = other.m_Count;
             Memory::Free(m_Data);
             m_Data = Memory::Calloc<T>(m_Allocated);
-            std::copy(Other.begin(), Other.end(), m_Data);
+            std::copy(other.begin(), other.end(), m_Data);
             return *this;
         }
 
-        Array& operator=(Array&& Other) noexcept
+        Array& operator=(Array&& other) noexcept
         {
-            if(this == &Other)
+            if(this == &other)
                 return *this;
 
-            m_Data = Other.m_Data;
-            m_Count = Other.m_Count;
-            m_Allocated = Other.m_Allocated;
+            m_Data = other.m_Data;
+            m_Count = other.m_Count;
+            m_Allocated = other.m_Allocated;
 
-            Other.m_Data = nullptr;
-            Other.m_Count = 0;
-            Other.m_Allocated = 0;
+            other.m_Data = nullptr;
+            other.m_Count = 0;
+            other.m_Allocated = 0;
             return *this;
         }
 
-        ReferenceType operator[](SizeType Index)
+        ReferenceType operator[](SizeType index)
         {
-            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count && m_Count != 0, "Index out of bounds");
+            return m_Data[index];
         }
 
-        ConstReferenceType operator[](SizeType Index) const
+        ConstReferenceType operator[](SizeType index) const
         {
-            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count && m_Count != 0, "Index out of bounds");
+            return m_Data[index];
         }
 
-        void SetAt(SizeType Index, ConstReferenceType Element)
+        void SetAt(SizeType index, ConstReferenceType element)
         {
-            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
-            m_Data[Index] = Element;
+            NOVA_ASSERT(index <= m_Count && m_Count != 0, "Index out of bounds");
+            m_Data[index] = element;
         }
 
-        ReferenceType GetAt(SizeType Index)
+        ReferenceType GetAt(SizeType index)
         {
-            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count && m_Count != 0, "Index out of bounds");
+            return m_Data[index];
         }
 
-        ConstReferenceType GetAt(SizeType Index) const
+        ConstReferenceType GetAt(SizeType index) const
         {
-            NOVA_ASSERT(Index <= m_Count && m_Count != 0, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count && m_Count != 0, "Index out of bounds");
+            return m_Data[index];
         }
 
         ReferenceType First()
@@ -171,35 +171,35 @@ namespace Nova
             return m_Data[m_Count - 1];
         }
 
-        void Add(ConstReferenceType Element)
+        void Add(ConstReferenceType element)
         {
             if(m_Count >= m_Allocated)
             {
                 m_Allocated = Realloc(m_Allocated);
-                PointerType Realloc = Memory::Calloc<T>(m_Allocated);
+                PointerType realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
-                    Realloc[i] = m_Data[i];
+                    realloc[i] = m_Data[i];
                 Memory::Free(m_Data);
-                m_Data = Realloc;
+                m_Data = realloc;
             }
 
-            m_Data[m_Count++] = Element;
+            m_Data[m_Count++] = element;
         }
 
-        void AddUnique(ConstReferenceType Element)
+        void AddUnique(ConstReferenceType element)
         {
-            if (Find(Element) == -1)
-                Add(Element);
+            if (Find(element) == -1)
+                Add(element);
         }
 
-        void AddRange(const std::initializer_list<T>& List)
+        void AddRange(const std::initializer_list<T>& list)
         {
-            if(m_Count + List.size() >= m_Allocated)
+            if(m_Count + list.size() >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + List.size());
+                } while (m_Allocated < m_Count + list.size());
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -207,18 +207,18 @@ namespace Nova
                 m_Data = Realloc;
             }
 
-            std::copy(List.begin(), List.end(), &m_Data[m_Count]);
-            m_Count += List.size();
+            std::copy(list.begin(), list.end(), &m_Data[m_Count]);
+            m_Count += list.size();
         }
 
-        void AddRange(const Array& Other)
+        void AddRange(const Array& other)
         {
-            if(m_Count + Other.m_Count >= m_Allocated)
+            if(m_Count + other.m_Count >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + Other.m_Count);
+                } while (m_Allocated < m_Count + other.m_Count);
 
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
@@ -227,18 +227,18 @@ namespace Nova
                 m_Data = Realloc;
             }
 
-            std::copy(Other.begin(), Other.end(), &m_Data[m_Count]);
-            m_Count += Other.Count();
+            std::copy(other.begin(), other.end(), &m_Data[m_Count]);
+            m_Count += other.count();
         }
 
-        void AddRange(ConstPointerType Data, SizeType Count)
+        void AddRange(ConstPointerType data, SizeType count)
         {
-            if(m_Count + Count >= m_Allocated)
+            if(m_Count + count >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + Count);
+                } while (m_Allocated < m_Count + count);
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -246,8 +246,8 @@ namespace Nova
                 m_Data = Realloc;
             }
 
-            std::copy(Data, Data + Count, &m_Data[m_Count]);
-            m_Count += Count;
+            std::copy(data, data + count, &m_Data[m_Count]);
+            m_Count += count;
         }
 
         void Emplace(T&& element)
@@ -265,10 +265,10 @@ namespace Nova
             m_Data[m_Count++] = std::move(element);
         }
 
-        Array Union(const Array& Other)
+        Array Union(const Array& other)
         {
             Array Result = *this;
-            for (const T& Element : Other)
+            for (const T& Element : other)
                 AddUnique(Element);
             return Result;
         }
@@ -423,11 +423,11 @@ namespace Nova
         SizeType Count() const { return m_Count; }
         size_t Size() const { return m_Count * sizeof(T); }
 
-        bool operator==(const Array& Other) const
+        bool operator==(const Array& other) const
         {
-            if(m_Count != Other.m_Count) return false;
+            if(m_Count != other.m_Count) return false;
             for(SizeType i = 0; i < m_Count; ++i)
-                if(m_Data[i] != Other.m_Data[i]) return false;
+                if(m_Data[i] != other.m_Data[i]) return false;
             return true;
         }
 

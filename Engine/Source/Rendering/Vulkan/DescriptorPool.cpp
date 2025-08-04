@@ -10,10 +10,10 @@ namespace Nova::Vulkan
     bool DescriptorPool::Initialize(const Rendering::DescriptorPoolCreateInfo& createInfo)
     {
         Array<VkDescriptorPoolSize> poolSizes;
-        for (const Pair<DescriptorType, uint32_t>& poolSize : createInfo.sizes)
+        for (const Pair<ResourceBindingType, uint32_t>& poolSize : createInfo.sizes)
         {
             VkDescriptorPoolSize descriptorPoolSize = {};
-            descriptorPoolSize.type = Convert<DescriptorType, VkDescriptorType>(poolSize.key);
+            descriptorPoolSize.type = Convert<ResourceBindingType, VkDescriptorType>(poolSize.key);
             descriptorPoolSize.descriptorCount = poolSize.value;
             poolSizes.Add(descriptorPoolSize);
         }

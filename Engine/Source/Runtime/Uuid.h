@@ -7,10 +7,11 @@ namespace Nova
     class Uuid
     {
     public:
-        Uuid();
+        Uuid() = default;
         Uuid(const Uuid& uuid);
         explicit Uuid(uint64_t low, uint64_t high);
 
+        static Uuid Generate();
         const uint64_t* GetValues() const;
         String GetString() const;
 

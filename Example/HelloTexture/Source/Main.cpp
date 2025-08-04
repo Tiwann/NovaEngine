@@ -8,15 +8,16 @@
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/ShaderModule.h"
 #include "Rendering/Vulkan/ShaderModule.h"
-#include "ShaderUtils.h"
-#include "BufferUtils.h"
+#include "Utils/ShaderUtils.h"
+#include "Utils/BufferUtils.h"
 #include "Math/Vector3.h"
-#include "Math/Vector4.h"
 #include "Containers/StringFormat.h"
 #include "Rendering/Vulkan/Conversions.h"
 #include "Rendering/Vulkan/DescriptorPool.h"
-#include "Runtime/Time.h"
 #include "Runtime/ScopedTimer.h"
+#include "Rendering/Sampler.h"
+#include "Rendering/Vulkan/Sampler.h"
+#include "Rendering/Vulkan/Texture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <External/stb_image.h>
@@ -24,9 +25,9 @@
 #include <cstdlib>
 #include <chrono>
 
-#include "Rendering/Sampler.h"
-#include "Rendering/Vulkan/Sampler.h"
-#include "Rendering/Vulkan/Texture.h"
+#include "Rendering/RenderPass.h"
+#include "Rendering/Vulkan/ShaderBindingSetLayout.h"
+#include "Runtime/ShaderCompiler.h"
 
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
@@ -83,11 +84,11 @@ namespace Nova
             swapchain->Invalidate();
         });
 
-        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newX, const int32_t newY)
+        window.resizeEvent.Bind([&device, &renderTarget](const int32_t newWidth, const int32_t newHeight)
         {
             Vulkan::Swapchain* swapchain = device.GetSwapchain();
             swapchain->Invalidate();
-            renderTarget.Resize(newX, newY);
+            renderTarget.Resize(newWidth, newHeight);
         });
 
         int32_t textureWidth = 0, textureHeight = 0;
@@ -116,8 +117,17 @@ namespace Nova
 
         stbi_image_free(pixels);
 
-        Array<uint32_t> vertSpirv, fragSpirv;
-        CompileShaderToSpirv(GetAssetPath("Shaders/HelloTexture.slang"), "HelloTexture", vertSpirv, fragSpirv);
+
+        ShaderCompiler shaderCompiler;
+        shaderCompiler.Initialize();
+        shaderCompiler.AddEntryPoint({ "vertex", ShaderStageFlagBits::Vertex });
+        shaderCompiler.AddEntryPoint({ "fragment", ShaderStageFlagBits::Fragment });
+        if (!shaderCompiler.Compile(GetAssetPath("Shaders/HelloTexture.slang"), "HelloTexture", ShaderTarget::SPIRV))
+            return EXIT_FAILURE;
+
+        Array<uint32_t> vertSpirv = shaderCompiler.GetEntryPointBinary(ShaderStageFlagBits::Vertex);
+        Array<uint32_t> fragSpirv = shaderCompiler.GetEntryPointBinary(ShaderStageFlagBits::Fragment);
+        shaderCompiler.Destroy();
 
         Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
         Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);
@@ -131,6 +141,19 @@ namespace Nova
         fragmentShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
         fragmentShaderStageCreateInfo.module = fragShaderModule.GetHandle();
         fragmentShaderStageCreateInfo.pName = "main";
+
+
+        /*
+        Vulkan::ShaderBindingSetLayout bindingSetLayout;
+        bindingSetLayout.Initialize({&device});
+        bindingSetLayout.SetBinding(0, { "Sampler", ShaderStageFlagBits::Fragment, ResourceBindingType::Sampler });
+        bindingSetLayout.SetBinding(1, { "Texture", ShaderStageFlagBits::Fragment, ResourceBindingType::SampledTexture });
+        bindingSetLayout.Build();
+        */
+
+
+
+
 
 
         VkDescriptorSetLayoutBinding layoutBindings[2]
@@ -180,8 +203,8 @@ namespace Nova
 
         Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.device = &device;
-        descriptorPoolCreateInfo.sizes[DescriptorType::SampledImage] = 1;
-        descriptorPoolCreateInfo.sizes[DescriptorType::Sampler] = 1;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::SampledTexture] = 1;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::Sampler] = 1;
         descriptorPoolCreateInfo.maxSets = 1;
         Vulkan::DescriptorPool descriptorPool;
         if (!descriptorPool.Initialize(descriptorPoolCreateInfo))
@@ -300,6 +323,23 @@ namespace Nova
         };
 
 
+        Rendering::RenderPassAttachment colorAttachment;
+        colorAttachment.type = Rendering::AttachmentType::Color;
+        colorAttachment.loadOp = Rendering::LoadOperation::Load;
+        colorAttachment.storeOp = Rendering::StoreOperation::Store;
+        colorAttachment.clearValue.color = Color::Black;
+
+        Rendering::RenderPassAttachment depthAttachment;
+        depthAttachment.type = Rendering::AttachmentType::Depth;
+        depthAttachment.loadOp = Rendering::LoadOperation::Load;
+        depthAttachment.storeOp = Rendering::StoreOperation::Store;
+        depthAttachment.clearValue.depth = 1.0f;
+        depthAttachment.clearValue.stencil = 0;
+
+        Rendering::RenderPass renderPass(0, 0, renderTarget.GetWidth(), renderTarget.GetHeight());
+        renderPass.AddAttachment(colorAttachment);
+        renderPass.AddAttachment(depthAttachment);
+
 
         while (g_Running)
         {
@@ -309,9 +349,14 @@ namespace Nova
 
             if (device.BeginFrame())
             {
+                renderPass.SetAttachmentTexture(0, renderTarget.GetColorTexture());
+                renderPass.SetAttachmentTexture(1, renderTarget.GetDepthTexture());
+                renderPass.SetAttachmentResolveTexture(0, device.GetSwapchain()->GetCurrentTexture());
+
                 Vulkan::CommandBuffer& commandBuffer = device.GetCurrentCommandBuffer();
-                renderTarget.BeginRendering(commandBuffer);
-                renderTarget.Clear(0x060606FF);
+                commandBuffer.BeginRenderPass(renderPass);
+
+                commandBuffer.ClearColor(0x060606FF, 0);
                 commandBuffer.SetViewport(0, 0, (float)renderTarget.GetWidth(), (float)renderTarget.GetHeight(), 0.0f, 1.0f);
                 commandBuffer.SetScissor(0, 0, (float)renderTarget.GetWidth(), (float)renderTarget.GetHeight());
                 commandBuffer.BindGraphicsPipeline(pipeline);
@@ -319,14 +364,8 @@ namespace Nova
                 commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
                 vkCmdBindDescriptorSets(commandBuffer.GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet, 0, nullptr);
                 commandBuffer.DrawIndexed(6, 0);
-                renderTarget.EndRendering();
 
-                if constexpr (SAMPLE_COUNT > 1)
-                {
-                    device.ResolveToSwapchain(renderTarget);
-                } else {
-                    device.BlitToSwapchain(renderTarget, Filter::Nearest);
-                }
+                commandBuffer.EndRenderPass();
                 device.EndFrame();
                 device.Present();
             }

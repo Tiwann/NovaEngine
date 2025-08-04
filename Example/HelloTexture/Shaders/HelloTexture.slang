@@ -15,7 +15,7 @@ struct VertexOutput
 typedef VertexOutput FragmentInput;
 
 [shader("vertex")]
-VertexOutput vert(VertexInput input)
+VertexOutput vertex(VertexInput input)
 {
     VertexOutput out;
     out.position = float4(input.position, 1.0);
@@ -27,7 +27,7 @@ VertexOutput vert(VertexInput input)
 [vk::binding(1, 0)] Texture2D texture;
 
 [shader("fragment")]
-float4 frag(FragmentInput input) : SV_Target
+float4 fragment(FragmentInput input) : SV_Target
 {
     float4 color = texture.Sample(sampler, input.texCoords);
     return color;

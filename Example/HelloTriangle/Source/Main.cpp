@@ -8,8 +8,8 @@
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/ShaderModule.h"
 #include "Rendering/Vulkan/ShaderModule.h"
-#include "ShaderUtils.h"
-#include "BufferUtils.h"
+#include "Utils/ShaderUtils.h"
+#include "Utils/BufferUtils.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
 #include "Containers/StringFormat.h"
@@ -20,6 +20,10 @@
 
 #include <vulkan/vulkan.h>
 #include <cstdlib>
+
+#include "Components/Camera.h"
+#include "Game/Scene.h"
+#include "Components/Transform.h"
 
 static constexpr uint32_t SAMPLE_COUNT = 8;
 static bool g_Running = true;
@@ -55,6 +59,7 @@ namespace Nova
         Vulkan::Device device;
         if (!device.Initialize(deviceCreateInfo))
             return EXIT_FAILURE;
+        device.SetName("Main Device");
 
         Rendering::RenderTargetCreateInfo renderTargetCreateInfo;
         renderTargetCreateInfo.device = &device;
@@ -101,7 +106,7 @@ namespace Nova
 
         VkPushConstantRange range;
         range.offset = 0;
-        range.size = sizeof(float);
+        range.size = sizeof(Matrix4);
         range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
@@ -211,13 +216,35 @@ namespace Nova
         renderPass.AddAttachment(colorAttachment);
         renderPass.AddAttachment(depthAttachment);
 
+        Scene scene("My Scene");
+        EntityHandle cameraEntity = scene.CreateEntity("Camera");
+        Camera* camera = cameraEntity->AddComponent<Camera>();
+        camera->SetDimensions(renderTarget.GetWidth(), renderTarget.GetHeight());
+        camera->SetClipPlanes(0.001f, 1000.0f);
+        camera->SetProjectionMode(CameraProjectionMode::Orthographic);
+        camera->SetOrthographicSize(300.0f);
 
+        EntityHandle triangleEntity = scene.CreateEntity("Triangle");
+        scene.OnInit();
+
+
+
+        float lastTime = 0.0;
         while (g_Running)
         {
             const ScopedTimer timer(onTimer);
             float currentTime = (float)Time::Get();
 
+            float deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+
             window.PollEvents();
+            scene.OnUpdate(deltaTime);
+
+            Transform* transform = triangleEntity->GetComponent<Transform>();
+            transform->Rotate(Quaternion::FromEulerDegrees(0.0f, 0.0f, 5.0f * deltaTime));
+            const Matrix4& viewProj = camera->GetViewProjectionMatrix();
+            const Matrix4 mvp = transform->GetWorldSpaceMatrix();
 
             if (device.BeginFrame())
             {
@@ -234,7 +261,7 @@ namespace Nova
                 commandBuffer.BindGraphicsPipeline(pipeline);
                 commandBuffer.BindVertexBuffer(vertexBuffer, 0);
                 commandBuffer.BindIndexBuffer(indexBuffer, 0, Format::Uint32);
-                commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(float), &currentTime, pipelineLayout);
+                commandBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, pipelineLayout);
                 commandBuffer.DrawIndexed(3, 0);
 
                 commandBuffer.EndRenderPass();

@@ -6,6 +6,7 @@
 #include "Texture.h"
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
+#include "VulkanExtensions.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
@@ -58,6 +59,9 @@ namespace Nova::Vulkan
             std::println(std::cerr, "Failed to create instance!");
             return false;
         }
+
+        if (!LoadVulkanFunctions(m_Instance))
+            return false;
 
         VkPhysicalDevice availablePhysicalDevices[32];
         uint32_t availablePhysicalDeviceCount = 0;
@@ -328,6 +332,8 @@ namespace Nova::Vulkan
             return false;
         }
 
+        m_Swapchain.SetName("Swapchain");
+
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
             Rendering::SemaphoreCreateInfo semaphoreCreateInfo;
@@ -347,6 +353,7 @@ namespace Nova::Vulkan
 
             m_Frames[imageIndex].commandBuffer.Allocate(allocateInfo);
         }
+
         return true;
     }
 
@@ -470,6 +477,17 @@ namespace Nova::Vulkan
     void Device::WaitIdle()
     {
         vkDeviceWaitIdle(m_Handle);
+    }
+
+    void Device::SetName(StringView name)
+    {
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        info.objectHandle = (uint64_t)m_Handle;
+        info.objectType = VK_OBJECT_TYPE_DEVICE;
+        info.pObjectName = *name;
+        vkSetDebugUtilsObjectName(m_Handle, &info);
+#endif
     }
 
     void Device::ResolveToSwapchain(Rendering::RenderTarget& renderTarget)

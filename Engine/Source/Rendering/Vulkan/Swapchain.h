@@ -21,6 +21,7 @@ namespace Nova::Vulkan
         bool Initialize(const Rendering::SwapchainCreateInfo& createInfo) override;
         void Destroy() override;
         bool Recreate() override;
+        void SetName(StringView name) override;
 
         bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex);
         void ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget);
@@ -33,6 +34,9 @@ namespace Nova::Vulkan
         VkImage GetImage(uint32_t index) const;
         VkImageView GetImageView(uint32_t index) const;
     private:
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        StringView m_Name;
+#endif
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };

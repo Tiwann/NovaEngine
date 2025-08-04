@@ -80,7 +80,7 @@ namespace Nova
 
     const Matrix4& Camera::GetViewMatrix()
     {
-        const Function<Matrix4()> computeView = [&]() -> Matrix4
+        const auto computeView = [&]() -> Matrix4
         {
             const Transform* transform = GetTransform();
             Matrix4 view = Matrix4::Identity;
@@ -119,11 +119,11 @@ namespace Nova
 
     const Matrix4& Camera::GetViewProjectionMatrix()
     {
-        const Function<Matrix4()> ComputeViewProjection = [&]() -> Matrix4
+        const auto computeViewProjection = [&]() -> Matrix4
         {
             return GetProjectionMatrix() * GetViewMatrix();
         };
-        return m_ViewProjectionMatrix.Get(ComputeViewProjection);
+        return m_ViewProjectionMatrix.Get(computeViewProjection);
     }
 
     void Camera::SetDimensions(const uint32_t width, const uint32_t height)

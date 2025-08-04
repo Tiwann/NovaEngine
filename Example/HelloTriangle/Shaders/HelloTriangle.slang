@@ -14,11 +14,9 @@ struct VertexOutput
 
 typedef VertexOutput FragmentInput;
 
-[vk::push_constant] ConstantBuffer<float> time;
+[vk::push_constant] ConstantBuffer<float4x4> mvp;
 
-#define PI 3.14159
-
-float4 rotate(float3 pos, float degrees)
+float4 rotate(float4 pos, float degrees)
 {
     float2x2 rotation = float2x2(cos(radians(degrees)), sin(radians(degrees)), -sin(radians(degrees)), cos(radians(degrees)));
     return float4(mul(rotation, pos.xy), 0.0, 1.0);
@@ -28,7 +26,8 @@ float4 rotate(float3 pos, float degrees)
 VertexOutput vert(VertexInput input)
 {
     VertexOutput out;
-    out.position = rotate(input.position, 5.0 * time);
+    float4 position = mul(mvp, float4(input.position, 1.0));
+    out.position = position;
     out.color = input.color;
     return out;
 }

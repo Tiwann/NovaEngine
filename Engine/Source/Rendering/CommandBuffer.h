@@ -17,6 +17,7 @@ namespace Nova::Rendering
     class RenderPass;
     class Texture;
     struct BlitRegion;
+    class ShaderBindingSetLayout;
 
     enum class CommandBufferLevel
     {

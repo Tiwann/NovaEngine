@@ -9,7 +9,7 @@ namespace Nova
     public:
 
         Lazy() = default;
-        explicit Lazy(const T& value) : m_Value(value) { }
+        Lazy(const T& value) : m_Value(value) { }
 
         const T& Get(const Function<T()>& getter)
         {
@@ -31,7 +31,8 @@ namespace Nova
             return m_IsDirty;
         }
 
-        T& operator*() const { return m_Value; }
+        T& operator*() { return m_Value; }
+        const T& operator*() const { return m_Value; }
     private:
         T m_Value;
         bool m_IsDirty = true;

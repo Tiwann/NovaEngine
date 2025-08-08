@@ -28,7 +28,7 @@ namespace Nova::Rendering
         template<typename ShaderModuleType> requires IsBaseOf<ShaderModule, ShaderModuleType>::value
         static ShaderModuleType Create(Device& device, ShaderStageFlagBits stage, const Array<uint32_t>& spirvCode)
         {
-            Rendering::ShaderModuleCreateInfo createInfo;
+            ShaderModuleCreateInfo createInfo;
             createInfo.device = &device;
             createInfo.stage = stage;
             createInfo.code = spirvCode.Data();
@@ -39,8 +39,8 @@ namespace Nova::Rendering
             return std::move(shaderModule);
         }
 
-        ShaderStageFlags GetStageFlags() const { return m_Stage; }
+        ShaderStageFlagBits GetStage() const { return m_Stage; }
     protected:
-        ShaderStageFlags m_Stage = ShaderStageFlagBits::None;
+        ShaderStageFlagBits m_Stage = ShaderStageFlagBits::None;
     };
 }

@@ -16,6 +16,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Rendering/LoadOperation.h"
+#include "Rendering/ResolveMode.h"
 #include "Rendering/StoreOperation.h"
 
 
@@ -300,5 +301,36 @@ namespace Nova::Vulkan
         if (val & (uint32_t)ShaderStageFlagBits::RayGeneration)
             result |= VK_SHADER_STAGE_RAYGEN_BIT_KHR;
         return result;
+    }
+
+    template<>
+    inline VkShaderStageFlagBits Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(const ShaderStageFlagBits& value)
+    {
+        switch (value)
+        {
+        case ShaderStageFlagBits::None: return (VkShaderStageFlagBits)0;
+        case ShaderStageFlagBits::Vertex: return VK_SHADER_STAGE_VERTEX_BIT;
+        case ShaderStageFlagBits::Geometry: return VK_SHADER_STAGE_GEOMETRY_BIT;
+        case ShaderStageFlagBits::Fragment: return VK_SHADER_STAGE_FRAGMENT_BIT;
+        case ShaderStageFlagBits::Compute: return VK_SHADER_STAGE_COMPUTE_BIT;
+        case ShaderStageFlagBits::RayGeneration: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+        case ShaderStageFlagBits::Tessellation: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        case ShaderStageFlagBits::Mesh: return VK_SHADER_STAGE_MESH_BIT_EXT;
+        default: return (VkShaderStageFlagBits)0;
+        }
+    }
+
+    template<>
+    inline VkResolveModeFlagBits Convert<ResolveMode, VkResolveModeFlagBits>(const ResolveMode& value)
+    {
+        switch (value)
+        {
+        case ResolveMode::None: return VK_RESOLVE_MODE_NONE;
+        case ResolveMode::Zero: return VK_RESOLVE_MODE_SAMPLE_ZERO_BIT;
+        case ResolveMode::Average: return VK_RESOLVE_MODE_AVERAGE_BIT;
+        case ResolveMode::Min: return VK_RESOLVE_MODE_MIN_BIT;
+        case ResolveMode::Max: return VK_RESOLVE_MODE_MAX_BIT;
+        default: return VK_RESOLVE_MODE_NONE;
+        }
     }
 }

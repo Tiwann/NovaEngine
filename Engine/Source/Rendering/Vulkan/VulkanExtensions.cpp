@@ -1,5 +1,4 @@
 ﻿#include "VulkanExtensions.h"
-#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {

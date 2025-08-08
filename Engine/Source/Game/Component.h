@@ -4,11 +4,15 @@
 #include "Containers/String.h"
 #include "Runtime/Flags.h"
 
+
+namespace Nova::Rendering { class CommandBuffer; }
+
 namespace Nova
 {
     class Transform;
     class Entity;
     class Scene;
+    class Application;
 
     enum class ComponentFlagBits
     {
@@ -32,6 +36,7 @@ namespace Nova
         Transform* GetTransform() const;
         Entity* GetOwner() const;
         Scene* GetScene() const;
+        Application* GetApplication() const;
         
         virtual void OnInit() {}
         virtual void OnStart() {}
@@ -40,18 +45,19 @@ namespace Nova
         virtual void OnDisable() {}
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnPhysicsUpdate(float deltaTime) {}
+        virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
         //virtual void OnInspectorGUI(const ImGuiIO& IO) {}
 
         bool IsEnabled() const;
         void SetEnabled(bool enabled);
 
         Uuid GetUuid() const;
-        void SetFlags(ComponentFlags flags);
-        ComponentFlags GetFlags() const;
+        void SetComponentFlags(ComponentFlags flags);
+        ComponentFlags GetComponentFlags() const;
     protected:
         Uuid m_Uuid = Uuid::Zero;
         bool m_Enabled = false;
         Entity* m_Entity = nullptr;
-        ComponentFlags m_Flags = ComponentFlagBits::None;
+        ComponentFlags m_ComponentFlags = ComponentFlagBits::None;
     };
 }

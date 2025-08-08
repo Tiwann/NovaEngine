@@ -357,6 +357,14 @@ namespace Nova::Vulkan
             m_Frames[imageIndex].commandBuffer = commandBuffer;
         }
 
+        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        descriptorPoolCreateInfo.device = this;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::Sampler] = 32;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::SampledTexture] = 32;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::CombinedTextureSampler] = 32;
+        descriptorPoolCreateInfo.sizes[ResourceBindingType::UniformBuffer] = 32;
+        descriptorPoolCreateInfo.maxSets = 32;
+        m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;
     }
 
@@ -411,7 +419,7 @@ namespace Nova::Vulkan
 
         VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-        barrier.oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         barrier.srcAccessMask = VK_ACCESS_2_NONE;
         barrier.dstAccessMask = VK_ACCESS_2_NONE;
@@ -552,6 +560,11 @@ namespace Nova::Vulkan
     Queue* Device::GetTransferQueue()
     {
         return &m_TransferQueue;
+    }
+
+    DescriptorPool* Device::GetDescriptorPool()
+    {
+        return &m_DescriptorPool;
     }
 
     Semaphore& Device::GetCurrentSubmitSemaphore()

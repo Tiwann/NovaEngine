@@ -4,6 +4,7 @@
 
 #include "Conversions.h"
 #include "Device.h"
+#include "ShaderBindingSetLayout.h"
 
 namespace Nova::Vulkan
 {
@@ -48,5 +49,19 @@ namespace Nova::Vulkan
     const VkDescriptorPool* DescriptorPool::GetHandlePtr() const
     {
         return &m_Handle;
+    }
+
+    VkDescriptorSet DescriptorPool::AllocateDescriptorSet(const Rendering::ShaderBindingSetLayout& bindingSetLayout) const
+    {
+        VkDescriptorSet descriptorSet = nullptr;
+        const VkDescriptorSetLayout descriptorSetLayout = ((const ShaderBindingSetLayout&)bindingSetLayout).GetDescriptorSetLayout();
+
+        VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
+        descriptorSetAllocateInfo.descriptorPool = m_Handle;
+        descriptorSetAllocateInfo.descriptorSetCount = 1;
+        descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
+        if (vkAllocateDescriptorSets(m_Device->GetHandle(), &descriptorSetAllocateInfo, &descriptorSet) != VK_SUCCESS)
+            return nullptr;
+        return descriptorSet;
     }
 }

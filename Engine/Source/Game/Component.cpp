@@ -1,5 +1,6 @@
 ﻿#include "Component.h"
 #include "Entity.h"
+#include "Scene.h"
 
 namespace Nova
 {
@@ -28,6 +29,12 @@ namespace Nova
         return m_Entity->GetOwner();
     }
 
+    Application* Component::GetApplication() const
+    {
+        const Scene* scene = GetScene();
+        return scene->GetOwner();
+    }
+
     void Component::SetEnabled(bool Enabled)
     {
         if (m_Enabled == Enabled)
@@ -40,13 +47,13 @@ namespace Nova
         return m_Uuid;
     }
 
-    void Component::SetFlags(ComponentFlags Flags)
+    void Component::SetComponentFlags(const ComponentFlags flags)
     {
-        m_Flags = Flags;
+        m_ComponentFlags = flags;
     }
 
-    ComponentFlags Component::GetFlags() const
+    ComponentFlags Component::GetComponentFlags() const
     {
-        return m_Flags;
+        return m_ComponentFlags;
     }
 }

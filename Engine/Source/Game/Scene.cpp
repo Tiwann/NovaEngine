@@ -31,7 +31,7 @@ namespace Nova
 #ifdef NOVA_HAS_PHYSICS
         m_PhysicsWorld2D.Step();
 #endif
-        
+
 #ifdef NOVA_HAS_PHYSICS3D
         m_PhysicsWorld3D.Step();
 #endif
@@ -39,6 +39,14 @@ namespace Nova
         for(Entity* entity : m_Entities)
         {
             entity->OnPhysicsUpdate(deltaTime);
+        }
+    }
+
+    void Scene::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    {
+        for(Entity* entity : m_Entities)
+        {
+            entity->OnRender(cmdBuffer);
         }
     }
 
@@ -101,6 +109,11 @@ namespace Nova
             const EntityHandle Handle = EntityHandle(entity->GetUUID(), this);
             function.Call(Handle);
         }
+    }
+
+    Application* Scene::GetOwner() const
+    {
+        return m_Owner;
     }
 
     void Scene::SetName(const String& name)

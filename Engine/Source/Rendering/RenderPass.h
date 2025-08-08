@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "ResolveMode.h"
+
 
 namespace Nova::Rendering
 {
@@ -39,6 +41,7 @@ namespace Nova::Rendering
         ClearValue clearValue = ClearValue();
         LoadOperation loadOp = LoadOperation::DontCare;
         StoreOperation storeOp = StoreOperation::DontCare;
+        ResolveMode resolveMode = ResolveMode::None;
         const Texture* texture = nullptr;
         const Texture* resolveTexture = nullptr;
     };
@@ -46,9 +49,11 @@ namespace Nova::Rendering
     class RenderPass
     {
     public:
+        RenderPass() = default;
         RenderPass(uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height);
+        void Initialize(uint32_t offsetX, uint32_t offsetY, uint32_t width, uint32_t height);
 
-        void AddAttachment(RenderPassAttachment& attachment);
+        void AddAttachment(const RenderPassAttachment& attachment);
 
         uint32_t GetOffsetX() const;
         uint32_t GetOffsetY() const;
@@ -58,7 +63,7 @@ namespace Nova::Rendering
         uint32_t GetColorAttachmentCount() const;
         uint32_t GetDepthAttachmentCount() const;
 
-        RenderPassAttachment* GetAttachment(uint32_t index) const;
+        RenderPassAttachment& GetAttachment(uint32_t index);
         RenderPassAttachment* GetDepthAttachment() const;
 
         void SetAttachmentTexture(size_t attachmentIndex, const Texture& texture);
@@ -67,14 +72,16 @@ namespace Nova::Rendering
         bool HasDepthAttachment() const;
         bool HasStencilAttachment() const;
 
-        Array<RenderPassAttachment*>::Iterator begin();
-        Array<RenderPassAttachment*>::Iterator end();
-        Array<RenderPassAttachment*>::ConstIterator begin() const;
-        Array<RenderPassAttachment*>::ConstIterator end() const;
+        Array<RenderPassAttachment>::Iterator begin();
+        Array<RenderPassAttachment>::Iterator end();
+        Array<RenderPassAttachment>::ConstIterator begin() const;
+        Array<RenderPassAttachment>::ConstIterator end() const;
 
         void Resize(uint32_t newWidth, uint32_t newHeight);
+
+
     private:
-        Array<RenderPassAttachment*> m_Attachments;
+        Array<RenderPassAttachment> m_Attachments;
         uint32_t m_OffsetX = 0;
         uint32_t m_OffsetY = 0;
         uint32_t m_Width = 0;

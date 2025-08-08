@@ -18,6 +18,7 @@ namespace Nova
         Camera(Entity* owner);
 
         void OnInit() override;
+        void OnUpdate(float deltaTime) override;
         //void OnInspectorGUI(const ImGuiIO& IO) override;
         
         const Matrix4& GetViewMatrix();

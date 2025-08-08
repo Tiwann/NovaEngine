@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <chrono>
 
-#include "ShaderUtils.h"
 #include "Rendering/ComputePipeline.h"
 #include "Rendering/DescriptorPool.h"
 #include "Rendering/Texture.h"
@@ -33,6 +32,7 @@ namespace Nova
         return StringFormat("{}/{}", APPLICATION_DIR, filepath);
     }
 
+#ifndef NOVA_CUSTOM_ENTRY_POINT
     int GuardedMain(int, char**)
     {
         WindowCreateInfo windowCreateInfo;
@@ -231,4 +231,5 @@ namespace Nova
         window.Destroy();
         return 0;
     }
+#endif
 }

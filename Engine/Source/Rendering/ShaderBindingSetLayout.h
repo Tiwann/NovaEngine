@@ -18,8 +18,9 @@ namespace Nova::Rendering
     struct ShaderBinding
     {
         StringView name;
-        ShaderStageFlags stageFlags;
+        ShaderStageFlags stageFlags = ShaderStageFlagBits::None;
         ResourceBindingType bindingType;
+        uint32_t arrayCount = 1;
     };
 
     class ShaderBindingSetLayout

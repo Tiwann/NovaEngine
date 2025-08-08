@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-
 namespace Nova
 {
+#ifdef NOVA_CUSTOM_ENTRY_POINT
     extern "C" int GuardedMain(int argc, char** argv);
+#else
     extern "C" class Application* CreateApplication();
-    inline bool g_ApplicationRunning = false;
+#endif
 }

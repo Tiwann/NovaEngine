@@ -36,6 +36,20 @@ namespace Nova
         T As() const { return (T)m_Value; }
 
         constexpr bool Contains(const Enum& other) const { return ((uint32_t)m_Value & (uint32_t)other) != 0; }
+
+        constexpr Flags& Append(const Enum value)
+        {
+            m_Value = (Enum)((uint32_t)m_Value | (uint32_t)value);
+            return *this;
+        }
+
+        constexpr Flags& Remove(const Enum value)
+        {
+            m_Value = (Enum)((uint32_t)m_Value & ~(uint32_t)value);
+            return *this;
+        }
+
+        constexpr Flags& Toggle(const Enum value) { return Contains(value) ? Remove(value) : Append(value); }
     private:
         Enum m_Value = (Enum)0;
     };

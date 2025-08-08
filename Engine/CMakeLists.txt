@@ -17,7 +17,7 @@ target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
 target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d PRIVATE glfw)
-target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT)
+target_compile_definitions(NovaEngine PRIVATE NOVA_CORE NOVA_ENGINE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\" INTERFACE NOVA_CLIENT)
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
     target_compile_definitions(NovaEngine PUBLIC NOVA_CUSTOM_ENTRY_POINT)

@@ -26,6 +26,15 @@ namespace Nova
         Window() = default;
         ~Window() override = default;
 
+        static Window* Create(const WindowCreateInfo& createInfo);
+
+        template<typename WindowType> requires std::is_base_of_v<Window, WindowType>
+        WindowType* Create(const WindowCreateInfo& createInfo)
+        {
+            return (WindowType*)Create(createInfo);
+        }
+
+
         virtual bool Initialize(const WindowCreateInfo& createInfo) = 0;
         virtual void PollEvents() = 0;
         virtual void Destroy() = 0;

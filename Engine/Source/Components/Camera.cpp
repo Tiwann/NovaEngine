@@ -2,6 +2,7 @@
 #include "Math/LinearAlgebra.h"
 #include "Transform.h"
 #include "Game/Entity.h"
+#include "Runtime/Application.h"
 #include "Runtime/Window.h"
 
 namespace Nova
@@ -14,12 +15,29 @@ namespace Nova
     void Camera::OnInit()
     {
         Component::OnInit();
-        Transform* Transform = GetTransform();
-        Transform->OnChanged.Bind([&]
+        Transform* transform = GetTransform();
+        transform->onChanged.Bind([&]
         {
             m_ViewMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         });
+    }
+
+    void Camera::OnUpdate(const float deltaTime)
+    {
+        Component::OnUpdate(deltaTime);
+        const Application* application = GetApplication();
+        const Window* window = application->GetWindow();
+        const float newWidth = window->GetWidth();
+        const float newHeight = window->GetHeight();
+
+        if (Math::AreDifferent(m_Width, newWidth) || Math::AreDifferent(m_Height, newHeight))
+        {
+            m_Width = newWidth;
+            m_Height = newHeight;
+            m_ProjectionMatrix.SetDirty();
+            m_ViewProjectionMatrix.SetDirty();
+        }
     }
 
     /*void Camera::OnInspectorGUI(const ImGuiIO& IO)

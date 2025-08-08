@@ -16,8 +16,8 @@ namespace Nova::Rendering
 
     struct FenceCreateInfo
     {
-        Device* device;
-        FenceCreateFlags flags;
+        Device* device = nullptr;
+        FenceCreateFlags flags = FenceCreateFlagBits::None;
     };
 
     class Fence

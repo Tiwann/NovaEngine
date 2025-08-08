@@ -1,5 +1,19 @@
 ﻿#include "Runtime/EntryPoint.h"
 
+#ifndef NOVA_CUSTOM_ENTRY_POINT
+#include "Runtime/Application.h"
+
+namespace Nova
+{
+    int GuardedMain(const int argc, char** arv)
+    {
+        Application* application = CreateApplication();
+        application->Run();
+        delete application;
+        return 0;
+    }
+}
+#endif
 
 #if defined(NOVA_PLATFORM_WINDOWS)
 #include <Windows.h>

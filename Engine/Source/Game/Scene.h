@@ -14,19 +14,24 @@
 #include "Physics/PhysicsWorld3D.h"
 #endif
 
+namespace Nova::Rendering { class CommandBuffer; }
+
 namespace Nova
 {
+    class Application;
+
     class Scene : public Object
     {
     public:
         using Iterator = Array<Entity*>::Iterator;
         using ConstIterator = Array<Entity*>::ConstIterator;
 
-        Scene(const String& name) : Object(name) {}
+        Scene(Application* owner, const String& name) : Object(name), m_Owner(owner) {}
         ~Scene() override = default;
          
         void OnInit();
         void OnUpdate(float deltaTime);
+        void OnRender(Rendering::CommandBuffer& cmdBuffer);
         void OnDestroy();
 
         template <typename ComponentType>
@@ -50,6 +55,8 @@ namespace Nova
 
         void ForEach(const Function<void(const EntityHandle&)>& function);
 
+        Application* GetOwner() const;
+
 
 #ifdef NOVA_HAS_PHYSICS
         const PhysicsWorld2D& GetPhysicsWorld2D() const;
@@ -71,6 +78,7 @@ namespace Nova
         String m_Name;
         BumpAllocator<Entity, 32> m_EntityPool;
         Array<Entity*> m_Entities;
+        Application* m_Owner = nullptr;
 #ifdef NOVA_HAS_PHYSICS
         PhysicsWorld2D m_PhysicsWorld2D;
 #endif

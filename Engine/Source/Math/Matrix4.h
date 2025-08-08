@@ -7,6 +7,7 @@ namespace Nova
     struct Vector2;
     struct Vector3;
     struct Quaternion;
+    struct Matrix2;
     
     class Matrix4
     {

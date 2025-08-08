@@ -228,7 +228,7 @@ namespace Nova
             }
 
             std::copy(other.begin(), other.end(), &m_Data[m_Count]);
-            m_Count += other.count();
+            m_Count += other.Count();
         }
 
         void AddRange(ConstPointerType data, SizeType count)

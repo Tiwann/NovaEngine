@@ -8,6 +8,8 @@
 #include "Runtime/Flags.h"
 #include "Runtime/Object.h"
 
+namespace Nova::Rendering { class CommandBuffer; }
+
 namespace Nova
 {
     class Component;
@@ -51,6 +53,7 @@ namespace Nova
             Array<T*> result;
             for(Component* component : m_Components)
             {
+                if (!component) continue;
                 if(T* casted = dynamic_cast<T*>(component))
                     result.Add(casted);
             }
@@ -128,6 +131,7 @@ namespace Nova
         virtual void OnStart();
         virtual void OnUpdate(float deltaTime);
         virtual void OnPhysicsUpdate(float deltaTime);
+        virtual void OnRender(Rendering::CommandBuffer& cmdBuffer);
         virtual void OnDestroy();
 
     private:

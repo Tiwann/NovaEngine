@@ -14,6 +14,12 @@ namespace Nova
 
 namespace Nova::Rendering
 {
+    enum class DeviceType
+    {
+        Unknown,
+        Vulkan
+    };
+
     struct DeviceCreateInfo
     {
         String applicationName;
@@ -31,6 +37,8 @@ namespace Nova::Rendering
     public:
         Device() = default;
         virtual ~Device() = default;
+
+        static Device* Create(DeviceType type, const DeviceCreateInfo& createInfo);
 
         virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

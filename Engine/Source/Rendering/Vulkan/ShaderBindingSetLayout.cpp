@@ -9,18 +9,20 @@ namespace Nova::Vulkan
     {
         Array<VkDescriptorSetLayoutBinding> bindings;
 
-        for (const auto& [index, binding] : m_Bindings)
+        for (size_t i = 0; i < m_Bindings.Count(); i++)
         {
-            VkDescriptorSetLayoutBinding vkBinding;
-            vkBinding.binding = index;
+            const Rendering::ShaderBinding& binding = m_Bindings[i];
+            VkDescriptorSetLayoutBinding vkBinding = { };
+            vkBinding.binding = i;
             vkBinding.descriptorCount = 1;
             vkBinding.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(binding.stageFlags);
             vkBinding.descriptorType = Convert<ResourceBindingType, VkDescriptorType>(binding.bindingType);
+            vkBinding.pImmutableSamplers = nullptr;
             bindings.Add(vkBinding);
         }
 
         VkDescriptorSetLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-        layoutCreateInfo.bindingCount = bindings.Size();
+        layoutCreateInfo.bindingCount = bindings.Count();
         layoutCreateInfo.pBindings = bindings.Data();
 
         const VkDevice deviceHandle = m_Device->GetHandle();

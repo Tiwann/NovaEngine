@@ -33,6 +33,9 @@ namespace Nova
 
         T& operator*() { return m_Value; }
         const T& operator*() const { return m_Value; }
+
+        const T* operator&() const { return &m_Value; }
+
     private:
         T m_Value;
         bool m_IsDirty = true;

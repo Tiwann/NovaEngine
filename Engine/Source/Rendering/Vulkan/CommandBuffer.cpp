@@ -317,24 +317,24 @@ namespace Nova::Vulkan
     {
         Array<VkRenderingAttachmentInfo> colorAttachments;
 
-        for (const Rendering::RenderPassAttachment* attachment : renderPass)
+        for (const Rendering::RenderPassAttachment& attachment : renderPass)
         {
-            if (attachment->type == Rendering::AttachmentType::Depth)
+            if (attachment.type == Rendering::AttachmentType::Depth)
                 continue;
 
-            const Color& clearColor = attachment->clearValue.color;
+            const Color& clearColor = attachment.clearValue.color;
 
             VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment->loadOp);
-            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment->storeOp);
+            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
+            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
             colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachmentInfo.imageView = ((Texture*)attachment->texture)->GetImageView();
+            colorAttachmentInfo.imageView = ((Texture*)attachment.texture)->GetImageView();
             colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
-            if (attachment->resolveTexture)
+            if (attachment.resolveTexture)
             {
-                colorAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+                colorAttachmentInfo.resolveMode = Convert<ResolveMode, VkResolveModeFlagBits>(attachment.resolveMode);
                 colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                colorAttachmentInfo.resolveImageView = ((Texture*)attachment->resolveTexture)->GetImageView();
+                colorAttachmentInfo.resolveImageView = ((Texture*)attachment.resolveTexture)->GetImageView();
             }
 
 
@@ -355,7 +355,7 @@ namespace Nova::Vulkan
             depthAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
             if (depthAttachment->resolveTexture)
             {
-                depthAttachmentInfo.resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT;
+                depthAttachmentInfo.resolveMode = Convert<ResolveMode, VkResolveModeFlagBits>(depthAttachment->resolveMode);
                 depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
                 depthAttachmentInfo.resolveImageView = ((Texture*)depthAttachment->resolveTexture)->GetImageView();
             }

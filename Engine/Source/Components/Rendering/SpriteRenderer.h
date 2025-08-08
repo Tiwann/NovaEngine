@@ -1,0 +1,67 @@
+﻿#pragma once
+#include "Game/Component.h"
+#include "Assets/Sprite.h"
+#include "Math/Vector2.h"
+#include "Rendering/SpriteRendererFlags.h"
+#include "Rendering/Vulkan/Buffer.h"
+#include "Rendering/Vulkan/GraphicsPipeline.h"
+#include "Rendering/Vulkan/Sampler.h"
+#include "Rendering/Vulkan/ShaderBindingSetLayout.h"
+
+typedef struct VkPipelineLayout_T* VkPipelineLayout;
+typedef struct VkDescriptorSet_T* VkDescriptorSet;
+typedef struct VkDescriptorSetLayout_T* VkDescriptorSetLayout;
+
+namespace Nova
+{
+
+    class SpriteRenderer : public Component
+    {
+    public:
+        SpriteRenderer(Entity* owner);
+
+        void OnInit() override;
+        void OnUpdate(float deltaTime) override;
+        void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
+        void OnDestroy() override;
+
+        Sprite& GetSprite();
+        void SetSprite(const Sprite& sprite);
+
+        Vector2 GetTiling() const;
+        void SetTiling(const Vector2& tiling);
+
+        uint32_t GetPixelsPerUnit() const;
+        void SetPixelsPerUnit(uint32_t pixelsPerUnit);
+
+        Color GetColorTint() const;
+        void SetColorTint(const Color& color);
+
+        SpriteRendererFlags GetFlags() const;
+        void SetFlags(SpriteRendererFlags flags);
+    private:
+        void UpdateUniforms();
+        void UpdateResources();
+    private:
+        Sprite m_Sprite = { 0, 0, 0, 0, nullptr };
+        SpriteRendererFlags m_Flags = SpriteRendererFlagBits::None;
+        uint32_t m_PixelsPerUnit = 128;
+        Vector2 m_Tiling = Vector2::One;
+        Color m_ColorTint = Color::White;
+
+        bool m_UpdateUniforms = true;
+        bool m_UpdateResources = true;
+
+        Vulkan::Buffer m_VertexBuffer;
+        Vulkan::Buffer m_IndexBuffer;
+        Vulkan::Buffer m_UniformBuffer;
+        Vulkan::Buffer m_StagingBuffer;
+        Vulkan::Sampler m_Sampler;
+        Vulkan::GraphicsPipeline m_Pipeline;
+
+        Vulkan::ShaderBindingSetLayout m_BindingSetLayout;
+        VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
+        VkDescriptorSet m_DescriptorSet = nullptr;
+        VkPipelineLayout m_PipelineLayout = nullptr;
+    };
+}

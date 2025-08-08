@@ -82,6 +82,13 @@ namespace Nova::Vulkan
             bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         }
 
+        if (createInfo.usage == Rendering::BufferUsage::UniformBuffer)
+        {
+            bufferAllocationCreateInfo.priority = 1.0f;
+            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        }
+
 
         Device* device = static_cast<Device*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();

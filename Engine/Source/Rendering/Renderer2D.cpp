@@ -1,332 +1,295 @@
 ﻿#include "Renderer2D.h"
-#include "Device.h"
-#include "Math/Vector2.h"
-#include "Math/Vector3.h"
-#include "Math/Vector4.h"
-#include "Assets/Sprite.h"
-#include "Texture.h"
-#include "RenderTarget.h"
-#include "DescriptorPool.h"
-#include "Components/Camera.h"
-#include "Containers/StringFormat.h"
-#include "Vulkan/Device.h"
-#include "Vulkan/Buffer.h"
-#include "Vulkan/Sampler.h"
-#include "Vulkan/GraphicsPipeline.h"
-#include "Vulkan/CommandBuffer.h"
-#include "Vulkan/ShaderModule.h"
-#include "Vulkan/DescriptorPool.h"
-#include "Vulkan/Texture.h"
-#include "External/ShaderUtils.h"
 
-#include <cstdint>
+#include "Texture.h"
+#include "Assets/Sprite.h"
+#include "Containers/Array.h"
+#include "Math/Matrix2.h"
+#include "Math/Vector2.h"
+#include "Math/Vector4.h"
+#include "Vulkan/Buffer.h"
+#include "Vulkan/CommandBuffer.h"
+#include "Vulkan/GraphicsPipeline.h"
+#include "Vulkan/Sampler.h"
 #include <vulkan/vulkan.h>
 
-namespace Nova::Rendering
+#include "RenderPass.h"
+#include "Math/Matrix4.h"
+#include "Runtime/Path.h"
+#include "Runtime/ShaderCompiler.h"
+#include "Utils/BufferUtils.h"
+#include "Vulkan/DescriptorPool.h"
+#include "Vulkan/Device.h"
+#include "Vulkan/ShaderBindingSetLayout.h"
+#include "Vulkan/ShaderModule.h"
+
+
+namespace Nova
 {
     struct QuadVertex
     {
-        Vector3 position;
-        Vector2 texCoords;
-        Vector4 color;
-        uint32_t textureIndex;
+        Vector2 position;
+        Vector2 texCoord;
+        uint32_t spriteId;
     };
 
-    static uint32_t QuadCount = 0;
-    static Array<QuadVertex> QuadVertices;
-    static Array<uint32_t> QuadIndices;
-    static Array<Sprite> Sprites;
-
-    struct QuadPipeline
+    static struct QuadBatch
     {
+        struct alignas(16) Uniform
+        {
+            Matrix4 transform;
+            Vector2 tiling;
+            Vector2 __padding;
+            Matrix2 spriteScale;
+            Vector4 color;
+        };
+
+        Array<QuadVertex> vertices;
+        Array<uint32_t> indices;
+        Array<Sprite> sprites;
+        Array<Uniform> uniforms;
+        uint32_t quadCount = 0;
+
+        Vulkan::Sampler sampler;
+        Vulkan::Buffer uniformBuffer;
+        Vulkan::Buffer uboStaging;
+        Vulkan::GraphicsPipeline pipeline;
+        VkPipelineLayout pipelineLayout;
+        Vulkan::ShaderBindingSetLayout bindingSetLayout;
+        VkDescriptorSet descriptorSet;
+
         Vulkan::Buffer vertexBuffer;
         Vulkan::Buffer indexBuffer;
-        Vulkan::Sampler sampler;
-
-        Vulkan::ShaderModule vertexModule;
-        Vulkan::ShaderModule fragmentModule;
-        Vulkan::GraphicsPipeline pipelineState;
-        VkDescriptorSetLayout descriptorSetLayout;
-        VkDescriptorSet descriptorSet;
-        VkPipelineLayout pipelineLayout;
-
-        bool Initialize(Device& device, RenderTarget& renderTarget, uint32_t maxQuads)
-        {
-            BufferCreateInfo bufferCreateInfo;
-            bufferCreateInfo.device = &device;
-            bufferCreateInfo.usage = BufferUsage::VertexBuffer;
-            bufferCreateInfo.size = maxQuads * 4 * sizeof(QuadVertex);
-            if (!vertexBuffer.Initialize(bufferCreateInfo))
-                return false;
+    } s_QuadData;
 
 
-            bufferCreateInfo.usage = BufferUsage::IndexBuffer;
-            bufferCreateInfo.size = maxQuads * 6 * sizeof(uint32_t);
-            if (!indexBuffer.Initialize(bufferCreateInfo))
-                return false;
-
-            SamplerCreateInfo samplerCreateInfo;
-            samplerCreateInfo.device = &device;
-            if (!sampler.Initialize(samplerCreateInfo))
-                return false;
-
-
-
-            Array<uint32_t> vertSpirv, fragSpirv;
-            CompileShaderToSpirv(StringFormat("Assets/Shaders/Sprite.slang"), "Sprite", vertSpirv, fragSpirv);
-            vertexModule = ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Vertex, vertSpirv);
-            fragmentModule = ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Fragment, fragSpirv);
-
-            VkPipelineShaderStageCreateInfo vertexShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-            vertexShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-            vertexShaderStageCreateInfo.module = vertexModule.GetHandle();
-            vertexShaderStageCreateInfo.pName = "main";
-
-            VkPipelineShaderStageCreateInfo fragmentShaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-            fragmentShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-            fragmentShaderStageCreateInfo.module = fragmentModule.GetHandle();
-            fragmentShaderStageCreateInfo.pName = "main";
-
-            VkDescriptorSetLayoutBinding layoutBinding
-            {
-                .binding = 0,
-                .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .descriptorCount = (uint32_t)Sprites.Count(),
-                .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-                .pImmutableSamplers = nullptr,
-            };
-
-            VkDescriptorBindingFlags bindingFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
-            VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagsInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO };
-            bindingFlagsInfo.bindingCount = 1;
-            bindingFlagsInfo.pBindingFlags = &bindingFlags;
-
-            VkDescriptorSetLayoutCreateInfo dslCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-            dslCreateInfo.bindingCount = 1;
-            dslCreateInfo.pBindings = &layoutBinding;
-            dslCreateInfo.pNext = &bindingFlagsInfo;
-
-            VkResult result = vkCreateDescriptorSetLayout(((Vulkan::Device&)device).GetHandle(), &dslCreateInfo, nullptr, &descriptorSetLayout);
-            if (result != VK_SUCCESS)
-                return EXIT_FAILURE;
-
-            VkPushConstantRange range;
-            range.offset = 0;
-            range.size = sizeof(Matrix4);
-            range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-            VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-            pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
-            pipelineLayoutCreateInfo.setLayoutCount = 1;
-            pipelineLayoutCreateInfo.pPushConstantRanges = &range;
-            pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-
-            result = vkCreatePipelineLayout(((Vulkan::Device&)device).GetHandle(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout);
-            if (result != VK_SUCCESS)
-                return EXIT_FAILURE;
-
-
-            DescriptorPoolCreateInfo descriptorPoolCreateInfo;
-            descriptorPoolCreateInfo.device = &device;
-            descriptorPoolCreateInfo.sizes[ResourceBindingType::CombinedTextureSampler] = 32;
-            descriptorPoolCreateInfo.maxSets = 1;
-            Vulkan::DescriptorPool descriptorPool;
-            if (!descriptorPool.Initialize(descriptorPoolCreateInfo))
-                return EXIT_FAILURE;
-
-            VkDescriptorSetVariableDescriptorCountAllocateInfo countInfo { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO };
-            uint32_t spriteCount = Sprites.Count();
-            countInfo.descriptorSetCount = 1;
-            countInfo.pDescriptorCounts = &spriteCount;
-
-            VkDescriptorSetAllocateInfo dsAllocateInfo = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
-            dsAllocateInfo.descriptorPool = descriptorPool.GetHandle();
-            dsAllocateInfo.pSetLayouts = &descriptorSetLayout;
-            dsAllocateInfo.descriptorSetCount = 1;
-            dsAllocateInfo.pNext = &countInfo;
-            vkAllocateDescriptorSets(((Vulkan::Device&)device).GetHandle(), &dsAllocateInfo, &descriptorSet);
-
-
-            Array<VkWriteDescriptorSet> writeDescriptors;
-            for (size_t i = 0; i < Sprites.Count(); i++)
-            {
-                const Sprite& sprite = Sprites[i];
-
-                VkDescriptorImageInfo imageInfo;
-                imageInfo.sampler = sampler.GetHandle();
-                imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                imageInfo.imageView = ((Vulkan::Texture*)sprite.texture)->GetImageView();
-
-                VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-                write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                write.dstSet = descriptorSet;
-                write.dstBinding = 0;
-                write.dstArrayElement = i;
-                write.descriptorCount = 1;
-                write.pImageInfo = &imageInfo;
-
-                writeDescriptors.Add(write);
-            }
-
-            vkUpdateDescriptorSets(((Vulkan::Device&)device).GetHandle(), writeDescriptors.Count(), writeDescriptors.Data(), 0, nullptr);
-
-            GraphicsPipelineCreateInfo pipelineCreateInfo;
-            pipelineCreateInfo.device = &device;
-            pipelineCreateInfo.pipelineLayout = pipelineLayout;
-
-            pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "POSITION", Format::Vector3 });
-            pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TEXCOORDS", Format::Vector2 });
-            pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "COLOR", Format::Vector4 });
-            pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TEXINDEX", Format::Uint32 });
-
-            pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
-            pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
-
-            pipelineCreateInfo.rasterizationInfo.cullMode = CullMode::BackFace;
-            pipelineCreateInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
-            pipelineCreateInfo.rasterizationInfo.discardEnable = false;
-            pipelineCreateInfo.rasterizationInfo.polygonMode = PolygonMode::Fill;
-            pipelineCreateInfo.rasterizationInfo.depthClampEnable = false;
-            pipelineCreateInfo.rasterizationInfo.depthBiasEnable = false;
-
-            pipelineCreateInfo.colorBlendInfo.colorBlendEnable = false;
-
-            pipelineCreateInfo.depthStencilInfo.depthTestEnable = false;
-            pipelineCreateInfo.depthStencilInfo.depthWriteEnable = false;
-            pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
-            pipelineCreateInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
-
-            pipelineCreateInfo.multisampleInfo.alphaToOneEnable = false;
-            pipelineCreateInfo.multisampleInfo.sampleShadingEnable = false;
-            pipelineCreateInfo.multisampleInfo.alphaToCoverageEnable = false;
-            pipelineCreateInfo.multisampleInfo.sampleCount = 1;
-
-            pipelineCreateInfo.viewportInfo.x = 0;
-            pipelineCreateInfo.viewportInfo.y = 0;
-            pipelineCreateInfo.viewportInfo.width = renderTarget.GetWidth();
-            pipelineCreateInfo.viewportInfo.height = renderTarget.GetHeight();
-
-            pipelineCreateInfo.scissorInfo.x = 0;
-            pipelineCreateInfo.scissorInfo.y = 0;
-            pipelineCreateInfo.scissorInfo.width = renderTarget.GetWidth();
-            pipelineCreateInfo.scissorInfo.height = renderTarget.GetHeight();
-
-            const VkPipelineShaderStageCreateInfo shaderStages[2] { vertexShaderStageCreateInfo, fragmentShaderStageCreateInfo };
-            pipelineCreateInfo.shaderStages = shaderStages;
-            pipelineCreateInfo.shaderStagesCount = 2;
-
-            if (!pipelineState.Initialize(pipelineCreateInfo))
-                return false;
-
-            return true;
-        }
-
-        void Destroy()
-        {
-            vertexBuffer.Destroy();
-            indexBuffer.Destroy();
-            sampler.Destroy();
-            pipelineState.Destroy();
-        }
-    };
-
-    static QuadPipeline quadPipeline;
-
-    bool Renderer2D::Initialize(Device& device, RenderTarget& renderTarget)
+    bool Renderer2D::Initialize(const Renderer2DCreateInfo& createInfo)
     {
-        if (!quadPipeline.Initialize(device, renderTarget, 10000))
+        m_Device = createInfo.device;
+        Rendering::SamplerCreateInfo samplerInfo;
+        samplerInfo.device = createInfo.device;
+        if (!s_QuadData.sampler.Initialize(samplerInfo))
             return false;
+
+        Rendering::BufferCreateInfo uboCreateInfo;
+        uboCreateInfo.device = createInfo.device;
+        uboCreateInfo.size = createInfo.maxQuads * sizeof(QuadBatch::Uniform);
+        uboCreateInfo.usage = Rendering::BufferUsage::UniformBuffer;
+        if (!s_QuadData.uniformBuffer.Initialize(uboCreateInfo))
+            return false;
+
+        Rendering::BufferCreateInfo stagingBufferCreateInfo;
+        stagingBufferCreateInfo.device = createInfo.device;
+        stagingBufferCreateInfo.size = createInfo.maxQuads * sizeof(QuadBatch::Uniform);
+        stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
+        if (!s_QuadData.uboStaging.Initialize(uboCreateInfo))
+            return false;
+
+
+        const String shaderPath = Path::Combine(NOVA_ENGINE_ROOT_DIR, "Engine/Assets/Shaders/Sprite.slang");
+        ShaderCompiler compiler;
+        compiler.AddEntryPoint({ "vert", ShaderStageFlagBits::Vertex });
+        compiler.AddEntryPoint({ "frag", ShaderStageFlagBits::Fragment });
+        compiler.Initialize();
+        compiler.Compile(shaderPath, "HelloTriangle", ShaderTarget::SPIRV);
+
+        const Array<uint32_t> vertSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Vertex);
+        const Array<uint32_t> fragSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Fragment);
+        if (vertSpirv.IsEmpty() || fragSpirv.IsEmpty()) return false;
+
+        Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*createInfo.device, ShaderStageFlagBits::Vertex, vertSpirv);
+        Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*createInfo.device, ShaderStageFlagBits::Fragment, fragSpirv);
+
+        s_QuadData.bindingSetLayout.SetBinding(0, { "uniforms", ShaderStageFlagBits::Fragment, ResourceBindingType::UniformBuffer, 1 });
+        s_QuadData.bindingSetLayout.SetBinding(0, { "textures", ShaderStageFlagBits::Fragment, ResourceBindingType::CombinedTextureSampler });
+        s_QuadData.bindingSetLayout.Build();
+
+        Vulkan::Device* device = (Vulkan::Device*)createInfo.device;
+        VkDescriptorSetLayout setLayout = s_QuadData.bindingSetLayout.GetDescriptorSetLayout();
+
+        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
+        pipelineLayoutCreateInfo.pSetLayouts = &setLayout;
+        pipelineLayoutCreateInfo.setLayoutCount = 1;
+        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
+        VkResult result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCreateInfo, nullptr, &s_QuadData.pipelineLayout);
+        if (result != VK_SUCCESS) return false;
+
+
+        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
+        pipelineCreateInfo.device = createInfo.device;
+        pipelineCreateInfo.renderPass = createInfo.renderPass;
+        pipelineCreateInfo.pipelineLayout = s_QuadData.pipelineLayout;
+
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector2 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "SpriteId", Format::Uint32 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "QuadId", Format::Uint32 });
+
+        pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
+        pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
+
+        pipelineCreateInfo.rasterizationInfo.cullMode = CullMode::BackFace;
+        pipelineCreateInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
+        pipelineCreateInfo.rasterizationInfo.discardEnable = false;
+        pipelineCreateInfo.rasterizationInfo.polygonMode = PolygonMode::Fill;
+        pipelineCreateInfo.rasterizationInfo.depthClampEnable = false;
+        pipelineCreateInfo.rasterizationInfo.depthBiasEnable = false;
+
+        pipelineCreateInfo.colorBlendInfo.colorBlendEnable = false;
+
+        pipelineCreateInfo.depthStencilInfo.depthTestEnable = false;
+        pipelineCreateInfo.depthStencilInfo.depthWriteEnable = false;
+        pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
+        pipelineCreateInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
+
+        pipelineCreateInfo.multisampleInfo.alphaToOneEnable = false;
+        pipelineCreateInfo.multisampleInfo.sampleShadingEnable = false;
+        pipelineCreateInfo.multisampleInfo.alphaToCoverageEnable = false;
+        pipelineCreateInfo.multisampleInfo.sampleCount = 8;
+
+        pipelineCreateInfo.viewportInfo.x = 0;
+        pipelineCreateInfo.viewportInfo.y = 0;
+        pipelineCreateInfo.viewportInfo.width = createInfo.renderPass->GetWidth();
+        pipelineCreateInfo.viewportInfo.height = createInfo.renderPass->GetHeight();
+
+        pipelineCreateInfo.scissorInfo.x = 0;
+        pipelineCreateInfo.scissorInfo.y = 0;
+        pipelineCreateInfo.scissorInfo.width = createInfo.renderPass->GetWidth();
+        pipelineCreateInfo.scissorInfo.height = createInfo.renderPass->GetHeight();
+
+        const VkPipelineShaderStageCreateInfo shaderStages[] { vertShaderModule.GetShaderStageCreateInfo(), fragShaderModule.GetShaderStageCreateInfo() };
+        pipelineCreateInfo.shaderStages = shaderStages;
+        pipelineCreateInfo.shaderStagesCount = 2;
+        if (!s_QuadData.pipeline.Initialize(pipelineCreateInfo))
+            return false;
+
+
+        Vulkan::DescriptorPool* descriptorPool = device->GetDescriptorPool();
+        s_QuadData.descriptorSet = descriptorPool->AllocateDescriptorSet(s_QuadData.bindingSetLayout);
         return true;
     }
 
-    void Renderer2D::Destroy()
+    bool Renderer2D::BeginScene(Camera* camera)
     {
-        quadPipeline.Destroy();
-        QuadCount = 0;
-        QuadVertices.Clear();
-        QuadIndices.Clear();
-        Sprites.Clear();
-    }
+        m_Camera = camera;
+        s_QuadData.vertices.Clear();
+        s_QuadData.indices.Clear();
+        s_QuadData.sprites.Clear();
+        s_QuadData.uniforms.Clear();
+        s_QuadData.quadCount = 0;
 
-    bool Renderer2D::BeginScene(const Camera* camera)
-    {
-        if (!camera) return false;
-        QuadVertices.Clear();
-        QuadIndices.Clear();
-        Sprites.Clear();
         return true;
     }
 
     void Renderer2D::EndScene()
     {
-        BufferCreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.device = m_Device;
-        stagingBufferCreateInfo.usage = BufferUsage::StagingBuffer;
-        stagingBufferCreateInfo.size = QuadVertices.Size();
+        Array<VkWriteDescriptorSet> writes;
 
-        Vulkan::Buffer stagingBuffer;
-        stagingBuffer.Initialize(stagingBufferCreateInfo);
-        stagingBuffer.CPUCopy(QuadVertices.Data(), 0, QuadVertices.Size());
-        stagingBuffer.GPUCopy(quadPipeline.vertexBuffer, 0, 0, QuadVertices.Size());
+        for (size_t i = 0; i < s_QuadData.quadCount; i++)
+        {
+            VkDescriptorBufferInfo bufferInfo;
+            bufferInfo.buffer = s_QuadData.uniformBuffer.GetHandle();
+            bufferInfo.offset = 0;
+            bufferInfo.range = s_QuadData.quadCount * sizeof(QuadBatch::Uniform);
 
-        stagingBufferCreateInfo.size = QuadIndices.Size();
-        stagingBuffer.Initialize(stagingBufferCreateInfo);
-        stagingBuffer.CPUCopy(QuadIndices.Data(), 0, QuadIndices.Size());
-        stagingBuffer.GPUCopy(quadPipeline.indexBuffer, 0, 0, QuadIndices.Size());
+            VkWriteDescriptorSet uniform = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+            uniform.dstSet = s_QuadData.descriptorSet;
+            uniform.dstBinding = 0;
+            uniform.dstArrayElement = i;
+            uniform.descriptorCount = 1;
+            uniform.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            uniform.pBufferInfo = &bufferInfo;
+            writes.Add(uniform);
+
+            VkDescriptorImageInfo imageInfo;
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            imageInfo.imageView = ((Vulkan::Texture*)s_QuadData.sprites[s_QuadData.vertices[i * 4].spriteId].texture)->GetImageView();
+            imageInfo.sampler = s_QuadData.sampler.GetHandle();
+
+
+            VkWriteDescriptorSet image = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+            image.dstSet = s_QuadData.descriptorSet;
+            image.dstBinding = 1;
+            image.dstArrayElement = i;
+            image.descriptorCount = 1;
+            image.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            image.pImageInfo = &imageInfo;
+            writes.Add(image);
+        }
+
+        vkUpdateDescriptorSets(((Vulkan::Device*)m_Device)->GetHandle(), writes.Count(), writes.Data(), 0, nullptr);
+
+        s_QuadData.uboStaging.CPUCopy(s_QuadData.uniforms.Data(), 0, s_QuadData.uniforms.Size());
+        s_QuadData.uboStaging.GPUCopy(s_QuadData.uniformBuffer, 0, 0, s_QuadData.uniforms.Size());
+
+        s_QuadData.vertexBuffer.Destroy();
+        s_QuadData.vertexBuffer = CreateVertexBuffer(*m_Device, s_QuadData.vertices.Data(), s_QuadData.vertices.Size());
+
+        s_QuadData.indexBuffer.Destroy();
+        s_QuadData.indexBuffer = CreateIndexBuffer(*m_Device, s_QuadData.indices.Data(), s_QuadData.indices.Size());
     }
 
-    void Renderer2D::Render()
+    void Renderer2D::Render(Rendering::CommandBuffer& cmdBuffer)
     {
-        Vulkan::Device* device = (Vulkan::Device*)m_Device;
-        Vulkan::CommandBuffer& cmdBuff = device->GetCurrentCommandBuffer();
-        vkCmdBindDescriptorSets(cmdBuff.GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, quadPipeline.pipelineLayout, 0, 1, &quadPipeline.descriptorSet, 0, nullptr);
-        cmdBuff.SetViewport(0, 0, m_Camera->GetWidth(), m_Camera->GetHeight(), 0.0f, 1.0f);
-        cmdBuff.SetScissor(0, 0, m_Camera->GetWidth(), m_Camera->GetHeight());
-        cmdBuff.BindVertexBuffer(quadPipeline.vertexBuffer, 0);
-        cmdBuff.BindIndexBuffer(quadPipeline.indexBuffer, 0, Format::Uint32);
-        cmdBuff.DrawIndexed(QuadIndices.Count(), 0);
+        cmdBuffer.BindGraphicsPipeline(s_QuadData.pipeline);
+        cmdBuffer.BindVertexBuffer(s_QuadData.vertexBuffer, 0);
+        cmdBuffer.BindIndexBuffer(s_QuadData.indexBuffer, 0, Format::Uint32);
+        cmdBuffer.DrawIndexed(s_QuadData.indices.Count(), 0);
     }
 
-    void Renderer2D::DrawSprite(const Vector3& position, const Sprite& sprite)
+    void Renderer2D::DrawSprite(const Matrix4& transform, const Sprite& sprite, const Vector2& tiling, const Color& colorTint, const SpriteRendererFlags& flags)
     {
         if (!sprite.texture)
             return;
 
-        NOVA_ASSERT(sprite.x < sprite.texture->GetWidth() &&
-                   sprite.y < sprite.texture->GetHeight() &&
-                   sprite.x + sprite.width <= sprite.texture->GetWidth() &&
-                   sprite.y + sprite.height <= sprite.texture->GetHeight(), "Failed to created sprite");
-
         const float textureWidth = sprite.texture->GetWidth();
         const float textureHeight = sprite.texture->GetHeight();
 
-        const Vector2 uv0 = {(float)sprite.x / textureWidth, ((float)sprite.y + sprite.height) / textureHeight};
-        const Vector2 uv1 = {((float)sprite.x + sprite.width) / textureWidth, ((float)sprite.y + sprite.height) / textureHeight};
-        const Vector2 uv2 = {((float)sprite.x + sprite.width) / textureWidth, (float)sprite.y / textureHeight};
-        const Vector2 uv3 = {(float)sprite.x / textureWidth, (float)sprite.y / textureHeight};
+        Vector2 uv0 = { sprite.x / (float)textureWidth, (sprite.y + sprite.height) / (float)textureHeight };
+        Vector2 uv1 = { (sprite.x + sprite.width) / (float)textureWidth, (sprite.y + sprite.height) / (float)textureHeight };
+        Vector2 uv2 = { (sprite.x + sprite.width) / (float)textureWidth, sprite.y / (float)textureHeight };
+        Vector2 uv3 = { sprite.x / (float)textureWidth, sprite.y / (float)textureHeight };
 
-        Sprites.AddUnique(sprite);
-
-        const QuadVertex vertices[]
+        if(flags.Contains(SpriteRendererFlagBits::FlipHorizontal))
         {
-            { position + Vector3(-0.5f, -0.5f, 0.0f), uv0, Color::White, (uint32_t)Sprites.Find(sprite) },
-            { position + Vector3(-0.5f, +0.5f, 0.0f), uv1, Color::White, (uint32_t)Sprites.Find(sprite) },
-            { position + Vector3(+0.5f, +0.5f, 0.0f), uv2, Color::White, (uint32_t)Sprites.Find(sprite) },
-            { position + Vector3(+0.5f, -0.5f, 0.0f), uv3, Color::White, (uint32_t)Sprites.Find(sprite) },
+            std::swap(uv0, uv1);
+            std::swap(uv2, uv3);
+        }
+
+        if(flags.Contains(SpriteRendererFlagBits::FlipVertical))
+        {
+            std::swap(uv0, uv2);
+            std::swap(uv1, uv3);
+        }
+
+        // TODO: Need to extract scale out of the World Space Matrix
+        // TODO: Have pixels per unit parameter
+        const Vector2 finalTiling = flags.Contains(SpriteRendererFlagBits::TileWithScale) ? tiling : tiling;
+        const Vector2 spriteSize = Vector2(sprite.width, sprite.height);
+        const Matrix2 spriteScale = sprite.texture ? Math::Scale(Matrix2::Identity, spriteSize / /* pixelsPerUnit */ 1.0f) : Matrix2::Identity;
+        s_QuadData.uniforms.Add({ transform, finalTiling, Vector2::Zero, spriteScale, colorTint });
+        s_QuadData.sprites.AddUnique(sprite);
+
+        const QuadVertex vertices[4]
+        {
+            { Vector2(-0.5f, -0.5f), uv0, (uint32_t)s_QuadData.sprites.Find(sprite) },
+            { Vector2(-0.5f, +0.5f), uv1, (uint32_t)s_QuadData.sprites.Find(sprite) },
+            { Vector2(+0.5f, +0.5f), uv2, (uint32_t)s_QuadData.sprites.Find(sprite) },
+            { Vector2(+0.5f, -0.5f), uv3, (uint32_t)s_QuadData.sprites.Find(sprite) },
         };
 
         const uint32_t indices[6]
         {
-            QuadCount * 4 + 0,
-            QuadCount * 4 + 2,
-            QuadCount * 4 + 1,
-            QuadCount * 4 + 0,
-            QuadCount * 4 + 3,
-            QuadCount * 4 + 2,
+            s_QuadData.quadCount * 4 + 0,
+            s_QuadData.quadCount * 4 + 2,
+            s_QuadData.quadCount * 4 + 1,
+            s_QuadData.quadCount * 4 + 0,
+            s_QuadData.quadCount * 4 + 3,
+            s_QuadData.quadCount * 4 + 2,
         };
 
-        QuadVertices.AddRange(vertices, std::size(vertices));
-        QuadIndices.AddRange(indices, std::size(indices));
-        QuadCount++;
+        s_QuadData.vertices.AddRange(vertices, std::size(vertices));
+        s_QuadData.indices.AddRange(indices, std::size(indices));
+        s_QuadData.quadCount++;
     }
 }

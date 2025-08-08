@@ -12,10 +12,10 @@ namespace Nova
         String GetAssetType() const override;
 
         void ClearSprites();
-        void AddSprite(const Sprite& Sprite);
+        void AddSprite(const Sprite& sprite);
         
         Array<Sprite>::SizeType Count() const;
-        Sprite& GetSprite(size_t Index);
+        Sprite& GetSprite(size_t index);
     private:
         Array<Sprite> m_Sprites;
     };

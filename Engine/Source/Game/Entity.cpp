@@ -115,6 +115,18 @@ namespace Nova
         }
     }
 
+    void Entity::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    {
+        if(!m_Enabled) return;
+
+        for(Component* component : m_Components)
+        {
+            if(!component->IsEnabled())
+                continue;
+            component->OnRender(cmdBuffer);
+        }
+    }
+
     void Entity::OnDestroy()
     {
         for(Component* component : m_Components)

@@ -1,10 +1,5 @@
 ﻿#pragma once
-
-typedef struct VkInstance_T* VkInstance;
-typedef struct VkDevice_T* VkDevice;
-enum VkResult : int;
-
-typedef VkResult(*PFN_vkSetDebugUtilsObjectNameEXT)(VkDevice, const struct VkDebugUtilsObjectNameInfoEXT*);
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {

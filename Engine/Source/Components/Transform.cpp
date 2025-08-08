@@ -69,7 +69,7 @@ namespace Nova
         m_Position = position;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     void Transform::SetScale(const float scale)
@@ -82,7 +82,7 @@ namespace Nova
         m_Rotation = rotation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     void Transform::SetScale(const Vector3& scale)
@@ -90,7 +90,7 @@ namespace Nova
         m_Scale = scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     // TODO: We dont want to change transform when controlled by physics
@@ -99,7 +99,7 @@ namespace Nova
         m_Position += translation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     void Transform::Rotate(const Quaternion& rotation)
@@ -107,7 +107,7 @@ namespace Nova
         m_Rotation = rotation * m_Rotation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
 
@@ -121,7 +121,7 @@ namespace Nova
         m_Position = Rotation * m_Position;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     void Transform::Scale(const Vector3& scale)
@@ -129,7 +129,7 @@ namespace Nova
         m_Scale *= scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     void Transform::Scale(const float scale)
@@ -137,7 +137,7 @@ namespace Nova
         m_Scale *= scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        OnChanged.BroadcastChecked();
+        onChanged.BroadcastChecked();
     }
 
     Vector3 Transform::GetForwardVector() const

@@ -123,10 +123,10 @@ namespace Nova::Vulkan
         Array<VkFormat> colorAttachmentFormats;
         for (size_t attachmentIndex = 0; attachmentIndex < createInfo.renderPass->GetAttachmentCount(); attachmentIndex++)
         {
-            Rendering::RenderPassAttachment* attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
-            if (attachment->type != Rendering::AttachmentType::Color)
+            Rendering::RenderPassAttachment& attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
+            if (attachment.type != Rendering::AttachmentType::Color)
                 continue;
-            colorAttachmentFormats.Add(Convert<Format, VkFormat>(attachment->texture->GetFormat()));
+            colorAttachmentFormats.Add(Convert<Format, VkFormat>(attachment.texture->GetFormat()));
         }
 
 

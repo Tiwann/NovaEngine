@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "ImGuiRenderer.h"
+﻿#include "ImGuiRenderer.h"
 #include <imgui.h>
 
 namespace Nova::Rendering

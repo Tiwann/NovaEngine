@@ -12,9 +12,9 @@ namespace Nova
         m_Sprites.Clear();
     }
 
-    void SpriteAnimation::AddSprite(const Sprite& Sprite)
+    void SpriteAnimation::AddSprite(const Sprite& sprite)
     {
-        m_Sprites.Add(Sprite);
+        m_Sprites.Add(sprite);
     }
 
     size_t SpriteAnimation::Count() const
@@ -22,8 +22,8 @@ namespace Nova
         return m_Sprites.Count();
     }
 
-    Sprite& SpriteAnimation::GetSprite(size_t Index)
+    Sprite& SpriteAnimation::GetSprite(size_t index)
     {
-        return m_Sprites[Index];
+        return m_Sprites[index];
     }
 }

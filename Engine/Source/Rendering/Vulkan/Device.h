@@ -5,6 +5,7 @@
 #include "Swapchain.h"
 #include "CommandPool.h"
 #include "CommandBuffer.h"
+#include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
 #include "Containers/MulticastDelegate.h"
@@ -48,6 +49,7 @@ namespace Nova::Vulkan
         Queue* GetPresentQueue();
         Queue* GetComputeQueue();
         Queue* GetTransferQueue();
+        DescriptorPool* GetDescriptorPool();
 
         Semaphore& GetCurrentSubmitSemaphore();
         Semaphore& GetCurrentPresentSemaphore();
@@ -66,6 +68,7 @@ namespace Nova::Vulkan
         Swapchain m_Swapchain;
         CommandPool m_CommandPool;
         CommandPool m_TransferCommandPool;
+        DescriptorPool m_DescriptorPool;
 
         Queue m_GraphicsQueue;
         Queue m_PresentQueue;

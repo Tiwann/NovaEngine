@@ -89,6 +89,10 @@ namespace Nova::Vulkan
         ImDrawData* drawData = ImGui::GetDrawData();
         if (!drawData) return;
         const VkCommandBuffer cmdBuffer = ((CommandBuffer&)commandBuffer).GetHandle();
+        const uint32_t width = m_Device->GetSwapchain()->GetWidth();
+        const uint32_t height = m_Device->GetSwapchain()->GetHeight();
+        commandBuffer.SetViewport(0, 0, width, height, 0.0f, 1.0f);
+        commandBuffer.SetScissor(0, 0, width, height);
         ImGui_ImplVulkan_RenderDrawData(drawData, cmdBuffer);
     }
 }

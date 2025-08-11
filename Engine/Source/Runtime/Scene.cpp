@@ -50,17 +50,6 @@ namespace Nova
         }
     }
 
-    //void Scene::OnRender(Renderer* Renderer) const
-    //{
-    //    if (Camera* Camera = Renderer->GetCurrentCamera())
-    //    {
-    //        Renderer->ClearColor(Camera->ClearColor);
-    //    }
-    //    for(Entity* Entity : m_Entities)
-    //    {
-    //        Entity->OnRender(Renderer);
-    //    }
-    //}
 
     void Scene::OnDestroy()
     {
@@ -102,15 +91,6 @@ namespace Nova
         return true;
     }
 
-    void Scene::ForEach(const Function<void(const EntityHandle&)>& function)
-    {
-        for(const Entity* entity : m_Entities)
-        {
-            const EntityHandle Handle = EntityHandle(entity->GetUUID(), this);
-            function.Call(Handle);
-        }
-    }
-
     Application* Scene::GetOwner() const
     {
         return m_Owner;
@@ -119,6 +99,15 @@ namespace Nova
     void Scene::SetName(const String& name)
     {
         m_Name = name;
+    }
+
+    void Scene::ForEach(const Function<void(const EntityHandle&)>& function)
+    {
+        for(const Entity* entity : m_Entities)
+        {
+            const EntityHandle Handle = EntityHandle(entity->GetUUID(), this);
+            function.Call(Handle);
+        }
     }
 
 #ifdef NOVA_HAS_PHYSICS

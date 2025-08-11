@@ -37,6 +37,7 @@ namespace Nova
 
         virtual void OnInit() {}
         virtual void OnUpdate(float deltaTime) {}
+        virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnGUI() {}
         virtual void OnDestroy() {}
@@ -51,6 +52,7 @@ namespace Nova
         const Ref<Rendering::RenderTarget>& GetRenderTarget() const;
 
         const AssetDatabase& GetAssetDatabase() const;
+        AssetDatabase& GetAssetDatabase();
         slang::IGlobalSession* GetSlangSession() const;
     protected:
         void Update();

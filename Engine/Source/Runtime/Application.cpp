@@ -149,9 +149,10 @@ namespace Nova
     {
         if (m_Device->BeginFrame())
         {
-            Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain();
-
             Vulkan::CommandBuffer& cmdBuffer = m_Device.As<Vulkan::Device>()->GetCurrentCommandBuffer();
+            OnPreRender(cmdBuffer);
+
+            Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain();
             m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
             m_RenderPass.SetAttachmentResolveTexture(0, swapchain->GetCurrentTexture());
@@ -178,8 +179,12 @@ namespace Nova
 
     void Application::Destroy()
     {
-        OnDestroy();
         m_Device->WaitIdle();
+        OnDestroy();
+        m_AssetDatabase.UnloadAll();
+        m_SlangSession->release();
+        slang::shutdown();
+        m_RenderTarget->Destroy();
         m_ImGuiRenderer->Destroy();
         m_Device->Destroy();
         m_Window->Destroy();
@@ -221,6 +226,11 @@ namespace Nova
     }
 
     const AssetDatabase& Application::GetAssetDatabase() const
+    {
+        return m_AssetDatabase;
+    }
+
+    AssetDatabase& Application::GetAssetDatabase()
     {
         return m_AssetDatabase;
     }

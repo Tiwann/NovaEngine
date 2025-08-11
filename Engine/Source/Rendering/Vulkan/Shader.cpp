@@ -259,8 +259,12 @@ namespace Nova::Vulkan
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         imageInfo.imageView = ((const Texture&)texture).GetImageView();
 
+        VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        if (texture.GetUsageFlags().Contains(Rendering::TextureUsageFlagBits::Storage))
+            descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        write.descriptorType = descriptorType;
         write.descriptorCount = 1;
         write.dstBinding = binding;
         write.dstArrayElement = 0;

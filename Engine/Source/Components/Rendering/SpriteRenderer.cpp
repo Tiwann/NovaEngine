@@ -61,27 +61,6 @@ namespace Nova
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector2 });
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
-
-        pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
-        pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
-
-        pipelineCreateInfo.rasterizationInfo.cullMode = CullMode::BackFace;
-        pipelineCreateInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
-        pipelineCreateInfo.rasterizationInfo.discardEnable = false;
-        pipelineCreateInfo.rasterizationInfo.polygonMode = PolygonMode::Fill;
-        pipelineCreateInfo.rasterizationInfo.depthClampEnable = false;
-        pipelineCreateInfo.rasterizationInfo.depthBiasEnable = false;
-
-        pipelineCreateInfo.colorBlendInfo.colorBlendEnable = false;
-
-        pipelineCreateInfo.depthStencilInfo.depthTestEnable = false;
-        pipelineCreateInfo.depthStencilInfo.depthWriteEnable = false;
-        pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
-        pipelineCreateInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
-
-        pipelineCreateInfo.multisampleInfo.alphaToOneEnable = false;
-        pipelineCreateInfo.multisampleInfo.sampleShadingEnable = false;
-        pipelineCreateInfo.multisampleInfo.alphaToCoverageEnable = false;
         pipelineCreateInfo.multisampleInfo.sampleCount = 8;
 
         pipelineCreateInfo.viewportInfo.x = 0;
@@ -96,7 +75,7 @@ namespace Nova
         m_Pipeline.Initialize(pipelineCreateInfo);
     }
 
-    static void UpdateBuffer(Vulkan::Device& device, Vulkan::Buffer& buffer, const void* data, const size_t offset, const size_t size)
+    static void UpdateBuffer(Vulkan::Device& device, const Vulkan::Buffer& buffer, const void* data, const size_t offset, const size_t size)
     {
         Vulkan::CommandPool* cmdPool = device.GetCommandPool();
         Vulkan::CommandBuffer cmdBuffer = cmdPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
@@ -215,7 +194,7 @@ namespace Nova
         m_UpdateResources = true;
     }
 
-    void SpriteRenderer::UpdateUniforms()
+    void SpriteRenderer::UpdateUniforms() const
     {
         Scene* scene = GetScene();
 

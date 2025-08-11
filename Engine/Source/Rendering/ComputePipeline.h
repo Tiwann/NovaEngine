@@ -3,13 +3,12 @@
 namespace Nova::Rendering
 {
     class Device;
-    class ShaderModule;
+    class Shader;
 
     struct ComputePipelineCreateInfo
     {
         Device* device = nullptr;
-        ShaderModule* shaderModule = nullptr;
-        void* pipelineLayout = nullptr;
+        Shader* shader = nullptr;
     };
 
     class ComputePipeline

@@ -27,12 +27,7 @@ static bool g_Running = true;
 
 namespace Nova
 {
-    static String GetAssetPath(const StringView filepath)
-    {
-        return StringFormat("{}/{}", APPLICATION_DIR, filepath);
-    }
-
-#ifndef NOVA_CUSTOM_ENTRY_POINT
+#ifdef NOVA_CUSTOM_ENTRY_POINT
     int GuardedMain(int, char**)
     {
         WindowCreateInfo windowCreateInfo;

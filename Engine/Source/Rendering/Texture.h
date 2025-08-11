@@ -50,6 +50,7 @@ namespace Nova::Rendering
         uint32_t GetHeight() const { return m_Height; }
         uint32_t GetMips() const { return m_Mips; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
+        TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;

@@ -51,8 +51,7 @@ namespace Nova
         
         Uuid GetGuid() const { return m_Uuid; }
         const String& GetName() const { return m_Name; }
-        void SetName(const String& Name);
-
+        void SetName(const String& name);
         void ForEach(const Function<void(const EntityHandle&)>& function);
 
         Application* GetOwner() const;

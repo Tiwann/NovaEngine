@@ -42,7 +42,7 @@ namespace Nova
         SpriteRendererFlags GetFlags() const;
         void SetFlags(SpriteRendererFlags flags);
     private:
-        void UpdateUniforms();
+        void UpdateUniforms() const;
         void UpdateResources();
     private:
         Sprite m_Sprite = { 0, 0, 0, 0, nullptr };

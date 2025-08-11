@@ -363,6 +363,7 @@ namespace Nova::Vulkan
         descriptorPoolCreateInfo.sizes[BindingType::SampledTexture] = 32;
         descriptorPoolCreateInfo.sizes[BindingType::CombinedTextureSampler] = 32;
         descriptorPoolCreateInfo.sizes[BindingType::UniformBuffer] = 32;
+        descriptorPoolCreateInfo.sizes[BindingType::StorageTexture] = 32;
         descriptorPoolCreateInfo.maxSets = 32;
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;

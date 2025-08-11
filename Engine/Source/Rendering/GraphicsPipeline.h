@@ -20,7 +20,7 @@ namespace Nova::Rendering
         struct InputAssemblyInfo
         {
             bool primitiveRestartEnable = false;
-            PrimitiveTopology topology;
+            PrimitiveTopology topology = PrimitiveTopology::TriangleList;
         } inputAssemblyInfo;
 
         struct VertexInputInfo
@@ -31,7 +31,7 @@ namespace Nova::Rendering
         struct RasterizationInfo
         {
             CullMode cullMode = CullMode::BackFace;
-            FrontFace frontFace = FrontFace::Clockwise;
+            FrontFace frontFace = FrontFace::CounterClockwise;
             PolygonMode polygonMode = PolygonMode::Fill;
             bool discardEnable = false;
             bool depthClampEnable = false;

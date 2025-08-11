@@ -13,6 +13,7 @@ namespace Nova::Rendering
     class Device;
     class RenderPass;
     class RenderTarget;
+    class Shader;
 
     struct GraphicsPipelineCreateInfo
     {
@@ -84,11 +85,7 @@ namespace Nova::Rendering
 
         Device* device = nullptr;
         RenderPass* renderPass = nullptr;
-
-        //TODO: THIS IS TEMPORARY
-        void* pipelineLayout = nullptr;
-        const void* shaderStages = nullptr;
-        size_t shaderStagesCount = 0;
+        Shader* shader = nullptr;
     };
 
     class GraphicsPipeline

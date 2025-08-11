@@ -1,5 +1,9 @@
 ﻿#include "ImGuiRenderer.h"
+#include "Vulkan/ImGuiRenderer.h"
+#include "Device.h"
+
 #include <imgui.h>
+
 
 namespace Nova::Rendering
 {
@@ -29,5 +33,28 @@ namespace Nova::Rendering
         // TODO: Add imguizmo
         //ImGuizmo::SetImGuiContext(m_Context);
         return true;
+    }
+
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, Device* device, const uint32_t sampleCount)
+    {
+        if (!window) return nullptr;
+        if (!device) return nullptr;
+        if (sampleCount % 2 != 0 && sampleCount > 16) return nullptr;
+        ImGuiRenderer* renderer = nullptr;
+        switch (device->GetDeviceType())
+        {
+        case DeviceType::Unknown:
+            return nullptr;
+        case DeviceType::Vulkan:
+            {
+                renderer = new Vulkan::ImGuiRenderer();
+                if (!renderer->Initialize({window, device, sampleCount}))
+                {
+                    delete renderer;
+                    return nullptr;
+                }
+            }
+        }
+        return Ref(renderer);
     }
 }

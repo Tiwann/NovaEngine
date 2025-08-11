@@ -109,4 +109,9 @@
     <Type Name="Nova::UUID">
         <DisplayString>{GetString()}</DisplayString>
     </Type>
+
+    <!-- Nova::Map<T> -->
+    <Type Name="Nova::Ref&lt;*&gt;">
+        <ValuePointer>m_Pointer</ValuePointer>
+    </Type>
 </AutoVisualizer>

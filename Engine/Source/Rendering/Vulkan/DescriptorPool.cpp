@@ -11,10 +11,10 @@ namespace Nova::Vulkan
     bool DescriptorPool::Initialize(const Rendering::DescriptorPoolCreateInfo& createInfo)
     {
         Array<VkDescriptorPoolSize> poolSizes;
-        for (const Pair<ResourceBindingType, uint32_t>& poolSize : createInfo.sizes)
+        for (const Pair<BindingType, uint32_t>& poolSize : createInfo.sizes)
         {
             VkDescriptorPoolSize descriptorPoolSize = {};
-            descriptorPoolSize.type = Convert<ResourceBindingType, VkDescriptorType>(poolSize.key);
+            descriptorPoolSize.type = Convert<BindingType, VkDescriptorType>(poolSize.key);
             descriptorPoolSize.descriptorCount = poolSize.value;
             poolSizes.Add(descriptorPoolSize);
         }
@@ -54,7 +54,7 @@ namespace Nova::Vulkan
     VkDescriptorSet DescriptorPool::AllocateDescriptorSet(const Rendering::ShaderBindingSetLayout& bindingSetLayout) const
     {
         VkDescriptorSet descriptorSet = nullptr;
-        const VkDescriptorSetLayout descriptorSetLayout = ((const ShaderBindingSetLayout&)bindingSetLayout).GetDescriptorSetLayout();
+        const VkDescriptorSetLayout descriptorSetLayout = ((const ShaderBindingSetLayout&)bindingSetLayout).GetHandle();
 
         VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
         descriptorSetAllocateInfo.descriptorPool = m_Handle;

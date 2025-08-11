@@ -119,7 +119,7 @@ namespace Nova
 
 
         ShaderCompiler shaderCompiler;
-        shaderCompiler.Initialize();
+        shaderCompiler.Initialize(TODO);
         shaderCompiler.AddEntryPoint({ "vertex", ShaderStageFlagBits::Vertex });
         shaderCompiler.AddEntryPoint({ "fragment", ShaderStageFlagBits::Fragment });
         if (!shaderCompiler.Compile(GetAssetPath("Shaders/HelloTexture.slang"), "HelloTexture", ShaderTarget::SPIRV))
@@ -203,8 +203,8 @@ namespace Nova
 
         Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.device = &device;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::SampledTexture] = 1;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::Sampler] = 1;
+        descriptorPoolCreateInfo.sizes[BindingType::SampledTexture] = 1;
+        descriptorPoolCreateInfo.sizes[BindingType::Sampler] = 1;
         descriptorPoolCreateInfo.maxSets = 1;
         Vulkan::DescriptorPool descriptorPool;
         if (!descriptorPool.Initialize(descriptorPoolCreateInfo))

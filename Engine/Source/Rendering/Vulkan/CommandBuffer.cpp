@@ -11,6 +11,8 @@
 #include "VulkanUtils.h"
 #include <vulkan/vulkan.h>
 
+#include "Shader.h"
+
 namespace Nova::Vulkan
 {
 
@@ -75,6 +77,7 @@ namespace Nova::Vulkan
         {
             VkCommandBufferInheritanceInfo inheritanceInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
             // TODO: Write api for secondary command buffers
+
         }
 
         if (vkBeginCommandBuffer(m_Handle, &info) != VK_SUCCESS)
@@ -143,6 +146,22 @@ namespace Nova::Vulkan
         vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
     }
 
+    void CommandBuffer::BindShader(const Rendering::Shader& shader)
+    {
+        const Shader& sh = (const Shader&)shader;
+
+        const auto descriptorSets = sh.GetDescriptorSets();
+        VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
+        info.layout = sh.GetPipelineLayout();
+        info.firstSet = 0;
+        info.descriptorSetCount = descriptorSets.Count();
+        info.pDescriptorSets = descriptorSets.Data();
+        info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
+        info.dynamicOffsetCount = 0;
+        info.pDynamicOffsets = nullptr;
+        vkCmdBindDescriptorSets2(m_Handle, &info);
+    }
+
     void CommandBuffer::SetViewport(const float x, const float y, const float width, const float height, const float minDepth, const float maxDepth)
     {
         VkViewport viewport { };
@@ -183,6 +202,11 @@ namespace Nova::Vulkan
     void CommandBuffer::PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values, void* layout)
     {
         vkCmdPushConstants(m_Handle, (VkPipelineLayout)layout, stageFlags, offset, size, values);
+    }
+
+    void CommandBuffer::UpdateBuffer(const Rendering::Buffer& buffer, const size_t offset, const size_t size, const void* data)
+    {
+        vkCmdUpdateBuffer(m_Handle, ((const Buffer&)buffer).GetHandle(), offset, size, data);
     }
 
     void CommandBuffer::BufferCopy(Rendering::Buffer& src, Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)

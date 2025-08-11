@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "EntityHandle.h"
-#include "Game/Component.h"
-#include "Containers/Function.h"
-#include "Containers/String.h"
-#include "Containers/StringFormat.h"
-#include "Runtime/Uuid.h"
-#include "Runtime/Flags.h"
-#include "Runtime/Object.h"
+#include "Component.h"
+#include "../Containers/Function.h"
+#include "../Containers/String.h"
+#include "../Containers/StringFormat.h"
+#include "Uuid.h"
+#include "Flags.h"
+#include "Object.h"
 
 namespace Nova::Rendering { class CommandBuffer; }
 

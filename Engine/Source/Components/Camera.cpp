@@ -1,7 +1,7 @@
 ﻿#include "Camera.h"
 #include "Math/LinearAlgebra.h"
 #include "Transform.h"
-#include "Game/Entity.h"
+#include "../Runtime/Entity.h"
 #include "Runtime/Application.h"
 #include "Runtime/Window.h"
 

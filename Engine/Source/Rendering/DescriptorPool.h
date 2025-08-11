@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "ResourceBindingType.h"
+#include "BindingType.h"
 #include "Containers/Map.h"
 
 namespace Nova::Rendering
@@ -8,7 +8,7 @@ namespace Nova::Rendering
     struct DescriptorPoolCreateInfo
     {
         Device* device;
-        Map<ResourceBindingType, uint32_t> sizes;
+        Map<BindingType, uint32_t> sizes;
         size_t maxSets;
     };
 

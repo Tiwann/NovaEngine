@@ -33,7 +33,7 @@ namespace Nova::Vulkan
         imageCreateInfo.format = Convert<Format, VkFormat>(createInfo.format);
         imageCreateInfo.extent.width = createInfo.width;
         imageCreateInfo.extent.height = createInfo.height;
-        imageCreateInfo.extent.depth = 1;
+        imageCreateInfo.extent.depth = createInfo.depth;
         imageCreateInfo.mipLevels = createInfo.mips;
         imageCreateInfo.arrayLayers = 1;
         imageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
@@ -205,6 +205,7 @@ namespace Nova::Vulkan
         m_Format = createInfo.format;
         m_Width = createInfo.width;
         m_Height = createInfo.height;
+        m_Depth = createInfo.depth;
         m_Mips = createInfo.mips;
         m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;

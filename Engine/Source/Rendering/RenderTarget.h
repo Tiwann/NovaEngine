@@ -1,6 +1,10 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
+#include "Runtime/Object.h"
 #include <cstdint>
+
+#include "Runtime/Ref.h"
+
 
 namespace Nova { struct Color; }
 
@@ -21,29 +25,23 @@ namespace Nova::Rendering
         uint32_t sampleCount = 0;
     };
 
-    class RenderTarget
+    class RenderTarget : public Object
     {
     public:
-        RenderTarget() = default;
-        virtual ~RenderTarget() = default;
+        RenderTarget() : Object("Render Target") {}
+        ~RenderTarget() override = default;
 
         virtual bool Initialize(const RenderTargetCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
-        virtual void BeginRendering(CommandBuffer& commandBuffer) = 0;
-        virtual void EndRendering() = 0;
-
         virtual bool Resize(uint32_t newX, uint32_t newY) = 0;
-        virtual void Clear(const Color& color) = 0;
-        virtual void Clear(float depth, uint8_t stencil) = 0;
 
-        uint32_t GetWidth() const { return m_Width; }
-        uint32_t GetHeight() const { return m_Height; }
-        uint32_t GetDepth() const { return m_Depth; }
-        Format GetColorFormat() const { return m_ColorFormat; }
-        Format GetDepthFormat() const { return m_DepthFormat; }
-        uint32_t GetSampleCount() const { return m_SampleCount; }
-        uint32_t GetImageCount() const { return m_ImageCount; }
-
+        uint32_t GetWidth() const;
+        uint32_t GetHeight() const;
+        uint32_t GetDepth() const;
+        Format GetColorFormat() const;
+        Format GetDepthFormat() const;
+        uint32_t GetSampleCount() const;
+        uint32_t GetImageCount() const;
     protected:
         Device* m_Device = nullptr;
         uint32_t m_Width = 0;
@@ -54,4 +52,6 @@ namespace Nova::Rendering
         uint32_t m_SampleCount = 0;
         uint32_t m_ImageCount = 0;
     };
+
+    Ref<RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
 }

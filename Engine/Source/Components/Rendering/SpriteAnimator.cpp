@@ -1,5 +1,5 @@
 ﻿#include "Assets/SpriteAnimation.h"
-#include "Game/Entity.h"
+#include "../../Runtime/Entity.h"
 #include "SpriteAnimator.h"
 #include "SpriteRenderer.h"
 

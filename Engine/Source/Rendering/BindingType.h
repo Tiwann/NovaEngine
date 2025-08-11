@@ -2,7 +2,7 @@
 
 namespace Nova
 {
-    enum class ResourceBindingType
+    enum class BindingType
     {
         Sampler,
         CombinedTextureSampler,
@@ -15,5 +15,6 @@ namespace Nova
         AccelerationStructure,
         StorageTexelBuffer,
         UniformTexelBuffer,
+        PushConstant
     };
 }

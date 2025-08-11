@@ -14,12 +14,12 @@ struct VertexOutput
 
 struct Uniforms
 {
+    float4x4 mvp;
 	float2 tiling;
     float2x2 spriteScale;
     float4 color;
 }
 
-[vk::push_constant] ConstantBuffer<float4x4> mvp;
 [vk::binding(0, 0)] SamplerState sampler;
 [vk::binding(1, 0)] Texture2D texture;
 [vk::binding(2, 0)] ConstantBuffer<Uniforms, Std140DataLayout> uniforms;
@@ -29,7 +29,7 @@ VertexOutput vert(VertexInput input)
 {
 	VertexOutput out;
 	float2 scaledPosition = mul(uniforms.spriteScale, input.position);
-    out.position = mul(mvp, float4(scaledPosition, 0.0, 1.0));
+    out.position = mul(uniforms.mvp, float4(scaledPosition, 0.0, 1.0));
     out.texCoords = uniforms.tiling * input.texCoords;
 	return out;
 }

@@ -36,6 +36,7 @@ namespace Nova::Vulkan
         void Present() override;
         void WaitIdle() override;
         void SetName(StringView name) override;
+        Rendering::DeviceType GetDeviceType() override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

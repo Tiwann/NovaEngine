@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "Containers/String.h"
-#include "SwpchainBuffering.h"
-#include "Filter.h"
-#include <cstdint>
-
 #include "Containers/StringView.h"
+#include "SwpchainBuffering.h"
+#include "Runtime/Ref.h"
+#include "Runtime/Object.h"
+#include <cstdint>
 
 
 namespace Nova
@@ -32,13 +32,11 @@ namespace Nova::Rendering
     class RenderTarget;
     class Texture;
 
-    class Device
+    class Device : public Object
     {
     public:
-        Device() = default;
-        virtual ~Device() = default;
-
-        static Device* Create(DeviceType type, const DeviceCreateInfo& createInfo);
+        Device() : Object("Rendering Device") {}
+        ~Device() override = default;
 
         virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
@@ -48,5 +46,8 @@ namespace Nova::Rendering
         virtual void Present() = 0;
         virtual void WaitIdle() = 0;
         virtual void SetName(StringView name) = 0;
+        virtual DeviceType GetDeviceType() = 0;
     };
+
+    Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);
 }

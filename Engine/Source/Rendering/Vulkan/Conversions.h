@@ -3,7 +3,7 @@
 #include "Rendering/BlendOperation.h"
 #include "Rendering/CompareOperation.h"
 #include "Rendering/CullMode.h"
-#include "Rendering/ResourceBindingType.h"
+#include "Rendering/BindingType.h"
 #include "Rendering/FrontFace.h"
 #include "Rendering/PolygonMode.h"
 #include "Rendering/PrimitiveTopology.h"
@@ -227,21 +227,21 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkDescriptorType Convert<ResourceBindingType, VkDescriptorType>(const ResourceBindingType& value)
+    inline VkDescriptorType Convert<BindingType, VkDescriptorType>(const BindingType& value)
     {
         switch (value)
         {
-        case ResourceBindingType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
-        case ResourceBindingType::CombinedTextureSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        case ResourceBindingType::SampledTexture: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        case ResourceBindingType::StorageTexture: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-        case ResourceBindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        case ResourceBindingType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-        case ResourceBindingType::InputAttachment: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
-        case ResourceBindingType::InlineUniformBlock: return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK;
-        case ResourceBindingType::AccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
-        case ResourceBindingType::StorageTexelBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-        case ResourceBindingType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
+        case BindingType::Sampler: return VK_DESCRIPTOR_TYPE_SAMPLER;
+        case BindingType::CombinedTextureSampler: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        case BindingType::SampledTexture: return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        case BindingType::StorageTexture: return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        case BindingType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case BindingType::StorageBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        case BindingType::InputAttachment: return VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT;
+        case BindingType::InlineUniformBlock: return VK_DESCRIPTOR_TYPE_INLINE_UNIFORM_BLOCK;
+        case BindingType::AccelerationStructure: return VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
+        case BindingType::StorageTexelBuffer: return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
+        case BindingType::UniformTexelBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
         default: throw;
         }
     }

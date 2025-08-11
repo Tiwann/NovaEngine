@@ -22,7 +22,6 @@ namespace Nova::Vulkan
         bool CPUCopy(const void* src, size_t offset, size_t size) override;
         bool GPUCopy(Rendering::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
 
-
         VkBuffer GetHandle() const;
         const VkBuffer* GetHandlePtr() const;
     private:

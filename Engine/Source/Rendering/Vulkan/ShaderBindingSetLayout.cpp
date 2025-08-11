@@ -16,7 +16,7 @@ namespace Nova::Vulkan
             vkBinding.binding = i;
             vkBinding.descriptorCount = 1;
             vkBinding.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(binding.stageFlags);
-            vkBinding.descriptorType = Convert<ResourceBindingType, VkDescriptorType>(binding.bindingType);
+            vkBinding.descriptorType = Convert<BindingType, VkDescriptorType>(binding.bindingType);
             vkBinding.pImmutableSamplers = nullptr;
             bindings.Add(vkBinding);
         }
@@ -26,26 +26,26 @@ namespace Nova::Vulkan
         layoutCreateInfo.pBindings = bindings.Data();
 
         const VkDevice deviceHandle = m_Device->GetHandle();
-        if (vkCreateDescriptorSetLayout(deviceHandle, &layoutCreateInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
+        if (vkCreateDescriptorSetLayout(deviceHandle, &layoutCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;
 
         return true;
     }
 
-    bool ShaderBindingSetLayout::Initialize(const Rendering::ShaderBindingSetLayoutCreateInfo& createInfo)
+    bool ShaderBindingSetLayout::Initialize(Rendering::Device* device)
     {
-        m_Device = (Device*)createInfo.device;
+        m_Device = (Device*)device;
         return true;
     }
 
     void ShaderBindingSetLayout::Destroy()
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
-        vkDestroyDescriptorSetLayout(deviceHandle, m_DescriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(deviceHandle, m_Handle, nullptr);
     }
 
-    const VkDescriptorSetLayout& ShaderBindingSetLayout::GetDescriptorSetLayout() const
+    const VkDescriptorSetLayout& ShaderBindingSetLayout::GetHandle() const
     {
-        return m_DescriptorSetLayout;
+        return m_Handle;
     }
 }

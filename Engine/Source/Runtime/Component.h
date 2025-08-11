@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
-#include "Runtime/Uuid.h"
-#include "Containers/String.h"
-#include "Runtime/Flags.h"
+#include "Object.h"
+#include "Uuid.h"
+#include "../Containers/String.h"
+#include "Flags.h"
 
 
 namespace Nova::Rendering { class CommandBuffer; }

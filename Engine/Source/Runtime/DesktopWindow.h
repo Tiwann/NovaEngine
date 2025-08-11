@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include <functional>
-
 #include "Window.h"
 #include "Containers/Map.h"
 #include "Containers/StaticArray.h"

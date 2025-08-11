@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "Object.h"
 
 
 namespace Nova::Rendering { class CommandBuffer; }

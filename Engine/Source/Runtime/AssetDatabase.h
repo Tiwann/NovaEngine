@@ -1,23 +1,21 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "Object.h"
 #include "Containers/Map.h"
-#include <type_traits>
 
 namespace Nova
 {
     class Asset;
-    class Sound;
-    
+
     class AssetDatabase : public Object
     {
     public:
-        AssetDatabase() : Object("Asset Database"){}
+        AssetDatabase() : Object("Asset Database") {}
         ~AssetDatabase() override = default;
 
-        template<typename AssetType, typename... Args> requires std::is_base_of_v<Asset, AssetType>
-        AssetType* CreateAsset(const String& name, Args&&... arguments)
+        template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
+        AssetType* CreateAsset(const String& name)
         {
-            AssetType* asset = new AssetType(name, std::forward<Args>(arguments)...);
+            AssetType* asset = new AssetType();
             m_Data[name] = asset;
             return asset;
         }
@@ -27,7 +25,7 @@ namespace Nova
         void UnloadAll();
 
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
-        AssetType* Get(const String& name)
+        AssetType* Get(const String& name) const
         {
             if (!m_Data.Contains(name))
                 return nullptr;

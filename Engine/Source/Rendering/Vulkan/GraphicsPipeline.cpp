@@ -2,7 +2,8 @@
 #include "Device.h"
 #include "Conversions.h"
 #include "Rendering/RenderPass.h"
-#include "Rendering/RenderTarget.h"
+#include "Shader.h"
+#include "ShaderModule.h"
 
 #include <vulkan/vulkan.h>
 
@@ -142,6 +143,15 @@ namespace Nova::Vulkan
             renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
         }
 
+        Array<VkPipelineShaderStageCreateInfo> shaderStages;
+        for (const ShaderModule& shaderModule : ((Shader*)createInfo.shader)->GetShaderModules())
+        {
+            VkPipelineShaderStageCreateInfo shaderStage { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
+            shaderStage.module = shaderModule.GetHandle();
+            shaderStage.pName = "main";
+            shaderStage.stage = Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(shaderModule.GetStage());
+            shaderStages.Add(shaderStage);
+        }
 
         VkGraphicsPipelineCreateInfo pipelineCreateInfo { VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
         pipelineCreateInfo.pNext = &renderingInfo;
@@ -154,9 +164,9 @@ namespace Nova::Vulkan
         pipelineCreateInfo.pDynamicState = &dynamicState;
         pipelineCreateInfo.pMultisampleState = &multisampleState;
         pipelineCreateInfo.renderPass = nullptr;
-        pipelineCreateInfo.pStages = (const VkPipelineShaderStageCreateInfo*)createInfo.shaderStages;
-        pipelineCreateInfo.stageCount = createInfo.shaderStagesCount;
-        pipelineCreateInfo.layout = (VkPipelineLayout)createInfo.pipelineLayout;
+        pipelineCreateInfo.pStages = shaderStages.Data();
+        pipelineCreateInfo.stageCount = shaderStages.Count();
+        pipelineCreateInfo.layout = ((Shader*)createInfo.shader)->GetPipelineLayout();
 
         if (vkCreateGraphicsPipelines(deviceHandle, nullptr, 1, &pipelineCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;

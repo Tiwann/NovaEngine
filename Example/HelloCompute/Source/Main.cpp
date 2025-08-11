@@ -148,7 +148,7 @@ namespace Nova
 
         Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.device = &device;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::StorageTexture] = 1;
+        descriptorPoolCreateInfo.sizes[BindingType::StorageTexture] = 1;
         descriptorPoolCreateInfo.maxSets = 1;
         Vulkan::DescriptorPool descriptorPool;
         if (!descriptorPool.Initialize(descriptorPoolCreateInfo))

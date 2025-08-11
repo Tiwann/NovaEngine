@@ -4,10 +4,10 @@
 
 namespace Nova
 {
-    Vulkan::Buffer CreateVertexBuffer(Rendering::Device& device, const void* data, size_t size)
+    Vulkan::Buffer CreateVertexBuffer(const Ref<Rendering::Device>& device, const void* data, const size_t size)
     {
         Rendering::BufferCreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.device = &device;
+        stagingBufferCreateInfo.device = device;
         stagingBufferCreateInfo.size = size;
         stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
 
@@ -16,7 +16,7 @@ namespace Nova
         stagingBuffer.CPUCopy(data, 0, size);
 
         Rendering::BufferCreateInfo vertexBufferCreateInfo;
-        vertexBufferCreateInfo.device = &device;
+        vertexBufferCreateInfo.device = device;
         vertexBufferCreateInfo.size = size;
         vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
 
@@ -27,10 +27,10 @@ namespace Nova
         return std::move(vertexBuffer);
     }
 
-    Vulkan::Buffer CreateIndexBuffer(Rendering::Device& device, const void* data, size_t size)
+    Vulkan::Buffer CreateIndexBuffer(const Ref<Rendering::Device>& device, const void* data, const size_t size)
     {
         Rendering::BufferCreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.device = &device;
+        stagingBufferCreateInfo.device = device;
         stagingBufferCreateInfo.size = size;
         stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
 
@@ -39,7 +39,7 @@ namespace Nova
         stagingBuffer.CPUCopy(data, 0, size);
 
         Rendering::BufferCreateInfo indexBufferCreateInfo;
-        indexBufferCreateInfo.device = &device;
+        indexBufferCreateInfo.device = device;
         indexBufferCreateInfo.size = size;
         indexBufferCreateInfo.usage = Rendering::BufferUsage::IndexBuffer;
 

@@ -3,11 +3,12 @@
 
 namespace Nova::Rendering
 {
-    Device* Device::Create(const DeviceType type, const DeviceCreateInfo& createInfo)
+    Ref<Device> CreateRenderDevice(const DeviceType type, const DeviceCreateInfo& createInfo)
     {
         Device* device = nullptr;
         switch (type)
         {
+        case DeviceType::Unknown: return nullptr;
         case DeviceType::Vulkan:
             {
                 device = new Vulkan::Device();
@@ -17,7 +18,7 @@ namespace Nova::Rendering
                     return nullptr;
                 }
             }
-        default: return nullptr;
         }
+        return Ref(device);
     }
 }

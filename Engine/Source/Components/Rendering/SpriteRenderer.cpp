@@ -1,15 +1,14 @@
 #include "SpriteRenderer.h"
-#include "Game/Entity.h"
-#include "Game/Scene.h"
+#include "Runtime/Entity.h"
+#include "Runtime/Scene.h"
 #include "Math/Matrix4.h"
 #include "Rendering/ShaderModule.h"
-#include "Rendering/Vulkan/ShaderModule.h"
 #include "Runtime/Application.h"
-#include "Runtime/ShaderCompiler.h"
 #include "Components/Transform.h"
 #include "Components/Camera.h"
 #include "Utils/BufferUtils.h"
-#include "Runtime/Path.h"
+#include "Rendering/Vulkan/Device.h"
+#include "Rendering/Shader.h"
 
 #include <vulkan/vulkan.h>
 #include <utility>
@@ -26,6 +25,7 @@ namespace Nova
 
     struct Uniforms
     {
+        Matrix4 mvp;
         Vector2 tiling;
         float padding[2];
         Vector4 spriteScale[2];
@@ -34,65 +34,30 @@ namespace Nova
 
     SpriteRenderer::SpriteRenderer(Entity* owner) : Component(owner, "Sprite Renderer")
     {
+        GetTransform()->onChanged.Bind([&]{ m_UpdateUniforms = true; });
     }
 
     void SpriteRenderer::OnInit()
     {
         Application* application = GetApplication();
-        Vulkan::Device* device = application->GetDevice();
+        const Ref<Rendering::Device>& device = application->GetDevice();
         Rendering::RenderPass* renderPass = application->GetRenderPass();
 
         const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
-        m_IndexBuffer = CreateIndexBuffer(*device, indices, sizeof(indices));
+        m_IndexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
         m_VertexBuffer.Initialize({ device, Rendering::BufferUsage::VertexBuffer, 4 * sizeof(SpriteVertex) });
         m_UniformBuffer.Initialize({ device, Rendering::BufferUsage::UniformBuffer, sizeof(Uniforms) });
         m_StagingBuffer.Initialize({ device, Rendering::BufferUsage::StagingBuffer, 4 * sizeof(SpriteVertex) });
         m_Sampler.Initialize(Rendering::SamplerCreateInfo(device));
 
-        const String shaderPath = Path::Combine(NOVA_ENGINE_ROOT_DIR, "Engine/Assets/Shaders/Sprite.slang");
-        ShaderCompiler compiler;
-        compiler.AddEntryPoint({ "vert", ShaderStageFlagBits::Vertex });
-        compiler.AddEntryPoint({ "frag", ShaderStageFlagBits::Fragment });
-        compiler.Initialize();
-        compiler.Compile(shaderPath, "Sprite", ShaderTarget::SPIRV);
-
-        const Array<uint32_t> vertSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Vertex);
-        const Array<uint32_t> fragSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Fragment);
-        if (vertSpirv.IsEmpty() || fragSpirv.IsEmpty()) return;
-
-        Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*device, ShaderStageFlagBits::Vertex, vertSpirv);
-        Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*device, ShaderStageFlagBits::Fragment, fragSpirv);
-
-        m_BindingSetLayout.Initialize({device});
-        m_BindingSetLayout.SetBinding(0, {"sampler", ShaderStageFlagBits::Fragment, ResourceBindingType::Sampler, 1});
-        m_BindingSetLayout.SetBinding(1, {"texture", ShaderStageFlagBits::Fragment, ResourceBindingType::SampledTexture, 1});
-        m_BindingSetLayout.SetBinding(2, {"uniforms", ShaderStageFlagBits::Vertex | ShaderStageFlagBits::Fragment, ResourceBindingType::UniformBuffer, 1});
-        m_BindingSetLayout.Build();
-
-        m_DescriptorSetLayout = m_BindingSetLayout.GetDescriptorSetLayout();
-
-        VkPushConstantRange range;
-        range.offset = 0;
-        range.size = sizeof(Matrix4);
-        range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-        pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
-        pipelineLayoutCreateInfo.setLayoutCount = 1;
-        pipelineLayoutCreateInfo.pPushConstantRanges = &range;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-
-        Vulkan::DescriptorPool* descriptorPool = device->GetDescriptorPool();
-        m_DescriptorSet = descriptorPool->AllocateDescriptorSet(m_BindingSetLayout);
-
-        VkResult result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
-        if (result != VK_SUCCESS) return;
+        const AssetDatabase& assetDatabase = application->GetAssetDatabase();
+        m_Shader = assetDatabase.Get<Rendering::Shader>("Sprite");
 
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = device;
         pipelineCreateInfo.renderPass = renderPass;
-        pipelineCreateInfo.pipelineLayout = m_PipelineLayout;
+        pipelineCreateInfo.shader = m_Shader;
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector2 });
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
@@ -128,10 +93,6 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = renderPass->GetWidth();
         pipelineCreateInfo.scissorInfo.height = renderPass->GetHeight();
-
-        const VkPipelineShaderStageCreateInfo shaderStages[] { vertShaderModule.GetShaderStageCreateInfo(), fragShaderModule.GetShaderStageCreateInfo() };
-        pipelineCreateInfo.shaderStages = shaderStages;
-        pipelineCreateInfo.shaderStagesCount = std::size(shaderStages);
         m_Pipeline.Initialize(pipelineCreateInfo);
     }
 
@@ -147,7 +108,7 @@ namespace Nova
             Vulkan::Fence fence;
             fence.Initialize({ &device });
 
-            Vulkan::Queue* graphicsQueue = device.GetGraphicsQueue();
+            const Vulkan::Queue* graphicsQueue = device.GetGraphicsQueue();
             graphicsQueue->Submit(&cmdBuffer, nullptr, nullptr, &fence);
             fence.Wait(~0);
 
@@ -161,11 +122,7 @@ namespace Nova
         if(!m_Sprite.texture) return;
         if (m_Sprite.width == 0 || m_Sprite.height == 0) return;
 
-        if (m_UpdateUniforms)
-        {
-            UpdateUniforms();
-            m_UpdateUniforms = false;
-        }
+        UpdateUniforms();
 
         if (m_UpdateResources)
         {
@@ -177,28 +134,20 @@ namespace Nova
     void SpriteRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)
     {
         if(!m_Sprite.texture) return;
-        Scene* scene = GetScene();
-
-        Array<Camera*> cameras = scene->GetAllComponents<Camera>();
-        if (cameras.IsEmpty()) return;
-
-        Camera* camera = cameras.First();
-        if (!camera->IsEnabled()) return;
-
-        const Matrix4& viewProjection = camera->GetViewProjectionMatrix();
-        const Matrix4& worldSpaceMatrix = GetTransform()->GetWorldSpaceMatrix();
-        const Matrix4 mvp = viewProjection * worldSpaceMatrix;
 
         Application* application = GetApplication();
         const Rendering::RenderPass* renderPass = application->GetRenderPass();
 
+        m_Shader->BindSampler(0, 0, m_Sampler);
+        m_Shader->BindTexture(0, 1, *m_Sprite.texture);
+        m_Shader->BindBuffer(0, 2, m_UniformBuffer, 0, sizeof(Uniforms));
+
         cmdBuffer.BindGraphicsPipeline(m_Pipeline);
-        vkCmdBindDescriptorSets(((Vulkan::CommandBuffer&)cmdBuffer).GetHandle(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSet, 0, nullptr);
+        cmdBuffer.BindShader(*m_Shader);
         cmdBuffer.BindVertexBuffer(m_VertexBuffer, 0);
         cmdBuffer.BindIndexBuffer(m_IndexBuffer, 0, Format::Uint32);
         cmdBuffer.SetViewport(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight(), 0.0f, 1.0f);
         cmdBuffer.SetScissor(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight());
-        cmdBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, m_PipelineLayout);
         cmdBuffer.DrawIndexed(6, 0);
     }
 
@@ -268,6 +217,18 @@ namespace Nova
 
     void SpriteRenderer::UpdateUniforms()
     {
+        Scene* scene = GetScene();
+
+        Array<Camera*> cameras = scene->GetAllComponents<Camera>();
+        if (cameras.IsEmpty()) return;
+
+        Camera* camera = cameras.First();
+        if (!camera->IsEnabled()) return;
+
+        const Matrix4& viewProjection = camera->GetViewProjectionMatrix();
+        const Matrix4& worldSpaceMatrix = GetTransform()->GetWorldSpaceMatrix();
+        const Matrix4 mvp = viewProjection * worldSpaceMatrix;
+
         const Vector2 tiling = m_Flags.Contains(SpriteRendererFlagBits::TileWithScale)
         ? (Vector2)GetTransform()->GetScale()
         : m_Tiling;
@@ -277,6 +238,7 @@ namespace Nova
         : Matrix2::Identity;
 
         Uniforms uniforms;
+        uniforms.mvp = mvp;
         uniforms.tiling = tiling;
         uniforms.spriteScale[0] = Vector4(spriteScale[0].x, spriteScale[0].y, 0.0f, 0.0f);
         uniforms.spriteScale[1] = Vector4(spriteScale[1].x, spriteScale[1].y, 0.0f, 0.0f);
@@ -320,53 +282,5 @@ namespace Nova
 
         m_StagingBuffer.CPUCopy(vertices, 0, sizeof(vertices));
         m_StagingBuffer.GPUCopy(m_VertexBuffer, 0, 0, sizeof(vertices));
-
-        const VkDescriptorImageInfo imageInfo
-        {
-            m_Sampler.GetHandle(),
-            ((Vulkan::Texture*)m_Sprite.texture)->GetImageView(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        };
-
-        const VkDescriptorBufferInfo bufferInfo
-        {
-            .buffer = m_UniformBuffer.GetHandle(),
-            .offset = 0,
-            .range = VK_WHOLE_SIZE
-        };
-
-        Array<VkWriteDescriptorSet> writes;
-
-        VkWriteDescriptorSet samplerWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        samplerWrite.dstSet = m_DescriptorSet;
-        samplerWrite.dstBinding = 0;
-        samplerWrite.dstArrayElement = 0;
-        samplerWrite.descriptorCount = 1;
-        samplerWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-        samplerWrite.pImageInfo = &imageInfo;
-        writes.Add(samplerWrite);
-
-        VkWriteDescriptorSet textureWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        textureWrite.dstSet = m_DescriptorSet;
-        textureWrite.dstBinding = 1;
-        textureWrite.dstArrayElement = 0;
-        textureWrite.descriptorCount = 1;
-        textureWrite.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        textureWrite.pImageInfo = &imageInfo;
-        writes.Add(textureWrite);
-
-        VkWriteDescriptorSet bufferWrite = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        bufferWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        bufferWrite.dstSet = m_DescriptorSet;
-        bufferWrite.dstBinding = 2;
-        bufferWrite.dstArrayElement = 0;
-        bufferWrite.descriptorCount = 1;
-        bufferWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        bufferWrite.pBufferInfo = &bufferInfo;
-        writes.Add(bufferWrite);
-
-        Application* application = GetApplication();
-        const Vulkan::Device* device = application->GetDevice();
-        vkUpdateDescriptorSets(device->GetHandle(), writes.Count(), writes.Data(), 0, nullptr);
     }
 }

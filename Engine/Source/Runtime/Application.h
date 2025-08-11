@@ -1,12 +1,17 @@
 ﻿#pragma once
 #include "Containers/String.h"
-#include "Rendering/Vulkan/Device.h"
-#include "Rendering/Vulkan/ImGuiRenderer.h"
-#include "Game/SceneManager.h"
+#include "Rendering/Device.h"
 #include "Rendering/RenderPass.h"
-#include "Rendering/Vulkan/RenderTarget.h"
+#include "Rendering/RenderTarget.h"
+#include "Rendering/ImGuiRenderer.h"
+#include "SceneManager.h"
+#include "Window.h"
+#include "Ref.h"
+#include "AssetDatabase.h"
 
 #include <cstdint>
+
+namespace slang { class IGlobalSession; }
 
 namespace Nova
 {
@@ -30,36 +35,42 @@ namespace Nova
         void Run();
         void Exit();
 
-
         virtual void OnInit() {}
         virtual void OnUpdate(float deltaTime) {}
-        virtual void OnRender(Vulkan::CommandBuffer& cmdBuffer) {}
+        virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnGUI() {}
         virtual void OnDestroy() {}
 
         float GetDeltaTime() const;
-        Window* GetWindow() const;
-        Vulkan::Device* GetDevice();
-        Vulkan::ImGuiRenderer* GetImGuiRenderer();
+        const Ref<Window>& GetWindow() const;
+        const Ref<Rendering::Device>& GetDevice() const;
+        const Ref<Rendering::ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 
         Rendering::RenderPass* GetRenderPass();
-        Vulkan::RenderTarget* GetRenderTarget();
+        const Ref<Rendering::RenderTarget>& GetRenderTarget() const;
+
+        const AssetDatabase& GetAssetDatabase() const;
+        slang::IGlobalSession* GetSlangSession() const;
     protected:
         void Update();
         void Render();
         void Destroy();
     private:
-        Window* m_Window = nullptr;
-        Vulkan::Device m_Device;
-        Vulkan::RenderTarget m_RenderTarget;
+        Ref<Window> m_Window = nullptr;
+        Ref<Rendering::Device> m_Device = nullptr;
+        slang::IGlobalSession* m_SlangSession = nullptr;
+
+        Ref<Rendering::RenderTarget> m_RenderTarget = nullptr;
         Rendering::RenderPass m_RenderPass;
-        Vulkan::ImGuiRenderer m_ImGuiRenderer;
+
+        Ref<Rendering::ImGuiRenderer> m_ImGuiRenderer = nullptr;
         Rendering::RenderPass m_ImGuiRenderPass;
 
         SceneManager m_SceneManager;
-        bool m_IsRunning = true;
+        AssetDatabase m_AssetDatabase;
 
+        bool m_IsRunning = true;
         double m_LastTime = 0.0f;
         double m_DeltaTime = 0.0f;
     };

@@ -2,7 +2,7 @@
 
 namespace Nova
 {
-    Object::Object() : m_Name("NewObject")
+    Object::Object() : m_Name("New Object")
     {
         
     }

@@ -1,10 +1,10 @@
 ﻿#include "Window.h"
-
 #include "DesktopWindow.h"
+
 
 namespace Nova
 {
-    Window* Window::Create(const WindowCreateInfo& createInfo)
+    Ref<Window> CreateWindow(const WindowCreateInfo& createInfo)
     {
 #if defined(NOVA_PLATFORM_WINDOWS) || defined(NOVA_PLATFORM_LINUX)
         Window* window = new DesktopWindow();
@@ -13,13 +13,13 @@ namespace Nova
             delete window;
             window = nullptr;
         }
-        return window;
+        return Ref(window);
 #endif
     }
 
-    void Window::SetTitle(const String& Title)
+    void Window::SetTitle(const String& title)
     {
-        m_Title = Title;
+        m_Title = title;
     }
 
     const String& Window::GetTitle() const

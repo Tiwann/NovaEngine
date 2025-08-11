@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Game/Asset.h"
+#include "../Runtime/Asset.h"
 #include "Containers/StringView.h"
 #include <miniaudio.h>
 

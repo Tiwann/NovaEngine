@@ -2,6 +2,11 @@
 
 namespace Nova::Rendering
 {
+    size_t ShaderBindingSetLayout::BindingCount() const
+    {
+        return m_Bindings.Count();
+    }
+
     void ShaderBindingSetLayout::SetBinding(const uint32_t index, const ShaderBinding& binding)
     {
         m_Bindings[index] = binding;

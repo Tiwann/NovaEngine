@@ -195,89 +195,6 @@ namespace Nova::Vulkan
         }
     }
 
-    void RenderTarget::BeginRendering(Rendering::CommandBuffer& commandBuffer)
-    {
-        m_CommandBuffer = static_cast<CommandBuffer*>(&commandBuffer);
-        const Device* device = static_cast<Device*>(m_Device);
-        const uint32_t frameIndex = device->GetCurrentFrameIndex();
-
-        VkImageMemoryBarrier colorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        colorBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorBarrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        colorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        colorBarrier.image = m_ColorImages[frameIndex];
-        colorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        colorBarrier.subresourceRange.baseMipLevel = 0;
-        colorBarrier.subresourceRange.levelCount = 1;
-        colorBarrier.subresourceRange.baseArrayLayer = 0;
-        colorBarrier.subresourceRange.layerCount = 1;
-        colorBarrier.srcAccessMask = VK_ACCESS_NONE_KHR;
-        colorBarrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        vkCmdPipelineBarrier(
-            m_CommandBuffer->GetHandle(),
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &colorBarrier
-        );
-
-        VkRenderingAttachmentInfo colorAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        colorAttachment.clearValue.color = VkClearColorValue{ { 0.0f, 0.0, 0.0, 1.0f } };
-        colorAttachment.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachment.imageView = m_ColorImageViews[frameIndex];
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-        VkRenderingAttachmentInfo depthAttachment = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        depthAttachment.clearValue.depthStencil = VkClearDepthStencilValue(1.0f, 0);
-        depthAttachment.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        depthAttachment.imageView = m_DepthImageViews[frameIndex];
-        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-
-        VkRenderingInfo renderingInfo = { VK_STRUCTURE_TYPE_RENDERING_INFO };
-        renderingInfo.layerCount = 1;
-        renderingInfo.renderArea.extent = VkExtent2D{ m_Width, m_Height };
-        renderingInfo.renderArea.offset = VkOffset2D{ 0, 0 };
-        renderingInfo.viewMask = 0;
-        renderingInfo.colorAttachmentCount = 1;
-        renderingInfo.pColorAttachments = &colorAttachment;
-        renderingInfo.pDepthAttachment = &depthAttachment;
-
-        vkCmdBeginRendering(m_CommandBuffer->GetHandle(), &renderingInfo);
-    }
-
-    void RenderTarget::EndRendering()
-    {
-        const Device* device = static_cast<Device*>(m_Device);
-        const uint32_t frameIndex = device->GetCurrentFrameIndex();
-
-        vkCmdEndRendering(m_CommandBuffer->GetHandle());
-
-        VkImageMemoryBarrier colorBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        colorBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        colorBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        colorBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-        colorBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        colorBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        colorBarrier.image = m_ColorImages[frameIndex];
-        colorBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        colorBarrier.subresourceRange.baseMipLevel = 0;
-        colorBarrier.subresourceRange.levelCount = 1;
-        colorBarrier.subresourceRange.baseArrayLayer = 0;
-        colorBarrier.subresourceRange.layerCount = 1;
-
-
-        vkCmdPipelineBarrier(
-            m_CommandBuffer->GetHandle(),
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &colorBarrier
-        );
-    }
-
     bool RenderTarget::Resize(const uint32_t newWidth, const uint32_t newHeight)
     {
         if (m_Width == newWidth && m_Height == newHeight)
@@ -297,41 +214,6 @@ namespace Nova::Vulkan
         createInfo.depthFormat = m_DepthFormat;
         createInfo.sampleCount = m_SampleCount;
         return Initialize(createInfo);
-    }
-
-    void RenderTarget::Clear(const Color& color)
-    {
-        const VkCommandBuffer commandBuffer = m_CommandBuffer->GetHandle();
-
-        VkClearAttachment clearAttachment;
-        clearAttachment.colorAttachment = 0;
-        clearAttachment.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        clearAttachment.clearValue.color = VkClearColorValue{ { color.r, color.g, color.b, color.a }};
-
-        VkClearRect clearRect;
-        clearRect.rect.extent = VkExtent2D{ m_Width, m_Height };
-        clearRect.rect.offset = VkOffset2D{ 0, 0 };
-        clearRect.layerCount = 1;
-        clearRect.baseArrayLayer = 0;
-
-        vkCmdClearAttachments(commandBuffer, 1, &clearAttachment, 1, &clearRect);
-    }
-
-    void RenderTarget::Clear(const float depth, const uint8_t stencil)
-    {
-        const VkCommandBuffer commandBuffer = m_CommandBuffer->GetHandle();
-
-        VkClearAttachment clearAttachment;
-        clearAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        clearAttachment.clearValue.depthStencil = VkClearDepthStencilValue{ depth, stencil };
-
-        VkClearRect clearRect;
-        clearRect.rect.offset = VkOffset2D{ 0, 0 };
-        clearRect.rect.extent = VkExtent2D{ m_Width, m_Height };
-        clearRect.layerCount = 1;
-        clearRect.baseArrayLayer = 0;
-
-        vkCmdClearAttachments(commandBuffer, 1, &clearAttachment, 1, &clearRect);
     }
 
     const Texture& RenderTarget::GetColorTexture()

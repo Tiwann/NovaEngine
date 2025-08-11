@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    Component::Component(Entity* owner, const String& name) : Object(name), m_Enabled(true), m_Entity(owner), m_Uuid(Uuid::Generate())
+    Component::Component(Entity* owner, const String& name) : Object(name), m_Uuid(Uuid::Generate()), m_Enabled(true), m_Entity(owner)
     {
     }
 

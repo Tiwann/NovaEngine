@@ -1,5 +1,9 @@
 ﻿#pragma once
+#include "Runtime/Object.h"
 #include <cstdint>
+
+#include "Runtime/Ref.h"
+
 
 struct ImGuiContext;
 
@@ -17,11 +21,11 @@ namespace Nova::Rendering
         uint32_t sampleCount = 0;
     };
 
-    class ImGuiRenderer
+    class ImGuiRenderer : public Object
     {
     public:
-        ImGuiRenderer() = default;
-        virtual ~ImGuiRenderer() = default;
+        ImGuiRenderer() : Object("ImGui Renderer"){}
+        ~ImGuiRenderer() override = default;
 
         virtual bool Initialize(const ImGuiRendererCreateInfo& createInfo);
         virtual void Destroy() = 0;
@@ -32,4 +36,6 @@ namespace Nova::Rendering
     protected:
         ImGuiContext* m_Context = nullptr;
     };
+
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, Device* device, uint32_t sampleCount);
 }

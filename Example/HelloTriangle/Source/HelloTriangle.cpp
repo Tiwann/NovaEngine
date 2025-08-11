@@ -1,6 +1,6 @@
 ﻿#include "Components/Camera.h"
 #include "Components/Transform.h"
-#include "Game/Scene.h"
+#include "Runtime/Scene.h"
 #include "Math/Matrix4.h"
 #include "Math/Vector3.h"
 #include "Rendering/GraphicsPipeline.h"
@@ -8,20 +8,24 @@
 #include "Rendering/Vulkan/Buffer.h"
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/Vulkan/RenderTarget.h"
-#include "Rendering/Vulkan/ShaderModule.h"
 #include "Runtime/Application.h"
-#include "Runtime/ShaderCompiler.h"
 #include "Utils/BufferUtils.h"
-
-#include <imgui.h>
-#include <vulkan/vulkan.h>
-
 #include "Assets/Sprite.h"
 #include "Components/Rendering/SpriteRenderer.h"
 #include "Runtime/Path.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "External/stb_image.h"
+#include "Rendering/Shader.h"
+
+#include "Rendering/CommandBuffer.h"
+#include "Rendering/Vulkan/Shader.h"
+#include "Runtime/Ref.h"
+
+#include <imgui.h>
+#include <vulkan/vulkan.h>
+#include <slang/slang.h>
+
 
 using namespace Nova;
 
@@ -31,45 +35,27 @@ class HelloTriangle : public Application
 public:
     void OnInit() override
     {
-        Window* window = GetWindow();
-        Vulkan::Device* device = GetDevice();
+        const auto& device = GetDevice();
 
         const String shaderPath = Path::Combine(APPLICATION_DIR, "Shaders", "HelloTriangle.slang");
-        ShaderCompiler compiler;
-        compiler.AddEntryPoint({ "vert", ShaderStageFlagBits::Vertex });
-        compiler.AddEntryPoint({ "frag", ShaderStageFlagBits::Fragment });
-        compiler.Initialize();
-        compiler.Compile(shaderPath, "HelloTriangle", ShaderTarget::SPIRV);
 
-        const Array<uint32_t> vertSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Vertex);
-        const Array<uint32_t> fragSpirv = compiler.GetEntryPointBinary(ShaderStageFlagBits::Fragment);
-        if (vertSpirv.IsEmpty() || fragSpirv.IsEmpty()) return;
+        Rendering::ShaderCreateInfo shaderCreateInfo = { };
+        shaderCreateInfo.device = device;
+        shaderCreateInfo.entryPoints.Add({ "vert", ShaderStageFlagBits::Vertex });
+        shaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
+        shaderCreateInfo.moduleInfo = { "HelloTriangle", shaderPath };
+        shaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
+        shaderCreateInfo.slang = GetSlangSession();
 
-        Vulkan::ShaderModule vertShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*device, ShaderStageFlagBits::Vertex, vertSpirv);
-        Vulkan::ShaderModule fragShaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(*device, ShaderStageFlagBits::Fragment, fragSpirv);
-
-        VkPushConstantRange range;
-        range.offset = 0;
-        range.size = sizeof(Matrix4);
-        range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
-        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        pipelineLayoutCreateInfo.pPushConstantRanges = &range;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-
-        VkResult result = vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
-        if (result != VK_SUCCESS) return;
-
+        m_Shader.Initialize(shaderCreateInfo);
 
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = device;
         pipelineCreateInfo.renderPass = GetRenderPass();
-        pipelineCreateInfo.pipelineLayout = m_PipelineLayout;
+        pipelineCreateInfo.shader = &m_Shader;
 
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector3 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Color", Format::Vector4 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "POSITION", Format::Vector3 });
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "COLOR", Format::Vector4 });
 
         pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
         pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
@@ -102,11 +88,7 @@ public:
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = GetRenderTarget()->GetWidth();
         pipelineCreateInfo.scissorInfo.height = GetRenderTarget()->GetHeight();
-
-        const VkPipelineShaderStageCreateInfo shaderStages[] { vertShaderModule.GetShaderStageCreateInfo(), fragShaderModule.GetShaderStageCreateInfo() };
-        pipelineCreateInfo.shaderStages = shaderStages;
-        pipelineCreateInfo.shaderStagesCount = 2;
-        m_Pipeline.Initialize(pipelineCreateInfo);
+        //m_Pipeline.Initialize(pipelineCreateInfo);
 
         struct Vertex
         {
@@ -123,8 +105,8 @@ public:
 
         const uint32_t indices[] { 0, 2, 1 };
 
-        m_VertexBuffer = CreateVertexBuffer(*device, vertices, sizeof(vertices));
-        m_IndexBuffer = CreateIndexBuffer(*device, indices, sizeof(indices));
+        //m_VertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
+        //m_IndexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
 
         const auto createScene = [this]() -> Scene*
         {
@@ -155,21 +137,22 @@ public:
             createInfo.usageFlags = Rendering::TextureUsageFlagBits::Sampled;
             createInfo.width = width;
             createInfo.height = height;
+            createInfo.depth = 1;
             createInfo.format = Format::R8G8B8A8_UNORM;
             createInfo.mips = 1;
             createInfo.data = pixels;
             createInfo.dataSize = width * height * 4;
             createInfo.sampleCount = 1;
 
-            static Vulkan::Texture texture;
-            texture.Initialize(createInfo);
+            Vulkan::Texture* texture = new Vulkan::Texture;
+            texture->Initialize(createInfo);
 
             static Sprite sprite;
             sprite.x = 0;
             sprite.y = 0;
             sprite.width = width;
             sprite.height = height;
-            sprite.texture = &texture;
+            sprite.texture = texture;
 
 
             const EntityHandle spriteEntity = scene->CreateEntity("Sprite");
@@ -289,19 +272,18 @@ public:
         ImGui::PopStyleVar();
     }
 
-    void OnRender(Vulkan::CommandBuffer& cmdBuffer) override
+    void OnRender(Rendering::CommandBuffer& cmdBuffer) override
     {
         const Matrix4& viewProj = m_Camera->GetViewProjectionMatrix();
         const Matrix4 mvp = viewProj * m_TriangleTransform->GetWorldSpaceMatrix();
 
-        const Vulkan::RenderTarget* renderTarget = GetRenderTarget();
-        cmdBuffer.SetViewport(0, 0, renderTarget->GetWidth(), renderTarget->GetHeight(), 0.0f, 1.0f);
-        cmdBuffer.SetScissor(0, 0, renderTarget->GetWidth(), renderTarget->GetHeight());
-        cmdBuffer.BindGraphicsPipeline(m_Pipeline);
-        cmdBuffer.BindVertexBuffer(m_VertexBuffer, 0);
-        cmdBuffer.BindIndexBuffer(m_IndexBuffer, 0, Format::Uint32);
-        cmdBuffer.PushConstants(ShaderStageFlagBits::Vertex, 0, sizeof(Matrix4), &mvp, m_PipelineLayout);
-        cmdBuffer.DrawIndexed(3, 0);
+        //const auto& renderTarget = GetRenderTarget();
+        //cmdBuffer.SetViewport(0, 0, renderTarget->GetWidth(), renderTarget->GetHeight(), 0.0f, 1.0f);
+        //cmdBuffer.SetScissor(0, 0, renderTarget->GetWidth(), renderTarget->GetHeight());
+        //cmdBuffer.BindGraphicsPipeline(m_Pipeline);
+        //cmdBuffer.BindVertexBuffer(m_VertexBuffer, 0);
+        //cmdBuffer.BindIndexBuffer(m_IndexBuffer, 0, Format::Uint32);
+        //cmdBuffer.DrawIndexed(3, 0);
     }
 
     void OnDestroy() override
@@ -310,6 +292,7 @@ public:
     }
 
 private:
+    Vulkan::Shader m_Shader;
     Vulkan::GraphicsPipeline m_Pipeline;
     Vulkan::Buffer m_VertexBuffer;
     Vulkan::Buffer m_IndexBuffer;

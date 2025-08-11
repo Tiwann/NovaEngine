@@ -16,12 +16,8 @@ namespace Nova::Vulkan
     public:
         bool Initialize(const Rendering::RenderTargetCreateInfo& createInfo) override;
         void Destroy() override;
-        void BeginRendering(Rendering::CommandBuffer& commandBuffer) override;
-        void EndRendering() override;
 
         bool Resize(uint32_t newWidth, uint32_t newHeight) override;
-        void Clear(const Color& color) override;
-        void Clear(float depth, uint8_t stencil) override;
 
         const Texture& GetColorTexture();
         const Texture& GetDepthTexture();

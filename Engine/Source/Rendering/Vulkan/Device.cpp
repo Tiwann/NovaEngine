@@ -359,10 +359,10 @@ namespace Nova::Vulkan
 
         Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.device = this;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::Sampler] = 32;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::SampledTexture] = 32;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::CombinedTextureSampler] = 32;
-        descriptorPoolCreateInfo.sizes[ResourceBindingType::UniformBuffer] = 32;
+        descriptorPoolCreateInfo.sizes[BindingType::Sampler] = 32;
+        descriptorPoolCreateInfo.sizes[BindingType::SampledTexture] = 32;
+        descriptorPoolCreateInfo.sizes[BindingType::CombinedTextureSampler] = 32;
+        descriptorPoolCreateInfo.sizes[BindingType::UniformBuffer] = 32;
         descriptorPoolCreateInfo.maxSets = 32;
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;
@@ -499,6 +499,11 @@ namespace Nova::Vulkan
         info.pObjectName = *name;
         vkSetDebugUtilsObjectName(m_Handle, &info);
 #endif
+    }
+
+    Rendering::DeviceType Device::GetDeviceType()
+    {
+        return Rendering::DeviceType::Vulkan;
     }
 
 

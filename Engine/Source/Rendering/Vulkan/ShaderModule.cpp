@@ -7,40 +7,6 @@
 
 namespace Nova::Vulkan
 {
-    ShaderModule::ShaderModule() : Rendering::ShaderModule()
-    {
-
-    }
-
-    ShaderModule::ShaderModule(ShaderModule&& other) noexcept
-    {
-        if (this == &other)
-            return;
-
-        m_Device = other.m_Device;
-        m_Handle = other.m_Handle;
-        m_Stage = other.m_Stage;
-
-        other.m_Handle = nullptr;
-        other.m_Device = nullptr;
-        other.m_Stage = ShaderStageFlagBits::None;
-    }
-
-    ShaderModule& ShaderModule::operator=(ShaderModule&& other) noexcept
-    {
-        if (this == &other)
-            return *this;
-
-        m_Device = other.m_Device;
-        m_Handle = other.m_Handle;
-        m_Stage = other.m_Stage;
-
-        other.m_Device = nullptr;
-        other.m_Handle = nullptr;
-        other.m_Stage = ShaderStageFlagBits::None;
-        return *this;
-    }
-
     bool ShaderModule::Initialize(const Rendering::ShaderModuleCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
@@ -70,12 +36,12 @@ namespace Nova::Vulkan
         return m_Handle;
     }
 
-    VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCreateInfo() const
+    /*VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCreateInfo() const
     {
         VkPipelineShaderStageCreateInfo shaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         shaderStageCreateInfo.module = m_Handle;
         shaderStageCreateInfo.pName = "main";
         shaderStageCreateInfo.stage = Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(m_Stage);
         return shaderStageCreateInfo;
-    }
+    }*/
 }

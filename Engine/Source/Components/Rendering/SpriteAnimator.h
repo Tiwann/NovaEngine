@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "SpriteRenderer.h"
-#include "Game/Component.h"
+#include "../../Runtime/Component.h"
 #include "Runtime/Timer.h"
 
 namespace Nova

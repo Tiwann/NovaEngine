@@ -7,15 +7,20 @@ namespace Nova
 {
     struct Path
     {
-        static String Combine(StringView path, StringView other)
+        static String Combine(const StringView path, const StringView other)
         {
             return StringFormat("{}/{}", path, other);
         }
 
         template<typename... Args>
-        static String Combine(StringView path, StringView other, Args&&... args)
+        static String Combine(const StringView path, const StringView other, Args&&... args)
         {
             return StringFormat("{}/{}", StringFormat("{}/{}", path, other), std::forward<Args>(args)...);
         }
+
+        static String GetEngineDirectory() { return Combine(NOVA_ENGINE_ROOT_DIR, "Engine"); }
+        static String GetEngineAssetsDirectory() { return Combine(GetEngineDirectory(), "Assets"); }
+        static String GetEngineAssetPath(const StringView filepath) { return Combine(GetEngineAssetsDirectory(), filepath); }
+
     };
 }

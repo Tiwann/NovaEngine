@@ -28,9 +28,9 @@ namespace Nova
         constexpr Flags operator|(const Enum& other) const { return Flags(m_Value | (uint32_t)other); };
         constexpr Flags operator&(const Enum& other) const { return Flags(m_Value & (uint32_t)other); };
         constexpr Flags operator^(const Enum& other) const { return Flags(m_Value ^ (uint32_t)other); };
-        constexpr Flags& operator|=(const Enum& other) { m_Value = m_Value | (uint32_t)other; return *this; };
-        constexpr Flags& operator&=(const Enum& other) { m_Value = m_Value & (uint32_t)other; return *this; };
-        constexpr Flags& operator^=(const Enum& other) { m_Value = m_Value ^ (uint32_t)other; return *this; };
+        constexpr Flags& operator|=(const Enum& other) { m_Value = (Enum)((uint32_t)m_Value | (uint32_t)other); return *this; };
+        constexpr Flags& operator&=(const Enum& other) { m_Value = (Enum)((uint32_t)m_Value & (uint32_t)other); return *this; };
+        constexpr Flags& operator^=(const Enum& other) { m_Value = (Enum)((uint32_t)m_Value ^ (uint32_t)other); return *this; };
 
         template<typename T> requires std::is_same_v<T, std::underlying_type_t<Enum>>
         T As() const { return (T)m_Value; }

@@ -1,13 +1,13 @@
 #pragma once
-#include "Runtime/Object.h"
-#include "Runtime/Uuid.h"
+#include "Object.h"
+#include "Uuid.h"
 #include "Entity.h"
-#include "Containers/Function.h"
-#include "Containers/String.h"
-#include "Containers/BumpAllocator.h"
+#include "../Containers/Function.h"
+#include "../Containers/String.h"
+#include "../Containers/BumpAllocator.h"
 
 #ifdef NOVA_HAS_PHYSICS
-#include "Physics/PhysicsWorld2D.h"
+#include "../Physics/PhysicsWorld2D.h"
 #endif
 
 #ifdef NOVA_HAS_PHYSICS3D

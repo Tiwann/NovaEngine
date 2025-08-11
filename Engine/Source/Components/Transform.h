@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Game/Component.h"
+#include "../Runtime/Component.h"
 #include "Math/LinearAlgebra.h"
 #include "Containers/Lazy.h"
 #include "Containers/MulticastDelegate.h"

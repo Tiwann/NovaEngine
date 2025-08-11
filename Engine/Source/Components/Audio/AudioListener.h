@@ -1,5 +1,5 @@
 #pragma once
-#include "Game/Component.h"
+#include "../../Runtime/Component.h"
 #include "Math/Vector3.h"
 #include <cstdint>
 

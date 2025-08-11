@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Containers/String.h"
 #include "Containers/MulticastDelegate.h"
+#include "Ref.h"
 #include <cstdint>
 
 namespace Nova
@@ -26,15 +27,6 @@ namespace Nova
         Window() = default;
         ~Window() override = default;
 
-        static Window* Create(const WindowCreateInfo& createInfo);
-
-        template<typename WindowType> requires std::is_base_of_v<Window, WindowType>
-        WindowType* Create(const WindowCreateInfo& createInfo)
-        {
-            return (WindowType*)Create(createInfo);
-        }
-
-
         virtual bool Initialize(const WindowCreateInfo& createInfo) = 0;
         virtual void PollEvents() = 0;
         virtual void Destroy() = 0;
@@ -53,4 +45,6 @@ namespace Nova
         uint32_t m_Width = 0;
         uint32_t m_Height = 0;
     };
+
+    Ref<Window> CreateWindow(const WindowCreateInfo& createInfo);
 }

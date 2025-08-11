@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include "Game/Component.h"
+#include "Runtime/Component.h"
 #include "Assets/Sprite.h"
 #include "Math/Vector2.h"
 #include "Rendering/SpriteRendererFlags.h"
 #include "Rendering/Vulkan/Buffer.h"
+#include "Rendering/Vulkan/CommandBuffer.h"
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/Vulkan/Sampler.h"
 #include "Rendering/Vulkan/ShaderBindingSetLayout.h"
@@ -14,6 +15,7 @@ typedef struct VkDescriptorSetLayout_T* VkDescriptorSetLayout;
 
 namespace Nova
 {
+    namespace Rendering { class Shader; }
 
     class SpriteRenderer : public Component
     {
@@ -52,16 +54,12 @@ namespace Nova
         bool m_UpdateUniforms = true;
         bool m_UpdateResources = true;
 
+        Rendering::Shader* m_Shader = nullptr;
         Vulkan::Buffer m_VertexBuffer;
         Vulkan::Buffer m_IndexBuffer;
         Vulkan::Buffer m_UniformBuffer;
         Vulkan::Buffer m_StagingBuffer;
         Vulkan::Sampler m_Sampler;
         Vulkan::GraphicsPipeline m_Pipeline;
-
-        Vulkan::ShaderBindingSetLayout m_BindingSetLayout;
-        VkDescriptorSetLayout m_DescriptorSetLayout = nullptr;
-        VkDescriptorSet m_DescriptorSet = nullptr;
-        VkPipelineLayout m_PipelineLayout = nullptr;
     };
 }

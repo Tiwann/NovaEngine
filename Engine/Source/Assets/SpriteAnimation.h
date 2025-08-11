@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Sprite.h"
-#include "Game/Asset.h"
+#include "../Runtime/Asset.h"
 #include "Containers/Array.h"
 
 namespace Nova

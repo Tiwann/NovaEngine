@@ -25,7 +25,12 @@ namespace Nova
         });
         return result ? *result : nullptr;
     }
-    
+
+    Scene* EntityHandle::GetContext() const
+    {
+        return m_Context;
+    }
+
     bool EntityHandle::operator==(const EntityHandle& Other) const
     {
         return m_EntityID == Other.m_EntityID;

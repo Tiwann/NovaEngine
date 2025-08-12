@@ -1,7 +1,7 @@
 ﻿#include "Runtime/EntryPoint.h"
 
 #ifndef NOVA_CUSTOM_ENTRY_POINT
-#include "Runtime/Application.h"
+#include "Runtime/GameApplication.h"
 
 namespace Nova
 {

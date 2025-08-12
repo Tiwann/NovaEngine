@@ -17,6 +17,8 @@ namespace Nova
 {
     namespace Rendering { class Shader; }
 
+    class SpriteAnimation;
+
     class SpriteRenderer : public Component
     {
     public:
@@ -24,11 +26,15 @@ namespace Nova
 
         void OnInit() override;
         void OnUpdate(float deltaTime) override;
+        void OnPreRender(Rendering::CommandBuffer& cmdBuffer) override;
         void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
         void OnDestroy() override;
 
         Sprite& GetSprite();
         void SetSprite(const Sprite& sprite);
+
+        void SetSpriteAnimation(SpriteAnimation* spriteAnimation);
+        SpriteAnimation* GetSpriteAnimation() const;
 
         Vector2 GetTiling() const;
         void SetTiling(const Vector2& tiling);
@@ -41,18 +47,21 @@ namespace Nova
 
         SpriteRendererFlags GetFlags() const;
         void SetFlags(SpriteRendererFlags flags);
-    private:
-        void UpdateUniforms() const;
-        void UpdateResources();
+
+        void SetSpeed(int32_t fps);
+        void SetSpeed(float speed);
+        float GetSpeed() const;
     private:
         Sprite m_Sprite = { 0, 0, 0, 0, nullptr };
+        SpriteAnimation* m_SpriteAnimation = nullptr;
         SpriteRendererFlags m_Flags = SpriteRendererFlagBits::None;
         uint32_t m_PixelsPerUnit = 128;
         Vector2 m_Tiling = Vector2::One;
         Color m_ColorTint = Color::White;
 
-        bool m_UpdateUniforms = true;
-        bool m_UpdateResources = true;
+        float m_Time = 0.0f;
+        float m_Speed = 1.0f / 20.0f;
+        uint32_t m_SpriteIndex = 0;
 
         Rendering::Shader* m_Shader = nullptr;
         Vulkan::Buffer m_VertexBuffer;
@@ -62,4 +71,6 @@ namespace Nova
         Vulkan::Sampler m_Sampler;
         Vulkan::GraphicsPipeline m_Pipeline;
     };
+
+
 }

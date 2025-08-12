@@ -30,9 +30,9 @@ namespace Nova
 
         ~BumpAllocator()
         {
-            for (const Array<PointerType> All = GetAllValid(); PointerType Element : All)
+            for (const Array<PointerType> all = GetAllValid(); PointerType element : all)
             {
-                Free(Element);
+                Free(element);
             }
             m_AvailableFlags.Fill(false);
         }
@@ -52,26 +52,26 @@ namespace Nova
         }
 
         template<typename... Args>
-        PointerType New(Args&&... Arguments)
+        PointerType New(Args&&... args)
         {
-            PointerType Where = GetAvailableSpace();
-            if(!Where)
+            PointerType where = GetAvailableSpace();
+            if(!where)
             {
                 NOVA_ASSERT(false, "BumpAllocator::New No space available");
                 return nullptr;
             }
-            return std::construct_at(Where, std::forward<Args>(Arguments)...);
+            return std::construct_at(where, std::forward<Args>(args)...);
         }
 
-        void Free(PointerType Ptr)
+        void Free(PointerType ptr)
         {
-            if(!Ptr) return;
-            NOVA_ASSERT(Ptr >= &m_Data[0] && Ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
-            Ptr->~T();
-            SizeType Index = Ptr - &m_Data[0];
-            m_AvailableFlags[Index] = true;
+            if(!ptr) return;
+            NOVA_ASSERT(ptr >= &m_Data[0] && ptr < &m_Data[0] + Size, "Memory is not allocated from this bump allocator!");
+            ptr->~T();
+            SizeType index = ptr - &m_Data[0];
+            m_AvailableFlags[index] = true;
             --m_Count;
-            (void)Memory::Memset(Ptr, 0x00, 1);
+            (void)Memory::Memset(ptr, 0x00, 1);
         }
 
         SizeType Count() const
@@ -81,50 +81,50 @@ namespace Nova
 
         Array<PointerType> GetAllValid()
         {
-            Array<PointerType> Result;
+            Array<PointerType> result;
             for(SizeType i = 0; i < Size; ++i)
             {
                 if(!m_AvailableFlags[i])
-                    Result.Add(&m_Data[i]);
+                    result.Add(&m_Data[i]);
             }
-            return Result;
+            return result;
         }
 
-        PointerType Single(const Predicate& Predicate)
+        PointerType Single(const Predicate& predicate)
         {
             for(SizeType i = 0; i < Size; ++i)
             {
                 if(!m_AvailableFlags[i])
                 {
-                    if(Predicate(m_Data[i]))
+                    if(predicate(m_Data[i]))
                         return &m_Data[i];
                 }
             }
             return nullptr;
         }
 
-        Array<PointerType> Where(const Predicate& Predicate)
+        Array<PointerType> Where(const Predicate& predicate)
         {
-            Array<PointerType> Result;
+            Array<PointerType> result;
             for(SizeType i = 0; i < Size; ++i)
             {
-                if(!m_AvailableFlags[i] && Predicate(m_Data[i]))
-                    Result.Add(&m_Data[i]);
+                if(!m_AvailableFlags[i] && predicate(m_Data[i]))
+                    result.Add(&m_Data[i]);
             }
-            return Result;
+            return result;
         }
 
         template<typename Out>
-        Array<Out*> Select(const Selector<Out>& Selector)
+        Array<Out*> Select(const Selector<Out>& selector)
         {
-            if(!Selector) return {};
-            Array<Out*> Result;
+            if(!selector) return {};
+            Array<Out*> result;
             for(SizeType i = 0; i < m_Count; ++i)
             {
                 if(!m_AvailableFlags[i])
-                    Result.Add(Selector(m_Data[i]));
+                    result.Add(selector(m_Data[i]));
             }
-            return Result;
+            return result;
         }
     
     private:

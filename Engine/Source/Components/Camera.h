@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../Runtime/Component.h"
+#include "Runtime/Component.h"
 #include "Containers/Lazy.h"
 #include "Math/Matrix4.h"
 #include <cstdint>

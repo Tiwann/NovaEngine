@@ -1,5 +1,5 @@
 ﻿#include "Transform.h"
-#include "../Runtime/Entity.h"
+#include "Runtime/Entity.h"
 #include "Runtime/Assertion.h"
 //#include "Physics/PhysicsComponent.h"
 //#include "Physics/RigidBody2D.h"

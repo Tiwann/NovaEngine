@@ -29,7 +29,7 @@ namespace Nova::Rendering
         uint32_t depth = 0;
         uint32_t mips = 0;
         uint32_t sampleCount = 0;
-        uint8_t* data = nullptr;
+        const uint8_t* data = nullptr;
         size_t dataSize = 0;
     };
 

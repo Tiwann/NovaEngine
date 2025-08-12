@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "SpriteRenderer.h"
-#include "../../Runtime/Component.h"
+#include "Runtime/Component.h"
 #include "Runtime/Timer.h"
 
 namespace Nova
@@ -14,7 +14,7 @@ namespace Nova
         
         void OnInit() override;
         void OnStart() override;
-        void OnUpdate(float Delta) override;
+        void OnUpdate(float deltaTime) override;
 
         SpriteRenderer* GetSpriteRenderer() const;
         void SetSpriteRenderer(SpriteRenderer* SpriteRenderer);
@@ -25,11 +25,10 @@ namespace Nova
         void SetSpeed(int32_t speed);
         int32_t GetSpeed() const;
     private:
-        Timer m_Timer;
+        float m_Time = 0.0f;
         SpriteRenderer* m_SpriteRenderer = nullptr;
         SpriteAnimation* m_Animation = nullptr;
         int32_t m_Speed = 12;
         uint32_t m_Index = 0;
-        void OnSpriteChange();
     };
 }

@@ -2,17 +2,16 @@
 #include "Runtime/Window.h"
 #include "Runtime/DesktopWindow.h"
 #include "Conversions.h"
-#include "RenderTarget.h"
-#include "Texture.h"
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
 #include "VulkanExtensions.h"
+#include "Containers/StringFormat.h"
+#include "Runtime/Version.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
 
-#include "Containers/StringFormat.h"
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
@@ -28,8 +27,8 @@ namespace Nova::Vulkan
         VkApplicationInfo applicationInfo = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
         applicationInfo.apiVersion = VK_API_VERSION_1_4;
         applicationInfo.pEngineName = "Nova Engine";
-        applicationInfo.engineVersion = createInfo.versionMajor << 16 | (createInfo.versionMinor & 0xFF);
-        applicationInfo.pApplicationName = *createInfo.applicationName;
+        applicationInfo.engineVersion = NOVA_VERSION;
+        applicationInfo.pApplicationName = *createInfo.appName;
         applicationInfo.applicationVersion = 0;
 
         Array<const char*> layers;

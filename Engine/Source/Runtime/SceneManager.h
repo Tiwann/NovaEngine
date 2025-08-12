@@ -15,6 +15,7 @@ namespace Nova
         SceneManager() = default;
 
         void OnUpdate(float deltaTime);
+        void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
         void OnRender(Rendering::CommandBuffer& cmdBuffer);
         void Destroy();
 

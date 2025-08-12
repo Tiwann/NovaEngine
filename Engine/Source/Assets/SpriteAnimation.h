@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Sprite.h"
-#include "../Runtime/Asset.h"
+#include "SpriteSheet.h"
+#include "Runtime/Asset.h"
 #include "Containers/Array.h"
 
 namespace Nova
@@ -11,12 +12,15 @@ namespace Nova
         SpriteAnimation() = default;
         String GetAssetType() const override;
 
-        void ClearSprites();
-        void AddSprite(const Sprite& sprite);
+        bool LoadFromSpriteSheet(const SpriteSheet& spriteSheet);
         
         Array<Sprite>::SizeType Count() const;
         Sprite& GetSprite(size_t index);
+
+        void SetSpriteSheet(const SpriteSheet& spriteSheet);
+        SpriteSheet GetSpriteSheet() const;
     private:
         Array<Sprite> m_Sprites;
+        SpriteSheet m_SpriteSheet;
     };
 }

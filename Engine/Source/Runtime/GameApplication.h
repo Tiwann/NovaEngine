@@ -17,7 +17,7 @@ namespace Nova
 {
     class Window;
 
-    struct ApplicationCreateInfo
+    struct ApplicationConfiguration
     {
         String applicationName;
         uint32_t windowWidth, windowHeight;
@@ -35,6 +35,7 @@ namespace Nova
         void Run();
         void Exit();
 
+        virtual ApplicationConfiguration GetConfiguration() const = 0;
         virtual void OnInit() {}
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}

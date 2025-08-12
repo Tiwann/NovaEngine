@@ -17,7 +17,7 @@ target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
 target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d PRIVATE glfw)
-target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\")
+target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
     target_compile_definitions(NovaEngine PUBLIC NOVA_CUSTOM_ENTRY_POINT)
@@ -38,11 +38,6 @@ elseif (CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
 elseif (CMAKE_BUILD_TYPE MATCHES Release OR CMAKE_BUILD_TYPE MATCHES MinSizeRel)
     target_compile_definitions(NovaEngine PUBLIC NOVA_RELEASE)
 endif ()
-
-if(BUILD_SHARED_LIBS)
-    target_compile_definitions(NovaEngine PRIVATE NOVA_BUILD_SHARED)
-endif ()
-
 
 if(WIN32)
     target_compile_definitions(NovaEngine PUBLIC UNICODE _UNICODE NOVA_PLATFORM_WINDOWS _CRT_SECURE_NO_WARNINGS)

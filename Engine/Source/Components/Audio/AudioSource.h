@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Runtime/Component.h"
+#include "Runtime/Component.h"
 #include "Containers/MulticastDelegate.h"
 #include "Math/Vector3.h"
 #include <cstdint>

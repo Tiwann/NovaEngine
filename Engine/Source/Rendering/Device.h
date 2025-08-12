@@ -22,8 +22,7 @@ namespace Nova::Rendering
 
     struct DeviceCreateInfo
     {
-        String applicationName;
-        uint16_t versionMajor, versionMinor;
+        String appName;
         Window* window = nullptr;
         SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
         bool vSync = false;

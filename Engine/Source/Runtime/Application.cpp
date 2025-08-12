@@ -1,5 +1,4 @@
-﻿#include "Application.h"
-
+﻿#include "GameApplication.h"
 #include "Path.h"
 #include "Time.h"
 #include "Window.h"
@@ -13,12 +12,14 @@ namespace Nova
 {
     void Application::Run()
     {
+        ApplicationConfiguration configuration = GetConfiguration();
+
         // Creating window
         WindowCreateInfo windowCreateInfo;
-        windowCreateInfo.title = "Hello Triangle";
-        windowCreateInfo.width = 600;
-        windowCreateInfo.height = 400;
-        windowCreateInfo.resizable = true;
+        windowCreateInfo.title = configuration.applicationName;
+        windowCreateInfo.width = configuration.windowWidth;
+        windowCreateInfo.height = configuration.windowHeight;
+        windowCreateInfo.resizable = configuration.resizable;
         windowCreateInfo.show = true;
         m_Window = CreateWindow(windowCreateInfo);
         if (!m_Window) return;
@@ -27,12 +28,10 @@ namespace Nova
 
         // Creating render device;
         Rendering::DeviceCreateInfo rdCreateInfo;
-        rdCreateInfo.applicationName = "Hello Triangle";
-        rdCreateInfo.versionMajor = 1;
-        rdCreateInfo.versionMinor = 0;
+        rdCreateInfo.appName = configuration.applicationName;
         rdCreateInfo.window = m_Window;
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
-        rdCreateInfo.vSync = false;
+        rdCreateInfo.vSync = true;
         m_Device = CreateRenderDevice(Rendering::DeviceType::Vulkan, rdCreateInfo);
         if (!m_Device) return;
 
@@ -50,7 +49,6 @@ namespace Nova
         if (!m_RenderTarget) return;
 
         // Render target render pass
-
         {
             Rendering::RenderPassAttachment colorAttachment;
             colorAttachment.type = Rendering::AttachmentType::Color;
@@ -104,7 +102,7 @@ namespace Nova
 
 
         // Load engine shaders
-        const auto loadShader = [this](const String& shaderName, const String& shaderPath)
+        const auto loadShaderBasic = [this](const String& shaderName, const String& shaderPath) -> Rendering::Shader*
         {
             Rendering::ShaderCreateInfo spriteShaderCreateInfo;
             spriteShaderCreateInfo.device = m_Device;
@@ -114,11 +112,13 @@ namespace Nova
             spriteShaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
             spriteShaderCreateInfo.moduleInfo = { shaderName, shaderPath };
 
-            Rendering::Shader* spriteShader = m_AssetDatabase.CreateAsset<Vulkan::Shader>("Sprite");
-            spriteShader->SetObjectName(shaderName);
-            spriteShader->Initialize(spriteShaderCreateInfo);
+            Rendering::Shader* shader = m_AssetDatabase.CreateAsset<Vulkan::Shader>(shaderName);
+            shader->SetObjectName(shaderName);
+            shader->Initialize(spriteShaderCreateInfo);
+            return shader;
         };
-        loadShader("Sprite", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
+
+        loadShaderBasic("Sprite", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
 
         OnInit();
         Update();
@@ -150,6 +150,7 @@ namespace Nova
         if (m_Device->BeginFrame())
         {
             Vulkan::CommandBuffer& cmdBuffer = m_Device.As<Vulkan::Device>()->GetCurrentCommandBuffer();
+            m_SceneManager.OnPreRender(cmdBuffer);
             OnPreRender(cmdBuffer);
 
             Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain();

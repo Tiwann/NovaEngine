@@ -44,9 +44,11 @@ namespace Nova
 
         bool IsValid() const;
         Entity* GetEntity() const;
+        Scene* GetContext() const;
 
         operator bool() const { return IsValid(); }
-        Entity* operator->() const{ return GetEntity(); }
+        Entity* operator->() { return GetEntity(); }
+        const Entity* operator->() const { return GetEntity(); }
 
         bool operator==(const EntityHandle& other) const;
     private:

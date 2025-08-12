@@ -1,7 +1,9 @@
 ﻿#include "Assets/SpriteAnimation.h"
-#include "../../Runtime/Entity.h"
+#include "Runtime/Entity.h"
 #include "SpriteAnimator.h"
 #include "SpriteRenderer.h"
+
+#include <print>
 
 namespace Nova
 {
@@ -14,11 +16,6 @@ namespace Nova
     {
         Component::OnInit();
         m_SpriteRenderer = m_Entity->GetComponent<SpriteRenderer>();
-        m_Timer.finishedEvent.BindMember(this, &SpriteAnimator::OnSpriteChange);
-
-        m_Timer.SetDuration(1.0f / (float)m_Speed);
-        m_Timer.SetLoop(true);
-        m_Timer.Start();
     }
 
     void SpriteAnimator::OnStart()
@@ -29,14 +26,22 @@ namespace Nova
         m_SpriteRenderer->SetSprite(Sprite);
     }
 
-    void SpriteAnimator::OnUpdate(float Delta)
+    void SpriteAnimator::OnUpdate(const float deltaTime)
     {
-        Component::OnUpdate(Delta);
+        Component::OnUpdate(deltaTime);
         if(!m_SpriteRenderer) return;
         if(!m_Animation) return;
-        
-        m_Timer.SetDuration(1.0f / (float)m_Speed);
-        m_Timer.Update(Delta);
+
+        const float duration = 1.0f / m_Speed;
+        m_Time += deltaTime;
+        if (m_Time >= duration)
+        {
+            m_Time = 0.0f;
+            m_Index = (m_Index + 1) % m_Animation->Count();
+            const Sprite& newSprite = m_Animation->GetSprite(m_Index);
+            m_SpriteRenderer->SetSprite(newSprite);
+            std::println("{}", m_Index);
+        }
     }
 
     SpriteRenderer* SpriteAnimator::GetSpriteRenderer() const
@@ -58,7 +63,7 @@ namespace Nova
     {
         m_Animation = Animation;
         m_Index = 0;
-        m_Timer.Reset();
+        m_Time = 0.0f;
     }
 
     void SpriteAnimator::SetSpeed(const int32_t speed)
@@ -69,12 +74,5 @@ namespace Nova
     int32_t SpriteAnimator::GetSpeed() const
     {
         return m_Speed;
-    }
-
-    void SpriteAnimator::OnSpriteChange()
-    {
-        m_Index = (m_Index + 1) % m_Animation->Count();
-        const Sprite& NewSprite = m_Animation->GetSprite(m_Index);
-        m_SpriteRenderer->SetSprite(NewSprite);
     }
 }

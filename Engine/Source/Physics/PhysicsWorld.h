@@ -2,6 +2,7 @@
 #include "PhysicsBodyDefinition.h"
 #include "Containers/Array.h"
 #include "Math/Vector3.h"
+#include "Runtime/Object.h"
 
 namespace Nova
 {
@@ -18,11 +19,11 @@ namespace Nova
         uint32_t iterations = 4;
     };
 
-    class PhysicsWorld
+    class PhysicsWorld : public Object
     {
     public:
         PhysicsWorld() = default;
-        virtual ~PhysicsWorld() = default;
+        ~PhysicsWorld() override = default;
         virtual bool Initialize(const PhysicsWorldCreateInfo& createInfo) = 0;
         virtual void Step() = 0;
         virtual void Destroy() = 0;

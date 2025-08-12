@@ -1,6 +1,9 @@
 #include "Scene.h"
 #include "Entity.h"
 
+#ifdef NOVA_HAS_PHYSICS
+#include "Physics/PhysicsWorld2D.h"
+#endif
 
 namespace Nova
 {
@@ -9,7 +12,8 @@ namespace Nova
 #ifdef NOVA_HAS_PHYSICS
         PhysicsWorldCreateInfo physics2DCreateInfo;
         physics2DCreateInfo.scene = this;
-        m_PhysicsWorld2D.Initialize(physics2DCreateInfo);
+        m_PhysicsWorld2D = MakeRef<PhysicsWorld2D>();
+        m_PhysicsWorld2D->Initialize(physics2DCreateInfo);
 #endif
 
 #ifdef NOVA_HAS_PHYSICS3D
@@ -29,7 +33,7 @@ namespace Nova
         }
 
 #ifdef NOVA_HAS_PHYSICS
-        m_PhysicsWorld2D.Step();
+        m_PhysicsWorld2D->Step();
 #endif
 
 #ifdef NOVA_HAS_PHYSICS3D
@@ -39,6 +43,14 @@ namespace Nova
         for(Entity* entity : m_Entities)
         {
             entity->OnPhysicsUpdate(deltaTime);
+        }
+    }
+
+    void Scene::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    {
+        for(Entity* entity : m_Entities)
+        {
+            entity->OnPreRender(cmdBuffer);
         }
     }
 
@@ -59,7 +71,7 @@ namespace Nova
             DestroyEntity(handle);
         }
 #ifdef NOVA_HAS_PHYSICS
-        m_PhysicsWorld2D.Destroy();
+        m_PhysicsWorld2D->Destroy();
 #endif
 
 #ifdef NOVA_HAS_PHYSICS3D
@@ -81,7 +93,11 @@ namespace Nova
         if (handle == nullptr)
             return false;
 
+        if (handle.GetContext() != this)
+            return false;
+
         Entity* entity = handle.GetEntity();
+        // Might remove this, already checked in EntityHandle::GetEntity
         if(!m_Entities.Contains(entity)) return false;
 
         entity->OnDestroy();
@@ -96,10 +112,6 @@ namespace Nova
         return m_Owner;
     }
 
-    void Scene::SetName(const String& name)
-    {
-        m_Name = name;
-    }
 
     void Scene::ForEach(const Function<void(const EntityHandle&)>& function)
     {
@@ -111,12 +123,7 @@ namespace Nova
     }
 
 #ifdef NOVA_HAS_PHYSICS
-    const PhysicsWorld2D& Scene::GetPhysicsWorld2D() const
-    {
-        return m_PhysicsWorld2D;
-    }
-
-    PhysicsWorld2D& Scene::GetPhysicsWorld2D()
+    Ref<PhysicsWorld2D> Scene::GetPhysicsWorld2D() const
     {
         return m_PhysicsWorld2D;
     }

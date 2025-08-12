@@ -2,13 +2,10 @@
 #include "Object.h"
 #include "Uuid.h"
 #include "Entity.h"
-#include "../Containers/Function.h"
-#include "../Containers/String.h"
-#include "../Containers/BumpAllocator.h"
-
-#ifdef NOVA_HAS_PHYSICS
-#include "../Physics/PhysicsWorld2D.h"
-#endif
+#include "Ref.h"
+#include "Containers/Function.h"
+#include "Containers/String.h"
+#include "Containers/BumpAllocator.h"
 
 #ifdef NOVA_HAS_PHYSICS3D
 #include "Physics/PhysicsWorld3D.h"
@@ -19,6 +16,7 @@ namespace Nova::Rendering { class CommandBuffer; }
 namespace Nova
 {
     class Application;
+    class PhysicsWorld2D;
 
     class Scene : public Object
     {
@@ -31,6 +29,7 @@ namespace Nova
          
         void OnInit();
         void OnUpdate(float deltaTime);
+        void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
         void OnRender(Rendering::CommandBuffer& cmdBuffer);
         void OnDestroy();
 
@@ -48,18 +47,15 @@ namespace Nova
         
         EntityHandle CreateEntity(const String& name);
         bool DestroyEntity(EntityHandle& handle);
-        
+
         Uuid GetGuid() const { return m_Uuid; }
-        const String& GetName() const { return m_Name; }
-        void SetName(const String& name);
         void ForEach(const Function<void(const EntityHandle&)>& function);
 
         Application* GetOwner() const;
 
 
 #ifdef NOVA_HAS_PHYSICS
-        const PhysicsWorld2D& GetPhysicsWorld2D() const;
-        PhysicsWorld2D& GetPhysicsWorld2D();
+        Ref<PhysicsWorld2D> GetPhysicsWorld2D() const;
 #endif
 #ifdef NOVA_HAS_PHYSICS3D
         const PhysicsWorld3D& GetPhysicsWorld3D() const;
@@ -74,12 +70,11 @@ namespace Nova
 
     private:
         Uuid m_Uuid;
-        String m_Name;
         BumpAllocator<Entity, 32> m_EntityPool;
         Array<Entity*> m_Entities;
         Application* m_Owner = nullptr;
 #ifdef NOVA_HAS_PHYSICS
-        PhysicsWorld2D m_PhysicsWorld2D;
+        Ref<PhysicsWorld2D> m_PhysicsWorld2D = nullptr;
 #endif
 #ifdef NOVA_HAS_PHYSICS3D
         PhysicsWorld3D m_PhysicsWorld3D;

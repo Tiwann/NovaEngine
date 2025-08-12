@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Object.h"
 #include "Uuid.h"
-#include "../Containers/String.h"
+#include "Containers/String.h"
 #include "Flags.h"
 
 
@@ -45,6 +45,7 @@ namespace Nova
         virtual void OnDisable() {}
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnPhysicsUpdate(float deltaTime) {}
+        virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
         //virtual void OnInspectorGUI(const ImGuiIO& IO) {}
 

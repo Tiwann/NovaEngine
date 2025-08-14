@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Component.h"
-#include "Assets/Sprite.h"
+#include "../../Runtime/Sprite.h"
 #include "Math/Vector2.h"
 #include "Rendering/SpriteRendererFlags.h"
 #include "Rendering/Vulkan/Buffer.h"
@@ -8,6 +8,7 @@
 #include "Rendering/Vulkan/GraphicsPipeline.h"
 #include "Rendering/Vulkan/Sampler.h"
 #include "Rendering/Vulkan/ShaderBindingSetLayout.h"
+#include "Runtime/Ref.h"
 
 typedef struct VkPipelineLayout_T* VkPipelineLayout;
 typedef struct VkDescriptorSet_T* VkDescriptorSet;
@@ -54,6 +55,7 @@ namespace Nova
     private:
         Sprite m_Sprite = { 0, 0, 0, 0, nullptr };
         SpriteAnimation* m_SpriteAnimation = nullptr;
+        SpriteAnimation* m_PendingSpriteAnimation = nullptr;
         SpriteRendererFlags m_Flags = SpriteRendererFlagBits::None;
         uint32_t m_PixelsPerUnit = 128;
         Vector2 m_Tiling = Vector2::One;
@@ -64,6 +66,7 @@ namespace Nova
         uint32_t m_SpriteIndex = 0;
 
         Rendering::Shader* m_Shader = nullptr;
+        Ref<Rendering::ShaderBindingSet> m_BindingSet = nullptr;
         Vulkan::Buffer m_VertexBuffer;
         Vulkan::Buffer m_IndexBuffer;
         Vulkan::Buffer m_UniformBuffer;

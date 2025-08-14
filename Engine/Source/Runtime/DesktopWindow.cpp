@@ -235,7 +235,7 @@ namespace Nova
         return m_DeltaMousePosition;
     }
 
-    void DesktopWindow::SetFullscreen(bool enabled)
+    void DesktopWindow::SetFullscreen(const bool enabled)
     {
         if (enabled)
         {
@@ -250,6 +250,12 @@ namespace Nova
         {
             glfwSetWindowMonitor(m_Handle, nullptr, m_CachedPosX, m_CachedPosY, m_CachedWidth, m_CachedHeight, GLFW_DONT_CARE);
         }
+    }
+
+    void DesktopWindow::SetIcon(const void* pixels, const uint32_t width, const uint32_t height)
+    {
+        const GLFWimage image { (int32_t)width, (int32_t)height, (unsigned char*)pixels };
+        glfwSetWindowIcon(m_Handle, 1, &image);
     }
 
 

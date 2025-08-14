@@ -3,11 +3,11 @@
 #include "ShaderModuleInfo.h"
 #include "ShaderEntryPoint.h"
 #include "ShaderTarget.h"
+#include "Runtime/Asset.h"
+#include "Runtime/Ref.h"
 
 #include <slang/slang.h>
 #include <slang/slang-com-ptr.h>
-
-#include "Runtime/Asset.h"
 
 
 namespace Nova::Rendering
@@ -16,6 +16,7 @@ namespace Nova::Rendering
     class Texture;
     class Sampler;
     class Buffer;
+    class ShaderBindingSet;
 
     struct ShaderCreateInfo
     {
@@ -38,9 +39,6 @@ namespace Nova::Rendering
         virtual bool Initialize(const ShaderCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        virtual bool BindTexture(uint32_t set, uint32_t binding, const Texture& texture) = 0;
-        virtual bool BindSampler(uint32_t set, uint32_t binding, const Sampler& sampler) = 0;
-        virtual bool BindCombinedSamplerTexture(uint32_t set, uint32_t binding, const Sampler& sampler, const Texture& texture) = 0;
-        virtual bool BindBuffer(uint32_t set, uint32_t binding, const Buffer& buffer, size_t offset, size_t size) = 0;
+        virtual Ref<ShaderBindingSet> CreateBindingSet(size_t setIndex) const = 0;
     };
 }

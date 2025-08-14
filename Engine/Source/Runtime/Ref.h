@@ -10,7 +10,7 @@ namespace Nova
     public:
         Ref() = default;
 
-        Ref(T* ptr) : m_Pointer(ptr)
+        explicit Ref(T* ptr) : m_Pointer(ptr)
         {
             if (ptr)
                 ((RefObject*)ptr)->AddReference();

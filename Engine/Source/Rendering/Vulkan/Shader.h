@@ -15,23 +15,17 @@ namespace Nova::Vulkan
     {
     public:
         bool Initialize(const Rendering::ShaderCreateInfo& createInfo) override;
-
         void Destroy() override;
-        bool BindTexture(uint32_t set, uint32_t binding, const Rendering::Texture& texture) override;
-        bool BindSampler(uint32_t set, uint32_t binding, const Rendering::Sampler& sampler) override;
-        bool BindCombinedSamplerTexture(uint32_t set, uint32_t binding, const Rendering::Sampler& sampler, const Rendering::Texture& texture) override;
-        bool BindBuffer(uint32_t set, uint32_t binding, const Rendering::Buffer& buffer, size_t offset, size_t size) override;
 
+        Ref<Rendering::ShaderBindingSet> CreateBindingSet(size_t setIndex) const override;
 
         const Array<ShaderModule>& GetShaderModules() const;
         const ShaderModule& GetShaderModule(ShaderStageFlagBits stage) const;
         const Array<ShaderBindingSetLayout>& GetBindingSetLayouts() const;
-        const Array<ShaderBindingSet>& GetBindingSets() const;
         ShaderStageFlags GetShaderStageFlags() const;
         VkPipelineLayout GetPipelineLayout() const;
 
         Array<VkDescriptorSetLayout> GetDescriptorSetLayouts() const;
-        Array<VkDescriptorSet> GetDescriptorSets() const;
     private:
         Device* m_Device = nullptr;
         Slang::ComPtr<slang::IGlobalSession> m_Slang = nullptr;
@@ -44,7 +38,6 @@ namespace Nova::Vulkan
         Array<Rendering::ShaderPushConstantRange> m_PushConstantRanges;
         Array<ShaderModule> m_ShaderModules;
         Array<ShaderBindingSetLayout> m_BindingSetLayouts;
-        Array<ShaderBindingSet> m_BindingSets;
         VkPipelineLayout m_PipelineLayout = nullptr;
     };
 }

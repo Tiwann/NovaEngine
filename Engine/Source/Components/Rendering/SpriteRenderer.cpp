@@ -3,16 +3,18 @@
 #include "Runtime/Scene.h"
 #include "Math/Matrix4.h"
 #include "Rendering/ShaderModule.h"
-#include "Runtime/GameApplication.h"
+#include "Runtime/Application.h"
 #include "Components/Transform.h"
 #include "Components/Camera.h"
 #include "Utils/BufferUtils.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Shader.h"
-#include "Assets/SpriteAnimation.h"
+#include "../../Runtime/SpriteAnimation.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdint>
+
+#include "Rendering/Vulkan/Shader.h"
 
 
 namespace Nova
@@ -68,6 +70,7 @@ namespace Nova
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Rendering::Shader>("Sprite");
+        m_BindingSet = m_Shader->CreateBindingSet(0);
 
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = device;
@@ -89,8 +92,8 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.height = renderPass->GetHeight();
         m_Pipeline.Initialize(pipelineCreateInfo);
 
-        m_Shader->BindSampler(0, 0, m_Sampler);
-        m_Shader->BindBuffer(0, 2, m_UniformBuffer, 0, sizeof(Uniforms));
+        m_BindingSet->BindSampler(0, m_Sampler);
+        m_BindingSet->BindBuffer(2, m_UniformBuffer, 0, sizeof(Uniforms));
     }
 
     void SpriteRenderer::OnUpdate(const float deltaTime)
@@ -102,8 +105,7 @@ namespace Nova
             {
                 m_Time = 0.0f;
                 m_SpriteIndex = (m_SpriteIndex + 1) % m_SpriteAnimation->Count();
-                SetSprite(m_SpriteAnimation->GetSprite(m_SpriteIndex));
-                m_Shader->BindTexture(0, 1, *m_Sprite.texture);
+                m_Sprite = m_SpriteAnimation->GetSprite(m_SpriteIndex);
             }
         }
     }
@@ -152,8 +154,9 @@ namespace Nova
         const Rendering::RenderPass* renderPass = application->GetRenderPass();
 
 
+        m_BindingSet->BindTexture(1, *m_Sprite.texture);
         cmdBuffer.BindGraphicsPipeline(m_Pipeline);
-        cmdBuffer.BindShader(*m_Shader);
+        cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.BindVertexBuffer(m_VertexBuffer, 0);
         cmdBuffer.BindIndexBuffer(m_IndexBuffer, 0, Format::Uint32);
         cmdBuffer.SetViewport(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight(), 0.0f, 1.0f);
@@ -173,15 +176,30 @@ namespace Nova
 
     void SpriteRenderer::SetSprite(const Sprite& sprite)
     {
+        const Application* application = GetApplication();
+        const Ref<Rendering::Device>& device = application->GetDevice();
+        device->WaitIdle();
+
         if (!sprite.texture) return;
         if (sprite == m_Sprite) return;
 
         m_Sprite = sprite;
+        m_SpriteIndex = 0;
+        m_Time = 0.0f;
+        m_BindingSet->BindTexture(1, *m_Sprite.texture);
     }
 
     void SpriteRenderer::SetSpriteAnimation(SpriteAnimation* spriteAnimation)
     {
+        const Application* application = GetApplication();
+        const Ref<Rendering::Device>& device = application->GetDevice();
+        device->WaitIdle();
+
         m_SpriteAnimation = spriteAnimation;
+        m_SpriteIndex = 0;
+        m_Time = 0.0f;
+        m_Sprite = spriteAnimation->GetSprite(m_SpriteIndex);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture);
     }
 
     SpriteAnimation* SpriteRenderer::GetSpriteAnimation() const

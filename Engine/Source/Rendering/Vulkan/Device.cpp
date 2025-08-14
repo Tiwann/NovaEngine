@@ -64,6 +64,36 @@ namespace Nova::Vulkan
         if (!LoadVulkanFunctions(m_Instance))
             return false;
 
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        static const decltype(VkDebugUtilsMessengerCreateInfoEXT::pfnUserCallback) messageCallback =
+            [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+            const VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+            void* pUserData) -> VkBool32
+        {
+            if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+            {
+                std::println(std::cerr, "[VULKAN ERROR] {}", pCallbackData->pMessage);
+                return true;
+            }
+
+            if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+            {
+                std::println(std::cerr, "[VULKAN WARNING] {}", pCallbackData->pMessage);
+                return true;
+            }
+            return false;
+        };
+        VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo = { VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
+        debugMessengerCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+        debugMessengerCreateInfo.pfnUserCallback = messageCallback;
+        if (vkCreateDebugUtilsMessenger(m_Instance, &debugMessengerCreateInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS)
+            return false;
+#endif
+
         VkPhysicalDevice availablePhysicalDevices[32];
         uint32_t availablePhysicalDeviceCount = 0;
         vkEnumeratePhysicalDevices(m_Instance, &availablePhysicalDeviceCount, nullptr);

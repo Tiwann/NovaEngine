@@ -1,7 +1,8 @@
-﻿#include "GameApplication.h"
+﻿#include "Application.h"
 #include "Path.h"
 #include "Time.h"
 #include "Window.h"
+#include "Audio/AudioSystem.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
@@ -31,10 +32,9 @@ namespace Nova
         rdCreateInfo.appName = configuration.applicationName;
         rdCreateInfo.window = m_Window;
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
-        rdCreateInfo.vSync = true;
+        rdCreateInfo.vSync = configuration.vsync;
         m_Device = CreateRenderDevice(Rendering::DeviceType::Vulkan, rdCreateInfo);
         if (!m_Device) return;
-
 
         // Creating render target
         Rendering::RenderTargetCreateInfo rtCreateInfo;
@@ -100,6 +100,11 @@ namespace Nova
         if (SLANG_FAILED(slang::createGlobalSession(&m_SlangSession)))
             return;
 
+        AudioSystemCreateInfo audioSystemCreateInfo;
+        audioSystemCreateInfo.channels = 2;
+        audioSystemCreateInfo.sampleRate = 44100;
+        audioSystemCreateInfo.listenerCount = 1;
+        m_AudioSystem = CreateAudioSystem(audioSystemCreateInfo);
 
         // Load engine shaders
         const auto loadShaderBasic = [this](const String& shaderName, const String& shaderPath) -> Rendering::Shader*

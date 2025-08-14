@@ -7,6 +7,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Conversions.h"
+
 namespace Nova::Vulkan
 {
     static SlangCompileTarget GetCompileTarget(const Rendering::ShaderTarget target)
@@ -83,7 +85,6 @@ namespace Nova::Vulkan
         m_EntryPoints.Clear();
         m_ShaderModules.Clear();
         m_BindingSetLayouts.Clear();
-        m_BindingSets.Clear();
 
         slang::TargetDesc shaderTargetDesc;
         shaderTargetDesc.format = GetCompileTarget(createInfo.target);
@@ -168,10 +169,9 @@ namespace Nova::Vulkan
             m_ShaderModules.Add(shaderModule);
         }
 
-
         slang::ProgramLayout* programLayout = m_LinkedProgram->getLayout();
-        slang::VariableLayoutReflection* varLayout = programLayout->getGlobalParamsVarLayout();
-        slang::TypeLayoutReflection* typeLayout = varLayout->getTypeLayout();
+        slang::VariableLayoutReflection* globalsVarLayout = programLayout->getGlobalParamsVarLayout();
+        slang::TypeLayoutReflection* globalsTypeLayout = globalsVarLayout->getTypeLayout();
 
         ShaderStageFlags stageFlags = ShaderStageFlagBits::None;
         for (int e = 0; e < programLayout->getEntryPointCount(); ++e)
@@ -180,25 +180,45 @@ namespace Nova::Vulkan
             stageFlags |= GetStage(ep->getStage());
         }
 
-        const uint32_t setCount = typeLayout->getDescriptorSetCount();
+        Array<Rendering::ShaderPushConstantRange> ranges;
+        uint32_t paramCount = programLayout->getParameterCount();
+        uint32_t offset = 0;
+        for (uint32_t paramIndex = 0; paramIndex < paramCount; ++paramIndex)
+        {
+            slang::VariableLayoutReflection* variableLayout = programLayout->getParameterByIndex(paramIndex);
+            slang::VariableReflection* variable = variableLayout->getVariable();
+            slang::Attribute* attribute = variable->findAttributeByName(createInfo.slang, "vk_push_constant");
+            if (!attribute) continue;
+
+            slang::TypeLayoutReflection* typeLayout = variableLayout->getTypeLayout();
+            size_t size = typeLayout->getElementTypeLayout()->getSize();
+
+            if (size > 0)
+            {
+                Rendering::ShaderPushConstantRange range;
+                range.offset = offset;
+                range.size = size;
+                range.stageFlags = stageFlags;
+                ranges.Add(range);
+                offset += size;
+            }
+        }
+
+
+        const uint32_t setCount = globalsTypeLayout->getDescriptorSetCount();
         for (uint32_t setIndex = 0; setIndex < setCount; ++setIndex)
         {
-            const uint32_t bindingCount = typeLayout->getDescriptorSetDescriptorRangeCount(setIndex);
-
+            const uint32_t bindingCount = globalsTypeLayout->getDescriptorSetDescriptorRangeCount(setIndex);
 
             ShaderBindingSetLayout bindingSetLayout;
             for (uint32_t bindingIndex = 0; bindingIndex < bindingCount; ++bindingIndex)
             {
-                const BindingType bindingType = GetBindingType(typeLayout->getDescriptorSetDescriptorRangeType(setIndex, bindingIndex));
-                if (bindingType == BindingType::PushConstant)
-                {
-                    continue;
-                }
+                const BindingType bindingType = GetBindingType(globalsTypeLayout->getDescriptorSetDescriptorRangeType(setIndex, bindingIndex));
+                if (bindingType == BindingType::PushConstant) continue;
 
-                size_t bindingIndexOffset = typeLayout->getDescriptorSetDescriptorRangeIndexOffset(setIndex, bindingIndex);
-
-                const uint32_t descriptorCount = typeLayout->getDescriptorSetDescriptorRangeDescriptorCount(setIndex, bindingIndex);
-                bindingSetLayout.SetBinding(bindingIndex, { "", stageFlags, bindingType, descriptorCount });
+                size_t bindingIndexOffset = globalsTypeLayout->getDescriptorSetDescriptorRangeIndexOffset(setIndex, bindingIndex);
+                const uint32_t descriptorCount = globalsTypeLayout->getDescriptorSetDescriptorRangeDescriptorCount(setIndex, bindingIndex);
+                bindingSetLayout.SetBinding(bindingIndexOffset, { "", stageFlags, bindingType, descriptorCount });
             }
 
             if (bindingSetLayout.BindingCount() > 0)
@@ -210,26 +230,27 @@ namespace Nova::Vulkan
         }
 
         Device* device = (Device*)createInfo.device;
-        const DescriptorPool* descriptorPool = device->GetDescriptorPool();
-        for (const ShaderBindingSetLayout& bindingSetLayout : m_BindingSetLayouts)
-        {
-            ShaderBindingSet bindingSet;
-            bindingSet.Initialize(*descriptorPool, bindingSetLayout);
-            m_BindingSets.Add(bindingSet);
-        }
 
-        const auto toDescriptorSetLayouts = [](const ShaderBindingSetLayout& setLayout)
+        Array<VkDescriptorSetLayout> descriptorSetLayouts = m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
+            [](const ShaderBindingSetLayout& setLayout)
         {
             return setLayout.GetHandle();
-        };
+        });
 
-        Array<VkDescriptorSetLayout> descriptorSetLayouts = m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(toDescriptorSetLayouts);
+        Array<VkPushConstantRange> pushConstantRanges = ranges.Transform<VkPushConstantRange>([](const Rendering::ShaderPushConstantRange& range)
+        {
+            VkPushConstantRange pcRange;
+            pcRange.offset = range.offset;
+            pcRange.size = range.size;
+            pcRange.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(range.stageFlags);
+            return pcRange;
+        });
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo { VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
         pipelineLayoutCreateInfo.setLayoutCount = descriptorSetLayouts.Count();
         pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.Data();
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutCreateInfo.pushConstantRangeCount = ranges.Count();
+        pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.Data();
         vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
 
         m_Device = device;
@@ -241,118 +262,24 @@ namespace Nova::Vulkan
         for (auto& bindingSetLayout : m_BindingSetLayouts)
             bindingSetLayout.Destroy();
 
-        for (auto& bindingSet : m_BindingSets)
-            bindingSet.Destroy();
-
         for (auto& shaderModule : m_ShaderModules)
             shaderModule.Destroy();
 
         vkDestroyPipelineLayout(m_Device->GetHandle(), m_PipelineLayout, nullptr);
     }
 
-    bool Shader::BindTexture(const uint32_t set, const uint32_t binding, const Rendering::Texture& texture)
+    Ref<Rendering::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
     {
-        if (set > m_BindingSets.Count())
-            return false;
+        Rendering::ShaderBindingSetCreateInfo createInfo;
+        createInfo.device = m_Device;
+        createInfo.pool = m_Device->GetDescriptorPool();
+        createInfo.layout = &m_BindingSetLayouts[setIndex];
 
-        VkDescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = ((const Texture&)texture).GetImageView();
+        ShaderBindingSet* bindingSet = new ShaderBindingSet();
+        if (!bindingSet->Initialize(createInfo))
+            return nullptr;
 
-        VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        if (texture.GetUsageFlags().Contains(Rendering::TextureUsageFlagBits::Storage))
-            descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-
-        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = descriptorType;
-        write.descriptorCount = 1;
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.pImageInfo = &imageInfo;
-        write.dstSet = m_BindingSets[set].GetHandle();
-        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
-        return true;
-    }
-
-    bool Shader::BindSampler(const uint32_t set, const uint32_t binding, const Rendering::Sampler& sampler)
-    {
-        if (set > m_BindingSets.Count())
-            return false;
-
-        VkDescriptorImageInfo imageInfo;
-        imageInfo.sampler = ((const Sampler&)sampler).GetHandle();
-
-        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-        write.descriptorCount = 1;
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.pImageInfo = &imageInfo;
-        write.dstSet = m_BindingSets[set].GetHandle();
-        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
-        return true;
-    }
-
-    bool Shader::BindCombinedSamplerTexture(const uint32_t set, const uint32_t binding, const Rendering::Sampler& sampler, const Rendering::Texture& texture)
-    {
-        if (set > m_BindingSets.Count())
-            return false;
-
-        VkDescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = ((const Texture&)texture).GetImageView();
-        imageInfo.sampler = ((const Sampler&)sampler).GetHandle();
-
-        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        write.descriptorCount = 1;
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.pImageInfo = &imageInfo;
-        write.dstSet = m_BindingSets[set].GetHandle();
-        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
-        return true;
-    }
-
-    bool Shader::BindBuffer(const uint32_t set, const uint32_t binding, const Rendering::Buffer& buffer, const size_t offset, const size_t size)
-    {
-        if (set > m_BindingSets.Count())
-            return false;
-
-        VkDescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = ((const Buffer&)buffer).GetHandle();
-        bufferInfo.offset = offset;
-        bufferInfo.range = size;
-
-        VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
-        switch (buffer.GetUsage())
-        {
-        case Rendering::BufferUsage::None:
-        case Rendering::BufferUsage::VertexBuffer:
-        case Rendering::BufferUsage::IndexBuffer:
-        case Rendering::BufferUsage::UniformBuffer:
-            descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            break;
-        case Rendering::BufferUsage::StorageBuffer:
-            descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            break;
-        case Rendering::BufferUsage::StagingBuffer:
-            break;
-        }
-
-        if (descriptorType == VK_DESCRIPTOR_TYPE_MAX_ENUM)
-            return false;
-
-
-        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = descriptorType;
-        write.descriptorCount = 1;
-        write.dstBinding = binding;
-        write.dstArrayElement = 0;
-        write.pBufferInfo = &bufferInfo;
-        write.dstSet = m_BindingSets[set].GetHandle();
-        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
-        return true;
+        return Ref<Rendering::ShaderBindingSet>(bindingSet);
     }
 
     const Array<ShaderModule>& Shader::GetShaderModules() const
@@ -373,11 +300,6 @@ namespace Nova::Vulkan
         return m_BindingSetLayouts;
     }
 
-    const Array<ShaderBindingSet>& Shader::GetBindingSets() const
-    {
-        return m_BindingSets;
-    }
-
     ShaderStageFlags Shader::GetShaderStageFlags() const
     {
         ShaderStageFlags stageFlags = ShaderStageFlagBits::None;
@@ -393,11 +315,10 @@ namespace Nova::Vulkan
 
     Array<VkDescriptorSetLayout> Shader::GetDescriptorSetLayouts() const
     {
-        return m_BindingSetLayouts.Transform<VkDescriptorSetLayout>([](const ShaderBindingSetLayout& bindingSetLayout) { return bindingSetLayout.GetHandle(); });
-    }
-
-    Array<VkDescriptorSet> Shader::GetDescriptorSets() const
-    {
-        return m_BindingSets.Transform<VkDescriptorSet>([](const ShaderBindingSet& bindingSet) { return bindingSet.GetHandle(); });
+        return m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
+            [](const ShaderBindingSetLayout& bindingSetLayout)
+            {
+                return bindingSetLayout.GetHandle();
+            });
     }
 }

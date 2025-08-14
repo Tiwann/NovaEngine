@@ -16,6 +16,7 @@ namespace slang { class IGlobalSession; }
 namespace Nova
 {
     class Window;
+    class AudioSystem;
 
     struct ApplicationConfiguration
     {
@@ -62,6 +63,7 @@ namespace Nova
     private:
         Ref<Window> m_Window = nullptr;
         Ref<Rendering::Device> m_Device = nullptr;
+        Ref<AudioSystem> m_AudioSystem = nullptr;
         slang::IGlobalSession* m_SlangSession = nullptr;
 
         Ref<Rendering::RenderTarget> m_RenderTarget = nullptr;

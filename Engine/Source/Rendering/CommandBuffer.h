@@ -19,6 +19,7 @@ namespace Nova::Rendering
     class Texture;
     struct BlitRegion;
     class ShaderBindingSetLayout;
+    class ShaderBindingSet;
     class Shader;
 
     enum class CommandBufferLevel
@@ -69,7 +70,7 @@ namespace Nova::Rendering
         virtual void BindComputePipeline(const ComputePipeline& pipeline) = 0;
         virtual void BindVertexBuffer(const Buffer& vertexBuffer, size_t offset) = 0;
         virtual void BindIndexBuffer(const Buffer& indexBuffer, size_t offset, Format indexFormat) = 0;
-        virtual void BindShader(const Shader& shader) = 0;
+        virtual void BindShaderBindingSet(const Shader& shader, const ShaderBindingSet& bindingSet) = 0;
         virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
         virtual void DrawIndexed(size_t count, size_t offset) = 0;

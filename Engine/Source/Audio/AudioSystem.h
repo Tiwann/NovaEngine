@@ -3,6 +3,8 @@
 #include <miniaudio.h>
 #include <cstdint>
 
+#include "Runtime/Ref.h"
+
 
 namespace Nova
 {
@@ -38,4 +40,6 @@ namespace Nova
         ma_engine m_Engine;
         static AudioSystem* s_Instance;
     };
+
+    Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo);
 }

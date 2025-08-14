@@ -27,7 +27,7 @@ namespace Nova::Vulkan
         void BindComputePipeline(const Rendering::ComputePipeline& pipeline) override;
         void BindVertexBuffer(const Rendering::Buffer& vertexBuffer, size_t offset) override;
         void BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat) override;
-        void BindShader(const Rendering::Shader& shader) override;
+        void BindShaderBindingSet(const Rendering::Shader& shader, const Rendering::ShaderBindingSet& bindingSet) override;
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void DrawIndexed(size_t count, size_t offset) override;

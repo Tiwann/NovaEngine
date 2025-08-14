@@ -39,19 +39,26 @@ enum Flags
 VertexOutput vert(VertexInput input)
 {
     VertexOutput out;
-    uint textureWidth = 0, textureHeight = 0;
-    texture.GetDimensions(textureWidth, textureHeight);
 
-    const int col = uniforms.frameIndex % uniforms.cols;
-    const int row = uniforms.frameIndex / uniforms.cols;
+    float2 texCoords = input.texCoords;
+	if(uniforms.cols != 0 && uniforms.rows != 0)
+	{
+		uint textureWidth = 0, textureHeight = 0;
+        texture.GetDimensions(textureWidth, textureHeight);
 
-    const float2 frameSize = float2(1.0 / uniforms.cols, 1.0 / uniforms.rows);
-    float2 texCoords = input.texCoords * frameSize + float2(col, row) * frameSize;
-    if ((uniforms.flags & Flags.FlipHorizontal) != 0)
-        texCoords.x *= -1;
+        const int col = uniforms.frameIndex % uniforms.cols;
+        const int row = uniforms.frameIndex / uniforms.cols;
 
-    if ((uniforms.flags & Flags.FlipVertical) != 0)
-            texCoords.y *= -1;
+		const float2 frameSize = float2(1.0 / uniforms.cols, 1.0 / uniforms.rows);
+        texCoords = input.texCoords * frameSize + float2(col, row) * frameSize;
+
+        if (uniforms.flags & Flags.FlipHorizontal)
+            texCoords.x *= -1;
+
+        if (uniforms.flags & Flags.FlipVertical)
+                texCoords.y *= -1;
+    }
+
 
 	float2 scaledPosition = mul(uniforms.spriteScale, input.position);
     out.position = mul(uniforms.mvp, float4(scaledPosition, 0.0, 1.0));

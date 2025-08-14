@@ -2,7 +2,7 @@
 #include "Math/LinearAlgebra.h"
 #include "Transform.h"
 #include "Runtime/Entity.h"
-#include "Runtime/GameApplication.h"
+#include "Runtime/Application.h"
 #include "Runtime/Window.h"
 
 namespace Nova

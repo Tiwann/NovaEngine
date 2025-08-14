@@ -14,6 +14,7 @@ typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 typedef struct VkDevice_T* VkDevice;
 typedef struct VmaAllocator_T* VmaAllocator;
+typedef struct VkDebugUtilsMessengerEXT_T* VkDebugUtilsMessengerEXT;
 
 namespace Nova::Vulkan
 {
@@ -80,5 +81,8 @@ namespace Nova::Vulkan
         uint32_t m_CurrentFrameIndex = 0;
         uint32_t m_LastFrameIndex = 0;
 
+#if defined(NOVA_DEV) || defined(NOVA_DEBUG)
+        VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
+#endif
     };
 }

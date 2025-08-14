@@ -142,4 +142,15 @@ namespace Nova
     {
         return s_Instance;
     }
+
+    Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo)
+    {
+        AudioSystem* audioSystem = new AudioSystem();
+        if (!audioSystem->Initialize(createInfo))
+        {
+            delete audioSystem;
+            return nullptr;
+        }
+        return Ref(audioSystem);
+    }
 }

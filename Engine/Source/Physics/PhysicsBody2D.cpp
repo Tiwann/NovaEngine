@@ -2,6 +2,7 @@
 #include "PhysicsMaterial.h"
 #include "PhysicsWorld2D.h"
 #include "Math/Quaternion.h"
+#include "Box2DHelpers.h"
 
 #include <box2d/box2d.h>
 
@@ -9,6 +10,7 @@ namespace Nova
 {
     PhysicsBody2D::PhysicsBody2D(const b2BodyId handle, const PhysicsWorld2D& world) : PhysicsBody(world), m_Handle(handle)
     {
+
     }
 
     void PhysicsBody2D::SetPosition(const Vector3& position)
@@ -42,6 +44,7 @@ namespace Nova
     void PhysicsBody2D::SetPositionAndRotation(const Vector3& position, const Quaternion& rotation)
     {
         const float radians = rotation.ToEuler().z;
+
         b2Body_SetTransform(m_Handle, b2Vec2(position.x, position.y), b2MakeRot(radians));
     }
 
@@ -90,27 +93,27 @@ namespace Nova
     Vector3 PhysicsBody2D::GetLinearVelocityPoint(const Vector3& localPoint) const
     {
         const b2Vec2 linearVelocity = b2Body_GetLocalPointVelocity(m_Handle, b2Vec2(localPoint.x, localPoint.y));
-        return Vector3(linearVelocity.x, linearVelocity.y, 0.0f);
+        return Vector3(ToVector2(linearVelocity));
     }
 
     void PhysicsBody2D::AddForce(const Vector3& force)
     {
-        b2Body_ApplyForceToCenter(m_Handle, b2Vec2(force.x, force.y), true);
+        b2Body_ApplyForceToCenter(m_Handle, Tob2Vec2(force), true);
     }
 
     void PhysicsBody2D::AddImpulse(const Vector3& impulse)
     {
-        b2Body_ApplyLinearImpulseToCenter(m_Handle, b2Vec2(impulse.x, impulse.y), true);
+        b2Body_ApplyLinearImpulseToCenter(m_Handle, Tob2Vec2(impulse), true);
     }
 
     void PhysicsBody2D::AddForceAtPosition(const Vector3& position, const Vector3& force)
     {
-        b2Body_ApplyForce(m_Handle, b2Vec2(force.x, force.y), b2Vec2(position.x, position.y), true);
+        b2Body_ApplyForce(m_Handle, Tob2Vec2(force), Tob2Vec2(position), true);
     }
 
     void PhysicsBody2D::AddImpulseAtPosition(const Vector3& position, const Vector3& impulse)
     {
-        b2Body_ApplyLinearImpulse(m_Handle, b2Vec2(impulse.x, impulse.y), b2Vec2(position.x, position.y), true);
+        b2Body_ApplyLinearImpulse(m_Handle, Tob2Vec2(impulse), Tob2Vec2(position), true);
     }
 
     const PhysicsConstraintsFlags& PhysicsBody2D::GetConstraints() const
@@ -121,12 +124,7 @@ namespace Nova
     void PhysicsBody2D::SetConstraints(const PhysicsConstraintsFlags& constraints)
     {
         m_Constraints = constraints;
-
-        b2MotionLocks locks;
-        locks.linearX = constraints.Contains(PhysicsConstraintsFlagBits::PositionX);
-        locks.linearY = constraints.Contains(PhysicsConstraintsFlagBits::PositionY);
-        locks.angularZ = constraints.Contains(PhysicsConstraintsFlagBits::RotationZ);
-        b2Body_SetMotionLocks(m_Handle, locks);
+        b2Body_SetMotionLocks(m_Handle, Tob2MotionLocks(constraints));
     }
 
     const PhysicsMaterial& PhysicsBody2D::GetMaterial() const

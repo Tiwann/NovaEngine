@@ -146,16 +146,15 @@ namespace Nova::Vulkan
         vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
     }
 
-    void CommandBuffer::BindShader(const Rendering::Shader& shader)
+    void CommandBuffer::BindShaderBindingSet(const Rendering::Shader& shader, const Rendering::ShaderBindingSet& bindingSet)
     {
         const Shader& sh = (const Shader&)shader;
 
-        const auto descriptorSets = sh.GetDescriptorSets();
         VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
         info.layout = sh.GetPipelineLayout();
         info.firstSet = 0;
-        info.descriptorSetCount = descriptorSets.Count();
-        info.pDescriptorSets = descriptorSets.Data();
+        info.descriptorSetCount = 1;
+        info.pDescriptorSets = ((const ShaderBindingSet&)bindingSet).GetHandlePtr();
         info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
         info.dynamicOffsetCount = 0;
         info.pDynamicOffsets = nullptr;

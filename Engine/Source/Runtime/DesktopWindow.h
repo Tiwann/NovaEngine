@@ -35,6 +35,7 @@ namespace Nova
         GLFWwindow* GetHandle();
         const GLFWwindow* GetHandle() const;
 
+
         void Show() const;
         void Hide() const;
         void SetPosition(int32_t x, int32_t y);
@@ -45,6 +46,7 @@ namespace Nova
         Vector2 GetMousePosition() const;
         Vector2 GetDeltaMousePosition() const;
         void SetFullscreen(bool enabled);
+        void SetIcon(const void* pixels, uint32_t width, uint32_t height);
 
         bool GetKeyDown(const KeyCode& keyCode) const;
         bool GetKey(const KeyCode& keyCode) const;

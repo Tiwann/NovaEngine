@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Sprite.h"
 #include "SpriteSheet.h"
-#include "Runtime/Asset.h"
+#include "Asset.h"
 #include "Containers/Array.h"
 
 namespace Nova

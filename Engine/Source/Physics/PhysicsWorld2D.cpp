@@ -1,7 +1,6 @@
 ﻿#include "PhysicsWorld2D.h"
-#include <box2d/box2d.h>
-
 #include "PhysicsBody2D.h"
+#include <box2d/box2d.h>
 
 namespace Nova
 {
@@ -30,16 +29,29 @@ namespace Nova
         b2DestroyWorld(m_Handle);
     }
 
-    PhysicsBody* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& definition, const PhysicsMaterial& material)
+    PhysicsBody* PhysicsWorld2D::CreateBody(const PhysicsBodyDefinition& definition)
     {
-        b2BodyDef bodyDefinition = b2DefaultBodyDef();
-        bodyDefinition.position = b2Vec2(definition.position.x, definition.position.y);
-        bodyDefinition.rotation = b2MakeRot(definition.rotation.ToEuler().z);
-        bodyDefinition.type = (b2BodyType)definition.type;
+        b2BodyDef def = b2DefaultBodyDef();
+        def.position = b2Vec2(definition.position.x, definition.position.y);
+        def.rotation = b2MakeRot(definition.rotation.ToEuler().z);
+        def.type = (b2BodyType)definition.type;
 
-        const b2BodyId handle = b2CreateBody(m_Handle, &bodyDefinition);
-        PhysicsBody2D* createdBody = new PhysicsBody2D(handle, *this);
-        b2Body_SetUserData(handle, this);
+        const b2BodyId bodyHandle = b2CreateBody(m_Handle, &def);
+        b2ShapeDef shapeDef = b2DefaultShapeDef();
+        shapeDef.density = definition.material.density;
+        shapeDef.material.friction = definition.material.friction;
+        shapeDef.material.restitution = definition.material.bounciness;
+        shapeDef.material.rollingResistance = 0;
+        shapeDef.isSensor = definition.isTrigger;
+        shapeDef.enableContactEvents = true;
+        shapeDef.enableSensorEvents = true;
+
+        const b2Polygon dynamicBox = b2MakeBox(1.0f, 1.0f);
+        b2CreatePolygonShape(bodyHandle, &shapeDef, &dynamicBox);
+
+
+        PhysicsBody2D* createdBody = new PhysicsBody2D(bodyHandle, *this);
+        b2Body_SetUserData(bodyHandle, this);
         m_Bodies.Add(createdBody);
         return createdBody;
     }

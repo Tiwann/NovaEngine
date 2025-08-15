@@ -8,7 +8,7 @@ namespace Nova
         if (!m_Data.Contains(name))
             return false;
             
-        Asset* asset = m_Data[name];
+        Ref<Asset> asset = m_Data[name];
         if (!m_Data.Remove({ name, asset }))
             return false;
             
@@ -16,7 +16,7 @@ namespace Nova
         return true;
     }
 
-    bool AssetDatabase::UnloadAsset(Asset* asset)
+    bool AssetDatabase::UnloadAsset(Ref<Asset> asset)
     {
         const size_t index = m_Data.FindValue(asset);
         if (index == ~0) return false;

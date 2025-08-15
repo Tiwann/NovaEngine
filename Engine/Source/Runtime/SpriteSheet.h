@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Runtime/Ref.h"
 #include <cstdint>
 
 namespace Nova
@@ -10,6 +11,6 @@ namespace Nova
         uint32_t columns;
         uint32_t spriteCount;
         uint32_t spriteSize;
-        Rendering::Texture* texture = nullptr;
+        Ref<Rendering::Texture> texture = nullptr;
     };
 }

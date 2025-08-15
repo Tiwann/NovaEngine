@@ -1,6 +1,6 @@
 ﻿#include "PhysicsBody2D.h"
-#include "PhysicsMaterial.h"
 #include "PhysicsWorld2D.h"
+#include "PhysicsShape2D.h"
 #include "Math/Quaternion.h"
 #include "Box2DHelpers.h"
 
@@ -11,6 +11,16 @@ namespace Nova
     PhysicsBody2D::PhysicsBody2D(const b2BodyId handle, const PhysicsWorld2D& world) : PhysicsBody(world), m_Handle(handle)
     {
 
+    }
+
+    void PhysicsBody2D::AttachShape(PhysicsShape2D* shape)
+    {
+        shape->Initialize(this);
+    }
+
+    void PhysicsBody2D::DetachShape(PhysicsShape2D* shape)
+    {
+        shape->Destroy();
     }
 
     void PhysicsBody2D::SetPosition(const Vector3& position)
@@ -37,7 +47,7 @@ namespace Nova
         const b2Transform transform = b2Body_GetTransform(m_Handle);
         const b2Vec2 axisX = b2Rot_GetXAxis(transform.q);
         const b2Vec2 axisY = b2Rot_GetYAxis(transform.q);
-        const Vector3 axis = Vector3(axisX.x, axisY.y, 0.0f).Cross(Vector3(axisY.x, axisX.y, 0.0f));
+        const Vector3 axis = Vector3(ToVector2(axisX)).Cross(Vector3(ToVector2(axisY)));
         return Quaternion::FromAxisAngle(axis, b2Rot_GetAngle(transform.q));
     }
 
@@ -127,18 +137,6 @@ namespace Nova
         b2Body_SetMotionLocks(m_Handle, Tob2MotionLocks(constraints));
     }
 
-    const PhysicsMaterial& PhysicsBody2D::GetMaterial() const
-    {
-        return m_Material;
-    }
-
-    void PhysicsBody2D::SetMaterial(const PhysicsMaterial& material)
-    {
-        //b2SurfaceMaterial surfaceMaterial = b2DefaultSurfaceMaterial();
-        //surfaceMaterial.friction = material.friction;
-        //surfaceMaterial.restitution = material.bounciness;
-        //b2Shape_SetSurfaceMaterial(m_Handle, surfaceMaterial);
-    }
 
     PhysicsBodyType PhysicsBody2D::GetType() const
     {
@@ -148,15 +146,17 @@ namespace Nova
     void PhysicsBody2D::SetType(const PhysicsBodyType type)
     {
         m_Type = type;
+        b2Body_SetType(m_Handle, (b2BodyType)type);
     }
 
-    bool PhysicsBody2D::IsSensor()
+    void PhysicsBody2D::SetGravityScale(const float scale)
     {
-        return false;
+        b2Body_SetGravityScale(m_Handle, scale);
     }
 
-    void PhysicsBody2D::SetIsSensor(bool isSensor)
+    float PhysicsBody2D::GetGravityScale() const
     {
+        return b2Body_GetGravityScale(m_Handle);
     }
 
     b2BodyId PhysicsBody2D::GetHandle() const

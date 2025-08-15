@@ -10,7 +10,7 @@ namespace Nova
 
     }
 
-    Entity::Entity(const String& name, Scene* owner) : Object(name), m_Owner(owner), m_Uuid(Uuid::Generate())
+    Entity::Entity(const String& name, Scene* owner) : Object(name), m_Uuid(Uuid::Generate()), m_Owner(owner)
     {
         m_Transform = AddComponent<Transform>();
     }

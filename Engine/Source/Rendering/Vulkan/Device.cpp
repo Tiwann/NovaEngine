@@ -7,10 +7,14 @@
 #include "VulkanExtensions.h"
 #include "Containers/StringFormat.h"
 #include "Runtime/Version.h"
+#include "Buffer.h"
+#include "Sampler.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
+
+#include "GraphicsPipeline.h"
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
@@ -37,8 +41,9 @@ namespace Nova::Vulkan
         Array<const char*> extensions;
         extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
 
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+
 #endif
 
         if (dynamic_cast<DesktopWindow*>(createInfo.window))
@@ -515,7 +520,7 @@ namespace Nova::Vulkan
         m_LastFrameIndex = m_CurrentFrameIndex;
     }
 
-    void Device::WaitIdle()
+    void Device::WaitIdle() const
     {
         vkDeviceWaitIdle(m_Handle);
     }
@@ -534,6 +539,50 @@ namespace Nova::Vulkan
     Rendering::DeviceType Device::GetDeviceType()
     {
         return Rendering::DeviceType::Vulkan;
+    }
+
+    Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo) const
+    {
+        Texture* texture = new Texture();
+        if (!texture->Initialize(createInfo))
+        {
+            delete texture;
+            return nullptr;
+        }
+        return Ref(texture);
+    }
+
+    Ref<Rendering::Sampler> Device::CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const
+    {
+        Sampler* sampler = new Sampler();
+        if (!sampler->Initialize(createInfo))
+        {
+            delete sampler;
+            return nullptr;
+        }
+        return Ref(sampler);
+    }
+
+    Ref<Rendering::Buffer> Device::CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const
+    {
+        Buffer* buffer = new Buffer();
+        if (!buffer->Initialize(createInfo))
+        {
+            delete buffer;
+            return nullptr;
+        }
+        return Ref(buffer);
+    }
+
+    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo)
+    {
+        GraphicsPipeline* pipeline = new GraphicsPipeline();
+        if (!pipeline->Initialize(createInfo))
+        {
+            delete pipeline;
+            return nullptr;
+        }
+        return Ref(pipeline);
     }
 
 

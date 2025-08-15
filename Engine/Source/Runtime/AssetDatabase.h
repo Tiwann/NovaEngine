@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Object.h"
+#include "Ref.h"
 #include "Containers/Map.h"
 
 namespace Nova
@@ -13,27 +14,27 @@ namespace Nova
         ~AssetDatabase() override = default;
 
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
-        AssetType* CreateAsset(const String& name)
+        Ref<AssetType> CreateAsset(const String& name)
         {
-            AssetType* asset = new AssetType();
+            Ref<AssetType> asset = Ref<AssetType>(new AssetType());
             m_Data[name] = asset;
             return asset;
         }
 
         bool UnloadAsset(const String& name);
-        bool UnloadAsset(Asset* asset);
+        bool UnloadAsset(Ref<Asset> asset);
         void UnloadAll();
 
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
-        AssetType* Get(const String& name) const
+        Ref<AssetType> Get(const String& name) const
         {
             if (!m_Data.Contains(name))
                 return nullptr;
-            return dynamic_cast<AssetType*>(m_Data[name]);
+            return m_Data[name].As<AssetType>();
         }
     
     private:
-        Map<String, Asset*> m_Data;
+        Map<String, Ref<Asset>> m_Data;
     };
 
     

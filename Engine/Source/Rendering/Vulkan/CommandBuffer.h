@@ -39,7 +39,7 @@ namespace Nova::Vulkan
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
         void DispatchIndirect(const Rendering::Buffer& buffer, size_t offset) override;
 
-        void BufferCopy(Rendering::Buffer& src, Rendering::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
+        void BufferCopy(const Rendering::Buffer& src, const Rendering::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
         void Blit(const Rendering::Texture& src, const Rendering::BlitRegion& srcRegion, const Rendering::Texture& dest, const Rendering::BlitRegion& destRegion, Filter filter) override;
         void Blit(const Rendering::Texture& src, const Rendering::Texture& dest, Filter filter) override;
 

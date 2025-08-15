@@ -9,12 +9,11 @@
 #include "Utils/BufferUtils.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Shader.h"
-#include "../../Runtime/SpriteAnimation.h"
+#include "Runtime/SpriteAnimation.h"
+#include "Rendering/ShaderBindingSet.h"
 
 #include <vulkan/vulkan.h>
 #include <cstdint>
-
-#include "Rendering/Vulkan/Shader.h"
 
 
 namespace Nova
@@ -47,7 +46,7 @@ namespace Nova
     void SpriteRenderer::OnInit()
     {
         Application* application = GetApplication();
-        const Ref<Rendering::Device>& device = application->GetDevice();
+        Ref<Rendering::Device> device = application->GetDevice();
         Rendering::RenderPass* renderPass = application->GetRenderPass();
 
         const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
@@ -62,11 +61,9 @@ namespace Nova
         };
         m_VertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
 
-
-        m_VertexBuffer.Initialize({ device, Rendering::BufferUsage::VertexBuffer, 4 * sizeof(SpriteVertex) });
-        m_UniformBuffer.Initialize({ device, Rendering::BufferUsage::UniformBuffer, sizeof(Uniforms) });
-        m_StagingBuffer.Initialize({ device, Rendering::BufferUsage::StagingBuffer, 4 * sizeof(SpriteVertex) });
-        m_Sampler.Initialize(Rendering::SamplerCreateInfo(device));
+        m_UniformBuffer = device->CreateBuffer({ device, Rendering::BufferUsage::UniformBuffer, sizeof(Uniforms) });
+        m_StagingBuffer = device->CreateBuffer({ device, Rendering::BufferUsage::StagingBuffer, 4 * sizeof(SpriteVertex) });
+        m_Sampler = device->CreateSampler(Rendering::SamplerCreateInfo(device));
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Rendering::Shader>("Sprite");
@@ -90,7 +87,7 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.y = 0;
         pipelineCreateInfo.scissorInfo.width = renderPass->GetWidth();
         pipelineCreateInfo.scissorInfo.height = renderPass->GetHeight();
-        m_Pipeline.Initialize(pipelineCreateInfo);
+        m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
         m_BindingSet->BindSampler(0, m_Sampler);
         m_BindingSet->BindBuffer(2, m_UniformBuffer, 0, sizeof(Uniforms));
@@ -107,6 +104,10 @@ namespace Nova
                 m_SpriteIndex = (m_SpriteIndex + 1) % m_SpriteAnimation->Count();
                 m_Sprite = m_SpriteAnimation->GetSprite(m_SpriteIndex);
             }
+        } else
+        {
+            m_Time = 0.0f;
+            m_SpriteIndex = 0;
         }
     }
 
@@ -143,7 +144,7 @@ namespace Nova
         uniforms.scale[1] = Vector4(spriteScale[1].x, spriteScale[1].y, 0.0f, 0.0f);
         uniforms.color = m_ColorTint;
 
-        cmdBuffer.UpdateBuffer(m_UniformBuffer, 0, sizeof(Uniforms), &uniforms);
+        cmdBuffer.UpdateBuffer(*m_UniformBuffer, 0, sizeof(Uniforms), &uniforms);
     }
 
     void SpriteRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)
@@ -154,11 +155,11 @@ namespace Nova
         const Rendering::RenderPass* renderPass = application->GetRenderPass();
 
 
-        m_BindingSet->BindTexture(1, *m_Sprite.texture);
-        cmdBuffer.BindGraphicsPipeline(m_Pipeline);
+        m_BindingSet->BindTexture(1, m_Sprite.texture);
+        cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
-        cmdBuffer.BindVertexBuffer(m_VertexBuffer, 0);
-        cmdBuffer.BindIndexBuffer(m_IndexBuffer, 0, Format::Uint32);
+        cmdBuffer.BindVertexBuffer(*m_VertexBuffer, 0);
+        cmdBuffer.BindIndexBuffer(*m_IndexBuffer, 0, Format::Uint32);
         cmdBuffer.SetViewport(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight(), 0.0f, 1.0f);
         cmdBuffer.SetScissor(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight());
         cmdBuffer.DrawIndexed(6, 0);
@@ -166,7 +167,17 @@ namespace Nova
 
     void SpriteRenderer::OnDestroy()
     {
-        Component::OnDestroy();
+        const Application* application = GetApplication();
+        const Ref<Rendering::Device>& device = application->GetDevice();
+        device->WaitIdle();
+
+        m_BindingSet->Destroy();
+        m_VertexBuffer->Destroy();
+        m_IndexBuffer->Destroy();
+        m_UniformBuffer->Destroy();
+        m_StagingBuffer->Destroy();
+        m_Sampler->Destroy();
+        m_Pipeline->Destroy();
     }
 
     Sprite& SpriteRenderer::GetSprite()
@@ -176,17 +187,19 @@ namespace Nova
 
     void SpriteRenderer::SetSprite(const Sprite& sprite)
     {
+        if (!sprite.texture) return;
+        if (sprite == m_Sprite) return;
+
         const Application* application = GetApplication();
         const Ref<Rendering::Device>& device = application->GetDevice();
         device->WaitIdle();
 
-        if (!sprite.texture) return;
-        if (sprite == m_Sprite) return;
-
         m_Sprite = sprite;
+        m_SpriteAnimation = nullptr;
+
         m_SpriteIndex = 0;
         m_Time = 0.0f;
-        m_BindingSet->BindTexture(1, *m_Sprite.texture);
+        m_BindingSet->BindTexture(1, m_Sprite.texture);
     }
 
     void SpriteRenderer::SetSpriteAnimation(SpriteAnimation* spriteAnimation)
@@ -199,7 +212,7 @@ namespace Nova
         m_SpriteIndex = 0;
         m_Time = 0.0f;
         m_Sprite = spriteAnimation->GetSprite(m_SpriteIndex);
-        m_BindingSet->BindTexture(1, *m_Sprite.texture);
+        m_BindingSet->BindTexture(1, m_Sprite.texture);
     }
 
     SpriteAnimation* SpriteRenderer::GetSpriteAnimation() const

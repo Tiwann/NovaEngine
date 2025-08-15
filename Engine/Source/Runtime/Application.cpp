@@ -117,7 +117,8 @@ namespace Nova
             spriteShaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
             spriteShaderCreateInfo.moduleInfo = { shaderName, shaderPath };
 
-            Rendering::Shader* shader = m_AssetDatabase.CreateAsset<Vulkan::Shader>(shaderName);
+            // TODO: Provide a way to specify which shader implementation
+            Ref<Vulkan::Shader> shader = m_AssetDatabase.CreateAsset<Vulkan::Shader>(shaderName);
             shader->SetObjectName(shaderName);
             shader->Initialize(spriteShaderCreateInfo);
             return shader;

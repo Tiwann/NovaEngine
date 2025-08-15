@@ -208,7 +208,7 @@ namespace Nova::Vulkan
         vkCmdUpdateBuffer(m_Handle, ((const Buffer&)buffer).GetHandle(), offset, size, data);
     }
 
-    void CommandBuffer::BufferCopy(Rendering::Buffer& src, Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
+    void CommandBuffer::BufferCopy(const Rendering::Buffer& src, const Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
         VkBufferCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_COPY_2 };
         region.srcOffset = srcOffset;
@@ -216,8 +216,8 @@ namespace Nova::Vulkan
         region.size = size;
 
         VkCopyBufferInfo2 copyInfo { VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2 };
-        copyInfo.srcBuffer = ((Buffer&)src).GetHandle();
-        copyInfo.dstBuffer = ((Buffer&)dest).GetHandle();
+        copyInfo.srcBuffer = ((const Buffer&)src).GetHandle();
+        copyInfo.dstBuffer = ((const Buffer&)dest).GetHandle();
         copyInfo.regionCount = 1;
         copyInfo.pRegions = &region;
         vkCmdCopyBuffer2(m_Handle, &copyInfo);

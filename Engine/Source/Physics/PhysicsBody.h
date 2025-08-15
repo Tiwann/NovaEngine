@@ -1,19 +1,26 @@
 ﻿#pragma once
-#include "PhysicsMaterial.h"
 #include "PhysicsBodyType.h"
 #include "PhysicsConstraints.h"
+#include "Containers/MulticastDelegate.h"
 #include "Math/Vector3.h"
 #include "Math/Quaternion.h"
 
 namespace Nova
 {
     class PhysicsWorld;
+    struct PhysicsContact;
 
     class PhysicsBody
     {
     public:
+        using ContactDelegate = MulticastDelegate<void(const PhysicsContact& contact)>;
+
         explicit PhysicsBody(const PhysicsWorld& world) : m_World(&world){ }
         virtual ~PhysicsBody() = default;
+
+        ContactDelegate onContactBeginEvent;
+        ContactDelegate onContactStayEvent;
+        ContactDelegate onContactEndEvent;
         
         void SetUserPointer(void* user) { m_UserPointer = user; }
         void* GetUserPointer() const { return m_UserPointer; }
@@ -45,24 +52,17 @@ namespace Nova
         virtual const PhysicsConstraintsFlags& GetConstraints() const = 0;
         virtual void SetConstraints(const PhysicsConstraintsFlags& constraints) = 0;
 
-        virtual const PhysicsMaterial& GetMaterial() const = 0;
-        virtual void SetMaterial(const PhysicsMaterial& material) = 0;
-
         virtual PhysicsBodyType GetType() const = 0;
         virtual void SetType(PhysicsBodyType type) = 0;
 
-        virtual bool IsSensor() = 0;
-        virtual void SetIsSensor(bool isSensor) = 0;
-
-        bool IsColliding() const { return m_IsColliding; }
+        virtual void SetGravityScale(float scale) = 0;
+        virtual float GetGravityScale() const = 0;
 
         const PhysicsWorld* GetWorld() const { return m_World; }
     protected:
         PhysicsConstraintsFlags m_Constraints;
-        PhysicsMaterial m_Material;
         PhysicsBodyType m_Type = PhysicsBodyType::Static;
-        bool m_IsSensor = false;
-        bool m_IsColliding = false;
+
     private:
         const PhysicsWorld* m_World = nullptr;
         void* m_UserPointer = nullptr;

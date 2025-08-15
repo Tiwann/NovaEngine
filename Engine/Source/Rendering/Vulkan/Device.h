@@ -35,9 +35,14 @@ namespace Nova::Vulkan
         bool BeginFrame() override;
         void EndFrame() override;
         void Present() override;
-        void WaitIdle() override;
+        void WaitIdle() const override;
         void SetName(StringView name) override;
         Rendering::DeviceType GetDeviceType() override;
+
+        Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) const override;
+        Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const override;
+        Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const override;
+        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

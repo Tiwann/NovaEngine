@@ -14,6 +14,9 @@ namespace Nova
         PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition) override;
         void DestroyBody(PhysicsBody* body) override;
 
+        void SetGravity(const Vector3& gravity) override;
+        Vector3 GetGravity() const override;
+
         b2WorldId GetHandle() const;
     private:
         b2WorldId m_Handle = b2_nullWorldId;

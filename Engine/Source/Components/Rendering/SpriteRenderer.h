@@ -1,13 +1,12 @@
 ﻿#pragma once
 #include "Runtime/Component.h"
-#include "../../Runtime/Sprite.h"
+#include "Runtime/Sprite.h"
 #include "Math/Vector2.h"
+#include "Rendering/Buffer.h"
+#include "Rendering/GraphicsPipeline.h"
+#include "Rendering/Sampler.h"
+#include "Rendering/ShaderBindingSet.h"
 #include "Rendering/SpriteRendererFlags.h"
-#include "Rendering/Vulkan/Buffer.h"
-#include "Rendering/Vulkan/CommandBuffer.h"
-#include "Rendering/Vulkan/GraphicsPipeline.h"
-#include "Rendering/Vulkan/Sampler.h"
-#include "Rendering/Vulkan/ShaderBindingSetLayout.h"
 #include "Runtime/Ref.h"
 
 typedef struct VkPipelineLayout_T* VkPipelineLayout;
@@ -65,14 +64,14 @@ namespace Nova
         float m_Speed = 1.0f / 20.0f;
         uint32_t m_SpriteIndex = 0;
 
-        Rendering::Shader* m_Shader = nullptr;
+        Ref<Rendering::Shader> m_Shader = nullptr;
         Ref<Rendering::ShaderBindingSet> m_BindingSet = nullptr;
-        Vulkan::Buffer m_VertexBuffer;
-        Vulkan::Buffer m_IndexBuffer;
-        Vulkan::Buffer m_UniformBuffer;
-        Vulkan::Buffer m_StagingBuffer;
-        Vulkan::Sampler m_Sampler;
-        Vulkan::GraphicsPipeline m_Pipeline;
+        Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
+        Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
+        Ref<Rendering::Buffer> m_UniformBuffer = nullptr;
+        Ref<Rendering::Buffer> m_StagingBuffer = nullptr;
+        Ref<Rendering::Sampler> m_Sampler = nullptr;
+        Ref<Rendering::GraphicsPipeline> m_Pipeline = nullptr;
     };
 
 

@@ -5,12 +5,15 @@
 namespace Nova
 {
     class PhysicsWorld2D;
-    struct PhysicsContactInfo2D;
+    class PhysicsShape2D;
     
     class PhysicsBody2D : public PhysicsBody
     {
     public:
         explicit PhysicsBody2D(b2BodyId handle, const PhysicsWorld2D& world);
+
+        void AttachShape(PhysicsShape2D* shape);
+        void DetachShape(PhysicsShape2D* shape);
 
         void SetPosition(const Vector3& position) override;
         Vector3 GetPosition() const override;
@@ -37,15 +40,11 @@ namespace Nova
         const PhysicsConstraintsFlags& GetConstraints() const override;
         void SetConstraints(const PhysicsConstraintsFlags& constraints) override;
 
-        const PhysicsMaterial& GetMaterial() const override;
-        void SetMaterial(const PhysicsMaterial& material) override;
-
         PhysicsBodyType GetType() const override;
         void SetType(PhysicsBodyType type) override;
 
-        bool IsSensor() override;
-        void SetIsSensor(bool isSensor) override;
-
+        void SetGravityScale(float scale) override;
+        float GetGravityScale() const override;
         b2BodyId GetHandle() const;
 
     private:

@@ -16,10 +16,10 @@ namespace Nova::Vulkan
 
         VkDescriptorSet GetHandle() const;
         const VkDescriptorSet* GetHandlePtr() const;
-        bool BindTexture(uint32_t binding, const Rendering::Texture& texture) override;
-        bool BindSampler(uint32_t binding, const Rendering::Sampler& sampler) override;
-        bool BindCombinedSamplerTexture(uint32_t binding, const Rendering::Sampler& sampler, const Rendering::Texture& texture) override;
-        bool BindBuffer(uint32_t binding, const Rendering::Buffer& buffer, size_t offset, size_t size) override;
+        bool BindTexture(uint32_t binding, const Ref<Rendering::Texture>& texture) override;
+        bool BindSampler(uint32_t binding, const Ref<Rendering::Sampler>& sampler) override;
+        bool BindCombinedSamplerTexture(uint32_t binding, const Ref<Rendering::Sampler>& sampler, const Ref<Rendering::Texture>& texture) override;
+        bool BindBuffer(uint32_t binding, const Ref<Rendering::Buffer>& buffer, size_t offset, size_t size) override;
 
     private:
         Device* m_Device = nullptr;

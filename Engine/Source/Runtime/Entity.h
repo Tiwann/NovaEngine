@@ -76,7 +76,6 @@ namespace Nova
             T* newComponent = new T(this);
             m_Components.Add(newComponent);
             newComponent->OnInit();
-            /*NOVA_LOG(Entity, Verbosity::Trace, "Created {} component on Entity {}", NewComponent->GetName(), m_Name);*/
             return newComponent;
         }
         

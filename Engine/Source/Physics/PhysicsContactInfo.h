@@ -1,12 +1,14 @@
 ﻿#pragma once
+#include "Math/Vector3.h"
 
 namespace Nova
 {
-    template<typename BodyType, typename Vector> requires IsVectorValue<Vector>
-    struct PhysicsContactInfo
+    class PhysicsBody2D;
+
+    struct PhysicsContact
     {
-        Vector Point;
-        Vector Normal;
-        BodyType* OtherBody;
+        Vector3 point;
+        Vector3 normal;
+        PhysicsBody* otherBody = nullptr;
     };
 }

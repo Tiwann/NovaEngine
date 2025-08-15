@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Runtime/Object.h"
 
 namespace Nova::Rendering
 {
@@ -21,11 +22,11 @@ namespace Nova::Rendering
         size_t size = 0;
     };
 
-    class Buffer
+    class Buffer : public Object
     {
     public:
-        Buffer() = default;
-        virtual ~Buffer() = default;
+        Buffer() : Object("Buffer") {}
+        ~Buffer() override = default;
 
         Buffer(const Buffer&) = delete;
         Buffer& operator=(const Buffer&) = delete;

@@ -89,14 +89,21 @@ namespace Nova
         }
 
 
-        T& operator*() const { return *m_Pointer; }
-        T* operator->() const { return m_Pointer; }
-        T* Get() const { return m_Pointer; }
+        T& operator*() { return *m_Pointer; }
+        const T& operator*() const { return *m_Pointer; }
 
-        operator T*() const { return m_Pointer; }
+        T* operator->() { return m_Pointer; }
+        const T* operator->() const { return m_Pointer; }
+
+        T* Get() { return m_Pointer; }
+        const T* Get() const { return m_Pointer; }
+
+        operator T*() { return m_Pointer; }
+        operator const T*() const { return m_Pointer; }
 
         template <typename U>
         operator U*() const { return (U*)m_Pointer; }
+
 
         void Attach(T* newPointer)
         {

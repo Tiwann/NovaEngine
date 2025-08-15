@@ -1,9 +1,14 @@
 ﻿#pragma once
-#include "Rendering/Vulkan/Buffer.h"
 #include "Runtime/Ref.h"
 
 namespace Nova
 {
-    Vulkan::Buffer CreateVertexBuffer(const Ref<Rendering::Device>& device, const void* data, size_t size);
-    Vulkan::Buffer CreateIndexBuffer(const Ref<Rendering::Device>& device, const void* data, size_t size);
+    namespace Rendering
+    {
+        class Device;
+        class Buffer;
+    }
+
+    Ref<Rendering::Buffer> CreateVertexBuffer(const Ref<Rendering::Device>& device, const void* data, size_t size);
+    Ref<Rendering::Buffer> CreateIndexBuffer(const Ref<Rendering::Device>& device, const void* data, size_t size);
 }

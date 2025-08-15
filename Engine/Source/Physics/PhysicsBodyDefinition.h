@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Math/Vector3.h"
 #include "PhysicsBodyType.h"
-#include "PhysicsMaterial.h"
 #include "Math/Quaternion.h"
 
 namespace Nova
@@ -13,8 +12,5 @@ namespace Nova
         Vector3 position = Vector3::Zero;
         Quaternion rotation = Quaternion::Identity;
         PhysicsBodyType type = PhysicsBodyType::Static;
-        PhysicsMaterial material = PhysicsMaterial();
-        PhysicsShape* shape = nullptr;
-        bool isTrigger;
     };
 }

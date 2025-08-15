@@ -2,6 +2,7 @@
 #include "CompareOperation.h"
 #include "Filter.h"
 #include "SamplerAddressMode.h"
+#include "Runtime/Object.h"
 
 
 namespace Nova::Rendering
@@ -25,11 +26,11 @@ namespace Nova::Rendering
         Filter mipmapFilter = Filter::Nearest;
     };
 
-    class Sampler
+    class Sampler : public Object
     {
     public:
-        Sampler() = default;
-        virtual ~Sampler() = default;
+        Sampler() : Object("Sampler") {}
+        ~Sampler() override = default;
 
         virtual bool Initialize(const SamplerCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

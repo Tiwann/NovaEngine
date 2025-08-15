@@ -4,7 +4,6 @@
 #include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
-#include <cstdint>
 
 
 namespace Nova
@@ -30,6 +29,13 @@ namespace Nova::Rendering
 
     class RenderTarget;
     class Texture;
+    struct TextureCreateInfo;
+    class Sampler;
+    struct SamplerCreateInfo;
+    class Buffer;
+    struct BufferCreateInfo;
+    class GraphicsPipeline;
+    struct GraphicsPipelineCreateInfo;
 
     class Device : public Object
     {
@@ -43,9 +49,14 @@ namespace Nova::Rendering
         virtual bool BeginFrame() = 0;
         virtual void EndFrame() = 0;
         virtual void Present() = 0;
-        virtual void WaitIdle() = 0;
+        virtual void WaitIdle() const = 0;
         virtual void SetName(StringView name) = 0;
         virtual DeviceType GetDeviceType() = 0;
+
+        virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) const = 0;
+        virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) const = 0;
+        virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) const = 0;
+        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
     };
 
     Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);

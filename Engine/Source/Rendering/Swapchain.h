@@ -2,10 +2,10 @@
 #include "Runtime/Format.h"
 #include "PresentMode.h"
 #include "SwpchainBuffering.h"
+#include "Containers/StringView.h"
 
 #include <cstdint>
 
-#include "Containers/StringView.h"
 
 namespace Nova::Rendering
 {

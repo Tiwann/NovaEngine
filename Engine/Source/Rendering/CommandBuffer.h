@@ -84,7 +84,7 @@ namespace Nova::Rendering
         virtual void DispatchIndirect(const Buffer& buffer, size_t offset) = 0;
 
         // Transfer Commands
-        virtual void BufferCopy(Buffer& src, Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) = 0;
+        virtual void BufferCopy(const Buffer& src, const Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) = 0;
         virtual void Blit(const Texture& src, const BlitRegion& srcRegion, const Texture& dest, const BlitRegion& destRegion, Filter filter = Filter::Linear) = 0;
         virtual void Blit(const Texture& src, const Texture& dest, Filter filter = Filter::Linear) = 0;
 

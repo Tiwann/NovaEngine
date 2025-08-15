@@ -15,7 +15,6 @@ namespace Nova
             }
 
             m_ActiveScene = m_PendingScene;
-            m_ActiveScene->OnInit();
             m_PendingScene = nullptr;
         }
 
@@ -76,6 +75,7 @@ namespace Nova
     Scene* SceneManager::CreateSceneAndSetActive(Application* owner, const String& name)
     {
         Scene* newScene = new Scene(owner, name);
+        newScene->OnInit();
         LoadScene(newScene);
         return newScene;
     }

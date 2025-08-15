@@ -65,7 +65,10 @@ namespace Nova
                 }
             }
 
+        }
 
+        for (int i = 0; i < contactEvents.endCount; ++i)
+        {
             if (const b2ContactEndTouchEvent* endEvent = contactEvents.endEvents + i;
                 b2Shape_IsValid(endEvent->shapeIdA) && b2Shape_IsValid(endEvent->shapeIdB))
             {
@@ -89,6 +92,7 @@ namespace Nova
                 bodyB->onContactEndEvent.Broadcast(contactB);
             }
         }
+
     }
 
     void PhysicsWorld2D::Destroy()

@@ -9,7 +9,6 @@
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
 
-
 namespace Nova::Vulkan
 {
     bool Swapchain::Initialize(const Rendering::SwapchainCreateInfo& createInfo)
@@ -190,100 +189,31 @@ namespace Nova::Vulkan
         if (result != VK_SUCCESS)
             return false;
 
-
         return true;
     }
 
-    void Swapchain::ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget)
+    const Ref<Texture>& Swapchain::GetTexture(const uint32_t index)
     {
-        const Device* device = static_cast<Device*>(m_Device);
-        const uint32_t frameIndex = device->GetCurrentFrameIndex();
-
-        VkImageMemoryBarrier transferBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        transferBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        transferBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        transferBarrier.srcAccessMask = 0;
-        transferBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        transferBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        transferBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        transferBarrier.image = m_Images[frameIndex];
-        transferBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        transferBarrier.subresourceRange.baseMipLevel = 0;
-        transferBarrier.subresourceRange.levelCount = 1;
-        transferBarrier.subresourceRange.baseArrayLayer = 0;
-        transferBarrier.subresourceRange.layerCount = 1;
-
-        vkCmdPipelineBarrier(
-            commandBuffer->GetHandle(),
-            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &transferBarrier
-        );
-
-        VkImageResolve region;
-        region.extent.width = m_ImageWidth;
-        region.extent.height = m_ImageHeight;
-        region.extent.depth = 1;
-        region.dstOffset = VkOffset3D{ 0, 0, 0 };
-        region.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        region.dstSubresource.baseArrayLayer = 0;
-        region.dstSubresource.layerCount = 1;
-        region.dstSubresource.mipLevel = 0;
-        region.srcOffset = VkOffset3D{ 0, 0, 0 };
-        region.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        region.srcSubresource.baseArrayLayer = 0;
-        region.srcSubresource.layerCount = 1;
-        region.srcSubresource.mipLevel = 0;
-
-        const VkCommandBuffer cmdBuff = commandBuffer->GetHandle();
-        const VkImage srcImage = renderTarget->GetColorImage(frameIndex);
-        const VkImage dstImage = m_Images[frameIndex];
-        vkCmdResolveImage(cmdBuff, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-
-        VkImageMemoryBarrier presentBarrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
-        presentBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        presentBarrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        presentBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-        presentBarrier.dstAccessMask = VK_ACCESS_NONE;
-        presentBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        presentBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        presentBarrier.image = m_Images[frameIndex];
-        presentBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        presentBarrier.subresourceRange.baseMipLevel = 0;
-        presentBarrier.subresourceRange.levelCount = 1;
-        presentBarrier.subresourceRange.baseArrayLayer = 0;
-        presentBarrier.subresourceRange.layerCount = 1;
-
-        vkCmdPipelineBarrier(
-            commandBuffer->GetHandle(),
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-            0, 0, nullptr, 0, nullptr, 1, &presentBarrier
-        );
-    }
-
-    const Texture& Swapchain::GetTexture(const uint32_t index)
-    {
-        const auto createTexture = [this, &index] -> Texture
+        const auto createTexture = [this, &index]() -> Ref<Texture>
         {
-            Texture texture;
-            texture.m_Device = (Device*)m_Device;
-            texture.m_Image = m_Images[index];
-            texture.m_ImageView = m_ImageViews[index];
-            texture.m_Width = m_ImageWidth;
-            texture.m_Height = m_ImageHeight;
-            texture.m_Allocation = nullptr;
-            texture.m_SampleCount = 1;
-            texture.m_Mips = 1;
-            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::None;
-            texture.m_Format = m_ImageFormat;
-
+            Ref<Texture> texture = new Texture();
+            texture->m_Device = (Device*)m_Device;
+            texture->m_Image = m_Images[index];
+            texture->m_ImageView = m_ImageViews[index];
+            texture->m_Width = m_ImageWidth;
+            texture->m_Height = m_ImageHeight;
+            texture->m_Allocation = nullptr;
+            texture->m_SampleCount = 1;
+            texture->m_Mips = 1;
+            texture->m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture->m_Format = m_ImageFormat;
             return texture;
         };
+
         return m_Textures[index].Get(createTexture);
     }
 
-    const Texture& Swapchain::GetCurrentTexture()
+    const Ref<Texture>& Swapchain::GetCurrentTexture()
     {
         const Device* device = (Device*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();

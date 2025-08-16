@@ -3,10 +3,9 @@
 #include "PhysicsShape2D.h"
 #include "PhysicsContactInfo.h"
 #include "Box2DHelpers.h"
+#include "Runtime/Application.h"
 
 #include <box2d/box2d.h>
-
-#include "Runtime/Application.h"
 
 
 namespace Nova
@@ -37,6 +36,8 @@ namespace Nova
             if (const b2ContactBeginTouchEvent* beginEvent = contactEvents.beginEvents + i;
                 b2Shape_IsValid(beginEvent->shapeIdA) && b2Shape_IsValid(beginEvent->shapeIdB))
             {
+                if (!b2Contact_IsValid(beginEvent->contactId)) continue;
+
                 b2ContactData contactData = b2Contact_GetData(beginEvent->contactId);
                 const PhysicsShape2D* shapeA = (PhysicsShape2D*)b2Shape_GetUserData(contactData.shapeIdA);
                 const PhysicsShape2D* shapeB = (PhysicsShape2D*)b2Shape_GetUserData(contactData.shapeIdB);
@@ -72,6 +73,8 @@ namespace Nova
             if (const b2ContactEndTouchEvent* endEvent = contactEvents.endEvents + i;
                 b2Shape_IsValid(endEvent->shapeIdA) && b2Shape_IsValid(endEvent->shapeIdB))
             {
+                if (!b2Contact_IsValid(endEvent->contactId)) continue;
+
                 b2ContactData contactData = b2Contact_GetData(endEvent->contactId);
                 const PhysicsShape2D* shapeA = (PhysicsShape2D*)b2Shape_GetUserData(contactData.shapeIdA);
                 const PhysicsShape2D* shapeB = (PhysicsShape2D*)b2Shape_GetUserData(contactData.shapeIdB);

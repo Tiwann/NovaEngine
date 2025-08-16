@@ -12,7 +12,7 @@ namespace Nova
         if (!m_Data.Remove({ name, asset }))
             return false;
             
-        delete asset;
+        asset.Release();
         return true;
     }
 
@@ -21,15 +21,15 @@ namespace Nova
         const size_t index = m_Data.FindValue(asset);
         if (index == ~0) return false;
         m_Data.RemoveAt(index);
-        delete asset;
+        asset.Release();
         return true;
     }
 
     void AssetDatabase::UnloadAll()
     {
-        for (const auto& [name, asset] : m_Data)
+        for (auto& [name, asset] : m_Data)
         {
-            delete asset;
+            asset.Release();
         }
         m_Data.Clear();
     }

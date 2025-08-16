@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "Containers/Lazy.h"
 #include "Rendering/Swapchain.h"
+#include "Runtime/Ref.h"
 
 typedef struct VkSwapchainKHR_T* VkSwapchainKHR;
 typedef struct VkImage_T* VkImage;
@@ -24,10 +25,9 @@ namespace Nova::Vulkan
         void SetName(StringView name) override;
 
         bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex);
-        void ResolveImage(const CommandBuffer* commandBuffer, const RenderTarget* renderTarget);
 
-        const Texture& GetTexture(uint32_t index);
-        const Texture& GetCurrentTexture();
+        const Ref<Texture>& GetTexture(uint32_t index);
+        const Ref<Texture>& GetCurrentTexture();
 
         VkSwapchainKHR GetHandle() const;
         const VkSwapchainKHR* GetHandlePtr() const;
@@ -40,6 +40,6 @@ namespace Nova::Vulkan
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };
-        Lazy<Texture> m_Textures[3];
+        Lazy<Ref<Texture>> m_Textures[3] = { Ref<Texture>(nullptr), Ref<Texture>(nullptr), Ref<Texture>(nullptr) };
     };
 }

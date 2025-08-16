@@ -27,6 +27,8 @@ namespace Nova::Rendering
         bool vSync = false;
     };
 
+    class Surface;
+    struct SurfaceCreateInfo;
     class RenderTarget;
     class Texture;
     struct TextureCreateInfo;
@@ -40,7 +42,10 @@ namespace Nova::Rendering
     class Device : public Object
     {
     public:
-        Device() : Object("Rendering Device") {}
+        Device() : Object("Rendering Device")
+        {
+        }
+
         ~Device() override = default;
 
         virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
@@ -53,10 +58,15 @@ namespace Nova::Rendering
         virtual void SetName(StringView name) = 0;
         virtual DeviceType GetDeviceType() = 0;
 
+        virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) const = 0;
         virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) const = 0;
         virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) const = 0;
         virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) const = 0;
         virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+
+        StringView GetDeviceVendor() const;
+    protected:
+        String m_DeviceVendor;
     };
 
     Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);

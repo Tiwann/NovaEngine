@@ -34,6 +34,12 @@ namespace Nova
             return count - 1;
         }
 
+        void Kill()
+        {
+            m_RefCount.store(0, std::memory_order_release);
+            delete this;
+        }
+
         uint32_t RefCount() const { return m_RefCount; }
 
         virtual void MakeExternal(){}
@@ -42,4 +48,28 @@ namespace Nova
         std::atomic<uint32_t> m_RefCount = 0;
         std::atomic<uint32_t> m_InternalRefCount = 0;
     };
+
+    template<typename T>
+    void AddRef(T* ptr)
+    {
+        if (!ptr) return;
+        RefObject* ref = (RefObject*)ptr;
+        ref->AddReference();
+    }
+
+    template<typename T>
+    void RelRef(T* ptr)
+    {
+        if (!ptr) return;
+        RefObject* ref = (RefObject*)ptr;
+        ref->ReleaseReference();
+    }
+
+    template<typename T>
+    void KillRef(T* ptr)
+    {
+        if (!ptr) return;
+        RefObject* ref = (RefObject*)ptr;
+        ref->Kill();
+    }
 }

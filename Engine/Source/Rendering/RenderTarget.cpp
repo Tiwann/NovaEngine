@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "Device.h"
+﻿#include "Device.h"
 #include "RenderTarget.h"
 #include "Vulkan/RenderTarget.h"
 

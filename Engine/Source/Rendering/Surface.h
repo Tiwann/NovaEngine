@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include <cstdint>
 
+#include "Runtime/Object.h"
+
 namespace Nova { class Window; }
 
 namespace Nova::Rendering
@@ -13,11 +15,11 @@ namespace Nova::Rendering
         Window* window = nullptr;
     };
 
-    class Surface
+    class Surface : public Object
     {
     public:
-        Surface() = default;
-        virtual ~Surface() = default;
+        Surface() : Object("Surface") {}
+        ~Surface() override = default;
 
         virtual bool Initialize(const SurfaceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

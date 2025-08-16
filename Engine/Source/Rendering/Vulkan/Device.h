@@ -39,6 +39,7 @@ namespace Nova::Vulkan
         void SetName(StringView name) override;
         Rendering::DeviceType GetDeviceType() override;
 
+        Ref<Rendering::Surface> CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) const override;
         Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) const override;
         Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const override;
         Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const override;
@@ -48,7 +49,7 @@ namespace Nova::Vulkan
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
         VkPhysicalDevice GetPhysicalDevice() const;
-        Surface* GetSurface();
+        Ref<Surface> GetSurface();
         Swapchain* GetSwapchain();
         CommandPool* GetCommandPool();
         CommandPool* GetTransferCommandPool();
@@ -65,13 +66,12 @@ namespace Nova::Vulkan
 
         uint32_t GetCurrentFrameIndex() const;
 
-        MulticastDelegate<void(uint32_t, uint32_t)> swapchainResizeEvent;
     private:
         VkInstance m_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;
         VkDevice m_Handle = nullptr;
         VmaAllocator m_Allocator = nullptr;
-        Surface m_Surface;
+        Ref<Surface> m_Surface = nullptr;
         Swapchain m_Swapchain;
         CommandPool m_CommandPool;
         CommandPool m_TransferCommandPool;

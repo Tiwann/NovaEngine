@@ -36,6 +36,7 @@ namespace Nova
         m_Device = CreateRenderDevice(Rendering::DeviceType::Vulkan, rdCreateInfo);
         if (!m_Device) return;
 
+
         // Creating render target
         Rendering::RenderTargetCreateInfo rtCreateInfo;
         rtCreateInfo.device = GetDevice();
@@ -162,7 +163,7 @@ namespace Nova
             Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain();
             m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
-            m_RenderPass.SetAttachmentResolveTexture(0, swapchain->GetCurrentTexture());
+            m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
 
             cmdBuffer.BeginRenderPass(m_RenderPass);
             m_SceneManager.OnRender(cmdBuffer);
@@ -174,7 +175,7 @@ namespace Nova
             m_ImGuiRenderer->EndFrame();
 
 
-            m_ImGuiRenderPass.SetAttachmentTexture(0, swapchain->GetCurrentTexture());
+            m_ImGuiRenderPass.SetAttachmentTexture(0, *swapchain->GetCurrentTexture());
             cmdBuffer.BeginRenderPass(m_ImGuiRenderPass);
             m_ImGuiRenderer->Render(cmdBuffer);
             cmdBuffer.EndRenderPass();

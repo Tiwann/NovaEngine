@@ -52,8 +52,6 @@ namespace Nova
     {
         m_Width = width;
         UpdateBox();
-        if (b2Shape_IsValid(m_Shape))
-            b2Shape_SetPolygon(m_Shape, &m_Polygon);
     }
 
     float BoxShape2D::GetHeight() const
@@ -65,8 +63,6 @@ namespace Nova
     {
         m_Height = height;
         UpdateBox();
-        if (b2Shape_IsValid(m_Shape))
-            b2Shape_SetPolygon(m_Shape, &m_Polygon);
     }
 
     void BoxShape2D::UpdateBox()
@@ -74,5 +70,7 @@ namespace Nova
         const b2Transform transform = b2Transform(Tob2Vec2(m_Position), b2MakeRot(m_Rotation));
         m_Polygon = b2MakeBox(m_Width * 0.5f, m_Height * 0.5f);
         m_Polygon = b2TransformPolygon(transform, &m_Polygon);
+        if (b2Shape_IsValid(m_Shape))
+            b2Shape_SetPolygon(m_Shape, &m_Polygon);
     }
 }

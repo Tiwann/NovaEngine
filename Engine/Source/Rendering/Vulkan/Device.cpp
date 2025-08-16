@@ -128,13 +128,17 @@ namespace Nova::Vulkan
                 return false;
         }
 
+        VkPhysicalDeviceProperties2 physicalDeviceProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
+        vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &physicalDeviceProperties);
+        m_DeviceVendor = physicalDeviceProperties.properties.deviceName;
 
         Rendering::SurfaceCreateInfo surfaceCreateInfo;
         surfaceCreateInfo.window = createInfo.window;
         surfaceCreateInfo.device = this;
-        if (!m_Surface.Initialize(surfaceCreateInfo))
+        m_Surface = CreateSurface(surfaceCreateInfo);
+        if (!m_Surface)
         {
-            std::println(std::cerr, "Failed to initialize surface!");
+            std::println(std::cerr, "[VULKAN] Failed to initialize surface!");
             return false;
         }
 
@@ -167,7 +171,7 @@ namespace Nova::Vulkan
         for (uint32_t i = 0; i < queueFamilyProperties.Count(); ++i)
         {
             VkBool32 supportsSurface = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface.GetHandle(), &supportsSurface);
+            vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface->GetHandle(), &supportsSurface);
             if (supportsSurface)
             {
                 m_PresentQueue.SetIndex(i);
@@ -331,9 +335,9 @@ namespace Nova::Vulkan
                 result = VK_PRESENT_MODE_FIFO_KHR;
 
                 uint32_t presentModeCount;
-                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, nullptr);
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface->GetHandle(), &presentModeCount, nullptr);
                 Array<VkPresentModeKHR> presentModes(presentModeCount);
-                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, presentModes.Data());
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface->GetHandle(), &presentModeCount, presentModes.Data());
 
                 if (presentModes.Contains(VK_PRESENT_MODE_MAILBOX_KHR))
                     result = VK_PRESENT_MODE_MAILBOX_KHR;
@@ -354,7 +358,7 @@ namespace Nova::Vulkan
 
         Rendering::SwapchainCreateInfo swapchainCreateInfo;
         swapchainCreateInfo.device = this;
-        swapchainCreateInfo.surface = &m_Surface;
+        swapchainCreateInfo.surface = m_Surface;
         swapchainCreateInfo.recycle = false;
         swapchainCreateInfo.buffering = createInfo.buffering;
         swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
@@ -417,7 +421,7 @@ namespace Nova::Vulkan
         m_TransferCommandPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);
-        m_Surface.Destroy();
+        m_Surface->Destroy();
         vkDestroyDevice(m_Handle, nullptr);
         vkDestroyInstance(m_Instance, nullptr);
     }
@@ -425,7 +429,7 @@ namespace Nova::Vulkan
 
     bool Device::BeginFrame()
     {
-        if (!m_Surface.IsAvailable())
+        if (!m_Surface->IsAvailable())
             return false;
 
         if (!m_Swapchain.IsValid())
@@ -541,6 +545,17 @@ namespace Nova::Vulkan
         return Rendering::DeviceType::Vulkan;
     }
 
+    Ref<Rendering::Surface> Device::CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) const
+    {
+        Surface* surface = new Surface();
+        if (!surface->Initialize(createInfo))
+        {
+            delete surface;
+            return nullptr;
+        }
+        return Ref(surface);
+    }
+
     Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo) const
     {
         Texture* texture = new Texture();
@@ -606,9 +621,9 @@ namespace Nova::Vulkan
         return m_PhysicalDevice;
     }
 
-    Surface* Device::GetSurface()
+    Ref<Surface> Device::GetSurface()
     {
-        return &m_Surface;
+        return m_Surface;
     }
 
     Swapchain* Device::GetSwapchain()

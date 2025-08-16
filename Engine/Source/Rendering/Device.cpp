@@ -3,6 +3,11 @@
 
 namespace Nova::Rendering
 {
+    StringView Device::GetDeviceVendor() const
+    {
+        return m_DeviceVendor;
+    }
+
     Ref<Device> CreateRenderDevice(const DeviceType type, const DeviceCreateInfo& createInfo)
     {
         Device* device = nullptr;

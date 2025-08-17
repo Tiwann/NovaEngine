@@ -3,6 +3,7 @@
 #include "Time.h"
 #include "Window.h"
 #include "Audio/AudioSystem.h"
+#include "Rendering/DebugRenderer.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
@@ -107,8 +108,9 @@ namespace Nova
         audioSystemCreateInfo.listenerCount = 1;
         m_AudioSystem = CreateAudioSystem(audioSystemCreateInfo);
 
+
         // Load engine shaders
-        const auto loadShaderBasic = [this](const String& shaderName, const String& shaderPath) -> Rendering::Shader*
+        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath)
         {
             Rendering::ShaderCreateInfo spriteShaderCreateInfo;
             spriteShaderCreateInfo.device = m_Device;
@@ -116,16 +118,28 @@ namespace Nova
             spriteShaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
             spriteShaderCreateInfo.entryPoints.Add({ "vert", ShaderStageFlagBits::Vertex });
             spriteShaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
-            spriteShaderCreateInfo.moduleInfo = { shaderName, shaderPath };
+            spriteShaderCreateInfo.moduleInfo = { moduleName, shaderPath };
 
             // TODO: Provide a way to specify which shader implementation
             Ref<Vulkan::Shader> shader = m_AssetDatabase.CreateAsset<Vulkan::Shader>(shaderName);
             shader->SetObjectName(shaderName);
-            shader->Initialize(spriteShaderCreateInfo);
+            if (!shader->Initialize(spriteShaderCreateInfo))
+            {
+                m_AssetDatabase.UnloadAsset(shader);
+                return Ref<Rendering::Shader>(nullptr);
+            }
+
             return shader;
         };
 
-        loadShaderBasic("Sprite", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
+        LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
+        LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
+
+        DebugRendererCreateInfo debugRendererCreateInfo;
+        debugRendererCreateInfo.device = m_Device;
+        debugRendererCreateInfo.shader = m_AssetDatabase.Get<Rendering::Shader>("DebugShader");
+        if (!DebugRenderer::Initialize(debugRendererCreateInfo))
+            return;
 
         OnInit();
         Update();
@@ -168,6 +182,7 @@ namespace Nova
             cmdBuffer.BeginRenderPass(m_RenderPass);
             m_SceneManager.OnRender(cmdBuffer);
             OnRender(cmdBuffer);
+            DebugRenderer::Render(cmdBuffer);
             cmdBuffer.EndRenderPass();
 
             m_ImGuiRenderer->BeginFrame();
@@ -189,6 +204,7 @@ namespace Nova
     {
         m_Device->WaitIdle();
         OnDestroy();
+        DebugRenderer::Destroy();
         m_AssetDatabase.UnloadAll();
         m_SlangSession->release();
         slang::shutdown();

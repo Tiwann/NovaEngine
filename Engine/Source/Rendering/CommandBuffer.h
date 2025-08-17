@@ -5,6 +5,7 @@
 #include "Runtime/Format.h"
 #include "ShaderStage.h"
 #include "Containers/StringView.h"
+#include "Runtime/Ref.h"
 
 namespace Nova { struct Color; }
 
@@ -76,7 +77,7 @@ namespace Nova::Rendering
         virtual void DrawIndexed(size_t count, size_t offset) = 0;
         virtual void BeginRenderPass(const RenderPass& renderPass) = 0;
         virtual void EndRenderPass() = 0;
-        virtual void PushConstants(ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values, void* layout) = 0;
+        virtual void PushConstants(const Ref<Shader>& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;
         virtual void UpdateBuffer(const Buffer& buffer, size_t offset, size_t size, const void* data) = 0;
 
         // Compute Commands

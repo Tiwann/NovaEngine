@@ -38,6 +38,7 @@ namespace Nova::Vulkan
         void WaitIdle() const override;
         void SetName(StringView name) override;
         Rendering::DeviceType GetDeviceType() override;
+        uint32_t GetImageCount() const override;
 
         Ref<Rendering::Surface> CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) const override;
         Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) const override;
@@ -65,7 +66,6 @@ namespace Nova::Vulkan
         CommandBuffer& GetCurrentCommandBuffer();
 
         uint32_t GetCurrentFrameIndex() const;
-
     private:
         VkInstance m_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;

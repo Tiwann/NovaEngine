@@ -231,6 +231,27 @@ namespace Nova
             m_Count += other.Count();
         }
 
+        template<size_t N>
+        void AddRange(const T(&data)[N])
+        {
+            if(m_Count + N >= m_Allocated)
+            {
+                do
+                {
+                    m_Allocated = Realloc(m_Allocated);
+                } while (m_Allocated < m_Count + N);
+
+                PointerType realloc = Memory::Calloc<T>(m_Allocated);
+                for(SizeType i = 0; i < m_Count; ++i)
+                    realloc[i] = m_Data[i];
+                Memory::Free(m_Data);
+                m_Data = realloc;
+            }
+
+            std::copy(data, data + N, &m_Data[m_Count]);
+            m_Count += N;
+        }
+
         void AddRange(ConstPointerType data, SizeType count)
         {
             if(m_Count + count >= m_Allocated)

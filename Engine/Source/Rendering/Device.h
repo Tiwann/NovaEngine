@@ -4,7 +4,7 @@
 #include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
-
+#include <cstdint>
 
 namespace Nova
 {
@@ -63,6 +63,8 @@ namespace Nova::Rendering
         virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) const = 0;
         virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) const = 0;
         virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+
+        virtual uint32_t GetImageCount() const = 0;
 
         StringView GetDeviceVendor() const;
     protected:

@@ -556,6 +556,12 @@ namespace Nova::Vulkan
         return Ref(surface);
     }
 
+    uint32_t Device::GetImageCount() const
+    {
+        return m_Swapchain.GetImageCount();
+
+    }
+
     Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo) const
     {
         Texture* texture = new Texture();

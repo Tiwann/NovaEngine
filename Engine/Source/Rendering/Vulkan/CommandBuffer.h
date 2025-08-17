@@ -33,7 +33,7 @@ namespace Nova::Vulkan
         void DrawIndexed(size_t count, size_t offset) override;
         void BeginRenderPass(const Rendering::RenderPass& renderPass) override;
         void EndRenderPass() override;
-        void PushConstants(const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values, void* layout) override;
+        void PushConstants(const Ref<Rendering::Shader>& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;
         void UpdateBuffer(const Rendering::Buffer& buffer, size_t offset, size_t size, const void* data) override;
 
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;

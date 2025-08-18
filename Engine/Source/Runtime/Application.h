@@ -42,6 +42,7 @@ namespace Nova
         virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnGUI() {}
+        virtual void OnDrawDebug() {}
         virtual void OnDestroy() {}
 
         float GetDeltaTime() const;

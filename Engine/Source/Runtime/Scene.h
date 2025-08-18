@@ -31,7 +31,20 @@ namespace Nova
         void OnUpdate(float deltaTime);
         void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
         void OnRender(Rendering::CommandBuffer& cmdBuffer);
+        void OnDrawDebug();
         void OnDestroy();
+
+        template<typename ComponentType>
+        ComponentType* GetFirstComponent()
+        {
+            for (const Entity* entity : m_Entities)
+            {
+                ComponentType* component = entity->GetComponent<ComponentType>();
+                if (!component) continue;
+                return component;
+            }
+            return nullptr;
+        }
 
         template <typename ComponentType>
         Array<ComponentType*> GetAllComponents()

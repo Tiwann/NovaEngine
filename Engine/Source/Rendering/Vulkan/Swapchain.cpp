@@ -2,12 +2,12 @@
 #include "Device.h"
 #include "Conversions.h"
 #include "Containers/StringFormat.h"
-#include <vulkan/vulkan.h>
-
 #include "CommandBuffer.h"
 #include "RenderTarget.h"
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
+
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
@@ -141,7 +141,7 @@ namespace Nova::Vulkan
 
     void Swapchain::Destroy()
     {
-        const Device* device = static_cast<Device*>(m_Device);
+        const Device* device = (Device*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
 
         for (size_t i = 0; i < GetImageCount(); i++)
@@ -182,8 +182,7 @@ namespace Nova::Vulkan
         if (!semaphore)
             return false;
 
-
-        const Device* device = static_cast<Device*>(m_Device);
+        const Device* device = (Device*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
         const VkResult result = vkAcquireNextImageKHR(deviceHandle, m_Handle, 1000000000, semaphore->GetHandle(), fence ? fence->GetHandle() : nullptr, &frameIndex);
         if (result != VK_SUCCESS)

@@ -62,6 +62,14 @@ namespace Nova
         }
     }
 
+    void Scene::OnDrawDebug()
+    {
+        for (Entity* entity : m_Entities)
+        {
+            entity->OnDrawDebug();
+        }
+    }
+
 
     void Scene::OnDestroy()
     {

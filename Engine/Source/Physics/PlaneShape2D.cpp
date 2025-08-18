@@ -62,5 +62,7 @@ namespace Nova
         const b2Vec2 point2 = b2Vec2(m_Position.x + m_Width * 0.5f, m_Position.y);
         m_Segment.point1 = b2RotateVector(b2MakeRot(m_Rotation), point1);
         m_Segment.point2 = b2RotateVector(b2MakeRot(m_Rotation), point2);
+        if (b2Shape_IsValid(m_Shape))
+            b2Shape_SetSegment(m_Shape, &m_Segment);
     }
 }

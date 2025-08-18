@@ -1,4 +1,3 @@
-#pragma once
 #include "PhysicsMaterial.h"
 
 namespace Nova

@@ -1,8 +1,10 @@
 ﻿#include "Application.h"
 #include "Path.h"
+#include "Scene.h"
 #include "Time.h"
 #include "Window.h"
 #include "Audio/AudioSystem.h"
+#include "Components/Camera.h"
 #include "Rendering/DebugRenderer.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Vulkan/Device.h"
@@ -129,7 +131,7 @@ namespace Nova
                 return Ref<Rendering::Shader>(nullptr);
             }
 
-            return shader;
+            return Ref<Rendering::Shader>(shader);
         };
 
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
@@ -138,6 +140,8 @@ namespace Nova
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;
         debugRendererCreateInfo.shader = m_AssetDatabase.Get<Rendering::Shader>("DebugShader");
+        debugRendererCreateInfo.renderPass = &m_RenderPass;
+        debugRendererCreateInfo.maxVertices = 512;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
             return;
 
@@ -178,6 +182,15 @@ namespace Nova
             m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
             m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
+
+            Scene* scene = m_SceneManager.GetActiveScene();
+            if (Camera* camera = scene->GetFirstComponent<Camera>())
+            {
+                DebugRenderer::Begin(camera->GetViewProjectionMatrix());
+                m_SceneManager.OnDrawDebug();
+                OnDrawDebug();
+                DebugRenderer::End(cmdBuffer);
+            }
 
             cmdBuffer.BeginRenderPass(m_RenderPass);
             m_SceneManager.OnRender(cmdBuffer);

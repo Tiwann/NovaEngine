@@ -6,7 +6,7 @@
 
 namespace Nova
 {
-    class Transform : public Component
+    class Transform final : public Component
     {
     public:
         Transform(Entity* owner);

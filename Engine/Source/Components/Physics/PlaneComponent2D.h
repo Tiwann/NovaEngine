@@ -12,10 +12,15 @@ namespace Nova
         ~PlaneComponent2D() override {}
 
         void OnInit() override;
+        void OnDrawDebug() override;
         void OnDestroy() override;
 
         void SetShapePosition(const Vector2& position);
         void SetShapeRotation(float rotation);
+        Vector2 GetShapePosition() const;
+        float GetShapeRotation();
+
+        float GetWidth() const;
         void SetWidth(float width);
     };
 }

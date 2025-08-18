@@ -47,7 +47,7 @@ namespace Nova
 
     Stream::OffsetType MemoryStream::Tell() const
     {
-        return m_Opened ? m_Position : EndOfFile;
+        return m_Opened ? m_Position : OffsetType(~0);
     }
 
     void MemoryStream::Close()

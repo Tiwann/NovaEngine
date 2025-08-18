@@ -7,6 +7,7 @@ namespace Nova
     class PhysicsWorld2D : public PhysicsWorld
     {
     public:
+        PhysicsWorld2D() : PhysicsWorld("Physics World 2D") {}
         bool Initialize(const PhysicsWorldCreateInfo& createInfo) override;
         void Step() override;
         void Destroy() override;

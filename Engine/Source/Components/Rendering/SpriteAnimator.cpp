@@ -1,4 +1,4 @@
-﻿#include "../../Runtime/SpriteAnimation.h"
+﻿#include "Runtime/SpriteAnimation.h"
 #include "Runtime/Entity.h"
 #include "SpriteAnimator.h"
 #include "SpriteRenderer.h"

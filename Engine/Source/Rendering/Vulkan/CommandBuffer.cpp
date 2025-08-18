@@ -201,7 +201,7 @@ namespace Nova::Vulkan
     void CommandBuffer::PushConstants(const Ref<Rendering::Shader>& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
     {
 
-        vkCmdPushConstants(m_Handle, shader.As<Shader>()->GetPipelineLayout(), stageFlags, offset, size, values);
+        vkCmdPushConstants(m_Handle, shader.As<Shader>()->GetPipelineLayout(), Convert<ShaderStageFlags, VkShaderStageFlags>(stageFlags), offset, size, values);
     }
 
     void CommandBuffer::UpdateBuffer(const Rendering::Buffer& buffer, const size_t offset, const size_t size, const void* data)

@@ -222,9 +222,9 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
+
         VkPhysicalDeviceSynchronization2Features synchronization2Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES };
         synchronization2Features.synchronization2 = true;
-
 
         VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
         indexingFeatures.pNext = &synchronization2Features;
@@ -243,6 +243,8 @@ namespace Nova::Vulkan
 
         VkPhysicalDeviceFeatures features = {};
         features.samplerAnisotropy = true;
+        features.fillModeNonSolid = true;
+        features.wideLines = true;
 
         VkDeviceCreateInfo deviceCreateInfo = { VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
         deviceCreateInfo.pNext = &dynamicRenderingFeatures;

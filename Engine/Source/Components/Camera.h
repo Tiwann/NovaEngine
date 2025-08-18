@@ -12,7 +12,7 @@ namespace Nova
         Perspective
     };
 
-    class Camera : public Component
+    class Camera final : public Component
     {
     public:
         Camera(Entity* owner);

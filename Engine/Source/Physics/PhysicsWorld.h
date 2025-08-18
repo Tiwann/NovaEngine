@@ -23,7 +23,7 @@ namespace Nova
     class PhysicsWorld : public Object
     {
     public:
-        PhysicsWorld() = default;
+        PhysicsWorld(const String& name) : Object(name) {}
         ~PhysicsWorld() override = default;
         virtual bool Initialize(const PhysicsWorldCreateInfo& createInfo) = 0;
         virtual void Step() = 0;

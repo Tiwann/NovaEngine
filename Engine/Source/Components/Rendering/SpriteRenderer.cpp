@@ -66,7 +66,7 @@ namespace Nova
         m_Sampler = device->CreateSampler(Rendering::SamplerCreateInfo(device));
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
-        m_Shader = assetDatabase.Get<Rendering::Shader>("Sprite");
+        m_Shader = assetDatabase.Get<Rendering::Shader>("SpriteShader");
         m_BindingSet = m_Shader->CreateBindingSet(0);
 
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;

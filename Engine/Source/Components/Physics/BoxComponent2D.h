@@ -11,6 +11,7 @@ namespace Nova
         BoxComponent2D(Entity* owner): PhysicsComponent(owner, "Box Component 2D"){ }
 
         void OnInit() override;
+        void OnDrawDebug() override;
         void OnDestroy() override;
 
         void SetShapePosition(const Vector2& position);

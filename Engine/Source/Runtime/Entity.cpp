@@ -139,6 +139,18 @@ namespace Nova
         }
     }
 
+    void Entity::OnDrawDebug()
+    {
+        if(!m_Enabled) return;
+
+        for(Component* component : m_Components)
+        {
+            if(!component->IsEnabled())
+                continue;
+            component->OnDrawDebug();
+        }
+    }
+
     void Entity::OnDestroy()
     {
         for(Component* component : m_Components)

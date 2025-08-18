@@ -19,7 +19,7 @@ namespace Nova
 
     class SpriteAnimation;
 
-    class SpriteRenderer : public Component
+    class SpriteRenderer final : public Component
     {
     public:
         SpriteRenderer(Entity* owner);

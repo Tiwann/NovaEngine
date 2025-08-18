@@ -34,6 +34,12 @@ namespace Nova
             m_ActiveScene->OnRender(cmdBuffer);
     }
 
+    void SceneManager::OnDrawDebug()
+    {
+        if (m_ActiveScene)
+            m_ActiveScene->OnDrawDebug();
+    }
+
     void SceneManager::Destroy()
     {
         UnloadActiveScene();

@@ -9,7 +9,9 @@ namespace Nova
     {
     public:
         using PointerType = T*;
+        using ConstPointerType = const T*;
         using ReferenceType = T&;
+        using ConstReferenceType = const T&;
         Ref() = default;
 
         Ref(PointerType ptr) : m_Pointer(ptr)
@@ -83,16 +85,16 @@ namespace Nova
 
 
         ReferenceType operator*() { return *m_Pointer; }
-        const ReferenceType operator*() const { return *m_Pointer; }
+        ConstReferenceType operator*() const { return *m_Pointer; }
 
         PointerType operator->() { return m_Pointer; }
-        const PointerType operator->() const { return m_Pointer; }
+        ConstPointerType operator->() const { return m_Pointer; }
 
         PointerType Get() { return m_Pointer; }
-        const PointerType Get() const { return m_Pointer; }
+        ConstPointerType Get() const { return m_Pointer; }
 
         operator PointerType() { return m_Pointer; }
-        operator const PointerType() const { return m_Pointer; }
+        operator ConstPointerType() const { return m_Pointer; }
 
         template <typename U>
         operator U*() const { return (U*)m_Pointer; }
@@ -145,7 +147,9 @@ namespace Nova
     public:
         using RefType = Ref<T>;
         using PointerType = typename RefType::PointerType;
+        using ConstPointerType = typename RefType::ConstPointerType;
         using ReferenceType = typename RefType::ReferenceType;
+        using ConstReferenceType = typename RefType::ConstReferenceType;
 
         explicit WeakRef(RefType& ref) : m_Pointer(ref.Get()){}
 
@@ -169,16 +173,16 @@ namespace Nova
 
 
         ReferenceType operator*() { return *m_Pointer; }
-        const ReferenceType operator*() const { return *m_Pointer; }
+        ConstReferenceType operator*() const { return *m_Pointer; }
 
         PointerType operator->() { return m_Pointer; }
-        const PointerType operator->() const { return m_Pointer; }
+        ConstPointerType operator->() const { return m_Pointer; }
 
         PointerType Get() { return m_Pointer; }
-        const PointerType Get() const { return m_Pointer; }
+        ConstPointerType Get() const { return m_Pointer; }
 
         operator PointerType() { return m_Pointer; }
-        operator const PointerType() const { return m_Pointer; }
+        operator ConstPointerType() const { return m_Pointer; }
     private:
         PointerType m_Pointer = nullptr;
     };

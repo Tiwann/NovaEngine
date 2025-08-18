@@ -2,8 +2,8 @@
 
 struct VertexInput
 {
-    float3 position;
-    float4 color;
+    float3 position : POSITION;
+    float4 color : COLOR;
 }
 
 struct VertexOutput
@@ -12,7 +12,7 @@ struct VertexOutput
     float4 color;
 };
 
-[vk::push_constant] float4x4 viewProj;
+[vk::push_constant] ConstantBuffer<float4x4, Std430DataLayout> viewProj;
 
 [shader("vertex")]
 VertexOutput vert(VertexInput input)
@@ -20,6 +20,7 @@ VertexOutput vert(VertexInput input)
     VertexOutput output;
     output.position = mul(viewProj, float4(input.position, 1.0));
     output.color = input.color;
+    return output;
 }
 
 [shader("fragment")]

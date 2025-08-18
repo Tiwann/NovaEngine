@@ -1,7 +1,10 @@
 ﻿#include "BoxComponent2D.h"
+#include "Components/Camera.h"
+#include "Components/Transform.h"
 #include "Physics/BoxShape2D.h"
 #include "Physics/PhysicsBody2D.h"
 #include "Physics/PhysicsWorld2D.h"
+#include "Rendering/DebugRenderer.h"
 #include "Runtime/Scene.h"
 
 namespace Nova
@@ -18,6 +21,18 @@ namespace Nova
         m_Body->onContactStayEvent.BindMember(this, &BoxComponent2D::OnContactStay);
         m_Body->onContactEndEvent.BindMember(this, &BoxComponent2D::OnContactEnd);
     }
+
+    void BoxComponent2D::OnDrawDebug()
+    {
+        const BoxShape2D* shape = (BoxShape2D*)m_Shape;
+        const Transform* transform = GetTransform();
+        const Vector3 position = transform->GetPosition() + Vector3(shape->GetPosition());
+        const Vector3 size = Vector3(shape->GetWidth(), shape->GetHeight(), 0.0f);
+
+        const Quaternion rotation = Quaternion::FromAxisAngle(Vector3::Forward, shape->GetRotation());
+        DebugRenderer::DrawSquare(position, rotation, size, Color::Yellow);
+    }
+
 
     void BoxComponent2D::OnDestroy()
     {
@@ -71,8 +86,8 @@ namespace Nova
     void BoxComponent2D::SetSize(const float width, const float height)
     {
         BoxShape2D* shape = (BoxShape2D*)m_Shape;
-        shape->SetWidth(width);
-        shape->SetHeight(height);
+        shape->SetWidth(Math::Max(width, Math::Epsilon));
+        shape->SetHeight(Math::Max(height, Math::Epsilon));
     }
 
     void BoxComponent2D::OnContactBegin(const PhysicsContact& contact)

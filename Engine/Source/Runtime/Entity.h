@@ -132,6 +132,7 @@ namespace Nova
         virtual void OnPhysicsUpdate(float deltaTime);
         virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
         virtual void OnRender(Rendering::CommandBuffer& cmdBuffer);
+        virtual void OnDrawDebug();
         virtual void OnDestroy();
 
     private:

@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "PhysicsShape2D.h"
+﻿#include "PhysicsShape2D.h"
 #include "PhysicsMaterial.h"
 #include <box2d/box2d.h>
 
@@ -44,7 +43,7 @@ namespace Nova
             b2SurfaceMaterial surfaceMat = b2Shape_GetSurfaceMaterial(m_Shape);
             surfaceMat.friction = m_Material->GetFriction();
             surfaceMat.restitution = m_Material->GetBounciness();
-            b2Shape_SetSurfaceMaterial(m_Shape, surfaceMat);
+            b2Shape_SetSurfaceMaterial(m_Shape, &surfaceMat);
             b2Shape_SetDensity(m_Shape, material->GetDensity(), true);
         }
     }

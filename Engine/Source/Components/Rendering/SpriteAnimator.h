@@ -1,13 +1,12 @@
 ﻿#pragma once
 #include "SpriteRenderer.h"
 #include "Runtime/Component.h"
-#include "Runtime/Timer.h"
 
 namespace Nova
 {
     class SpriteAnimation;
     
-    class SpriteAnimator : public Component
+    class SpriteAnimator final : public Component
     {
     public:
         SpriteAnimator(Entity* owner);

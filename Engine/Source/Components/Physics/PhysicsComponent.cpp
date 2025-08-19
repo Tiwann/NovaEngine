@@ -46,7 +46,7 @@ namespace Nova
         return m_Body->GetRotation();
     }
 
-    void PhysicsComponent::SetPositionAndRotation(const Vector3& position, const Quaternion& rotation)
+    void PhysicsComponent::SetBodyPositionAndRotation(const Vector3& position, const Quaternion& rotation)
     {
         m_Body->SetPosition(position);
     }

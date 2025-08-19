@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Object.h"
 #include "Containers/StringFormat.h"
-#include "Runtime/Ref.h"
 
 #include <type_traits>
 
@@ -11,15 +10,15 @@ namespace Nova
     class Editor : public Object
     {
     public:
-        explicit Editor(const Ref<ObjectType>& target)
+        explicit Editor(ObjectType* target)
         : Object(StringFormat("{} Editor", target->GetObjectName())), m_Target(target){}
 
         ~Editor() override = default;
 
         virtual void OnInit() {}
         virtual void OnInspectorGui() {}
-
-    private:
-        Ref<ObjectType> m_Target = nullptr;
+        virtual void OnDestroy() {}
+    protected:
+        ObjectType* m_Target = nullptr;
     };
 }

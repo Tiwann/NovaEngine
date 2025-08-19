@@ -23,7 +23,7 @@ namespace Nova
         Vector3 GetBodyPosition() const;
         void SetBodyRotation(const Quaternion& rotation);
         Quaternion GetBodyRotation() const;
-        void SetPositionAndRotation(const Vector3& position, const Quaternion& rotation);
+        void SetBodyPositionAndRotation(const Vector3& position, const Quaternion& rotation);
 
         void SetLinearVelocity(const Vector3& velocity);
         Vector3 GetLinearVelocity() const;

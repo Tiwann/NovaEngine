@@ -5,12 +5,16 @@
 #include "Window.h"
 #include "Audio/AudioSystem.h"
 #include "Components/Camera.h"
+#include "Editor/HierarchyWindow.h"
+#include "Editor/InspectorWindow.h"
 #include "Rendering/DebugRenderer.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
 #include "Rendering/Vulkan/Shader.h"
 #include "Rendering/Vulkan/Swapchain.h"
+
+#include <imgui.h>
 
 namespace Nova
 {
@@ -145,6 +149,10 @@ namespace Nova
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
             return;
 
+
+        m_EditorWindows.Add(EditorWindow::CreateWindow<HierarchyWindow>());
+        m_EditorWindows.Add(EditorWindow::CreateWindow<InspectorWindow>());
+
         OnInit();
         Update();
     }
@@ -162,6 +170,9 @@ namespace Nova
             m_DeltaTime = currentTime - m_LastTime;
             m_LastTime = currentTime;
             m_Window->PollEvents();
+
+            for (Ref<EditorWindow>& window : m_EditorWindows)
+                window->OnUpdate(m_DeltaTime);
 
             m_SceneManager.OnUpdate(m_DeltaTime);
             OnUpdate(m_DeltaTime);
@@ -199,6 +210,9 @@ namespace Nova
             cmdBuffer.EndRenderPass();
 
             m_ImGuiRenderer->BeginFrame();
+            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+            for (Ref<EditorWindow>& window : m_EditorWindows)
+                window->OnGui();
             OnGUI();
             m_ImGuiRenderer->EndFrame();
 

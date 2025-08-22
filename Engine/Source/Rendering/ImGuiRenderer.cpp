@@ -1,9 +1,9 @@
 ﻿#include "ImGuiRenderer.h"
 #include "Vulkan/ImGuiRenderer.h"
 #include "Device.h"
+#include "External/ImGuiExtension.h"
 
 #include <imgui.h>
-
 
 namespace Nova::Rendering
 {
@@ -14,8 +14,7 @@ namespace Nova::Rendering
 
         m_Context = ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
-        // TODO: Need to change branch to docking!!
-        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         // TODO: Add fonts
         /*for(size_t i = 0; i < NumFonts; i++)
@@ -29,6 +28,7 @@ namespace Nova::Rendering
             return false;
 
         ImGui::SetCurrentContext(m_Context);
+        ImGui::NovaStyle();
 
         // TODO: Add imguizmo
         //ImGuizmo::SetImGuiContext(m_Context);

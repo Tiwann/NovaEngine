@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include <print>
 
+#include "Editor/Selection.h"
+
 namespace Nova
 {
     void SceneManager::OnUpdate(const float deltaTime)
@@ -16,6 +18,7 @@ namespace Nova
 
             m_ActiveScene = m_PendingScene;
             m_PendingScene = nullptr;
+            Selection::SelectedScene = m_ActiveScene;
         }
 
         if (m_ActiveScene)

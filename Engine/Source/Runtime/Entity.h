@@ -99,7 +99,8 @@ namespace Nova
         void SetParent(Entity* entity);
         bool HasChildren() const;
         bool HasParent() const;
-        
+
+        size_t GetChildCount() const;
         Entity* GetChild(size_t index) const;
         Entity* GetParent() const;
         Transform* GetTransform() const;

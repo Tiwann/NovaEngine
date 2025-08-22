@@ -42,6 +42,11 @@ namespace Nova
 
     bool Entity::HasParent() const { return m_Parent != nullptr; }
 
+    size_t Entity::GetChildCount() const
+    {
+        return m_Children.Count();
+    }
+
     Entity* Entity::GetChild(size_t index) const
     {
         if(index > m_Children.Count())

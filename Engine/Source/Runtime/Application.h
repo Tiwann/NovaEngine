@@ -17,6 +17,7 @@ namespace Nova
 {
     class Window;
     class AudioSystem;
+    class EditorWindow;
 
     struct ApplicationConfiguration
     {
@@ -75,6 +76,8 @@ namespace Nova
 
         SceneManager m_SceneManager;
         AssetDatabase m_AssetDatabase;
+
+        Array<Ref<EditorWindow>> m_EditorWindows;
 
         bool m_IsRunning = true;
         double m_LastTime = 0.0f;

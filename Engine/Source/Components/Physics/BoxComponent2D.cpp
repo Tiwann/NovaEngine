@@ -17,9 +17,9 @@ namespace Nova
         m_Shape = new BoxShape2D();
         ((PhysicsBody2D*)m_Body)->AttachShape((BoxShape2D*)m_Shape);
         m_Body->SetUserPointer(this);
-        m_Body->onContactBeginEvent.BindMember(this, &BoxComponent2D::OnContactBegin);
-        m_Body->onContactStayEvent.BindMember(this, &BoxComponent2D::OnContactStay);
-        m_Body->onContactEndEvent.BindMember(this, &BoxComponent2D::OnContactEnd);
+        //m_Body->onContactBeginEvent.BindMember(this, &BoxComponent2D::OnContactBegin);
+        //m_Body->onContactStayEvent.BindMember(this, &BoxComponent2D::OnContactStay);
+        //m_Body->onContactEndEvent.BindMember(this, &BoxComponent2D::OnContactEnd);
     }
 
     void BoxComponent2D::OnDrawDebug()

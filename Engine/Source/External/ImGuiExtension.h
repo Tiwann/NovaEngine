@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Ref.h"
+#include "Containers/StringView.h"
 #include <imgui.h>
 
 
@@ -13,6 +14,7 @@ namespace Nova
 
 namespace ImGui
 {
+    bool IMGUI_API Begin(Nova::StringView name);
     void IMGUI_API PushID(const Nova::Uuid& id);
     void IMGUI_API PushID(const Nova::Component* component);
     void IMGUI_API AddComponent(Nova::Entity* entity);

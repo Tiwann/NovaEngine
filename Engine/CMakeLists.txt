@@ -1,6 +1,6 @@
 ﻿include(Vendor/Vendor.cmake)
 
-file(GLOB_RECURSE NOVA_ENGINE_SOURCES Source/*.cpp Source/*.h)
+file(GLOB_RECURSE NOVA_ENGINE_SOURCES Source/*.cpp Source/*.hpp Source/*.c Source/*.h Source/*.cc Source/*.hh)
 file(GLOB_RECURSE NOVA_ENGINE_WINDOWS_SOURCES Source/*/Windows/*.cpp Source/*/Windows/*.h)
 file(GLOB_RECURSE NOVA_ENGINE_LINUX_SOURCES Source/*/Linux/*.cpp Source/*/Linux/*.h)
 

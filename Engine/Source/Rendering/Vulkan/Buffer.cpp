@@ -170,4 +170,10 @@ namespace Nova::Vulkan
     {
         return &m_Handle;
     }
+
+    void Buffer::GetAllocationInfo(VmaAllocationInfo2& outAllocationInfo) const
+    {
+        const VmaAllocator allocatorHandle = m_Device->GetAllocator();
+        vmaGetAllocationInfo2(allocatorHandle, m_Allocation, &outAllocationInfo);
+    }
 }

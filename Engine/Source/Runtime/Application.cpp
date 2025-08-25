@@ -118,12 +118,17 @@ namespace Nova
         // Load engine shaders
         const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath)
         {
+            const Rendering::ShaderEntryPoint entryPoints []
+            {
+                { "vert", ShaderStageFlagBits::Vertex },
+                { "frag", ShaderStageFlagBits::Fragment }
+            };
+
             Rendering::ShaderCreateInfo spriteShaderCreateInfo;
             spriteShaderCreateInfo.device = m_Device;
             spriteShaderCreateInfo.slang = m_SlangSession;
             spriteShaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
-            spriteShaderCreateInfo.entryPoints.Add({ "vert", ShaderStageFlagBits::Vertex });
-            spriteShaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
+            spriteShaderCreateInfo.entryPoints.AddRange(entryPoints);
             spriteShaderCreateInfo.moduleInfo = { moduleName, shaderPath };
 
             // TODO: Provide a way to specify which shader implementation
@@ -145,13 +150,18 @@ namespace Nova
         debugRendererCreateInfo.device = m_Device;
         debugRendererCreateInfo.shader = m_AssetDatabase.Get<Rendering::Shader>("DebugShader");
         debugRendererCreateInfo.renderPass = &m_RenderPass;
-        debugRendererCreateInfo.maxVertices = 512;
+        debugRendererCreateInfo.maxVertices = 64;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
             return;
 
 
         m_EditorWindows.Add(EditorWindow::CreateWindow<HierarchyWindow>());
         m_EditorWindows.Add(EditorWindow::CreateWindow<InspectorWindow>());
+
+        //auto viewportWindow = EditorWindow::CreateWindow<ViewportWindow>(m_Device);
+        //viewportWindow->SetRenderTarget(m_RenderTarget);
+        //viewportWindow->UpdateResources();
+        //m_EditorWindows.Add(viewportWindow);
 
         OnInit();
         Update();

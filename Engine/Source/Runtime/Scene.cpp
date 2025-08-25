@@ -12,6 +12,7 @@ namespace Nova
 #ifdef NOVA_HAS_PHYSICS
         PhysicsWorldCreateInfo physics2DCreateInfo;
         physics2DCreateInfo.scene = this;
+        physics2DCreateInfo.iterations = 8;
         m_PhysicsWorld2D = MakeRef<PhysicsWorld2D>();
         m_PhysicsWorld2D->Initialize(physics2DCreateInfo);
 #endif

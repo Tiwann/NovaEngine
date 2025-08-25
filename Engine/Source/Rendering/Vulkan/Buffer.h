@@ -3,6 +3,7 @@
 
 typedef struct VkBuffer_T* VkBuffer;
 typedef struct VmaAllocation_T* VmaAllocation;
+struct VmaAllocationInfo2;
 
 
 namespace Nova::Vulkan
@@ -24,6 +25,7 @@ namespace Nova::Vulkan
 
         VkBuffer GetHandle() const;
         const VkBuffer* GetHandlePtr() const;
+        void GetAllocationInfo(VmaAllocationInfo2& outAllocationInfo) const;
     private:
         Device* m_Device = nullptr;
         VkBuffer m_Handle = nullptr;

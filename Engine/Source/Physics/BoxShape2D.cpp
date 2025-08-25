@@ -67,7 +67,7 @@ namespace Nova
 
     void BoxShape2D::UpdateBox()
     {
-        m_Polygon = b2MakeOffsetBox(m_Width * 0.5f, m_Height * 0.5f, b2Vec2_zero, b2MakeRot(m_Rotation));
+        m_Polygon = b2MakeOffsetBox(m_Width * 0.5f, m_Height * 0.5f, Tob2Vec2(m_Position), b2MakeRot(m_Rotation));
         if (b2Shape_IsValid(m_Shape))
             b2Shape_SetPolygon(m_Shape, &m_Polygon);
     }

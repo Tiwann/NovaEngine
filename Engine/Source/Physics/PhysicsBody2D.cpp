@@ -163,4 +163,9 @@ namespace Nova
     {
         return m_Handle;
     }
+
+    bool PhysicsBody2D::IsAwake() const
+    {
+        return b2Body_IsAwake(m_Handle);
+    }
 }

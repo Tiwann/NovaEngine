@@ -58,6 +58,9 @@ namespace Nova
         virtual void SetGravityScale(float scale) = 0;
         virtual float GetGravityScale() const = 0;
 
+        virtual bool IsAwake() const = 0;
+
+
         const PhysicsWorld* GetWorld() const { return m_World; }
     protected:
         PhysicsConstraintsFlags m_Constraints;

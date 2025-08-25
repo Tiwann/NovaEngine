@@ -27,8 +27,8 @@ namespace Nova
 
     void PhysicsWorld2D::Step()
     {
-        Application* application = GetApplication();
-        b2World_Step(m_Handle, application->GetDeltaTime(), m_Iterations);
+        Application* app = GetApplication();
+        b2World_Step(m_Handle, m_TimeStep, m_Iterations);
 
         const b2ContactEvents contactEvents = b2World_GetContactEvents(m_Handle);
         for (int i = 0; i < contactEvents.beginCount; ++i)

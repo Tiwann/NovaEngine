@@ -47,6 +47,7 @@ namespace Nova
         float GetGravityScale() const override;
         b2BodyId GetHandle() const;
 
+        bool IsAwake() const override;
     private:
         b2BodyId m_Handle = b2_nullBodyId;
     };

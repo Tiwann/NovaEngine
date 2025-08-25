@@ -14,7 +14,9 @@
 
 #include <vulkan/vulkan.h>
 #include <cstdint>
+#include <vma/vk_mem_alloc.h>
 
+#include "Rendering/Vulkan/Buffer.h"
 
 namespace Nova
 {

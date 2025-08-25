@@ -37,6 +37,8 @@ namespace Nova
 
         Scene* GetOwner() { return m_Owner;}
         Application* GetApplication() { return m_Owner->GetOwner(); }
+
+        const Array<PhysicsBody*>& GetBodies() const { return m_Bodies; }
     protected:
         Scene* m_Owner = nullptr;
         Array<PhysicsBody*> m_Bodies;

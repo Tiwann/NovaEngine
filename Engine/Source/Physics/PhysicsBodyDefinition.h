@@ -11,6 +11,6 @@ namespace Nova
     {
         Vector3 position = Vector3::Zero;
         Quaternion rotation = Quaternion::Identity;
-        PhysicsBodyType type = PhysicsBodyType::Static;
+        PhysicsBodyType type = PhysicsBodyType::Dynamic;
     };
 }

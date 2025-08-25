@@ -9,15 +9,22 @@
 #include "Runtime/Component.h"
 #include "Runtime/Entity.h"
 #include "Runtime/Uuid.h"
-#include <imgui_impl_vulkan.h>
-#include <cstdint>
-
 #include "Rendering/Device.h"
 #include "Rendering/Vulkan/Sampler.h"
 #include "Rendering/Vulkan/Texture.h"
 
+#include <imgui_impl_vulkan.h>
+#include <cstdint>
+
+
+
 namespace ImGui
 {
+    bool Begin(const Nova::StringView name)
+    {
+        return Begin(*name);
+    }
+
     void PushID(const Nova::Uuid& id)
     {
         const uint64_t* begin = id.GetValues();

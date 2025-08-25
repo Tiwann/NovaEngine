@@ -2,62 +2,61 @@
 #include <cstdint>
 #include <cstring>
 
-
-#define NOVA_MALLOC(Size) ::operator new []((Size))
-#define NOVA_REALLOC(Ptr, Size) ::operator new []((Size), (Ptr))
-#define NOVA_MEMSET(Ptr, Value, Size) std::memset((Ptr), (Value), (Size))
-#define NOVA_FREE(Ptr) ::operator delete[]((Ptr))
+#define NOVA_MALLOC(size) ::operator new []((size))
+#define NOVA_REALLOC(ptr, size) ::operator new []((size), (ptr))
+#define NOVA_MEMSET(ptr, value, size) std::memset((ptr), (value), (size))
+#define NOVA_FREE(ptr) ::operator delete[]((ptr))
 
 namespace Nova::Memory
 {
     template<typename T>
-    T* Malloc(const size_t Count = 1)
+    T* Malloc(const size_t count = 1)
     {
-        return (T*)NOVA_MALLOC(Count * sizeof(T));
+        return (T*)NOVA_MALLOC(count * sizeof(T));
     }
     
     template<typename T>
-    T* Realloc(T* Ptr, const size_t Count = 1)
+    T* Realloc(T* ptr, const size_t count = 1)
     {
-        return (T*)NOVA_REALLOC(Ptr, Count * sizeof(T));
+        return (T*)NOVA_REALLOC(ptr, count * sizeof(T));
     }
 
     template<typename T>
-    T* Memset(T* Ptr, const int32_t Value, const size_t Count = 1)
+    T* Memset(T* ptr, const int32_t value, const size_t count = 1)
     {
-        return (T*)NOVA_MEMSET((void*)Ptr, Value, Count * sizeof(T));
+        return (T*)NOVA_MEMSET((void*)ptr, value, count * sizeof(T));
     }
 
     template<typename T>
-    T* Memzero(T* Ptr)
+    T* Memzero(T* ptr)
     {
-        return Memset(Ptr, 0, 1);
+        return Memset(ptr, 0, 1);
     }
 
     template<typename T>
-    T* Memzero(T& Ptr)
+    T* Memzero(T& ptr)
     {
-        return Memset(&Ptr, 0, 1);
+        return Memset(&ptr, 0, 1);
     }
 
     template<typename T>
-    T* Calloc(size_t Count = 1)
+    T* Calloc(size_t count = 1)
     {
-        T* Result = Malloc<T>(Count);
-        Result = Memset(Result, 0, Count);
-        return Result;
+        T* result = Malloc<T>(count);
+        result = Memset(result, 0, count);
+        return result;
     }
 
     template<typename T>
-    void Free(T* Ptr)
+    void Free(T* ptr)
     {
-        NOVA_FREE(Ptr);
+        NOVA_FREE(ptr);
     }
 
     template<typename SourceType, typename DestType>
-    void Memcpy(DestType* Dest, const SourceType* Src, const size_t Size)
+    void Memcpy(DestType* dest, const SourceType* src, const size_t size)
     {
-        memcpy(Dest, Src, Size);
+        memcpy(dest, src, size);
     }
 
     inline bool Memcmp(const void* lhs, const void* rhs, const size_t size)

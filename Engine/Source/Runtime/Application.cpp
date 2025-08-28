@@ -204,14 +204,17 @@ namespace Nova
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
             m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
 
-            Scene* scene = m_SceneManager.GetActiveScene();
-            if (Camera* camera = scene->GetFirstComponent<Camera>())
+            if (Scene* scene = m_SceneManager.GetActiveScene())
             {
-                DebugRenderer::Begin(camera->GetViewProjectionMatrix());
-                m_SceneManager.OnDrawDebug();
-                OnDrawDebug();
-                DebugRenderer::End(cmdBuffer);
+                if (Camera* camera = scene->GetFirstComponent<Camera>())
+                {
+                    DebugRenderer::Begin(camera->GetViewProjectionMatrix());
+                    m_SceneManager.OnDrawDebug();
+                    OnDrawDebug();
+                    DebugRenderer::End(cmdBuffer);
+                }
             }
+
 
             cmdBuffer.BeginRenderPass(m_RenderPass);
             m_SceneManager.OnRender(cmdBuffer);

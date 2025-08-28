@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "ImGuiExtension.h"
+﻿#include "ImGuiExtension.h"
 #include "Components/Camera.h"
 #include "Components/Audio/AudioListener.h"
 #include "Components/Audio/AudioSource.h"

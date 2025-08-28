@@ -105,7 +105,12 @@ namespace Nova
     void DebugRenderer::End(Rendering::CommandBuffer& cmdBuffer)
     {
         NOVA_ASSERT(s_Begin, "DebugRenderer::End/End call mismatch!");
-        if (s_Vertices.IsEmpty()) return;
+        if (s_Vertices.IsEmpty())
+        {
+            s_Begin = false;
+            return;
+        }
+
         cmdBuffer.UpdateBuffer(*s_VertexBuffer, 0, s_Vertices.Size(), s_Vertices.Data());
         cmdBuffer.UpdateBuffer(*s_IndexBuffer, 0, s_Indices.Size(), s_Indices.Data());
         s_Begin = false;

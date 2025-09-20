@@ -1,9 +1,11 @@
 [submodule "Engine/Vendor/miniaudio"]
 	path = Engine/Vendor/miniaudio
 	url = git@github.com:mackron/miniaudio.git
+	branch = master
 [submodule "Engine/Vendor/glfw"]
 	path = Engine/Vendor/glfw
 	url = git@github.com:glfw/glfw.git
+	branch = master
 [submodule "Engine/Vendor/imgui"]
 	path = Engine/Vendor/imgui
 	url = git@github.com:ocornut/imgui.git
@@ -11,3 +13,4 @@
 [submodule "Engine/Vendor/box2d"]
 	path = Engine/Vendor/box2d
 	url = git@github.com:erincatto/box2d.git
+	branch = main

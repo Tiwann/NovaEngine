@@ -36,6 +36,11 @@ namespace Nova
         SizeType Count() const { return m_Count; }
         SizeType Size() const { return m_Count * sizeof(CharacterType); }
 
+        bool EndsWith(StringViewBase str)
+        {
+            return std::string_view(m_Data, m_Count).find_last_of(std::string_view(str.m_Data, str.m_Count)) != std::string_view::npos;
+        }
+
         ConstIterator begin() const { return m_Data; }
         ConstIterator end() const { return m_Data + m_Count; }
 

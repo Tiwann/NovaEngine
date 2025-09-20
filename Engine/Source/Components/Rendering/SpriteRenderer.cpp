@@ -34,7 +34,7 @@ namespace Nova
         int32_t flags;
         Matrix4 mvp;
         Vector2 tiling;
-        float __padding1[2];
+        Vector2 offset;
         Vector4 scale[2];
         Vector4 color;
     };
@@ -142,6 +142,7 @@ namespace Nova
         uniforms.cols = m_SpriteAnimation ? m_SpriteAnimation->GetSpriteSheet().columns : 0;
         uniforms.mvp = mvp;
         uniforms.tiling = tiling;
+        uniforms.offset = m_TilingOffset;
         uniforms.scale[0] = Vector4(spriteScale[0].x, spriteScale[0].y, 0.0f, 0.0f);
         uniforms.scale[1] = Vector4(spriteScale[1].x, spriteScale[1].y, 0.0f, 0.0f);
         uniforms.color = m_ColorTint;
@@ -230,6 +231,16 @@ namespace Nova
     void SpriteRenderer::SetTiling(const Vector2& tiling)
     {
         m_Tiling = tiling;
+    }
+
+    Vector2 SpriteRenderer::GetTilingOffset() const
+    {
+        return m_TilingOffset;
+    }
+
+    void SpriteRenderer::SetTilingOffset(const Vector2& tilingOffset)
+    {
+        m_TilingOffset = tilingOffset;
     }
 
     uint32_t SpriteRenderer::GetPixelsPerUnit() const

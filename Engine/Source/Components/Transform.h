@@ -9,7 +9,7 @@ namespace Nova
     class Transform final : public Component
     {
     public:
-        Transform(Entity* owner);
+        explicit Transform(Entity* owner);
         
         const Vector3& GetPosition() const;
         const Quaternion& GetRotation() const;

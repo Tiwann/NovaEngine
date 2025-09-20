@@ -13,7 +13,11 @@ namespace Nova
     {
         const Scene* scene = GetScene();
         Ref<PhysicsWorld2D> world = scene->GetPhysicsWorld2D();
-        m_Body = world->CreateBody(PhysicsBodyDefinition());
+        const Transform* transform = GetTransform();
+        PhysicsBodyDefinition definition;
+        definition.position = transform->GetPosition();
+        definition.rotation = transform->GetRotation();
+        m_Body = world->CreateBody(definition);
         m_Shape = new BoxShape2D();
         ((PhysicsBody2D*)m_Body)->AttachShape((BoxShape2D*)m_Shape);
         m_Body->SetUserPointer(this);

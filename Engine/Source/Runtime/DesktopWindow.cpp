@@ -4,6 +4,30 @@
 
 namespace Nova
 {
+    static void glfwCenterWindow(GLFWwindow *window, GLFWmonitor *monitor)
+    {
+        const	GLFWvidmode	*mode	= glfwGetVideoMode(monitor);
+        const int32_t monitor_width	= mode->width;
+        const int32_t monitor_height	= mode->height;
+
+        int32_t window_width	= 0;
+        int32_t window_height	= 0;
+
+        glfwGetWindowSize(window, &window_width, &window_height);
+
+        int32_t left = 0;
+        int32_t top = 0;
+        int32_t right = 0;
+        int32_t bottom = 0;
+
+        glfwGetWindowFrameSize(window, &left, &top, &right, &bottom);
+
+        const int32_t	window_pos_x		= (monitor_width  - window_width + left - right)  >> 1;
+        const int32_t	window_pos_y		= (monitor_height - window_height + top - bottom) >> 1;
+
+        glfwSetWindowPos(window, window_pos_x, window_pos_y);
+    }
+    
     bool DesktopWindow::Initialize(const WindowCreateInfo& createInfo)
     {
         if (!glfwInit())
@@ -15,16 +39,20 @@ namespace Nova
             m_Handle = nullptr;
         }
 
-        glfwWindowHint(GLFW_RESIZABLE, createInfo.resizable);
+        glfwWindowHint(GLFW_RESIZABLE, createInfo.flags.Contains(WindowCreateFlagBits::Resizable));
+        glfwWindowHint(GLFW_DECORATED, createInfo.flags.Contains(WindowCreateFlagBits::Decorated));
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         m_Handle = glfwCreateWindow(createInfo.width, createInfo.height, *createInfo.title, nullptr, nullptr);
 
+        if (createInfo.flags.Contains(WindowCreateFlagBits::CreateAtCenter))
+            glfwCenterWindow(m_Handle, glfwGetPrimaryMonitor());
+
         if (!m_Handle)
             return false;
 
-        if (createInfo.show)
+        if (createInfo.flags.Contains(WindowCreateFlagBits::Show))
             glfwShowWindow(m_Handle);
 
         m_Width = createInfo.width;
@@ -40,32 +68,32 @@ namespace Nova
                 window->closeEvent.Broadcast();
         });
 
-        glfwSetWindowFocusCallback(m_Handle, [](GLFWwindow* handle, const int focus){
+        glfwSetWindowFocusCallback(m_Handle, [](GLFWwindow* handle, const int32_t focus){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_HasFocus = (bool)focus;
         });
 
-        glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int maximized){
+        glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int32_t maximized){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_IsMaximized = (bool)maximized;
             if (window->maximizeEvent.IsBound())
                 window->maximizeEvent.Broadcast();
         });
 
-        glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int maximized){
+        glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int32_t maximized){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_IsMaximized = (bool)maximized;
             if (window->maximizeEvent.IsBound())
                 window->maximizeEvent.Broadcast();
         });
 
-        glfwSetWindowPosCallback(m_Handle, [](GLFWwindow* handle, const int newX, const int newY){
+        glfwSetWindowPosCallback(m_Handle, [](GLFWwindow* handle, const int32_t newX, const int32_t newY){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_PosX = newX;
             window->m_PosY = newY;
         });
 
-        glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow* handle, const int newWidth, const int newHeight){
+        glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow* handle, const int32_t newWidth, const int32_t newHeight){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_Width = newWidth;
             window->m_Height = newHeight;
@@ -73,13 +101,13 @@ namespace Nova
                 window->resizeEvent.Broadcast(newWidth, newHeight);
         });
 
-        glfwSetWindowIconifyCallback(m_Handle, [](GLFWwindow* handle, const int iconified)
+        glfwSetWindowIconifyCallback(m_Handle, [](GLFWwindow* handle, const int32_t iconified)
         {
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_IsMinimized = (bool)iconified;
         });
 
-        glfwSetKeyCallback(m_Handle, [](GLFWwindow* handle, int key, int, const int action, int)
+        glfwSetKeyCallback(m_Handle, [](GLFWwindow* handle, int32_t key, int32_t, const int32_t action, int32_t)
         {
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             switch (action)
@@ -94,7 +122,7 @@ namespace Nova
             }
         });
 
-        glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* handle, int button, const int action, int)
+        glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow* handle, int32_t button, const int32_t action, int32_t)
         {
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             switch (action)
@@ -134,7 +162,7 @@ namespace Nova
 
         for(size_t id = 0; id < GAMEPAD_COUNT; ++id)
         {
-            glfwGetGamepadState((int)id, (GLFWgamepadstate*)&m_GamepadStates[id]);
+            glfwGetGamepadState((int32_t)id, (GLFWgamepadstate*)&m_GamepadStates[id]);
 
             for(size_t buttonIndex = 0 ; buttonIndex < GAMEPAD_BUTTON_COUNT; ++buttonIndex)
             {
@@ -266,7 +294,7 @@ namespace Nova
 
     bool DesktopWindow::GetKey(const KeyCode& keyCode) const
     {
-        const int state = glfwGetKey(m_Handle, (int)keyCode);
+        const int32_t state = glfwGetKey(m_Handle, (int32_t)keyCode);
         return state == GLFW_PRESS;
     }
 
@@ -282,7 +310,7 @@ namespace Nova
 
     bool DesktopWindow::GetMouseButton(const MouseButton& mouseButton) const
     {
-        const int state = glfwGetMouseButton(m_Handle, (int)mouseButton);
+        const int32_t state = glfwGetMouseButton(m_Handle, (int32_t)mouseButton);
         return state == GLFW_PRESS;
     }
 
@@ -305,7 +333,7 @@ namespace Nova
 
     bool DesktopWindow::IsGamepadConnected(const size_t id)
     {
-        return glfwJoystickPresent((int)id);
+        return glfwJoystickPresent((int32_t)id);
     }
 
     BufferView<bool> DesktopWindow::GetGamepadButtons(const size_t id)

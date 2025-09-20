@@ -26,6 +26,9 @@ namespace Nova
 
         bool operator==(const Quaternion& other) const;
         bool operator!=(const Quaternion& other) const;
+
+        Quaternion operator-() const;
+        Quaternion operator+() const;
         Quaternion operator+(const Quaternion& other) const;
         Quaternion operator-(const Quaternion& other) const;
         Quaternion& operator+=(const Quaternion& other);
@@ -35,6 +38,7 @@ namespace Nova
         Quaternion& operator*=(const Quaternion& other);
         Quaternion& operator*=(float other);
         Quaternion operator/(float other) const;
+
         Vector3 operator*(const Vector3& other) const;
         Vector4 operator*(const Vector4& other) const;
         Matrix4 operator*(const Matrix4& other) const;
@@ -50,6 +54,10 @@ namespace Nova
         static Quaternion FromAxisAngleDegrees(const Vector3& axis, float degrees);
         static Quaternion FromEuler(const Vector3& eulerAngles);
         static Quaternion FromEulerDegrees(const Vector3& eulerAnglesDegrees);
+
+        static Quaternion Angle(const Quaternion& a, const Quaternion& b);
+        static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
+        static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t);
         static Quaternion One;
         static Quaternion Identity;
     };

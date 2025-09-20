@@ -2,6 +2,7 @@
 #include "Runtime/Component.h"
 #include "Containers/MulticastDelegate.h"
 #include "Math/Vector3.h"
+#include "Runtime/Ref.h"
 #include <cstdint>
 
 namespace Nova
@@ -17,11 +18,11 @@ namespace Nova
     class AudioSource : public Component
     {
     public:
-        using StartedDelegate = MulticastDelegate<void(AudioClip* audioClip, bool wasPaused)>;
-        using StoppedDelegate = MulticastDelegate<void(AudioClip* audioClip, bool isPause)>;
-        using PlayingDelegate = MulticastDelegate<void(AudioClip* audioClip, uint32_t position, uint32_t length)>;
+        using StartedDelegate = MulticastDelegate<void(Ref<AudioClip> audioClip, bool wasPaused)>;
+        using StoppedDelegate = MulticastDelegate<void(Ref<AudioClip> audioClip, bool isPause)>;
+        using PlayingDelegate = MulticastDelegate<void(Ref<AudioClip> audioClip, uint32_t position, uint32_t length)>;
         
-        AudioSource(Entity* owner);
+        explicit AudioSource(Entity* owner);
 
         void OnUpdate(float deltaTime) override;
         //void OnInspectorGUI(const ImGuiIO& IO) override;
@@ -35,8 +36,8 @@ namespace Nova
         void Pause();
         void Resume();
 
-        AudioClip* GetAudioClip() const;
-        void SetAudioClip(AudioClip* clip);
+        Ref<AudioClip> GetAudioClip() const;
+        void SetAudioClip(Ref<AudioClip> clip);
         void SetVolume(float volume);
         void SetPitch(float pitch);
         void SetPan(float pan);

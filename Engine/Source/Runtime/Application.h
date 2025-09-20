@@ -23,8 +23,7 @@ namespace Nova
     {
         String applicationName;
         uint32_t windowWidth, windowHeight;
-        bool resizable;
-        bool fullscreen;
+        WindowCreateFlags windowFlags;
         bool vsync;
     };
 

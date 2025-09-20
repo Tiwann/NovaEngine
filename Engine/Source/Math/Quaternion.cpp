@@ -26,6 +26,16 @@ namespace Nova
         return !operator==(other);
     }
 
+    Quaternion Quaternion::operator-() const
+    {
+        return { -w, -x, -y, -z };
+    }
+
+    Quaternion Quaternion::operator+() const
+    {
+        return *this;
+    }
+
     bool Quaternion::operator==(const Quaternion& other) const
     {
         return x == other.x && y == other.y && z == other.z;
@@ -234,6 +244,42 @@ namespace Nova
     Quaternion Quaternion::FromEulerDegrees(const Vector3& eulerAnglesDegrees)
     {
         return FromEuler(eulerAnglesDegrees.Apply(Math::Radians));
+    }
+
+    Quaternion Quaternion::Angle(const Quaternion& a, const Quaternion& b)
+    {
+        return {};
+    }
+
+    Quaternion Quaternion::Lerp(const Quaternion& a, const Quaternion& b, float t)
+    {
+        const Quaternion result
+        {
+            Math::Lerp(a.w, b.w, t),
+            Math::Lerp(a.x, b.x, t),
+            Math::Lerp(a.y, b.y, t),
+            Math::Lerp(a.z, b.z, t)
+        };
+        return result;
+    }
+
+    Quaternion Quaternion::Slerp(const Quaternion& a, const Quaternion& b, const float t)
+    {
+        Quaternion z = b;
+
+        float cosTheta = a.Dot(b);
+
+        if(cosTheta < 0.0f)
+        {
+            z = -b;
+            cosTheta = -cosTheta;
+        }
+
+        if(cosTheta > 1.0f - Math::Epsilon)
+            return Lerp(a, b, t);
+
+        const float angle = Math::Acos(cosTheta);
+        return ((a * Math::Sin(1.0f - t) * angle) + z * Math::Sin(t * angle)) / Math::Sin(angle);
     }
 
     float Quaternion::Magnitude() const

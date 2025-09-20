@@ -3,17 +3,32 @@
 #include "Containers/String.h"
 #include "Containers/MulticastDelegate.h"
 #include "Ref.h"
+#include "Flags.h"
 #include <cstdint>
+
 
 namespace Nova
 {
+    enum class WindowCreateFlagBits
+    {
+        None = 0,
+        Resizable = BIT(0),
+        Decorated = BIT(1),
+        Fullscreen = BIT(2),
+        CreateAtCenter = BIT(3),
+        Show = BIT(4),
+
+        Default = Show | Decorated,
+    };
+
+    typedef Flags<WindowCreateFlagBits> WindowCreateFlags;
+
     struct WindowCreateInfo
     {
         String title;
         uint32_t width;
         uint32_t height;
-        bool resizable;
-        bool show;
+        WindowCreateFlags flags;
     };
 
     class Window : public Object

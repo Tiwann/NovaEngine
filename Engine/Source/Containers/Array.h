@@ -355,7 +355,7 @@ namespace Nova
             m_Count = 0;
         }
 
-        // Return an array of pointer to elements of type T, inside m_Data, where each element satisfy Predicate
+        // Return an array of pointer to elements of type T, inside m_Data, where each element satisfies Predicate
         Array<PointerType> Where(const Predicate& Predicate) const
         {
             if(!Predicate) return {};

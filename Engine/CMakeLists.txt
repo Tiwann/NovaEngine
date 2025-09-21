@@ -1,6 +1,6 @@
 ﻿include(Vendor/Vendor.cmake)
 
-file(GLOB_RECURSE NOVA_ENGINE_SOURCES Source/*.cpp Source/*.hpp Source/*.c Source/*.h Source/*.cc Source/*.hh)
+file(GLOB_RECURSE NOVA_ENGINE_SOURCES Source/*.cpp Source/*.hpp Source/*.c Source/*.h Source/*.cc Source/*.hh Source/*.hxx)
 file(GLOB_RECURSE NOVA_ENGINE_WINDOWS_SOURCES Source/*/Windows/*.cpp Source/*/Windows/*.h)
 file(GLOB_RECURSE NOVA_ENGINE_LINUX_SOURCES Source/*/Linux/*.cpp Source/*/Linux/*.h)
 
@@ -16,7 +16,7 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d PRIVATE glfw)
+target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d PRIVATE glfw assimp::assimp)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)

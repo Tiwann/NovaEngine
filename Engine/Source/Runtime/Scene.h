@@ -46,6 +46,18 @@ namespace Nova
             return nullptr;
         }
 
+        template<typename ComponentType>
+        const ComponentType* GetFirstComponent() const
+        {
+            for (const Entity* entity : m_Entities)
+            {
+                ComponentType* component = entity->GetComponent<ComponentType>();
+                if (!component) continue;
+                return component;
+            }
+            return nullptr;
+        }
+
         template <typename ComponentType>
         Array<ComponentType*> GetAllComponents()
         {

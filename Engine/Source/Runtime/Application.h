@@ -37,6 +37,8 @@ namespace Nova
         void Run();
         void Exit();
 
+        static Application& GetCurrentApplication();
+
         virtual ApplicationConfiguration GetConfiguration() const = 0;
         virtual void OnInit() {}
         virtual void OnUpdate(float deltaTime) {}

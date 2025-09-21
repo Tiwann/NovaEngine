@@ -5,7 +5,7 @@
 
 namespace Nova
 {
-    struct SpriteVertex
+    struct Vertex
     {
         Vector3 Position;
         Vector2 TextureCoordinate;

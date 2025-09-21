@@ -26,7 +26,7 @@ namespace Nova::Rendering
         SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
         bool vSync = false;
     };
-
+    
     class Surface;
     struct SurfaceCreateInfo;
     class RenderTarget;
@@ -62,7 +62,7 @@ namespace Nova::Rendering
         virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) const = 0;
         virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) const = 0;
         virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) const = 0;
-        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) const = 0;
 
         virtual uint32_t GetImageCount() const = 0;
 

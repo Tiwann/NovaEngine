@@ -5,11 +5,13 @@
 
 namespace Nova
 {
+    Application* g_Application = nullptr;
+
     int GuardedMain(const int argc, char** arv)
     {
-        Application* application = CreateApplication();
-        application->Run();
-        delete application;
+        g_Application = CreateApplication();
+        g_Application->Run();
+        delete g_Application;
         return 0;
     }
 }
@@ -18,7 +20,7 @@ namespace Nova
 #if defined(NOVA_PLATFORM_WINDOWS)
 #include <Windows.h>
 #if defined(NOVA_RELEASE)
-int WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
+INT WINAPI WinMain(HINSTANCE, HINSTANCE, PSTR, int)
 {
     return Nova::GuardedMain(__argc, __argv);
 }

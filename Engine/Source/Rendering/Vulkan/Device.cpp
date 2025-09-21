@@ -597,7 +597,7 @@ namespace Nova::Vulkan
         return Ref(buffer);
     }
 
-    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo)
+    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) const
     {
         GraphicsPipeline* pipeline = new GraphicsPipeline();
         if (!pipeline->Initialize(createInfo))

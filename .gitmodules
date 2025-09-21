@@ -11,3 +11,6 @@
 [submodule "Engine/Vendor/box2d"]
 	path = Engine/Vendor/box2d
 	url = git@github.com:erincatto/box2d.git
+[submodule "Engine/Vendor/assimp"]
+	path = Engine/Vendor/assimp
+	url = git@github.com:assimp/assimp.git

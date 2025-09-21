@@ -12,6 +12,7 @@ namespace Nova
         using ConstPointerType = const T*;
         using ReferenceType = T&;
         using ConstReferenceType = const T&;
+
         Ref() = default;
 
         Ref(PointerType ptr) : m_Pointer(ptr)
@@ -126,7 +127,6 @@ namespace Nova
             KillRef(m_Pointer);
             m_Pointer = nullptr;
         }
-
     private:
         PointerType m_Pointer = nullptr;
 
@@ -151,7 +151,7 @@ namespace Nova
         using ReferenceType = typename RefType::ReferenceType;
         using ConstReferenceType = typename RefType::ConstReferenceType;
 
-        explicit WeakRef(RefType& ref) : m_Pointer(ref.Get()){}
+        explicit WeakRef(const RefType& ref) : m_Pointer(ref.Get()){}
 
         template<typename U> requires std::is_base_of_v<RefObject, U>
         explicit WeakRef(Ref<U>& ref) : m_Pointer(PointerType(ref.Get())){}

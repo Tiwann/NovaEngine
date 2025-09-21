@@ -44,7 +44,7 @@ namespace Nova::Vulkan
         Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) const override;
         Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const override;
         Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const override;
-        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) override;
+        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) const override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

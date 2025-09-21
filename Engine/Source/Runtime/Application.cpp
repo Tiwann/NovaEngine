@@ -18,6 +18,8 @@
 
 namespace Nova
 {
+    extern Application* g_Application;
+
     void Application::Run()
     {
         ApplicationConfiguration configuration = GetConfiguration();
@@ -170,6 +172,11 @@ namespace Nova
     void Application::Exit()
     {
         m_IsRunning = false;
+    }
+
+    Application& Application::GetCurrentApplication()
+    {
+        return *g_Application;
     }
 
     void Application::Update()

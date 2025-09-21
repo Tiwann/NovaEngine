@@ -1,0 +1,197 @@
+﻿#include "StaticMeshRenderer.h"
+
+#include "LightComponent.h"
+#include "Components/Camera.h"
+#include "Components/Transform.h"
+#include "Runtime/StaticMesh.h"
+#include "Rendering/GraphicsPipeline.h"
+#include "Runtime/AssetDatabase.h"
+#include "Rendering/Shader.h"
+#include "Runtime/Application.h"
+#include "Rendering/Device.h"
+#include "Runtime/Scene.h"
+#include "Runtime/Window.h"
+#include "Math/Matrix3x4.h"
+#include "Math/Vector3.h"
+#include "Rendering/Buffer.h"
+#include "Rendering/CommandBuffer.h"
+#include "Rendering/ShaderBindingSet.h"
+
+namespace Nova
+{
+    struct alignas(16) SceneData
+    {
+        Matrix4 modelMatrix;
+        Matrix4 viewMatrix;
+        Matrix4 projectionMatrix;
+        Matrix3x4 normalMatrix;
+        Vector3 cameraViewDirection;
+        float directionalLightIntensity;
+        Vector3 directionalLightColor;
+        float padding2;
+        Vector3 directionalLightDirection;
+        float ambientLightIntensity;
+        Vector3 ambientLightColor;
+    };
+
+    StaticMeshRenderer::StaticMeshRenderer(Entity* owner) : Component(owner, "Static Mesh Component")
+    {
+    }
+
+    void StaticMeshRenderer::OnInit()
+    {
+        Component::OnInit();
+
+        const Entity* owner = GetOwner();
+        const Scene* scene = owner->GetOwner();
+        const Application* application = scene->GetOwner();
+        const Ref<Rendering::Device> device = application->GetDevice();
+        const Window* window = application->GetWindow();
+        const float width = window->GetWidth();
+        const float height = window->GetHeight();
+
+        const AssetDatabase& assetDatabase = application->GetAssetDatabase();
+        m_Shader = assetDatabase.Get<Rendering::Shader>("BlinnPhong");
+
+        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
+        pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
+        pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"POSITION", Format::Vector3});
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"NORMAL", Format::Vector3});
+        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"COLOR", Format::Vector4});
+        pipelineCreateInfo.colorBlendInfo.colorBlendEnable = false;
+        pipelineCreateInfo.rasterizationInfo.cullMode = CullMode::BackFace;
+        pipelineCreateInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
+        pipelineCreateInfo.rasterizationInfo.polygonMode = PolygonMode::Fill;
+        pipelineCreateInfo.viewportInfo = {0, 0, (uint32_t)width, (uint32_t)height, 0.0f, 1.0f};
+        pipelineCreateInfo.scissorInfo = {0, 0, (uint32_t)width, (uint32_t)height};
+        pipelineCreateInfo.depthStencilInfo.depthTestEnable = true;
+        pipelineCreateInfo.depthStencilInfo.depthWriteEnable = true;
+        pipelineCreateInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
+        pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
+        pipelineCreateInfo.rasterizationInfo.discardEnable = false;
+        pipelineCreateInfo.shader = m_Shader;
+
+        m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
+
+        Rendering::BufferCreateInfo uniformBufferCreateInfo;
+        uniformBufferCreateInfo.device = device;
+        uniformBufferCreateInfo.size = sizeof(SceneData);
+        uniformBufferCreateInfo.usage = Rendering::BufferUsage::UniformBuffer;
+        m_SceneUniformBuffer = device->CreateBuffer(uniformBufferCreateInfo);
+
+        m_BindingSet = m_Shader->CreateBindingSet();
+        m_BindingSet->BindBuffer(0, m_SceneUniformBuffer, 0, ~0);
+    }
+
+    void StaticMeshRenderer::OnDestroy()
+    {
+        Component::OnDestroy();
+        m_SceneUniformBuffer->Destroy();
+        m_Pipeline->Destroy();
+    }
+
+    void StaticMeshRenderer::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    {
+        Component::OnPreRender(cmdBuffer);
+        if (!m_StaticMesh) return;
+
+        Entity* owner = GetOwner();
+        Scene* scene = owner->GetOwner();
+        Camera* camera = scene->GetFirstComponent<Camera>();
+        if (!camera) return;
+
+        Transform* entityTransform = owner->GetTransform();
+        Transform* cameraTransform = camera->GetTransform();
+
+        const Matrix4& modelMatrix = entityTransform->GetWorldSpaceMatrix();
+        const Matrix4& viewMatrix = camera->GetViewMatrix();
+        const Matrix4& projectionMatrix = camera->GetProjectionMatrix();
+        const Matrix3& normalMatrix = entityTransform->GetWorldSpaceNormalMatrix();
+
+        const Vector3& cameraPosition = cameraTransform->GetPosition();
+        const Vector3& entityPosition = entityTransform->GetPosition();
+        const Vector3 cameraViewDirection = Math::Normalize(cameraPosition - entityPosition);
+
+        const Array<LightComponent*> allLights = scene->GetAllComponents<LightComponent>();
+        LightComponent** dirLight = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Directional; }).First();
+        LightComponent** ambLight = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Ambient; }).First();
+
+        const Color& dirLightColor = dirLight ? (*dirLight)->GetColor() : Color::Black;
+        const float dirLightIntensity = dirLight ? (*dirLight)->GetIntensity() : 0.0f;
+        const Vector3 dirLightDir = dirLight ? (*dirLight)->GetTransform()->GetForwardVector() : Vector3::Zero;
+        const Color& ambLightColor = ambLight ? (*ambLight)->GetColor() : Color::Black;
+        const float ambLightIntensity = ambLight ? (*ambLight)->GetIntensity() : 0.0f;
+
+        const auto ColorToVec3 = [](const Color& Color) -> Vector3
+        {
+            return Vector3(Color.r, Color.g, Color.b);
+        };
+
+        const SceneData sceneData {
+            .modelMatrix = modelMatrix,
+            .viewMatrix = viewMatrix,
+            .projectionMatrix = projectionMatrix,
+            .normalMatrix = Matrix3x4(normalMatrix),
+            .cameraViewDirection = cameraViewDirection,
+            .directionalLightColor = ColorToVec3(dirLightColor),
+            .directionalLightIntensity = dirLightIntensity,
+            .directionalLightDirection = dirLightDir,
+            .ambientLightColor = ColorToVec3(ambLightColor),
+            .ambientLightIntensity = ambLightIntensity,
+        };
+
+        cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, sizeof(SceneData), &sceneData);
+    }
+
+    void StaticMeshRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    {
+        Component::OnRender(cmdBuffer);
+        if (!m_StaticMesh)
+            return;
+
+        if (m_StaticMesh->GetSubMeshes().IsEmpty())
+            return;
+
+        // THIS NEEDS TO BE OPTIMIZED BY FILTER THE AVAILABLE LIGHTS
+        Entity* owner = GetOwner();
+        const Scene* scene = owner->GetOwner();
+        const Application* application = scene->GetOwner();
+        const Window* window = application->GetWindow();
+
+        const Camera* camera = scene->GetFirstComponent<Camera>();
+        if (!camera) return;
+
+        const float width = window->GetWidth();
+        const float height = window->GetHeight();
+
+        cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
+        cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
+        cmdBuffer.SetViewport(0.0f, 0.0f, width, width, 0.0f, 1.0f);
+        cmdBuffer.SetScissor(0, 0, (int32_t)width, (int32_t)height);
+
+        for (const SubMeshInfo& subMesh : m_StaticMesh->GetSubMeshes())
+        {
+            cmdBuffer.BindVertexBuffer(*m_StaticMesh->GetVertexBuffer(), subMesh.vertexBufferOffset);
+            cmdBuffer.BindIndexBuffer(*m_StaticMesh->GetIndexBuffer(), subMesh.indexBufferOffset, Format::Uint32);
+            cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 0);
+        }
+    }
+
+    Ref<StaticMesh> StaticMeshRenderer::GetStaticMesh() const
+    {
+        return m_StaticMesh;
+    }
+
+    void StaticMeshRenderer::SetStaticMesh(Ref<StaticMesh> newMesh)
+    {
+        const Entity* owner = GetOwner();
+        const Scene* scene = owner->GetOwner();
+        const Application* application = scene->GetOwner();
+        const Ref<Rendering::Device> device = application->GetDevice();
+        device->WaitIdle();
+
+        m_StaticMesh = newMesh;
+    }
+}

@@ -110,7 +110,6 @@ namespace Nova
         onChanged.BroadcastChecked();
     }
 
-
     void Transform::RotateAround(const Vector3& eulerAngles, const Vector3& point)
     {
         Matrix4 Rotation = Matrix4::Identity;
@@ -157,42 +156,41 @@ namespace Nova
 
     const Matrix4& Transform::GetWorldSpaceMatrix()
     {
-        const Function<Matrix4()> ComputeWorldSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> computeWorldSpaceMatrix = [&]() -> Matrix4
         {
-            const Matrix4& LocalMatrix = GetLocalSpaceMatrix();
+            const Matrix4& localMatrix = GetLocalSpaceMatrix();
 
             if(m_Entity && m_Entity->HasParent())
             {
-                const Entity* Parent = m_Entity->GetParent();
-                Transform* ParentTransform = Parent->GetTransform();
-                const Matrix4& ParentWorldMatrix = ParentTransform->GetWorldSpaceMatrix();
-                return ParentWorldMatrix * LocalMatrix;
+                const Entity* parent = m_Entity->GetParent();
+                Transform* parentTransform = parent->GetTransform();
+                const Matrix4& parentWorldMatrix = parentTransform->GetWorldSpaceMatrix();
+                return parentWorldMatrix * localMatrix;
             }
-            return LocalMatrix;
+            return localMatrix;
         };
 
-        return m_WorldSpaceMatrix.Get(ComputeWorldSpaceMatrix);
+        return m_WorldSpaceMatrix.Get(computeWorldSpaceMatrix);
     }
 
     const Matrix4& Transform::GetLocalSpaceMatrix()
     {
-        const Function<Matrix4()> ComputeLocalSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> computeLocalSpaceMatrix = [&]() -> Matrix4
         {
             return Matrix4::TRS(m_Position, m_Rotation, m_Scale);
         };
-
-        return m_LocalSpaceMatrix.Get(ComputeLocalSpaceMatrix);
+        return m_LocalSpaceMatrix.Get(computeLocalSpaceMatrix);
     }
 
     const Matrix3& Transform::GetWorldSpaceNormalMatrix()
     {
-        const Function<Matrix3()> ComputeLocalToWorldNormalMatrix = [&]() -> Matrix3
+        const Function<Matrix3()> computeLocalToWorldNormalMatrix = [&]() -> Matrix3
         {
-            const Matrix4& ModelMatrix = GetWorldSpaceMatrix();
-            return Math::Transpose(Math::Inverse(Matrix3(ModelMatrix)));
+            const Matrix4& modelMatrix = GetWorldSpaceMatrix();
+            return Math::Transpose(Math::Inverse(Matrix3(modelMatrix)));
         };
 
-        return m_WorldSpaceNormalMatrix.Get(ComputeLocalToWorldNormalMatrix);
+        return m_WorldSpaceNormalMatrix.Get(computeLocalToWorldNormalMatrix);
     }
 
     /*void Transform::OnInspectorGUI(const ImGuiIO& IO)

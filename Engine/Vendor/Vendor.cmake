@@ -3,6 +3,18 @@ add_subdirectory(Vendor/miniaudio)
 
 add_subdirectory(Vendor/box2d)
 
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
+set(ASSIMP_INSTALL_PDB OFF)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
+set(ASSIMP_BUILD_FBX_IMPORTER   ON)
+set(ASSIMP_BUILD_OBJ_IMPORTER   ON)
+set(ASSIMP_BUILD_GLTF_IMPORTER  ON)
+set(ASSIMP_BUILD_BLEND_IMPORTER  ON)
+add_subdirectory(Vendor/assimp)
+
+
 option(GLFW_BUILD_DOCS OFF)
 option(GLFW_INSTALL OFF)
 add_subdirectory(Vendor/glfw)

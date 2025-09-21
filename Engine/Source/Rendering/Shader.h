@@ -39,6 +39,6 @@ namespace Nova::Rendering
         virtual bool Initialize(const ShaderCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        virtual Ref<ShaderBindingSet> CreateBindingSet(size_t setIndex) const = 0;
+        virtual Ref<ShaderBindingSet> CreateBindingSet(size_t setIndex = 0) const = 0;
     };
 }

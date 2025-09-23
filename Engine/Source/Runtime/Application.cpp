@@ -29,8 +29,7 @@ namespace Nova
         windowCreateInfo.title = configuration.applicationName;
         windowCreateInfo.width = configuration.windowWidth;
         windowCreateInfo.height = configuration.windowHeight;
-        windowCreateInfo.resizable = configuration.resizable;
-        windowCreateInfo.show = true;
+        windowCreateInfo.flags = configuration.windowFlags;
         m_Window = CreateWindow(windowCreateInfo);
         if (!m_Window) return;
 
@@ -81,6 +80,7 @@ namespace Nova
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
             m_RenderPass.Initialize(0, 0, m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight());
         }
+
         // Creating imgui renderer
         m_ImGuiRenderer = CreateImGuiRenderer(m_Window, m_Device, 1);
 
@@ -146,11 +146,11 @@ namespace Nova
         };
 
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
-        LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
+        Ref<Rendering::Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;
-        debugRendererCreateInfo.shader = m_AssetDatabase.Get<Rendering::Shader>("DebugShader");
+        debugRendererCreateInfo.shader = debugShader;
         debugRendererCreateInfo.renderPass = &m_RenderPass;
         debugRendererCreateInfo.maxVertices = 64;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
@@ -159,11 +159,6 @@ namespace Nova
 
         m_EditorWindows.Add(EditorWindow::CreateWindow<HierarchyWindow>());
         m_EditorWindows.Add(EditorWindow::CreateWindow<InspectorWindow>());
-
-        //auto viewportWindow = EditorWindow::CreateWindow<ViewportWindow>(m_Device);
-        //viewportWindow->SetRenderTarget(m_RenderTarget);
-        //viewportWindow->UpdateResources();
-        //m_EditorWindows.Add(viewportWindow);
 
         OnInit();
         Update();

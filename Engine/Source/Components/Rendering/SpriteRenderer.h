@@ -39,6 +39,9 @@ namespace Nova
         Vector2 GetTiling() const;
         void SetTiling(const Vector2& tiling);
 
+        Vector2 GetTilingOffset() const;
+        void SetTilingOffset(const Vector2& tilingOffset);
+
         uint32_t GetPixelsPerUnit() const;
         void SetPixelsPerUnit(uint32_t pixelsPerUnit);
 
@@ -56,8 +59,9 @@ namespace Nova
         SpriteAnimation* m_SpriteAnimation = nullptr;
         SpriteAnimation* m_PendingSpriteAnimation = nullptr;
         SpriteRendererFlags m_Flags = SpriteRendererFlagBits::None;
-        uint32_t m_PixelsPerUnit = 128;
+        uint32_t m_PixelsPerUnit = 100;
         Vector2 m_Tiling = Vector2::One;
+        Vector2 m_TilingOffset = Vector2::Zero;
         Color m_ColorTint = Color::White;
 
         float m_Time = 0.0f;
@@ -73,6 +77,7 @@ namespace Nova
         Ref<Rendering::Sampler> m_Sampler = nullptr;
         Ref<Rendering::GraphicsPipeline> m_Pipeline = nullptr;
     };
+
 
 
 }

@@ -8,10 +8,10 @@
 
 namespace Nova
 {
-    
+
     AudioSource::AudioSource(Entity* owner) : Component(owner, "Audio Source")
     {
-        
+
     }
 
     void AudioSource::OnDestroy()
@@ -158,12 +158,12 @@ namespace Nova
         }
     }
 
-    AudioClip* AudioSource::GetAudioClip() const
+    Ref<AudioClip> AudioSource::GetAudioClip() const
     {
         return m_Clip;
     }
 
-    void AudioSource::SetAudioClip(AudioClip* clip)
+    void AudioSource::SetAudioClip(Ref<AudioClip> clip)
     {
         if(IsPlaying()) Stop();
         m_Clip = clip;
@@ -206,7 +206,7 @@ namespace Nova
 
     bool AudioSource::IsPlaying() const
     {
-        return ma_sound_is_playing(m_Clip->GetHandle());
+        return m_Clip ? ma_sound_is_playing(m_Clip->GetHandle()) : false;
     }
 
     bool AudioSource::IsPaused() const

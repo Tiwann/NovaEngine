@@ -19,7 +19,8 @@ struct Uniforms
     int32_t rows;
     int32_t flags;
     float4x4 mvp;
-	float2 tiling;
+    float2 tiling;
+    float2 offset;
     float2x2 spriteScale;
     float4 color;
 }
@@ -52,17 +53,17 @@ VertexOutput vert(VertexInput input)
 		const float2 frameSize = float2(1.0 / uniforms.cols, 1.0 / uniforms.rows);
         texCoords = input.texCoords * frameSize + float2(col, row) * frameSize;
 
-        if (uniforms.flags & Flags.FlipHorizontal)
+        if ((uniforms.flags & Flags.FlipHorizontal) == 0)
             texCoords.x *= -1;
 
-        if (uniforms.flags & Flags.FlipVertical)
+        if ((uniforms.flags & Flags.FlipVertical) == 0)
                 texCoords.y *= -1;
     }
 
 
 	float2 scaledPosition = mul(uniforms.spriteScale, input.position);
     out.position = mul(uniforms.mvp, float4(scaledPosition, 0.0, 1.0));
-    out.texCoords = uniforms.tiling * texCoords;
+    out.texCoords = uniforms.tiling * texCoords + uniforms.offset;
 	return out;
 }
 

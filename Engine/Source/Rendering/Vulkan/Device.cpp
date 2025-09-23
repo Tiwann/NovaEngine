@@ -9,12 +9,11 @@
 #include "Runtime/Version.h"
 #include "Buffer.h"
 #include "Sampler.h"
+#include "GraphicsPipeline.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
-
-#include "GraphicsPipeline.h"
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME

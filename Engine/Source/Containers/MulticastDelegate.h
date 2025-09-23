@@ -8,76 +8,77 @@
 
 namespace Nova
 {
-	template<typename Signature>
-	class MulticastDelegate
-	{
-	public:
-		using DelegateType = Function<Signature>;
-		using PointerType = typename DelegateType::PointerType;
-		template<class Class> using MemberPointerType = typename DelegateType::template MemberPointerType<Class>;
-		using DelegateArray = Array<DelegateType>;
-		
-		MulticastDelegate() = default;
+    template <typename Signature>
+    class MulticastDelegate
+    {
+    public:
+        using DelegateType = Function<Signature>;
+        using PointerType = typename DelegateType::PointerType;
+        template <class Class>
+        using MemberPointerType = typename DelegateType::template MemberPointerType<Class>;
+        using DelegateArray = Array<DelegateType>;
 
-		bool IsBound() const { return !m_Subscribers.IsEmpty(); }
-		
-		void Bind(DelegateType subscriber)
-		{
-			m_Subscribers.Add(subscriber);
-		}
+        MulticastDelegate() = default;
 
-		template<typename Class>
-		void BindMember(Class* instance, MemberPointerType<Class> memberFunction)
-		{
-			DelegateType subscriber;
-			subscriber.BindMember(instance, memberFunction);
-			m_Subscribers.Add(subscriber);
-		}
+        bool IsBound() const { return !m_Subscribers.IsEmpty(); }
 
-		void operator+=(DelegateType Subscriber)
-		{
-			Bind(Subscriber);
-		}
+        void Bind(DelegateType subscriber)
+        {
+            m_Subscribers.Add(subscriber);
+        }
 
-		void Unbind(DelegateType Subscriber)
-		{
-			m_Subscribers.RemoveAll(Subscriber);
-		}
-		
-		void operator-=(DelegateType Subscriber)
-		{
-			Unbind(Subscriber);
-		}
+        template <typename Class>
+        void BindMember(Class* instance, MemberPointerType<Class> memberFunction)
+        {
+            DelegateType subscriber;
+            subscriber.BindMember(instance, memberFunction);
+            m_Subscribers.Add(subscriber);
+        }
 
-		void ClearAll()
-		{
-			m_Subscribers.Clear();
-		}
+        void operator+=(DelegateType Subscriber)
+        {
+            Bind(Subscriber);
+        }
 
-		template<typename... Params>
-		void Broadcast(Params&&... Parameters)
-		{
-			for (const DelegateType& Delegate : m_Subscribers)
-			{
-				Delegate.Call(std::forward<Params>(Parameters)...);
-			}
-		}
+        void Unbind(DelegateType Subscriber)
+        {
+            m_Subscribers.RemoveAll(Subscriber);
+        }
 
-		template<typename... Params>
-		void BroadcastChecked(Params&&... Parameters)
-		{
-			for(const auto& Delegate : m_Subscribers)
-			{
-				NOVA_ASSERT(Delegate, "Tried to broadcast event but found a invalid subscriber");
-			}
-			
-			for (const auto& Delegate : m_Subscribers)
-			{
-				Delegate.Call(std::forward<Params>(Parameters)...);
-			}
-		}
+        void operator-=(DelegateType Subscriber)
+        {
+            Unbind(Subscriber);
+        }
 
-	private:
-		DelegateArray m_Subscribers;
-	};
+        void ClearAll()
+        {
+            m_Subscribers.Clear();
+        }
+
+        template <typename... Params>
+        void Broadcast(Params&&... Parameters)
+        {
+            for (const DelegateType& Delegate : m_Subscribers)
+            {
+                Delegate.Call(std::forward<Params>(Parameters)...);
+            }
+        }
+
+        template <typename... Params>
+        void BroadcastChecked(Params&&... Parameters)
+        {
+            for (const auto& Delegate : m_Subscribers)
+            {
+                NOVA_ASSERT(Delegate, "Tried to broadcast event but found a invalid subscriber");
+            }
+
+            for (const auto& Delegate : m_Subscribers)
+            {
+                Delegate.Call(std::forward<Params>(Parameters)...);
+            }
+        }
+
+    private:
+        DelegateArray m_Subscribers;
+    };
 }

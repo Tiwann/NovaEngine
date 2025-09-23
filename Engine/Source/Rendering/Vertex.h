@@ -7,15 +7,15 @@ namespace Nova
 {
     struct Vertex
     {
-        Vector3 Position;
-        Vector2 TextureCoordinate;
-        Vector3 Normal;
-        Vector4 Color;
+        Vector3 position;
+        Vector2 texCoords;
+        Vector3 normal;
+        Vector4 color;
 
         enum class Attributes
         {
             Position,
-            TextureCoordinate,
+            TextureCoordinates,
             Normal,
             Color,
         };

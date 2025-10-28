@@ -7,7 +7,6 @@
 #include "Function.h"
 #include <initializer_list>
 #include <algorithm>
-#include <cstring>
 
 namespace Nova
 {
@@ -31,8 +30,6 @@ namespace Nova
         template<typename Out>
         using ConstSelector = Function<const Out*(ReferenceType)>;
 
-        static constexpr SizeType InvalidIndex = -1ULL;
-
         Array()
         {
             m_Allocated = 1;
@@ -40,7 +37,7 @@ namespace Nova
             m_Count = 0;
         }
 
-        Array(ConstReferenceType first)
+        explicit Array(ConstReferenceType first)
         {
             m_Allocated = 1;
             m_Data = Memory::Calloc<T>(m_Allocated);
@@ -48,7 +45,7 @@ namespace Nova
             m_Data[0] = first;
         }
 
-        Array(const SizeType count)
+        explicit Array(const SizeType count)
         {
             m_Allocated = Math::NearestPowerOfTwo<SizeType>(count);
             m_Data = Memory::Calloc<T>(m_Allocated);
@@ -192,14 +189,31 @@ namespace Nova
                 Add(element);
         }
 
+        template<typename... Args>
+        void Emplace(Args&&... args)
+        {
+            if(m_Count >= m_Allocated)
+            {
+                m_Allocated = Realloc(m_Allocated);
+                PointerType realloc = Memory::Calloc<T>(m_Allocated);
+                for(SizeType i = 0; i < m_Count; ++i)
+                    realloc[i] = m_Data[i];
+                Memory::Free(m_Data);
+                m_Data = realloc;
+            }
+
+            m_Data[m_Count++] = T(std::forward<Args>(args)...);
+        }
+
         void AddRange(const std::initializer_list<T>& list)
         {
-            if(m_Count + list.size() >= m_Allocated)
+            const SizeType totalCount = m_Count + list.size();
+            if(totalCount >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + list.size());
+                } while (m_Allocated < totalCount);
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -213,12 +227,13 @@ namespace Nova
 
         void AddRange(const Array& other)
         {
-            if(m_Count + other.m_Count >= m_Allocated)
+            const SizeType totalCount = m_Count + other.m_Count;
+            if(totalCount >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + other.m_Count);
+                } while (m_Allocated < totalCount);
 
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
@@ -234,12 +249,13 @@ namespace Nova
         template<size_t N>
         void AddRange(const T(&data)[N])
         {
-            if(m_Count + N >= m_Allocated)
+            const SizeType totalCount = m_Count + N;
+            if(totalCount >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + N);
+                } while (m_Allocated < totalCount);
 
                 PointerType realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
@@ -254,12 +270,13 @@ namespace Nova
 
         void AddRange(ConstPointerType data, SizeType count)
         {
-            if(m_Count + count >= m_Allocated)
+            const SizeType totalCount = m_Count + count;
+            if(totalCount >= m_Allocated)
             {
                 do
                 {
                     m_Allocated = Realloc(m_Allocated);
-                } while (m_Allocated < m_Count + count);
+                } while (m_Allocated < totalCount);
                 PointerType Realloc = Memory::Calloc<T>(m_Allocated);
                 for(SizeType i = 0; i < m_Count; ++i)
                     Realloc[i] = m_Data[i];
@@ -288,56 +305,56 @@ namespace Nova
 
         Array Union(const Array& other)
         {
-            Array Result = *this;
-            for (const T& Element : other)
-                AddUnique(Element);
-            return Result;
+            Array result = *this;
+            for (const T& element : other)
+                AddUnique(element);
+            return result;
         }
 
-        bool Remove(ConstReferenceType Element)
+        bool Remove(ConstReferenceType element)
         {
-            SizeType Index = Find(Element);
-            if(Index == InvalidIndex) return false;
+            SizeType index = Find(element);
+            if(index == SizeType(-1)) return false;
 
-            std::move(m_Data + Index + 1, m_Data + m_Count, m_Data + Index);
+            std::move(m_Data + index + 1, m_Data + m_Count, m_Data + index);
             m_Count--;
             return true;
         }
 
-        void RemoveAt(SizeType Index)
+        void RemoveAt(SizeType index)
         {
             NOVA_ASSERT(Index <= m_Count, "Index out of bounds!");
-            std::move(m_Data + Index + 1, m_Data + m_Count, m_Data + Index);
+            std::move(m_Data + index + 1, m_Data + m_Count, m_Data + index);
             m_Count--;
         }
 
-        bool RemoveAll(ConstReferenceType Element)
+        bool RemoveAll(ConstReferenceType element)
         {
-            SizeType Index;
-            bool Found = false;
-            while ((Index = Find(Element)) != InvalidIndex)
+            SizeType index;
+            bool found = false;
+            while ((index = Find(element)) != SizeType(-1))
             {
-                if(Index < m_Count) std::move(m_Data + Index + 1, m_Data + m_Count, m_Data + Index);
+                if(index < m_Count) std::move(m_Data + index + 1, m_Data + m_Count, m_Data + index);
                 m_Count--;
-                Found = true;
+                found = true;
             }
-            return Found;
+            return found;
         }
 
-        bool Contains(ConstReferenceType Element) const
+        bool Contains(ConstReferenceType element) const
         {
             for(SizeType i = 0; i < m_Count; ++i)
-                if(m_Data[i] == Element)
+                if(m_Data[i] == element)
                     return true;
             return false;
         }
 
-        SizeType Find(ConstReferenceType Element) const
+        SizeType Find(ConstReferenceType element) const
         {
 
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                if(m_Data[i] == Element)
+                if(m_Data[i] == element)
                 {
                     return i;
                 }
@@ -345,9 +362,14 @@ namespace Nova
             return -1;
         }
 
-        void Pop()
+        void PopBack()
         {
             RemoveAt(m_Count);
+        }
+
+        void PopHead()
+        {
+            RemoveAt(0);
         }
 
         void Clear()
@@ -356,57 +378,57 @@ namespace Nova
         }
 
         // Return an array of pointer to elements of type T, inside m_Data, where each element satisfies Predicate
-        Array<PointerType> Where(const Predicate& Predicate) const
+        Array<PointerType> Where(const Predicate& predicate) const
         {
-            if(!Predicate) return {};
+            if(!predicate) return {};
             Array<PointerType> Result;
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                if(Predicate(m_Data[i]))
+                if(predicate(m_Data[i]))
                     Result.Add(&m_Data[i]);
             }
             return Result;
         }
 
         // Return a pointer to first elements of type T, inside m_Data, which satisfy Predicate
-        PointerType Single(const Predicate& Predicate) const
+        PointerType Single(const Predicate& predicate) const
         {
-            if(!Predicate) return nullptr;
+            if(!predicate) return nullptr;
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                if(Predicate(m_Data[i]))
+                if(predicate(m_Data[i]))
                     return &m_Data[i];
             }
             return nullptr;
         }
 
         template<typename Out>
-        Array<Out*> Select(const Selector<Out>& Selector) const
+        Array<Out*> Select(const Selector<Out>& selector) const
         {
-            if(!Selector) return {};
+            if(!selector) return {};
             Array<Out*> Result;
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                Result.Add(Selector(m_Data[i]));
+                Result.Add(selector(m_Data[i]));
             }
             return Result;
         }
 
-        bool All(const Predicate& Predicate) const
+        bool All(const Predicate& predicate) const
         {
             for (SizeType i = 0; i < m_Count; ++i)
             {
-                if (!Predicate(m_Data[i]))
+                if (!predicate(m_Data[i]))
                     return false;
             }
             return true;
         }
 
-        bool Any(const Predicate& Predicate) const
+        bool Any(const Predicate& predicate) const
         {
             for (SizeType i = 0; i < m_Count; ++i)
             {
-                if (Predicate(m_Data[i]))
+                if (predicate(m_Data[i]))
                     return true;
             }
             return false;
@@ -414,11 +436,6 @@ namespace Nova
 
         bool IsEmpty() const { return m_Count == 0; }
 
-
-        void Sort(const Predicate& Predicate)
-        {
-            //std::ranges::sort(m_Data, m_Data + m_Count, Predicate);
-        }
 
         template<typename U>
         Array<U> Transform(const Function<U(ConstReferenceType)>& predicate) const

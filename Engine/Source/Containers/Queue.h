@@ -10,10 +10,11 @@ namespace Nova
         using ArrayType = Array<T>;
         using SizeType = typename ArrayType::SizeType;
         using ValueType = typename ArrayType::ValueType;
-        using Iterator = typename ArrayType::Iterator;
-        using ConstIterator = typename ArrayType::ConstIterator;
         using ReferenceType = typename ArrayType::ReferenceType;
         using ConstReferenceType = typename ArrayType::ConstReferenceType;
+        using ForwardType = typename ArrayType::ForwardType;
+        using Iterator = typename ArrayType::Iterator;
+        using ConstIterator = typename ArrayType::ConstIterator;
 
         Queue() = default;
         Queue(const Queue&) = default;
@@ -21,16 +22,22 @@ namespace Nova
         Queue& operator=(const Queue&) = default;
         Queue& operator=(Queue&&) = default;
         
-        void Enqueue(ConstReferenceType Item)
+        void Enqueue(ConstReferenceType item)
         {
-            m_Data.Add(Item);
+            m_Data.Add(item);
+        }
+
+        template<typename... Args>
+        void Enqueue(Args&&... args)
+        {
+            m_Data.Emplace(args);
         }
 
         ValueType Dequeue()
         {
-            ValueType First = m_Data.First();
-            m_Data.RemoveAt(0);
-            return First;
+            ValueType first = m_Data.First();
+            m_Data.PopHead();
+            return first;
         }
 
         bool IsEmpty() const { return m_Data.IsEmpty(); }

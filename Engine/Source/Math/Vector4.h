@@ -21,6 +21,7 @@ namespace Nova
         
         float Magnitude() const;
         float* ValuePtr();
+        const float* ValuePtr() const;
         float Dot(const Vector4& Vec) const;
 
         Vector4 WithX(float X) const;

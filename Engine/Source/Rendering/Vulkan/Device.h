@@ -40,11 +40,13 @@ namespace Nova::Vulkan
         Rendering::DeviceType GetDeviceType() override;
         uint32_t GetImageCount() const override;
 
-        Ref<Rendering::Surface> CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) const override;
-        Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) const override;
-        Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const override;
-        Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const override;
-        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) const override;
+        Ref<Rendering::Surface> CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) override;
+        Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) override;
+        Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) override;
+        Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) override;
+        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) override;
+        Ref<Rendering::ComputePipeline> CreateComputePipeline(const Rendering::ComputePipelineCreateInfo& createInfo) override;
+        Ref<Rendering::Shader> CreateShader(const Rendering::ShaderCreateInfo& createInfo) override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

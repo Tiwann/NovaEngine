@@ -11,12 +11,13 @@
 #include "VulkanUtils.h"
 #include <vulkan/vulkan.h>
 
+#include "Material.h"
 #include "Shader.h"
 
 namespace Nova::Vulkan
 {
 
-    static const Rendering::RenderPass* CurrentRenderPass = nullptr;
+    static const Rendering::RenderPass* s_CurrentRenderPass = nullptr;
 
     bool CommandBuffer::Allocate(const Rendering::CommandBufferAllocateInfo& allocateInfo)
     {
@@ -111,15 +112,26 @@ namespace Nova::Vulkan
         clearAttachment.clearValue.color = VkClearColorValue{ { color.r, color.g, color.b, color.a }};
 
         VkClearRect clearRect;
-        clearRect.rect.extent = VkExtent2D{ CurrentRenderPass->GetWidth(), CurrentRenderPass->GetHeight() };
-        clearRect.rect.offset = VkOffset2D{ (int32_t)CurrentRenderPass->GetOffsetX(), (int32_t)CurrentRenderPass->GetOffsetY() };
+        clearRect.rect.extent = VkExtent2D{ s_CurrentRenderPass->GetWidth(), s_CurrentRenderPass->GetHeight() };
+        clearRect.rect.offset = VkOffset2D{ (int32_t)s_CurrentRenderPass->GetOffsetX(), (int32_t)s_CurrentRenderPass->GetOffsetY() };
         clearRect.baseArrayLayer = 0;
         clearRect.layerCount = 1;
         vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
     }
 
-    void CommandBuffer::ClearDepth(float depth, uint32_t stencil)
+    void CommandBuffer::ClearDepthStencil(const float depth, const uint32_t stencil, const uint32_t attachmentIndex)
     {
+        VkClearAttachment clearAttachment;
+        clearAttachment.colorAttachment = attachmentIndex;
+        clearAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        clearAttachment.clearValue.depthStencil = { depth, stencil };
+
+        VkClearRect clearRect;
+        clearRect.rect.extent = VkExtent2D{ s_CurrentRenderPass->GetWidth(), s_CurrentRenderPass->GetHeight() };
+        clearRect.rect.offset = VkOffset2D{ (int32_t)s_CurrentRenderPass->GetOffsetX(), (int32_t)s_CurrentRenderPass->GetOffsetY() };
+        clearRect.baseArrayLayer = 0;
+        clearRect.layerCount = 1;
+        vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
     }
 
     void CommandBuffer::BindGraphicsPipeline(const Rendering::GraphicsPipeline& pipeline)
@@ -161,6 +173,16 @@ namespace Nova::Vulkan
         vkCmdBindDescriptorSets2(m_Handle, &info);
     }
 
+    void CommandBuffer::BindMaterial(const Rendering::Material& material)
+    {
+        const auto& pipeline = material.GetPipeline();
+        BindGraphicsPipeline(*pipeline);
+
+        const auto& bindingSets = material.GetBindingSets();
+        for (auto bindingSet : bindingSets)
+            BindShaderBindingSet(*material.GetShader(), *bindingSet);
+    }
+
     void CommandBuffer::SetViewport(const float x, const float y, const float width, const float height, const float minDepth, const float maxDepth)
     {
         VkViewport viewport { };
@@ -198,10 +220,9 @@ namespace Nova::Vulkan
         vkCmdDispatchIndirect(m_Handle, ((const Buffer&)buffer).GetHandle(), offset);
     }
 
-    void CommandBuffer::PushConstants(const Ref<Rendering::Shader>& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
+    void CommandBuffer::PushConstants(const Rendering::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
     {
-
-        vkCmdPushConstants(m_Handle, shader.As<Shader>()->GetPipelineLayout(), Convert<ShaderStageFlags, VkShaderStageFlags>(stageFlags), offset, size, values);
+        vkCmdPushConstants(m_Handle, ((const Shader&)shader).GetPipelineLayout(), Convert<ShaderStageFlags, VkShaderStageFlags>(stageFlags), offset, size, values);
     }
 
     void CommandBuffer::UpdateBuffer(const Rendering::Buffer& buffer, const size_t offset, const size_t size, const void* data)
@@ -395,7 +416,7 @@ namespace Nova::Vulkan
         renderingInfo.pDepthAttachment = renderPass.HasDepthAttachment() ? &depthAttachmentInfo : nullptr;
         vkCmdBeginRendering(m_Handle, &renderingInfo);
 
-        CurrentRenderPass = &renderPass;
+        s_CurrentRenderPass = &renderPass;
     }
 
     void CommandBuffer::EndRenderPass()

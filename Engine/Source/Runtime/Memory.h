@@ -2,10 +2,19 @@
 #include <cstdint>
 #include <cstring>
 
+#define NOVA_LIBC_MEMORY
+#ifndef NOVA_LIBC_MEMORY
 #define NOVA_MALLOC(size) ::operator new []((size))
 #define NOVA_REALLOC(ptr, size) ::operator new []((size), (ptr))
 #define NOVA_MEMSET(ptr, value, size) std::memset((ptr), (value), (size))
 #define NOVA_FREE(ptr) ::operator delete[]((ptr))
+#else
+#include <cstdlib>
+#define NOVA_MALLOC(size) std::malloc((size))
+#define NOVA_REALLOC(ptr, size) std::realloc((ptr), (size))
+#define NOVA_MEMSET(ptr, value, size) std::memset((ptr), (value), (size))
+#define NOVA_FREE(ptr) std::free((ptr))
+#endif
 
 namespace Nova::Memory
 {

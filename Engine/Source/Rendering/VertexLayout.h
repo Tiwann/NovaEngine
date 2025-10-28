@@ -16,7 +16,7 @@ namespace Nova
     {
     public:
         VertexLayout() = default;
-        explicit VertexLayout(const Array<VertexAttribute>& attributes);
+        VertexLayout(const Array<VertexAttribute>& attributes);
         
         void AddAttribute(const VertexAttribute& attribute);
         

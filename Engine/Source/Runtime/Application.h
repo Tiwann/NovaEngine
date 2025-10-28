@@ -18,6 +18,7 @@ namespace Nova
     class Window;
     class AudioSystem;
     class EditorWindow;
+    class Event;
 
     struct ApplicationConfiguration
     {
@@ -50,6 +51,7 @@ namespace Nova
         float GetDeltaTime() const;
         const Ref<Window>& GetWindow() const;
         const Ref<Rendering::Device>& GetDevice() const;
+        Ref<Rendering::Device>& GetDevice();
         const Ref<Rendering::ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 

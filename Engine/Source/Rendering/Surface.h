@@ -13,6 +13,9 @@ namespace Nova::Rendering
     {
         Device* device = nullptr;
         Window* window = nullptr;
+
+        SurfaceCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; };
+        SurfaceCreateInfo& withWindow(Window* inWindow) { window = inWindow; return *this; };
     };
 
     class Surface : public Object

@@ -42,6 +42,11 @@ namespace Nova
         return (float*)this;
     }
 
+    const float* Vector4::ValuePtr() const
+    {
+        return (const float*)this;
+    }
+
     float Vector4::Dot(const Vector4& Vec) const
     {
         return x * Vec.x + y * Vec.y + z * Vec.z + w * Vec.w;

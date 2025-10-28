@@ -123,7 +123,7 @@ namespace Nova
         cmdBuffer.BindGraphicsPipeline(*s_Pipeline);
         cmdBuffer.BindVertexBuffer(*s_VertexBuffer, 0);
         cmdBuffer.BindIndexBuffer(*s_IndexBuffer, 0, Format::Uint32);
-        cmdBuffer.PushConstants(s_Shader, ShaderStageFlagBits::Vertex | ShaderStageFlagBits::Fragment, 0, sizeof(Matrix4), s_ViewProjection.ValuePtr());
+        cmdBuffer.PushConstants(*s_Shader, ShaderStageFlagBits::Vertex | ShaderStageFlagBits::Fragment, 0, sizeof(Matrix4), s_ViewProjection.ValuePtr());
         cmdBuffer.SetViewport(s_RenderPass->GetOffsetX(), s_RenderPass->GetOffsetY(), s_RenderPass->GetWidth(), s_RenderPass->GetHeight(), 0.0f, 1.0f);
         cmdBuffer.SetScissor(s_RenderPass->GetOffsetX(), s_RenderPass->GetOffsetY(), s_RenderPass->GetWidth(), s_RenderPass->GetHeight());
         cmdBuffer.DrawIndexed(s_Indices.Count(), 0);

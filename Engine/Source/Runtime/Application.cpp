@@ -118,7 +118,7 @@ namespace Nova
 
 
         // Load engine shaders
-        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath)
+        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath) -> Ref<Rendering::Shader>
         {
             const Rendering::ShaderEntryPoint entryPoints []
             {
@@ -126,23 +126,19 @@ namespace Nova
                 { "frag", ShaderStageFlagBits::Fragment }
             };
 
-            Rendering::ShaderCreateInfo spriteShaderCreateInfo;
-            spriteShaderCreateInfo.device = m_Device;
-            spriteShaderCreateInfo.slang = m_SlangSession;
-            spriteShaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
-            spriteShaderCreateInfo.entryPoints.AddRange(entryPoints);
-            spriteShaderCreateInfo.moduleInfo = { moduleName, shaderPath };
+            Rendering::ShaderCreateInfo shaderCreateInfo;
+            shaderCreateInfo.slang = m_SlangSession;
+            shaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
+            shaderCreateInfo.entryPoints.AddRange(entryPoints);
+            shaderCreateInfo.moduleInfo = { moduleName, shaderPath };
 
             // TODO: Provide a way to specify which shader implementation
-            Ref<Vulkan::Shader> shader = m_AssetDatabase.CreateAsset<Vulkan::Shader>(shaderName);
-            shader->SetObjectName(shaderName);
-            if (!shader->Initialize(spriteShaderCreateInfo))
-            {
-                m_AssetDatabase.UnloadAsset(shader);
-                return Ref<Rendering::Shader>(nullptr);
-            }
+            Ref<Rendering::Shader> shader = m_Device->CreateShader(shaderCreateInfo);
+            if (!shader) return nullptr;
 
-            return Ref<Rendering::Shader>(shader);
+            shader->SetObjectName(shaderName);
+            m_AssetDatabase.AddAsset(shader, shaderName);
+            return shader;
         };
 
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
@@ -267,6 +263,11 @@ namespace Nova
     }
 
     const Ref<Rendering::Device>& Application::GetDevice() const
+    {
+        return m_Device;
+    }
+
+    Ref<Rendering::Device>& Application::GetDevice()
     {
         return m_Device;
     }

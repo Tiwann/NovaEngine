@@ -96,8 +96,25 @@ namespace Nova
         case Format::D32_FLOAT:            return 4ULL;
         case Format::D32_FLOAT_S8_UINT:    return 5ULL;
         case Format::D24_UNORM_S8_UINT:     return 4ULL;
+        case Format::ASTC_4X4_UNORM:
+            break;
+        case Format::ASTC_6X6_UNORM:
+            break;
+        case Format::ASTC_8X8_UNORM:
+            break;
+        case Format::ASTC_12X12_UNORM:
+            break;
+        case Format::ASTC_4X4_SRGB:
+            break;
+        case Format::ASTC_6X6_SRGB:
+            break;
+        case Format::ASTC_8X8_SRGB:
+            break;
+        case Format::ASTC_12X12_SRGB:
+            break;
         default:                           return 0ULL;
         }
+        return size_t(0);
     }
 
     static size_t GetFormatBytesPerChannel(const Format Format)

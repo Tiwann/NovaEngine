@@ -17,7 +17,7 @@ namespace Nova
         using ConstIterator = ConstIterator<PairType>;
 
         Map() = default;
-        Map(const ArrayType& Array) : m_Data(ArrayType(Array)){}
+        Map(const ArrayType& array) : m_Data(array){}
         Map(const Map&) = default;
         Map(Map&&) noexcept = default;
         Map& operator=(const Map&) = default;

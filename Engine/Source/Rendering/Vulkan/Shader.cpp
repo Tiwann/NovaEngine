@@ -282,6 +282,26 @@ namespace Nova::Vulkan
         return Ref<Rendering::ShaderBindingSet>(bindingSet);
     }
 
+    Array<Ref<Rendering::ShaderBindingSet>> Shader::CreateBindingSets() const
+    {
+        Array<Ref<Rendering::ShaderBindingSet>> bindingSets;
+
+        for (const auto& setLayout : m_BindingSetLayouts)
+        {
+            Rendering::ShaderBindingSetCreateInfo createInfo;
+            createInfo.device = m_Device;
+            createInfo.pool = m_Device->GetDescriptorPool();
+            createInfo.layout = &setLayout;
+
+            ShaderBindingSet* bindingSet = new ShaderBindingSet();
+            bindingSet->Initialize(createInfo);
+
+            bindingSets.Add(Ref<Rendering::ShaderBindingSet>(bindingSet));
+        }
+
+        return bindingSets;
+    }
+
     const Array<ShaderModule>& Shader::GetShaderModules() const
     {
         return m_ShaderModules;

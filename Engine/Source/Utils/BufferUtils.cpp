@@ -6,10 +6,9 @@
 
 namespace Nova
 {
-    Ref<Rendering::Buffer> CreateVertexBuffer(const Ref<Rendering::Device>& device, const void* data, const size_t size)
+    Ref<Rendering::Buffer> CreateVertexBuffer(Ref<Rendering::Device>& device, const void* data, const size_t size)
     {
         Rendering::BufferCreateInfo stagingBufferCreateInfo;
-        stagingBufferCreateInfo.device = device;
         stagingBufferCreateInfo.size = size;
         stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
 
@@ -17,7 +16,6 @@ namespace Nova
         stagingBuffer->CPUCopy(data, 0, size);
 
         Rendering::BufferCreateInfo vertexBufferCreateInfo;
-        vertexBufferCreateInfo.device = device;
         vertexBufferCreateInfo.size = size;
         vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
 
@@ -27,7 +25,7 @@ namespace Nova
         return vertexBuffer;
     }
 
-    Ref<Rendering::Buffer> CreateIndexBuffer(const Ref<Rendering::Device>& device, const void* data, const size_t size)
+    Ref<Rendering::Buffer> CreateIndexBuffer(Ref<Rendering::Device>& device, const void* data, const size_t size)
     {
         Rendering::BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.device = device;

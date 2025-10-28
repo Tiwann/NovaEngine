@@ -7,6 +7,7 @@ option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a cus
 option(NOVA_ENGINE_INCLUDE_AUDIO "Compile engine with audio support" ON)
 option(NOVA_ENGINE_INCLUDE_PHYSICS "Compile engine with physics support" ON)
 add_subdirectory(Engine)
+add_subdirectory(Editor)
 
 if(NOVA_ENGINE_BUILD_EXAMPLES)
     add_subdirectory(Example/HelloTriangle)

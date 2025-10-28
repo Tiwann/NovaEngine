@@ -22,18 +22,19 @@ namespace Nova::Vulkan
         void End() override;
 
         void ClearColor(const Color& color, uint32_t attachmentIndex) override;
-        void ClearDepth(float depth, uint32_t stencil) override;
+        void ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex) override;
         void BindGraphicsPipeline(const Rendering::GraphicsPipeline& pipeline) override;
         void BindComputePipeline(const Rendering::ComputePipeline& pipeline) override;
         void BindVertexBuffer(const Rendering::Buffer& vertexBuffer, size_t offset) override;
         void BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat) override;
         void BindShaderBindingSet(const Rendering::Shader& shader, const Rendering::ShaderBindingSet& bindingSet) override;
+        void BindMaterial(const Rendering::Material& material) override;
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void DrawIndexed(size_t count, size_t offset) override;
         void BeginRenderPass(const Rendering::RenderPass& renderPass) override;
         void EndRenderPass() override;
-        void PushConstants(const Ref<Rendering::Shader>& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;
+        void PushConstants(const Rendering::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;
         void UpdateBuffer(const Rendering::Buffer& buffer, size_t offset, size_t size, const void* data) override;
 
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;

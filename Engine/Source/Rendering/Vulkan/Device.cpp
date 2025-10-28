@@ -15,6 +15,9 @@
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
 
+#include "ComputePipeline.h"
+#include "Shader.h"
+
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
@@ -546,10 +549,11 @@ namespace Nova::Vulkan
         return Rendering::DeviceType::Vulkan;
     }
 
-    Ref<Rendering::Surface> Device::CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) const
+    Ref<Rendering::Surface> Device::CreateSurface(const Rendering::SurfaceCreateInfo& createInfo)
     {
         Surface* surface = new Surface();
-        if (!surface->Initialize(createInfo))
+        Rendering::SurfaceCreateInfo surfaceCreateInfo(createInfo);
+        if (!surface->Initialize(surfaceCreateInfo.withDevice(this)))
         {
             delete surface;
             return nullptr;
@@ -563,10 +567,11 @@ namespace Nova::Vulkan
 
     }
 
-    Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo) const
+    Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
-        if (!texture->Initialize(createInfo))
+        Rendering::TextureCreateInfo textureCreateInfo(createInfo);
+        if (!texture->Initialize(textureCreateInfo.withDevice(this)))
         {
             delete texture;
             return nullptr;
@@ -574,10 +579,11 @@ namespace Nova::Vulkan
         return Ref(texture);
     }
 
-    Ref<Rendering::Sampler> Device::CreateSampler(const Rendering::SamplerCreateInfo& createInfo) const
+    Ref<Rendering::Sampler> Device::CreateSampler(const Rendering::SamplerCreateInfo& createInfo)
     {
         Sampler* sampler = new Sampler();
-        if (!sampler->Initialize(createInfo))
+        Rendering::SamplerCreateInfo samplerCreateInfo(createInfo);
+        if (!sampler->Initialize(samplerCreateInfo.withDevice(this)))
         {
             delete sampler;
             return nullptr;
@@ -585,10 +591,11 @@ namespace Nova::Vulkan
         return Ref(sampler);
     }
 
-    Ref<Rendering::Buffer> Device::CreateBuffer(const Rendering::BufferCreateInfo& createInfo) const
+    Ref<Rendering::Buffer> Device::CreateBuffer(const Rendering::BufferCreateInfo& createInfo)
     {
         Buffer* buffer = new Buffer();
-        if (!buffer->Initialize(createInfo))
+        Rendering::BufferCreateInfo bufferCreateInfo(createInfo);
+        if (!buffer->Initialize(bufferCreateInfo.withDevice(this)))
         {
             delete buffer;
             return nullptr;
@@ -596,15 +603,40 @@ namespace Nova::Vulkan
         return Ref(buffer);
     }
 
-    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) const
+    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo)
     {
         GraphicsPipeline* pipeline = new GraphicsPipeline();
-        if (!pipeline->Initialize(createInfo))
+        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
+        if (!pipeline->Initialize(pipelineCreateInfo.setDevice(this)))
         {
             delete pipeline;
             return nullptr;
         }
         return Ref(pipeline);
+    }
+
+    Ref<Rendering::ComputePipeline> Device::CreateComputePipeline(const Rendering::ComputePipelineCreateInfo& createInfo)
+    {
+        ComputePipeline* pipeline = new ComputePipeline();
+        Rendering::ComputePipelineCreateInfo pipelineCreateInfo(createInfo);
+        if (!pipeline->Initialize(pipelineCreateInfo.withDevice(this)))
+        {
+            delete pipeline;
+            return nullptr;
+        }
+        return Ref(pipeline);
+    }
+
+    Ref<Rendering::Shader> Device::CreateShader(const Rendering::ShaderCreateInfo& createInfo)
+    {
+        Shader* shader = new Shader();
+        Rendering::ShaderCreateInfo shaderCreateInfo(createInfo);
+        if (!shader->Initialize(shaderCreateInfo.withDevice(this)))
+        {
+            delete shader;
+            return nullptr;
+        }
+        return Ref(shader);
     }
 
 

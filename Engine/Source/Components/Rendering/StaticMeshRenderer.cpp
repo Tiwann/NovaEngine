@@ -1,8 +1,8 @@
 ﻿#include "StaticMeshRenderer.h"
-
 #include "LightComponent.h"
 #include "Components/Camera.h"
 #include "Components/Transform.h"
+#include "Containers/Std140Buffer.h"
 #include "Runtime/StaticMesh.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Runtime/AssetDatabase.h"
@@ -45,7 +45,7 @@ namespace Nova
         const Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
         const Application* application = scene->GetOwner();
-        const Ref<Rendering::Device> device = application->GetDevice();
+        Ref<Rendering::Device> device = application->GetDevice();
         const Window* window = application->GetWindow();
         const float width = window->GetWidth();
         const float height = window->GetHeight();
@@ -53,25 +53,30 @@ namespace Nova
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Rendering::Shader>("BlinnPhong");
 
-        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
-        pipelineCreateInfo.inputAssemblyInfo.topology = PrimitiveTopology::TriangleList;
-        pipelineCreateInfo.inputAssemblyInfo.primitiveRestartEnable = false;
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"POSITION", Format::Vector3});
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"TEXCOORDINATE", Format::Vector2});
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"NORMAL", Format::Vector3});
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({"COLOR", Format::Vector4});
-        pipelineCreateInfo.colorBlendInfo.colorBlendEnable = false;
-        pipelineCreateInfo.rasterizationInfo.cullMode = CullMode::BackFace;
-        pipelineCreateInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
-        pipelineCreateInfo.rasterizationInfo.polygonMode = PolygonMode::Fill;
-        pipelineCreateInfo.viewportInfo = {0, 0, (uint32_t)width, (uint32_t)height, 0.0f, 1.0f};
-        pipelineCreateInfo.scissorInfo = {0, 0, (uint32_t)width, (uint32_t)height};
-        pipelineCreateInfo.depthStencilInfo.depthTestEnable = true;
-        pipelineCreateInfo.depthStencilInfo.depthWriteEnable = true;
-        pipelineCreateInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
-        pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
-        pipelineCreateInfo.rasterizationInfo.discardEnable = false;
-        pipelineCreateInfo.shader = m_Shader;
+        const Array vertexAttributes
+        {
+            VertexAttribute{"POSITION", Format::Vector3},
+            VertexAttribute{"TEXCOORDINATE", Format::Vector2},
+            VertexAttribute{"NORMAL", Format::Vector3},
+            VertexAttribute{"COLOR", Format::Vector4},
+        };
+
+        const Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo = Rendering::GraphicsPipelineCreateInfo()
+            .setDevice(device)
+            .setShader(m_Shader)
+            .setPrimitiveTopology(PrimitiveTopology::TriangleList)
+            .setVertexLayout(vertexAttributes)
+            .setCullMode(CullMode::BackFace)
+            .setFrontFace(FrontFace::CounterClockwise)
+            .setPolygonMode(PolygonMode::Fill)
+            .setDepthStencilInfo({
+                .depthTestEnable = true,
+                .depthWriteEnable = true,
+                .stencilTestEnable = false,
+                .depthCompareOp = CompareOperation::Less
+            })
+            .setViewportInfo({0, 0, (uint32_t)width, (uint32_t)height, 0.0f, 1.0f})
+            .setScissorInfo({0, 0, (uint32_t)width, (uint32_t)height});
 
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
@@ -124,25 +129,20 @@ namespace Nova
         const Color& ambLightColor = ambLight ? (*ambLight)->GetColor() : Color::Black;
         const float ambLightIntensity = ambLight ? (*ambLight)->GetIntensity() : 0.0f;
 
-        const auto ColorToVec3 = [](const Color& Color) -> Vector3
-        {
-            return Vector3(Color.r, Color.g, Color.b);
-        };
+        uint8_t buffer[512];
 
-        const SceneData sceneData {
-            .modelMatrix = modelMatrix,
-            .viewMatrix = viewMatrix,
-            .projectionMatrix = projectionMatrix,
-            .normalMatrix = Matrix3x4(normalMatrix),
-            .cameraViewDirection = cameraViewDirection,
-            .directionalLightColor = ColorToVec3(dirLightColor),
-            .directionalLightIntensity = dirLightIntensity,
-            .directionalLightDirection = dirLightDir,
-            .ambientLightColor = ColorToVec3(ambLightColor),
-            .ambientLightIntensity = ambLightIntensity,
-        };
+        Std140Buffer bufferWriter(buffer, std::size(buffer));
+        bufferWriter.WriteMatrix4(modelMatrix);
+        bufferWriter.WriteMatrix4(viewMatrix);
+        bufferWriter.WriteMatrix4(projectionMatrix);
+        bufferWriter.WriteMatrix3Aligned(normalMatrix);
+        bufferWriter.WriteVector4(Vector4(cameraViewDirection));
+        bufferWriter.WriteVector4(Vector4(dirLightColor.r, dirLightColor.g, dirLightColor.b, dirLightIntensity));
+        bufferWriter.WriteVector4(Vector4(ambLightColor.r, ambLightColor.g, ambLightColor.g, ambLightIntensity));
+        bufferWriter.WriteVector3Aligned(dirLightDir);
 
-        cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, sizeof(SceneData), &sceneData);
+
+        cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, bufferWriter.Tell(), buffer);
     }
 
     void StaticMeshRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)

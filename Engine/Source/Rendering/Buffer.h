@@ -20,6 +20,10 @@ namespace Nova::Rendering
         Device* device;
         BufferUsage usage = BufferUsage::None;
         size_t size = 0;
+
+        BufferCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; }
+        BufferCreateInfo& withUsage(const BufferUsage inUsage) { usage = inUsage; return *this; }
+        BufferCreateInfo& withSize(const size_t inSize) { size = inSize; return *this; }
     };
 
     class Buffer : public Object

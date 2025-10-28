@@ -21,6 +21,12 @@ namespace Nova
             return asset;
         }
 
+        template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
+        void AddAsset(const Ref<AssetType>& asset, const String& name)
+        {
+            m_Data[name] = asset;
+        }
+
         bool UnloadAsset(const String& name);
         bool UnloadAsset(Ref<Asset> asset);
         void UnloadAll();

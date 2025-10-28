@@ -38,6 +38,10 @@ namespace Nova::Rendering
     struct BufferCreateInfo;
     class GraphicsPipeline;
     struct GraphicsPipelineCreateInfo;
+    class ComputePipeline;
+    struct ComputePipelineCreateInfo;
+    class Shader;
+    struct ShaderCreateInfo;
 
     class Device : public Object
     {
@@ -58,11 +62,13 @@ namespace Nova::Rendering
         virtual void SetName(StringView name) = 0;
         virtual DeviceType GetDeviceType() = 0;
 
-        virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) const = 0;
-        virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) const = 0;
-        virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) const = 0;
-        virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) const = 0;
-        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) const = 0;
+        virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
+        virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
+        virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
+        virtual Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
+        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+        virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
 
         virtual uint32_t GetImageCount() const = 0;
 

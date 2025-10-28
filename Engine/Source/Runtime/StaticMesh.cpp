@@ -157,17 +157,17 @@ namespace Nova
                 const aiVector3D& normal = loadedMesh->HasNormals() ? loadedMesh->mNormals[vertexIndex] : aiVector3D(0, 0, 0);
                 const aiColor4D& color = loadedMesh->HasVertexColors(0) ? loadedMesh->mColors[0][vertexIndex] : aiColor4D(0, 0, 0, 0);
 
-                Vector3(* const ToVector3)(const aiVector3D&) = [](const aiVector3D& in) { return Vector3(in.x, in.y, in.z); };
-                Vector2(* const ToVector2)(const aiVector3D&) = [](const aiVector3D& in) { return Vector2(in.x, in.y); };
-                Vector4(* const ToVector4)(const aiColor4D&) = [](const aiColor4D& in) { return Vector4(in.r, in.g, in.b, in.a); };
+                Vector3(* const toVector3)(const aiVector3D&) = [](const aiVector3D& in) { return Vector3(in.x, in.y, in.z); };
+                Vector2(* const toVector2)(const aiVector3D&) = [](const aiVector3D& in) { return Vector2(in.x, in.y); };
+                Vector4(* const toVector4)(const aiColor4D&) = [](const aiColor4D& in) { return Vector4(in.r, in.g, in.b, in.a); };
 
 
                 const Vertex vertex
                 {
-                    .Position = ToVector3(position),
-                    .TextureCoordinate = ToVector2(texCoord),
-                    .Normal = ToVector3(normal),
-                    .Color = ToVector4(color)
+                    .position = toVector3(position),
+                    .texCoords = toVector2(texCoord),
+                    .normal = toVector3(normal),
+                    .color = toVector4(color)
                 };
                 vertices.Add(vertex);
             }
@@ -185,8 +185,8 @@ namespace Nova
         }
 
 
-        const Application& application = Application::GetCurrentApplication();
-        const Ref<Rendering::Device> device = application.GetDevice();
+        Application& application = Application::GetCurrentApplication();
+        Ref<Rendering::Device>& device = application.GetDevice();
         m_VertexBuffer = CreateVertexBuffer(device, allVerts.Data(), allVerts.Size());
         m_IndexBuffer = CreateIndexBuffer(device, allIndices.Data(), allIndices.Size());
         importer.FreeScene();

@@ -9,6 +9,9 @@ namespace Nova::Rendering
     {
         Device* device = nullptr;
         Shader* shader = nullptr;
+
+        ComputePipelineCreateInfo& withDevice(Device* device) { this->device = device; return *this; }
+        ComputePipelineCreateInfo& withShader(Shader* shader) { this->shader = shader; return *this; }
     };
 
     class ComputePipeline

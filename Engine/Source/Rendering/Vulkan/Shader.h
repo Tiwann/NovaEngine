@@ -18,6 +18,7 @@ namespace Nova::Vulkan
         void Destroy() override;
 
         Ref<Rendering::ShaderBindingSet> CreateBindingSet(size_t setIndex) const override;
+        Array<Ref<Rendering::ShaderBindingSet>> CreateBindingSets() const override;
 
         const Array<ShaderModule>& GetShaderModules() const;
         const ShaderModule& GetShaderModule(ShaderStageFlagBits stage) const;

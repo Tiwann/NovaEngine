@@ -7,6 +7,7 @@
 #include "PolygonMode.h"
 #include "PrimitiveTopology.h"
 #include "VertexLayout.h"
+#include "Runtime/Ref.h"
 
 namespace Nova::Rendering
 {
@@ -86,6 +87,26 @@ namespace Nova::Rendering
         Device* device = nullptr;
         RenderPass* renderPass = nullptr;
         Shader* shader = nullptr;
+
+
+        GraphicsPipelineCreateInfo() = default;
+
+        GraphicsPipelineCreateInfo& setInputAssemblyInfo(const InputAssemblyInfo& inputAssembly) { inputAssemblyInfo = inputAssembly; return *this; }
+        GraphicsPipelineCreateInfo& setVertexLayout(const VertexLayout& vertexLayout) { vertexInputInfo.layout = vertexLayout; return *this; }
+        GraphicsPipelineCreateInfo& addVertexAttribute(const VertexAttribute& attribute) { vertexInputInfo.layout.AddAttribute(attribute); return *this; }
+        GraphicsPipelineCreateInfo& setRasterizationInfo(const RasterizationInfo& rasterization) { rasterizationInfo = rasterization; return *this; }
+        GraphicsPipelineCreateInfo& setColorBlendInfo(const ColorBlendInfo& colorBlend) { colorBlendInfo = colorBlend; return *this; }
+        GraphicsPipelineCreateInfo& setDepthStencilInfo(const DepthStencilInfo& depthStencil) { depthStencilInfo = depthStencil; return *this; }
+        GraphicsPipelineCreateInfo& setMultisampleInfo(const MultisampleInfo& multisample) { multisampleInfo = multisample; return *this; }
+        GraphicsPipelineCreateInfo& setViewportInfo(const ViewportInfo& viewport) { viewportInfo = viewport; return *this; }
+        GraphicsPipelineCreateInfo& setScissorInfo(const ScissorInfo& scissor) { scissorInfo = scissor; return *this; }
+        GraphicsPipelineCreateInfo& setPrimitiveTopology(const PrimitiveTopology topology) { inputAssemblyInfo.topology = topology; return *this; }
+        GraphicsPipelineCreateInfo& setCullMode(const CullMode cullMode) { rasterizationInfo.cullMode = cullMode; return *this; }
+        GraphicsPipelineCreateInfo& setFrontFace(const FrontFace frontFace) { rasterizationInfo.frontFace = frontFace; return *this; }
+        GraphicsPipelineCreateInfo& setPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
+        GraphicsPipelineCreateInfo& setShader(const Ref<Shader>& shader) { this->shader = shader; return *this; }
+        GraphicsPipelineCreateInfo& setDevice(const Ref<Device>& device) { this->device = device; return *this; }
+        GraphicsPipelineCreateInfo& setRenderPass(RenderPass* renderPass) { this->renderPass = renderPass; return *this; }
     };
 
     class GraphicsPipeline

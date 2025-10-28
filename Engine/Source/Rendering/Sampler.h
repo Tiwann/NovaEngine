@@ -24,6 +24,11 @@ namespace Nova::Rendering
         float minLod = 0.0f;
         float maxLod = 1.0f;
         Filter mipmapFilter = Filter::Nearest;
+
+        SamplerCreateInfo& withDevice(Device* inDevice) {  device = inDevice; return *this; }
+        SamplerCreateInfo& withAddressModeUVW(const SamplerAddressMode inU, const SamplerAddressMode inV, const SamplerAddressMode inW) { addressModeU = inU; addressModeV = inV; addressModeW = inW; return *this; }
+        SamplerCreateInfo& withFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }
+        SamplerCreateInfo& withLODRange(const float min, const float max) { minLod = min; maxLod = max; return *this; }
     };
 
     class Sampler : public Object

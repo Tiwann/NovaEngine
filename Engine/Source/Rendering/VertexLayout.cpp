@@ -33,7 +33,7 @@ namespace Nova
     size_t VertexLayout::GetOffset(const VertexAttribute& attribute) const
     {
         const Array<VertexAttribute>::SizeType Index = m_Attributes.Find(attribute);
-        NOVA_ASSERT(Index != -1, "invalid Vertex Attribute!");
+        NOVA_ASSERT(Index != -1, "Invalid vertex attribute!");
         size_t Result = 0;
         for(Array<VertexAttribute>::SizeType i = 0; i < Index; i++)
         {

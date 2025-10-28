@@ -12,13 +12,11 @@
 #include "Rendering/Filter.h"
 #include "Runtime/Format.h"
 #include "Rendering/ShaderStage.h"
-
-#include <vulkan/vulkan.h>
-
 #include "Rendering/LoadOperation.h"
 #include "Rendering/ResolveMode.h"
 #include "Rendering/StoreOperation.h"
 
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {

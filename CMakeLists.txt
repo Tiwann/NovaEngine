@@ -1,0 +1,15 @@
+﻿cmake_minimum_required(VERSION 4.0)
+project(NovaEngine)
+
+include(CMake/Vulkan.cmake)
+option(NOVA_ENGINE_BUILD_EXAMPLES "Build example projects that uses Nova Engine" ON)
+option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a custom entry point" OFF)
+option(NOVA_ENGINE_INCLUDE_AUDIO "Compile engine with audio support" ON)
+option(NOVA_ENGINE_INCLUDE_PHYSICS "Compile engine with physics support" ON)
+add_subdirectory(Engine)
+add_subdirectory(Editor)
+
+if(NOVA_ENGINE_BUILD_EXAMPLES)
+    add_subdirectory(Example/HelloTriangle)
+    add_subdirectory(Example/HelloCompute)
+endif ()

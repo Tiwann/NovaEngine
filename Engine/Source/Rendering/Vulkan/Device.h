@@ -8,7 +8,6 @@
 #include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
-#include "Containers/MulticastDelegate.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;

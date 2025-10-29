@@ -57,7 +57,7 @@ namespace Nova::Vulkan
         vkFreeCommandBuffers(deviceHandle, commandPoolHandle, 1, &m_Handle);
     }
 
-    void CommandBuffer::SetName(StringView name)
+    void CommandBuffer::SetName(const StringView name)
     {
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         const VkDevice deviceHandle = m_Device->GetHandle();
@@ -208,6 +208,11 @@ namespace Nova::Vulkan
     void CommandBuffer::DrawIndexed(const size_t count, const size_t offset)
     {
         vkCmdDrawIndexed(m_Handle, count, 1, 0, offset, 0);
+    }
+
+    void CommandBuffer::Draw(const size_t vertexCount, const size_t instanceCount, const size_t firstIndex, const size_t firstInstance)
+    {
+        vkCmdDraw(m_Handle, vertexCount, instanceCount, firstIndex, firstInstance);
     }
 
     void CommandBuffer::Dispatch(const uint32_t groupCountX, const uint32_t groupCountY, const uint32_t groupCountZ)

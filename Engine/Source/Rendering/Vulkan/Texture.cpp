@@ -28,8 +28,11 @@ namespace Nova::Vulkan
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
         vkDestroyImageView(deviceHandle, m_ImageView, nullptr);
 
+        VkImageType imageType = VK_IMAGE_TYPE_1D;
+        if (createInfo.height > 1) imageType = VK_IMAGE_TYPE_2D;
+        if (createInfo.depth > 1) imageType = VK_IMAGE_TYPE_3D;
         VkImageCreateInfo imageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
-        imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imageCreateInfo.imageType = imageType;
         imageCreateInfo.format = Convert<Format, VkFormat>(createInfo.format);
         imageCreateInfo.extent.width = createInfo.width;
         imageCreateInfo.extent.height = createInfo.height;
@@ -90,8 +93,6 @@ namespace Nova::Vulkan
 
             CommandPool* commandPool = device->GetCommandPool();
             CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
-
-
 
             if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
             {

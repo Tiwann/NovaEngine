@@ -43,6 +43,7 @@ namespace Nova::Rendering
         virtual bool GPUCopy(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
 
         BufferUsage GetUsage() const { return m_Usage; }
+        BufferUsage GetUsage() { return m_Usage; }
     protected:
         size_t m_Size = 0;
         BufferUsage m_Usage = BufferUsage::None;

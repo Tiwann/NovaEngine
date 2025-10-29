@@ -95,7 +95,7 @@ namespace Nova
         case ModelFormat::None: return false;
         }
         return false;*/
-        return LoadFromFile(filepath);
+        return LoadFromFileAssimp(filepath);
     }
 
     const Array<SubMeshInfo>& StaticMesh::GetSubMeshes() const

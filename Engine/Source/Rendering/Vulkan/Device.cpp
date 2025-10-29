@@ -9,14 +9,13 @@
 #include "Runtime/Version.h"
 #include "Buffer.h"
 #include "Sampler.h"
+#include "Shader.h"
 #include "GraphicsPipeline.h"
+#include "ComputePipeline.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
-
-#include "ComputePipeline.h"
-#include "Shader.h"
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
@@ -224,9 +223,12 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
+        VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES };
+        shaderDrawParametersFeatures.shaderDrawParameters = true;
 
         VkPhysicalDeviceSynchronization2Features synchronization2Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES };
         synchronization2Features.synchronization2 = true;
+        synchronization2Features.pNext = &shaderDrawParametersFeatures;
 
         VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
         indexingFeatures.pNext = &synchronization2Features;
@@ -638,7 +640,6 @@ namespace Nova::Vulkan
         }
         return Ref(shader);
     }
-
 
     VkInstance Device::GetInstance() const
     {

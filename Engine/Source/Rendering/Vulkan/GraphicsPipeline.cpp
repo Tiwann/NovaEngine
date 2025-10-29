@@ -43,8 +43,8 @@ namespace Nova::Vulkan
         VkPipelineVertexInputStateCreateInfo vertexInputState { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
         vertexInputState.pVertexAttributeDescriptions = attributeDescriptions.Data();
         vertexInputState.vertexAttributeDescriptionCount = attributeDescriptions.Count();
-        vertexInputState.pVertexBindingDescriptions = &bindingDescription;
-        vertexInputState.vertexBindingDescriptionCount = 1;
+        vertexInputState.pVertexBindingDescriptions = vertexAttributes.Count() > 0 ? &bindingDescription : nullptr;
+        vertexInputState.vertexBindingDescriptionCount = vertexAttributes.Count() > 0 ? 1 : 0;
 
         VkPipelineRasterizationStateCreateInfo rasterizationState { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
         rasterizationState.cullMode = Convert<CullMode, VkCullModeFlags>(createInfo.rasterizationInfo.cullMode);

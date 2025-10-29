@@ -24,7 +24,7 @@ VertexOutput vert(VertexInput input)
 }
 
 [shader("fragment")]
-float4 frag(VertexOutput input)
+float4 frag(VertexOutput input) : SV_Target
 {
 	return input.color;
 }

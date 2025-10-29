@@ -61,6 +61,9 @@ namespace Nova
         const AssetDatabase& GetAssetDatabase() const;
         AssetDatabase& GetAssetDatabase();
         slang::IGlobalSession* GetSlangSession() const;
+
+        uint32_t GetWindowWidth() const { return m_Window->GetWidth(); }
+        uint32_t GetWindowHeight() const { return m_Window->GetHeight(); }
     protected:
         void Update();
         void Render();

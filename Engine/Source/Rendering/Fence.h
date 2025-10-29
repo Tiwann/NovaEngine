@@ -18,6 +18,9 @@ namespace Nova::Rendering
     {
         Device* device = nullptr;
         FenceCreateFlags flags = FenceCreateFlagBits::None;
+
+        FenceCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; }
+        FenceCreateInfo& withFlags(const FenceCreateFlags inFlags) { flags = inFlags; return *this; }
     };
 
     class Fence

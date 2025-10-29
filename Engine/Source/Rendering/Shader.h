@@ -10,6 +10,8 @@
 #include <slang/slang-com-ptr.h>
 
 
+
+
 namespace Nova::Rendering
 {
     class Device;
@@ -34,6 +36,7 @@ namespace Nova::Rendering
         ShaderCreateInfo& withIncludesAdded(const Array<StringView>& includes) { this->includes.AddRange(includes); return *this; }
         ShaderCreateInfo& withEntryPoints(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints = entryPoints; return *this; }
         ShaderCreateInfo& withEntryPointsAdded(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints.AddRange(entryPoints); return *this; }
+        ShaderCreateInfo& withSlang(slang::IGlobalSession* slang) { this->slang = slang; return *this; }
     };
 
     class Shader : public Asset

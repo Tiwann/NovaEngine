@@ -323,7 +323,7 @@ namespace Nova
 
         void RemoveAt(SizeType index)
         {
-            NOVA_ASSERT(Index <= m_Count, "Index out of bounds!");
+            NOVA_ASSERT(index <= m_Count, "Index out of bounds!");
             std::move(m_Data + index + 1, m_Data + m_Count, m_Data + index);
             m_Count--;
         }

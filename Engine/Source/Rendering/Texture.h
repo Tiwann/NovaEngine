@@ -4,7 +4,6 @@
 #include "Runtime/Asset.h"
 #include <cstdint>
 
-
 namespace Nova::Rendering
 {
     class Device;
@@ -26,13 +25,14 @@ namespace Nova::Rendering
         Format format = Format::None;
         uint32_t width = 0;
         uint32_t height = 0;
-        uint32_t depth = 0;
-        uint32_t mips = 0;
+        uint32_t depth = 1;
+        uint32_t mips = 1;
         uint32_t sampleCount = 0;
         const uint8_t* data = nullptr;
         size_t dataSize = 0;
 
         TextureCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; }
+        TextureCreateInfo& withFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
         TextureCreateInfo& withFormat(const Format inFormat) { format = inFormat; return *this; }
         TextureCreateInfo& withWidth(const uint32_t inWidth) { width = inWidth; return *this; }
         TextureCreateInfo& withHeight(const uint32_t inHeight) { height = inHeight; return *this; }

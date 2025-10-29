@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Runtime/Object.h"
 
 namespace Nova::Rendering
 {
@@ -13,5 +14,11 @@ namespace Nova::Rendering
         ResolveDest,
         ResolveSource,
         Present,
+    };
+
+    class Resource : public Object
+    {
+    public:
+        ~Resource() override = default;
     };
 }

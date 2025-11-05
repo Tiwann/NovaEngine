@@ -18,8 +18,8 @@ namespace Nova::Vulkan
         if (createInfo.usageFlags == TextureUsageFlagBits::None)
             return false;
 
-        if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
-            return false;
+        /*if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
+            return false;*/
 
         Device* device = static_cast<Device*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();

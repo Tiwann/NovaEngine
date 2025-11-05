@@ -4,8 +4,8 @@
 
 namespace Nova
 {
-    WideString StringConvertToWide(const String& From);
-    String StringConvertToMultibyte(const WideString& From);
-    WideString StringConvertToWide(const StringView& From);
-    String StringConvertToMultibyte(const WideStringView& From);
+    WideString StringConvertToWide(const String& from);
+    String StringConvertToMultibyte(const WideString& from);
+    WideString StringConvertToWide(const StringView& from);
+    String StringConvertToMultibyte(const WideStringView& from);
 }

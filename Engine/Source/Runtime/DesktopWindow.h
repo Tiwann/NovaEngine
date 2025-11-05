@@ -39,6 +39,7 @@ namespace Nova
         void Show() const;
         void Hide() const;
         void SetPosition(int32_t x, int32_t y);
+        void Resize(uint32_t width, uint32_t height);
         bool HasFocus() const;
         bool IsMinimized() const;
         bool IsMaximized() const;

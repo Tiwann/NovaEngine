@@ -37,6 +37,7 @@ namespace Nova::Rendering
         ShaderCreateInfo& withEntryPoints(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints = entryPoints; return *this; }
         ShaderCreateInfo& withEntryPointsAdded(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints.AddRange(entryPoints); return *this; }
         ShaderCreateInfo& withSlang(slang::IGlobalSession* slang) { this->slang = slang; return *this; }
+        ShaderCreateInfo& addEntryPoint(const ShaderEntryPoint& entryPoint) { this->entryPoints.Add(entryPoint); return *this; }
     };
 
     class Shader : public Asset

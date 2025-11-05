@@ -24,7 +24,7 @@ namespace Nova
     {
         String applicationName;
         uint32_t windowWidth, windowHeight;
-        WindowCreateFlags windowFlags;
+        WindowCreateFlags windowFlags = WindowCreateFlagBits::Default;
         bool vsync;
     };
 
@@ -50,6 +50,7 @@ namespace Nova
 
         float GetDeltaTime() const;
         const Ref<Window>& GetWindow() const;
+        Ref<Window>& GetWindow();
         const Ref<Rendering::Device>& GetDevice() const;
         Ref<Rendering::Device>& GetDevice();
         const Ref<Rendering::ImGuiRenderer>& GetImGuiRenderer() const;

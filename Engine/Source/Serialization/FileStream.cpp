@@ -20,7 +20,7 @@ namespace Nova
     
     FileStream::FileStream(StringView filepath, const OpenModeFlags openMode): Stream(openMode), m_Filepath(std::move(filepath))
     {
-        m_Handle = fopen(*m_Filepath, GetMode(openMode));
+        m_Handle = fopen(*m_Filepath, *GetMode(openMode));
         m_Opened = m_Handle;
     }
 

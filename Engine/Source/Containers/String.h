@@ -52,6 +52,11 @@ namespace Nova
             memcpy(m_Data, Data, m_Count * CharacterSize);
         }
 
+        StringBase(SizeType count) : m_Count(count)
+        {
+            m_Data = new CharacterType[m_Count + 1]{};
+        }
+
         StringBase(CharacterType* Data, SizeType Count)
         {
             NOVA_ASSERT(Data, "Cannot construct string with nullptr!");

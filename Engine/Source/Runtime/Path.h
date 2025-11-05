@@ -1,7 +1,9 @@
 ﻿#pragma once
+#include "Window.h"
 #include "Containers/String.h"
 #include "Containers/StringView.h"
 #include "Containers/StringFormat.h"
+#include "Runtime/DialogFilters.h"
 
 namespace Nova
 {
@@ -28,5 +30,8 @@ namespace Nova
             return Combine(StringView(NOVA_APPLICATION_DIR), "Assets", filepath);
         }
         #endif
+
+        static String OpenFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
+        static String SaveFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
     };
 }

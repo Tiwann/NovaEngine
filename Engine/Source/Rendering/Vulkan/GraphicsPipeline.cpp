@@ -168,6 +168,11 @@ namespace Nova::Vulkan
         pipelineCreateInfo.stageCount = shaderStages.Count();
         pipelineCreateInfo.layout = ((Shader*)createInfo.shader)->GetPipelineLayout();
 
+        if (m_Handle)
+        {
+            vkDestroyPipeline(deviceHandle, m_Handle, nullptr);
+        }
+
         if (vkCreateGraphicsPipelines(deviceHandle, nullptr, 1, &pipelineCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;
         return true;

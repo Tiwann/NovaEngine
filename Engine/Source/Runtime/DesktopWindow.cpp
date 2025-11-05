@@ -220,6 +220,11 @@ namespace Nova
         glfwSetWindowPos(m_Handle, x, y);
     }
 
+    void DesktopWindow::Resize(const uint32_t width, const uint32_t height)
+    {
+        glfwSetWindowSize(m_Handle, width, height);
+    }
+
     bool DesktopWindow::HasFocus() const
     {
         return m_HasFocus;

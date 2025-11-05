@@ -262,6 +262,11 @@ namespace Nova
         return m_Window;
     }
 
+    Ref<Window>& Application::GetWindow()
+    {
+        return m_Window;
+    }
+
     const Ref<Rendering::Device>& Application::GetDevice() const
     {
         return m_Device;

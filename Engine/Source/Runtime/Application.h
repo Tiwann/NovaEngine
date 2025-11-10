@@ -44,6 +44,7 @@ namespace Nova
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
+        virtual void OnPostRender(Rendering::CommandBuffer& cmdBuffer) {}
         virtual void OnGUI() {}
         virtual void OnDrawDebug() {}
         virtual void OnDestroy() {}
@@ -65,6 +66,14 @@ namespace Nova
 
         uint32_t GetWindowWidth() const { return m_Window->GetWidth(); }
         uint32_t GetWindowHeight() const { return m_Window->GetHeight(); }
+
+        template<typename T> requires std::is_base_of_v<Asset, T>
+        Ref<T> CreateAsset(const String& name)
+        {
+            Ref<T> asset = m_AssetDatabase.CreateAsset<T>(name);
+            return asset;
+        }
+
     protected:
         void Update();
         void Render();

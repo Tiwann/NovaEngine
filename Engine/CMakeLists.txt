@@ -20,6 +20,7 @@ target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d glfw 
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 if(WIN32)
+    target_link_libraries(NovaEngine PUBLIC kernel32)
     target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_WINDOWS_SOURCES})
 endif ()
 

@@ -609,7 +609,7 @@ namespace Nova::Vulkan
     {
         GraphicsPipeline* pipeline = new GraphicsPipeline();
         Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
-        if (!pipeline->Initialize(pipelineCreateInfo.setDevice(this)))
+        if (!pipeline->Initialize(pipelineCreateInfo.SetDevice(this)))
         {
             delete pipeline;
             return nullptr;

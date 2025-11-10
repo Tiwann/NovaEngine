@@ -32,6 +32,7 @@ namespace Nova
 
         Sprite& GetSprite();
         void SetSprite(const Sprite& sprite);
+        void SetSprite(Ref<Rendering::Texture> texture);
 
         void SetSpriteAnimation(SpriteAnimation* spriteAnimation);
         SpriteAnimation* GetSpriteAnimation() const;

@@ -205,6 +205,11 @@ namespace Nova
         m_BindingSet->BindTexture(1, m_Sprite.texture);
     }
 
+    void SpriteRenderer::SetSprite(Ref<Rendering::Texture> texture)
+    {
+        SetSprite({0, 0, texture->GetWidth(), texture->GetHeight(), texture});
+    }
+
     void SpriteRenderer::SetSpriteAnimation(SpriteAnimation* spriteAnimation)
     {
         const Application* application = GetApplication();

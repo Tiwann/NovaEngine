@@ -1,4 +1,5 @@
 ﻿module Debug;
+import Common;
 
 struct VertexInput
 {
@@ -18,7 +19,7 @@ struct VertexOutput
 VertexOutput vert(VertexInput input)
 {
     VertexOutput output;
-    output.position = mul(viewProj, float4(input.position, 1.0));
+    output.position = viewProj * float4(input.position, 1.0);
     output.color = input.color;
     return output;
 }

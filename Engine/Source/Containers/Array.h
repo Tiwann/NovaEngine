@@ -8,6 +8,8 @@
 #include <initializer_list>
 #include <algorithm>
 
+#include "Math/Matrix2.h"
+
 namespace Nova
 {
     template<typename T>
@@ -51,6 +53,7 @@ namespace Nova
             m_Data = Memory::Calloc<T>(m_Allocated);
             m_Count = count;
         }
+
 
         Array(const std::initializer_list<T>& list) : m_Count(list.size()), m_Allocated(list.size())
         {

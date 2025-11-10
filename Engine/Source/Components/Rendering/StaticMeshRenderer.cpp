@@ -2,7 +2,6 @@
 #include "LightComponent.h"
 #include "Components/Camera.h"
 #include "Components/Transform.h"
-#include "Containers/Std140Buffer.h"
 #include "Runtime/StaticMesh.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Runtime/AssetDatabase.h"
@@ -44,14 +43,11 @@ namespace Nova
 
         const Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
-        const Application* application = scene->GetOwner();
+        Application* application = scene->GetOwner();
         Ref<Rendering::Device> device = application->GetDevice();
-        const Window* window = application->GetWindow();
-        const float width = window->GetWidth();
-        const float height = window->GetHeight();
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
-        m_Shader = assetDatabase.Get<Rendering::Shader>("BlinnPhong");
+        m_Shader = assetDatabase.Get<Rendering::Shader>("BlinnPhongShader");
 
         const Array vertexAttributes
         {
@@ -62,21 +58,15 @@ namespace Nova
         };
 
         const Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo = Rendering::GraphicsPipelineCreateInfo()
-            .setDevice(device)
-            .setShader(m_Shader)
-            .setPrimitiveTopology(PrimitiveTopology::TriangleList)
-            .setVertexLayout(vertexAttributes)
-            .setCullMode(CullMode::BackFace)
-            .setFrontFace(FrontFace::CounterClockwise)
-            .setPolygonMode(PolygonMode::Fill)
-            .setDepthStencilInfo({
-                .depthTestEnable = true,
-                .depthWriteEnable = true,
-                .stencilTestEnable = false,
-                .depthCompareOp = CompareOperation::Less
-            })
-            .setViewportInfo({0, 0, (uint32_t)width, (uint32_t)height, 0.0f, 1.0f})
-            .setScissorInfo({0, 0, (uint32_t)width, (uint32_t)height});
+        .SetDevice(device)
+        .SetShader(m_Shader)
+        .SetRenderPass(application->GetRenderPass())
+        .SetVertexLayout(vertexAttributes)
+        .SetMultisampleInfo({8})
+        .SetDepthStencilInfo({
+            .depthTestEnable = true,
+            .depthWriteEnable = true,
+        });
 
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
@@ -93,6 +83,7 @@ namespace Nova
     void StaticMeshRenderer::OnDestroy()
     {
         Component::OnDestroy();
+        m_BindingSet->Destroy();
         m_SceneUniformBuffer->Destroy();
         m_Pipeline->Destroy();
     }
@@ -108,7 +99,7 @@ namespace Nova
         if (!camera) return;
 
         Transform* entityTransform = owner->GetTransform();
-        Transform* cameraTransform = camera->GetTransform();
+        const Transform* cameraTransform = camera->GetTransform();
 
         const Matrix4& modelMatrix = entityTransform->GetWorldSpaceMatrix();
         const Matrix4& viewMatrix = camera->GetViewMatrix();
@@ -129,20 +120,25 @@ namespace Nova
         const Color& ambLightColor = ambLight ? (*ambLight)->GetColor() : Color::Black;
         const float ambLightIntensity = ambLight ? (*ambLight)->GetIntensity() : 0.0f;
 
-        uint8_t buffer[512];
-
-        Std140Buffer bufferWriter(buffer, std::size(buffer));
-        bufferWriter.WriteMatrix4(modelMatrix);
-        bufferWriter.WriteMatrix4(viewMatrix);
-        bufferWriter.WriteMatrix4(projectionMatrix);
-        bufferWriter.WriteMatrix3Aligned(normalMatrix);
-        bufferWriter.WriteVector4(Vector4(cameraViewDirection));
-        bufferWriter.WriteVector4(Vector4(dirLightColor.r, dirLightColor.g, dirLightColor.b, dirLightIntensity));
-        bufferWriter.WriteVector4(Vector4(ambLightColor.r, ambLightColor.g, ambLightColor.g, ambLightIntensity));
-        bufferWriter.WriteVector3Aligned(dirLightDir);
+        const auto ToVector3 = [](const Color& Color) -> Vector3
+        {
+            return Vector3(Color.r, Color.g, Color.b);
+        };
 
 
-        cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, bufferWriter.Tell(), buffer);
+        SceneData sceneData;
+        sceneData.modelMatrix = modelMatrix;
+        sceneData.viewMatrix = viewMatrix;
+        sceneData.projectionMatrix = projectionMatrix;
+        sceneData.normalMatrix = Matrix3x4(normalMatrix);
+        sceneData.cameraViewDirection = cameraViewDirection;
+        sceneData.directionalLightColor = ToVector3(dirLightColor);
+        sceneData.directionalLightIntensity = dirLightIntensity;
+        sceneData.directionalLightDirection = dirLightDir;
+        sceneData.ambientLightColor = ToVector3(ambLightColor);
+        sceneData.ambientLightIntensity = ambLightIntensity;
+
+        cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, sizeof(SceneData), &sceneData);
     }
 
     void StaticMeshRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)
@@ -153,6 +149,12 @@ namespace Nova
 
         if (m_StaticMesh->GetSubMeshes().IsEmpty())
             return;
+
+        Ref<Rendering::Buffer> vertexBuffer = m_StaticMesh->GetVertexBuffer();
+        if (!vertexBuffer) return;
+
+        Ref<Rendering::Buffer> indexBuffer = m_StaticMesh->GetIndexBuffer();
+        if (!indexBuffer) return;
 
         // THIS NEEDS TO BE OPTIMIZED BY FILTER THE AVAILABLE LIGHTS
         Entity* owner = GetOwner();
@@ -168,13 +170,13 @@ namespace Nova
 
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
-        cmdBuffer.SetViewport(0.0f, 0.0f, width, width, 0.0f, 1.0f);
+        cmdBuffer.SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(0, 0, (int32_t)width, (int32_t)height);
 
         for (const SubMeshInfo& subMesh : m_StaticMesh->GetSubMeshes())
         {
-            cmdBuffer.BindVertexBuffer(*m_StaticMesh->GetVertexBuffer(), subMesh.vertexBufferOffset);
-            cmdBuffer.BindIndexBuffer(*m_StaticMesh->GetIndexBuffer(), subMesh.indexBufferOffset, Format::Uint32);
+            cmdBuffer.BindVertexBuffer(*vertexBuffer, subMesh.vertexBufferOffset);
+            cmdBuffer.BindIndexBuffer(*indexBuffer, subMesh.indexBufferOffset, Format::Uint32);
             cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 0);
         }
     }
@@ -184,12 +186,10 @@ namespace Nova
         return m_StaticMesh;
     }
 
-    void StaticMeshRenderer::SetStaticMesh(Ref<StaticMesh> newMesh)
+    void StaticMeshRenderer::SetStaticMesh(const Ref<StaticMesh>& newMesh)
     {
-        const Entity* owner = GetOwner();
-        const Scene* scene = owner->GetOwner();
-        const Application* application = scene->GetOwner();
-        const Ref<Rendering::Device> device = application->GetDevice();
+        const Application* application = GetApplication();
+        const Ref<Rendering::Device>& device = application->GetDevice();
         device->WaitIdle();
 
         m_StaticMesh = newMesh;

@@ -91,22 +91,22 @@ namespace Nova::Rendering
 
         GraphicsPipelineCreateInfo() = default;
 
-        GraphicsPipelineCreateInfo& setInputAssemblyInfo(const InputAssemblyInfo& inputAssembly) { inputAssemblyInfo = inputAssembly; return *this; }
-        GraphicsPipelineCreateInfo& setVertexLayout(const VertexLayout& vertexLayout) { vertexInputInfo.layout = vertexLayout; return *this; }
-        GraphicsPipelineCreateInfo& addVertexAttribute(const VertexAttribute& attribute) { vertexInputInfo.layout.AddAttribute(attribute); return *this; }
-        GraphicsPipelineCreateInfo& setRasterizationInfo(const RasterizationInfo& rasterization) { rasterizationInfo = rasterization; return *this; }
-        GraphicsPipelineCreateInfo& setColorBlendInfo(const ColorBlendInfo& colorBlend) { colorBlendInfo = colorBlend; return *this; }
-        GraphicsPipelineCreateInfo& setDepthStencilInfo(const DepthStencilInfo& depthStencil) { depthStencilInfo = depthStencil; return *this; }
-        GraphicsPipelineCreateInfo& setMultisampleInfo(const MultisampleInfo& multisample) { multisampleInfo = multisample; return *this; }
-        GraphicsPipelineCreateInfo& setViewportInfo(const ViewportInfo& viewport) { viewportInfo = viewport; return *this; }
-        GraphicsPipelineCreateInfo& setScissorInfo(const ScissorInfo& scissor) { scissorInfo = scissor; return *this; }
-        GraphicsPipelineCreateInfo& setPrimitiveTopology(const PrimitiveTopology topology) { inputAssemblyInfo.topology = topology; return *this; }
-        GraphicsPipelineCreateInfo& setCullMode(const CullMode cullMode) { rasterizationInfo.cullMode = cullMode; return *this; }
-        GraphicsPipelineCreateInfo& setFrontFace(const FrontFace frontFace) { rasterizationInfo.frontFace = frontFace; return *this; }
-        GraphicsPipelineCreateInfo& setPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
-        GraphicsPipelineCreateInfo& setShader(const Ref<Shader>& shader) { this->shader = shader; return *this; }
-        GraphicsPipelineCreateInfo& setDevice(const Ref<Device>& device) { this->device = device; return *this; }
-        GraphicsPipelineCreateInfo& setRenderPass(RenderPass* renderPass) { this->renderPass = renderPass; return *this; }
+        GraphicsPipelineCreateInfo& SetInputAssemblyInfo(const InputAssemblyInfo& inputAssembly) { inputAssemblyInfo = inputAssembly; return *this; }
+        GraphicsPipelineCreateInfo& SetVertexLayout(const VertexLayout& vertexLayout) { vertexInputInfo.layout = vertexLayout; return *this; }
+        GraphicsPipelineCreateInfo& AddVertexAttribute(const VertexAttribute& attribute) { vertexInputInfo.layout.AddAttribute(attribute); return *this; }
+        GraphicsPipelineCreateInfo& SetRasterizationInfo(const RasterizationInfo& rasterization) { rasterizationInfo = rasterization; return *this; }
+        GraphicsPipelineCreateInfo& SetColorBlendInfo(const ColorBlendInfo& colorBlend) { colorBlendInfo = colorBlend; return *this; }
+        GraphicsPipelineCreateInfo& SetDepthStencilInfo(const DepthStencilInfo& depthStencil) { depthStencilInfo = depthStencil; return *this; }
+        GraphicsPipelineCreateInfo& SetMultisampleInfo(const MultisampleInfo& multisample) { multisampleInfo = multisample; return *this; }
+        GraphicsPipelineCreateInfo& SetViewportInfo(const ViewportInfo& viewport) { viewportInfo = viewport; return *this; }
+        GraphicsPipelineCreateInfo& SetScissorInfo(const ScissorInfo& scissor) { scissorInfo = scissor; return *this; }
+        GraphicsPipelineCreateInfo& SetPrimitiveTopology(const PrimitiveTopology topology) { inputAssemblyInfo.topology = topology; return *this; }
+        GraphicsPipelineCreateInfo& SetCullMode(const CullMode cullMode) { rasterizationInfo.cullMode = cullMode; return *this; }
+        GraphicsPipelineCreateInfo& SetFrontFace(const FrontFace frontFace) { rasterizationInfo.frontFace = frontFace; return *this; }
+        GraphicsPipelineCreateInfo& SetPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
+        GraphicsPipelineCreateInfo& SetShader(const Ref<Shader>& shader) { this->shader = shader; return *this; }
+        GraphicsPipelineCreateInfo& SetDevice(const Ref<Device>& device) { this->device = device; return *this; }
+        GraphicsPipelineCreateInfo& SetRenderPass(RenderPass* renderPass) { this->renderPass = renderPass; return *this; }
     };
 
     class GraphicsPipeline

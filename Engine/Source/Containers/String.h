@@ -11,16 +11,16 @@ namespace Nova
 {
 
     template<typename CharacterType> requires IsCharacterValue<CharacterType>
-    static size_t StringLength(const CharacterType* Data)
+    static size_t StringLength(const CharacterType* data)
     {
-        CharacterType* Ptr = const_cast<CharacterType*>(Data);
-        size_t Count = 0;
-        while (*Ptr != 0)
+        CharacterType* ptr = const_cast<CharacterType*>(data);
+        size_t count = 0;
+        while (*ptr != 0)
         {
-            Count++;
-            ++Ptr;
+            count++;
+            ++ptr;
         }
-        return Count;
+        return count;
     }
     
     template<typename T> requires IsCharacterValue<T>
@@ -36,7 +36,7 @@ namespace Nova
         using ArrayType = Array<CharacterType>;
         using BufferType = BufferView<CharacterType>;
         
-        static inline const SizeType CharacterSize = sizeof(CharacterType);
+        static constexpr SizeType CharacterSize = sizeof(CharacterType);
         
         StringBase()
         {
@@ -52,7 +52,7 @@ namespace Nova
             memcpy(m_Data, Data, m_Count * CharacterSize);
         }
 
-        StringBase(SizeType count) : m_Count(count)
+        explicit StringBase(const SizeType count) : m_Count(count)
         {
             m_Data = new CharacterType[m_Count + 1]{};
         }
@@ -113,21 +113,21 @@ namespace Nova
             m_Count = 0;
         }
 
-        CharacterType& operator[](SizeType Index)
+        CharacterType& operator[](SizeType index)
         {
-            NOVA_ASSERT(Index <= m_Count, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count, "Index out of bounds");
+            return m_Data[index];
         }
         
-        const CharacterType& operator[](SizeType Index) const
+        const CharacterType& operator[](SizeType index) const
         {
-            NOVA_ASSERT(Index <= m_Count, "Index out of bounds");
-            return m_Data[Index];
+            NOVA_ASSERT(index <= m_Count, "Index out of bounds");
+            return m_Data[index];
         }
 
-        bool operator==(const StringBase& Other) const
+        bool operator==(const StringBase& other) const
         {
-            return std::strcmp(m_Data, Other.m_Data) == 0 && m_Count == Other.m_Count;
+            return std::strcmp(m_Data, other.m_Data) == 0 && m_Count == other.m_Count;
         }
 
         bool IsEmpty() const { return m_Count == 0; }
@@ -141,212 +141,221 @@ namespace Nova
         SizeType Count() const { return m_Count; }
         SizeType Size() const { return m_Count * CharacterSize; }
         
-        StringBase& Append(StringLiteralType Data)
+        StringBase& Append(StringLiteralType data)
         {
-            NOVA_ASSERT(Data, "Cannot append string with nullptr string literal!");
-            const SizeType DataCount = StringLength(Data);
-            const SizeType NewCount = m_Count + DataCount;
-            CharacterType* NewData = new CharacterType[NewCount + 1]{};
-            memcpy(NewData, m_Data, m_Count * CharacterSize);
-            memcpy(NewData + m_Count, Data, DataCount * CharacterSize);
+            NOVA_ASSERT(data, "Cannot append string with nullptr string literal!");
+            const SizeType dataCount = StringLength(data);
+            const SizeType newCount = m_Count + dataCount;
+            CharacterType* newData = new CharacterType[newCount + 1]{};
+            memcpy(newData, m_Data, m_Count * CharacterSize);
+            memcpy(newData + m_Count, data, dataCount * CharacterSize);
             delete [] m_Data;
-            m_Data = NewData;
-            m_Count = NewCount;
+            m_Data = newData;
+            m_Count = newCount;
             return *this;
         }
 
         
-        StringBase& Append(CharacterType Character)
+        StringBase& Append(CharacterType character)
         {
-            const SizeType NewCount = m_Count + 1;
-            CharacterType* NewData = new CharacterType[NewCount + 1]{};
-            memcpy(NewData, m_Data, m_Count * CharacterSize);
-            memcpy(NewData + m_Count, &Character, CharacterSize);
+            const SizeType newCount = m_Count + 1;
+            CharacterType* newData = new CharacterType[newCount + 1]{};
+            memcpy(newData, m_Data, m_Count * CharacterSize);
+            memcpy(newData + m_Count, &character, CharacterSize);
             delete [] m_Data;
-            m_Data = NewData;
-            m_Count = NewCount;
+            m_Data = newData;
+            m_Count = newCount;
             return *this;
         }
 
-        StringBase& Append(const StringBase& String)
+        StringBase& Append(const StringBase& string)
         {
-            const SizeType DataCount = String.Count();
-            const SizeType NewCount = m_Count + DataCount;
-            CharacterType* NewData = new CharacterType[NewCount + 1]{};
-            memcpy(NewData, m_Data, m_Count * CharacterSize);
-            memcpy(NewData + m_Count, String.Data(), DataCount * CharacterSize);
+            const SizeType dataCount = string.Count();
+            const SizeType newCount = m_Count + dataCount;
+            CharacterType* newData = new CharacterType[newCount + 1]{};
+            memcpy(newData, m_Data, m_Count * CharacterSize);
+            memcpy(newData + m_Count, string.Data(), dataCount * CharacterSize);
             delete [] m_Data;
-            m_Data = NewData;
-            m_Count = NewCount;
+            m_Data = newData;
+            m_Count = newCount;
             return *this;
         }
         
-        StringBase Substring(SizeType Begin, SizeType End) const
+        StringBase Substring(SizeType begin, SizeType end) const
         {
-            NOVA_ASSERT(Begin < m_Count && Begin + (End - Begin) <= m_Count, "Indices out of bounds!");
-            const SizeType NewCount = End - Begin + 1;
-            CharacterType* NewData = new CharacterType[NewCount + 1]{};
-            memcpy(NewData, m_Data + Begin, NewCount * CharacterSize);
-            return {NewData, NewCount};
+            NOVA_ASSERT(begin < m_Count && begin + (end - begin) <= m_Count, "Indices out of bounds!");
+            const SizeType newCount = end - begin + 1;
+            CharacterType* newData = new CharacterType[newCount + 1]{};
+            memcpy(newData, m_Data + begin, newCount * CharacterSize);
+            return {newData, newCount};
         }
 
-        StringBase Substring(const SizeType Begin) const
+        StringBase Substring(const SizeType begin) const
         {
-            return Substring(Begin, m_Count);
+            return Substring(begin, m_Count);
         }
         
-        SizeType Find(CharacterType Char) const
+        SizeType Find(CharacterType character) const
         {
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                if(m_Data[i] == Char)
+                if(m_Data[i] == character)
                     return i;
             }
             return -1;
         }
 
-        SizeType Find(const StringBase& Str) const
+        SizeType Find(const StringBase& string) const
         {
-            std::basic_string_view<CharacterType> View(m_Data, m_Count);
-            std::basic_string_view<CharacterType> Other(Str.m_Data, Str.m_Count);
-            return View.find(Other);
+            std::basic_string_view<CharacterType> view(m_Data, m_Count);
+            std::basic_string_view<CharacterType> otherView(string.m_Data, string.m_Count);
+            return view.find(otherView);
         }
 
-        SizeType Find(SizeType Index, const StringBase& Str) const
+        SizeType Find(SizeType index, const StringBase& str) const
         {
-            std::basic_string_view<CharacterType> View(m_Data + Index, m_Count);
-            std::basic_string_view<CharacterType> Other(Str.m_Data, Str.m_Count);
-            return View.find(Other);
+            std::basic_string_view<CharacterType> view(m_Data + index, m_Count);
+            std::basic_string_view<CharacterType> otherView(str.m_Data, str.m_Count);
+            return view.find(otherView);
         }
         
-        SizeType OccurrencesOf(CharacterType Char)
+        SizeType OccurrencesOf(CharacterType character)
         {
-            SizeType Result = 0;
+            SizeType result = 0;
             for(SizeType i = 0; i < m_Count; ++i)
             {
-                CharacterType Curr = m_Data[i];
-                if(Curr == Char)
-                    Result++;
+                CharacterType current = m_Data[i];
+                if(current == character)
+                    result++;
             }
-            return Result; 
+            return result;
         }
 
-        bool StartsWith(const StringBase& Str)
+        bool StartsWith(const StringBase& string)
         {
-            const SizeType Found = Find(Str);
-            return Found == 0;
+            const SizeType found = Find(string);
+            return found == 0;
         }
 
-        template<typename... Args>
-        uint32_t ScanFormat(const StringBase& Format, Args*... Arguments)
+        StringBase& Replace(const StringBase& from, const StringBase& To)
         {
-            return std::sscanf(m_Data, Format.m_Data, Arguments...);
-        }
+            const SizeType index = Find(from);
+            if(index == -1ULL) return *this;
 
-        StringBase& Replace(const StringBase& From, const StringBase& To)
-        {
-            const SizeType Index = Find(From);
-            if(Index == -1ULL) return *this;
-
-            if (To.Count() <= From.Count())
+            if (To.Count() <= from.Count())
             {
-                memcpy(m_Data + Index, *To, To.Size());
+                memcpy(m_Data + index, *To, To.Size());
                 return *this;
             }
             
-            const SizeType Delta = To.Count() - From.Count();
-            const SizeType NewCount = m_Count + Delta;
-            CharacterType* NewData = new CharacterType[NewCount]{};
+            const SizeType delta = To.Count() - from.Count();
+            const SizeType newCount = m_Count + delta;
+            CharacterType* newData = new CharacterType[newCount]{};
                 
-            CharacterType* Dest = NewData;
-            CharacterType* Src = m_Data;
-            SizeType Size = Index * CharacterSize;
-            memcpy(Dest, Src, Size);
+            CharacterType* dest = newData;
+            CharacterType* src = m_Data;
+            SizeType size = index * CharacterSize;
+            memcpy(dest, src, size);
                 
-            Dest = NewData + Index * CharacterSize;
-            Src = const_cast<CharacterType*>(*To);
-            Size = To.Size();
-            memcpy(Dest, Src, Size);
+            dest = newData + index * CharacterSize;
+            src = const_cast<CharacterType*>(*To);
+            size = To.Size();
+            memcpy(dest, src, size);
 
-            Dest = NewData + Index * CharacterSize + To.Size();
-            Src = m_Data + Index * CharacterSize + From.Size();
-            Size = m_Count * CharacterSize - (Index * CharacterSize + From.Size());
-            memcpy(Dest, Src, Size);
+            dest = newData + index * CharacterSize + To.Size();
+            src = m_Data + index * CharacterSize + from.Size();
+            size = m_Count * CharacterSize - (index * CharacterSize + from.Size());
+            memcpy(dest, src, size);
 
             delete [] m_Data;
-            m_Data = NewData;
-            m_Count = NewCount;
+            m_Data = newData;
+            m_Count = newCount;
             return *this;
         }
 
-        StringBase& Replace(SizeType Index, SizeType Count, const StringBase& To)
+        StringBase& Replace(SizeType index, SizeType count, const StringBase& to)
         {
-            NOVA_ASSERT(Index < m_Count && Index + Count <= m_Count, "Range is out of bounds!");
-            if (Index == -1ULL) return *this;
+            NOVA_ASSERT(index < m_Count && index + count <= m_Count, "Range is out of bounds!");
+            if (index == -1ULL) return *this;
 
-            if (To.Count() <= Count)
+            if (to.Count() <= count)
             {
-                memcpy(m_Data + Index, *To, To.Size());
+                memcpy(m_Data + index, *to, to.Size());
                 return *this;
             }
 
-            const SizeType Delta = To.Count() - Count;
-            const SizeType NewCount = m_Count + Delta;
-            CharacterType* NewData = new CharacterType[NewCount]{};
+            const SizeType delta = to.Count() - count;
+            const SizeType newCount = m_Count + delta;
+            CharacterType* newData = new CharacterType[newCount]{};
                 
-            CharacterType* Dest = NewData;
-            CharacterType* Src = m_Data;
-            SizeType Size = Index * CharacterSize;
-            memcpy(Dest, Src, Size);
+            CharacterType* dest = newData;
+            CharacterType* src = m_Data;
+            SizeType size = index * CharacterSize;
+            memcpy(dest, src, size);
                 
-            Dest = NewData + Index * CharacterSize;
-            Src = const_cast<CharacterType*>(*To);
-            Size = To.Size();
-            memcpy(Dest, Src, Size);
+            dest = newData + index * CharacterSize;
+            src = const_cast<CharacterType*>(*to);
+            size = to.Size();
+            memcpy(dest, src, size);
 
-            Dest = NewData + Index * CharacterSize + To.Size();
-            Src = m_Data + Index * CharacterSize + Count * CharacterSize;
-            Size = m_Count * CharacterSize - (Index * CharacterSize + Count * CharacterSize);
-            memcpy(Dest, Src, Size);
+            dest = newData + index * CharacterSize + to.Size();
+            src = m_Data + index * CharacterSize + count * CharacterSize;
+            size = m_Count * CharacterSize - (index * CharacterSize + count * CharacterSize);
+            memcpy(dest, src, size);
 
             delete [] m_Data;
-            m_Data = NewData;
-            m_Count = NewCount;
+            m_Data = newData;
+            m_Count = newCount;
             return *this;
         }
 
-        StringBase& ReplaceAll(const StringBase& From, const StringBase& To)
+        StringBase& ReplaceAll(const StringBase& from, const StringBase& to)
         {
-            SizeType Index = 0;
-            while ((Index = Find(Index, From)) != -1ULL)
+            SizeType index = 0;
+            while ((index = Find(index, from)) != -1ULL)
             {
-                Replace(Index, m_Count - Index, To);
+                Replace(index, m_Count - index, to);
             }
             return *this;
         }
 
-        StringBase& Remove(SizeType From, SizeType To)
+        StringBase& ReplaceAll(CharacterType from, CharacterType to)
         {
-            NOVA_ASSERT(From < To, "Range is illegal");
-            NOVA_ASSERT(From < m_Count, "Range is illegal");
-            NOVA_ASSERT(To <= m_Count, "Range is illegal");
-            NOVA_ASSERT(From + (To - From) <= m_Count, "Range is illegal");
-            const SizeType Delta = To - From;
+            if (from == to) return *this;
+            if (!m_Data || m_Count <= 0) return *this;
+
+            CharacterType* ptr = m_Data;
+            while (ptr < m_Data + m_Count)
+            {
+                if (*ptr == from)
+                    *ptr = to;
+                ++ptr;
+            }
+            return *this;
+        }
+
+        StringBase& Remove(SizeType from, SizeType to)
+        {
+            NOVA_ASSERT(from < to, "Range is illegal");
+            NOVA_ASSERT(from < m_Count, "Range is illegal");
+            NOVA_ASSERT(to <= m_Count, "Range is illegal");
+            NOVA_ASSERT(from + (to - from) <= m_Count, "Range is illegal");
+            const SizeType delta = to - from;
             
-            const CharacterType* Src = m_Data + To;
-            CharacterType* Dest = m_Data + From;
-            const SizeType Size = (m_Count - To) * CharacterSize;
-            ::memmove(Dest, Src, Size);
-            m_Count -= Delta;
+            const CharacterType* src = m_Data + to;
+            CharacterType* dest = m_Data + from;
+            const SizeType size = (m_Count - to) * CharacterSize;
+            ::memmove(dest, src, size);
+            m_Count -= delta;
             m_Data[m_Count] = 0;
             return *this;
         }
 
-        StringBase& Remove(const StringBase& Str)
+        StringBase& Remove(const StringBase& string)
         {
-            const SizeType Index = Find(Str);
-            if (Index == -1ULL) return *this;
-            Remove(Index, Index + Str.Count());
+            const SizeType index = Find(string);
+            if (index == -1ULL) return *this;
+            Remove(index, index + string.Count());
             return *this;
         }
         
@@ -361,59 +370,59 @@ namespace Nova
         template<typename U>
         BufferView<U> GetView() { return BufferView<U>((U*)m_Data, m_Count); }
         
-        StringBase& operator+(const StringBase& Other)
+        StringBase& operator+(const StringBase& other)
         {
-            return Append(Other);
+            return Append(other);
         }
 
-        StringBase& TrimEnd(CharacterType Character)
+        StringBase& TrimEnd(CharacterType character)
         {
-            SizeType Count = 0;
-            for (size_t Index = m_Count - 1; Index > 0; --Index)
+            SizeType count = 0;
+            for (size_t index = m_Count - 1; index > 0; --index)
             {
-                if (m_Data[Index] != Character)
+                if (m_Data[index] != character)
                     break;
-                Count++;
+                count++;
             }
 
-            if (Count == 0)
+            if (count == 0)
                 return *this;
 
-            m_Count -= Count;
+            m_Count -= count;
             m_Data[m_Count] = 0;
             return *this;
         }
 
-        StringBase TrimStart(CharacterType Character) const
+        StringBase TrimStart(CharacterType character) const
         {
-            StringBase Copy(*this);
-            SizeType Count = 0;
-            while (Count < Copy.m_Count && Copy.m_Data[Count] == Character)
-                ++Count;
+            StringBase copy(*this);
+            SizeType count = 0;
+            while (count < copy.m_Count && copy.m_Data[count] == character)
+                ++count;
 
-            if (Count == 0)
-                return Copy;
+            if (count == 0)
+                return copy;
 
-            memmove(Copy.m_Data, Copy.m_Data + Count, (Copy.m_Count - Count) * CharacterSize);
-            Copy.m_Count -= Count;
-            Copy.m_Data[m_Count] = 0;
-            return Copy;
+            memmove(copy.m_Data, copy.m_Data + count, (copy.m_Count - count) * CharacterSize);
+            copy.m_Count -= count;
+            copy.m_Data[m_Count] = 0;
+            return copy;
         }
 
         StringBase TrimStart(const Array<CharacterType>& Characters) const
         {
-            StringBase Copy(*this);
-            SizeType Count = 0;
-            while (Count < Copy.m_Count && Characters.Contains(Copy.m_Data[Count]))
-                ++Count;
+            StringBase copy(*this);
+            SizeType count = 0;
+            while (count < copy.m_Count && Characters.Contains(copy.m_Data[count]))
+                ++count;
 
-            if (Count == 0)
+            if (count == 0)
                 return *this;
 
-            ::memmove(Copy.m_Data, Copy.m_Data + Count, (Copy.m_Count - Count) * CharacterSize);
-            Copy.m_Count -= Count;
-            Copy.m_Data[m_Count] = 0;
-            return Copy;
+            ::memmove(copy.m_Data, copy.m_Data + count, (copy.m_Count - count) * CharacterSize);
+            copy.m_Count -= count;
+            copy.m_Data[m_Count] = 0;
+            return copy;
         }
 
         ArrayType ToArray() const
@@ -422,9 +431,9 @@ namespace Nova
         }
 
 
-        friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringBase& Str)
+        friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringBase& string)
         {
-            os.write(Str.m_Data, Str.m_Count * CharacterSize);
+            os.write(string.m_Data, string.m_Count * CharacterSize);
             os.flush();
             return os;
         }

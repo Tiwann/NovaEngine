@@ -78,7 +78,6 @@ namespace Nova::Vulkan
         {
             VkCommandBufferInheritanceInfo inheritanceInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
             // TODO: Write api for secondary command buffers
-
         }
 
         if (vkBeginCommandBuffer(m_Handle, &info) != VK_SUCCESS)
@@ -386,15 +385,11 @@ namespace Nova::Vulkan
                 colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 colorAttachmentInfo.resolveImageView = ((Texture*)attachment.resolveTexture)->GetImageView();
             }
-
-
             colorAttachments.Add(colorAttachmentInfo);
         }
 
 
         const Rendering::RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
-        const Color& clearColor = depthAttachment->clearValue.color;
-
         VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
         if (renderPass.HasDepthAttachment())
         {
@@ -402,7 +397,7 @@ namespace Nova::Vulkan
             depthAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
             depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthAttachmentInfo.imageView = ((Texture*)depthAttachment->texture)->GetImageView();
-            depthAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
+            depthAttachmentInfo.clearValue.depthStencil = { depthAttachment->clearValue.depth, depthAttachment->clearValue.stencil};
             if (depthAttachment->resolveTexture)
             {
                 depthAttachmentInfo.resolveMode = Convert<ResolveMode, VkResolveModeFlagBits>(depthAttachment->resolveMode);

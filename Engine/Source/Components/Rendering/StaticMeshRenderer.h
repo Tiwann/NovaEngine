@@ -29,7 +29,7 @@ namespace Nova
         void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
 
         Ref<StaticMesh> GetStaticMesh() const;
-        void SetStaticMesh(Ref<StaticMesh> newMesh);
+        void SetStaticMesh(const Ref<StaticMesh>& newMesh);
     private:
         Ref<StaticMesh> m_StaticMesh = nullptr;
         Ref<Rendering::Shader> m_Shader = nullptr;

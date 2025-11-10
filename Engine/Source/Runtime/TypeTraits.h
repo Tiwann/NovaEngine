@@ -138,6 +138,9 @@ namespace Nova
     template<typename T>
     static inline constexpr bool IsCharacterValue = IsCharacter<T>::value;
 
+    template<typename T>
+    concept Character = IsCharacterValue<T>;
+
 
     template <typename, typename>
     static inline constexpr bool IsSameValue = false;

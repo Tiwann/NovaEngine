@@ -18,9 +18,25 @@ struct std::formatter<Nova::StringView> : std::formatter<std::string_view>
 namespace Nova
 {
     template <typename... Args>
-    String StringFormat(const StringView& Fmt, const Args&... Arguments)
+    String StringFormat(const StringView& format, const Args&... args)
     {
-        std::string Formatted = std::vformat(static_cast<std::string_view>(Fmt), std::make_format_args(Arguments...));
-        return {Formatted.data(), Formatted.size()};
+        std::string formatted = std::vformat(static_cast<std::string_view>(format), std::make_format_args(args...));
+        return {formatted.data(), formatted.size()};
+    }
+
+    template<Character T, typename... Args>
+    uint32_t StringScanf(const StringView string, const StringViewBase<T> format, Args*... args)
+    {
+        if constexpr (typeid(T) == typeid(char))
+        {
+            return std::sscanf(string.Data(), format.Data(), args...);
+        } else if constexpr (typeid(T) == typeid(wchar_t))
+        {
+            return std::swscanf(string.Data(), format.Data(), args...);
+        } else
+        {
+            static_assert(false, "Cannot sscanf with this string type!");
+            return 0;
+        }
     }
 }

@@ -45,8 +45,8 @@ namespace Nova
         uint32_t m_Width = 0, m_Height = 0;
         CameraProjectionMode m_ProjectionMode = CameraProjectionMode::Perspective;
         float m_FieldOfView = 45.0f;
-        float m_Near = 0.1f;
-        float m_Far = 1000.0f;
+        float m_Near = 0.01f;
+        float m_Far = 10000.0f;
         float m_OrthoSize = 1.0f;
         Color m_ClearColor = Color::Black;
 

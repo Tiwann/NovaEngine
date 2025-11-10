@@ -22,8 +22,8 @@ namespace Nova::Vulkan
         m_BindingSets = m_Shader->CreateBindingSets();
 
         Rendering::GraphicsPipelineCreateInfo pipelineInfo = Rendering::GraphicsPipelineCreateInfo()
-            .setShader(m_Shader)
-            .setPrimitiveTopology(PrimitiveTopology::TriangleList);
+            .SetShader(m_Shader)
+            .SetPrimitiveTopology(PrimitiveTopology::TriangleList);
 
         auto& device = Application::GetCurrentApplication().GetDevice();
         m_Pipeline = device->CreateGraphicsPipeline(pipelineInfo);

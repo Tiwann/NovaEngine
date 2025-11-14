@@ -3,6 +3,7 @@
 #include <miniaudio.h>
 #include <cstdint>
 
+#include "Runtime/Object.h"
 #include "Runtime/Ref.h"
 
 
@@ -17,7 +18,7 @@ namespace Nova
         uint32_t listenerCount = 1;
     };
 
-    class AudioSystem
+    class AudioSystem : public Object
     {
     public:
         AudioSystem();

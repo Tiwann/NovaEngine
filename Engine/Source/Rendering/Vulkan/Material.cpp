@@ -1,5 +1,4 @@
 ﻿#include "Material.h"
-
 #include "Device.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Rendering/Shader.h"
@@ -8,35 +7,51 @@
 
 namespace Nova::Vulkan
 {
-    bool Material::Build()
+    bool Material::Initialize(const Rendering::MaterialCreateInfo& createInfo)
     {
-        if (!m_Shader) return false;
+        if (!createInfo.device || !createInfo.shader) return false;
 
-        if (m_Pipeline)
-            m_Pipeline->Destroy();
+        m_Device = createInfo.device;
+        m_Shader = createInfo.shader;
 
-        for (auto& bindingSet : m_BindingSets)
-            bindingSet->Destroy();
-        m_BindingSets.Clear();
+        if (!m_BindingSets.IsEmpty())
+        {
+            for (Ref<Rendering::ShaderBindingSet>& bindingSet : m_BindingSets)
+                bindingSet->Destroy();
+            m_BindingSets.Clear();
+        }
 
         m_BindingSets = m_Shader->CreateBindingSets();
-
-        Rendering::GraphicsPipelineCreateInfo pipelineInfo = Rendering::GraphicsPipelineCreateInfo()
-            .SetShader(m_Shader)
-            .SetPrimitiveTopology(PrimitiveTopology::TriangleList);
-
-        auto& device = Application::GetCurrentApplication().GetDevice();
-        m_Pipeline = device->CreateGraphicsPipeline(pipelineInfo);
-        if (!m_Pipeline) return false;
-
+        if (m_BindingSets.IsEmpty()) return false;
         return true;
     }
 
-    void Material::BindTexture(StringView name, Ref<Rendering::Texture> texture)
+    void Material::Destroy()
+    {
+        if (!m_BindingSets.IsEmpty())
+        {
+            for (Ref<Rendering::ShaderBindingSet>& bindingSet : m_BindingSets)
+                bindingSet->Destroy();
+            m_BindingSets.Clear();
+        }
+
+        m_Shader = nullptr;
+    }
+
+    void Material::SetSampler(StringView name, Ref<Rendering::Sampler> sampler)
     {
     }
 
-    void Material::BindBuffer(StringView name, Ref<Rendering::Buffer> buffer)
+    void Material::SetTexture(StringView name, Ref<Rendering::Texture> texture)
+    {
+    }
+
+    void Material::SetSamplerAndTexture(StringView name, Ref<Rendering::Sampler> sampler,
+        Ref<Rendering::Texture> texture)
+    {
+    }
+
+    void Material::SetBuffer(StringView name, Ref<Rendering::Buffer> buffer)
     {
     }
 }

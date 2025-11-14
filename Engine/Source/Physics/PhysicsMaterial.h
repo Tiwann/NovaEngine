@@ -9,7 +9,7 @@ namespace Nova
         PhysicsMaterial() : Asset("Physics Material"){}
         ~PhysicsMaterial() override = default;
 
-        String GetAssetType() const override;
+        AssetType GetAssetType() const override;
 
         float GetDensity() const;
         void SetDensity(float density);

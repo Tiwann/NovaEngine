@@ -43,7 +43,7 @@ namespace Nova
 {
     AudioSystem* AudioSystem::s_Instance = nullptr;
 
-    AudioSystem::AudioSystem()
+    AudioSystem::AudioSystem() : Object("AudioSystem")
     {
         memset(&m_Engine, 0, sizeof(ma_engine));
     }

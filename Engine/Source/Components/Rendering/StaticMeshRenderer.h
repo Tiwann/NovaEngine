@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Rendering/Sampler.h"
 #include "Runtime/Component.h"
 #include "Runtime/Ref.h"
 
@@ -33,6 +34,7 @@ namespace Nova
     private:
         Ref<StaticMesh> m_StaticMesh = nullptr;
         Ref<Rendering::Shader> m_Shader = nullptr;
+        Ref<Rendering::Sampler> m_Sampler = nullptr;
         Ref<Rendering::GraphicsPipeline> m_Pipeline = nullptr;
         Ref<Rendering::Buffer> m_SceneUniformBuffer = nullptr;
         Ref<Rendering::ShaderBindingSet> m_BindingSet = nullptr;

@@ -13,7 +13,7 @@ namespace Nova
         bool LoadFromMemory(const void* data, size_t size);
         void Destroy();
 
-        String GetAssetType() const override;
+        AssetType GetAssetType() const override;
 
         ma_sound* GetHandle();
         const ma_sound* GetHandle() const;

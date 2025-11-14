@@ -96,7 +96,7 @@ namespace Nova
         public float4x4 viewMatrix;
         public float4x4 projectionMatrix;
         public float3x3 normalMatrix;
-        public float3 cameraViewDirection;
+        public float3 cameraWorldPos;
         public float dirLightIntensity;
         public float3 dirLightColor;
         public float3 dirLightDir;

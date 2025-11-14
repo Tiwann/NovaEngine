@@ -1,15 +1,17 @@
 ﻿#pragma once
-#include "Rendering\Material.h"
+#include "Rendering/Material.h"
 
 namespace Nova::Vulkan
 {
-    class Material : public Rendering::Material
+    class Material final : public Rendering::Material
     {
     public:
-        Material(const Ref<Rendering::Shader>& shader): Rendering::Material(shader){}
+        bool Initialize(const Rendering::MaterialCreateInfo& createInfo) override;
+        void Destroy() override;
 
-        bool Build() override;
-        void BindTexture(StringView name, Ref<Rendering::Texture> texture) override;
-        void BindBuffer(StringView name, Ref<Rendering::Buffer> buffer) override;
+        void SetSampler(StringView name, Ref<Rendering::Sampler> sampler) override;
+        void SetTexture(StringView name, Ref<Rendering::Texture> texture) override;
+        void SetSamplerAndTexture(StringView name, Ref<Rendering::Sampler> sampler, Ref<Rendering::Texture> texture) override;
+        void SetBuffer(StringView name, Ref<Rendering::Buffer> buffer) override;
     };
 }

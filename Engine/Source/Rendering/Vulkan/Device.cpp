@@ -49,9 +49,9 @@ namespace Nova::Vulkan
 
         if (dynamic_cast<DesktopWindow*>(createInfo.window))
         {
-            uint32_t GlfwExtensionCount;
-            const char** GlfwExtensions = glfwGetRequiredInstanceExtensions(&GlfwExtensionCount);
-            extensions.AddRange(GlfwExtensions, GlfwExtensionCount);
+            uint32_t glfwExtensionsCount;
+            const char** lfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
+            extensions.AddRange(lfwExtensions, glfwExtensionsCount);
         }
 
         VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
@@ -230,7 +230,7 @@ namespace Nova::Vulkan
         synchronization2Features.synchronization2 = true;
         synchronization2Features.pNext = &shaderDrawParametersFeatures;
 
-        VkPhysicalDeviceDescriptorIndexingFeaturesEXT indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT };
+        VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
         indexingFeatures.pNext = &synchronization2Features;
         indexingFeatures.runtimeDescriptorArray = true;
         indexingFeatures.descriptorBindingVariableDescriptorCount = true;
@@ -401,14 +401,14 @@ namespace Nova::Vulkan
             m_Frames[imageIndex].commandBuffer = commandBuffer;
         }
 
-        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
-        descriptorPoolCreateInfo.device = this;
-        descriptorPoolCreateInfo.sizes[BindingType::Sampler] = 32;
-        descriptorPoolCreateInfo.sizes[BindingType::SampledTexture] = 32;
-        descriptorPoolCreateInfo.sizes[BindingType::CombinedTextureSampler] = 32;
-        descriptorPoolCreateInfo.sizes[BindingType::UniformBuffer] = 32;
-        descriptorPoolCreateInfo.sizes[BindingType::StorageTexture] = 32;
-        descriptorPoolCreateInfo.maxSets = 32;
+        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo = Rendering::DescriptorPoolCreateInfo()
+        .SetDevice(this)
+        .SetBindingTypeSize(BindingType::Sampler, 32)
+        .SetBindingTypeSize(BindingType::SampledTexture, 32)
+        .SetBindingTypeSize(BindingType::StorageTexture, 32)
+        .SetBindingTypeSize(BindingType::CombinedTextureSampler, 32)
+        .SetBindingTypeSize(BindingType::UniformBuffer, 32)
+        .SetMaxSets(32);
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;
     }

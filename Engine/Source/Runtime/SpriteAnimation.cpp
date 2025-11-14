@@ -2,9 +2,9 @@
 
 namespace Nova
 {
-    String SpriteAnimation::GetAssetType() const
+    AssetType SpriteAnimation::GetAssetType() const
     {
-        return "Sprite Animation";
+        return AssetType::SpriteAnimation;
     }
 
     bool SpriteAnimation::LoadFromSpriteSheet(const SpriteSheet& spriteSheet)

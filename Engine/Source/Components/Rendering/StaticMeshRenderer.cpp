@@ -24,7 +24,7 @@ namespace Nova
         Matrix4 viewMatrix;
         Matrix4 projectionMatrix;
         Matrix3x4 normalMatrix;
-        Vector3 cameraViewDirection;
+        Vector3 cameraPosition;
         float directionalLightIntensity;
         Vector3 directionalLightColor;
         float padding2;
@@ -54,6 +54,7 @@ namespace Nova
             VertexAttribute{"POSITION", Format::Vector3},
             VertexAttribute{"TEXCOORDINATE", Format::Vector2},
             VertexAttribute{"NORMAL", Format::Vector3},
+            VertexAttribute{"TANGENT", Format::Vector3},
             VertexAttribute{"COLOR", Format::Vector4},
         };
 
@@ -78,6 +79,12 @@ namespace Nova
 
         m_BindingSet = m_Shader->CreateBindingSet();
         m_BindingSet->BindBuffer(0, m_SceneUniformBuffer, 0, ~0);
+
+        const Rendering::SamplerCreateInfo samplerCreateInfo = Rendering::SamplerCreateInfo()
+        .withAddressMode(SamplerAddressMode::Repeat)
+        .withFilter(Filter::Linear, Filter::Linear)
+        .withLODRange(0.0f, 1.0f);
+        m_Sampler = device->CreateSampler(samplerCreateInfo);
     }
 
     void StaticMeshRenderer::OnDestroy()
@@ -86,6 +93,7 @@ namespace Nova
         m_BindingSet->Destroy();
         m_SceneUniformBuffer->Destroy();
         m_Pipeline->Destroy();
+        m_Sampler->Destroy();
     }
 
     void StaticMeshRenderer::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
@@ -108,7 +116,6 @@ namespace Nova
 
         const Vector3& cameraPosition = cameraTransform->GetPosition();
         const Vector3& entityPosition = entityTransform->GetPosition();
-        const Vector3 cameraViewDirection = Math::Normalize(cameraPosition - entityPosition);
 
         const Array<LightComponent*> allLights = scene->GetAllComponents<LightComponent>();
         LightComponent** dirLight = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Directional; }).First();
@@ -131,7 +138,7 @@ namespace Nova
         sceneData.viewMatrix = viewMatrix;
         sceneData.projectionMatrix = projectionMatrix;
         sceneData.normalMatrix = Matrix3x4(normalMatrix);
-        sceneData.cameraViewDirection = cameraViewDirection;
+        sceneData.cameraPosition = cameraPosition;
         sceneData.directionalLightColor = ToVector3(dirLightColor);
         sceneData.directionalLightIntensity = dirLightIntensity;
         sceneData.directionalLightDirection = dirLightDir;
@@ -147,7 +154,7 @@ namespace Nova
         if (!m_StaticMesh)
             return;
 
-        if (m_StaticMesh->GetSubMeshes().IsEmpty())
+        if (m_StaticMesh->GetMaterialInfos().IsEmpty())
             return;
 
         Ref<Rendering::Buffer> vertexBuffer = m_StaticMesh->GetVertexBuffer();
@@ -173,11 +180,16 @@ namespace Nova
         cmdBuffer.SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(0, 0, (int32_t)width, (int32_t)height);
 
-        for (const SubMeshInfo& subMesh : m_StaticMesh->GetSubMeshes())
+        for (const auto& [materialIndex, materialInfo] : m_StaticMesh->GetMaterialInfos())
         {
-            cmdBuffer.BindVertexBuffer(*vertexBuffer, subMesh.vertexBufferOffset);
-            cmdBuffer.BindIndexBuffer(*indexBuffer, subMesh.indexBufferOffset, Format::Uint32);
-            cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 0);
+            m_BindingSet->BindCombinedSamplerTexture(1, m_Sampler, materialInfo.texture);
+
+            for (const SubMeshInfo& subMesh : materialInfo.subMeshes)
+            {
+                cmdBuffer.BindVertexBuffer(*vertexBuffer, subMesh.vertexBufferOffset);
+                cmdBuffer.BindIndexBuffer(*indexBuffer, subMesh.indexBufferOffset, Format::Uint32);
+                cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 0);
+            }
         }
     }
 

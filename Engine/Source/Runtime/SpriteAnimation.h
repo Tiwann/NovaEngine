@@ -10,7 +10,7 @@ namespace Nova
     {
     public:
         SpriteAnimation() = default;
-        String GetAssetType() const override;
+        AssetType GetAssetType() const override;
 
         bool LoadFromSpriteSheet(const SpriteSheet& spriteSheet);
         

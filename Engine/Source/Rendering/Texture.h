@@ -52,7 +52,7 @@ namespace Nova::Rendering
         virtual void Destroy() = 0;
         virtual bool IsValid() = 0;
 
-        String GetAssetType() const override { return "Texture"; }
+        AssetType GetAssetType() const override { return AssetType::Texture; }
 
         Format GetFormat() const { return m_Format; }
         uint32_t GetWidth() const { return m_Width; }

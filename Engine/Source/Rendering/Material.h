@@ -6,30 +6,40 @@
 
 namespace Nova::Rendering
 {
+    class Device;
     class Shader;
     class ShaderBindingSet;
     class Texture;
     class Buffer;
-    class GraphicsPipeline;
+    class Sampler;
+
+    struct MaterialCreateInfo
+    {
+        Ref<Device> device = nullptr;
+        Ref<Shader> shader = nullptr;
+    };
 
     class Material : public Asset
     {
     public:
-        Material(Ref<Shader> shader) : m_Shader(shader) {}
+        Material() = default;
 
-        String GetAssetType() const override { return "Material"; }
+        virtual bool Initialize(const MaterialCreateInfo& createInfo) = 0;
+        virtual void Destroy() = 0;
 
-        virtual bool Build() = 0;
-        virtual void BindTexture(StringView name, Ref<Texture> texture) = 0;
-        virtual void BindBuffer(StringView name, Ref<Buffer> buffer) = 0;
+        AssetType GetAssetType() const final { return AssetType::Material; }
+
+        virtual void SetSampler(StringView name, Ref<Sampler> sampler) = 0;
+        virtual void SetTexture(StringView name, Ref<Texture> texture) = 0;
+        virtual void SetSamplerAndTexture(StringView name, Ref<Sampler> sampler, Ref<Texture> texture) = 0;
+        virtual void SetBuffer(StringView name, Ref<Buffer> buffer) = 0;
 
         const Array<Ref<ShaderBindingSet>>& GetBindingSets() const { return m_BindingSets; }
 
         Ref<Shader> GetShader() const { return m_Shader; }
-        Ref<GraphicsPipeline> GetPipeline() const { return m_Pipeline; }
     protected:
+        Ref<Device> m_Device = nullptr;
         Ref<Shader> m_Shader = nullptr;
         Array<Ref<ShaderBindingSet>> m_BindingSets;
-        Ref<GraphicsPipeline> m_Pipeline = nullptr;
     };
 }

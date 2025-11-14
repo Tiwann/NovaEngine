@@ -10,6 +10,7 @@ namespace Nova
         Vector3 position;
         Vector2 texCoords;
         Vector3 normal;
+        Vector3 tangent;
         Vector4 color;
 
         enum class Attributes

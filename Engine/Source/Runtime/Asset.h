@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Uuid.h"
 #include "Object.h"
+#include "AssetType.h"
 
 namespace Nova
 {
@@ -12,7 +13,7 @@ namespace Nova
 
         explicit Asset(const String& name) : Object(name), m_Uuid(Uuid::Generate()) {}
 
-        virtual String GetAssetType() const = 0;
+        virtual AssetType GetAssetType() const = 0;
 
         void SetUuid(const Uuid& uuid) { m_Uuid = uuid; }
         Uuid GetUuid() const { return m_Uuid; }

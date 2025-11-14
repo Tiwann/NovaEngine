@@ -85,7 +85,8 @@ namespace Nova
 
     Vector3 Vector3::Normalized() const
     {
-        return {x / Magnitude(), y / Magnitude(), z / Magnitude()};
+        const float magnitude = Magnitude();
+        return {x / magnitude, y / magnitude, z / magnitude};
     }
 
     Vector3 Vector3::operator+(const Vector3& Vec) const

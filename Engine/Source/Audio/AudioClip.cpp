@@ -25,9 +25,9 @@ namespace Nova
         ma_sound_uninit(&m_Handle);
     }
 
-    String AudioClip::GetAssetType() const
+    AssetType AudioClip::GetAssetType() const
     {
-        return "Audio Clip";
+        return AssetType::AudioClip;
     }
 
     ma_sound* AudioClip::GetHandle()

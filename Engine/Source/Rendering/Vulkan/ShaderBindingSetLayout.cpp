@@ -26,6 +26,8 @@ namespace Nova::Vulkan
         layoutCreateInfo.pBindings = bindings.Data();
 
         const VkDevice deviceHandle = m_Device->GetHandle();
+
+        vkDestroyDescriptorSetLayout(deviceHandle, m_Handle, nullptr);
         if (vkCreateDescriptorSetLayout(deviceHandle, &layoutCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;
 

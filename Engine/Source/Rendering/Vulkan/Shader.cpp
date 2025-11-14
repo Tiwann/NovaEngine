@@ -251,6 +251,8 @@ namespace Nova::Vulkan
         pipelineLayoutCreateInfo.pSetLayouts = descriptorSetLayouts.Data();
         pipelineLayoutCreateInfo.pushConstantRangeCount = ranges.Count();
         pipelineLayoutCreateInfo.pPushConstantRanges = pushConstantRanges.Data();
+
+        vkDestroyPipelineLayout(device->GetHandle(), m_PipelineLayout, nullptr);
         vkCreatePipelineLayout(device->GetHandle(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
 
         m_Device = device;

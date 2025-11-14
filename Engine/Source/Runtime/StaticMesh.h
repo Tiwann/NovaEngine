@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Asset.h"
 #include "Containers/Array.h"
+#include "Containers/Map.h"
 #include "Containers/StringView.h"
+#include "Rendering/Texture.h"
 #include "Runtime/Ref.h"
 
 namespace Nova
@@ -11,28 +13,19 @@ namespace Nova
         class Buffer;
     }
 
-    struct MaterialSlot
-    {
-        String name;
-        size_t index;
-    };
-
-    struct MaterialSlotBinding
-    {
-        MaterialSlot* slot = nullptr;
-        class Material* material = nullptr;
-    };
-
     struct SubMeshInfo
     {
-        String name = "Empty Mesh";
         size_t vertexBufferOffset = 0;
         size_t vertexBufferSize = 0;
         size_t indexBufferOffset = 0;
         size_t indexBufferSize = 0;
-        Array<MaterialSlotBinding> materialSlotBindings;
     };
 
+    struct MaterialInfo
+    {
+        Array<SubMeshInfo> subMeshes;
+        Ref<Rendering::Texture> texture = nullptr;
+    };
 
     class StaticMesh final : public Asset
     {
@@ -41,21 +34,18 @@ namespace Nova
         explicit StaticMesh(const String& name);
         ~StaticMesh() override;
 
-        String GetAssetType() const override;
+        AssetType GetAssetType() const override;
         bool LoadFromFile(StringView filepath);
 
-        const Array<SubMeshInfo>& GetSubMeshes() const;
+        const Map<uint32_t, MaterialInfo>& GetMaterialInfos() const;
         Ref<Rendering::Buffer> GetVertexBuffer() const;
         Ref<Rendering::Buffer> GetIndexBuffer() const;
-
-        void BindMaterial(size_t subMeshIndex, size_t slotIndex, Material* material);
     private:
         bool LoadFromFileAssimp(StringView filepath);
     private:
-        Array<SubMeshInfo> m_SubMeshes;
+        Map<uint32_t, MaterialInfo> m_MaterialInfos;
         Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
         Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
-        Array<MaterialSlot> m_MaterialSlots;
     };
     
 }

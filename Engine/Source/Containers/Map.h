@@ -115,6 +115,7 @@ namespace Nova
             return m_Data == other.m_Data;
         }
 
+        bool IsEmpty() const { return m_Data.IsEmpty(); }
 
         Iterator begin() override { return m_Data.begin(); }
         Iterator end() override { return m_Data.end(); }

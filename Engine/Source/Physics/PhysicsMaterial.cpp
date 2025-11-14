@@ -2,9 +2,9 @@
 
 namespace Nova
 {
-    String PhysicsMaterial::GetAssetType() const
+    AssetType PhysicsMaterial::GetAssetType() const
     {
-        return "Physics Material";
+        return AssetType::PhysicsMaterial;
     }
 
     float PhysicsMaterial::GetDensity() const

@@ -46,7 +46,7 @@ namespace Nova::Rendering
         Shader() = default;
         ~Shader() override = default;
 
-        String GetAssetType() const override { return "Shader"; }
+        AssetType GetAssetType() const override { return AssetType::Shader; }
 
         virtual bool Initialize(const ShaderCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

@@ -3,7 +3,6 @@
 
 #include <vulkan/vulkan.h>
 
-#include "Conversions.h"
 
 namespace Nova::Vulkan
 {
@@ -16,6 +15,7 @@ namespace Nova::Vulkan
         shaderModuleCreateInfo.pCode = createInfo.code;
 
         const VkDevice deviceHandle = device->GetHandle();
+        vkDestroyShaderModule(deviceHandle, m_Handle, nullptr);
         const VkResult result = vkCreateShaderModule(deviceHandle, &shaderModuleCreateInfo, nullptr, &m_Handle);
         if (result != VK_SUCCESS)
             return false;

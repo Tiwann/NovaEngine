@@ -28,7 +28,7 @@ namespace Nova
 
         bool operator==(const StringViewBase& Other) const
         {
-            return m_Count == Other.m_Count && m_Data == Other.m_Data;
+            return m_Count == Other.m_Count && Memory::Memcmp(m_Data, Other.m_Data, m_Count * StringType::CharacterSize);
         }
 
         bool IsValid() const { return m_Data && m_Count != 0; }

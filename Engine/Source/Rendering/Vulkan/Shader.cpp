@@ -4,10 +4,10 @@
 #include "DescriptorPool.h"
 #include "Device.h"
 #include "Sampler.h"
+#include "Conversions.h"
 
 #include <vulkan/vulkan.h>
-
-#include "Conversions.h"
+#include <spirv_reflect.h>
 
 namespace Nova::Vulkan
 {
@@ -82,9 +82,12 @@ namespace Nova::Vulkan
 
     bool Shader::Initialize(const Rendering::ShaderCreateInfo& createInfo)
     {
+        // TODO: /!\ MEMORY LEAK HERE
         m_EntryPoints.Clear();
         m_ShaderModules.Clear();
         m_BindingSetLayouts.Clear();
+
+
 
         slang::TargetDesc shaderTargetDesc;
         shaderTargetDesc.format = GetCompileTarget(createInfo.target);
@@ -146,6 +149,8 @@ namespace Nova::Vulkan
         }
 
 
+        Array<SpvReflectShaderModule> reflectModules;
+
         for (size_t entryPointIndex = 0; entryPointIndex < m_EntryPoints.Count(); ++entryPointIndex)
         {
             Slang::ComPtr<slang::IBlob> entryPointCode = nullptr;
@@ -167,6 +172,10 @@ namespace Nova::Vulkan
             ShaderModule shaderModule;
             shaderModule.Initialize(shaderModuleCreateInfo);
             m_ShaderModules.Add(shaderModule);
+
+            SpvReflectShaderModule reflectModule;
+            spvReflectCreateShaderModule(entryPointCode->getBufferSize(), entryPointCode->getBufferPointer(), &reflectModule);
+            reflectModules.Add(reflectModule);
         }
 
         slang::ProgramLayout* programLayout = m_LinkedProgram->getLayout();
@@ -208,7 +217,7 @@ namespace Nova::Vulkan
         const uint32_t setCount = globalsTypeLayout->getDescriptorSetCount();
         for (uint32_t setIndex = 0; setIndex < setCount; ++setIndex)
         {
-            const uint32_t bindingCount = globalsTypeLayout->getDescriptorSetDescriptorRangeCount(setIndex);
+            uint32_t bindingCount = globalsTypeLayout->getDescriptorSetDescriptorRangeCount(setIndex);
 
             ShaderBindingSetLayout bindingSetLayout;
             for (uint32_t bindingIndex = 0; bindingIndex < bindingCount; ++bindingIndex)
@@ -218,7 +227,29 @@ namespace Nova::Vulkan
 
                 size_t bindingIndexOffset = globalsTypeLayout->getDescriptorSetDescriptorRangeIndexOffset(setIndex, bindingIndex);
                 const uint32_t descriptorCount = globalsTypeLayout->getDescriptorSetDescriptorRangeDescriptorCount(setIndex, bindingIndex);
-                bindingSetLayout.SetBinding(bindingIndexOffset, { "", stageFlags, bindingType, descriptorCount });
+
+                const char* bindingName = nullptr;
+
+                for (const SpvReflectShaderModule& reflectModule : reflectModules)
+                {
+                    if (bindingName) break;
+
+                    uint32_t spvReflectBindingCount = 0;
+                    spvReflectEnumerateDescriptorBindings(&reflectModule, &spvReflectBindingCount, nullptr);
+                    Array<SpvReflectDescriptorBinding*> bindings(spvReflectBindingCount);
+                    spvReflectEnumerateDescriptorBindings(&reflectModule, &spvReflectBindingCount, bindings.Data());
+
+                    for (const SpvReflectDescriptorBinding* binding : bindings)
+                    {
+                        if (binding->set == setIndex && binding->binding == bindingIndex)
+                        {
+                            bindingName = binding->name;
+                            break;
+                        }
+                    }
+                }
+
+                bindingSetLayout.SetBinding(bindingIndexOffset, { bindingName, stageFlags, bindingType, descriptorCount });
             }
 
             if (bindingSetLayout.BindingCount() > 0)
@@ -228,6 +259,9 @@ namespace Nova::Vulkan
                 m_BindingSetLayouts.Add(bindingSetLayout);
             }
         }
+
+        for (SpvReflectShaderModule& reflectModule : reflectModules)
+            spvReflectDestroyShaderModule(&reflectModule);
 
         Device* device = (Device*)createInfo.device;
 
@@ -281,7 +315,7 @@ namespace Nova::Vulkan
         if (!bindingSet->Initialize(createInfo))
             return nullptr;
 
-        return Ref<Rendering::ShaderBindingSet>(bindingSet);
+        return Ref(bindingSet);
     }
 
     Array<Ref<Rendering::ShaderBindingSet>> Shader::CreateBindingSets() const
@@ -298,7 +332,7 @@ namespace Nova::Vulkan
             ShaderBindingSet* bindingSet = new ShaderBindingSet();
             bindingSet->Initialize(createInfo);
 
-            bindingSets.Add(Ref<Rendering::ShaderBindingSet>(bindingSet));
+            bindingSets.Add(Ref(bindingSet));
         }
 
         return bindingSets;

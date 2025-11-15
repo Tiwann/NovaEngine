@@ -170,6 +170,23 @@ namespace Nova::Vulkan
         info.dynamicOffsetCount = 0;
         info.pDynamicOffsets = nullptr;
         vkCmdBindDescriptorSets2(m_Handle, &info);
+
+    }
+
+    void CommandBuffer::BindShaderBindingSets(const Rendering::Shader& shader, const Array<Ref<Rendering::ShaderBindingSet>>& shaderBindingSets)
+    {
+        const Shader& sh = (const Shader&)shader;
+
+        const Array<VkDescriptorSet> descriptorSets = shaderBindingSets.Transform<VkDescriptorSet>([](const Ref<Rendering::ShaderBindingSet>& bindingSet) { return bindingSet.As<ShaderBindingSet>()->GetHandle(); });
+        VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
+        info.layout = sh.GetPipelineLayout();
+        info.firstSet = 0;
+        info.descriptorSetCount = descriptorSets.Count();
+        info.pDescriptorSets = descriptorSets.Data();
+        info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
+        info.dynamicOffsetCount = 0;
+        info.pDynamicOffsets = nullptr;
+        vkCmdBindDescriptorSets2(m_Handle, &info);
     }
 
     void CommandBuffer::BindMaterial(const Rendering::Material& material)

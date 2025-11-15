@@ -16,7 +16,7 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source)
-target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d glfw PRIVATE assimp::assimp)
+target_link_libraries(NovaEngine PUBLIC vulkan slang miniaudio imgui box2d glfw PRIVATE assimp::assimp spirv-reflect-static)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 if(WIN32)

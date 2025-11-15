@@ -17,6 +17,8 @@
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
 
+#include "Material.h"
+
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
@@ -573,7 +575,7 @@ namespace Nova::Vulkan
     {
         Texture* texture = new Texture();
         Rendering::TextureCreateInfo textureCreateInfo(createInfo);
-        if (!texture->Initialize(textureCreateInfo.withDevice(this)))
+        if (!texture->Initialize(textureCreateInfo.WithDevice(this)))
         {
             delete texture;
             return nullptr;
@@ -585,7 +587,7 @@ namespace Nova::Vulkan
     {
         Sampler* sampler = new Sampler();
         Rendering::SamplerCreateInfo samplerCreateInfo(createInfo);
-        if (!sampler->Initialize(samplerCreateInfo.withDevice(this)))
+        if (!sampler->Initialize(samplerCreateInfo.WithDevice(this)))
         {
             delete sampler;
             return nullptr;
@@ -597,7 +599,7 @@ namespace Nova::Vulkan
     {
         Buffer* buffer = new Buffer();
         Rendering::BufferCreateInfo bufferCreateInfo(createInfo);
-        if (!buffer->Initialize(bufferCreateInfo.withDevice(this)))
+        if (!buffer->Initialize(bufferCreateInfo.WithDevice(this)))
         {
             delete buffer;
             return nullptr;
@@ -621,7 +623,7 @@ namespace Nova::Vulkan
     {
         ComputePipeline* pipeline = new ComputePipeline();
         Rendering::ComputePipelineCreateInfo pipelineCreateInfo(createInfo);
-        if (!pipeline->Initialize(pipelineCreateInfo.withDevice(this)))
+        if (!pipeline->Initialize(pipelineCreateInfo.WithDevice(this)))
         {
             delete pipeline;
             return nullptr;
@@ -633,12 +635,24 @@ namespace Nova::Vulkan
     {
         Shader* shader = new Shader();
         Rendering::ShaderCreateInfo shaderCreateInfo(createInfo);
-        if (!shader->Initialize(shaderCreateInfo.withDevice(this)))
+        if (!shader->Initialize(shaderCreateInfo.WithDevice(this)))
         {
             delete shader;
             return nullptr;
         }
         return Ref(shader);
+    }
+
+    Ref<Rendering::Material> Device::CreateMaterial(const Rendering::MaterialCreateInfo& createInfo)
+    {
+        Material* material = new Material();
+        Rendering::MaterialCreateInfo matCreateInfo(createInfo);
+        if (!material->Initialize(matCreateInfo.WithDevice(this)))
+        {
+            delete material;
+            return nullptr;
+        }
+        return Ref(material);
     }
 
     VkInstance Device::GetInstance() const

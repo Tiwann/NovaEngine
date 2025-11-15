@@ -3,8 +3,9 @@ import VertexData3D;
 import Common;
 
 [[vk::binding(0, 0)]] ConstantBuffer<Nova::Scene, Std140DataLayout> scene;
+[[vk::binding(1, 0)]] SamplerState sampler;
 
-[[vk::binding(1, 0)]] Sampler2D albedoTex;
+[[vk::binding(0, 1)]] Texture2D albedoTex;
 
 [shader("vertex")]
 VertexOutput vert(VertexInput input) {
@@ -23,8 +24,8 @@ float4 frag(FragmentInput input) : SV_Target {
 	float3 N = normalize(input.normal);
 	float3 L = normalize(scene.dirLightDir);
 
-	float diffuse = max(dot(N, L), 0.0);
-	float3 diffuseLight = diffuse * lightColor * albedoTex.Sample(input.texCoord).xyz;
+    float diffuse = max(dot(N, L), 0.0);
+    float3 diffuseLight = diffuse * lightColor * albedoTex.Sample(sampler, input.texCoord).xyz;
 	float3 ambientLight = scene.ambLightColor * scene.ambLightIntensity;
 
     float3 V = normalize(scene.cameraWorldPos - input.fragPos);

@@ -18,5 +18,6 @@ namespace Nova::Vulkan
     private:
         Device* m_Device = nullptr;
         VkShaderModule m_Handle = nullptr;
+
     };
 }

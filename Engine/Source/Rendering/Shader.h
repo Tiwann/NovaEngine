@@ -29,7 +29,7 @@ namespace Nova::Rendering
         Array<StringView> includes;
         Array<ShaderEntryPoint> entryPoints;
 
-        ShaderCreateInfo& withDevice(Device* device) { this->device = device; return *this; }
+        ShaderCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
         ShaderCreateInfo& withModuleInfo(const ShaderModuleInfo& moduleInfo) { this->moduleInfo = moduleInfo; return *this; }
         ShaderCreateInfo& withTarget(const ShaderTarget& target) { this->target = target; return *this; }
         ShaderCreateInfo& withIncludes(const Array<StringView>& includes) { this->includes = includes; return *this; }

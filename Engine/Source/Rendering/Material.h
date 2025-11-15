@@ -17,6 +17,9 @@ namespace Nova::Rendering
     {
         Ref<Device> device = nullptr;
         Ref<Shader> shader = nullptr;
+
+        MaterialCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
+        MaterialCreateInfo& WithShader(Ref<Shader> shader) { this->shader = shader; return *this; }
     };
 
     class Material : public Asset
@@ -32,7 +35,7 @@ namespace Nova::Rendering
         virtual void SetSampler(StringView name, Ref<Sampler> sampler) = 0;
         virtual void SetTexture(StringView name, Ref<Texture> texture) = 0;
         virtual void SetSamplerAndTexture(StringView name, Ref<Sampler> sampler, Ref<Texture> texture) = 0;
-        virtual void SetBuffer(StringView name, Ref<Buffer> buffer) = 0;
+        virtual void SetBuffer(StringView name, Ref<Buffer> buffer, size_t offset, size_t size) = 0;
 
         const Array<Ref<ShaderBindingSet>>& GetBindingSets() const { return m_BindingSets; }
 

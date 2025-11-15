@@ -6,6 +6,8 @@
 #include "Runtime/Object.h"
 #include <cstdint>
 
+#include "Material.h"
+
 namespace Nova
 {
     class Window;
@@ -42,6 +44,8 @@ namespace Nova::Rendering
     struct ComputePipelineCreateInfo;
     class Shader;
     struct ShaderCreateInfo;
+    class Material;
+    struct MaterialCreateInfo;
 
     class Device : public Object
     {
@@ -69,6 +73,8 @@ namespace Nova::Rendering
         virtual Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
         virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
         virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
+        virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
+
 
         virtual uint32_t GetImageCount() const = 0;
 

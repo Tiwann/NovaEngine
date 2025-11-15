@@ -100,6 +100,16 @@ namespace Nova
         return LoadFromFileAssimp(filepath);
     }
 
+    void StaticMesh::SetMaterial(const uint32_t slot, Ref<Rendering::Material> material)
+    {
+        m_MaterialSlots[slot] = material;
+    }
+
+    Ref<Rendering::Material> StaticMesh::GetMaterial(const uint32_t slot)
+    {
+        return m_MaterialSlots[slot];
+    }
+
     const Map<uint32_t, MaterialInfo>& StaticMesh::GetMaterialInfos() const
     {
         return m_MaterialInfos;

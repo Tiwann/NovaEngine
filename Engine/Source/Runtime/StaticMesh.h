@@ -11,6 +11,7 @@ namespace Nova
     namespace Rendering
     {
         class Buffer;
+        class Material;
     }
 
     struct SubMeshInfo
@@ -37,13 +38,17 @@ namespace Nova
         AssetType GetAssetType() const override;
         bool LoadFromFile(StringView filepath);
 
+        void SetMaterial(uint32_t slot, Ref<Rendering::Material> material);
+        Ref<Rendering::Material> GetMaterial(uint32_t slot);
+
         const Map<uint32_t, MaterialInfo>& GetMaterialInfos() const;
         Ref<Rendering::Buffer> GetVertexBuffer() const;
         Ref<Rendering::Buffer> GetIndexBuffer() const;
     private:
         bool LoadFromFileAssimp(StringView filepath);
-    private:
+
         Map<uint32_t, MaterialInfo> m_MaterialInfos;
+        Map<uint32_t, Ref<Rendering::Material>> m_MaterialSlots;
         Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
         Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
     };

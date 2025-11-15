@@ -8,8 +8,6 @@
 #include <initializer_list>
 #include <algorithm>
 
-#include "Math/Matrix2.h"
-
 namespace Nova
 {
     template<typename T>

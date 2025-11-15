@@ -31,15 +31,15 @@ namespace Nova::Rendering
         const uint8_t* data = nullptr;
         size_t dataSize = 0;
 
-        TextureCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; }
-        TextureCreateInfo& withFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
-        TextureCreateInfo& withFormat(const Format inFormat) { format = inFormat; return *this; }
-        TextureCreateInfo& withWidth(const uint32_t inWidth) { width = inWidth; return *this; }
-        TextureCreateInfo& withHeight(const uint32_t inHeight) { height = inHeight; return *this; }
-        TextureCreateInfo& withDepth(const uint32_t inDepth) { depth = inDepth; return *this; }
-        TextureCreateInfo& withMips(const uint32_t inMips) { mips = inMips; return *this; }
-        TextureCreateInfo& withSampleCount(const uint32_t inSampleCount) { sampleCount = inSampleCount; return *this; }
-        TextureCreateInfo& withData(const uint8_t* inData, const size_t inSize) { data = inData; dataSize = inSize; return *this; }
+        TextureCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
+        TextureCreateInfo& WithFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
+        TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
+        TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }
+        TextureCreateInfo& WithHeight(const uint32_t inHeight) { height = inHeight; return *this; }
+        TextureCreateInfo& WithDepth(const uint32_t inDepth) { depth = inDepth; return *this; }
+        TextureCreateInfo& WithMips(const uint32_t inMips) { mips = inMips; return *this; }
+        TextureCreateInfo& WithSampleCount(const uint32_t inSampleCount) { sampleCount = inSampleCount; return *this; }
+        TextureCreateInfo& WithData(const uint8_t* inData, const size_t inSize) { data = inData; dataSize = inSize; return *this; }
     };
 
     class Texture : public Asset

@@ -77,14 +77,15 @@ namespace Nova
         uniformBufferCreateInfo.usage = Rendering::BufferUsage::UniformBuffer;
         m_SceneUniformBuffer = device->CreateBuffer(uniformBufferCreateInfo);
 
+        const Rendering::SamplerCreateInfo samplerCreateInfo = Rendering::SamplerCreateInfo()
+        .WithAddressMode(SamplerAddressMode::Repeat)
+        .WithFilter(Filter::Linear, Filter::Linear)
+        .WithLODRange(0.0f, 1.0f);
+        m_Sampler = device->CreateSampler(samplerCreateInfo);
+
         m_BindingSet = m_Shader->CreateBindingSet();
         m_BindingSet->BindBuffer(0, m_SceneUniformBuffer, 0, ~0);
-
-        const Rendering::SamplerCreateInfo samplerCreateInfo = Rendering::SamplerCreateInfo()
-        .withAddressMode(SamplerAddressMode::Repeat)
-        .withFilter(Filter::Linear, Filter::Linear)
-        .withLODRange(0.0f, 1.0f);
-        m_Sampler = device->CreateSampler(samplerCreateInfo);
+        m_BindingSet->BindSampler(1, m_Sampler);
     }
 
     void StaticMeshRenderer::OnDestroy()
@@ -176,13 +177,16 @@ namespace Nova
         const float height = window->GetHeight();
 
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
-        cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(0, 0, (int32_t)width, (int32_t)height);
 
-        for (const auto& [materialIndex, materialInfo] : m_StaticMesh->GetMaterialInfos())
+        const auto& materialInfos = m_StaticMesh->GetMaterialInfos();
+        for (uint32_t i = 0; i < materialInfos.Count(); i++)
         {
-            m_BindingSet->BindCombinedSamplerTexture(1, m_Sampler, materialInfo.texture);
+            const auto& materialInfoPair = materialInfos.GetAt(i);
+            const auto& materialInfo = materialInfoPair.value;
+            const auto materialIndex = materialInfoPair.key;
+            cmdBuffer.BindMaterial(*m_StaticMesh->GetMaterial(materialIndex));
 
             for (const SubMeshInfo& subMesh : materialInfo.subMeshes)
             {

@@ -25,11 +25,11 @@ namespace Nova::Rendering
         float maxLod = 1.0f;
         Filter mipmapFilter = Filter::Nearest;
 
-        SamplerCreateInfo& withDevice(Device* inDevice) {  device = inDevice; return *this; }
-        SamplerCreateInfo& withAddressModeUVW(const SamplerAddressMode inU, const SamplerAddressMode inV, const SamplerAddressMode inW) { addressModeU = inU; addressModeV = inV; addressModeW = inW; return *this; }
-        SamplerCreateInfo& withAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this; return *this; }
-        SamplerCreateInfo& withFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }
-        SamplerCreateInfo& withLODRange(const float min, const float max) { minLod = min; maxLod = max; return *this; }
+        SamplerCreateInfo& WithDevice(Device* inDevice) {  device = inDevice; return *this; }
+        SamplerCreateInfo& WithAddressModeUVW(const SamplerAddressMode inU, const SamplerAddressMode inV, const SamplerAddressMode inW) { addressModeU = inU; addressModeV = inV; addressModeW = inW; return *this; }
+        SamplerCreateInfo& WithAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this; return *this; }
+        SamplerCreateInfo& WithFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }
+        SamplerCreateInfo& WithLODRange(const float min, const float max) { minLod = min; maxLod = max; return *this; }
     };
 
     class Sampler : public Object

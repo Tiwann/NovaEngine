@@ -7,14 +7,14 @@
 namespace Nova
 {
     template<typename KeyType, typename ValueType>
-    class Map : Iterable<Pair<KeyType, ValueType>>
+    class Map
     {
     public:
         using PairType = Pair<KeyType, ValueType>;
         using ArrayType = Array<PairType>;
-        using SizeType = typename Array<PairType>::SizeType;
-        using Iterator = Iterator<PairType>;
-        using ConstIterator = ConstIterator<PairType>;
+        using SizeType = Array<PairType>::SizeType;
+        using Iterator = ArrayType::Iterator;
+        using ConstIterator = ArrayType::ConstIterator;
 
         Map() = default;
         Map(const ArrayType& array) : m_Data(array){}
@@ -117,10 +117,10 @@ namespace Nova
 
         bool IsEmpty() const { return m_Data.IsEmpty(); }
 
-        Iterator begin() override { return m_Data.begin(); }
-        Iterator end() override { return m_Data.end(); }
-        ConstIterator begin() const override { return m_Data.begin(); }
-        ConstIterator end() const override { return m_Data.end(); }
+        Iterator begin() { return m_Data.begin(); }
+        Iterator end()  { return m_Data.end(); }
+        ConstIterator begin() const { return m_Data.begin(); }
+        ConstIterator end() const { return m_Data.end(); }
 
     private:
         ArrayType m_Data;

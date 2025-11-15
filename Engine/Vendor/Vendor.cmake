@@ -15,8 +15,8 @@ set(ASSIMP_BUILD_BLEND_IMPORTER  ON)
 add_subdirectory(Vendor/assimp)
 
 
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_INSTALL OFF)
+set(GLFW_BUILD_DOCS OFF)
+set(GLFW_INSTALL OFF)
 add_subdirectory(Vendor/glfw)
 
 set(IMGUI_DIR Vendor/imgui)
@@ -41,3 +41,8 @@ set_target_properties(imgui PROPERTIES CXX_STANDARD 17)
 target_sources(imgui PRIVATE ${IMGUI_SRC})
 target_include_directories(imgui PUBLIC ${IMGUI_DIR} ${IMGUI_DIR}/backends)
 target_link_libraries(imgui PRIVATE glfw Vulkan::Vulkan)
+
+set(SPIRV_REFLECT_EXECUTABLE OFF)
+set(SPIRV_REFLECT_INSTALL OFF)
+set(SPIRV_REFLECT_STATIC_LIB ON)
+add_subdirectory(Vendor/SPIRV-Reflect)

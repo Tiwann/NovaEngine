@@ -9,16 +9,16 @@ namespace Nova
         using SizeType = size_t;
         using ElementType = T;
         using PointerType = ElementType*;
-        using ConstPointerType = ElementType const*;
+        using ConstPointerType = const ElementType*;
         using RefType = ElementType&;
-        using ConstRefType = ElementType const&;
+        using ConstRefType = const ElementType&;
     public:
         Iterator(PointerType Ptr) : m_Data(Ptr) {}
 
-        Iterator& operator+(SizeType Count) { m_Data += Count; return *this; }
+        Iterator operator+(SizeType Count) { return Iteratror(m_Data + Count); }
         
         Iterator& operator++() {  ++m_Data; return *this; }
-        Iterator& operator--() {  ++m_Data; return *this; }
+        Iterator& operator--() {  --m_Data; return *this; }
         
         Iterator operator++(int)
         {
@@ -50,12 +50,6 @@ namespace Nova
         {
             return m_Data == Other.m_Data;
         }
-
-        operator bool() const
-        {
-            return dynamic_cast<PointerType>(m_Data);
-        }
-    
     private:
         PointerType m_Data;
     };
@@ -66,29 +60,29 @@ namespace Nova
         using SizeType = size_t;
         using ElementType = T;
         using PointerType = ElementType*;
-        using ConstPointerType = ElementType const*;
+        using ConstPointerType = const ElementType*;
         using RefType = ElementType&;
-        using ConstRefType = ElementType const&;
+        using ConstRefType = const ElementType&;
     public:
         ConstIterator(PointerType Ptr) : m_Data(Ptr) {}
         ConstIterator(ConstPointerType Ptr) : m_Data(Ptr) {}
 
-        ConstIterator operator+(SizeType Count) { m_Data += Count; return *this; }
-        ConstIterator operator-(SizeType Count) { m_Data -= Count; return *this; }
+        ConstIterator operator+(SizeType Count) { return ConstIterator(m_Data + Count); }
+        ConstIterator operator-(SizeType Count) { return ConstIterator(m_Data - Count); }
         
         ConstIterator& operator++() {  ++m_Data; return *this; }
-        ConstIterator& operator--() {  ++m_Data; return *this; }
+        ConstIterator& operator--() {  --m_Data; return *this; }
         
         ConstIterator operator++(int)
         {
-            Iterator It = *this;
+            ConstIterator It = *this;
             ++(*this);
             return It;
         }
         
         ConstIterator operator--(int)
         {
-            Iterator It = *this;
+            ConstIterator It = *this;
             --(*this);
             return It;
         }

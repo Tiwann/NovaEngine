@@ -12,7 +12,7 @@ namespace Nova::Rendering
 
     struct ShaderBinding
     {
-        StringView name;
+        String name;
         ShaderStageFlags stageFlags = ShaderStageFlagBits::None;
         BindingType bindingType;
         uint32_t arrayCount = 1;
@@ -26,12 +26,13 @@ namespace Nova::Rendering
         }
     };
 
-    class ShaderBindingSetLayout
+    class ShaderBindingSetLayout : public Iterable<Map<uint32_t, ShaderBinding>::PairType>
     {
-        using BindingMap = Map<uint32_t, ShaderBinding>;
     public:
+        using BindingMap = Map<uint32_t, ShaderBinding>;
+
         ShaderBindingSetLayout() = default;
-        virtual ~ShaderBindingSetLayout() = default;
+        ~ShaderBindingSetLayout() override = default;
 
         virtual bool Initialize(Device* device) = 0;
         virtual void Destroy() = 0;
@@ -41,10 +42,12 @@ namespace Nova::Rendering
         void SetBinding(uint32_t index, const ShaderBinding& binding);
         const ShaderBinding& GetBinding(uint32_t index) const;
 
-        BindingMap::Iterator begin();
-        BindingMap::Iterator end();
-        BindingMap::ConstIterator begin() const;
-        BindingMap::ConstIterator end() const;
+        const BindingMap& GetBindings() const { return m_Bindings; }
+
+        BindingMap::Iterator begin() override;
+        BindingMap::Iterator end() override;
+        BindingMap::ConstIterator begin() const override;
+        BindingMap::ConstIterator end() const override;
     protected:
         BindingMap m_Bindings;
     };

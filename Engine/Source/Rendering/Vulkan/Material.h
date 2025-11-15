@@ -12,6 +12,6 @@ namespace Nova::Vulkan
         void SetSampler(StringView name, Ref<Rendering::Sampler> sampler) override;
         void SetTexture(StringView name, Ref<Rendering::Texture> texture) override;
         void SetSamplerAndTexture(StringView name, Ref<Rendering::Sampler> sampler, Ref<Rendering::Texture> texture) override;
-        void SetBuffer(StringView name, Ref<Rendering::Buffer> buffer) override;
+        void SetBuffer(StringView name, Ref<Rendering::Buffer> buffer, size_t offset, size_t size) override;
     };
 }

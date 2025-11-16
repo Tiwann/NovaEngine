@@ -87,8 +87,6 @@ namespace Nova::Vulkan
         m_ShaderModules.Clear();
         m_BindingSetLayouts.Clear();
 
-
-
         slang::TargetDesc shaderTargetDesc;
         shaderTargetDesc.format = GetCompileTarget(createInfo.target);
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;

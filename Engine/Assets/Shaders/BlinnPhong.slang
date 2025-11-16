@@ -26,7 +26,7 @@ float4 frag(FragmentInput input) : SV_Target {
 
     float3 albedo = albedoTex.Sample(sampler, input.texCoord).xyz;
     float diffuse = max(dot(N, L), 0.0);
-    float3 diffuseLight = diffuse * lightColor * albedo;
+    float3 diffuseLight = diffuse * lightColor;
 	float3 ambientLight = scene.ambLightColor * scene.ambLightIntensity;
 
     float3 V = normalize(scene.cameraWorldPos - input.fragPos);
@@ -36,6 +36,6 @@ float4 frag(FragmentInput input) : SV_Target {
 	float specularExponent = exp2(glossiness * 11.0) + 2.0;
 	specular = pow(specular, specularExponent);
 
-	float3 finalColor = ambientLight + diffuseLight + specular;
-	return float4(albedo, 1.0);
+	float3 finalColor = (ambientLight + diffuseLight) * albedo /* + specular */;
+	return float4(finalColor, 1.0);
 }

@@ -7,12 +7,12 @@
 #include "Rendering/Buffer.h"
 #include "Rendering/Vertex.h"
 #include "Utils/BufferUtils.h"
+#include "Utils/TextureUtils.h"
+#include "Rendering/Shader.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include "Utils/TextureUtils.h"
 
 
 namespace Nova
@@ -49,95 +49,8 @@ namespace Nova
         OBJ,
         DAE
     };
-
-    /*static bool HasFBXExtension(StringView filepath)
-    {
-        return filepath.EndsWith(".fbx") || filepath.EndsWith(".FBX");
-    }
-
-    static bool HasGLTFExtension(StringView filepath)
-    {
-        return filepath.EndsWith(".gltf") || filepath.EndsWith(".GLTF");
-    }
-
-    static bool HasGLBExtension(StringView filepath)
-    {
-        return filepath.EndsWith(".glb") || filepath.EndsWith(".GLB");
-    }
-
-    static bool HasOBJExtension(StringView filepath)
-    {
-        return filepath.EndsWith(".obj") || filepath.EndsWith(".OBJ");
-    }
-
-    static bool HasDAEExtension(StringView filepath)
-    {
-        return filepath.EndsWith(".dae") || filepath.EndsWith(".DAE");
-    }*/
-
-    /*static ModelFormat GetModelFormat(StringView filepath)
-    {
-        if (HasGLTFExtension(filepath)) return ModelFormat::GLTF;
-        if (HasFBXExtension(filepath)) return ModelFormat::FBX;
-        if (HasGLBExtension(filepath)) return ModelFormat::GLB;
-        if (HasOBJExtension(filepath)) return ModelFormat::OBJ;
-        if (HasDAEExtension(filepath)) return ModelFormat::DAE;
-        return ModelFormat::None;
-    }*/
     
-    bool StaticMesh::LoadFromFile(const StringView filepath)
-    {
-        /*switch (GetModelFormat(filepath))
-        {
-        case ModelFormat::FBX:  return LoadFromFileAssimp(filepath);
-        case ModelFormat::GLTF: return LoadFromFileAssimp(filepath);
-        case ModelFormat::GLB:  return LoadFromFileAssimp(filepath);
-        case ModelFormat::OBJ:  return LoadFromFileAssimp(filepath);
-        case ModelFormat::DAE:  return LoadFromFileAssimp(filepath);
-        case ModelFormat::None: return false;
-        }
-        return false;*/
-        return LoadFromFileAssimp(filepath);
-    }
-
-    void StaticMesh::SetMaterial(const uint32_t slot, Ref<Rendering::Material> material)
-    {
-        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
-        {
-            return info.slot == slot;
-        });
-
-        if (info)
-        {
-            info->material = material;
-        }
-    }
-
-    Ref<Rendering::Material> StaticMesh::GetMaterial(const uint32_t slot)
-    {
-        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
-        {
-            return info.slot == slot;
-        });
-        return info ? info->material : nullptr;
-    }
-
-    const Array<MaterialInfo>& StaticMesh::GetMaterialInfos() const
-    {
-        return m_MaterialInfos;
-    }
-
-    Ref<Rendering::Buffer> StaticMesh::GetVertexBuffer() const
-    {
-        return m_VertexBuffer;
-    }
-
-    Ref<Rendering::Buffer> StaticMesh::GetIndexBuffer() const
-    {
-        return m_IndexBuffer;
-    }
-
-    bool StaticMesh::LoadFromFileAssimp(StringView filepath)
+    bool StaticMesh::LoadFromFile(const StringView filepath, bool loadRessources)
     {
         Assimp::Importer importer;
         constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures;
@@ -206,10 +119,76 @@ namespace Nova
             indexOffset += subMeshInfo.indexBufferSize;
         }
 
+        if (loadRessources && !m_MaterialInfos.IsEmpty())
+        {
+            const AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
+            const Ref<Rendering::Shader> blinnPhongShader = assetDatabase.Get<Rendering::Shader>("BlinnPhongShader");
+
+            for (uint32_t i = 0; i < m_MaterialInfos.Count(); ++i)
+            {
+                const aiMaterial* loadedMaterial = loadedScene->mMaterials[i];
+
+                if (loadedMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+                {
+                    aiString path;
+                    if (loadedMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
+                    {
+                        const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
+
+                        Ref<Rendering::Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
+                        m_MaterialInfos[i].textures.Add(texture);
+
+                        Ref<Rendering::Material> material = device->CreateMaterial({device, blinnPhongShader});
+                        material->SetTexture("albedoTex", texture);
+                        m_MaterialInfos[i].material = material;
+                    }
+                }
+            }
+        }
+
+        if (m_VertexBuffer) m_VertexBuffer->Destroy();
         m_VertexBuffer = CreateVertexBuffer(device, allVertices.Data(), allVertices.Size());
+        if (m_IndexBuffer) m_IndexBuffer->Destroy();
         m_IndexBuffer = CreateIndexBuffer(device, allIndices.Data(), allIndices.Size());
         importer.FreeScene();
         return true;
+    }
+
+    void StaticMesh::SetMaterial(const uint32_t slot, Ref<Rendering::Material> material)
+    {
+        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
+        {
+            return info.slot == slot;
+        });
+
+        if (info)
+        {
+            info->material = material;
+        }
+    }
+
+    Ref<Rendering::Material> StaticMesh::GetMaterial(const uint32_t slot)
+    {
+        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
+        {
+            return info.slot == slot;
+        });
+        return info ? info->material : nullptr;
+    }
+
+    const Array<MaterialInfo>& StaticMesh::GetMaterialInfos() const
+    {
+        return m_MaterialInfos;
+    }
+
+    Ref<Rendering::Buffer> StaticMesh::GetVertexBuffer() const
+    {
+        return m_VertexBuffer;
+    }
+
+    Ref<Rendering::Buffer> StaticMesh::GetIndexBuffer() const
+    {
+        return m_IndexBuffer;
     }
 
     bool StaticMesh::MaterialSlotExists(uint32_t slot) const

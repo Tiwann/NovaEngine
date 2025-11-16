@@ -26,6 +26,7 @@ namespace Nova
     {
         String slotName;
         uint32_t slot = 0;
+        Array<Ref<Rendering::Texture>> textures;
         Ref<Rendering::Material> material = nullptr;
         Array<SubMeshInfo> subMeshes;
     };
@@ -38,7 +39,7 @@ namespace Nova
         ~StaticMesh() override;
 
         AssetType GetAssetType() const override;
-        bool LoadFromFile(StringView filepath);
+        bool LoadFromFile(StringView filepath, bool loadRessources);
 
         void SetMaterial(uint32_t slot, Ref<Rendering::Material> material);
         Ref<Rendering::Material> GetMaterial(uint32_t slot);
@@ -47,7 +48,6 @@ namespace Nova
         Ref<Rendering::Buffer> GetVertexBuffer() const;
         Ref<Rendering::Buffer> GetIndexBuffer() const;
     private:
-        bool LoadFromFileAssimp(StringView filepath);
         bool MaterialSlotExists(uint32_t slot) const;
         MaterialInfo& CreateMaterialSlot(const String& name, uint32_t slot);
 

@@ -14,48 +14,33 @@ namespace Nova::Vulkan
         m_Device = createInfo.device;
         m_Shader = createInfo.shader;
 
-        if (!m_BindingSets.IsEmpty())
-        {
-            for (Ref<Rendering::ShaderBindingSet>& bindingSet : m_BindingSets)
-                bindingSet->Destroy();
-            m_BindingSets.Clear();
-        }
+        if (m_BindingSet) m_BindingSet->Destroy();
 
-        m_BindingSets = m_Shader->CreateBindingSets();
-        if (m_BindingSets.IsEmpty()) return false;
+        m_BindingSet = m_Shader->CreateBindingSet(1);
+        if (!m_BindingSet) return false;
         return true;
     }
 
     void Material::Destroy()
     {
-        if (!m_BindingSets.IsEmpty())
-        {
-            for (Ref<Rendering::ShaderBindingSet>& bindingSet : m_BindingSets)
-                bindingSet->Destroy();
-            m_BindingSets.Clear();
-        }
-
+        m_BindingSet->Destroy();
         m_Shader = nullptr;
     }
 
     void Material::SetSampler(const StringView name, Ref<Rendering::Sampler> sampler)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const ShaderBindingSetLayout& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
 
-        for (uint32_t setIndex = 0; setIndex < setLayouts.Count(); setIndex++)
+        for (size_t i = 0; i < bindings.Count(); i++)
         {
-            const ShaderBindingSetLayout& setLayout = setLayouts[setIndex];
-            const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+            const auto& binding = bindings.GetAt(i);
 
-            for (size_t i = 0; i < bindings.Count(); i++)
+            if (name == binding.value.name)
             {
-                const auto& binding = bindings.GetAt(i);
-
-                if (name == binding.value.name)
-                {
-                    m_BindingSets[setIndex]->BindSampler(binding.key, sampler);
-                    return;
-                }
+                m_BindingSet->BindSampler(binding.key, sampler);
+                return;
             }
         }
     }
@@ -63,21 +48,17 @@ namespace Nova::Vulkan
     void Material::SetTexture(const StringView name, Ref<Rendering::Texture> texture)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const ShaderBindingSetLayout& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
 
-        for (uint32_t setIndex = 0; setIndex < setLayouts.Count(); setIndex++)
+        for (size_t i = 0; i < bindings.Count(); i++)
         {
-            const ShaderBindingSetLayout& setLayout = setLayouts[setIndex];
-            const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+            const auto& binding = bindings.GetAt(i);
 
-            for (size_t i = 0; i < bindings.Count(); i++)
+            if (name == binding.value.name)
             {
-                const auto& binding = bindings.GetAt(i);
-
-                if (name == binding.value.name)
-                {
-                    m_BindingSets[setIndex]->BindTexture(binding.key, texture);
-                    return;
-                }
+                m_BindingSet->BindTexture(binding.key, texture);
+                return;
             }
         }
     }
@@ -85,21 +66,17 @@ namespace Nova::Vulkan
     void Material::SetSamplerAndTexture(const StringView name, Ref<Rendering::Sampler> sampler, Ref<Rendering::Texture> texture)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const ShaderBindingSetLayout& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
 
-        for (uint32_t setIndex = 0; setIndex < setLayouts.Count(); setIndex++)
+        for (size_t i = 0; i < bindings.Count(); i++)
         {
-            const ShaderBindingSetLayout& setLayout = setLayouts[setIndex];
-            const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+            const auto& binding = bindings.GetAt(i);
 
-            for (size_t i = 0; i < bindings.Count(); i++)
+            if (name == binding.value.name)
             {
-                const auto& binding = bindings.GetAt(i);
-
-                if (name == binding.value.name)
-                {
-                    m_BindingSets[setIndex]->BindCombinedSamplerTexture(binding.key, sampler, texture);
-                    return;
-                }
+                m_BindingSet->BindCombinedSamplerTexture(binding.key, sampler, texture);
+                return;
             }
         }
     }
@@ -107,21 +84,17 @@ namespace Nova::Vulkan
     void Material::SetBuffer(const StringView name, Ref<Rendering::Buffer> buffer, const size_t offset, const size_t size)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const ShaderBindingSetLayout& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
 
-        for (uint32_t setIndex = 0; setIndex < setLayouts.Count(); setIndex++)
+        for (size_t i = 0; i < bindings.Count(); i++)
         {
-            const ShaderBindingSetLayout& setLayout = setLayouts[setIndex];
-            const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+            const auto& binding = bindings.GetAt(i);
 
-            for (size_t i = 0; i < bindings.Count(); i++)
+            if (name == binding.value.name)
             {
-                const auto& binding = bindings.GetAt(i);
-
-                if (name == binding.value.name)
-                {
-                    m_BindingSets[setIndex]->BindBuffer(binding.key, buffer, offset, size);
-                    return;
-                }
+                m_BindingSet->BindBuffer(binding.key, buffer, offset, size);
+                return;
             }
         }
     }

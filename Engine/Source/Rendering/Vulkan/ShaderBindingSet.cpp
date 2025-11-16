@@ -29,6 +29,7 @@ namespace Nova::Vulkan
 
         m_Device = (Device*)createInfo.device;
         m_DescriptorPool = (DescriptorPool*)createInfo.pool;
+        m_BindingSetLayout = (ShaderBindingSetLayout*)createInfo.layout;
         return true;
     }
 

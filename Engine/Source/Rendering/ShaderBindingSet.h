@@ -3,6 +3,8 @@
 #include "Runtime/Ref.h"
 #include <cstdint>
 
+#include "ShaderBindingSetLayout.h"
+
 
 namespace Nova::Rendering
 {
@@ -33,5 +35,10 @@ namespace Nova::Rendering
         virtual bool BindSampler(uint32_t binding, const Ref<Sampler>& sampler) = 0;
         virtual bool BindCombinedSamplerTexture(uint32_t binding, const Ref<Sampler>& sampler, const Ref<Texture>& texture) = 0;
         virtual bool BindBuffer(uint32_t binding, const Ref<Buffer>& buffer, size_t offset, size_t size) = 0;
+
+        const ShaderBindingSetLayout* GetBindingSetLayout() const { return m_BindingSetLayout; }
+        uint32_t GetSetIndex() const { return m_BindingSetLayout->GetSetIndex(); }
+    protected:
+        ShaderBindingSetLayout* m_BindingSetLayout = nullptr;
     };
 }

@@ -73,7 +73,6 @@ namespace Nova::Rendering
         virtual void BindVertexBuffer(const Buffer& vertexBuffer, size_t offset) = 0;
         virtual void BindIndexBuffer(const Buffer& indexBuffer, size_t offset, Format indexFormat) = 0;
         virtual void BindShaderBindingSet(const Shader& shader, const ShaderBindingSet& bindingSet) = 0;
-        virtual void BindShaderBindingSets(const Shader& shader, const Array<Ref<ShaderBindingSet>>& shaderBindingSets) = 0;
         virtual void BindMaterial(const Material& material) = 0;
         virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;

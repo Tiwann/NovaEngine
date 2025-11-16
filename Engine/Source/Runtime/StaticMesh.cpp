@@ -102,15 +102,27 @@ namespace Nova
 
     void StaticMesh::SetMaterial(const uint32_t slot, Ref<Rendering::Material> material)
     {
-        m_MaterialSlots[slot] = material;
+        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
+        {
+            return info.slot == slot;
+        });
+
+        if (info)
+        {
+            info->material = material;
+        }
     }
 
     Ref<Rendering::Material> StaticMesh::GetMaterial(const uint32_t slot)
     {
-        return m_MaterialSlots[slot];
+        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
+        {
+            return info.slot == slot;
+        });
+        return info ? info->material : nullptr;
     }
 
-    const Map<uint32_t, MaterialInfo>& StaticMesh::GetMaterialInfos() const
+    const Array<MaterialInfo>& StaticMesh::GetMaterialInfos() const
     {
         return m_MaterialInfos;
     }
@@ -144,7 +156,8 @@ namespace Nova
         {
             const aiMesh* loadedMesh = loadedScene->mMeshes[meshIndex];
             uint32_t materialIndex = loadedMesh->mMaterialIndex;
-            MaterialInfo& materialInfo = m_MaterialInfos[materialIndex];
+            const aiString materialSlotName = loadedScene->mMaterials[materialIndex]->GetName();
+            MaterialInfo& materialInfo = MaterialSlotExists(materialIndex) ? m_MaterialInfos[materialIndex] : CreateMaterialSlot(String{materialSlotName.C_Str()}, materialIndex);
 
             Array<uint32_t> indices;
             for (uint32_t faceIndex = 0; faceIndex < loadedMesh->mNumFaces; ++faceIndex)
@@ -193,35 +206,21 @@ namespace Nova
             indexOffset += subMeshInfo.indexBufferSize;
         }
 
-
-        if (loadedScene->HasMaterials())
-        {
-            for (unsigned int i = 0; i < loadedScene->mNumMaterials && i < m_MaterialInfos.Count(); ++i)
-            {
-                aiMaterial* material = loadedScene->mMaterials[i];
-                aiString name;
-                material->Get(AI_MATKEY_NAME, name);
-
-                if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
-                {
-                    aiString path;
-                    if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS)
-                    {
-                        const aiTexture* texture = loadedScene->GetEmbeddedTexture(path.data);
-
-                        if (texture->mHeight == 0)
-                        {
-                            m_MaterialInfos[i].texture = LoadTexture(device, texture->pcData, texture->mWidth);
-                        }
-                    }
-                }
-            }
-        }
-
-
         m_VertexBuffer = CreateVertexBuffer(device, allVertices.Data(), allVertices.Size());
         m_IndexBuffer = CreateIndexBuffer(device, allIndices.Data(), allIndices.Size());
         importer.FreeScene();
         return true;
+    }
+
+    bool StaticMesh::MaterialSlotExists(uint32_t slot) const
+    {
+        const auto* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info) { return info.slot == slot;});
+        return info;
+    }
+
+    MaterialInfo& StaticMesh::CreateMaterialSlot(const String& name, uint32_t slot)
+    {
+        m_MaterialInfos.Emplace({ name, slot });
+        return m_MaterialInfos.Last();
     }
 }

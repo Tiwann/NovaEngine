@@ -37,12 +37,12 @@ namespace Nova::Rendering
         virtual void SetSamplerAndTexture(StringView name, Ref<Sampler> sampler, Ref<Texture> texture) = 0;
         virtual void SetBuffer(StringView name, Ref<Buffer> buffer, size_t offset, size_t size) = 0;
 
-        const Array<Ref<ShaderBindingSet>>& GetBindingSets() const { return m_BindingSets; }
+        const Ref<ShaderBindingSet>& GetBindingSets() const { return m_BindingSet; }
 
         Ref<Shader> GetShader() const { return m_Shader; }
     protected:
         Ref<Device> m_Device = nullptr;
         Ref<Shader> m_Shader = nullptr;
-        Array<Ref<ShaderBindingSet>> m_BindingSets;
+        Ref<ShaderBindingSet> m_BindingSet = nullptr;
     };
 }

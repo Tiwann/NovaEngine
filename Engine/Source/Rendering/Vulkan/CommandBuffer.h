@@ -28,7 +28,6 @@ namespace Nova::Vulkan
         void BindVertexBuffer(const Rendering::Buffer& vertexBuffer, size_t offset) override;
         void BindIndexBuffer(const Rendering::Buffer& indexBuffer, size_t offset, Format indexFormat) override;
         void BindShaderBindingSet(const Rendering::Shader& shader, const Rendering::ShaderBindingSet& bindingSet) override;
-        void BindShaderBindingSets(const Rendering::Shader& shader, const Array<Ref<Rendering::ShaderBindingSet>>& shaderBindingSets) override;
         void BindMaterial(const Rendering::Material& material) override;
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;

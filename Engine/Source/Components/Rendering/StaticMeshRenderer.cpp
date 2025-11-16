@@ -177,16 +177,14 @@ namespace Nova
         const float height = window->GetHeight();
 
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
+        cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.SetViewport(0.0f, 0.0f, width, height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(0, 0, (int32_t)width, (int32_t)height);
 
         const auto& materialInfos = m_StaticMesh->GetMaterialInfos();
-        for (uint32_t i = 0; i < materialInfos.Count(); i++)
+        for (const MaterialInfo& materialInfo : materialInfos)
         {
-            const auto& materialInfoPair = materialInfos.GetAt(i);
-            const auto& materialInfo = materialInfoPair.value;
-            const auto materialIndex = materialInfoPair.key;
-            cmdBuffer.BindMaterial(*m_StaticMesh->GetMaterial(materialIndex));
+            cmdBuffer.BindMaterial(*m_StaticMesh->GetMaterial(materialInfo.slot));
 
             for (const SubMeshInfo& subMesh : materialInfo.subMeshes)
             {

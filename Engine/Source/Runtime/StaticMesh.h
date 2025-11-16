@@ -24,8 +24,10 @@ namespace Nova
 
     struct MaterialInfo
     {
+        String slotName;
+        uint32_t slot = 0;
+        Ref<Rendering::Material> material = nullptr;
         Array<SubMeshInfo> subMeshes;
-        Ref<Rendering::Texture> texture = nullptr;
     };
 
     class StaticMesh final : public Asset
@@ -41,14 +43,15 @@ namespace Nova
         void SetMaterial(uint32_t slot, Ref<Rendering::Material> material);
         Ref<Rendering::Material> GetMaterial(uint32_t slot);
 
-        const Map<uint32_t, MaterialInfo>& GetMaterialInfos() const;
+        const Array<MaterialInfo>& GetMaterialInfos() const;
         Ref<Rendering::Buffer> GetVertexBuffer() const;
         Ref<Rendering::Buffer> GetIndexBuffer() const;
     private:
         bool LoadFromFileAssimp(StringView filepath);
+        bool MaterialSlotExists(uint32_t slot) const;
+        MaterialInfo& CreateMaterialSlot(const String& name, uint32_t slot);
 
-        Map<uint32_t, MaterialInfo> m_MaterialInfos;
-        Map<uint32_t, Ref<Rendering::Material>> m_MaterialSlots;
+        Array<MaterialInfo> m_MaterialInfos;
         Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
         Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
     };

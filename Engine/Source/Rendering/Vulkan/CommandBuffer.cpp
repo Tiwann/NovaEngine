@@ -163,7 +163,7 @@ namespace Nova::Vulkan
 
         VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
         info.layout = sh.GetPipelineLayout();
-        info.firstSet = 0;
+        info.firstSet = bindingSet.GetSetIndex();
         info.descriptorSetCount = 1;
         info.pDescriptorSets = ((const ShaderBindingSet&)bindingSet).GetHandlePtr();
         info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
@@ -173,30 +173,9 @@ namespace Nova::Vulkan
 
     }
 
-    void CommandBuffer::BindShaderBindingSets(const Rendering::Shader& shader, const Array<Ref<Rendering::ShaderBindingSet>>& shaderBindingSets)
-    {
-        const Shader& sh = (const Shader&)shader;
-
-        const Array<VkDescriptorSet> descriptorSets = shaderBindingSets.Transform<VkDescriptorSet>([](const Ref<Rendering::ShaderBindingSet>& bindingSet) { return bindingSet.As<ShaderBindingSet>()->GetHandle(); });
-        VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
-        info.layout = sh.GetPipelineLayout();
-        info.firstSet = 0;
-        info.descriptorSetCount = descriptorSets.Count();
-        info.pDescriptorSets = descriptorSets.Data();
-        info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
-        info.dynamicOffsetCount = 0;
-        info.pDynamicOffsets = nullptr;
-        vkCmdBindDescriptorSets2(m_Handle, &info);
-    }
-
     void CommandBuffer::BindMaterial(const Rendering::Material& material)
     {
-        Ref<Shader> shader { material.GetShader() };
-        if (!shader) return;
-
-        const Array<Ref<Rendering::ShaderBindingSet>>& bindingSets = material.GetBindingSets();
-        for (auto bindingSet : bindingSets)
-            BindShaderBindingSet(*shader, *bindingSet);
+        BindShaderBindingSet(*material.GetShader(), *material.GetBindingSets());
     }
 
     void CommandBuffer::SetViewport(const float x, const float y, const float width, const float height, const float minDepth, const float maxDepth)

@@ -254,7 +254,7 @@ namespace Nova::Vulkan
 
             if (bindingSetLayout.BindingCount() > 0)
             {
-                bindingSetLayout.Initialize(createInfo.device);
+                bindingSetLayout.Initialize(createInfo.device, setIndex);
                 bindingSetLayout.Build();
                 m_BindingSetLayouts.Add(bindingSetLayout);
             }

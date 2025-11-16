@@ -34,9 +34,10 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSetLayout::Initialize(Rendering::Device* device)
+    bool ShaderBindingSetLayout::Initialize(Rendering::Device* device, uint32_t setIndex)
     {
         m_Device = (Device*)device;
+        m_SetIndex = setIndex;
         return true;
     }
 

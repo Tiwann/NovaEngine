@@ -11,7 +11,7 @@ namespace Nova::Vulkan
     class ShaderBindingSetLayout : public Rendering::ShaderBindingSetLayout
     {
     public:
-        bool Initialize(Rendering::Device* device) override;
+        bool Initialize(Rendering::Device* device, uint32_t setIndex) override;
         void Destroy() override;
         bool Build() override;
 

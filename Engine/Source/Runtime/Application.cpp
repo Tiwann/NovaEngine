@@ -16,6 +16,8 @@
 
 #include <imgui.h>
 
+#include "Utils/TextureUtils.h"
+
 namespace Nova
 {
     extern Application* g_Application;
@@ -51,7 +53,7 @@ namespace Nova
         rtCreateInfo.width = m_Window->GetWidth();
         rtCreateInfo.height = m_Window->GetHeight();
         rtCreateInfo.depth = 1;
-        rtCreateInfo.colorFormat = Format::R8G8B8A8_UNORM;
+        rtCreateInfo.colorFormat = Format::R8G8B8A8_SRGB;
         rtCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
         rtCreateInfo.sampleCount = 8;
         m_RenderTarget = CreateRenderTarget(rtCreateInfo);
@@ -132,7 +134,6 @@ namespace Nova
             shaderCreateInfo.entryPoints.AddRange(entryPoints);
             shaderCreateInfo.moduleInfo = { moduleName, shaderPath };
 
-            // TODO: Provide a way to specify which shader implementation
             Ref<Rendering::Shader> shader = m_Device->CreateShader(shaderCreateInfo);
             if (!shader) return nullptr;
 
@@ -141,9 +142,22 @@ namespace Nova
             return shader;
         };
 
+        const auto LoadTextureBasic = [this](StringView filepath, const String& assetName)
+        {
+            Ref<Rendering::Texture> texture = LoadTexture(GetDevice(), filepath);
+            m_AssetDatabase.AddAsset(texture, assetName);
+            return texture;
+        };
+
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         Ref<Rendering::Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
+
+        LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
+        LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
+        LoadTextureBasic(Path::GetEngineAssetPath("Textures/GreyTexPlaceholder.png"), "GreyTexPlaceholder");
+        LoadTextureBasic(Path::GetEngineAssetPath("Textures/CheckerTexPlaceholder.png"), "CheckerTexPlaceholder");
+        LoadTextureBasic(Path::GetEngineAssetPath("Textures/NormalTexPlaceholder.png"), "NormalTexPlaceholder");
 
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;

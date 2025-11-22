@@ -225,6 +225,7 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
+
         VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES };
         shaderDrawParametersFeatures.shaderDrawParameters = true;
 
@@ -369,7 +370,7 @@ namespace Nova::Vulkan
         swapchainCreateInfo.surface = m_Surface;
         swapchainCreateInfo.recycle = false;
         swapchainCreateInfo.buffering = createInfo.buffering;
-        swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
+        swapchainCreateInfo.format = Format::R8G8B8A8_SRGB;
         swapchainCreateInfo.width = createInfo.window->GetWidth();
         swapchainCreateInfo.height = createInfo.window->GetHeight();
         swapchainCreateInfo.presentMode = GetPresentMode(createInfo.vSync);
@@ -406,9 +407,9 @@ namespace Nova::Vulkan
         Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo = Rendering::DescriptorPoolCreateInfo()
         .SetDevice(this)
         .SetBindingTypeSize(BindingType::Sampler, 32)
-        .SetBindingTypeSize(BindingType::SampledTexture, 32)
+        .SetBindingTypeSize(BindingType::SampledTexture, 512)
         .SetBindingTypeSize(BindingType::StorageTexture, 32)
-        .SetBindingTypeSize(BindingType::CombinedTextureSampler, 32)
+        .SetBindingTypeSize(BindingType::CombinedTextureSampler, 512)
         .SetBindingTypeSize(BindingType::UniformBuffer, 32)
         .SetMaxSets(32);
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);

@@ -460,7 +460,7 @@ namespace Nova
         PointerType Data() { return m_Data; }
 
         SizeType Count() const { return m_Count; }
-        size_t Size() const { return m_Count * sizeof(T); }
+        SizeType Size() const { return m_Count * sizeof(T); }
 
         bool operator==(const Array& other) const
         {

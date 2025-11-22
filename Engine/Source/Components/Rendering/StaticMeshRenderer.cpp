@@ -119,8 +119,11 @@ namespace Nova
         const Vector3& entityPosition = entityTransform->GetPosition();
 
         const Array<LightComponent*> allLights = scene->GetAllComponents<LightComponent>();
-        LightComponent** dirLight = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Directional; }).First();
-        LightComponent** ambLight = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Ambient; }).First();
+        Array<LightComponent**> dirLights = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Directional; });
+        Array<LightComponent**> ambLights = allLights.Where([](const LightComponent* light) { return light->GetType() == LightType::Ambient; });
+
+        LightComponent** dirLight = dirLights.IsEmpty() ? nullptr : dirLights.First();
+        LightComponent** ambLight = ambLights.IsEmpty() ? nullptr : ambLights.First();
 
         const Color& dirLightColor = dirLight ? (*dirLight)->GetColor() : Color::Black;
         const float dirLightIntensity = dirLight ? (*dirLight)->GetIntensity() : 0.0f;
@@ -128,9 +131,9 @@ namespace Nova
         const Color& ambLightColor = ambLight ? (*ambLight)->GetColor() : Color::Black;
         const float ambLightIntensity = ambLight ? (*ambLight)->GetIntensity() : 0.0f;
 
-        const auto ToVector3 = [](const Color& Color) -> Vector3
+        const auto ToVector3 = [](const Color& color) -> Vector3
         {
-            return Vector3(Color.r, Color.g, Color.b);
+            return Vector3(color.r, color.g, color.b);
         };
 
 
@@ -184,7 +187,9 @@ namespace Nova
         const auto& materialInfos = m_StaticMesh->GetMaterialInfos();
         for (const MaterialInfo& materialInfo : materialInfos)
         {
-            cmdBuffer.BindMaterial(*m_StaticMesh->GetMaterial(materialInfo.slot));
+            Ref<Rendering::Material> material = m_StaticMesh->GetMaterial(materialInfo.slot);
+            if (!material) continue;
+            cmdBuffer.BindMaterial(*material);
 
             for (const SubMeshInfo& subMesh : materialInfo.subMeshes)
             {

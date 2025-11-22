@@ -72,4 +72,10 @@ namespace Nova::Memory
     {
         return memcmp(lhs, rhs, size) == 0;
     }
+
+    template<typename SourceType, typename DestType>
+    void Memmove(DestType* dest, const SourceType* src, const size_t size)
+    {
+        memmove(dest, src, size);
+    }
 }

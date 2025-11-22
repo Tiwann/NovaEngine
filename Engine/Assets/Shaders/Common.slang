@@ -65,6 +65,14 @@ public float4 remap(float4 val, float inmin, float inmax, float outmin, float ou
     return float4(x, y, z, w);
 }
 
+public float3x3 constructSpace(float3 i, float3 j, float3 k)
+{
+    return {
+        i.x, j.x, k.x,
+        i.y, j.y, k.y,
+        i.z, j.z, k.z,
+    };
+}
 
 namespace Nova
 {
@@ -90,11 +98,16 @@ namespace Nova
         public float outerRadius;
     };
 
+    public struct Camera
+    {
+        public float4x4 viewMatrix;
+        public float4x4 projectionMatrix;
+    }
+
     public struct Scene
     {
         public float4x4 modelMatrix;
-        public float4x4 viewMatrix;
-        public float4x4 projectionMatrix;
+        public Camera camera;
         public float3x3 normalMatrix;
         public float3 cameraWorldPos;
         public float dirLightIntensity;
@@ -111,17 +124,23 @@ namespace Nova
 
         public float4 LocalToViewPosition(float4 position)
         {
-            return mul(mul(viewMatrix, modelMatrix), position);
+            return mul(mul(camera.viewMatrix, modelMatrix), position);
         }
 
         public float4 LocalToClipPosition(float4 position)
         {
-            return mul(mul(mul(projectionMatrix, viewMatrix), modelMatrix), position);
+            return mul(mul(mul(camera.projectionMatrix, camera.viewMatrix), modelMatrix), position);
         }
 
         public float3 LocalToWorldNormal(float3 normal)
         {
             return mul(normalMatrix, normal);
+        }
+
+        public float3 LocalToWorldDirection(float3 direction)
+        {
+            float3x3 rotScale = float3x3(modelMatrix);
+            return mul(rotScale, direction);
         }
     };
 }

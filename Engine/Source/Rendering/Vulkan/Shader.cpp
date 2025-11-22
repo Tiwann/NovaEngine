@@ -93,12 +93,18 @@ namespace Nova::Vulkan
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
         shaderTargetDesc.profile = createInfo.slang->findProfile("spirv_1_5");
 
+        slang::CompilerOptionEntry entries[] = {
+            {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
+            {slang::CompilerOptionName::Optimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, SLANG_OPTIMIZATION_LEVEL_NONE)},
+        };
         slang::SessionDesc sessionDesc;
         sessionDesc.targets = &shaderTargetDesc;
         sessionDesc.targetCount = 1;
         sessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
         sessionDesc.searchPaths = createInfo.includes.Transform<const char*>([](const StringView includeDir) { return *includeDir; }).Data();
         sessionDesc.searchPathCount = createInfo.includes.Count();
+        sessionDesc.compilerOptionEntries = entries;
+        sessionDesc.compilerOptionEntryCount = std::size(entries);
 
         SlangResult result = createInfo.slang->createSession(sessionDesc, m_Session.writeRef());
         if (SLANG_FAILED(result)) return false;

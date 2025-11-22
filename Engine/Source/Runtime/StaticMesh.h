@@ -39,7 +39,7 @@ namespace Nova
         ~StaticMesh() override;
 
         AssetType GetAssetType() const override;
-        bool LoadFromFile(StringView filepath, bool loadRessources);
+        bool LoadFromFile(StringView filepath, bool loadResources);
 
         void SetMaterial(uint32_t slot, Ref<Rendering::Material> material);
         Ref<Rendering::Material> GetMaterial(uint32_t slot);

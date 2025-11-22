@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "BufferView.h"
-#include "Serialization/MemoryStream.h"
+#include "IO/MemoryStream.h"
 
 namespace Nova
 {

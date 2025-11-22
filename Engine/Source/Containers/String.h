@@ -44,12 +44,12 @@ namespace Nova
             m_Count = 0;
         }
         
-        StringBase(StringLiteralType Data)
+        StringBase(StringLiteralType data)
         {
-            NOVA_ASSERT(Data, "Cannot construct string with nullptr!");
-            m_Count = StringLength(Data);
+            NOVA_ASSERT(data, "Cannot construct string with nullptr!");
+            m_Count = StringLength(data);
             m_Data = new CharacterType[m_Count + 1]{};
-            memcpy(m_Data, Data, m_Count * CharacterSize);
+            memcpy(m_Data, data, m_Count * CharacterSize);
         }
 
         explicit StringBase(const SizeType count) : m_Count(count)
@@ -57,20 +57,20 @@ namespace Nova
             m_Data = new CharacterType[m_Count + 1]{};
         }
 
-        StringBase(CharacterType* Data, SizeType Count)
+        StringBase(CharacterType* data, SizeType count)
         {
-            NOVA_ASSERT(Data, "Cannot construct string with nullptr!");
-            m_Count = Count;
+            NOVA_ASSERT(data, "Cannot construct string with nullptr!");
+            m_Count = count;
             m_Data = new CharacterType[m_Count + 1]{};
-            memcpy(m_Data, Data, m_Count * CharacterSize);
+            memcpy(m_Data, data, m_Count * CharacterSize);
         }
 
-        StringBase(const StringBase& Other)
+        StringBase(const StringBase& other)
         {
             delete[] m_Data;
-            m_Data = new CharacterType[Other.m_Count + 1]{};
-            memcpy(m_Data, Other.m_Data, Other.m_Count * CharacterSize);
-            m_Count = Other.m_Count;
+            m_Data = new CharacterType[other.m_Count + 1]{};
+            memcpy(m_Data, other.m_Data, other.m_Count * CharacterSize);
+            m_Count = other.m_Count;
         }
 
         StringBase(StringBase&& Other) noexcept
@@ -81,29 +81,45 @@ namespace Nova
             Other.m_Count = 0;
         }
 
-        StringBase& operator=(const StringBase& Other)
+        StringBase& operator=(const StringBase& other)
         {
-            if(this == &Other)
+            if(this == &other)
                 return *this;
 
             if(m_Data) delete[] m_Data;
-            m_Data = new CharacterType[Other.m_Count + 1]{};
-            memcpy(m_Data, Other.m_Data, Other.m_Count * CharacterSize);
-            m_Count = Other.m_Count;
+            m_Data = new CharacterType[other.m_Count + 1]{};
+            memcpy(m_Data, other.m_Data, other.m_Count * CharacterSize);
+            m_Count = other.m_Count;
             return *this;
         }
 
-        StringBase& operator=(StringBase&& Other) noexcept
+        StringBase& operator=(StringBase&& other) noexcept
         {
-            if(this == &Other)
+            if(this == &other)
                 return *this;
 
             delete[] m_Data;
             
-            m_Data = Other.m_Data;
-            m_Count = Other.m_Count;
-            Other.m_Data = nullptr;
-            Other.m_Count = 0;
+            m_Data = other.m_Data;
+            m_Count = other.m_Count;
+            other.m_Data = nullptr;
+            other.m_Count = 0;
+            return *this;
+        }
+
+        template<SizeType N>
+        StringBase& operator=(CharacterType (&&buffer)[N])
+        {
+            const SizeType count = StringLength(buffer);
+            if (count < N)
+            {
+                delete[] m_Data;
+                m_Data = new CharacterType[count];
+            }
+
+            Memory::Memmove(m_Data, buffer, count * CharacterSize);
+            m_Data[m_Count] = 0;
+            m_Count = count;
             return *this;
         }
 
@@ -212,14 +228,31 @@ namespace Nova
             return view.find(otherView);
         }
 
-        SizeType Find(SizeType index, const StringBase& str) const
+        SizeType Find(SizeType index, const StringBase& string) const
         {
             std::basic_string_view<CharacterType> view(m_Data + index, m_Count);
-            std::basic_string_view<CharacterType> otherView(str.m_Data, str.m_Count);
+            std::basic_string_view<CharacterType> otherView(string.m_Data, string.m_Count);
             return view.find(otherView);
         }
+
+        SizeType FindLast(const StringBase& string) const
+        {
+            std::basic_string_view<CharacterType> view(m_Data, m_Count);
+            std::basic_string_view<CharacterType> otherView(string.m_Data, string.m_Count);
+            return view.find_last_of(otherView);
+        }
+
+        bool EndsWith(const StringBase& string) const
+        {
+            return FindLast(string) != SizeType(-1);
+        }
+
+        bool StartsWith(const StringBase& string) const
+        {
+            return Find(string) == 0;
+        }
         
-        SizeType OccurrencesOf(CharacterType character)
+        SizeType OccurrencesOf(CharacterType character) const
         {
             SizeType result = 0;
             for(SizeType i = 0; i < m_Count; ++i)
@@ -231,24 +264,18 @@ namespace Nova
             return result;
         }
 
-        bool StartsWith(const StringBase& string)
-        {
-            const SizeType found = Find(string);
-            return found == 0;
-        }
-
-        StringBase& Replace(const StringBase& from, const StringBase& To)
+        StringBase& Replace(const StringBase& from, const StringBase& to)
         {
             const SizeType index = Find(from);
             if(index == -1ULL) return *this;
 
-            if (To.Count() <= from.Count())
+            if (to.Count() <= from.Count())
             {
-                memcpy(m_Data + index, *To, To.Size());
+                memcpy(m_Data + index, *to, to.Size());
                 return *this;
             }
             
-            const SizeType delta = To.Count() - from.Count();
+            const SizeType delta = to.Count() - from.Count();
             const SizeType newCount = m_Count + delta;
             CharacterType* newData = new CharacterType[newCount]{};
                 
@@ -258,11 +285,11 @@ namespace Nova
             memcpy(dest, src, size);
                 
             dest = newData + index * CharacterSize;
-            src = const_cast<CharacterType*>(*To);
-            size = To.Size();
+            src = const_cast<CharacterType*>(*to);
+            size = to.Size();
             memcpy(dest, src, size);
 
-            dest = newData + index * CharacterSize + To.Size();
+            dest = newData + index * CharacterSize + to.Size();
             src = m_Data + index * CharacterSize + from.Size();
             size = m_Count * CharacterSize - (index * CharacterSize + from.Size());
             memcpy(dest, src, size);
@@ -367,7 +394,7 @@ namespace Nova
         ArrayType AsArray() const { return ArrayType(m_Data, m_Count); }
         BufferType AsBuffer() const { return BufferType(m_Data, m_Count); }
 
-        template<typename U>
+        template<typename U> requires (sizeof(T) % sizeof(U) == 0)
         BufferView<U> GetView() { return BufferView<U>((U*)m_Data, m_Count); }
         
         StringBase& operator+(const StringBase& other)
@@ -425,12 +452,6 @@ namespace Nova
             return copy;
         }
 
-        ArrayType ToArray() const
-        {
-            return ArrayType(m_Data, m_Count);
-        }
-
-
         friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringBase& string)
         {
             os.write(string.m_Data, string.m_Count * CharacterSize);
@@ -443,11 +464,7 @@ namespace Nova
         size_t m_Count = 0;
     };
 
-#if defined(NOVA_WIDE_STRINGS_BY_DEFAULT)
-    using String = StringBase<wchar_t>;
-#else
     using String = StringBase<char>;
-#endif
     using String8 = StringBase<char>;
     using String16 = StringBase<char16_t>;
     using String32 = StringBase<char32_t>;

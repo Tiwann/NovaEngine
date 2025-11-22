@@ -8,12 +8,12 @@ namespace Nova
     class StringViewBase
     {
         using StringType = StringBase<T>;
-        using CharacterType = typename StringType::CharacterType;
-        using PointerType = typename StringType::PointerType;
+        using CharacterType = StringType::CharacterType;
+        using PointerType = StringType::PointerType;
         using ConstPointerType = const CharacterType*;
-        using StringLiteralType = typename StringType::StringLiteralType;
-        using SizeType = typename StringType::SizeType;
-        using ConstIterator = typename StringType::ConstIterator;
+        using StringLiteralType = StringType::StringLiteralType;
+        using SizeType = StringType::SizeType;
+        using ConstIterator = StringType::ConstIterator;
     public:
         StringViewBase() = default;
         StringViewBase(const StringType& string) : m_Data(string.Data()), m_Count(string.Count()) { }
@@ -36,11 +36,6 @@ namespace Nova
         SizeType Count() const { return m_Count; }
         SizeType Size() const { return m_Count * sizeof(CharacterType); }
 
-        bool EndsWith(StringViewBase str)
-        {
-            return std::string_view(m_Data, m_Count).find_last_of(std::string_view(str.m_Data, str.m_Count)) != std::string_view::npos;
-        }
-
         ConstIterator begin() const { return m_Data; }
         ConstIterator end() const { return m_Data + m_Count; }
 
@@ -53,6 +48,38 @@ namespace Nova
         {
             NOVA_ASSERT(index < m_Count, "Index out of bounds!");
             return m_Data[index];
+        }
+
+
+        SizeType Find(const StringViewBase& string) const
+        {
+            std::basic_string_view<CharacterType> view(m_Data, m_Count);
+            std::basic_string_view<CharacterType> otherView(string.m_Data, string.m_Count);
+            return view.find(otherView);
+        }
+
+        SizeType Find(SizeType index, const StringViewBase& str) const
+        {
+            std::basic_string_view<CharacterType> view(m_Data + index, m_Count);
+            std::basic_string_view<CharacterType> otherView(str.m_Data, str.m_Count);
+            return view.find(otherView);
+        }
+
+        SizeType FindLast(const StringViewBase& string) const
+        {
+            std::basic_string_view<CharacterType> view(m_Data, m_Count);
+            std::basic_string_view<CharacterType> otherView(string.m_Data, string.m_Count);
+            return view.find_last_of(otherView);
+        }
+
+        bool StartsWith(const StringViewBase& string) const
+        {
+            return Find(string) == 0;
+        }
+
+        bool EndsWith(const StringViewBase& string) const
+        {
+            return FindLast(string) != SizeType(-1);
         }
 
         friend std::basic_ostream<CharacterType>& operator<<(std::basic_ostream<CharacterType>& os, const StringViewBase& string)

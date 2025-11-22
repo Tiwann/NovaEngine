@@ -14,6 +14,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "Math/Matrix4.h"
+
 
 namespace Nova
 {
@@ -50,15 +52,15 @@ namespace Nova
         DAE
     };
     
-    bool StaticMesh::LoadFromFile(const StringView filepath, bool loadRessources)
+    bool StaticMesh::LoadFromFile(const StringView filepath, bool loadResources)
     {
         Assimp::Importer importer;
-        constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures;
+        constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_PreTransformVertices;
         const aiScene* loadedScene = importer.ReadFile(*filepath, flags);
         if (!loadedScene) return false;
         if (!loadedScene->HasMeshes()) return false;
 
-        Ref<Rendering::Device> device = Application::GetCurrentApplication().GetDevice();
+        Ref<Rendering::Device>& device = Application::GetCurrentApplication().GetDevice();
 
         Array<Vertex> allVertices;
         Array<uint32_t> allIndices;
@@ -94,15 +96,34 @@ namespace Nova
                 const aiVector3D& tangent = loadedMesh->HasTangentsAndBitangents() ? loadedMesh->mTangents[vertexIndex] : aiVector3D(0, 0, 0);
                 const aiColor4D& color = loadedMesh->HasVertexColors(0) ? loadedMesh->mColors[0][vertexIndex] : aiColor4D(0, 0, 0, 0);
 
-                const Vertex vertex
+                String path{filepath};
+                if (path.Find(".fbx") == -1)
                 {
-                    .position = toVector3(position),
-                    .texCoords = toVector2(texCoord),
-                    .normal = toVector3(normal),
-                    .tangent = toVector3(tangent),
-                    .color = toVector4(color)
-                };
-                vertices.Add(vertex);
+                    const Vertex vertex
+                    {
+                        .position = toVector3(position),
+                        .texCoords = toVector2(texCoord),
+                        .normal = toVector3(normal),
+                        .tangent = toVector3(tangent),
+                        .color = toVector4(color)
+                    };
+
+                    vertices.Add(vertex);
+                }
+                else
+                {
+                    const Vertex vertex
+                    {
+                        .position = Math::Scale(Matrix4::Identity, Vector3::One * 0.01f) * toVector3(position),
+                        .texCoords = toVector2(texCoord),
+                        .normal = toVector3(normal),
+                        .tangent = toVector3(tangent),
+                        .color = toVector4(color)
+                    };
+
+                    vertices.Add(vertex);
+                }
+
             }
 
             allVertices.AddRange(vertices);
@@ -119,7 +140,7 @@ namespace Nova
             indexOffset += subMeshInfo.indexBufferSize;
         }
 
-        if (loadRessources && !m_MaterialInfos.IsEmpty())
+        if (loadResources && !m_MaterialInfos.IsEmpty())
         {
             const AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
             const Ref<Rendering::Shader> blinnPhongShader = assetDatabase.Get<Rendering::Shader>("BlinnPhongShader");
@@ -128,21 +149,34 @@ namespace Nova
             {
                 const aiMaterial* loadedMaterial = loadedScene->mMaterials[i];
 
-                if (loadedMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+                Ref<Rendering::Material> material = device->CreateMaterial({device, blinnPhongShader});
+                if (!material) continue;
+                m_MaterialInfos[i].material = material;
+
+                const auto FindAndAssignTexture = [&](aiTextureType textureType, StringView variableName, const String& placeholderTextureName)
                 {
-                    aiString path;
-                    if (loadedMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS)
+                    if (loadedMaterial->GetTextureCount(textureType) > 0)
                     {
-                        const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
+                        aiString path;
+                        if (loadedMaterial->GetTexture(textureType, 0, &path) == AI_SUCCESS)
+                        {
+                            const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
+                            
 
-                        Ref<Rendering::Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
-                        m_MaterialInfos[i].textures.Add(texture);
-
-                        Ref<Rendering::Material> material = device->CreateMaterial({device, blinnPhongShader});
-                        material->SetTexture("albedoTex", texture);
-                        m_MaterialInfos[i].material = material;
+                            Ref<Rendering::Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
+                            m_MaterialInfos[i].textures.Add(texture);
+                            material->SetTexture(variableName, texture);
+                        }
+                    } else
+                    {
+                        material->SetTexture(variableName, assetDatabase.Get<Rendering::Texture>(placeholderTextureName));
                     }
-                }
+                };
+
+                FindAndAssignTexture(aiTextureType_DIFFUSE, "diffuseTex", "CheckerTexPlaceholder");
+                FindAndAssignTexture(aiTextureType_SPECULAR, "specularTex", "GreyTexPlaceholder");
+                FindAndAssignTexture(aiTextureType_SHININESS, "glossinessTex", "BlackTexPlaceholder");
+                FindAndAssignTexture(aiTextureType_NORMALS, "normalTex", "NormalTexPlaceholder");
             }
         }
 

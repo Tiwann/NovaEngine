@@ -9,6 +9,8 @@ namespace Nova
     public:
         Matrix3x4();
         explicit Matrix3x4(const Matrix3& Matrix);
+        const float* ValuePtr() const { return (const float*)this; }
+        float* ValuePtr() { return (float*)this; }
     private:
         union
         {

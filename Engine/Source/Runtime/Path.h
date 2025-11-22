@@ -36,6 +36,7 @@ namespace Nova
         static StringView GetDocumentsDirectory();
         static StringView GetMusicDirectory();
         static StringView GetDownloadsDirectory();
+        static StringView GetDesktopDirectory();
 
         static String OpenFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
         static String SaveFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);

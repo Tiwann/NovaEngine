@@ -40,6 +40,7 @@ namespace Nova::Rendering
         TextureCreateInfo& WithMips(const uint32_t inMips) { mips = inMips; return *this; }
         TextureCreateInfo& WithSampleCount(const uint32_t inSampleCount) { sampleCount = inSampleCount; return *this; }
         TextureCreateInfo& WithData(const uint8_t* inData, const size_t inSize) { data = inData; dataSize = inSize; return *this; }
+        TextureCreateInfo& WithData(const Array<uint8_t>& inData) { data = inData.Data(); dataSize = inData.Size(); return *this; }
     };
 
     class Texture : public Asset

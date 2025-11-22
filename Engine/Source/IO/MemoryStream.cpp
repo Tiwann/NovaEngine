@@ -7,7 +7,7 @@ namespace Nova
         m_Opened = true;
     }
 
-    Stream::SizeType MemoryStream::Read(void* outBuffer, const SizeType size)
+    Stream::SizeType MemoryStream::ReadRaw(void* outBuffer, const SizeType size)
     {
         if(!m_Opened) return EndOfFile;
         memcpy(outBuffer, &m_Buffer[m_Position], size);
@@ -15,14 +15,14 @@ namespace Nova
         return size;
     }
 
-    Stream::SizeType MemoryStream::Write(const void* inBuffer, const SizeType count)
+    Stream::SizeType MemoryStream::WriteRaw(const void* inBuffer, const SizeType size)
     {
         if(!m_Opened) return EndOfFile;
-        if(m_Position + count > m_Buffer.Count()) return EndOfFile;
+        if(m_Position + size > m_Buffer.Count()) return EndOfFile;
 
-        memcpy((void*)&m_Buffer[m_Position], inBuffer, count);
-        m_Position += (OffsetType)count;
-        return count;
+        memcpy((void*)&m_Buffer[m_Position], inBuffer, size);
+        m_Position += (OffsetType)size;
+        return size;
     }
 
     bool MemoryStream::Seek(const Nova::Seek seek, const OffsetType offset)

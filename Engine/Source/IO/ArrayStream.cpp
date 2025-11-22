@@ -22,7 +22,7 @@ namespace Nova
         return true;
     }
 
-    Stream::SizeType ArrayStream::Read(void* outBuffer, SizeType size)
+    Stream::SizeType ArrayStream::ReadRaw(void* outBuffer, SizeType size)
     {
         if(!m_Opened) return -1ULL;
         if (m_Position + size > m_Count) return -1ULL;
@@ -31,10 +31,10 @@ namespace Nova
         return size;
     }
 
-    Stream::SizeType ArrayStream::Write(const void* inBuffer, SizeType count)
+    Stream::SizeType ArrayStream::WriteRaw(const void* inBuffer, SizeType size)
     {
         if(!m_Opened) return -1ULL;
-        while(m_Position + count > m_Allocated)
+        while(m_Position + size > m_Allocated)
         {
             m_Allocated *= 2ULL;
             uint8_t* NewPlace = Memory::Malloc<uint8_t>(m_Allocated);
@@ -43,12 +43,12 @@ namespace Nova
             m_Data = NewPlace;
         }
 
-        memcpy(&m_Data[m_Position], inBuffer, count);
-        if (m_Position + count > m_Count)
-            m_Count += count - (m_Count - m_Position);
+        memcpy(&m_Data[m_Position], inBuffer, size);
+        if (m_Position + size > m_Count)
+            m_Count += size - (m_Count - m_Position);
         
-        m_Position += (OffsetType)count;
-        return count;
+        m_Position += (OffsetType)size;
+        return size;
     }
 
     bool ArrayStream::Seek(Nova::Seek seekMode, OffsetType offset)

@@ -34,24 +34,24 @@ namespace Nova
         return m_Opened = m_Handle;
     }
 
-    Stream::SizeType FileStream::Read(void* outBuffer, const SizeType size)
+    Stream::SizeType FileStream::ReadRaw(void* outBuffer, const SizeType size)
     {
         return fread(outBuffer, 1, size, m_Handle);
     }
 
-    Stream::SizeType FileStream::Write(const void* inBuffer, const SizeType count)
+    Stream::SizeType FileStream::WriteRaw(const void* inBuffer, const SizeType size)
     {
-        return fwrite(inBuffer, 1, count, m_Handle);
+        return fwrite(inBuffer, 1, size, m_Handle);
     }
 
-    bool FileStream::Seek(const Nova::Seek seekMode, const OffsetType Offset)
+    bool FileStream::Seek(const Nova::Seek seekMode, const OffsetType offset)
     {
         const auto GetSeekMode = [](const Nova::Seek SeekMode) -> int
         {
             return SeekMode == Seek::Begin ? SEEK_SET : SeekMode == Seek::Current ? SEEK_CUR : SEEK_END;
         };
             
-        const int Result = fseek(m_Handle, Offset, GetSeekMode(seekMode));
+        const int Result = fseek(m_Handle, offset, GetSeekMode(seekMode));
         return Result == 0;
     }
 
@@ -70,9 +70,9 @@ namespace Nova
     Stream::OffsetType FileStream::GetSize()
     {
         Seek(Seek::End, 0);
-        const OffsetType Result = Tell();
+        const OffsetType result = Tell();
         Seek(Seek::Begin, 0);
-        return Result;
+        return result;
     }
 
     bool FileStream::IsGood() const
@@ -90,14 +90,14 @@ namespace Nova
         m_Opened = m_Handle;
     }
 
-    Stream::SizeType StandardStream::Read(void* outBuffer, SizeType size)
+    Stream::SizeType StandardStream::ReadRaw(void* outBuffer, SizeType size)
     {
         return -1;
     }
 
-    Stream::SizeType StandardStream::Write(const void* inBuffer, SizeType count)
+    Stream::SizeType StandardStream::WriteRaw(const void* inBuffer, SizeType size)
     {
-        return fprintf(m_Handle, "%s", (const char*)inBuffer);
+        return fprintf(m_Handle, "%*s", int(size), (const char*)inBuffer);
     }
 
     bool StandardStream::Seek(Nova::Seek seekMode, OffsetType offset)

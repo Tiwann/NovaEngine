@@ -35,4 +35,10 @@ namespace Nova
         static String downloadsDirectory = Combine(GetUserDirectory(), "Downloads");
         return downloadsDirectory;
     }
+
+    StringView Path::GetDesktopDirectory()
+    {
+        static String desktopDirectory = Combine(GetUserDirectory(), "Desktop");
+        return desktopDirectory;
+    }
 }

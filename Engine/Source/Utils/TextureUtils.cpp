@@ -46,7 +46,7 @@ namespace Nova
         createInfo.width = width;
         createInfo.height = height;
         createInfo.depth = 1;
-        createInfo.format = Format::R8G8B8A8_UNORM;
+        createInfo.format = Format::R8G8B8A8_SRGB;
         createInfo.mips = 1;
         createInfo.sampleCount = 1;
         createInfo.usageFlags = Rendering::TextureUsageFlagBits::Sampled;

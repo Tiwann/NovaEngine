@@ -112,8 +112,8 @@ namespace Nova
         {
             const String& currentDisplayName = displayNames[i];
             const String& currentExtension = extensions[i];
-            memcpy(result.Data() + currentCount, *currentDisplayName, currentDisplayName.Count());
-            memcpy(result.Data() + currentCount + currentDisplayName.Count() + 1 , *currentExtension, currentExtension.Count());
+            memcpy(*result + currentCount, *currentDisplayName, currentDisplayName.Count());
+            memcpy(*result + currentCount + currentDisplayName.Count() + 1 , *currentExtension, currentExtension.Count());
             currentCount += currentDisplayName.Count() + currentExtension.Count() + 1 + 1;
         }
         return result;

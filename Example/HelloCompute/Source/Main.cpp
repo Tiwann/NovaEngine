@@ -39,7 +39,7 @@ namespace Nova
         DesktopWindow window;
         window.Initialize(windowCreateInfo);
 
-        Rendering::DeviceCreateInfo deviceCreateInfo;
+        DeviceCreateInfo deviceCreateInfo;
         deviceCreateInfo.applicationName = "Hello Compute";
         deviceCreateInfo.versionMajor = 1;
         deviceCreateInfo.versionMinor = 0;
@@ -64,9 +64,9 @@ namespace Nova
             swapchain->Invalidate();
         });
 
-        Rendering::TextureCreateInfo texCreateInfo;
+        TextureCreateInfo texCreateInfo;
         texCreateInfo.device = &device;
-        texCreateInfo.usageFlags = Rendering::TextureUsageFlagBits::Storage;
+        texCreateInfo.usageFlags = TextureUsageFlagBits::Storage;
         texCreateInfo.width = window.GetWidth();
         texCreateInfo.height = window.GetHeight();
         texCreateInfo.format = Format::R32G32B32A32_FLOAT;
@@ -79,7 +79,7 @@ namespace Nova
 
         window.resizeEvent.Bind([&texture, &texCreateInfo](const int32_t newWidth, const int32_t newHeight)
         {
-            //Rendering::TextureCreateInfo createInfo = texCreateInfo;
+            //TextureCreateInfo createInfo = texCreateInfo;
             //createInfo.width = newWidth;
             //createInfo.height = newHeight;
             //texture.Initialize(createInfo);
@@ -103,7 +103,7 @@ namespace Nova
         stream.Close();
 #endif
 
-        Vulkan::ShaderModule shaderModule = Rendering::ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Compute, computeSpirv);
+        Vulkan::ShaderModule shaderModule = ShaderModule::Create<Vulkan::ShaderModule>(device, ShaderStageFlagBits::Compute, computeSpirv);
 
 
         VkDescriptorSetLayoutBinding binding;
@@ -134,14 +134,14 @@ namespace Nova
         if (result != VK_SUCCESS)
             return EXIT_FAILURE;
 
-        Rendering::ComputePipelineCreateInfo cpCreateInfo;
+        ComputePipelineCreateInfo cpCreateInfo;
         cpCreateInfo.device = &device;
         cpCreateInfo.shaderModule = &shaderModule;
         cpCreateInfo.pipelineLayout = pipelineLayout;
         Vulkan::ComputePipeline computePipeline;
         computePipeline.Initialize(cpCreateInfo);
 
-        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo;
+        DescriptorPoolCreateInfo descriptorPoolCreateInfo;
         descriptorPoolCreateInfo.device = &device;
         descriptorPoolCreateInfo.sizes[BindingType::StorageTexture] = 1;
         descriptorPoolCreateInfo.maxSets = 1;

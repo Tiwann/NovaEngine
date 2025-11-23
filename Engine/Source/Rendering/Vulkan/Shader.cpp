@@ -11,15 +11,15 @@
 
 namespace Nova::Vulkan
 {
-    static SlangCompileTarget GetCompileTarget(const Rendering::ShaderTarget target)
+    static SlangCompileTarget GetCompileTarget(const ShaderTarget target)
     {
         switch (target)
         {
-        case Rendering::ShaderTarget::SPIRV: return SLANG_SPIRV;
-        case Rendering::ShaderTarget::GLSL: return SLANG_GLSL;
-        case Rendering::ShaderTarget::HLSL: return SLANG_HLSL;
-        case Rendering::ShaderTarget::DXBC: return SLANG_DXBC;
-        case Rendering::ShaderTarget::DXIL: return SLANG_DXIL;
+        case ShaderTarget::SPIRV: return SLANG_SPIRV;
+        case ShaderTarget::GLSL: return SLANG_GLSL;
+        case ShaderTarget::HLSL: return SLANG_HLSL;
+        case ShaderTarget::DXBC: return SLANG_DXBC;
+        case ShaderTarget::DXIL: return SLANG_DXIL;
         default: return SLANG_SPIRV;
         }
     }
@@ -80,7 +80,7 @@ namespace Nova::Vulkan
         return errorString;
     };
 
-    bool Shader::Initialize(const Rendering::ShaderCreateInfo& createInfo)
+    bool Shader::Initialize(const ShaderCreateInfo& createInfo)
     {
         // TODO: /!\ MEMORY LEAK HERE
         m_EntryPoints.Clear();
@@ -123,7 +123,7 @@ namespace Nova::Vulkan
             return false;
         }
 
-        for (const Rendering::ShaderEntryPoint& shaderEntryPoint : createInfo.entryPoints)
+        for (const ShaderEntryPoint& shaderEntryPoint : createInfo.entryPoints)
         {
             Slang::ComPtr<slang::IEntryPoint> entryPoint = nullptr;
             result = m_Module->findEntryPointByName(*shaderEntryPoint.name, entryPoint.writeRef());
@@ -167,7 +167,7 @@ namespace Nova::Vulkan
 
             const ShaderStageFlagBits& shaderStage = createInfo.entryPoints[entryPointIndex].stage;
 
-            Rendering::ShaderModuleCreateInfo shaderModuleCreateInfo;
+            ShaderModuleCreateInfo shaderModuleCreateInfo;
             shaderModuleCreateInfo.code = (const uint32_t*)entryPointCode->getBufferPointer();
             shaderModuleCreateInfo.codeSize = entryPointCode->getBufferSize();
             shaderModuleCreateInfo.device = createInfo.device;
@@ -193,7 +193,7 @@ namespace Nova::Vulkan
             stageFlags |= GetStage(ep->getStage());
         }
 
-        Array<Rendering::ShaderPushConstantRange> ranges;
+        Array<ShaderPushConstantRange> ranges;
         uint32_t paramCount = programLayout->getParameterCount();
         uint32_t offset = 0;
         for (uint32_t paramIndex = 0; paramIndex < paramCount; ++paramIndex)
@@ -208,7 +208,7 @@ namespace Nova::Vulkan
 
             if (size > 0)
             {
-                Rendering::ShaderPushConstantRange range;
+                ShaderPushConstantRange range;
                 range.offset = offset;
                 range.size = size;
                 range.stageFlags = stageFlags;
@@ -275,7 +275,7 @@ namespace Nova::Vulkan
             return setLayout.GetHandle();
         });
 
-        Array<VkPushConstantRange> pushConstantRanges = ranges.Transform<VkPushConstantRange>([](const Rendering::ShaderPushConstantRange& range)
+        Array<VkPushConstantRange> pushConstantRanges = ranges.Transform<VkPushConstantRange>([](const ShaderPushConstantRange& range)
         {
             VkPushConstantRange pcRange;
             pcRange.offset = range.offset;
@@ -305,13 +305,14 @@ namespace Nova::Vulkan
         for (auto& shaderModule : m_ShaderModules)
             shaderModule.Destroy();
 
+        if (!m_Device) return;
         vkDestroyPipelineLayout(m_Device->GetHandle(), m_PipelineLayout, nullptr);
     }
 
-    Ref<Rendering::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
+    Ref<Nova::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
     {
-        Rendering::ShaderBindingSetCreateInfo createInfo;
-        createInfo.device = m_Device;
+        ShaderBindingSetCreateInfo createInfo;
+        createInfo.device = (Nova::Device*)m_Device;
         createInfo.pool = m_Device->GetDescriptorPool();
         createInfo.layout = &m_BindingSetLayouts[setIndex];
 
@@ -322,14 +323,16 @@ namespace Nova::Vulkan
         return Ref(bindingSet);
     }
 
-    Array<Ref<Rendering::ShaderBindingSet>> Shader::CreateBindingSets() const
+    Array<Ref<Nova::ShaderBindingSet>> Shader::CreateBindingSets() const
     {
-        Array<Ref<Rendering::ShaderBindingSet>> bindingSets;
+        if (!m_Device) return {};
+
+        Array<Ref<Nova::ShaderBindingSet>> bindingSets;
 
         for (const auto& setLayout : m_BindingSetLayouts)
         {
-            Rendering::ShaderBindingSetCreateInfo createInfo;
-            createInfo.device = m_Device;
+            ShaderBindingSetCreateInfo createInfo;
+            createInfo.device = (Nova::Device*)m_Device;
             createInfo.pool = m_Device->GetDescriptorPool();
             createInfo.layout = &setLayout;
 

@@ -4,31 +4,12 @@
 #include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
-#include <cstdint>
-
 #include "Material.h"
+#include <cstdint>
 
 namespace Nova
 {
     class Window;
-}
-
-namespace Nova::Rendering
-{
-    enum class DeviceType
-    {
-        Unknown,
-        Vulkan
-    };
-
-    struct DeviceCreateInfo
-    {
-        String appName;
-        Window* window = nullptr;
-        SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
-        bool vSync = false;
-    };
-    
     class Surface;
     struct SurfaceCreateInfo;
     class RenderTarget;
@@ -46,6 +27,20 @@ namespace Nova::Rendering
     struct ShaderCreateInfo;
     class Material;
     struct MaterialCreateInfo;
+
+    enum class DeviceType
+    {
+        Unknown,
+        Vulkan
+    };
+
+    struct DeviceCreateInfo
+    {
+        String appName;
+        Window* window = nullptr;
+        SwapchainBuffering buffering = SwapchainBuffering::DoubleBuffering;
+        bool vSync = false;
+    };
 
     class Device : public Object
     {

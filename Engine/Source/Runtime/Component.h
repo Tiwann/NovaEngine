@@ -5,7 +5,7 @@
 #include "Flags.h"
 
 
-namespace Nova::Rendering { class CommandBuffer; }
+namespace Nova { class CommandBuffer; }
 
 namespace Nova
 {
@@ -45,8 +45,8 @@ namespace Nova
         virtual void OnDisable() {}
         virtual void OnUpdate(float deltaTime) {}
         virtual void OnPhysicsUpdate(float deltaTime) {}
-        virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
-        virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
+        virtual void OnPreRender(CommandBuffer& cmdBuffer) {}
+        virtual void OnRender(CommandBuffer& cmdBuffer) {}
         virtual void OnDrawDebug(){}
         //virtual void OnInspectorGUI(const ImGuiIO& IO) {}
 

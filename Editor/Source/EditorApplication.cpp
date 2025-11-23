@@ -63,7 +63,7 @@ namespace Nova
         }
     }
 
-    void EditorApplication::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    void EditorApplication::OnRender(CommandBuffer& cmdBuffer)
     {
         cmdBuffer.ClearColor(Color::Red, 0);
     }

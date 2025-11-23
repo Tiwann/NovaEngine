@@ -7,7 +7,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Material::Initialize(const Rendering::MaterialCreateInfo& createInfo)
+    bool Material::Initialize(const MaterialCreateInfo& createInfo)
     {
         if (!createInfo.device || !createInfo.shader) return false;
 
@@ -27,7 +27,7 @@ namespace Nova::Vulkan
         m_Shader = nullptr;
     }
 
-    void Material::SetSampler(const StringView name, Ref<Rendering::Sampler> sampler)
+    void Material::SetSampler(const StringView name, Ref<Nova::Sampler> sampler)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const ShaderBindingSetLayout& setLayout = setLayouts[1];
@@ -45,7 +45,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetTexture(const StringView name, Ref<Rendering::Texture> texture)
+    void Material::SetTexture(const StringView name, Ref<Nova::Texture> texture)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const ShaderBindingSetLayout& setLayout = setLayouts[1];
@@ -63,7 +63,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetSamplerAndTexture(const StringView name, Ref<Rendering::Sampler> sampler, Ref<Rendering::Texture> texture)
+    void Material::SetSamplerAndTexture(const StringView name, Ref<Sampler> sampler, Ref<Nova::Texture> texture)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const ShaderBindingSetLayout& setLayout = setLayouts[1];
@@ -81,7 +81,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetBuffer(const StringView name, Ref<Rendering::Buffer> buffer, const size_t offset, const size_t size)
+    void Material::SetBuffer(const StringView name, Ref<Buffer> buffer, const size_t offset, const size_t size)
     {
         const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const ShaderBindingSetLayout& setLayout = setLayouts[1];

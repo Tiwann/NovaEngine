@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Runtime/Object.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     enum class ResourceState
     {

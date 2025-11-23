@@ -32,7 +32,7 @@ namespace Nova
             other.m_Pointer = nullptr;
         }
 
-        template <typename U> requires std::is_base_of_v<T, U>
+        template <typename U>
         Ref(const Ref<U>& other) : m_Pointer((PointerType)other.m_Pointer)
         {
             AddRef(other.m_Pointer);

@@ -4,7 +4,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Semaphore::Initialize(const Rendering::SemaphoreCreateInfo& createInfo)
+    bool Semaphore::Initialize(const SemaphoreCreateInfo& createInfo)
     {
 
         Device* device = static_cast<Device*>(createInfo.device);

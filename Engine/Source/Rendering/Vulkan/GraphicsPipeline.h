@@ -7,10 +7,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class GraphicsPipeline : public Rendering::GraphicsPipeline
+    class GraphicsPipeline final : public Nova::GraphicsPipeline
     {
     public:
-        bool Initialize(const Rendering::GraphicsPipelineCreateInfo& createInfo) override;
+        bool Initialize(const GraphicsPipelineCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkPipeline GetHandle() const;

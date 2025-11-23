@@ -10,7 +10,7 @@
 
 namespace Nova::Vulkan
 {
-    bool RenderTarget::Initialize(const Rendering::RenderTargetCreateInfo& createInfo)
+    bool RenderTarget::Initialize(const RenderTargetCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
         Swapchain* swapchain = device->GetSwapchain();
@@ -138,13 +138,13 @@ namespace Nova::Vulkan
             barriers.Add(depthBarrier);
         }
 
-        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
-        if (commandBuffer.Begin({Rendering::CommandBufferUsageFlagBits::OneTimeSubmit}))
+        if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
         {
-            Rendering::FenceCreateInfo fenceCreateInfo;
+            FenceCreateInfo fenceCreateInfo;
             fenceCreateInfo.device = device;
-            fenceCreateInfo.flags = Rendering::FenceCreateFlagBits::None;
+            fenceCreateInfo.flags = FenceCreateFlagBits::None;
 
             Fence fence;
             if (!fence.Initialize(fenceCreateInfo))
@@ -205,7 +205,7 @@ namespace Nova::Vulkan
 
         Destroy();
 
-        Rendering::RenderTargetCreateInfo createInfo;
+        RenderTargetCreateInfo createInfo;
         createInfo.device = m_Device;
         createInfo.width = newWidth;
         createInfo.height = newHeight;
@@ -231,7 +231,7 @@ namespace Nova::Vulkan
             texture.m_Format = m_ColorFormat;
             texture.m_Allocation = m_ColorAllocations[imageIndex];
             texture.m_Mips = 1;
-            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_UsageFlags = TextureUsageFlagBits::Attachment;
             texture.m_SampleCount = m_SampleCount;
             return texture;
         };
@@ -254,7 +254,7 @@ namespace Nova::Vulkan
             texture.m_Format = m_DepthFormat;
             texture.m_Allocation = m_DepthAllocations[imageIndex];
             texture.m_Mips = 1;
-            texture.m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture.m_UsageFlags = TextureUsageFlagBits::Attachment;
             texture.m_SampleCount = m_SampleCount;
             return texture;
         };

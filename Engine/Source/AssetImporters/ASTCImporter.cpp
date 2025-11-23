@@ -109,18 +109,18 @@ namespace Nova
 
         const Array<uint8_t> compressedBlocks = FileUtils::ReadTillEnd(stream);
 
-        Rendering::TextureCreateInfo textureCreateInfo = Rendering::TextureCreateInfo()
+        TextureCreateInfo textureCreateInfo = TextureCreateInfo()
         .WithWidth(width)
         .WithHeight(height)
         .WithDepth(depth)
         .WithFormat(GetFormatFromHeader(m_ImportFormat, header))
-        .WithFlags(Rendering::TextureUsageFlagBits::Sampled)
+        .WithFlags(TextureUsageFlagBits::Sampled)
         .WithMips(1)
         .WithSampleCount(1)
         .WithData(compressedBlocks);
 
         Application& application = Application::GetCurrentApplication();
-        Ref<Rendering::Device> device = application.GetDevice();
+        Ref<Device> device = application.GetDevice();
         Ref<Texture> texture = device->CreateTexture(textureCreateInfo);
 
         return true;

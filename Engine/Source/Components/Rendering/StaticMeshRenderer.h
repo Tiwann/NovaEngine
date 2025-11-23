@@ -6,15 +6,11 @@
 namespace Nova
 {
     class StaticMesh;
-
-    namespace Rendering
-    {
-        class Device;
-        class GraphicsPipeline;
-        class Buffer;
-        class Shader;
-        class ShaderBindingSet;
-    }
+    class Device;
+    class GraphicsPipeline;
+    class Buffer;
+    class Shader;
+    class ShaderBindingSet;
 }
 
 namespace Nova
@@ -26,17 +22,17 @@ namespace Nova
         void OnInit() override;
         void OnDestroy() override;
 
-        void OnPreRender(Rendering::CommandBuffer& cmdBuffer) override;
-        void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
+        void OnPreRender(CommandBuffer& cmdBuffer) override;
+        void OnRender(CommandBuffer& cmdBuffer) override;
 
         Ref<StaticMesh> GetStaticMesh() const;
         void SetStaticMesh(const Ref<StaticMesh>& newMesh);
     private:
         Ref<StaticMesh> m_StaticMesh = nullptr;
-        Ref<Rendering::Shader> m_Shader = nullptr;
-        Ref<Rendering::Sampler> m_Sampler = nullptr;
-        Ref<Rendering::GraphicsPipeline> m_Pipeline = nullptr;
-        Ref<Rendering::Buffer> m_SceneUniformBuffer = nullptr;
-        Ref<Rendering::ShaderBindingSet> m_BindingSet = nullptr;
+        Ref<Shader> m_Shader = nullptr;
+        Ref<Sampler> m_Sampler = nullptr;
+        Ref<GraphicsPipeline> m_Pipeline = nullptr;
+        Ref<Buffer> m_SceneUniformBuffer = nullptr;
+        Ref<ShaderBindingSet> m_BindingSet = nullptr;
     };
 }

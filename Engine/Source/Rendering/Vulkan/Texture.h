@@ -8,14 +8,16 @@ typedef struct VmaAllocation_T* VmaAllocation;
 namespace Nova::Vulkan
 {
     class Device;
+    class Swapchain;
+    class RenderTarget;
 
-    class Texture : public Rendering::Texture
+    class Texture final : public Nova::Texture
     {
     public:
         Texture() = default;
         ~Texture() override = default;
 
-        bool Initialize(const Rendering::TextureCreateInfo& createInfo) override;
+        bool Initialize(const TextureCreateInfo& createInfo) override;
         void Destroy() override;
         bool IsValid() override;
 
@@ -24,8 +26,8 @@ namespace Nova::Vulkan
         VmaAllocation GetAllocation() const;
         uint32_t GetImageLayout() const;
     private:
-        friend class Swapchain;
-        friend class RenderTarget;
+        friend Swapchain;
+        friend RenderTarget;
 
         Device* m_Device = nullptr;
         VkImage m_Image = nullptr;

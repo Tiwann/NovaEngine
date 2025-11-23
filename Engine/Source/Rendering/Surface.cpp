@@ -2,7 +2,7 @@
 #include "Runtime/DesktopWindow.h"
 #include "Runtime/Window.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     Device* Surface::GetDevice() const
     {

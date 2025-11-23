@@ -17,9 +17,9 @@
 namespace Nova::Vulkan
 {
 
-    static const Rendering::RenderPass* s_CurrentRenderPass = nullptr;
+    static const RenderPass* s_CurrentRenderPass = nullptr;
 
-    bool CommandBuffer::Allocate(const Rendering::CommandBufferAllocateInfo& allocateInfo)
+    bool CommandBuffer::Allocate(const CommandBufferAllocateInfo& allocateInfo)
     {
         Device* device = static_cast<Device*>(allocateInfo.device);
         m_CommandPool = allocateInfo.commandPool;
@@ -34,10 +34,10 @@ namespace Nova::Vulkan
 
         switch (m_Level)
         {
-        case Rendering::CommandBufferLevel::Primary:
+        case CommandBufferLevel::Primary:
             info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
             break;
-        case Rendering::CommandBufferLevel::Secondary:
+        case CommandBufferLevel::Secondary:
             info.level = VK_COMMAND_BUFFER_LEVEL_SECONDARY;
             break;
         }
@@ -69,12 +69,12 @@ namespace Nova::Vulkan
 #endif
     }
 
-    bool CommandBuffer::Begin(const Rendering::CommandBufferBeginInfo& beginInfo)
+    bool CommandBuffer::Begin(const CommandBufferBeginInfo& beginInfo)
     {
         VkCommandBufferBeginInfo info { VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO };
         info.flags = beginInfo.flags;
 
-        if (m_Level == Rendering::CommandBufferLevel::Secondary)
+        if (m_Level == CommandBufferLevel::Secondary)
         {
             VkCommandBufferInheritanceInfo inheritanceInfo { VK_STRUCTURE_TYPE_COMMAND_BUFFER_INHERITANCE_INFO };
             // TODO: Write api for secondary command buffers
@@ -90,12 +90,11 @@ namespace Nova::Vulkan
         vkEndCommandBuffer(m_Handle);
     }
 
-    void CommandBuffer::ExecuteCommandBuffers(const Array<Rendering::CommandBuffer*>& commandBuffers)
+    void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
     {
-        const auto toHandles = [](const Rendering::CommandBuffer* commandBuffer) -> VkCommandBuffer
+        const auto toHandles = [](const Nova::CommandBuffer* commandBuffer) -> VkCommandBuffer
         {
-            const CommandBuffer* cmdBuff = (const CommandBuffer*)commandBuffer;
-            return cmdBuff->GetHandle();
+            return ((const CommandBuffer*)commandBuffer)->GetHandle();
         };
 
         Array<VkCommandBuffer> cmdBuffs = commandBuffers.Transform<VkCommandBuffer>(toHandles);
@@ -133,31 +132,31 @@ namespace Nova::Vulkan
         vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
     }
 
-    void CommandBuffer::BindGraphicsPipeline(const Rendering::GraphicsPipeline& pipeline)
+    void CommandBuffer::BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline)
     {
         vkCmdBindPipeline(m_Handle, VK_PIPELINE_BIND_POINT_GRAPHICS, ((const GraphicsPipeline&)pipeline).GetHandle());
     }
 
-    void CommandBuffer::BindComputePipeline(const Rendering::ComputePipeline& pipeline)
+    void CommandBuffer::BindComputePipeline(const Nova::ComputePipeline& pipeline)
     {
         vkCmdBindPipeline(m_Handle, VK_PIPELINE_BIND_POINT_COMPUTE, ((const GraphicsPipeline&)pipeline).GetHandle());
     }
 
-    void CommandBuffer::BindVertexBuffer(const Rendering::Buffer& vertexBuffer, const size_t offset)
+    void CommandBuffer::BindVertexBuffer(const Nova::Buffer& vertexBuffer, const size_t offset)
     {
         const Buffer& vertexBuff = (const Buffer&)vertexBuffer;
         const VkCommandBuffer cmdBuff = GetHandle();
         vkCmdBindVertexBuffers(cmdBuff, 0, 1, vertexBuff.GetHandlePtr(), &offset);
     }
 
-    void CommandBuffer::BindIndexBuffer(const Rendering::Buffer& indexBuffer, const size_t offset, const Format indexFormat)
+    void CommandBuffer::BindIndexBuffer(const Nova::Buffer& indexBuffer, const size_t offset, const Format indexFormat)
     {
         const Buffer& indexBuff = (const Buffer&)indexBuffer;
         const VkCommandBuffer cmdBuff = GetHandle();
         vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
     }
 
-    void CommandBuffer::BindShaderBindingSet(const Rendering::Shader& shader, const Rendering::ShaderBindingSet& bindingSet)
+    void CommandBuffer::BindShaderBindingSet(const Nova::Shader& shader, const Nova::ShaderBindingSet& bindingSet)
     {
         const Shader& sh = (const Shader&)shader;
 
@@ -173,7 +172,7 @@ namespace Nova::Vulkan
 
     }
 
-    void CommandBuffer::BindMaterial(const Rendering::Material& material)
+    void CommandBuffer::BindMaterial(const Nova::Material& material)
     {
         BindShaderBindingSet(*material.GetShader(), *material.GetBindingSets());
     }
@@ -215,22 +214,22 @@ namespace Nova::Vulkan
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
-    void CommandBuffer::DispatchIndirect(const Rendering::Buffer& buffer, const size_t offset)
+    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, const size_t offset)
     {
         vkCmdDispatchIndirect(m_Handle, ((const Buffer&)buffer).GetHandle(), offset);
     }
 
-    void CommandBuffer::PushConstants(const Rendering::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
+    void CommandBuffer::PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
     {
         vkCmdPushConstants(m_Handle, ((const Shader&)shader).GetPipelineLayout(), Convert<ShaderStageFlags, VkShaderStageFlags>(stageFlags), offset, size, values);
     }
 
-    void CommandBuffer::UpdateBuffer(const Rendering::Buffer& buffer, const size_t offset, const size_t size, const void* data)
+    void CommandBuffer::UpdateBuffer(const Nova::Buffer& buffer, const size_t offset, const size_t size, const void* data)
     {
         vkCmdUpdateBuffer(m_Handle, ((const Buffer&)buffer).GetHandle(), offset, size, data);
     }
 
-    void CommandBuffer::BufferCopy(const Rendering::Buffer& src, const Rendering::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
+    void CommandBuffer::BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
         VkBufferCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_COPY_2 };
         region.srcOffset = srcOffset;
@@ -245,7 +244,7 @@ namespace Nova::Vulkan
         vkCmdCopyBuffer2(m_Handle, &copyInfo);
     }
 
-    void CommandBuffer::Blit(const Rendering::Texture& src, const Rendering::BlitRegion& srcRegion, const Rendering::Texture& dest, const Rendering::BlitRegion& destRegion, const Filter filter)
+    void CommandBuffer::Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, const Filter filter)
     {
         const Texture& source = (Texture&)src;
         const Texture& destination = (Texture&)dest;
@@ -351,27 +350,27 @@ namespace Nova::Vulkan
         vkCmdPipelineBarrier2(m_Handle, &outDependency);
     }
 
-    void CommandBuffer::Blit(const Rendering::Texture& src, const Rendering::Texture& dest, const Filter filter)
+    void CommandBuffer::Blit(const Nova::Texture& src, const Nova::Texture& dest, const Filter filter)
     {
-        const Rendering::BlitRegion srcRegion = { 0, 0, src.GetWidth(), src.GetHeight(), 0 };
-        const Rendering::BlitRegion destRegion = { 0, 0, dest.GetWidth(), dest.GetHeight(), 0 };
+        const BlitRegion srcRegion = { 0, 0, src.GetWidth(), src.GetHeight(), 0 };
+        const BlitRegion destRegion = { 0, 0, dest.GetWidth(), dest.GetHeight(), 0 };
         Blit(src, srcRegion, dest, destRegion, filter);
     }
 
-    void CommandBuffer::BeginRenderPass(const Rendering::RenderPass& renderPass)
+    void CommandBuffer::BeginRenderPass(const RenderPass& renderPass)
     {
         Array<VkRenderingAttachmentInfo> colorAttachments;
 
-        for (const Rendering::RenderPassAttachment& attachment : renderPass)
+        for (const RenderPassAttachment& attachment : renderPass)
         {
-            if (attachment.type == Rendering::AttachmentType::Depth)
+            if (attachment.type == AttachmentType::Depth)
                 continue;
 
             const Color& clearColor = attachment.clearValue.color;
 
             VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-            colorAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
-            colorAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
+            colorAttachmentInfo.loadOp = Convert<LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
+            colorAttachmentInfo.storeOp = Convert<StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
             colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             colorAttachmentInfo.imageView = ((Texture*)attachment.texture)->GetImageView();
             colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
@@ -385,12 +384,12 @@ namespace Nova::Vulkan
         }
 
 
-        const Rendering::RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
+        const RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
         VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
         if (renderPass.HasDepthAttachment())
         {
-            depthAttachmentInfo.loadOp = Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
-            depthAttachmentInfo.storeOp = Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
+            depthAttachmentInfo.loadOp = Convert<LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
+            depthAttachmentInfo.storeOp = Convert<StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
             depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthAttachmentInfo.imageView = ((Texture*)depthAttachment->texture)->GetImageView();
             depthAttachmentInfo.clearValue.depthStencil = { depthAttachment->clearValue.depth, depthAttachment->clearValue.stencil};

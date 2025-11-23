@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Containers/Array.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     class CommandBuffer;
     class Semaphore;

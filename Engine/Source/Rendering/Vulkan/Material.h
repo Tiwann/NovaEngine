@@ -3,15 +3,15 @@
 
 namespace Nova::Vulkan
 {
-    class Material final : public Rendering::Material
+    class Material final : public Nova::Material
     {
     public:
-        bool Initialize(const Rendering::MaterialCreateInfo& createInfo) override;
+        bool Initialize(const MaterialCreateInfo& createInfo) override;
         void Destroy() override;
 
-        void SetSampler(StringView name, Ref<Rendering::Sampler> sampler) override;
-        void SetTexture(StringView name, Ref<Rendering::Texture> texture) override;
-        void SetSamplerAndTexture(StringView name, Ref<Rendering::Sampler> sampler, Ref<Rendering::Texture> texture) override;
-        void SetBuffer(StringView name, Ref<Rendering::Buffer> buffer, size_t offset, size_t size) override;
+        void SetSampler(StringView name, Ref<Nova::Sampler> sampler) override;
+        void SetTexture(StringView name, Ref<Nova::Texture> texture) override;
+        void SetSamplerAndTexture(StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::Texture> texture) override;
+        void SetBuffer(StringView name, Ref<Nova::Buffer> buffer, size_t offset, size_t size) override;
     };
 }

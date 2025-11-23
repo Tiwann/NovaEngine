@@ -10,17 +10,17 @@ namespace Nova::Vulkan
     class CommandBuffer;
 
 
-    class CommandPool : public Rendering::CommandPool
+    class CommandPool final : public Nova::CommandPool
     {
     public:
-        bool Initialize(const Rendering::CommandPoolCreateInfo& createInfo) override;
+        bool Initialize(const CommandPoolCreateInfo& createInfo) override;
         void Destroy() override;
         void Reset() override;
 
         VkCommandPool GetHandle();
         const VkCommandPool* GetHandle() const;
 
-        CommandBuffer AllocateCommandBuffer(Rendering::CommandBufferLevel level);
+        CommandBuffer AllocateCommandBuffer(CommandBufferLevel level);
     private:
         Device* m_Device = nullptr;
         VkCommandPool m_Handle = nullptr;

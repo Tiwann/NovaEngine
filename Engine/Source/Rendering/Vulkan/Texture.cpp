@@ -8,9 +8,9 @@
 
 namespace Nova::Vulkan
 {
-    bool Texture::Initialize(const Rendering::TextureCreateInfo& createInfo)
+    bool Texture::Initialize(const TextureCreateInfo& createInfo)
     {
-        using namespace Nova::Rendering;
+        using namespace Nova;
 
         if (createInfo.width == 0 || createInfo.height == 0)
             return false;

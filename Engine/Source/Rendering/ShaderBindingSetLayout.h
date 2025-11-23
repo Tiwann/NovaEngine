@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
 

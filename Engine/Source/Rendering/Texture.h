@@ -4,7 +4,7 @@
 #include "Runtime/Asset.h"
 #include <cstdint>
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
 

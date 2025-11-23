@@ -5,7 +5,7 @@
 
 namespace Nova::Vulkan
 {
-    bool CommandPool::Initialize(const Rendering::CommandPoolCreateInfo& createInfo)
+    bool CommandPool::Initialize(const CommandPoolCreateInfo& createInfo)
     {
         Device* device = static_cast<Device*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
@@ -43,9 +43,9 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    CommandBuffer CommandPool::AllocateCommandBuffer(Rendering::CommandBufferLevel level)
+    CommandBuffer CommandPool::AllocateCommandBuffer(CommandBufferLevel level)
     {
-        Rendering::CommandBufferAllocateInfo allocateInfo;
+        CommandBufferAllocateInfo allocateInfo;
         allocateInfo.commandPool = this;
         allocateInfo.device = m_Device;
         allocateInfo.level = level;

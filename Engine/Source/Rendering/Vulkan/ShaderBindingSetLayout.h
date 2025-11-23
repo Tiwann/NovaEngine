@@ -8,10 +8,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class ShaderBindingSetLayout : public Rendering::ShaderBindingSetLayout
+    class ShaderBindingSetLayout : public Nova::ShaderBindingSetLayout
     {
     public:
-        bool Initialize(Rendering::Device* device, uint32_t setIndex) override;
+        bool Initialize(Nova::Device* device, uint32_t setIndex) override;
         void Destroy() override;
         bool Build() override;
 

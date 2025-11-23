@@ -7,10 +7,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class ShaderModule : public Rendering::ShaderModule
+    class ShaderModule final : public Nova::ShaderModule
     {
     public:
-        bool Initialize(const Rendering::ShaderModuleCreateInfo& createInfo) override;
+        bool Initialize(const ShaderModuleCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkShaderModule GetHandle() const;

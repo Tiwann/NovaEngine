@@ -8,11 +8,8 @@
 
 namespace Nova
 {
-    namespace Rendering
-    {
-        class Buffer;
-        class Material;
-    }
+    class Buffer;
+    class Material;
 
     struct SubMeshInfo
     {
@@ -26,8 +23,8 @@ namespace Nova
     {
         String slotName;
         uint32_t slot = 0;
-        Array<Ref<Rendering::Texture>> textures;
-        Ref<Rendering::Material> material = nullptr;
+        Array<Ref<Texture>> textures;
+        Ref<Material> material = nullptr;
         Array<SubMeshInfo> subMeshes;
     };
 
@@ -41,19 +38,19 @@ namespace Nova
         AssetType GetAssetType() const override;
         bool LoadFromFile(StringView filepath, bool loadResources);
 
-        void SetMaterial(uint32_t slot, Ref<Rendering::Material> material);
-        Ref<Rendering::Material> GetMaterial(uint32_t slot);
+        void SetMaterial(uint32_t slot, Ref<Material> material);
+        Ref<Material> GetMaterial(uint32_t slot);
 
         const Array<MaterialInfo>& GetMaterialInfos() const;
-        Ref<Rendering::Buffer> GetVertexBuffer() const;
-        Ref<Rendering::Buffer> GetIndexBuffer() const;
+        Ref<Buffer> GetVertexBuffer() const;
+        Ref<Buffer> GetIndexBuffer() const;
     private:
         bool MaterialSlotExists(uint32_t slot) const;
         MaterialInfo& CreateMaterialSlot(const String& name, uint32_t slot);
 
         Array<MaterialInfo> m_MaterialInfos;
-        Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
-        Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
+        Ref<Buffer> m_VertexBuffer = nullptr;
+        Ref<Buffer> m_IndexBuffer = nullptr;
     };
     
 }

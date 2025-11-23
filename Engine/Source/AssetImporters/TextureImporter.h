@@ -9,7 +9,7 @@ namespace Nova
     class TextureImporter
     {
     protected:
-        using Texture = Rendering::Texture;
+        using Texture = Texture;
 
     public:
         TextureImporter() = default;

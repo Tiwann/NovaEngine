@@ -1,6 +1,6 @@
 ﻿#include "ShaderBindingSetLayout.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     size_t ShaderBindingSetLayout::BindingCount() const
     {

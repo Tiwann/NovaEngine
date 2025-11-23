@@ -6,14 +6,14 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class ImGuiRenderer : public Rendering::ImGuiRenderer
+    class ImGuiRenderer final : public Nova::ImGuiRenderer
     {
     public:
-        bool Initialize(const Rendering::ImGuiRendererCreateInfo& createInfo) override;
+        bool Initialize(const ImGuiRendererCreateInfo& createInfo) override;
         void Destroy() override;
         void BeginFrame() override;
         void EndFrame() override;
-        void Render(Rendering::CommandBuffer& commandBuffer) override;
+        void Render(CommandBuffer& commandBuffer) override;
     private:
         Device* m_Device = nullptr;
     };

@@ -9,7 +9,7 @@
 #include "ResolveMode.h"
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Texture;
     class RenderTarget;

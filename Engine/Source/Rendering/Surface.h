@@ -1,12 +1,10 @@
 ﻿#pragma once
 #include <cstdint>
-
 #include "Runtime/Object.h"
 
-namespace Nova { class Window; }
-
-namespace Nova::Rendering
+namespace Nova
 {
+    class Window;
     class Device;
 
     struct SurfaceCreateInfo

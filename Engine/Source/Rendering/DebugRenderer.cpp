@@ -21,12 +21,12 @@ namespace Nova
     static Array<LineVertex> s_Vertices;
     static Array<uint32_t> s_Indices;
     static uint32_t s_IndicesCount = 0;
-    static Ref<Rendering::Shader> s_Shader = nullptr;
-    static Ref<Rendering::Buffer> s_VertexBuffer = nullptr;
-    static Ref<Rendering::Buffer> s_IndexBuffer = nullptr;
-    static Ref<Rendering::GraphicsPipeline> s_Pipeline = nullptr;
-    static Ref<Rendering::ShaderBindingSet> s_BindingSet = nullptr;
-    static Rendering::RenderPass* s_RenderPass = nullptr;
+    static Ref<Shader> s_Shader = nullptr;
+    static Ref<Buffer> s_VertexBuffer = nullptr;
+    static Ref<Buffer> s_IndexBuffer = nullptr;
+    static Ref<GraphicsPipeline> s_Pipeline = nullptr;
+    static Ref<ShaderBindingSet> s_BindingSet = nullptr;
+    static RenderPass* s_RenderPass = nullptr;
     static bool s_Begin = false;
 
     // CAREFUL THIS MIGHT INCREASE VERTEX COUNT
@@ -42,7 +42,7 @@ namespace Nova
         s_Shader = createInfo.shader;
         s_RenderPass = createInfo.renderPass;
 
-        Rendering::GraphicsPipelineCreateInfo pipelineInfo = Rendering::GraphicsPipelineCreateInfo();
+        GraphicsPipelineCreateInfo pipelineInfo = GraphicsPipelineCreateInfo();
         pipelineInfo.device = s_Device;
         pipelineInfo.shader = s_Shader;
         pipelineInfo.renderPass = s_RenderPass;
@@ -67,16 +67,16 @@ namespace Nova
         s_Pipeline = s_Device->CreateGraphicsPipeline(pipelineInfo);
         if (!s_Pipeline) return false;
 
-        Rendering::BufferCreateInfo vertexBufferCreateInfo;
+        BufferCreateInfo vertexBufferCreateInfo;
         vertexBufferCreateInfo.device = s_Device;
-        vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
+        vertexBufferCreateInfo.usage = BufferUsage::VertexBuffer;
         vertexBufferCreateInfo.size = createInfo.maxVertices * sizeof(LineVertex);
         s_VertexBuffer = s_Device->CreateBuffer(vertexBufferCreateInfo);
         if (!s_VertexBuffer) return false;
 
-        Rendering::BufferCreateInfo indexBufferCreateInfo;
+        BufferCreateInfo indexBufferCreateInfo;
         indexBufferCreateInfo.device = s_Device;
-        indexBufferCreateInfo.usage = Rendering::BufferUsage::IndexBuffer;
+        indexBufferCreateInfo.usage = BufferUsage::IndexBuffer;
         indexBufferCreateInfo.size = 2 * createInfo.maxVertices * sizeof(LineVertex);
         s_IndexBuffer = s_Device->CreateBuffer(indexBufferCreateInfo);
         if (!s_IndexBuffer) return false;
@@ -102,7 +102,7 @@ namespace Nova
         s_Begin = true;
     }
 
-    void DebugRenderer::End(Rendering::CommandBuffer& cmdBuffer)
+    void DebugRenderer::End(CommandBuffer& cmdBuffer)
     {
         NOVA_ASSERT(s_Begin, "DebugRenderer::End/End call mismatch!");
         if (s_Vertices.IsEmpty())
@@ -116,7 +116,7 @@ namespace Nova
         s_Begin = false;
     }
 
-    void DebugRenderer::Render(Rendering::CommandBuffer& cmdBuffer)
+    void DebugRenderer::Render(CommandBuffer& cmdBuffer)
     {
         if (s_Vertices.IsEmpty()) return;
 

@@ -2,7 +2,7 @@
 #include "BindingType.h"
 #include "Containers/Map.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     struct DescriptorPoolCreateInfo

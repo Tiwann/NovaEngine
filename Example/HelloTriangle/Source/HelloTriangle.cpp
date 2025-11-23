@@ -39,17 +39,17 @@ public:
 
         const String shaderPath = Path::Combine(APPLICATION_DIR, "Shaders", "HelloTriangle.slang");
 
-        Rendering::ShaderCreateInfo shaderCreateInfo = { };
+        ShaderCreateInfo shaderCreateInfo = { };
         shaderCreateInfo.device = device;
         shaderCreateInfo.entryPoints.Add({ "vert", ShaderStageFlagBits::Vertex });
         shaderCreateInfo.entryPoints.Add({ "frag", ShaderStageFlagBits::Fragment });
         shaderCreateInfo.moduleInfo = { "HelloTriangle", shaderPath };
-        shaderCreateInfo.target = Rendering::ShaderTarget::SPIRV;
+        shaderCreateInfo.target = ShaderTarget::SPIRV;
         shaderCreateInfo.slang = GetSlangSession();
 
         m_Shader.Initialize(shaderCreateInfo);
 
-        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo;
+        GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = device;
         pipelineCreateInfo.renderPass = GetRenderPass();
         pipelineCreateInfo.shader = &m_Shader;
@@ -132,9 +132,9 @@ public:
             int32_t width = 0, height = 0;
             stbi_uc* pixels = stbi_load(*texturePath, &width, &height, nullptr, STBI_rgb_alpha);
 
-            Rendering::TextureCreateInfo createInfo;
+            TextureCreateInfo createInfo;
             createInfo.device = GetDevice();
-            createInfo.usageFlags = Rendering::TextureUsageFlagBits::Sampled;
+            createInfo.usageFlags = TextureUsageFlagBits::Sampled;
             createInfo.width = width;
             createInfo.height = height;
             createInfo.depth = 1;
@@ -272,7 +272,7 @@ public:
         ImGui::PopStyleVar();
     }
 
-    void OnRender(Rendering::CommandBuffer& cmdBuffer) override
+    void OnRender(CommandBuffer& cmdBuffer) override
     {
         const Matrix4& viewProj = m_Camera->GetViewProjectionMatrix();
         const Matrix4 mvp = viewProj * m_TriangleTransform->GetWorldSpaceMatrix();

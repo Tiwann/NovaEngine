@@ -8,7 +8,7 @@
 
 namespace Nova::Vulkan
 {
-    bool DescriptorPool::Initialize(const Rendering::DescriptorPoolCreateInfo& createInfo)
+    bool DescriptorPool::Initialize(const DescriptorPoolCreateInfo& createInfo)
     {
         Array<VkDescriptorPoolSize> poolSizes;
         for (const Pair<BindingType, uint32_t>& poolSize : createInfo.sizes)
@@ -51,7 +51,7 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    VkDescriptorSet DescriptorPool::AllocateDescriptorSet(const Rendering::ShaderBindingSetLayout& bindingSetLayout) const
+    VkDescriptorSet DescriptorPool::AllocateDescriptorSet(const Nova::ShaderBindingSetLayout& bindingSetLayout) const
     {
         VkDescriptorSet descriptorSet = nullptr;
         const VkDescriptorSetLayout descriptorSetLayout = ((const ShaderBindingSetLayout&)bindingSetLayout).GetHandle();

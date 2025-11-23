@@ -5,7 +5,7 @@
 
 #include <imgui.h>
 
-namespace Nova::Rendering
+namespace Nova
 {
     bool ImGuiRenderer::Initialize(const ImGuiRendererCreateInfo& createInfo)
     {

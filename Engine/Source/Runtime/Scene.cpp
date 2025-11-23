@@ -47,7 +47,7 @@ namespace Nova
         }
     }
 
-    void Scene::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    void Scene::OnPreRender(CommandBuffer& cmdBuffer)
     {
         for(Entity* entity : m_Entities)
         {
@@ -55,7 +55,7 @@ namespace Nova
         }
     }
 
-    void Scene::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    void Scene::OnRender(CommandBuffer& cmdBuffer)
     {
         for(Entity* entity : m_Entities)
         {

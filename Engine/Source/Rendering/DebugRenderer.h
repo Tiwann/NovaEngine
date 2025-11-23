@@ -9,23 +9,19 @@ namespace Nova
     struct Vector2;
     class Matrix4;
     struct Color;
-
-    namespace Rendering
-    {
-        class CommandBuffer;
-        class Device;
-        class Shader;
-        class RenderPass;
-    }
+    class CommandBuffer;
+    class Device;
+    class Shader;
+    class RenderPass;
 }
 
 namespace Nova
 {
     struct DebugRendererCreateInfo
     {
-        Ref<Rendering::Device> device = nullptr;
-        Ref<Rendering::Shader> shader = nullptr;
-        Rendering::RenderPass* renderPass = nullptr;
+        Ref<Device> device = nullptr;
+        Ref<Shader> shader = nullptr;
+        RenderPass* renderPass = nullptr;
         uint32_t maxVertices = 0;
     };
 
@@ -39,13 +35,13 @@ namespace Nova
         static void Destroy();
 
         static void Begin(const Matrix4& viewProjection);
-        static void End(Rendering::CommandBuffer& cmdBuffer);
-        static void Render(Rendering::CommandBuffer& cmdBuffer);
+        static void End(CommandBuffer& cmdBuffer);
+        static void Render(CommandBuffer& cmdBuffer);
         static void DrawLine(const Vector3& start, const Vector3& end, const Color& color, float thickness = 1.0f);
         static void DrawSquare(const Vector3& position, const Quaternion& rotation, const Vector3& size, const Color& color, float thickness = 1.0f);
         static void DrawCircle(const Vector3& position, const Quaternion& rotation, float radius, const Color& color, float thickness = 1.0f);
         static void DrawCapsule(const Vector3& position, float height, float radius, const Color& color, float thickness = 1.0f);
     private:
-        static inline Ref<Rendering::Device> s_Device = nullptr;
+        static inline Ref<Device> s_Device = nullptr;
     };
 }

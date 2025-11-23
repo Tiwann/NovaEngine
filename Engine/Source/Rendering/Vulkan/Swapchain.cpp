@@ -11,7 +11,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Swapchain::Initialize(const Rendering::SwapchainCreateInfo& createInfo)
+    bool Swapchain::Initialize(const SwapchainCreateInfo& createInfo)
     {
         Device* device = static_cast<Device*>(createInfo.device);
         const Surface* surface = static_cast<const Surface*>(createInfo.surface);
@@ -111,9 +111,9 @@ namespace Nova::Vulkan
         }
 
         CommandPool* commandPool = ((Device*)m_Device)->GetCommandPool();
-        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
-        commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit });
+        commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit });
 
         VkDependencyInfo inDependency = { VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
         inDependency.dependencyFlags = 0;
@@ -123,7 +123,7 @@ namespace Nova::Vulkan
 
         commandBuffer.End();
 
-        Rendering::Scoped<Fence> fence = Rendering::FenceCreateInfo(m_Device);
+        Scoped<Fence> fence = FenceCreateInfo(m_Device);
         graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
         fence->Wait(~0);
 
@@ -152,8 +152,8 @@ namespace Nova::Vulkan
 
     bool Swapchain::Recreate()
     {
-        const Rendering::Surface* surface = GetSurface();
-        Rendering::SwapchainCreateInfo createInfo;
+        const Nova::Surface* surface = GetSurface();
+        SwapchainCreateInfo createInfo;
         createInfo.device = m_Device;
         createInfo.surface = m_Surface;
         createInfo.width = surface->GetWidth();
@@ -177,7 +177,7 @@ namespace Nova::Vulkan
 #endif
     }
 
-    bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex)
+    bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const
     {
         if (!semaphore)
             return false;
@@ -191,7 +191,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    const Ref<Texture>& Swapchain::GetTexture(const uint32_t index)
+    const Ref<Nova::Texture>& Swapchain::GetTexture(const uint32_t index)
     {
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
@@ -204,7 +204,7 @@ namespace Nova::Vulkan
             texture->m_Allocation = nullptr;
             texture->m_SampleCount = 1;
             texture->m_Mips = 1;
-            texture->m_UsageFlags = Rendering::TextureUsageFlagBits::Attachment;
+            texture->m_UsageFlags = TextureUsageFlagBits::Attachment;
             texture->m_Format = m_ImageFormat;
             return texture;
         };
@@ -212,7 +212,7 @@ namespace Nova::Vulkan
         return m_Textures[index].Get(createTexture);
     }
 
-    const Ref<Texture>& Swapchain::GetCurrentTexture()
+    const Ref<Nova::Texture>& Swapchain::GetCurrentTexture()
     {
         const Device* device = (Device*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();

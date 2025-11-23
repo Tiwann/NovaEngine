@@ -3,7 +3,7 @@
 #include "Vulkan/RenderTarget.h"
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     uint32_t RenderTarget::GetWidth() const
     {

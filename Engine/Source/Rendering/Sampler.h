@@ -5,7 +5,7 @@
 #include "Runtime/Object.h"
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
 

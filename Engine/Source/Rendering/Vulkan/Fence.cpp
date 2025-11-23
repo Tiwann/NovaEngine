@@ -4,7 +4,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Fence::Initialize(const Rendering::FenceCreateInfo& createInfo)
+    bool Fence::Initialize(const FenceCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
         const VkDevice deviceHandle = device->GetHandle();

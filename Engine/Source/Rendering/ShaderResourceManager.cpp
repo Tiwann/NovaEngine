@@ -1,6 +1,6 @@
 ﻿#include "ShaderResourceManager.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     void ShaderResourceManager::AddBindingSetLayout(const ShaderBindingSetLayout& setLayout)
     {

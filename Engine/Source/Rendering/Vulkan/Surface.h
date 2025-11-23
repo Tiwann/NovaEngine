@@ -3,14 +3,14 @@
 
 typedef struct VkSurfaceKHR_T* VkSurfaceKHR;
 
-namespace Nova::Rendering { class Device; }
+namespace Nova { class Device; }
 
 namespace Nova::Vulkan
 {
-    class Surface : public Rendering::Surface
+    class Surface final : public Nova::Surface
     {
     public:
-        bool Initialize(const Rendering::SurfaceCreateInfo& createInfo) override;
+        bool Initialize(const SurfaceCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkSurfaceKHR GetHandle() const;

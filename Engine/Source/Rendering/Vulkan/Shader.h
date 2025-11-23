@@ -11,14 +11,14 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class Shader : public Rendering::Shader
+    class Shader final : public Nova::Shader
     {
     public:
-        bool Initialize(const Rendering::ShaderCreateInfo& createInfo) override;
+        bool Initialize(const ShaderCreateInfo& createInfo) override;
         void Destroy() override;
 
-        Ref<Rendering::ShaderBindingSet> CreateBindingSet(size_t setIndex) const override;
-        Array<Ref<Rendering::ShaderBindingSet>> CreateBindingSets() const override;
+        Ref<Nova::ShaderBindingSet> CreateBindingSet(size_t setIndex) const override;
+        Array<Ref<Nova::ShaderBindingSet>> CreateBindingSets() const override;
 
         const Array<ShaderModule>& GetShaderModules() const;
         const ShaderModule& GetShaderModule(ShaderStageFlagBits stage) const;
@@ -36,7 +36,7 @@ namespace Nova::Vulkan
         Slang::ComPtr<slang::IComponentType> m_Program = nullptr;
         Slang::ComPtr<slang::IComponentType> m_LinkedProgram = nullptr;
 
-        Array<Rendering::ShaderPushConstantRange> m_PushConstantRanges;
+        Array<ShaderPushConstantRange> m_PushConstantRanges;
         Array<ShaderModule> m_ShaderModules;
         Array<ShaderBindingSetLayout> m_BindingSetLayouts;
         VkPipelineLayout m_PipelineLayout = nullptr;

@@ -60,7 +60,7 @@ namespace Nova
         if (!loadedScene) return false;
         if (!loadedScene->HasMeshes()) return false;
 
-        Ref<Rendering::Device>& device = Application::GetCurrentApplication().GetDevice();
+        Ref<Device>& device = Application::GetCurrentApplication().GetDevice();
 
         Array<Vertex> allVertices;
         Array<uint32_t> allIndices;
@@ -143,13 +143,13 @@ namespace Nova
         if (loadResources && !m_MaterialInfos.IsEmpty())
         {
             const AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
-            const Ref<Rendering::Shader> blinnPhongShader = assetDatabase.Get<Rendering::Shader>("BlinnPhongShader");
+            const Ref<Shader> blinnPhongShader = assetDatabase.Get<Shader>("BlinnPhongShader");
 
             for (uint32_t i = 0; i < m_MaterialInfos.Count(); ++i)
             {
                 const aiMaterial* loadedMaterial = loadedScene->mMaterials[i];
 
-                Ref<Rendering::Material> material = device->CreateMaterial({device, blinnPhongShader});
+                Ref<Material> material = device->CreateMaterial({device, blinnPhongShader});
                 if (!material) continue;
                 m_MaterialInfos[i].material = material;
 
@@ -163,13 +163,13 @@ namespace Nova
                             const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
                             
 
-                            Ref<Rendering::Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
+                            Ref<Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
                             m_MaterialInfos[i].textures.Add(texture);
                             material->SetTexture(variableName, texture);
                         }
                     } else
                     {
-                        material->SetTexture(variableName, assetDatabase.Get<Rendering::Texture>(placeholderTextureName));
+                        material->SetTexture(variableName, assetDatabase.Get<Texture>(placeholderTextureName));
                     }
                 };
 
@@ -188,7 +188,7 @@ namespace Nova
         return true;
     }
 
-    void StaticMesh::SetMaterial(const uint32_t slot, Ref<Rendering::Material> material)
+    void StaticMesh::SetMaterial(const uint32_t slot, Ref<Material> material)
     {
         MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
         {
@@ -201,7 +201,7 @@ namespace Nova
         }
     }
 
-    Ref<Rendering::Material> StaticMesh::GetMaterial(const uint32_t slot)
+    Ref<Material> StaticMesh::GetMaterial(const uint32_t slot)
     {
         MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
         {
@@ -215,12 +215,12 @@ namespace Nova
         return m_MaterialInfos;
     }
 
-    Ref<Rendering::Buffer> StaticMesh::GetVertexBuffer() const
+    Ref<Buffer> StaticMesh::GetVertexBuffer() const
     {
         return m_VertexBuffer;
     }
 
-    Ref<Rendering::Buffer> StaticMesh::GetIndexBuffer() const
+    Ref<Buffer> StaticMesh::GetIndexBuffer() const
     {
         return m_IndexBuffer;
     }

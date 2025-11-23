@@ -11,7 +11,7 @@ namespace Nova::Vulkan
 
         for (size_t i = 0; i < m_Bindings.Count(); i++)
         {
-            const Rendering::ShaderBinding& binding = m_Bindings[i];
+            const ShaderBinding& binding = m_Bindings[i];
             VkDescriptorSetLayoutBinding vkBinding = { };
             vkBinding.binding = i;
             vkBinding.descriptorCount = 1;
@@ -34,7 +34,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSetLayout::Initialize(Rendering::Device* device, uint32_t setIndex)
+    bool ShaderBindingSetLayout::Initialize(Nova::Device* device, uint32_t setIndex)
     {
         m_Device = (Device*)device;
         m_SetIndex = setIndex;

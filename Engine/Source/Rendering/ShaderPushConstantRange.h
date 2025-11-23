@@ -3,7 +3,7 @@
 #include <cstddef>
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     struct ShaderPushConstantRange
     {

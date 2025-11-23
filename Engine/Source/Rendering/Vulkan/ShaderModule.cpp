@@ -6,7 +6,7 @@
 
 namespace Nova::Vulkan
 {
-    bool ShaderModule::Initialize(const Rendering::ShaderModuleCreateInfo& createInfo)
+    bool ShaderModule::Initialize(const ShaderModuleCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
 

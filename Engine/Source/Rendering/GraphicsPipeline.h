@@ -9,7 +9,7 @@
 #include "VertexLayout.h"
 #include "Runtime/Ref.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class RenderPass;

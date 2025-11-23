@@ -7,10 +7,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class Fence : public Rendering::Fence
+    class Fence final : public Nova::Fence
     {
     public:
-        bool Initialize(const Rendering::FenceCreateInfo& createInfo) override;
+        bool Initialize(const FenceCreateInfo& createInfo) override;
         void Destroy() override;
         void Wait(uint64_t timeoutNs) override;
         void Reset() override;

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Runtime/Object.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
 
@@ -31,9 +31,6 @@ namespace Nova::Rendering
     public:
         Buffer() : Object("Buffer") {}
         ~Buffer() override = default;
-
-        Buffer(const Buffer&) = delete;
-        Buffer& operator=(const Buffer&) = delete;
 
         virtual bool Initialize(const BufferCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

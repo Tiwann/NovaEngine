@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 
-namespace Nova::Rendering
+namespace Nova
 {
     struct BlitRegion
     {

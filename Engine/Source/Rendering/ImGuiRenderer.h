@@ -9,7 +9,7 @@ struct ImGuiContext;
 
 namespace Nova { class Window; }
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class CommandBuffer;

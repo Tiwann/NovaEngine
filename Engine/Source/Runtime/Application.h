@@ -42,9 +42,9 @@ namespace Nova
         virtual ApplicationConfiguration GetConfiguration() const = 0;
         virtual void OnInit() {}
         virtual void OnUpdate(float deltaTime) {}
-        virtual void OnPreRender(Rendering::CommandBuffer& cmdBuffer) {}
-        virtual void OnRender(Rendering::CommandBuffer& cmdBuffer) {}
-        virtual void OnPostRender(Rendering::CommandBuffer& cmdBuffer) {}
+        virtual void OnPreRender(CommandBuffer& cmdBuffer) {}
+        virtual void OnRender(CommandBuffer& cmdBuffer) {}
+        virtual void OnPostRender(CommandBuffer& cmdBuffer) {}
         virtual void OnGUI() {}
         virtual void OnDrawDebug() {}
         virtual void OnDestroy() {}
@@ -52,13 +52,13 @@ namespace Nova
         float GetDeltaTime() const;
         const Ref<Window>& GetWindow() const;
         Ref<Window>& GetWindow();
-        const Ref<Rendering::Device>& GetDevice() const;
-        Ref<Rendering::Device>& GetDevice();
-        const Ref<Rendering::ImGuiRenderer>& GetImGuiRenderer() const;
+        const Ref<Device>& GetDevice() const;
+        Ref<Device>& GetDevice();
+        const Ref<ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 
-        Rendering::RenderPass* GetRenderPass();
-        const Ref<Rendering::RenderTarget>& GetRenderTarget() const;
+        RenderPass* GetRenderPass();
+        const Ref<RenderTarget>& GetRenderTarget() const;
 
         const AssetDatabase& GetAssetDatabase() const;
         AssetDatabase& GetAssetDatabase();
@@ -80,15 +80,15 @@ namespace Nova
         void Destroy();
     private:
         Ref<Window> m_Window = nullptr;
-        Ref<Rendering::Device> m_Device = nullptr;
+        Ref<Device> m_Device = nullptr;
         Ref<AudioSystem> m_AudioSystem = nullptr;
         slang::IGlobalSession* m_SlangSession = nullptr;
 
-        Ref<Rendering::RenderTarget> m_RenderTarget = nullptr;
-        Rendering::RenderPass m_RenderPass;
+        Ref<RenderTarget> m_RenderTarget = nullptr;
+        RenderPass m_RenderPass;
 
-        Ref<Rendering::ImGuiRenderer> m_ImGuiRenderer = nullptr;
-        Rendering::RenderPass m_ImGuiRenderPass;
+        Ref<ImGuiRenderer> m_ImGuiRenderer = nullptr;
+        RenderPass m_ImGuiRenderPass;
 
         SceneManager m_SceneManager;
         AssetDatabase m_AssetDatabase;

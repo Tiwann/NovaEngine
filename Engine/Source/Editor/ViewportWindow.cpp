@@ -15,7 +15,7 @@ namespace Nova
     {
         EditorWindow::OnInit();
 
-        Rendering::SamplerCreateInfo samplerCreateInfo;
+        SamplerCreateInfo samplerCreateInfo;
         samplerCreateInfo.device = m_Device;
         m_Sampler = m_Device->CreateSampler(samplerCreateInfo);
     }
@@ -26,7 +26,7 @@ namespace Nova
         m_Sampler->Destroy();
     }
 
-    void ViewportWindow::SetRenderTarget(Ref<Rendering::RenderTarget> renderTarget)
+    void ViewportWindow::SetRenderTarget(Ref<RenderTarget> renderTarget)
     {
         m_RenderTarget = renderTarget;
 

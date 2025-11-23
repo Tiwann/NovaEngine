@@ -11,7 +11,7 @@
 #include "Physics/PhysicsWorld3D.h"
 #endif
 
-namespace Nova::Rendering { class CommandBuffer; }
+namespace Nova { class CommandBuffer; }
 
 namespace Nova
 {
@@ -29,8 +29,8 @@ namespace Nova
          
         void OnInit();
         void OnUpdate(float deltaTime);
-        void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
-        void OnRender(Rendering::CommandBuffer& cmdBuffer);
+        void OnPreRender(CommandBuffer& cmdBuffer);
+        void OnRender(CommandBuffer& cmdBuffer);
         void OnDrawDebug();
         void OnDestroy();
 

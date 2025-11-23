@@ -7,10 +7,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class Sampler : public Rendering::Sampler
+    class Sampler final : public Nova::Sampler
     {
     public:
-        bool Initialize(const Rendering::SamplerCreateInfo& createInfo) override;
+        bool Initialize(const SamplerCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkSampler GetHandle() const;

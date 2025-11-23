@@ -11,10 +11,10 @@ namespace Nova::Vulkan
 {
     class CommandBuffer;
 
-    class RenderTarget : public Rendering::RenderTarget
+    class RenderTarget final : public Nova::RenderTarget
     {
     public:
-        bool Initialize(const Rendering::RenderTargetCreateInfo& createInfo) override;
+        bool Initialize(const RenderTargetCreateInfo& createInfo) override;
         void Destroy() override;
 
         bool Resize(uint32_t newWidth, uint32_t newHeight) override;

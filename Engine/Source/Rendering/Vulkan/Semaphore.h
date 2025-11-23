@@ -7,10 +7,10 @@ namespace Nova::Vulkan
 {
     class Device;
 
-    class Semaphore : public Rendering::Semaphore
+    class Semaphore final : public Nova::Semaphore
     {
     public:
-        bool Initialize(const Rendering::SemaphoreCreateInfo& createInfo) override;
+        bool Initialize(const SemaphoreCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkSemaphore GetHandle() const;

@@ -25,13 +25,13 @@ namespace Nova
             m_ActiveScene->OnUpdate(deltaTime);
     }
 
-    void SceneManager::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    void SceneManager::OnPreRender(CommandBuffer& cmdBuffer)
     {
         if (m_ActiveScene)
             m_ActiveScene->OnPreRender(cmdBuffer);
     }
 
-    void SceneManager::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    void SceneManager::OnRender(CommandBuffer& cmdBuffer)
     {
         if (m_ActiveScene)
             m_ActiveScene->OnRender(cmdBuffer);

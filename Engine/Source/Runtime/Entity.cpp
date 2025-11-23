@@ -120,7 +120,7 @@ namespace Nova
         }
     }
 
-    void Entity::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    void Entity::OnPreRender(CommandBuffer& cmdBuffer)
     {
         if(!m_Enabled) return;
 
@@ -132,7 +132,7 @@ namespace Nova
         }
     }
 
-    void Entity::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    void Entity::OnRender(CommandBuffer& cmdBuffer)
     {
         if(!m_Enabled) return;
 

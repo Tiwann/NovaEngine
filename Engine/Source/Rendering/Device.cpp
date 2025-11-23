@@ -1,7 +1,7 @@
 ﻿#include "Device.h"
 #include "Vulkan/Device.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     StringView Device::GetDeviceVendor() const
     {

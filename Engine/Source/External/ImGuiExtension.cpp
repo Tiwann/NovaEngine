@@ -166,7 +166,7 @@ namespace ImGui
         __style.TabRounding = 4;
     }
 
-    void Texture(Nova::Ref<Nova::Rendering::Texture> texture, Nova::Ref<Nova::Rendering::Sampler> sampler)
+    void Texture(Nova::Ref<Nova::Texture> texture, Nova::Ref<Nova::Sampler> sampler)
     {
         if (auto tex = texture.As<Nova::Vulkan::Texture>();
             auto texSampler = sampler.As<Nova::Vulkan::Sampler>())

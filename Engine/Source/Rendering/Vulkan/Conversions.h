@@ -328,24 +328,24 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkAttachmentLoadOp Convert<Rendering::LoadOperation, VkAttachmentLoadOp>(const Rendering::LoadOperation& value)
+    inline VkAttachmentLoadOp Convert<LoadOperation, VkAttachmentLoadOp>(const LoadOperation& value)
     {
         switch (value)
         {
-        case Rendering::LoadOperation::Load: return VK_ATTACHMENT_LOAD_OP_LOAD;
-        case Rendering::LoadOperation::Clear: return VK_ATTACHMENT_LOAD_OP_CLEAR;
-        case Rendering::LoadOperation::DontCare: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        case LoadOperation::Load: return VK_ATTACHMENT_LOAD_OP_LOAD;
+        case LoadOperation::Clear: return VK_ATTACHMENT_LOAD_OP_CLEAR;
+        case LoadOperation::DontCare: return VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         default: throw;
         }
     }
 
     template<>
-    inline VkAttachmentStoreOp Convert<Rendering::StoreOperation, VkAttachmentStoreOp>(const Rendering::StoreOperation& value)
+    inline VkAttachmentStoreOp Convert<StoreOperation, VkAttachmentStoreOp>(const StoreOperation& value)
     {
         switch (value)
         {
-        case Rendering::StoreOperation::Store: return VK_ATTACHMENT_STORE_OP_STORE;
-        case Rendering::StoreOperation::DontCare: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        case StoreOperation::Store: return VK_ATTACHMENT_STORE_OP_STORE;
+        case StoreOperation::DontCare: return VK_ATTACHMENT_STORE_OP_DONT_CARE;
         default: throw;
         }
     }

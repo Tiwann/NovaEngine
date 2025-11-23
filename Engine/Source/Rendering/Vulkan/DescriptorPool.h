@@ -4,21 +4,22 @@
 typedef struct VkDescriptorPool_T* VkDescriptorPool;
 typedef struct VkDescriptorSet_T* VkDescriptorSet;
 
-namespace Nova::Rendering { class ShaderBindingSetLayout; }
+namespace Nova { class ShaderBindingSetLayout; }
+
 namespace Nova::Vulkan
 {
     class Device;
 
-    class DescriptorPool : public Rendering::DescriptorPool
+    class DescriptorPool final : public Nova::DescriptorPool
     {
     public:
-        bool Initialize(const Rendering::DescriptorPoolCreateInfo& createInfo) override;
+        bool Initialize(const DescriptorPoolCreateInfo& createInfo) override;
         void Destroy() override;
 
         VkDescriptorPool GetHandle() const;
         const VkDescriptorPool* GetHandlePtr() const;
 
-        VkDescriptorSet AllocateDescriptorSet(const Rendering::ShaderBindingSetLayout& bindingSetLayout) const;
+        VkDescriptorSet AllocateDescriptorSet(const ShaderBindingSetLayout& bindingSetLayout) const;
     private:
         Device* m_Device = nullptr;
         VkDescriptorPool m_Handle = nullptr;

@@ -15,8 +15,7 @@ typedef struct VkDescriptorSetLayout_T* VkDescriptorSetLayout;
 
 namespace Nova
 {
-    namespace Rendering { class Shader; }
-
+    class Shader;
     class SpriteAnimation;
 
     class SpriteRenderer final : public Component
@@ -26,13 +25,13 @@ namespace Nova
 
         void OnInit() override;
         void OnUpdate(float deltaTime) override;
-        void OnPreRender(Rendering::CommandBuffer& cmdBuffer) override;
-        void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
+        void OnPreRender(CommandBuffer& cmdBuffer) override;
+        void OnRender(CommandBuffer& cmdBuffer) override;
         void OnDestroy() override;
 
         Sprite& GetSprite();
         void SetSprite(const Sprite& sprite);
-        void SetSprite(Ref<Rendering::Texture> texture);
+        void SetSprite(Ref<Texture> texture);
 
         void SetSpriteAnimation(SpriteAnimation* spriteAnimation);
         SpriteAnimation* GetSpriteAnimation() const;
@@ -69,14 +68,14 @@ namespace Nova
         float m_Speed = 1.0f / 20.0f;
         uint32_t m_SpriteIndex = 0;
 
-        Ref<Rendering::Shader> m_Shader = nullptr;
-        Ref<Rendering::ShaderBindingSet> m_BindingSet = nullptr;
-        Ref<Rendering::Buffer> m_VertexBuffer = nullptr;
-        Ref<Rendering::Buffer> m_IndexBuffer = nullptr;
-        Ref<Rendering::Buffer> m_UniformBuffer = nullptr;
-        Ref<Rendering::Buffer> m_StagingBuffer = nullptr;
-        Ref<Rendering::Sampler> m_Sampler = nullptr;
-        Ref<Rendering::GraphicsPipeline> m_Pipeline = nullptr;
+        Ref<Shader> m_Shader = nullptr;
+        Ref<ShaderBindingSet> m_BindingSet = nullptr;
+        Ref<Buffer> m_VertexBuffer = nullptr;
+        Ref<Buffer> m_IndexBuffer = nullptr;
+        Ref<Buffer> m_UniformBuffer = nullptr;
+        Ref<Buffer> m_StagingBuffer = nullptr;
+        Ref<Sampler> m_Sampler = nullptr;
+        Ref<GraphicsPipeline> m_Pipeline = nullptr;
     };
 
 

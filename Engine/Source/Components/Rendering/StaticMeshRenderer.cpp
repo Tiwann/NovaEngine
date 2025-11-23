@@ -44,10 +44,10 @@ namespace Nova
         const Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
         Application* application = scene->GetOwner();
-        Ref<Rendering::Device> device = application->GetDevice();
+        Ref<Device> device = application->GetDevice();
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
-        m_Shader = assetDatabase.Get<Rendering::Shader>("BlinnPhongShader");
+        m_Shader = assetDatabase.Get<Shader>("BlinnPhongShader");
 
         const Array vertexAttributes
         {
@@ -58,7 +58,7 @@ namespace Nova
             VertexAttribute{"COLOR", Format::Vector4},
         };
 
-        const Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo = Rendering::GraphicsPipelineCreateInfo()
+        const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
         .SetDevice(device)
         .SetShader(m_Shader)
         .SetRenderPass(application->GetRenderPass())
@@ -71,13 +71,13 @@ namespace Nova
 
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
-        Rendering::BufferCreateInfo uniformBufferCreateInfo;
+        BufferCreateInfo uniformBufferCreateInfo;
         uniformBufferCreateInfo.device = device;
         uniformBufferCreateInfo.size = sizeof(SceneData);
-        uniformBufferCreateInfo.usage = Rendering::BufferUsage::UniformBuffer;
+        uniformBufferCreateInfo.usage = BufferUsage::UniformBuffer;
         m_SceneUniformBuffer = device->CreateBuffer(uniformBufferCreateInfo);
 
-        const Rendering::SamplerCreateInfo samplerCreateInfo = Rendering::SamplerCreateInfo()
+        const SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear)
         .WithLODRange(0.0f, 1.0f);
@@ -97,7 +97,7 @@ namespace Nova
         m_Sampler->Destroy();
     }
 
-    void StaticMeshRenderer::OnPreRender(Rendering::CommandBuffer& cmdBuffer)
+    void StaticMeshRenderer::OnPreRender(CommandBuffer& cmdBuffer)
     {
         Component::OnPreRender(cmdBuffer);
         if (!m_StaticMesh) return;
@@ -152,7 +152,7 @@ namespace Nova
         cmdBuffer.UpdateBuffer(*m_SceneUniformBuffer, 0, sizeof(SceneData), &sceneData);
     }
 
-    void StaticMeshRenderer::OnRender(Rendering::CommandBuffer& cmdBuffer)
+    void StaticMeshRenderer::OnRender(CommandBuffer& cmdBuffer)
     {
         Component::OnRender(cmdBuffer);
         if (!m_StaticMesh)
@@ -161,10 +161,10 @@ namespace Nova
         if (m_StaticMesh->GetMaterialInfos().IsEmpty())
             return;
 
-        Ref<Rendering::Buffer> vertexBuffer = m_StaticMesh->GetVertexBuffer();
+        Ref<Buffer> vertexBuffer = m_StaticMesh->GetVertexBuffer();
         if (!vertexBuffer) return;
 
-        Ref<Rendering::Buffer> indexBuffer = m_StaticMesh->GetIndexBuffer();
+        Ref<Buffer> indexBuffer = m_StaticMesh->GetIndexBuffer();
         if (!indexBuffer) return;
 
         // THIS NEEDS TO BE OPTIMIZED BY FILTER THE AVAILABLE LIGHTS
@@ -187,7 +187,7 @@ namespace Nova
         const auto& materialInfos = m_StaticMesh->GetMaterialInfos();
         for (const MaterialInfo& materialInfo : materialInfos)
         {
-            Ref<Rendering::Material> material = m_StaticMesh->GetMaterial(materialInfo.slot);
+            Ref<Material> material = m_StaticMesh->GetMaterial(materialInfo.slot);
             if (!material) continue;
             cmdBuffer.BindMaterial(*material);
 
@@ -208,7 +208,7 @@ namespace Nova
     void StaticMeshRenderer::SetStaticMesh(const Ref<StaticMesh>& newMesh)
     {
         const Application* application = GetApplication();
-        const Ref<Rendering::Device>& device = application->GetDevice();
+        const Ref<Device>& device = application->GetDevice();
         device->WaitIdle();
 
         m_StaticMesh = newMesh;

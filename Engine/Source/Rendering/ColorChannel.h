@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Runtime/Flags.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     enum class ColorChannelFlagBits
     {

@@ -7,7 +7,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Surface::Initialize(const Rendering::SurfaceCreateInfo& createInfo)
+    bool Surface::Initialize(const SurfaceCreateInfo& createInfo)
     {
         if (!createInfo.window)
             return false;

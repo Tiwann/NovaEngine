@@ -6,17 +6,12 @@ typedef struct VkQueue_T* VkQueue;
 
 namespace Nova::Vulkan
 {
-    class CommandBuffer;
-    class Semaphore;
-    class Fence;
-    class Swapchain;
-
-    class Queue : public Rendering::Queue
+    class Queue final : public Nova::Queue
     {
     public:
-        void Submit(Rendering::CommandBuffer* commandBuffer, Rendering::Semaphore* waitSemaphore, Rendering::Semaphore* signalSemaphore, Rendering::Fence* fence = nullptr, uint32_t waitStagesMask = 0) const override;
-        void Submit(const Array<Rendering::CommandBuffer*>& commandBuffers, const Array<Rendering::Semaphore*>& waitSemaphores, const Array<Rendering::Semaphore*>& signalSemaphores, Rendering::Fence* fence, uint32_t waitStagesMask) const override;
-        bool Present(const Rendering::Swapchain& swapchain, const Rendering::Semaphore& waitSemaphore, uint32_t imageIndex) const override;
+        void Submit(Nova::CommandBuffer* commandBuffer, Nova::Semaphore* waitSemaphore, Nova::Semaphore* signalSemaphore, Nova::Fence* fence = nullptr, uint32_t waitStagesMask = 0) const override;
+        void Submit(const Array<Nova::CommandBuffer*>& commandBuffers, const Array<Nova::Semaphore*>& waitSemaphores, const Array<Nova::Semaphore*>& signalSemaphores, Nova::Fence* fence, uint32_t waitStagesMask) const override;
+        bool Present(const Nova::Swapchain& swapchain, const Nova::Semaphore& waitSemaphore, uint32_t imageIndex) const override;
 
         VkQueue GetHandle() const;
         VkQueue* GetHandlePtr();

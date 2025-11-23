@@ -9,7 +9,7 @@
 
 namespace Nova { struct Color; }
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class CommandPool;

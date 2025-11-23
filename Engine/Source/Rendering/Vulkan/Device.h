@@ -25,10 +25,10 @@ namespace Nova::Vulkan
         CommandBuffer commandBuffer;
     };
 
-    class Device : public Rendering::Device
+    class Device final : public Nova::Device
     {
     public:
-        bool Initialize(const Rendering::DeviceCreateInfo& createInfo) override;
+        bool Initialize(const DeviceCreateInfo& createInfo) override;
         void Destroy() override;
 
         bool BeginFrame() override;
@@ -36,23 +36,23 @@ namespace Nova::Vulkan
         void Present() override;
         void WaitIdle() const override;
         void SetName(StringView name) override;
-        Rendering::DeviceType GetDeviceType() override;
+        DeviceType GetDeviceType() override;
         uint32_t GetImageCount() const override;
 
-        Ref<Rendering::Surface> CreateSurface(const Rendering::SurfaceCreateInfo& createInfo) override;
-        Ref<Rendering::Texture> CreateTexture(const Rendering::TextureCreateInfo& createInfo) override;
-        Ref<Rendering::Sampler> CreateSampler(const Rendering::SamplerCreateInfo& createInfo) override;
-        Ref<Rendering::Buffer> CreateBuffer(const Rendering::BufferCreateInfo& createInfo) override;
-        Ref<Rendering::GraphicsPipeline> CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo) override;
-        Ref<Rendering::ComputePipeline> CreateComputePipeline(const Rendering::ComputePipelineCreateInfo& createInfo) override;
-        Ref<Rendering::Shader> CreateShader(const Rendering::ShaderCreateInfo& createInfo) override;
-        Ref<Rendering::Material> CreateMaterial(const Rendering::MaterialCreateInfo& createInfo) override;
+        Ref<Nova::Surface> CreateSurface(const SurfaceCreateInfo& createInfo) override;
+        Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
+        Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
+        Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
+        Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) override;
+        Ref<Nova::ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) override;
+        Ref<Nova::Shader> CreateShader(const ShaderCreateInfo& createInfo) override;
+        Ref<Nova::Material> CreateMaterial(const MaterialCreateInfo& createInfo) override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
         VkPhysicalDevice GetPhysicalDevice() const;
-        Ref<Surface> GetSurface();
+        Ref<Nova::Surface> GetSurface();
         Swapchain* GetSwapchain();
         CommandPool* GetCommandPool();
         CommandPool* GetTransferCommandPool();

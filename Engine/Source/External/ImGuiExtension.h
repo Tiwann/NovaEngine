@@ -9,7 +9,8 @@ namespace Nova
     class Uuid;
     class Component;
     class Entity;
-    namespace Rendering { class Texture; class Sampler; }
+    class Texture;
+    class Sampler;
 }
 
 namespace ImGui
@@ -19,5 +20,5 @@ namespace ImGui
     void IMGUI_API PushID(const Nova::Component* component);
     void IMGUI_API AddComponent(Nova::Entity* entity);
     void IMGUI_API NovaStyle(ImGuiStyle* style = nullptr);
-    void IMGUI_API Texture(Nova::Ref<Nova::Rendering::Texture> texture, Nova::Ref<Nova::Rendering::Sampler> sampler);
+    void IMGUI_API Texture(Nova::Ref<Nova::Texture> texture, Nova::Ref<Nova::Sampler> sampler);
 }

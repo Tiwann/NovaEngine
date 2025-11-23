@@ -12,7 +12,7 @@
 
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class Texture;

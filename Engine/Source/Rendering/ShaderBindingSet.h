@@ -6,7 +6,7 @@
 #include "ShaderBindingSetLayout.h"
 
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class Buffer;

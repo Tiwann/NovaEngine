@@ -6,7 +6,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Sampler::Initialize(const Rendering::SamplerCreateInfo& createInfo)
+    bool Sampler::Initialize(const SamplerCreateInfo& createInfo)
     {
         VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
         samplerCreateInfo.addressModeU = Convert<SamplerAddressMode, VkSamplerAddressMode>(createInfo.addressModeU);

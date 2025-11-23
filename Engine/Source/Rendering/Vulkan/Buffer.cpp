@@ -8,16 +8,16 @@
 
 namespace Nova::Vulkan
 {
-    static VkBufferUsageFlags GetBufferUsage(const Rendering::BufferUsage& usage)
+    static VkBufferUsageFlags GetBufferUsage(const BufferUsage& usage)
     {
         switch (usage)
         {
-        case Rendering::BufferUsage::None: return 0;
-        case Rendering::BufferUsage::VertexBuffer: return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        case Rendering::BufferUsage::IndexBuffer: return VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        case Rendering::BufferUsage::UniformBuffer: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        case Rendering::BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        case Rendering::BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        case BufferUsage::None: return 0;
+        case BufferUsage::VertexBuffer: return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        case BufferUsage::IndexBuffer: return VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        case BufferUsage::UniformBuffer: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        case BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        case BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         default: return 0;
         }
     }
@@ -37,7 +37,7 @@ namespace Nova::Vulkan
         other.m_Allocation = nullptr;
         other.m_Device = nullptr;
         other.m_Size = 0;
-        other.m_Usage = Rendering::BufferUsage::None;
+        other.m_Usage = BufferUsage::None;
     }
 
     Buffer& Buffer::operator=(Buffer&& other) noexcept
@@ -55,11 +55,11 @@ namespace Nova::Vulkan
         other.m_Allocation = nullptr;
         other.m_Device = nullptr;
         other.m_Size = 0;
-        other.m_Usage = Rendering::BufferUsage::None;
+        other.m_Usage = BufferUsage::None;
         return *this;
     }
 
-    bool Buffer::Initialize(const Rendering::BufferCreateInfo& createInfo)
+    bool Buffer::Initialize(const BufferCreateInfo& createInfo)
     {
         VkBufferCreateInfo bufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
         bufferCreateInfo.size = createInfo.size;
@@ -67,7 +67,7 @@ namespace Nova::Vulkan
 
         VmaAllocationCreateInfo bufferAllocationCreateInfo = {};
 
-        if (createInfo.usage == Rendering::BufferUsage::StagingBuffer)
+        if (createInfo.usage == BufferUsage::StagingBuffer)
         {
             bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
             bufferAllocationCreateInfo.priority = 0.5f;
@@ -75,14 +75,14 @@ namespace Nova::Vulkan
             bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
         }
 
-        if (createInfo.usage == Rendering::BufferUsage::VertexBuffer || createInfo.usage == Rendering::BufferUsage::IndexBuffer)
+        if (createInfo.usage == BufferUsage::VertexBuffer || createInfo.usage == BufferUsage::IndexBuffer)
         {
             bufferAllocationCreateInfo.priority = 1.0f;
             bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
             bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
         }
 
-        if (createInfo.usage == Rendering::BufferUsage::UniformBuffer)
+        if (createInfo.usage == BufferUsage::UniformBuffer)
         {
             bufferAllocationCreateInfo.priority = 1.0f;
             bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -112,7 +112,7 @@ namespace Nova::Vulkan
 
     bool Buffer::Resize(const size_t newSize, bool keepData)
     {
-        Rendering::BufferCreateInfo bufferCreateInfo;
+        BufferCreateInfo bufferCreateInfo;
         bufferCreateInfo.size = newSize;
         bufferCreateInfo.device = m_Device;
         bufferCreateInfo.usage = m_Usage;
@@ -138,18 +138,18 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool Buffer::GPUCopy(Rendering::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
+    bool Buffer::GPUCopy(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
         CommandPool* commandPool = m_Device->GetTransferCommandPool();
-        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
-        if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))
+        if (!commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
         commandBuffer.BufferCopy(*this, other, srcOffset, destOffset, size);
         commandBuffer.End();
 
-        Rendering::Scoped<Fence> fence = Rendering::FenceCreateInfo(m_Device);
+        Scoped<Fence> fence = FenceCreateInfo(m_Device);
 
         const Queue* transferQueue = m_Device->GetTransferQueue();
         transferQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);

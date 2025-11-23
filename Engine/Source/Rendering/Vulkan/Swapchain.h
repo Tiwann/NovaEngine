@@ -16,18 +16,18 @@ namespace Nova::Vulkan
     class RenderTarget;
     class CommandBuffer;
 
-    class Swapchain : public Rendering::Swapchain
+    class Swapchain final : public Nova::Swapchain
     {
     public:
-        bool Initialize(const Rendering::SwapchainCreateInfo& createInfo) override;
+        bool Initialize(const SwapchainCreateInfo& createInfo) override;
         void Destroy() override;
         bool Recreate() override;
         void SetName(StringView name) override;
 
-        bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex);
+        bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const;
 
-        const Ref<Texture>& GetTexture(uint32_t index);
-        const Ref<Texture>& GetCurrentTexture();
+        const Ref<Nova::Texture>& GetTexture(uint32_t index);
+        const Ref<Nova::Texture>& GetCurrentTexture();
 
         VkSwapchainKHR GetHandle() const;
         const VkSwapchainKHR* GetHandlePtr() const;
@@ -40,6 +40,6 @@ namespace Nova::Vulkan
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };
-        Lazy<Ref<Texture>> m_Textures[3] = { Ref<Texture>(nullptr), Ref<Texture>(nullptr), Ref<Texture>(nullptr) };
+        Lazy<Ref<Nova::Texture>> m_Textures[3] = { Ref<Nova::Texture>(nullptr), Ref<Nova::Texture>(nullptr), Ref<Nova::Texture>(nullptr) };
     };
 }

@@ -2,7 +2,7 @@
 #include "Object.h"
 
 
-namespace Nova::Rendering { class CommandBuffer; }
+namespace Nova { class CommandBuffer; }
 
 namespace Nova
 {
@@ -15,8 +15,8 @@ namespace Nova
         SceneManager() = default;
 
         void OnUpdate(float deltaTime);
-        void OnPreRender(Rendering::CommandBuffer& cmdBuffer);
-        void OnRender(Rendering::CommandBuffer& cmdBuffer);
+        void OnPreRender(CommandBuffer& cmdBuffer);
+        void OnRender(CommandBuffer& cmdBuffer);
         void OnDrawDebug();
         void Destroy();
 

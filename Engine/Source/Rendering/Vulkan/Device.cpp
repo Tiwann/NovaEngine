@@ -26,7 +26,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Device::Initialize(const Rendering::DeviceCreateInfo& createInfo)
+    bool Device::Initialize(const DeviceCreateInfo& createInfo)
     {
         if (!createInfo.window)
             return false;
@@ -135,9 +135,9 @@ namespace Nova::Vulkan
         vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &physicalDeviceProperties);
         m_DeviceVendor = physicalDeviceProperties.properties.deviceName;
 
-        Rendering::SurfaceCreateInfo surfaceCreateInfo;
-        surfaceCreateInfo.window = createInfo.window;
-        surfaceCreateInfo.device = this;
+        const SurfaceCreateInfo surfaceCreateInfo = SurfaceCreateInfo()
+        .withDevice(this)
+        .withWindow(createInfo.window);
         m_Surface = CreateSurface(surfaceCreateInfo);
         if (!m_Surface)
         {
@@ -318,9 +318,9 @@ namespace Nova::Vulkan
             return false;
         }
 
-        Rendering::CommandPoolCreateInfo commandPoolCreateInfo;
+        CommandPoolCreateInfo commandPoolCreateInfo;
         commandPoolCreateInfo.device = this;
-        commandPoolCreateInfo.flags = Rendering::CommandPoolCreateFlagBits::ResetCommandBuffer;
+        commandPoolCreateInfo.flags = CommandPoolCreateFlagBits::ResetCommandBuffer;
         commandPoolCreateInfo.queue = &m_GraphicsQueue;
         if (!m_CommandPool.Initialize(commandPoolCreateInfo))
         {
@@ -365,7 +365,7 @@ namespace Nova::Vulkan
             };
         };
 
-        Rendering::SwapchainCreateInfo swapchainCreateInfo;
+        SwapchainCreateInfo swapchainCreateInfo;
         swapchainCreateInfo.device = this;
         swapchainCreateInfo.surface = m_Surface;
         swapchainCreateInfo.recycle = false;
@@ -385,26 +385,26 @@ namespace Nova::Vulkan
 
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
-            Rendering::SemaphoreCreateInfo semaphoreCreateInfo(this);
+            SemaphoreCreateInfo semaphoreCreateInfo(this);
             m_Frames[imageIndex].submitSemaphore.Initialize(semaphoreCreateInfo);
             m_Frames[imageIndex].presentSemaphore.Initialize(semaphoreCreateInfo);
 
-            Rendering::FenceCreateInfo fenceCreateInfo;
+            FenceCreateInfo fenceCreateInfo;
             fenceCreateInfo.device = this;
-            fenceCreateInfo.flags = Rendering::FenceCreateFlagBits::None;
+            fenceCreateInfo.flags = FenceCreateFlagBits::None;
             m_Frames[imageIndex].fence.Initialize(fenceCreateInfo);
 
-            Rendering::CommandBufferAllocateInfo allocateInfo;
+            CommandBufferAllocateInfo allocateInfo;
             allocateInfo.device = this;
-            allocateInfo.level = Rendering::CommandBufferLevel::Primary;
+            allocateInfo.level = CommandBufferLevel::Primary;
             allocateInfo.commandPool = &m_CommandPool;
 
-            CommandBuffer commandBuffer = m_CommandPool.AllocateCommandBuffer(Rendering::CommandBufferLevel::Primary);
+            CommandBuffer commandBuffer = m_CommandPool.AllocateCommandBuffer(CommandBufferLevel::Primary);
             commandBuffer.SetName(StringFormat("Main Commander Buffer ({})", imageIndex));
             m_Frames[imageIndex].commandBuffer = commandBuffer;
         }
 
-        Rendering::DescriptorPoolCreateInfo descriptorPoolCreateInfo = Rendering::DescriptorPoolCreateInfo()
+        DescriptorPoolCreateInfo descriptorPoolCreateInfo = DescriptorPoolCreateInfo()
         .SetDevice(this)
         .SetBindingTypeSize(BindingType::Sampler, 32)
         .SetBindingTypeSize(BindingType::SampledTexture, 512)
@@ -461,7 +461,7 @@ namespace Nova::Vulkan
         }
 
         CommandBuffer& commandBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
-        if (!commandBuffer.Begin({ Rendering::CommandBufferUsageFlagBits::OneTimeSubmit }))
+        if (!commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
             return false;
 
 
@@ -549,15 +549,15 @@ namespace Nova::Vulkan
 #endif
     }
 
-    Rendering::DeviceType Device::GetDeviceType()
+    DeviceType Device::GetDeviceType()
     {
-        return Rendering::DeviceType::Vulkan;
+        return DeviceType::Vulkan;
     }
 
-    Ref<Rendering::Surface> Device::CreateSurface(const Rendering::SurfaceCreateInfo& createInfo)
+    Ref<Nova::Surface> Device::CreateSurface(const SurfaceCreateInfo& createInfo)
     {
         Surface* surface = new Surface();
-        Rendering::SurfaceCreateInfo surfaceCreateInfo(createInfo);
+        SurfaceCreateInfo surfaceCreateInfo(createInfo);
         if (!surface->Initialize(surfaceCreateInfo.withDevice(this)))
         {
             delete surface;
@@ -572,10 +572,10 @@ namespace Nova::Vulkan
 
     }
 
-    Ref<Rendering::Texture> Device::CreateTexture(const Rendering::TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> Device::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
-        Rendering::TextureCreateInfo textureCreateInfo(createInfo);
+        TextureCreateInfo textureCreateInfo(createInfo);
         if (!texture->Initialize(textureCreateInfo.WithDevice(this)))
         {
             delete texture;
@@ -584,10 +584,10 @@ namespace Nova::Vulkan
         return Ref(texture);
     }
 
-    Ref<Rendering::Sampler> Device::CreateSampler(const Rendering::SamplerCreateInfo& createInfo)
+    Ref<Nova::Sampler> Device::CreateSampler(const SamplerCreateInfo& createInfo)
     {
         Sampler* sampler = new Sampler();
-        Rendering::SamplerCreateInfo samplerCreateInfo(createInfo);
+        SamplerCreateInfo samplerCreateInfo(createInfo);
         if (!sampler->Initialize(samplerCreateInfo.WithDevice(this)))
         {
             delete sampler;
@@ -596,10 +596,10 @@ namespace Nova::Vulkan
         return Ref(sampler);
     }
 
-    Ref<Rendering::Buffer> Device::CreateBuffer(const Rendering::BufferCreateInfo& createInfo)
+    Ref<Nova::Buffer> Device::CreateBuffer(const BufferCreateInfo& createInfo)
     {
         Buffer* buffer = new Buffer();
-        Rendering::BufferCreateInfo bufferCreateInfo(createInfo);
+        BufferCreateInfo bufferCreateInfo(createInfo);
         if (!buffer->Initialize(bufferCreateInfo.WithDevice(this)))
         {
             delete buffer;
@@ -608,22 +608,22 @@ namespace Nova::Vulkan
         return Ref(buffer);
     }
 
-    Ref<Rendering::GraphicsPipeline> Device::CreateGraphicsPipeline(const Rendering::GraphicsPipelineCreateInfo& createInfo)
+    Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
     {
         GraphicsPipeline* pipeline = new GraphicsPipeline();
-        Rendering::GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
+        GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
         if (!pipeline->Initialize(pipelineCreateInfo.SetDevice(this)))
         {
             delete pipeline;
             return nullptr;
         }
-        return Ref(pipeline);
+        return Ref<GraphicsPipeline>(pipeline);
     }
 
-    Ref<Rendering::ComputePipeline> Device::CreateComputePipeline(const Rendering::ComputePipelineCreateInfo& createInfo)
+    Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
     {
         ComputePipeline* pipeline = new ComputePipeline();
-        Rendering::ComputePipelineCreateInfo pipelineCreateInfo(createInfo);
+        ComputePipelineCreateInfo pipelineCreateInfo(createInfo);
         if (!pipeline->Initialize(pipelineCreateInfo.WithDevice(this)))
         {
             delete pipeline;
@@ -632,10 +632,10 @@ namespace Nova::Vulkan
         return Ref(pipeline);
     }
 
-    Ref<Rendering::Shader> Device::CreateShader(const Rendering::ShaderCreateInfo& createInfo)
+    Ref<Nova::Shader> Device::CreateShader(const ShaderCreateInfo& createInfo)
     {
         Shader* shader = new Shader();
-        Rendering::ShaderCreateInfo shaderCreateInfo(createInfo);
+        ShaderCreateInfo shaderCreateInfo(createInfo);
         if (!shader->Initialize(shaderCreateInfo.WithDevice(this)))
         {
             delete shader;
@@ -644,10 +644,10 @@ namespace Nova::Vulkan
         return Ref(shader);
     }
 
-    Ref<Rendering::Material> Device::CreateMaterial(const Rendering::MaterialCreateInfo& createInfo)
+    Ref<Nova::Material> Device::CreateMaterial(const MaterialCreateInfo& createInfo)
     {
         Material* material = new Material();
-        Rendering::MaterialCreateInfo matCreateInfo(createInfo);
+        MaterialCreateInfo matCreateInfo(createInfo);
         if (!material->Initialize(matCreateInfo.WithDevice(this)))
         {
             delete material;
@@ -676,7 +676,7 @@ namespace Nova::Vulkan
         return m_PhysicalDevice;
     }
 
-    Ref<Surface> Device::GetSurface()
+    Ref<Nova::Surface> Device::GetSurface()
     {
         return m_Surface;
     }

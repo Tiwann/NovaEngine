@@ -3,8 +3,8 @@
 #include "Runtime/Application.h"
 
 using namespace Nova;
-using namespace Nova::Rendering;
-namespace Nova::Rendering { class Texture; class Shader;}
+using namespace Nova;
+namespace Nova { class Texture; class Shader;}
 
 class HelloCompute : public Application
 {

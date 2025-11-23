@@ -9,9 +9,9 @@
 
 namespace Nova::Vulkan
 {
-    bool ImGuiRenderer::Initialize(const Rendering::ImGuiRendererCreateInfo& createInfo)
+    bool ImGuiRenderer::Initialize(const ImGuiRendererCreateInfo& createInfo)
     {
-        if (!Rendering::ImGuiRenderer::Initialize(createInfo))
+        if (!Nova::ImGuiRenderer::Initialize(createInfo))
             return false;
 
         if (DesktopWindow* desktopWindow = dynamic_cast<DesktopWindow*>(createInfo.window))
@@ -83,7 +83,7 @@ namespace Nova::Vulkan
         ImGui::EndFrame();
     }
 
-    void ImGuiRenderer::Render(Rendering::CommandBuffer& commandBuffer)
+    void ImGuiRenderer::Render(Nova::CommandBuffer& commandBuffer)
     {
         ImGui::Render();
         ImDrawData* drawData = ImGui::GetDrawData();

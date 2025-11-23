@@ -2,7 +2,7 @@
 #include "Containers/StringView.h"
 #include "ShaderStage.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     struct ShaderEntryPoint
     {

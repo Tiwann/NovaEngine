@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
-#include "Containers/Map.h"
 #include "Containers/StringView.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     class Device;
     class Shader;
@@ -18,8 +17,8 @@ namespace Nova::Rendering
         Ref<Device> device = nullptr;
         Ref<Shader> shader = nullptr;
 
-        MaterialCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
-        MaterialCreateInfo& WithShader(Ref<Shader> shader) { this->shader = shader; return *this; }
+        MaterialCreateInfo& WithDevice(Device* inDevice) { this->device = inDevice; return *this; }
+        MaterialCreateInfo& WithShader(Shader* inShader) { this->shader = inShader; return *this; }
     };
 
     class Material : public Asset

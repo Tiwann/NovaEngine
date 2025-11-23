@@ -2,7 +2,7 @@
 
 #include "RenderTarget.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     RenderPass::RenderPass(const uint32_t offsetX, const uint32_t offsetY, const uint32_t width, const uint32_t height) :
         m_OffsetX(offsetX), m_OffsetY(offsetY), m_Width(width), m_Height(height)

@@ -6,41 +6,41 @@
 
 namespace Nova
 {
-    Ref<Rendering::Buffer> CreateVertexBuffer(Ref<Rendering::Device>& device, const void* data, const size_t size)
+    Ref<Buffer> CreateVertexBuffer(Ref<Device>& device, const void* data, const size_t size)
     {
-        Rendering::BufferCreateInfo stagingBufferCreateInfo;
+        BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.size = size;
-        stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
+        stagingBufferCreateInfo.usage = BufferUsage::StagingBuffer;
 
-        Ref<Rendering::Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
+        Ref<Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
         stagingBuffer->CPUCopy(data, 0, size);
 
-        Rendering::BufferCreateInfo vertexBufferCreateInfo;
+        BufferCreateInfo vertexBufferCreateInfo;
         vertexBufferCreateInfo.size = size;
-        vertexBufferCreateInfo.usage = Rendering::BufferUsage::VertexBuffer;
+        vertexBufferCreateInfo.usage = BufferUsage::VertexBuffer;
 
-        Ref<Rendering::Buffer> vertexBuffer = device->CreateBuffer(vertexBufferCreateInfo);
+        Ref<Buffer> vertexBuffer = device->CreateBuffer(vertexBufferCreateInfo);
         stagingBuffer->GPUCopy(*vertexBuffer, 0, 0, size);
         stagingBuffer->Destroy();
         return vertexBuffer;
     }
 
-    Ref<Rendering::Buffer> CreateIndexBuffer(Ref<Rendering::Device>& device, const void* data, const size_t size)
+    Ref<Buffer> CreateIndexBuffer(Ref<Device>& device, const void* data, const size_t size)
     {
-        Rendering::BufferCreateInfo stagingBufferCreateInfo;
+        BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.device = device;
         stagingBufferCreateInfo.size = size;
-        stagingBufferCreateInfo.usage = Rendering::BufferUsage::StagingBuffer;
+        stagingBufferCreateInfo.usage = BufferUsage::StagingBuffer;
 
-        Ref<Rendering::Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
+        Ref<Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
         stagingBuffer->CPUCopy(data, 0, size);
 
-        Rendering::BufferCreateInfo indexBufferCreateInfo;
+        BufferCreateInfo indexBufferCreateInfo;
         indexBufferCreateInfo.device = device;
         indexBufferCreateInfo.size = size;
-        indexBufferCreateInfo.usage = Rendering::BufferUsage::IndexBuffer;
+        indexBufferCreateInfo.usage = BufferUsage::IndexBuffer;
 
-        Ref<Rendering::Buffer> indexBuffer = device->CreateBuffer(indexBufferCreateInfo);
+        Ref<Buffer> indexBuffer = device->CreateBuffer(indexBufferCreateInfo);
         stagingBuffer->GPUCopy(*indexBuffer, 0, 0, size);
         stagingBuffer->Destroy();
         return indexBuffer;

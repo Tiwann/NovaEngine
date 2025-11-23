@@ -10,6 +10,6 @@ namespace Nova
         void OnInit() override;
         void OnUpdate(float deltaTime) override;
         void OnGUI() override;
-        void OnRender(Rendering::CommandBuffer& cmdBuffer) override;
+        void OnRender(CommandBuffer& cmdBuffer) override;
     };
 }

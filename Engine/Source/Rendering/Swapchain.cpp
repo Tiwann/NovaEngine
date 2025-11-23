@@ -1,7 +1,7 @@
 ﻿#include "Swapchain.h"
 #include "Surface.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     int32_t Swapchain::GetWidth() const
     {

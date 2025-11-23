@@ -9,7 +9,7 @@
 
 namespace Nova::Vulkan
 {
-    bool GraphicsPipeline::Initialize(const Rendering::GraphicsPipelineCreateInfo& createInfo)
+    bool GraphicsPipeline::Initialize(const GraphicsPipelineCreateInfo& createInfo)
     {
         m_Device = static_cast<Device*>(createInfo.device);
         VkDevice deviceHandle = m_Device->GetHandle();
@@ -124,8 +124,8 @@ namespace Nova::Vulkan
         Array<VkFormat> colorAttachmentFormats;
         for (size_t attachmentIndex = 0; attachmentIndex < createInfo.renderPass->GetAttachmentCount(); attachmentIndex++)
         {
-            Rendering::RenderPassAttachment& attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
-            if (attachment.type != Rendering::AttachmentType::Color)
+            RenderPassAttachment& attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
+            if (attachment.type != AttachmentType::Color)
                 continue;
             colorAttachmentFormats.Add(Convert<Format, VkFormat>(attachment.texture->GetFormat()));
         }
@@ -137,8 +137,8 @@ namespace Nova::Vulkan
         renderingInfo.pColorAttachmentFormats = colorAttachmentFormats.Data();
         if (createInfo.renderPass->HasDepthAttachment())
         {
-            const Rendering::RenderPassAttachment* depthAttachment = createInfo.renderPass->GetDepthAttachment();
-            const Rendering::Texture* depthTexture = depthAttachment->texture;
+            const RenderPassAttachment* depthAttachment = createInfo.renderPass->GetDepthAttachment();
+            const Nova::Texture* depthTexture = depthAttachment->texture;
             renderingInfo.depthAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
             renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
         }

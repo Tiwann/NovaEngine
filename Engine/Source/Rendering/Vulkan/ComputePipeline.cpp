@@ -8,7 +8,7 @@
 
 namespace Nova::Vulkan
 {
-    bool ComputePipeline::Initialize(const Rendering::ComputePipelineCreateInfo& createInfo)
+    bool ComputePipeline::Initialize(const ComputePipelineCreateInfo& createInfo)
     {
         if (!createInfo.device)
             return false;

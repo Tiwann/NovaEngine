@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Containers/String.h"
 
-namespace Nova::Rendering
+namespace Nova
 {
     struct ShaderModuleInfo
     {

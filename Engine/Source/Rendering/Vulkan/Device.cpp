@@ -18,6 +18,7 @@
 #include <vma/vk_mem_alloc.h>
 
 #include "Material.h"
+#include "Utils/VulkanUtils.h"
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
@@ -540,13 +541,7 @@ namespace Nova::Vulkan
 
     void Device::SetName(StringView name)
     {
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
-        info.objectHandle = (uint64_t)m_Handle;
-        info.objectType = VK_OBJECT_TYPE_DEVICE;
-        info.pObjectName = *name;
-        vkSetDebugUtilsObjectName(m_Handle, &info);
-#endif
+        Vulkan::SetObjectName(this, VK_OBJECT_TYPE_DEVICE, m_Handle, name);
     }
 
     DeviceType Device::GetDeviceType()

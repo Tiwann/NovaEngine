@@ -13,6 +13,7 @@
 
 #include "Material.h"
 #include "Shader.h"
+#include "Utils/VulkanUtils.h"
 
 namespace Nova::Vulkan
 {
@@ -59,14 +60,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::SetName(const StringView name)
     {
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        const VkDevice deviceHandle = m_Device->GetHandle();
-        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
-        info.objectHandle = (uint64_t)m_Handle;
-        info.objectType = VK_OBJECT_TYPE_COMMAND_BUFFER;
-        info.pObjectName = *name;
-        vkSetDebugUtilsObjectName(deviceHandle, &info);
-#endif
+        SetObjectName(m_Device, VK_OBJECT_TYPE_COMMAND_BUFFER, m_Handle, name);
     }
 
     bool CommandBuffer::Begin(const CommandBufferBeginInfo& beginInfo)

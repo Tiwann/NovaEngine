@@ -98,7 +98,10 @@ namespace Nova
         operator ConstPointerType() const { return m_Pointer; }
 
         template <typename U>
-        operator U*() const { return (U*)m_Pointer; }
+        operator const U*() const { return (U*)m_Pointer; }
+
+        template <typename U>
+        operator U*() { return (U*)m_Pointer; }
 
 
         void Attach(PointerType newPointer)

@@ -18,7 +18,7 @@ namespace Nova
         uint32_t listenerCount = 1;
     };
 
-    class AudioSystem : public Object
+    class AudioSystem final : public Object
     {
     public:
         AudioSystem();
@@ -27,8 +27,8 @@ namespace Nova
         bool Initialize(AudioSystemCreateInfo createInfo);
         void Destroy();
 
-        AudioClip* CreateClipFromFile(StringView filepath);
-        AudioClip* CreateClipFromMemory(const uint8_t* data, size_t size);
+        Ref<AudioClip> CreateClipFromFile(StringView filepath);
+        Ref<AudioClip> CreateClipFromMemory(const uint8_t* data, size_t size);
 
         void PlayAudioClip(AudioClip* clip);
         void StopAudioClip(AudioClip* clip);

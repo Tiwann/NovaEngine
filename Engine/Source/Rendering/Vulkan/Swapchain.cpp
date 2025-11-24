@@ -9,6 +9,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Utils/VulkanUtils.h"
+
 namespace Nova::Vulkan
 {
     bool Swapchain::Initialize(const SwapchainCreateInfo& createInfo)
@@ -167,14 +169,7 @@ namespace Nova::Vulkan
 
     void Swapchain::SetName(StringView name)
     {
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        const VkDevice deviceHandle = ((Device*)m_Device)->GetHandle();
-        VkDebugUtilsObjectNameInfoEXT info = { VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
-        info.objectHandle = (uint64_t)m_Handle;
-        info.objectType = VK_OBJECT_TYPE_SWAPCHAIN_KHR;
-        info.pObjectName = *name;
-        vkSetDebugUtilsObjectName(deviceHandle, &info);
-#endif
+        SetObjectName(m_Device, VK_OBJECT_TYPE_SWAPCHAIN_KHR, m_Handle, name);
     }
 
     bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const

@@ -7,7 +7,7 @@ namespace Nova
     class PhysicsComponentEditor : public Editor<PhysicsComponent>
     {
     public:
-        explicit PhysicsComponentEditor(const Ref<PhysicsComponent>& target) : Editor(target){}
+        explicit PhysicsComponentEditor(PhysicsComponent* target) : Editor(target){}
         void OnInspectorGui() override;
     };
 }

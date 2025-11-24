@@ -41,12 +41,13 @@ namespace Nova
             }
         }
 
+
         return true;
     }
 
     Array<String> DDSImporter::SupportedExtensions() const
     {
-        return { "dds", "DDS" };
+        return { "dds" };
     }
 
     Ref<TextureImporter::Texture> DDSImporter::CreateTexture() const

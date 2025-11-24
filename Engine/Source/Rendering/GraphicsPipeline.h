@@ -104,9 +104,9 @@ namespace Nova
         GraphicsPipelineCreateInfo& SetCullMode(const CullMode cullMode) { rasterizationInfo.cullMode = cullMode; return *this; }
         GraphicsPipelineCreateInfo& SetFrontFace(const FrontFace frontFace) { rasterizationInfo.frontFace = frontFace; return *this; }
         GraphicsPipelineCreateInfo& SetPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
-        GraphicsPipelineCreateInfo& SetShader(const Ref<Shader>& shader) { this->shader = shader; return *this; }
-        GraphicsPipelineCreateInfo& SetDevice(const Ref<Device>& device) { this->device = device; return *this; }
-        GraphicsPipelineCreateInfo& SetRenderPass(RenderPass* renderPass) { this->renderPass = renderPass; return *this; }
+        GraphicsPipelineCreateInfo& SetShader(Shader* inShader) { this->shader = inShader; return *this; }
+        GraphicsPipelineCreateInfo& SetDevice(Device* inDevice) { this->device = inDevice; return *this; }
+        GraphicsPipelineCreateInfo& SetRenderPass(RenderPass* inRenderPass) { this->renderPass = inRenderPass; return *this; }
     };
 
     class GraphicsPipeline

@@ -15,6 +15,22 @@ namespace Nova
             bool operator==(const Filter& other) const;
         };
         static Filter All;
+        static Filter WAV;
+        static Filter OGG;
+        static Filter MP3;
+        static Filter FLAC;
+        static Filter PNG;
+        static Filter WEBP;
+        static Filter JPEG;
+        static Filter TARGA;
+        static Filter DDS;
+        static Filter ASTC;
+        static Filter BMP;
+        static Filter FBX;
+        static Filter GLTF;
+        static Filter GLB;
+        static Filter OBJ;
+        static Filter DAE;
 
     public:
         DialogFilters();

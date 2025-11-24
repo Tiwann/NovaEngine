@@ -36,6 +36,21 @@ namespace Nova
     }
 
     DialogFilters::Filter DialogFilters::All = {"All Files", {"*"}};
+    DialogFilters::Filter DialogFilters::WAV = {"Waveform Audio", {"wav"}};
+    DialogFilters::Filter DialogFilters::OGG = {"Vorbis", {"ogg"}};
+    DialogFilters::Filter DialogFilters::MP3 = {"MPEG Audio Layer III", {"mp3"}};
+    DialogFilters::Filter DialogFilters::FLAC = {"Free Lossless Audio Codec", {"flac"}};
+    DialogFilters::Filter DialogFilters::PNG = {"Portable Network Graphics", {"png"}};
+    DialogFilters::Filter DialogFilters::WEBP = {"Google Webp", {"webp"}};
+    DialogFilters::Filter DialogFilters::JPEG = {"Joint Photographic Experts Group", {"jpg", "jpeg"}};
+    DialogFilters::Filter DialogFilters::TARGA = {"Truevision Targa", {"tga"}};
+    DialogFilters::Filter DialogFilters::DDS = {"DirectDraw Surface", {"dds"}};
+    DialogFilters::Filter DialogFilters::ASTC = {"Adaptive Scalable Texture", {"astc"}};
+    DialogFilters::Filter DialogFilters::BMP = {"Windows Bitmap", {"bmp"}};
+    DialogFilters::Filter DialogFilters::FBX = {"Autodesk Filmbox", {"fbx"}};
+    DialogFilters::Filter DialogFilters::GLTF = {"GL Transmission Format", {"gltf", "glb"}};
+    DialogFilters::Filter DialogFilters::OBJ = {"Wavefront OBJ", {"obj"}};
+    DialogFilters::Filter DialogFilters::DAE = {"Collada", {"dae"}};
 
     bool DialogFilters::Filter::operator==(const Filter& other) const
     {
@@ -48,29 +63,18 @@ namespace Nova
     }
 
     DialogFilters DialogFilters::ImageFilters = Array {
-        Filter{ .name = "Portable Network Graphics", .extensions = { "png" }},
-        Filter{ .name = "Joint Photographic Experts Group", .extensions = { "jpg", "jpeg" }},
-        Filter{ .name = "Windows Bitmap", .extensions = { "bmp" }},
-        Filter{ .name = "Truevision Targa", .extensions = { "tga" }},
-        All
+        {"All Image Formats", {"png", "jpg", "jpeg", "bmp", "tga", "dds", "astc"}},
+        PNG, JPEG, BMP, TARGA, DDS, ASTC, All
     };
 
     DialogFilters DialogFilters::SoundFilters = Array {
         Filter{ .name = "All Audio Formats", .extensions = { "wav", "mp3", "ogg", "flac" }},
-        Filter{ .name = "Waveform Audio", .extensions = { "wav" }},
-        Filter{ .name = "MPEG Audio Layer III", .extensions = { "mp3" }},
-        Filter{ .name = "Vorbis", .extensions = { "ogg" }},
-        Filter{ .name = "Free Lossless Audio Codec", .extensions = { "flac" }},
-        All
+        WAV, MP3, OGG, FLAC, All
     };
 
     DialogFilters DialogFilters::ModelFilters = Array {
         Filter{ .name = "All Model Formats", .extensions = { "fbx", "gltf", "glb", "obj", "dae" }},
-        Filter{ .name = "Autodesk Filmbox", .extensions = { "fbx" }},
-        Filter{ .name = "GL Transmission Format", .extensions = { "gltf", "glb" }},
-        Filter{ .name = "Wavefront", .extensions = { "obj" }},
-        Filter{ .name = "Collada", .extensions = { "dae" }},
-        All
+        FBX, GLTF, OBJ, DAE, All
     };
 
     String DialogFilters::GetFilterString() const

@@ -13,12 +13,21 @@ namespace Nova
     class Sampler;
 }
 
+using Nova::Ref;
+using Nova::StringView;
+using Nova::Entity;
+using Nova::Ref;
+using Nova::Texture;
+using Nova::Sampler;
+using Nova::Uuid;
+using Nova::Component;
+
 namespace ImGui
 {
-    bool IMGUI_API Begin(Nova::StringView name);
-    void IMGUI_API PushID(const Nova::Uuid& id);
-    void IMGUI_API PushID(const Nova::Component* component);
-    void IMGUI_API AddComponent(Nova::Entity* entity);
+    bool IMGUI_API Begin(StringView name);
+    void IMGUI_API PushID(const Uuid& id);
+    void IMGUI_API PushID(const Component* component);
+    void IMGUI_API AddComponent(Entity* entity);
     void IMGUI_API NovaStyle(ImGuiStyle* style = nullptr);
-    void IMGUI_API Texture(Nova::Ref<Nova::Texture> texture, Nova::Ref<Nova::Sampler> sampler);
+    void IMGUI_API Image(const Ref<Texture>& texture, const Ref<Sampler>& sampler);
 }

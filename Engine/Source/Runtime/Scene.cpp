@@ -90,7 +90,7 @@ namespace Nova
 
     EntityHandle Scene::CreateEntity(const String& name)
     {
-        Entity* entity = m_EntityPool.New(name, this);
+        Entity* entity = new Entity(name, this);
         entity->m_Enabled = true;
         entity->OnInit();
         m_Entities.Add(entity);
@@ -111,7 +111,7 @@ namespace Nova
 
         entity->OnDestroy();
         m_Entities.Remove(entity);
-        m_EntityPool.Free(entity);
+        delete entity;
         handle = nullptr;
         return true;
     }

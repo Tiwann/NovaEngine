@@ -95,7 +95,6 @@ namespace Nova
 
     private:
         Uuid m_Uuid;
-        BumpAllocator<Entity, 32> m_EntityPool;
         Array<Entity*> m_Entities;
         Application* m_Owner = nullptr;
 #ifdef NOVA_HAS_PHYSICS

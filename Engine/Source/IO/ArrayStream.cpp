@@ -76,6 +76,6 @@ namespace Nova
 
     Stream::OffsetType ArrayStream::Tell() const
     {
-        return m_Opened ? m_Position : EndOfFile;
+        return m_Opened ? m_Position : (OffsetType)EndOfFile;
     }
 }

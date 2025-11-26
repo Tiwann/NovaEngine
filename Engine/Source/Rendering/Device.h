@@ -63,6 +63,7 @@ namespace Nova
 
         virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
         virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Texture> CreateTextureUnitialized() = 0;
         virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
         virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
         virtual Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Asset.h"
 #include "Object.h"
 #include "Ref.h"
 #include "Containers/Map.h"
@@ -16,9 +17,20 @@ namespace Nova
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
         Ref<AssetType> CreateAsset(const String& name)
         {
-            Ref<AssetType> asset = Ref<AssetType>(new AssetType());
-            m_Data[name] = asset;
-            return asset;
+            for (size_t index = 0; index < m_Data.Count(); index++)
+            {
+                auto& pair = m_Data.GetAt(index);
+                if (!pair.value)
+                {
+                    pair.key = name;
+                    pair.value = new AssetType();
+                    pair.value->SetObjectName(name);
+                    return pair.value;
+                }
+            }
+
+            m_Data[name] = new AssetType();
+            return Ref(m_Data[name]);
         }
 
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>

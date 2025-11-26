@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "TextureImporter.h"
+﻿#include "TextureImporter.h"
 
 namespace Nova
 {

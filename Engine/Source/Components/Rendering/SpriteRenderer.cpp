@@ -65,7 +65,7 @@ namespace Nova
 
         m_UniformBuffer = device->CreateBuffer({ device, BufferUsage::UniformBuffer, sizeof(Uniforms) });
         m_StagingBuffer = device->CreateBuffer({ device, BufferUsage::StagingBuffer, 4 * sizeof(SpriteVertex) });
-        m_Sampler = device->CreateSampler(SamplerCreateInfo(device));
+        if (!m_Sampler) m_Sampler = device->CreateSampler(SamplerCreateInfo(device));
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Shader>("SpriteShader");

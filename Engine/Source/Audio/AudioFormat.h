@@ -16,7 +16,7 @@ namespace Nova
     {
         uint32_t channels;
         uint32_t sampleRate;
-        uint32_t bitsPerSample;
+        uint32_t bytesPerSample;
         SampleInterleaving interleaving;
     };
 
@@ -57,26 +57,26 @@ namespace Nova
     };
 
 
-    template<typename T, AudioChannels C = AudioChannels::Stereo> requires std::is_floating_point_v<T>
+    template<typename T, AudioChannels Channels = AudioChannels::Stereo> requires std::is_floating_point_v<T>
     class AudioBuffer
     {
     public:
         explicit AudioBuffer(const AudioFormat& format, T* data, size_t size) : m_Format(format), m_Data((uint8_t*)data), m_Size(size)
         {
-            assert(format.channels == (uint32_t)C);
+            assert(format.channels == (uint32_t)Channels);
         }
 
 
-        AudioFrame<T, C> GetFrame(size_t index)
+        AudioFrame<T, Channels> GetFrame(size_t index)
         {
-            AudioFrame<T, C> frame;
-            if constexpr (C == AudioChannels::Mono)
+            AudioFrame<T, Channels> frame;
+            if constexpr (Channels == AudioChannels::Mono)
             {
                 frame.center = m_Data[index];
                 return frame;
             }
 
-            if constexpr (C == AudioChannels::Stereo)
+            if constexpr (Channels == AudioChannels::Stereo)
             {
                 if (m_Format.interleaving == SampleInterleaving::Interleaved)
                 {

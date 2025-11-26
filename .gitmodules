@@ -21,3 +21,9 @@ branch = master
 [submodule "Engine/Vendor/SPIRV-Reflect"]
 	path = Engine/Vendor/SPIRV-Reflect
 	url = git@github.com:KhronosGroup/SPIRV-Reflect.git
+[submodule "Engine/Vendor/vorbis"]
+	path = Engine/Vendor/vorbis
+	url = git@github.com:xiph/vorbis.git
+[submodule "Engine/Vendor/ogg"]
+	path = Engine/Vendor/ogg
+	url = git@github.com:xiph/ogg.git

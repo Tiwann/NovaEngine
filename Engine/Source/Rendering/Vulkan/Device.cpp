@@ -412,7 +412,7 @@ namespace Nova::Vulkan
         .SetBindingTypeSize(BindingType::StorageTexture, 32)
         .SetBindingTypeSize(BindingType::CombinedTextureSampler, 512)
         .SetBindingTypeSize(BindingType::UniformBuffer, 32)
-        .SetMaxSets(32);
+        .SetMaxSets(4096);
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;
     }
@@ -577,6 +577,11 @@ namespace Nova::Vulkan
             return nullptr;
         }
         return Ref(texture);
+    }
+
+    Ref<Nova::Texture> Device::CreateTextureUnitialized()
+    {
+        return MakeRef<Texture>();
     }
 
     Ref<Nova::Sampler> Device::CreateSampler(const SamplerCreateInfo& createInfo)

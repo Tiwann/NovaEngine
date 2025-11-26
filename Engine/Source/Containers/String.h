@@ -156,6 +156,34 @@ namespace Nova
         
         SizeType Count() const { return m_Count; }
         SizeType Size() const { return m_Count * CharacterSize; }
+
+
+        StringBase& Resize(const SizeType newCount)
+        {
+            if (m_Count == newCount) return *this;
+
+            if (m_Count > newCount)
+            {
+                CharacterType* newData = new CharacterType [newCount + 1]{0};
+                Memory::Memcpy(newData, m_Data, m_Count * CharacterSize);
+                delete [] m_Data;
+                m_Data = newData;
+                m_Count = newCount;
+                return *this;
+            }
+
+            if (m_Count < newCount)
+            {
+                CharacterType* newData = new CharacterType [newCount + 1]{0};
+                Memory::Memcpy(newData, m_Data, newCount * CharacterSize);
+                delete [] m_Data;
+                m_Data = newData;
+                m_Count = newCount;
+                return *this;
+            }
+
+            return *this;
+        }
         
         StringBase& Append(StringLiteralType data)
         {

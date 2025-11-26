@@ -1,6 +1,8 @@
 ﻿#include "FileStream.h"
 #include <cstdio>
 
+#include "Containers/StringConversion.h"
+
 namespace Nova
 {
     static StringView GetMode(const OpenModeFlags openMode)
@@ -20,17 +22,19 @@ namespace Nova
     
     FileStream::FileStream(StringView filepath, const OpenModeFlags openMode): Stream(openMode), m_Filepath(std::move(filepath))
     {
-        m_Handle = fopen(*m_Filepath, *GetMode(openMode));
-        m_Opened = m_Handle;
+        Open(filepath, openMode);
     }
 
     bool FileStream::Open(const StringView& filepath, const OpenModeFlags openMode)
     {
-        if(m_Opened) Close();
-        m_Filepath = filepath;
-        m_OpenMode = openMode;
-
-        m_Handle = fopen(*m_Filepath, GetMode(openMode));
+#ifdef NOVA_PLATFORM_WINDOWS
+        WideString wFilepath = StringConvertToWide(filepath);
+        m_Handle = _wfopen(*wFilepath, *StringConvertToWide(GetMode(openMode)));
+        m_Opened = m_Handle;
+#else
+        m_Handle = fopen(*m_Filepath, *GetMode(openMode));
+        m_Opened = m_Handle;
+#endif
         return m_Opened = m_Handle;
     }
 

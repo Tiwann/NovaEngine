@@ -12,11 +12,11 @@ namespace Nova
 {
     String Path::OpenFileDialog(const StringView title, const StringView defaultPath, const DialogFilters& filters, Window& owningWindow)
     {
-        OPENFILENAME openFilename = { };
+        OPENFILENAMEW openFilename = { };
         Memory::Memzero(openFilename);
         WCHAR szFile[MAX_PATH] = { 0 };
         openFilename.hwndOwner = glfwGetWin32Window(((DesktopWindow&)owningWindow).GetHandle());
-        openFilename.lStructSize = sizeof(OPENFILENAME);
+        openFilename.lStructSize = sizeof(OPENFILENAMEW);
         openFilename.lpstrFile = szFile;
         openFilename.nMaxFile = MAX_PATH;
         openFilename.nFilterIndex = 1;

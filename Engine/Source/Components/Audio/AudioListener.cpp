@@ -25,14 +25,14 @@ namespace Nova
         Component::OnStart();
     }
 
-    void AudioListener::OnUpdate(float deltaTime)
+    void AudioListener::OnUpdate(const float deltaTime)
     {
         Component::OnUpdate(deltaTime);
 
         AudioSystem* audioSystem = AudioSystem::GetInstance();
 
         const Transform* transform = GetTransform();
-        const Vector3 position = transform->GetPosition();
+        const Vector3& position = transform->GetPosition();
         const Vector3 velocity = (position - m_LastPosition) / deltaTime;
         m_LastPosition = position;
         const Vector3 forward = transform->GetForwardVector();
@@ -40,7 +40,7 @@ namespace Nova
         ma_engine_listener_set_direction(audioSystem->GetHandle(), m_Index, forward.x, forward.y, forward.z);
         ma_engine_listener_set_position(audioSystem->GetHandle(), m_Index, position.x, position.y, position.z);
         ma_engine_listener_set_velocity(audioSystem->GetHandle(), m_Index, velocity.x, velocity.y, velocity.z);
-        ma_engine_listener_set_cone(audioSystem->GetHandle(), m_Index, Math::Tau, Math::Tau, 0.0f);
+        //ma_engine_listener_set_cone(audioSystem->GetHandle(), m_Index, Math::Tau, Math::Tau, 1.0f);
     }
 
     void AudioListener::OnEnable()

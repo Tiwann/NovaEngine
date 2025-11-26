@@ -13,7 +13,6 @@ namespace Nova
 
         const String& GetObjectName() const;
         void SetObjectName(const String& newName);
-
     protected:
         String m_Name;
     };

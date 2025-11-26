@@ -58,43 +58,9 @@ namespace Nova
         memset(&m_Engine, 0, sizeof(ma_engine));
     }
 
-    bool AudioSystem::Initialize(const uint32_t channels, const uint32_t sampleRate, const uint32_t listenerCount)
+    bool AudioSystem::Initialize(const AudioSystemCreateInfo& createInfo)
     {
-        ma_allocation_callbacks allocationCallbacks
-        {
-            this,
-            AudioSystemCallbacks::OnMalloc,
-            AudioSystemCallbacks::OnRealloc,
-            AudioSystemCallbacks::OnFree
-        };
-
-        ma_engine_config config = ma_engine_config_init();
-        config.channels = channels;
-        config.sampleRate = sampleRate;
-        config.listenerCount = listenerCount;
-        config.allocationCallbacks = allocationCallbacks;
-        config.dataCallback = AudioSystemCallbacks::AudioDataProc;
-        config.notificationCallback = AudioSystemCallbacks::OnNotification;
-        config.onProcess = AudioSystemCallbacks::OnProcess;
-        config.pProcessUserData = this;
-        config.noAutoStart = true;
-
-        ma_result result = ma_engine_init(&config, &m_Engine);
-        MA_RETURN_ON_FAIL(result);
-
-        result = ma_engine_start(&m_Engine);
-        MA_RETURN_ON_FAIL(result);
-
-        if (!s_Instance)
-        {
-            s_Instance = this;
-        }
-        return true;
-    }
-
-    bool AudioSystem::Initialize(AudioSystemCreateInfo createInfo)
-    {
-        ma_allocation_callbacks allocationCallbacks
+        const ma_allocation_callbacks allocationCallbacks
         {
             this,
             AudioSystemCallbacks::OnMalloc,
@@ -113,16 +79,16 @@ namespace Nova
         config.pProcessUserData = this;
         config.noAutoStart = true;
 
+        Destroy();
         ma_result result = ma_engine_init(&config, &m_Engine);
         MA_RETURN_ON_FAIL(result);
 
         result = ma_engine_start(&m_Engine);
         MA_RETURN_ON_FAIL(result);
 
-        if (!s_Instance)
-        {
-            s_Instance = this;
-        }
+        m_Channels = createInfo.channels;
+        m_SampleRate = createInfo.sampleRate;
+        s_Instance = this;
         return true;
     }
 
@@ -132,27 +98,6 @@ namespace Nova
         ma_engine_uninit(&m_Engine);
     }
 
-    Ref<AudioClip> AudioSystem::CreateClipFromFile(StringView filepath)
-    {
-        AudioClip* clip = new AudioClip();
-        if (!clip->LoadFromFile(filepath))
-        {
-            delete clip;
-            return nullptr;
-        }
-        return Ref(clip);
-    }
-
-    Ref<AudioClip> AudioSystem::CreateClipFromMemory(const uint8_t* data, size_t size)
-    {
-        AudioClip* clip = new AudioClip();
-        if (!clip->LoadFromMemory(data, size))
-        {
-            delete clip;
-            return nullptr;
-        }
-        return Ref(clip);
-    }
 
     void AudioSystem::PlayAudioClip(AudioClip* clip)
     {
@@ -167,6 +112,43 @@ namespace Nova
     AudioSystem* AudioSystem::GetInstance()
     {
         return s_Instance;
+    }
+
+    ma_engine* AudioSystem::GetInstanceHandle()
+    {
+        return s_Instance->GetHandle();
+    }
+
+    uint32_t AudioSystem::GetOutputChannelCount() const
+    {
+        return m_Channels;
+    }
+
+    uint32_t AudioSystem::GetOutputSampleRate() const
+    {
+        return m_SampleRate;
+    }
+
+    AudioFormat AudioSystem::GetOutputFormat() const
+    {
+        static auto GeBytesPerSample = [](const ma_format format) -> uint32_t
+        {
+            switch (format)
+            {
+            case ma_format_unknown: return 0;
+            case ma_format_u8: return 1;
+            case ma_format_s16: return 2;
+            case ma_format_s24: return 3;
+            case ma_format_s32: return 4;
+            case ma_format_f32: return 4;
+            case ma_format_count: return 0;
+            }
+            return 0;
+        };
+
+        const ma_device* device = ma_engine_get_device((ma_engine*)&m_Engine);
+
+        return {m_Channels, m_SampleRate, GeBytesPerSample(device->playback.format), SampleInterleaving::Interleaved};
     }
 
     Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo)

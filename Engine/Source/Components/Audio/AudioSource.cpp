@@ -18,9 +18,9 @@ namespace Nova
     {
         Component::OnDestroy();
         Stop();
-        onStartedEvent.ClearAll();
-        onStoppedEvent.ClearAll();
-        onPlayingEvent.ClearAll();
+        OnStartedEvent.ClearAll();
+        OnStoppedEvent.ClearAll();
+        OnPlayingEvent.ClearAll();
     }
 
     void AudioSource::OnUpdate(const float deltaTime)
@@ -35,10 +35,10 @@ namespace Nova
         ma_sound_set_looping(m_Clip->GetHandle(), m_Looping);
         ma_sound_set_spatialization_enabled(m_Clip->GetHandle(), m_Spatialized);
 
-        m_Position = ma_sound_get_time_in_pcm_frames(m_Clip->GetHandle());
-        ma_sound_get_length_in_pcm_frames(m_Clip->GetHandle(), &m_Length);
+        m_PositionFrames = ma_sound_get_time_in_pcm_frames(m_Clip->GetHandle());
+        ma_sound_get_length_in_pcm_frames(m_Clip->GetHandle(), &m_DurationFrames);
         if(IsPlaying())
-            onPlayingEvent.Broadcast(m_Clip, m_Position, m_Length);
+            OnPlayingEvent.Broadcast(m_Clip, m_PositionFrames, m_DurationFrames);
 
         const Transform* transform = GetTransform();
         const Vector3 position = transform->GetPosition();
@@ -48,7 +48,7 @@ namespace Nova
         ma_sound_set_position(m_Clip->GetHandle(), position.x, position.y, position.z);
         ma_sound_set_velocity(m_Clip->GetHandle(), velocity.x, velocity.y, velocity.z);
         ma_sound_set_direction(m_Clip->GetHandle(), forward.x, forward.y, forward.z);
-        ma_sound_set_cone(m_Clip->GetHandle(), Math::Tau, Math::Tau, 0.0f);
+        ma_sound_set_cone(m_Clip->GetHandle(), Math::Tau, Math::Tau, 1.0f);
     }
 
     /*
@@ -128,7 +128,7 @@ namespace Nova
     {
         AudioSystem* audioSystem = AudioSystem::GetInstance();
         audioSystem->PlayAudioClip(m_Clip);
-        onStartedEvent.Broadcast(m_Clip, false);
+        OnStartedEvent.Broadcast(m_Clip, false);
     }
 
     void AudioSource::Stop()
@@ -136,14 +136,14 @@ namespace Nova
         AudioSystem* audioSystem = AudioSystem::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
         ma_sound_set_start_time_in_pcm_frames(m_Clip->GetHandle(), 0);
-        onStoppedEvent.Broadcast(m_Clip, false);
+        OnStoppedEvent.Broadcast(m_Clip, false);
     }
 
     void AudioSource::Pause()
     {
         AudioSystem* audioSystem = AudioSystem::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
-        onStoppedEvent.Broadcast(m_Clip, true);
+        OnStoppedEvent.Broadcast(m_Clip, true);
         m_Paused = true;
     }
 
@@ -153,7 +153,7 @@ namespace Nova
         {
             AudioSystem* audioSystem = AudioSystem::GetInstance();
             audioSystem->PlayAudioClip(m_Clip);
-            onStartedEvent.Broadcast(m_Clip, false);
+            OnStartedEvent.Broadcast(m_Clip, false);
             m_Paused = false;
         }
     }

@@ -15,28 +15,28 @@
 #include <imgui_impl_vulkan.h>
 #include <cstdint>
 
-
+using namespace Nova;
 
 namespace ImGui
 {
-    bool Begin(const Nova::StringView name)
+    bool Begin(const StringView name)
     {
         return Begin(*name);
     }
 
-    void PushID(const Nova::Uuid& id)
+    void PushID(const Uuid& id)
     {
         const uint64_t* begin = id.GetValues();
         const uint64_t* end = id.GetValues() + 2;
         PushID((const char*)begin, (const char*)end);
     }
 
-    void PushID(const Nova::Component* component)
+    void PushID(const Component* component)
     {
         PushID(component->GetUuid());
     }
 
-    void AddComponent(Nova::Entity* entity)
+    void AddComponent(Entity* entity)
     {
         static bool showPopup = false;
 
@@ -48,7 +48,7 @@ namespace ImGui
 
         if(showPopup && BeginPopup("AddComponent"))
         {
-            const Nova::StringView componentNames[]
+            const StringView componentNames[]
             {
                 "Camera",
                 "Audio Listener",
@@ -66,12 +66,12 @@ namespace ImGui
                 {
                     switch (i)
                     {
-                    case 0: entity->AddComponent<Nova::Camera>(); break;
-                    case 1: entity->AddComponent<Nova::AudioListener>(); break;
-                    case 2: entity->AddComponent<Nova::AudioSource>(); break;
-                    case 3: entity->AddComponent<Nova::BoxComponent2D>(); break;
-                    case 4: entity->AddComponent<Nova::PlaneComponent2D>(); break;
-                    case 5: entity->AddComponent<Nova::SpriteRenderer>(); break;
+                    case 0: entity->AddComponent<Camera>(); break;
+                    case 1: entity->AddComponent<AudioListener>(); break;
+                    case 2: entity->AddComponent<AudioSource>(); break;
+                    case 3: entity->AddComponent<BoxComponent2D>(); break;
+                    case 4: entity->AddComponent<PlaneComponent2D>(); break;
+                    case 5: entity->AddComponent<SpriteRenderer>(); break;
                     default: break;
                     }
                     showPopup = false;
@@ -84,8 +84,8 @@ namespace ImGui
 
     void NovaStyle(ImGuiStyle* style)
     {
-        ImGuiStyle& __style = style ? *style : GetStyle();
-        ImVec4* colors = __style.Colors;
+        ImGuiStyle& styleRef = style ? *style : GetStyle();
+        ImVec4* colors = styleRef.Colors;
         colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
         colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
         colors[ImGuiCol_WindowBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
@@ -142,34 +142,33 @@ namespace ImGui
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(1.00f, 0.00f, 0.00f, 0.35f);
 
-        __style.WindowPadding = ImVec2(8.00f, 8.00f);
-        __style.FramePadding = ImVec2(5.00f, 2.00f);
-        __style.CellPadding = ImVec2(6.00f, 6.00f);
-        __style.ItemSpacing = ImVec2(6.00f, 6.00f);
-        __style.ItemInnerSpacing = ImVec2(6.00f, 6.00f);
-        __style.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-        __style.IndentSpacing = 25;
-        __style.ScrollbarSize = 15;
-        __style.GrabMinSize = 10;
-        __style.WindowBorderSize = 1;
-        __style.ChildBorderSize = 1;
-        __style.PopupBorderSize = 1;
-        __style.FrameBorderSize = 1;
-        __style.TabBorderSize = 1;
-        __style.WindowRounding = 7;
-        __style.ChildRounding = 4;
-        __style.FrameRounding = 3;
-        __style.PopupRounding = 4;
-        __style.ScrollbarRounding = 9;
-        __style.GrabRounding = 3;
-        __style.LogSliderDeadzone = 4;
-        __style.TabRounding = 4;
+        styleRef.WindowPadding = ImVec2(8.00f, 8.00f);
+        styleRef.FramePadding = ImVec2(5.00f, 2.00f);
+        styleRef.CellPadding = ImVec2(6.00f, 6.00f);
+        styleRef.ItemSpacing = ImVec2(6.00f, 6.00f);
+        styleRef.ItemInnerSpacing = ImVec2(6.00f, 6.00f);
+        styleRef.TouchExtraPadding = ImVec2(0.00f, 0.00f);
+        styleRef.IndentSpacing = 25;
+        styleRef.ScrollbarSize = 15;
+        styleRef.GrabMinSize = 10;
+        styleRef.WindowBorderSize = 1;
+        styleRef.ChildBorderSize = 1;
+        styleRef.PopupBorderSize = 1;
+        styleRef.FrameBorderSize = 1;
+        styleRef.TabBorderSize = 1;
+        styleRef.WindowRounding = 7;
+        styleRef.ChildRounding = 4;
+        styleRef.FrameRounding = 3;
+        styleRef.PopupRounding = 4;
+        styleRef.ScrollbarRounding = 9;
+        styleRef.GrabRounding = 3;
+        styleRef.LogSliderDeadzone = 4;
+        styleRef.TabRounding = 4;
     }
 
-    void Texture(Nova::Ref<Nova::Texture> texture, Nova::Ref<Nova::Sampler> sampler)
+    void Image(const Ref<Texture>& texture, const Ref<Sampler>& sampler)
     {
-        if (auto tex = texture.As<Nova::Vulkan::Texture>();
-            auto texSampler = sampler.As<Nova::Vulkan::Sampler>())
+        if (auto tex = texture.As<Vulkan::Texture>(); auto texSampler = sampler.As<Vulkan::Sampler>())
         {
             const ImTextureID id = (ImTextureID)ImGui_ImplVulkan_AddTexture(texSampler->GetHandle(), tex->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
             Image(id, ImVec2(tex->GetWidth(), tex->GetHeight()));

@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Window.h"
 #include "Containers/String.h"
 #include "Containers/StringView.h"
 #include "Containers/StringFormat.h"
@@ -7,17 +6,19 @@
 
 namespace Nova
 {
+    class Window;
+
     struct Path
     {
         static String Combine(const StringView path, const StringView other)
         {
-            return StringFormat("{}{}{}", path, s_Separator,other).ReplaceAll('/', '\\');
+            return StringFormat("{}{}{}", path, s_Separator,other).ReplaceAll('/', s_Separator);
         }
 
         template<typename... Args>
-        static String Combine(const StringView path, Args&&... args)
+        static String Combine(const StringView path, const StringView other, const Args&... args)
         {
-            return StringFormat("{}{}{}", path, s_Separator, std::forward<Args>(args)...).ReplaceAll('/', '\\');
+            return Combine(Combine(path, other), args...);
         }
 
 

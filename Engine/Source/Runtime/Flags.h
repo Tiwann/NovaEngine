@@ -24,6 +24,8 @@ namespace Nova
         constexpr operator uint32_t() const { return (uint32_t)m_Value; }
 
         constexpr bool operator==(const Flags& other) const { return m_Value == other.m_Value; }
+        constexpr bool operator==(const Enum& other) const { return m_Value == other; }
+        constexpr bool operator==(std::underlying_type_t<Enum> other) const { return (std::underlying_type_t<Enum>)m_Value == other; }
 
         constexpr Flags operator|(const Enum& other) const { return Flags((uint32_t)m_Value | (uint32_t)other); };
         constexpr Flags operator&(const Enum& other) const { return Flags((uint32_t)m_Value & (uint32_t)other); };

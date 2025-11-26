@@ -20,7 +20,6 @@ namespace Nova
     {
         const size_t index = m_Data.FindValue(asset);
         if (index == ~0) return false;
-        m_Data.RemoveAt(index);
         asset.Release();
         return true;
     }

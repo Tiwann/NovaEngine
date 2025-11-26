@@ -74,7 +74,7 @@ namespace Nova
         Ref<Buffer> m_IndexBuffer = nullptr;
         Ref<Buffer> m_UniformBuffer = nullptr;
         Ref<Buffer> m_StagingBuffer = nullptr;
-        Ref<Sampler> m_Sampler = nullptr;
+        static inline Ref<Sampler> m_Sampler = nullptr;
         Ref<GraphicsPipeline> m_Pipeline = nullptr;
     };
 

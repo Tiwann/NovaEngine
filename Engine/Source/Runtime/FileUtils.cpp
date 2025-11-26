@@ -5,6 +5,7 @@ namespace Nova::FileUtils
 {
     Array<uint8_t> ReadToBuffer(const StringView filepath)
     {
+
         FileStream stream(filepath, OpenModeFlagBits::ReadBinary);
         if (!stream.IsOpened()) return {};
 

@@ -1,4 +1,5 @@
-﻿option(MINIAUDIO_NO_EXTRA_NODES ON)
+﻿add_subdirectory(Vendor/ogg)
+add_subdirectory(Vendor/vorbis)
 add_subdirectory(Vendor/miniaudio)
 
 add_subdirectory(Vendor/box2d)
@@ -11,7 +12,6 @@ set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF)
 set(ASSIMP_BUILD_FBX_IMPORTER   ON)
 set(ASSIMP_BUILD_OBJ_IMPORTER   ON)
 set(ASSIMP_BUILD_GLTF_IMPORTER  ON)
-set(ASSIMP_BUILD_BLEND_IMPORTER  ON)
 add_subdirectory(Vendor/assimp)
 
 

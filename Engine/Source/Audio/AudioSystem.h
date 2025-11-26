@@ -1,10 +1,11 @@
 ﻿#pragma once
 #include "Containers/StringView.h"
-#include <miniaudio.h>
-#include <cstdint>
-
+#include "AudioFormat.h"
 #include "Runtime/Object.h"
 #include "Runtime/Ref.h"
+#include <cstdint>
+
+#include <miniaudio.h>
 
 
 namespace Nova
@@ -22,13 +23,8 @@ namespace Nova
     {
     public:
         AudioSystem();
-        [[deprecated("Deprecated use the version that accepts an AudioSystemCreateInfo structure instead")]]
-        bool Initialize(uint32_t channels, uint32_t sampleRate, uint32_t listenerCount);
-        bool Initialize(AudioSystemCreateInfo createInfo);
+        bool Initialize(const AudioSystemCreateInfo& createInfo);
         void Destroy();
-
-        Ref<AudioClip> CreateClipFromFile(StringView filepath);
-        Ref<AudioClip> CreateClipFromMemory(const uint8_t* data, size_t size);
 
         void PlayAudioClip(AudioClip* clip);
         void StopAudioClip(AudioClip* clip);
@@ -37,9 +33,16 @@ namespace Nova
         ma_engine* GetHandle() { return &m_Engine; }
 
         static AudioSystem* GetInstance();
+        static ma_engine* GetInstanceHandle();
+
+        uint32_t GetOutputChannelCount() const;
+        uint32_t GetOutputSampleRate() const;
+        AudioFormat GetOutputFormat() const;
     private:
         ma_engine m_Engine;
         static AudioSystem* s_Instance;
+        uint32_t m_Channels = 0;
+        uint32_t m_SampleRate = 0;
     };
 
     Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo);

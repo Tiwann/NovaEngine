@@ -5,10 +5,10 @@
 
 namespace Nova
 {
-    class AudioListener : public Component
+    class AudioListener final : public Component
     {
     public:
-        AudioListener(Entity* owner);
+        explicit AudioListener(Entity* owner);
 
         void OnInit() override;
         void OnDestroy() override;

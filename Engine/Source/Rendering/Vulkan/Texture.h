@@ -25,6 +25,7 @@ namespace Nova::Vulkan
         VkImageView GetImageView() const;
         VmaAllocation GetAllocation() const;
         uint32_t GetImageLayout() const;
+        void SetImageLayout(uint32_t imageLayout);
     private:
         friend Swapchain;
         friend RenderTarget;

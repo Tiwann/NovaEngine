@@ -246,4 +246,9 @@ namespace Nova::Vulkan
     {
         return m_ImageLayout;
     }
+
+    void Texture::SetImageLayout(const uint32_t imageLayout)
+    {
+        m_ImageLayout = imageLayout;
+    }
 }

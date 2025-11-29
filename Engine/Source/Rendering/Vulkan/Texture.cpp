@@ -1,11 +1,10 @@
 ﻿#include "Texture.h"
 #include "Device.h"
 #include "Conversions.h"
+#include "Buffer.h"
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
-
-#include "Buffer.h"
 
 
 namespace Nova::Vulkan
@@ -327,5 +326,10 @@ namespace Nova::Vulkan
         if (!buffer->CPUCopy(0, size, result.Data()))
             return {};
         return result;
+    }
+
+    void Texture::SetImageLayout(const uint32_t imageLayout)
+    {
+        m_ImageLayout = imageLayout;
     }
 }

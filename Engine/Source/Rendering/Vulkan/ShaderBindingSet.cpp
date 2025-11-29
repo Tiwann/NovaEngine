@@ -53,7 +53,7 @@ namespace Nova::Vulkan
         if (!texture) return false;
 
         VkDescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageLayout = (VkImageLayout)texture.As<Texture>()->GetImageLayout();
         imageInfo.imageView = texture.As<Texture>()->GetImageView();
 
         VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;

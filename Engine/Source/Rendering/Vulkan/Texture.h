@@ -27,6 +27,7 @@ namespace Nova::Vulkan
         uint32_t GetImageLayout() const;
 
         Array<uint8_t> GetPixels() override;
+        void SetImageLayout(uint32_t imageLayout);
     private:
         friend Swapchain;
         friend RenderTarget;

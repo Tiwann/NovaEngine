@@ -5,6 +5,8 @@
 #include <cstring>
 #include <print>
 
+#include "AudioNode.h"
+
 #define MA_FAILED(result) ((result) != MA_SUCCESS)
 #define MA_RETURN_ON_FAIL(result) if(MA_FAILED((result))) return false
 #define MA_RETURN_ON_FAIL_DATA(result, data) if(MA_FAILED((result))) return (data)
@@ -101,11 +103,13 @@ namespace Nova
 
     void AudioSystem::PlayAudioClip(AudioClip* clip)
     {
+        if (!clip) return;
         ma_sound_start(clip->GetHandle());
     }
 
     void AudioSystem::StopAudioClip(AudioClip* clip)
     {
+        if (!clip) return;
         ma_sound_stop(clip->GetHandle());
     }
 
@@ -149,6 +153,17 @@ namespace Nova
         const ma_device* device = ma_engine_get_device((ma_engine*)&m_Engine);
 
         return {m_Channels, m_SampleRate, GeBytesPerSample(device->playback.format), SampleInterleaving::Interleaved};
+    }
+
+    bool AudioSystem::AttachAudioNodeToOutputBus(Ref<AudioNode> audioNode)
+    {
+        const ma_result result = ma_node_attach_output_bus(audioNode->GetHandle(), 0, ma_engine_get_endpoint(&m_Engine), 0);
+        return result == MA_SUCCESS;
+    }
+
+    void AudioSystem::DetachAudioNodeFromOutputBus(const Ref<AudioNode>& audioNode)
+    {
+        //ma_node_detach_output_bus(audioNode.Get(), 0, ma_engine_get_endpoint(&m_Engine), 0);
     }
 
     Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo)

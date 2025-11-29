@@ -34,6 +34,8 @@ namespace Nova
 
     public:
         DialogFilters();
+        DialogFilters(const String& name, const Array<String>& extensions);
+        DialogFilters(const Filter& filter);
         DialogFilters(const Array<Filter>& filters);
         ~DialogFilters();
 
@@ -52,7 +54,7 @@ namespace Nova
         
         String GetFilterString() const;
         
-        static DialogFilters SoundFilters;
+        static DialogFilters AudioFilters;
         static DialogFilters ModelFilters;
         static DialogFilters ImageFilters;
 

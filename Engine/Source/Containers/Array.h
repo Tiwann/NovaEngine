@@ -378,6 +378,14 @@ namespace Nova
             m_Count = 0;
         }
 
+        void Free()
+        {
+            delete [] m_Data;
+            m_Data = nullptr;
+            m_Count = 0;
+            m_Allocated = 0;
+        }
+
         // Return an array of pointer to elements of type T, inside m_Data, where each element satisfies Predicate
         Array<PointerType> Where(const Predicate& predicate) const
         {

@@ -4,6 +4,17 @@
 namespace Nova
 {
     DialogFilters::DialogFilters() = default;
+
+    DialogFilters::DialogFilters(const String& name, const Array<String>& extensions)
+    {
+       AddFilter(name, extensions);
+    }
+
+    DialogFilters::DialogFilters(const Filter& filter)
+    {
+        m_Filters.Add(filter);
+    }
+
     DialogFilters::~DialogFilters()
     {
 
@@ -67,7 +78,7 @@ namespace Nova
         PNG, JPEG, BMP, TARGA, DDS, ASTC, All
     };
 
-    DialogFilters DialogFilters::SoundFilters = Array {
+    DialogFilters DialogFilters::AudioFilters = Array {
         Filter{ .name = "All Audio Formats", .extensions = { "wav", "mp3", "ogg", "flac" }},
         WAV, MP3, OGG, FLAC, All
     };

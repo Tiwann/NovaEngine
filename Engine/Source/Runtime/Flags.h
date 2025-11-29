@@ -11,7 +11,7 @@ namespace Nova
         return 1 << N;
     }
 
-    template<typename Enum> requires std::is_scoped_enum_v<Enum>
+    template<typename Enum> requires std::is_enum_v<Enum>
     class Flags
     {
     public:

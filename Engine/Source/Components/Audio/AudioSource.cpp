@@ -133,6 +133,7 @@ namespace Nova
 
     void AudioSource::Stop()
     {
+        if (!m_Clip) return;
         AudioSystem* audioSystem = AudioSystem::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
         ma_sound_set_start_time_in_pcm_frames(m_Clip->GetHandle(), 0);
@@ -202,6 +203,16 @@ namespace Nova
     float AudioSource::GetPitch() const
     {
         return m_Pitch;
+    }
+
+    BufferView<float> AudioSource::GetFrequencies() const
+    {
+        if (!IsPlaying()) return { nullptr, 0 };
+
+        Ref<FFTAudioNode> fftNode = m_Clip->GetFFTAudioNode();
+        if (!fftNode) return { nullptr, 0 };
+
+        return fftNode->GetFrequencies();
     }
 
     bool AudioSource::IsPlaying() const

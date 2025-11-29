@@ -1,12 +1,12 @@
 ﻿#pragma once
 #include "AudioFormat.h"
+#include "FFTAudioNode.h"
 #include "Runtime/Asset.h"
 #include "Containers/StringView.h"
 #include "Runtime/Flags.h"
+#include "Runtime/Ref.h"
 
-
-typedef struct ma_sound ma_sound;
-typedef struct ma_decoder ma_decoder;
+#include <miniaudio.h>
 
 namespace Nova
 {
@@ -17,6 +17,7 @@ namespace Nova
         Stream = BIT(1),
         Spatialize = BIT(2),
         Looping = BIT(3),
+        ComputeFFT = BIT(4),
 
         Music = Stream | Looping,
         SoundEffect = FullInMemory | Spatialize,
@@ -24,12 +25,13 @@ namespace Nova
 
     NOVA_DECLARE_FLAGS(AudioPlaybackFlagBits, AudioPlaybackFlags);
 
+    class AudioNode;
 
     class AudioClip final : public Asset
     {
     public:
-        AudioClip();
-        ~AudioClip() override;
+        AudioClip() = default;
+        ~AudioClip() override = default;
         bool LoadFromFile(StringView filepath, AudioPlaybackFlags flags);
         bool LoadFromMemory(const void* data, size_t size, AudioPlaybackFlags flags);
         void Destroy();
@@ -44,10 +46,15 @@ namespace Nova
         Array<uint8_t> GetSamples() const;
 
         AudioFormat GetFormat() const;
+
+        bool ConnectToNode(Ref<AudioNode> audioNode);
+        Ref<FFTAudioNode> GetFFTAudioNode() const;
     private:
-        ma_sound* m_Handle = nullptr;
-        ma_decoder* m_Decoder = nullptr;
+        ma_sound m_Handle;
+        ma_decoder m_Decoder;
         Array<uint8_t> m_InternalBuffer;
         AudioPlaybackFlags m_PlaybackFlags = AudioPlaybackFlagBits::None;
+        Ref<FFTAudioNode> m_FFTNode = nullptr;
+        bool m_Initialized = false;
     };
 }

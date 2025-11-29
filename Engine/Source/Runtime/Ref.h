@@ -149,10 +149,10 @@ namespace Nova
     {
     public:
         using RefType = Ref<T>;
-        using PointerType = typename RefType::PointerType;
-        using ConstPointerType = typename RefType::ConstPointerType;
-        using ReferenceType = typename RefType::ReferenceType;
-        using ConstReferenceType = typename RefType::ConstReferenceType;
+        using PointerType = RefType::PointerType;
+        using ConstPointerType = RefType::ConstPointerType;
+        using ReferenceType = RefType::ReferenceType;
+        using ConstReferenceType = RefType::ConstReferenceType;
 
         explicit WeakRef(const RefType& ref) : m_Pointer(ref.Get()){}
 

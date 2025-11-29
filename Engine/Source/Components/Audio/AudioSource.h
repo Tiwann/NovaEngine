@@ -50,6 +50,7 @@ namespace Nova
         StoppedDelegate OnStoppedEvent;
         PlayingDelegate OnPlayingEvent;
 
+        BufferView<float> GetFrequencies() const;
     private:
         Ref<AudioClip> m_Clip = nullptr;
         float m_Volume = 1.0f;

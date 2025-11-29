@@ -52,6 +52,7 @@ namespace Nova
         virtual bool Initialize(const TextureCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
         virtual bool IsValid() = 0;
+        virtual Array<uint8_t> GetPixels() = 0;
 
         AssetType GetAssetType() const override { return AssetType::Texture; }
 
@@ -61,6 +62,7 @@ namespace Nova
         uint32_t GetMips() const { return m_Mips; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
         TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
+
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;

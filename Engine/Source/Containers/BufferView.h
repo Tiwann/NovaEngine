@@ -43,6 +43,8 @@ namespace Nova
         }
 
         const Type* Data() const { return m_Data; }
+
+        bool IsNullOrEmpty() const { return !m_Data || m_Count == 0; }
     private:
         const Type* m_Data = nullptr;
         size_t m_Count = 0;

@@ -50,9 +50,9 @@ namespace Nova
                 contactA.normal = Vector3(ToVector2(-manifold.normal));
                 contactA.otherBody = bodyB;
                 if (manifold.points[0].persisted) {
-                    bodyA->onContactBeginEvent.Broadcast(contactA);
+                    bodyA->OnContactBeginEvent.Broadcast(contactA);
                 } else{
-                    bodyA->onContactStayEvent.Broadcast(contactA);
+                    bodyA->OnContactStayEvent.Broadcast(contactA);
                 }
 
                 PhysicsContact contactB;
@@ -60,9 +60,9 @@ namespace Nova
                 contactB.normal = Vector3(ToVector2(manifold.normal));
                 contactB.otherBody = bodyA;
                 if (manifold.points[1].persisted) {
-                    bodyB->onContactBeginEvent.Broadcast(contactB);
+                    bodyB->OnContactBeginEvent.Broadcast(contactB);
                 } else{
-                    bodyB->onContactStayEvent.Broadcast(contactB);
+                    bodyB->OnContactStayEvent.Broadcast(contactB);
                 }
             }
 
@@ -86,13 +86,13 @@ namespace Nova
                 contactA.point = Vector3(ToVector2(manifold.points[0].point));
                 contactA.normal = Vector3(ToVector2(-manifold.normal));
                 contactA.otherBody = bodyB;
-                bodyA->onContactEndEvent.Broadcast(contactA);
+                bodyA->OnContactEndEvent.Broadcast(contactA);
 
                 PhysicsContact contactB;
                 contactB.point = Vector3(ToVector2(manifold.points[1].point));
                 contactB.normal = Vector3(ToVector2(manifold.normal));
                 contactB.otherBody = bodyA;
-                bodyB->onContactEndEvent.Broadcast(contactB);
+                bodyB->OnContactEndEvent.Broadcast(contactB);
             }
         }
 

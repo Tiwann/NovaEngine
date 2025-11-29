@@ -18,9 +18,9 @@ namespace Nova
         explicit PhysicsBody(const PhysicsWorld& world) : m_World(&world){ }
         virtual ~PhysicsBody() = default;
 
-        ContactDelegate onContactBeginEvent;
-        ContactDelegate onContactStayEvent;
-        ContactDelegate onContactEndEvent;
+        ContactDelegate OnContactBeginEvent;
+        ContactDelegate OnContactStayEvent;
+        ContactDelegate OnContactEndEvent;
         
         void SetUserPointer(void* user) { m_UserPointer = user; }
         void* GetUserPointer() const { return m_UserPointer; }

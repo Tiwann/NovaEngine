@@ -40,9 +40,9 @@ namespace Nova
 
     void BoxComponent2D::OnDestroy()
     {
-        m_Body->onContactBeginEvent.ClearAll();
-        m_Body->onContactStayEvent.ClearAll();
-        m_Body->onContactEndEvent.ClearAll();
+        m_Body->OnContactBeginEvent.ClearAll();
+        m_Body->OnContactStayEvent.ClearAll();
+        m_Body->OnContactEndEvent.ClearAll();
 
         const Scene* scene = GetScene();
         Ref<PhysicsWorld2D> world = scene->GetPhysicsWorld2D();

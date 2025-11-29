@@ -37,6 +37,7 @@ namespace Nova
 
         virtual bool Resize(size_t newSize, bool keepData = true) = 0;
         virtual bool CPUCopy(const void* src, size_t offset, size_t size) = 0;
+        virtual bool CPUCopy(size_t offset, size_t size, void* outBuffer) = 0;
         virtual bool GPUCopy(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
 
         BufferUsage GetUsage() const { return m_Usage; }

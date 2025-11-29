@@ -7,6 +7,8 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
+#include "Conversions.h"
+
 namespace Nova::Vulkan
 {
     bool ImGuiRenderer::Initialize(const ImGuiRendererCreateInfo& createInfo)
@@ -44,7 +46,7 @@ namespace Nova::Vulkan
         initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         initInfo.PipelineRenderingCreateInfo.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
         initInfo.PipelineRenderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-        constexpr VkFormat ColorAttachment = VK_FORMAT_R8G8B8A8_UNORM;
+        const VkFormat ColorAttachment = Convert<Format, VkFormat>(swapchain->GetFormat());
         initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &ColorAttachment;
         initInfo.MSAASamples = (VkSampleCountFlagBits)createInfo.sampleCount;
 

@@ -17,7 +17,7 @@ namespace Nova::Vulkan
         case BufferUsage::IndexBuffer: return VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         case BufferUsage::UniformBuffer: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         case BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        case BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        case BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         default: return 0;
         }
     }
@@ -133,6 +133,15 @@ namespace Nova::Vulkan
     {
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         const VkResult result = vmaCopyMemoryToAllocation(allocatorHandle, src, m_Allocation, offset, size);
+        if (result != VK_SUCCESS)
+            return false;
+        return true;
+    }
+
+    bool Buffer::CPUCopy(const size_t offset, const size_t size, void* outBuffer)
+    {
+        const VmaAllocator allocatorHandle = m_Device->GetAllocator();
+        const VkResult result = vmaCopyAllocationToMemory(allocatorHandle, m_Allocation, offset, outBuffer, size);
         if (result != VK_SUCCESS)
             return false;
         return true;

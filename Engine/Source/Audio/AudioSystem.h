@@ -1,16 +1,17 @@
 ﻿#pragma once
-#include "Containers/StringView.h"
 #include "AudioFormat.h"
 #include "Runtime/Object.h"
 #include "Runtime/Ref.h"
+#include "Containers/StringView.h"
 #include <cstdint>
-
 #include <miniaudio.h>
 
 
 namespace Nova
 {
     class AudioClip;
+    class AudioNode;
+    struct AudioNodeCreateInfo;
 
     struct AudioSystemCreateInfo
     {
@@ -38,11 +39,15 @@ namespace Nova
         uint32_t GetOutputChannelCount() const;
         uint32_t GetOutputSampleRate() const;
         AudioFormat GetOutputFormat() const;
+
+        bool AttachAudioNodeToOutputBus(Ref<AudioNode> audioNode);
+        void DetachAudioNodeFromOutputBus(const Ref<AudioNode>& audioNode);
     private:
         ma_engine m_Engine;
         static AudioSystem* s_Instance;
         uint32_t m_Channels = 0;
         uint32_t m_SampleRate = 0;
+        Array<Ref<AudioNode>> m_AudioNodes;
     };
 
     Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo);

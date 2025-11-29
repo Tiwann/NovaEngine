@@ -27,3 +27,6 @@ branch = master
 [submodule "Engine/Vendor/ogg"]
 	path = Engine/Vendor/ogg
 	url = git@github.com:xiph/ogg.git
+[submodule "Engine/Vendor/kissfft"]
+	path = Engine/Vendor/kissfft
+	url = git@github.com:mborgerding/kissfft.git

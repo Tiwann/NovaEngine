@@ -1,10 +1,10 @@
 #include "AudioSource.h"
-
 #include "Audio/AudioClip.h"
 #include "Components/Transform.h"
 #include "Audio/AudioSystem.h"
 #include "Containers/String.h"
 #include "Containers/StringFormat.h"
+#include <imgui.h>
 
 namespace Nova
 {
@@ -51,76 +51,32 @@ namespace Nova
         ma_sound_set_cone(m_Clip->GetHandle(), Math::Tau, Math::Tau, 1.0f);
     }
 
-    /*
-    void AudioSource::OnInspectorGUI(const ImGuiIO& IO)
+    void AudioSource::OnGui()
     {
-        Component::OnInspectorGUI(IO);
+        Component::OnGui();
 
-        if (ImGui::TreeNode("Sound"))
+        if (ImGui::TreeNode("Audio Clip"))
         {
-            const String UUID = m_Sound ? m_Sound->GetUUID().GetString() : "None";
-            UI::Text(StringFormat("UUID: {}", UUID));
-            if(m_Sound)
-            {
-                UI::Text(StringFormat("Channels: {}", m_Sound->GetChannels()));
-                UI::Text(StringFormat("Sound Type: {}", SoundTypeToString(m_Sound->GetType())));
-                UI::Text(StringFormat("Sound Format: {}", SoundFormatToString(m_Sound->GetFormat())));
-                const float Seconds = m_Sound->GetDuration();
-                const int Minutes = Math::IntegerPart(Seconds / 60.0f);
-                const int RemainSeconds = ((int)Seconds) % 60;
-                UI::Text(StringFormat("Duration: {:02}:{:02}", Minutes, RemainSeconds));
-            }
-            
+            const String uuid = m_Clip ? m_Clip->GetUuid().GetString() : "None";
+            const String text = StringFormat("UUID: {}", uuid);
+            ImGui::TextUnformatted(StringView(text));
+
             ImGui::Separator();
-            const bool Playing = IsPlaying();
-            const char* Label = IsPlaying() ? "Stop" : "Play";
-            
-            if (UI::Button(Label, {}, m_Sound))
+            const bool playing = IsPlaying();
+            const char* label = IsPlaying() ? "Stop" : "Play";
+            if (ImGui::Button(label))
             {
-                if(!Playing) Play(); else Stop();
+                if (!playing) Play(); else; Stop();
             }
-
-            ImGui::SameLine();
-            if (ImGui::Button("Browse"))
-            {
-                const Path NewFile = File::OpenFileDialog("Choose a new audio file", "", DialogFilters::SoundFilters);
-                if (File::Exists(NewFile))
-                {
-                    Stop();
-                    const SoundFlags Options = m_Sound ? m_Sound->GetFlags() : SoundFlags(SoundFlagBits::Default);
-                    if (Sound* NewSound = Sound::CreateFromFile(NewFile, Options))
-                    {
-                        delete m_Sound;
-                        SetSound(NewSound);
-                    }
-                }
-                else
-                {
-                    const ScopedPointer<PopupMessage> Message = PopupMessage::Create(
-                        "Error",
-                        "Failed to load sound!",
-                        PopupMessageResponse::OK,
-                        PopupMessageIcon::Error);
-
-                    Message->Show();
-                }
-            }
-
-            
-            ImGui::SameLine();
-            if (ImGui::Button("Unload"))
-            {
-                Stop();
-                delete m_Sound;
-            }
-            
             ImGui::TreePop();
         }
-        
-        UI::DragValue<float>("Volume", m_Volume, 0.01f, 0.0f, 1.0f, "%.2f");
-        UI::DragValue<float>("Pitch", m_Pitch, 0.01f, 0.0f, 10.0f, "%.2f");
+
+        ImGui::DragFloat("Volume", &m_Volume, 0.01f, 0.0f, 1.0f, "%.2f");
+        ImGui::DragFloat("Pitch", &m_Pitch, 0.01f, 0.0f, 0.0f, "%.2f");
+        ImGui::DragFloat("Pan", &m_Pan, 0.01f, -1.0f, 1.0f, "%.2f");
         ImGui::Checkbox("Looping", &m_Looping);
-    }*/
+        ImGui::Checkbox("Spatialized", &m_Spatialized);
+    }
 
 
 

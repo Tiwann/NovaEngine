@@ -8,11 +8,13 @@ namespace Nova
     class BoxComponent2D final : public PhysicsComponent
     {
     public:
-        BoxComponent2D(Entity* owner): PhysicsComponent(owner, "Box Component 2D"){ }
+        explicit BoxComponent2D(Entity* owner): PhysicsComponent(owner, "Box Component 2D"){ }
 
         void OnInit() override;
         void OnDrawDebug() override;
         void OnDestroy() override;
+        void OnGui() override;
+
 
         void SetShapePosition(const Vector2& position);
         Vector2 GetShapePosition() const;

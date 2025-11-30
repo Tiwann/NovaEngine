@@ -15,11 +15,11 @@ namespace Nova
     class Camera final : public Component
     {
     public:
-        Camera(Entity* owner);
+        explicit Camera(Entity* owner);
 
         void OnInit() override;
         void OnUpdate(float deltaTime) override;
-        //void OnInspectorGUI(const ImGuiIO& IO) override;
+        void OnGui() override;
         
         const Matrix4& GetViewMatrix();
         const Matrix4& GetProjectionMatrix();

@@ -1,8 +1,8 @@
 ﻿#include "Transform.h"
 #include "Runtime/Entity.h"
 #include "Runtime/Assertion.h"
-//#include "Physics/PhysicsComponent.h"
-//#include "Physics/RigidBody2D.h"
+#include "Physics/PhysicsComponent.h"
+#include <imgui.h>
 
 
 namespace Nova
@@ -69,7 +69,7 @@ namespace Nova
         m_Position = position;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::SetScale(const float scale)
@@ -82,7 +82,7 @@ namespace Nova
         m_Rotation = rotation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::SetScale(const Vector3& scale)
@@ -90,7 +90,7 @@ namespace Nova
         m_Scale = scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     // TODO: We dont want to change transform when controlled by physics
@@ -99,7 +99,7 @@ namespace Nova
         m_Position += translation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::Rotate(const Quaternion& rotation)
@@ -107,7 +107,7 @@ namespace Nova
         m_Rotation = rotation * m_Rotation;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::RotateAround(const Vector3& eulerAngles, const Vector3& point)
@@ -120,7 +120,7 @@ namespace Nova
         m_Position = Rotation * m_Position;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::Scale(const Vector3& scale)
@@ -128,7 +128,7 @@ namespace Nova
         m_Scale *= scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     void Transform::Scale(const float scale)
@@ -136,7 +136,7 @@ namespace Nova
         m_Scale *= scale;
         m_WorldSpaceMatrix.SetDirty();
         m_LocalSpaceMatrix.SetDirty();
-        onChanged.BroadcastChecked();
+        OnChanged.BroadcastChecked();
     }
 
     Vector3 Transform::GetForwardVector() const
@@ -156,7 +156,7 @@ namespace Nova
 
     const Matrix4& Transform::GetWorldSpaceMatrix()
     {
-        const Function<Matrix4()> computeWorldSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> computeWorldSpaceMatrix = [&] -> Matrix4
         {
             const Matrix4& localMatrix = GetLocalSpaceMatrix();
 
@@ -175,7 +175,7 @@ namespace Nova
 
     const Matrix4& Transform::GetLocalSpaceMatrix()
     {
-        const Function<Matrix4()> computeLocalSpaceMatrix = [&]() -> Matrix4
+        const Function<Matrix4()> computeLocalSpaceMatrix = [&] -> Matrix4
         {
             return Matrix4::TRS(m_Position, m_Rotation, m_Scale);
         };
@@ -184,7 +184,7 @@ namespace Nova
 
     const Matrix3& Transform::GetWorldSpaceNormalMatrix()
     {
-        const Function<Matrix3()> computeLocalToWorldNormalMatrix = [&]() -> Matrix3
+        const Function<Matrix3()> computeLocalToWorldNormalMatrix = [&] -> Matrix3
         {
             const Matrix4& modelMatrix = GetWorldSpaceMatrix();
             return Math::Transpose(Math::Inverse(Matrix3(modelMatrix)));
@@ -193,51 +193,47 @@ namespace Nova
         return m_WorldSpaceNormalMatrix.Get(computeLocalToWorldNormalMatrix);
     }
 
-    /*void Transform::OnInspectorGUI(const ImGuiIO& IO)
+    void Transform::OnGui()
     {
-        Component::OnInspectorGUI(IO);
+        Component::OnGui();
 
-        if(UI::DragVector3<float>("Position", m_Position, 0.01f, 0, 0, "%.2f"))
+
+        if(ImGui::DragFloat3("Position", m_Position.ValuePtr(), 0.01f, 0, 0, "%.3f"))
         {
-            if(PhysicsComponent* Shape = m_Entity->GetComponent<PhysicsComponent>())
+            if(PhysicsComponent* physics = m_Entity->GetComponent<PhysicsComponent>())
             {
-                Shape->SetPosition(m_Position);
-                //Shape->RecreatePhysicsState();
+                physics->SetBodyPosition(m_Position);
             }
 
             m_WorldSpaceMatrix.SetDirty();
             m_LocalSpaceMatrix.SetDirty();
+            m_WorldSpaceNormalMatrix.SetDirty();
             OnChanged.BroadcastChecked();
         }
 
         // This creates a gimbal lock bug
-        Vector3 EulerAngles = m_Rotation.ToEulerDegrees();
-        if(UI::DragVector3<float>("Rotation", EulerAngles, 0.01f, 0, 0, "%.2f"))
+        Vector3 eulerAngles = m_Rotation.ToEulerDegrees();
+        if(ImGui::DragFloat3("Rotation", eulerAngles.ValuePtr(), 0.01f, 0, 0, "%.3f"))
         {
-            m_Rotation = Quaternion::FromEulerDegrees(EulerAngles);
-
-            if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())
+            m_Rotation = Quaternion::FromEulerDegrees(eulerAngles);
+            if(PhysicsComponent* physics = m_Entity->GetComponent<PhysicsComponent>())
             {
-                Shape->SetRotation(Quaternion::FromEuler(0.0f, 0.0f, EulerAngles.z));
-                //Shape->RecreatePhysicsState();
+                physics->SetBodyRotation(m_Rotation);
             }
 
             m_WorldSpaceMatrix.SetDirty();
             m_LocalSpaceMatrix.SetDirty();
+            m_WorldSpaceNormalMatrix.SetDirty();
             OnChanged.BroadcastChecked();
         }
 
-        if(UI::DragVector3<float>("Scale", m_Scale, 0.01f, 0, 0, "%.2f"))
+        if(ImGui::DragFloat3("Scale", m_Scale.ValuePtr(), 0.01f, 0, 0, "%.2f"))
         {
-            if(RigidBody2D* Shape = m_Entity->GetComponent<RigidBody2D>())
-            {
-                Shape->RecreatePhysicsState();
-            }
-
             m_WorldSpaceMatrix.SetDirty();
             m_LocalSpaceMatrix.SetDirty();
+            m_WorldSpaceNormalMatrix.SetDirty();
             OnChanged.BroadcastChecked();
         }
-    }*/
+    }
 }
 

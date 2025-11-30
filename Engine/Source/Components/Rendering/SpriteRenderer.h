@@ -21,13 +21,14 @@ namespace Nova
     class SpriteRenderer final : public Component
     {
     public:
-        SpriteRenderer(Entity* owner);
+        explicit SpriteRenderer(Entity* owner);
 
         void OnInit() override;
         void OnUpdate(float deltaTime) override;
         void OnPreRender(CommandBuffer& cmdBuffer) override;
         void OnRender(CommandBuffer& cmdBuffer) override;
         void OnDestroy() override;
+        void OnGui() override;
 
         Sprite& GetSprite();
         void SetSprite(const Sprite& sprite);

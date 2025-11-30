@@ -11,12 +11,9 @@
 #include "Rendering/Shader.h"
 #include "Runtime/SpriteAnimation.h"
 #include "Rendering/ShaderBindingSet.h"
-
-#include <vulkan/vulkan.h>
-#include <cstdint>
-#include <vma/vk_mem_alloc.h>
-
 #include "Rendering/Vulkan/Buffer.h"
+
+#include <imgui.h>
 
 namespace Nova
 {
@@ -181,6 +178,33 @@ namespace Nova
         m_StagingBuffer->Destroy();
         m_Sampler->Destroy();
         m_Pipeline->Destroy();
+    }
+
+    void SpriteRenderer::OnGui()
+    {
+        ImGui::DragFloat2("Tiling", m_Tiling.ValuePtr(), 0.1f);
+
+        const char* flagNames[] = { "None",
+                                    "Tile With Scale",
+                                    "Flip Horizontal",
+                                    "Flip Vertical"};
+
+
+        if(ImGui::BeginCombo("Flags", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            for(size_t i = 1; i < std::size(flagNames); i++)
+            {
+                bool isSlected = m_Flags.Contains(SpriteRendererFlagBits(1 << i));
+                if(ImGui::Selectable(flagNames[i], &isSlected))
+                {
+                    m_Flags.Toggle(SpriteRendererFlagBits(1 << i));
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        ImGui::ColorEdit4("Tint", (float*)&m_ColorTint, ImGuiColorEditFlags_DisplayHex);
+        ImGui::DragInt("Pixels Per Unit", (int*)&m_PixelsPerUnit, 1);
     }
 
     Sprite& SpriteRenderer::GetSprite()

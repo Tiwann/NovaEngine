@@ -15,8 +15,8 @@ namespace Nova
     class LightComponent : public Component
     {
     public:
-        LightComponent(Entity* owner, const String& name);
-        //void OnInspectorGUI(const ImGuiIO& IO) override;
+        explicit LightComponent(Entity* owner, const String& name);
+        void OnGui() override;
 
         float GetIntensity() const;
         void SetIntensity(float intensity);

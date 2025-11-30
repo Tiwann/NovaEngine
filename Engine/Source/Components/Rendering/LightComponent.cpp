@@ -1,5 +1,6 @@
 ﻿#include "LightComponent.h"
 #include "Containers/StaticArray.h"
+#include <imgui.h>
 
 namespace Nova
 {
@@ -8,23 +9,24 @@ namespace Nova
         
     }
 
-    /*void LightComponent::OnInspectorGUI(const ImGuiIO& IO)
+    void LightComponent::OnGui()
     {
-        Component::OnInspectorGUI(IO);
-        const char* LightTypes[4]
+        Component::OnGui();
+        const char* lightTypes[4]
         {
             "Directional",
             "Point",
             "Spot",
             "Ambient"
         };
+
         ImGui::BeginDisabled();
-        ImGui::Combo("Light Type", (int*)&m_Type, LightTypes, std::size(LightTypes));
+        ImGui::Combo("Light Type", (int*)&m_Type, lightTypes, std::size(lightTypes));
         ImGui::EndDisabled();
         ImGui::Separator();
-        UI::DragValue("Intensity", m_Intensity, 0.1f, 0.0f, 10.0f);
+        ImGui::DragFloat("Intensity", &m_Intensity, 0.1f, 0.0f, 20.0f);
         ImGui::ColorEdit3("Color", (float*)&m_Color);
-    }*/
+    }
 
     float LightComponent::GetIntensity() const
     {

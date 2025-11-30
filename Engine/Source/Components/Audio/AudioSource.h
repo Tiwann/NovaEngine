@@ -25,7 +25,7 @@ namespace Nova
         explicit AudioSource(Entity* owner);
 
         void OnUpdate(float deltaTime) override;
-        //void OnInspectorGUI(const ImGuiIO& IO) override;
+        void OnGui() override;
         void OnDestroy() override;
 
         void Play();

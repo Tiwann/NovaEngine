@@ -41,9 +41,9 @@ namespace Nova
         const Matrix4& GetWorldSpaceMatrix();
         const Matrix4& GetLocalSpaceMatrix();
         const Matrix3& GetWorldSpaceNormalMatrix();
-        //void OnInspectorGUI(const ImGuiIO& IO) override;
+        void OnGui() override;
 
-        MulticastDelegate<void()> onChanged;
+        MulticastDelegate<void()> OnChanged;
     private:
         Vector3 m_Position = Vector3::Zero;
         Quaternion m_Rotation = Quaternion::Identity;

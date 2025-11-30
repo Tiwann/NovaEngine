@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    void PhysicsComponentEditor::OnInspectorGui()
+    void PhysicsComponentEditor::OnGui()
     {
         ImGui::PushID(m_Target);
 

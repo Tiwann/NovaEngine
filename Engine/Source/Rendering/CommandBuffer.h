@@ -5,9 +5,7 @@
 #include "Runtime/Format.h"
 #include "ShaderStage.h"
 #include "Containers/StringView.h"
-#include "Runtime/Ref.h"
 
-namespace Nova { struct Color; }
 
 namespace Nova
 {
@@ -23,6 +21,9 @@ namespace Nova
     class ShaderBindingSet;
     class Shader;
     class Material;
+    class StaticMesh;
+    struct Color;
+    class Camera;
 
     enum class CommandBufferLevel
     {
@@ -76,8 +77,8 @@ namespace Nova
         virtual void BindMaterial(const Material& material) = 0;
         virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
-        virtual void DrawIndexed(size_t count, size_t offset) = 0;
         virtual void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) = 0;
+        virtual void DrawIndexed(size_t count, size_t offset) = 0;
         virtual void BeginRenderPass(const RenderPass& renderPass) = 0;
         virtual void EndRenderPass() = 0;
         virtual void PushConstants(const Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;

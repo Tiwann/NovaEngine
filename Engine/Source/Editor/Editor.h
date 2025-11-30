@@ -16,7 +16,7 @@ namespace Nova
         ~Editor() override = default;
 
         virtual void OnInit() {}
-        virtual void OnInspectorGui() {}
+        virtual void OnGui() {}
         virtual void OnDestroy() {}
     protected:
         ObjectType* m_Target = nullptr;

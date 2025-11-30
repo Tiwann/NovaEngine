@@ -29,7 +29,7 @@ namespace Nova
 
     HierarchyWindow::HierarchyWindow(): EditorWindow("Hierarchy Window")
     {
-        m_Show = false;
+        m_Show = true;
     }
 
     void HierarchyWindow::OnGui()

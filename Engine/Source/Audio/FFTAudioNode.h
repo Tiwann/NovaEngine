@@ -43,7 +43,7 @@ namespace Nova
         uint32_t GetOutputBusCount() const override;
         uint32_t GetNodeFlags() const override;
     private:
-        uint32_t m_FFTSize = MaxFFTSize;
+        uint32_t m_FFTSize = 512;
         FFTWindow m_FFTWindow = FFTWindow::Rectangular;
         kiss_fftr_cfg m_Config = nullptr;
         float m_InputBuffer[MaxFFTSize]{};

@@ -71,7 +71,6 @@ namespace Nova
         }
     }
 
-
     void Scene::OnDestroy()
     {
         for(const Entity* entity : m_Entities)

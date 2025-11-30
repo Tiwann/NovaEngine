@@ -4,6 +4,7 @@
 #include "Runtime/Entity.h"
 #include "Runtime/Application.h"
 #include "Runtime/Window.h"
+#include <imgui.h>
 
 namespace Nova
 {
@@ -16,7 +17,7 @@ namespace Nova
     {
         Component::OnInit();
         Transform* transform = GetTransform();
-        transform->onChanged.Bind([&]
+        transform->OnChanged.Bind([&]
         {
             m_ViewMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
@@ -40,46 +41,46 @@ namespace Nova
         }
     }
 
-    /*void Camera::OnInspectorGUI(const ImGuiIO& IO)
+    void Camera::OnGui()
     {
-        Component::OnInspectorGUI(IO);
+        Component::OnGui();
 
-        if (UI::DragValue<f32>("Width", m_Settings.Width, 1, 0, 0, "%.0f"))
+        if (ImGui::DragInt("Width", (int*)&m_Width, 1, 0, 0, "%d"))
         {
             m_ProjectionMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        if (UI::DragValue<f32>("Height", m_Settings.Height, 1, 0, 0, "%.0f"))
+        if (ImGui::DragInt("Height", (int*)&m_Height, 1, 0, 0, "%d"))
         {
             m_ProjectionMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        if (UI::DragValue<f32>("Near Plane", m_Settings.NearPlane))
+        if (ImGui::DragFloat("Near Plane", &m_Near, 1, 0, 0))
         {
             m_ProjectionMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        if (UI::DragValue<f32>("Far Plane", m_Settings.FarPlane))
+        if (ImGui::DragFloat("Far Plane", &m_Far, 1, 0, 0))
         {
             m_ProjectionMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        ImGui::ColorEdit4("Clear Color", (f32*)&ClearColor);
+        ImGui::ColorEdit4("Clear Color", (float*)&m_ClearColor);
 
-        const char* ProjectionTypes[2] = { "Perspective", "Orthographic" };
-        if (ImGui::Combo("Projection", (int*)&m_Settings.ProjectionMode, ProjectionTypes, 2))
+        const char* projectionTypes[2] = { "Orthographic", "Perspective" };
+        if (ImGui::Combo("Projection", (int*)&m_ProjectionMode, projectionTypes, 2))
         {
             m_ProjectionMatrix.SetDirty();
             m_ViewProjectionMatrix.SetDirty();
         }
 
-        if (m_Settings.ProjectionMode == CameraProjectionMode::Orthographic)
+        if (m_ProjectionMode == CameraProjectionMode::Orthographic)
         {
-            if (UI::DragValue<f32>("Orthographic Size", m_Settings.OrthoSize))
+            if (ImGui::DragFloat("Orthographic Size", &m_OrthoSize))
             {
                 m_ProjectionMatrix.SetDirty();
                 m_ViewProjectionMatrix.SetDirty();
@@ -87,13 +88,13 @@ namespace Nova
         }
         else
         {
-            if (UI::DragValue<f32>("Field Of View", m_Settings.FieldOfView, 1.0f, 0.0f, 180.0f))
+            if (ImGui::DragFloat("Field Of View", &m_FieldOfView, 1.0f, 0.0f, 180.0f))
             {
                 m_ProjectionMatrix.SetDirty();
                 m_ViewProjectionMatrix.SetDirty();
             }
         }
-    }*/
+    }
 
 
     const Matrix4& Camera::GetViewMatrix()

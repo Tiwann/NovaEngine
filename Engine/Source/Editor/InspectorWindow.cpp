@@ -11,7 +11,7 @@ namespace Nova
 {
     InspectorWindow::InspectorWindow(): EditorWindow("Inspector Window")
     {
-        m_Show = false;
+        m_Show = true;
     }
 
     void InspectorWindow::OnGui()
@@ -63,11 +63,11 @@ namespace Nova
 
                 ImGui::PushID(component->GetUuid());
 
-                //if (ImGui::TreeNode(*Component->GetName()))
-                //{
-                //    Component->OnInspectorGUI(IO);
-                //    ImGui::TreePop();
-                //}
+                if (ImGui::TreeNode(*component->GetObjectName()))
+                {
+                    component->OnGui();
+                    ImGui::TreePop();
+                }
                 ImGui::PopID();
 
                 if (ImGui::IsItemClicked((ImGuiMouseButton)MouseButton::Right))

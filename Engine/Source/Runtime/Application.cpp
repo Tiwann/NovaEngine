@@ -201,6 +201,13 @@ namespace Nova
             m_SceneManager.OnUpdate(m_DeltaTime);
             OnUpdate(m_DeltaTime);
 
+            m_ImGuiRenderer->BeginFrame();
+            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+            for (Ref<EditorWindow>& window : m_EditorWindows)
+                window->OnGui();
+            OnGUI();
+            m_ImGuiRenderer->EndFrame();
+
             Render();
         }
     }
@@ -235,14 +242,6 @@ namespace Nova
             OnRender(cmdBuffer);
             DebugRenderer::Render(cmdBuffer);
             cmdBuffer.EndRenderPass();
-
-            m_ImGuiRenderer->BeginFrame();
-            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-            for (Ref<EditorWindow>& window : m_EditorWindows)
-                window->OnGui();
-            OnGUI();
-            m_ImGuiRenderer->EndFrame();
-
 
             m_ImGuiRenderPass.SetAttachmentTexture(0, *swapchain->GetCurrentTexture());
             cmdBuffer.BeginRenderPass(m_ImGuiRenderPass);

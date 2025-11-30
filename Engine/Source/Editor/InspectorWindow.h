@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    class InspectorWindow : public EditorWindow
+    class InspectorWindow final : public EditorWindow
     {
     public:
         explicit InspectorWindow();

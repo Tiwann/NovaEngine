@@ -48,7 +48,7 @@ namespace Nova
         virtual void OnPreRender(CommandBuffer& cmdBuffer) {}
         virtual void OnRender(CommandBuffer& cmdBuffer) {}
         virtual void OnDrawDebug(){}
-        //virtual void OnInspectorGUI(const ImGuiIO& IO) {}
+        virtual void OnGui() {}
 
         bool IsEnabled() const;
         void SetEnabled(bool enabled);

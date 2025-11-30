@@ -2,6 +2,7 @@
 #include "Audio/AudioSystem.h"
 #include "Components/Transform.h"
 #include <miniaudio.h>
+#include <imgui.h>
 
 namespace Nova
 {
@@ -57,11 +58,11 @@ namespace Nova
         ma_engine_listener_set_enabled(audioSystem->GetHandle(), m_Index, false);
     }
 
-    /*void AudioListener::OnInspectorGUI(const ImGuiIO& IO)
+    void AudioListener::OnGui()
     {
-        Component::OnInspectorGUI(IO);
-        UI::SliderValue<uint32_t>("Index", m_Index, 0, FMOD_MAX_LISTENERS, "%d", SliderFlagBits::AlwaysClamp);
-    }*/
+        Component::OnGui();
+        ImGui::DragInt("Lister Index", (int*)&m_Index, 1, 0, MA_ENGINE_MAX_LISTENERS, "%d", ImGuiSliderFlags_AlwaysClamp);
+    }
 
     void AudioListener::SetIndex(const uint32_t index)
     {

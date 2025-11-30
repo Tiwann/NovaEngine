@@ -6,7 +6,7 @@
 #include "Physics/PlaneShape2D.h"
 #include "Runtime/Scene.h"
 #include "Rendering/DebugRenderer.h"
-
+#include <imgui.h>
 namespace Nova
 {
     void PlaneComponent2D::OnInit()
@@ -38,6 +38,84 @@ namespace Nova
         ((PhysicsBody2D*)m_Body)->DetachShape((PlaneShape2D*)m_Shape);
         delete m_Shape;
         world->DestroyBody(m_Body);
+    }
+
+    void PlaneComponent2D::OnGui()
+    {
+        Vector2 position = GetShapePosition();
+        if (ImGui::DragFloat2("Position", position.ValuePtr(), 0.01f))
+        {
+            SetShapePosition(position);
+        }
+
+        float rotation = GetShapeRotation();
+        if (ImGui::DragFloat("Rotation", &rotation, 0.01f))
+        {
+            SetShapeRotation(rotation);
+        }
+
+        float width = GetWidth();
+        if (ImGui::DragFloat("Width", &width, 0.01f))
+        {
+            SetWidth(width);
+        }
+
+        float gravityScale = GetGravityScale();
+        if (ImGui::DragFloat("Gravity Scale", &gravityScale, 0.01f))
+        {
+            SetGravityScale(gravityScale);
+        }
+
+        float linearDamping = GetLinearDamping();
+        if (ImGui::DragFloat("Linear Damping", &linearDamping, 0.01f))
+        {
+            SetLinearDamping(linearDamping);
+        }
+
+        float angularDamping = GetAngularDamping();
+        if (ImGui::DragFloat("Angular Damping", &angularDamping, 0.01f))
+        {
+            SetAngularDamping(angularDamping);
+        }
+
+        const char* constraintsFlagNames[]
+        {
+            "None",
+            "PositionX",
+            "PositionY",
+            "PositionZ",
+            "RotationX",
+            "RotationY",
+            "RotationZ"
+        };
+
+        PhysicsConstraintsFlags flags = GetConstraints();
+
+        if(ImGui::BeginCombo("Constraints", nullptr, ImGuiComboFlags_NoPreview))
+        {
+            for(size_t i = 1; i < std::size(constraintsFlagNames); i++)
+            {
+                bool isSlected = flags.Contains(PhysicsConstraintsFlagBits(1 << i));
+                if(ImGui::Selectable(constraintsFlagNames[i], &isSlected))
+                {
+                    flags.Toggle(PhysicsConstraintsFlagBits(1 << i));
+                }
+            }
+            SetConstraints(flags);
+            ImGui::EndCombo();
+        }
+
+        const char* bodyTypeNames[]
+        {
+            "Static",
+            "Kinematic",
+            "Dynamic"
+        };
+        PhysicsBodyType bodyType = GetType();
+        if (ImGui::Combo("Body Type", (int*)&bodyType, bodyTypeNames, std::size(bodyTypeNames)))
+        {
+            SetType(bodyType);
+        }
     }
 
     void PlaneComponent2D::SetShapePosition(const Vector2& position)

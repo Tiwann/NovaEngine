@@ -8,6 +8,6 @@ namespace Nova
     {
     public:
         explicit PhysicsComponentEditor(PhysicsComponent* target) : Editor(target){}
-        void OnInspectorGui() override;
+        void OnGui() override;
     };
 }

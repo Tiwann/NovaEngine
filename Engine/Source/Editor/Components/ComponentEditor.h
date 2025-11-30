@@ -10,7 +10,7 @@ namespace Nova
     public:
         explicit ComponentEditor(ComponentType* target) : Editor<ComponentType>(target){}
 
-        void OnInspectorGui() override
+        void OnGui() override
         {
 
         }

@@ -166,8 +166,6 @@ namespace Nova
         m_Components.Clear();
     }
 
-    
-
     bool Entity::IsEnabled() const
     {
         return m_Enabled;

@@ -169,7 +169,7 @@ namespace Nova::Vulkan
 
     void Swapchain::SetName(StringView name)
     {
-        SetObjectName(m_Device, VK_OBJECT_TYPE_SWAPCHAIN_KHR, m_Handle, name);
+        SetVkObjectDebugName(m_Device, VK_OBJECT_TYPE_SWAPCHAIN_KHR, m_Handle, name);
     }
 
     bool Swapchain::AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const

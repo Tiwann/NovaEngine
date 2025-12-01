@@ -60,7 +60,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::SetName(const StringView name)
     {
-        SetObjectName(m_Device, VK_OBJECT_TYPE_COMMAND_BUFFER, m_Handle, name);
+        SetVkObjectDebugName(m_Device, VK_OBJECT_TYPE_COMMAND_BUFFER, m_Handle, name);
     }
 
     bool CommandBuffer::Begin(const CommandBufferBeginInfo& beginInfo)

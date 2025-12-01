@@ -8,7 +8,7 @@
 namespace Nova::Vulkan
 {
     template<typename T> requires std::is_pointer_v<T>
-    void SetObjectName(Device* device, const VkObjectType objectType, T handle, StringView name)
+    void SetVkObjectDebugName(Device* device, const VkObjectType objectType, T handle, StringView name)
     {
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         const VkDevice deviceHandle = device->GetHandle();
@@ -21,10 +21,10 @@ namespace Nova::Vulkan
     }
 
     template<typename T> requires std::is_pointer_v<T>
-    void SetObjectName(Nova::Device* device, const VkObjectType objectType, T handle, StringView name)
+    void SetVkObjectDebugName(Nova::Device* device, const VkObjectType objectType, T handle, StringView name)
     {
         if (Device* vulkanDevice = dynamic_cast<Device*>(device))
-            SetObjectName(vulkanDevice, objectType, handle, name);
+            SetVkObjectDebugName(vulkanDevice, objectType, handle, name);
     }
 }
 

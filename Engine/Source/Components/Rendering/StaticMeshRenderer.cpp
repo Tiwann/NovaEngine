@@ -91,6 +91,12 @@ namespace Nova
     void StaticMeshRenderer::OnDestroy()
     {
         Component::OnDestroy();
+        const Entity* owner = GetOwner();
+        const Scene* scene = owner->GetOwner();
+        Application* application = scene->GetOwner();
+        Ref<Device> device = application->GetDevice();
+        device->WaitIdle();
+
         m_BindingSet->Destroy();
         m_SceneUniformBuffer->Destroy();
         m_Pipeline->Destroy();

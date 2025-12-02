@@ -28,6 +28,7 @@ namespace ImGui
     void IMGUI_API PushID(const Uuid& id);
     void IMGUI_API PushID(const Component* component);
     void IMGUI_API AddComponent(Entity* entity);
+    void IMGUI_API ConvertColorToLinear(ImVec4& color);
     void IMGUI_API NovaStyle(ImGuiStyle* style = nullptr);
     void IMGUI_API Image(const Ref<Texture>& texture, const Ref<Sampler>& sampler);
 }

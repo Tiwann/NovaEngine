@@ -82,6 +82,13 @@ namespace ImGui
         }
     }
 
+    void ConvertColorToLinear(ImVec4& color)
+    {
+        color.x = color.x <= 0.04045f ? color.x / 12.92f : pow((color.x + 0.055f) / 1.055f, 2.4f);
+        color.y = color.y <= 0.04045f ? color.y / 12.92f : pow((color.y + 0.055f) / 1.055f, 2.4f);
+        color.z = color.z <= 0.04045f ? color.z / 12.92f : pow((color.z + 0.055f) / 1.055f, 2.4f);
+    }
+
     void NovaStyle(ImGuiStyle* style)
     {
         ImGuiStyle& styleRef = style ? *style : GetStyle();
@@ -164,6 +171,11 @@ namespace ImGui
         styleRef.GrabRounding = 3;
         styleRef.LogSliderDeadzone = 4;
         styleRef.TabRounding = 4;
+
+        // This is a hack to convert colors in linear space as the engine uses SRGB for the swapchain
+        for (int colorIndex = 0; colorIndex < ImGuiCol_COUNT; colorIndex++) {
+            ConvertColorToLinear(styleRef.Colors[colorIndex]);
+        }
     }
 
     void Image(const Ref<Texture>& texture, const Ref<Sampler>& sampler)

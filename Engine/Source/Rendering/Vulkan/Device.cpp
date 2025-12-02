@@ -541,7 +541,7 @@ namespace Nova::Vulkan
 
     void Device::SetName(StringView name)
     {
-        Vulkan::SetObjectName(this, VK_OBJECT_TYPE_DEVICE, m_Handle, name);
+        SetVkObjectDebugName(this, VK_OBJECT_TYPE_DEVICE, m_Handle, name);
     }
 
     DeviceType Device::GetDeviceType()

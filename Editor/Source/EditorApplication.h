@@ -6,6 +6,7 @@ namespace Nova
     class EditorApplication final : public Application
     {
     public:
+        explicit EditorApplication(CmdLineArgs&& args);
         ApplicationConfiguration GetConfiguration() const override;
         void OnInit() override;
         void OnUpdate(float deltaTime) override;

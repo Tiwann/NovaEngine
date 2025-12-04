@@ -49,6 +49,8 @@ namespace Nova
 
         bool ConnectToNode(Ref<AudioNode> audioNode);
         Ref<FFTAudioNode> GetFFTAudioNode() const;
+
+        bool IsValid() const { return m_Initialized;}
     private:
         ma_sound m_Handle;
         ma_decoder m_Decoder;

@@ -27,7 +27,7 @@ namespace Nova
 
         SamplerCreateInfo& WithDevice(Device* inDevice) {  device = inDevice; return *this; }
         SamplerCreateInfo& WithAddressModeUVW(const SamplerAddressMode inU, const SamplerAddressMode inV, const SamplerAddressMode inW) { addressModeU = inU; addressModeV = inV; addressModeW = inW; return *this; }
-        SamplerCreateInfo& WithAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this; return *this; }
+        SamplerCreateInfo& WithAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this;  }
         SamplerCreateInfo& WithFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }
         SamplerCreateInfo& WithLODRange(const float min, const float max) { minLod = min; maxLod = max; return *this; }
     };

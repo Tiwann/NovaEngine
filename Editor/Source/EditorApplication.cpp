@@ -8,6 +8,10 @@ NOVA_DEFINE_APPLICATION_CLASS(Nova::EditorApplication);
 
 namespace Nova
 {
+    EditorApplication::EditorApplication(CmdLineArgs&& args) : Application(std::move(args))
+    {
+    }
+
     ApplicationConfiguration EditorApplication::GetConfiguration() const
     {
         ApplicationConfiguration config;

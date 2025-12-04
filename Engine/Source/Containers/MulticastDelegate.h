@@ -13,9 +13,9 @@ namespace Nova
     {
     public:
         using DelegateType = Function<Signature>;
-        using PointerType = typename DelegateType::PointerType;
+        using PointerType = DelegateType::PointerType;
         template <class Class>
-        using MemberPointerType = typename DelegateType::template MemberPointerType<Class>;
+        using MemberPointerType = DelegateType::template MemberPointerType<Class>;
         using DelegateArray = Array<DelegateType>;
 
         MulticastDelegate() = default;

@@ -206,7 +206,7 @@ namespace Nova
 
     bool Math::IsBetween(const float value, const float min, const float max)
     {
-        return value >= min && value <= max;
+        return value >= min && value < max;
     }
 
     float Math::Wrap(const float value, const float min, const float max)

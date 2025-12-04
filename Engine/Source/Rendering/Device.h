@@ -7,6 +7,9 @@
 #include "Material.h"
 #include <cstdint>
 
+#include "Buffer.h"
+#include "Texture.h"
+
 namespace Nova
 {
     class Window;
@@ -71,6 +74,10 @@ namespace Nova
         virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
         virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
 
+        Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);
+        Ref<Texture> CreateTexture(TextureUsageFlags usageFlags, uint32_t width, uint32_t height, Format format);
+        Ref<Material> CreateMaterial(Ref<Shader> material);
+        Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
 
         virtual uint32_t GetImageCount() const = 0;
 

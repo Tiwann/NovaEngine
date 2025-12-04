@@ -48,9 +48,26 @@ namespace Nova
             ImGui::SameLine();
             ImGui::AddComponent(entity);
             ImGui::SameLine();
+
+            Function<void(Entity*, bool)> SetEnityEnabled;
+            SetEnityEnabled = [&SetEnityEnabled](Entity* entity, const bool enabled)
+            {
+                entity->SetEnabled(enabled);
+                for (size_t childIndex = 0; childIndex < entity->GetChildCount(); childIndex++)
+                {
+                    Entity* child = entity->GetChild(childIndex);
+                    if (child)
+                    {
+                        SetEnityEnabled(child, enabled);
+                    }
+                }
+            };
+
             bool entityEnabled = entity->IsEnabled();
             if (ImGui::Checkbox("Enabled", &entityEnabled))
-                entity->SetEnabled(entityEnabled);
+            {
+                SetEnityEnabled(entity, entityEnabled);
+            }
             ImGui::PopID();
 
             ImGui::TextUnformatted(*StringFormat("UUID: {}", entity->GetUUID().GetString()));

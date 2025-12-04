@@ -168,7 +168,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::BindMaterial(const Nova::Material& material)
     {
-        BindShaderBindingSet(*material.GetShader(), *material.GetBindingSets());
+        BindShaderBindingSet(*material.GetShader(), *material.GetBindingSet());
     }
 
     void CommandBuffer::SetViewport(const float x, const float y, const float width, const float height, const float minDepth, const float maxDepth)

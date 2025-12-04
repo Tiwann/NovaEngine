@@ -8,6 +8,7 @@
 
 #include <vulkan/vulkan.h>
 #include <spirv_reflect.h>
+#include <unordered_map>
 
 namespace Nova::Vulkan
 {
@@ -194,68 +195,86 @@ namespace Nova::Vulkan
         }
 
         Array<ShaderPushConstantRange> ranges;
-        uint32_t paramCount = programLayout->getParameterCount();
-        uint32_t offset = 0;
-        for (uint32_t paramIndex = 0; paramIndex < paramCount; ++paramIndex)
+        const auto GetBindingType = [](const SpvReflectDescriptorType type)
         {
-            slang::VariableLayoutReflection* variableLayout = programLayout->getParameterByIndex(paramIndex);
-            slang::VariableReflection* variable = variableLayout->getVariable();
-            slang::Attribute* attribute = variable->findAttributeByName(createInfo.slang, "vk_push_constant");
-            if (!attribute) continue;
+            switch (type)
+            {
+            case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER: return BindingType::Sampler;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: return BindingType::CombinedTextureSampler;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE: return BindingType::SampledTexture;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE: return BindingType::StorageTexture;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER: return BindingType::UniformTexelBuffer;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER: return BindingType::StorageTexelBuffer;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER: return BindingType::UniformBuffer;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER: return BindingType::StorageBuffer;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC: return BindingType::InlineUniformBlock;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC: return BindingType::InlineUniformBlock;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_INPUT_ATTACHMENT: return BindingType::InputAttachment;
+            case SPV_REFLECT_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR: return BindingType::AccelerationStructure;
+            }
+            return (BindingType)0;
+        };
 
-            slang::TypeLayoutReflection* typeLayout = variableLayout->getTypeLayout();
-            size_t size = typeLayout->getElementTypeLayout()->getSize();
+        const auto GetShaderStage = [](SpvReflectShaderStageFlagBits bits)
+        {
+            switch (bits)
+            {
+            case SPV_REFLECT_SHADER_STAGE_VERTEX_BIT: return ShaderStageFlagBits::Vertex;
+            case SPV_REFLECT_SHADER_STAGE_TESSELLATION_CONTROL_BIT: return ShaderStageFlagBits::Tessellation;
+            case SPV_REFLECT_SHADER_STAGE_TESSELLATION_EVALUATION_BIT: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_GEOMETRY_BIT: return ShaderStageFlagBits::Geometry;
+            case SPV_REFLECT_SHADER_STAGE_FRAGMENT_BIT: return ShaderStageFlagBits::Fragment;
+            case SPV_REFLECT_SHADER_STAGE_COMPUTE_BIT: return ShaderStageFlagBits::Compute;
+            case SPV_REFLECT_SHADER_STAGE_TASK_BIT_NV: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_MESH_BIT_NV: return ShaderStageFlagBits::Mesh;
+            case SPV_REFLECT_SHADER_STAGE_RAYGEN_BIT_KHR: return ShaderStageFlagBits::RayGeneration;
+            case SPV_REFLECT_SHADER_STAGE_ANY_HIT_BIT_KHR: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_CLOSEST_HIT_BIT_KHR: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_MISS_BIT_KHR: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_INTERSECTION_BIT_KHR: return ShaderStageFlagBits::None;
+            case SPV_REFLECT_SHADER_STAGE_CALLABLE_BIT_KHR: return ShaderStageFlagBits::None;
+            default: return ShaderStageFlagBits::None;
+            }
+        };
 
-            if (size > 0)
+        std::unordered_map<uint32_t, ShaderBindingSetLayout> layouts;
+
+        for (size_t moduleIndex = 0; moduleIndex < reflectModules.Count(); moduleIndex++)
+        {
+            const SpvReflectShaderModule* reflectModule = &reflectModules[moduleIndex];
+            uint32_t pushConstantBlockCount = 0;
+            spvReflectEnumeratePushConstantBlocks(reflectModule, &pushConstantBlockCount, nullptr);
+            Array<SpvReflectBlockVariable*> pushConstantBlocks(pushConstantBlockCount);
+            spvReflectEnumeratePushConstantBlocks(reflectModule, &pushConstantBlockCount, pushConstantBlocks.Data());
+
+            for (SpvReflectBlockVariable* block : pushConstantBlocks)
             {
                 ShaderPushConstantRange range;
-                range.offset = offset;
-                range.size = size;
-                range.stageFlags = stageFlags;
+                range.offset = block->offset;
+                range.size = block->size;
+                range.stageFlags = GetShaderStage(reflectModule->shader_stage);
                 ranges.Add(range);
-                offset += size;
+            }
+
+
+            uint32_t spvReflectSetCount = 0;
+            spvReflectEnumerateDescriptorSets(reflectModule, &spvReflectSetCount, nullptr);
+            Array<SpvReflectDescriptorSet*> sets(spvReflectSetCount);
+            spvReflectEnumerateDescriptorSets(reflectModule, &spvReflectSetCount, sets.Data());
+
+            for (const SpvReflectDescriptorSet* set : sets)
+            {
+                ShaderBindingSetLayout& bindingSetLayout = layouts[set->set];
+                for (size_t bindingIndex = 0; bindingIndex < set->binding_count; ++bindingIndex)
+                {
+                    SpvReflectDescriptorBinding* binding = set->bindings[bindingIndex];
+                    bindingSetLayout.SetBinding(binding->binding, {binding->name, stageFlags, GetBindingType(binding->descriptor_type), binding->count });
+                }
             }
         }
 
-
-        const uint32_t setCount = globalsTypeLayout->getDescriptorSetCount();
-        for (uint32_t setIndex = 0; setIndex < setCount; ++setIndex)
+        for (auto& [setIndex, bindingSetLayout] : layouts)
         {
-            uint32_t bindingCount = globalsTypeLayout->getDescriptorSetDescriptorRangeCount(setIndex);
-
-            ShaderBindingSetLayout bindingSetLayout;
-            for (uint32_t bindingIndex = 0; bindingIndex < bindingCount; ++bindingIndex)
-            {
-                const BindingType bindingType = GetBindingType(globalsTypeLayout->getDescriptorSetDescriptorRangeType(setIndex, bindingIndex));
-                if (bindingType == BindingType::PushConstant) continue;
-
-                size_t bindingIndexOffset = globalsTypeLayout->getDescriptorSetDescriptorRangeIndexOffset(setIndex, bindingIndex);
-                const uint32_t descriptorCount = globalsTypeLayout->getDescriptorSetDescriptorRangeDescriptorCount(setIndex, bindingIndex);
-
-                const char* bindingName = nullptr;
-
-                for (const SpvReflectShaderModule& reflectModule : reflectModules)
-                {
-                    if (bindingName) break;
-
-                    uint32_t spvReflectBindingCount = 0;
-                    spvReflectEnumerateDescriptorBindings(&reflectModule, &spvReflectBindingCount, nullptr);
-                    Array<SpvReflectDescriptorBinding*> bindings(spvReflectBindingCount);
-                    spvReflectEnumerateDescriptorBindings(&reflectModule, &spvReflectBindingCount, bindings.Data());
-
-                    for (const SpvReflectDescriptorBinding* binding : bindings)
-                    {
-                        if (binding->set == setIndex && binding->binding == bindingIndex)
-                        {
-                            bindingName = binding->name;
-                            break;
-                        }
-                    }
-                }
-
-                bindingSetLayout.SetBinding(bindingIndexOffset, { bindingName, stageFlags, bindingType, descriptorCount });
-            }
-
             if (bindingSetLayout.BindingCount() > 0)
             {
                 bindingSetLayout.Initialize(createInfo.device, setIndex);
@@ -263,6 +282,7 @@ namespace Nova::Vulkan
                 m_BindingSetLayouts.Add(bindingSetLayout);
             }
         }
+
 
         for (SpvReflectShaderModule& reflectModule : reflectModules)
             spvReflectDestroyShaderModule(&reflectModule);
@@ -311,10 +331,13 @@ namespace Nova::Vulkan
 
     Ref<Nova::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
     {
+        const ShaderBindingSetLayout* setLayout = m_BindingSetLayouts.Single([&setIndex](const ShaderBindingSetLayout& setLayout) { return setLayout.GetSetIndex() == (uint32_t)setIndex; });
+        if (!setLayout) return nullptr;
+
         ShaderBindingSetCreateInfo createInfo;
         createInfo.device = (Nova::Device*)m_Device;
         createInfo.pool = m_Device->GetDescriptorPool();
-        createInfo.layout = &m_BindingSetLayouts[setIndex];
+        createInfo.layout = setLayout;
 
         ShaderBindingSet* bindingSet = new ShaderBindingSet();
         if (!bindingSet->Initialize(createInfo))

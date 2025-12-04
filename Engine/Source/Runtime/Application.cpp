@@ -35,7 +35,7 @@ namespace Nova
         m_Window = CreateWindow(windowCreateInfo);
         if (!m_Window) return;
 
-        m_Window->closeEvent.BindMember(this, &Application::Exit);
+        m_Window->CloseEvent.BindMember(this, &Application::Exit);
 
         // Creating render device;
         DeviceCreateInfo rdCreateInfo;
@@ -94,13 +94,13 @@ namespace Nova
         m_ImGuiRenderPass.Initialize(0, 0, m_Window->GetWidth(), m_Window->GetHeight());
         m_ImGuiRenderPass.AddAttachment(colorAttachment);
 
-        m_Window->maximizeEvent.Bind([this]
+        m_Window->MaximizeEvent.Bind([this]
         {
             if (Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain())
                 swapchain->Invalidate();
         });
 
-        m_Window->resizeEvent.Bind([this](const int32_t newWidth, const int32_t newHeight)
+        m_Window->ResizeEvent.Bind([this](const int32_t newWidth, const int32_t newHeight)
         {
             if (Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain())
                 swapchain->Invalidate();

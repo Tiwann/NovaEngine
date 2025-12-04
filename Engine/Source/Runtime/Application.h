@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "Ref.h"
 #include "AssetDatabase.h"
+#include "CmdLineArgs.h"
 
 #include <cstdint>
 
@@ -31,7 +32,7 @@ namespace Nova
     class Application
     {
     public:
-        Application() = default;
+        explicit Application(CmdLineArgs&& cmdLineArgs) : m_Args(std::move(cmdLineArgs)){}
         virtual ~Application() = default;
 
         void Run();
@@ -74,11 +75,13 @@ namespace Nova
             return asset;
         }
 
+        const CmdLineArgs& GetProgramArguments() { return m_Args; }
     protected:
         void Update();
         void Render();
         void Destroy();
     private:
+        CmdLineArgs m_Args;
         Ref<Window> m_Window = nullptr;
         Ref<Device> m_Device = nullptr;
         Ref<AudioSystem> m_AudioSystem = nullptr;

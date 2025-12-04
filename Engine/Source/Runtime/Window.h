@@ -51,10 +51,10 @@ namespace Nova
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
 
-        CloseDelegate closeEvent;
-        ResizeDelegate resizeEvent;
-        MinimizeDelegate minimizeEvent;
-        MaximizeDelegate maximizeEvent;
+        CloseDelegate CloseEvent;
+        ResizeDelegate ResizeEvent;
+        MinimizeDelegate MinimizeEvent;
+        MaximizeDelegate MaximizeEvent;
     protected:
         String m_Title;
         uint32_t m_Width = 0;

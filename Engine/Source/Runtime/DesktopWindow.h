@@ -2,6 +2,7 @@
 #include "Window.h"
 #include "Containers/Map.h"
 #include "Containers/StaticArray.h"
+#include "Containers/StringView.h"
 #include "Input/CursorMode.h"
 #include "Input/InputState.h"
 #include "Input/KeyCode.h"
@@ -25,12 +26,15 @@ namespace Nova
         float axes[6];
     };
 
-    class DesktopWindow : public Window
+    class DesktopWindow final: public Window
     {
     public:
+        using DropEvent = MulticastDelegate<void(const Array<StringView>&)>;
         bool Initialize(const WindowCreateInfo& createInfo) override;
         void PollEvents() override;
         void Destroy() override;
+
+        DropEvent OnDropEvent;
 
         GLFWwindow* GetHandle();
         const GLFWwindow* GetHandle() const;

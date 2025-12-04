@@ -11,7 +11,7 @@ namespace Nova
         Shader* shader = nullptr;
 
         ComputePipelineCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
-        ComputePipelineCreateInfo& withShader(Shader* shader) { this->shader = shader; return *this; }
+        ComputePipelineCreateInfo& WithShader(Shader* shader) { this->shader = shader; return *this; }
     };
 
     class ComputePipeline

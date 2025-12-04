@@ -64,8 +64,8 @@ namespace Nova
         glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow* handle)
         {
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
-            if (window->closeEvent.IsBound())
-                window->closeEvent.Broadcast();
+            if (window->CloseEvent.IsBound())
+                window->CloseEvent.Broadcast();
         });
 
         glfwSetWindowFocusCallback(m_Handle, [](GLFWwindow* handle, const int32_t focus){
@@ -76,15 +76,15 @@ namespace Nova
         glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int32_t maximized){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_IsMaximized = (bool)maximized;
-            if (window->maximizeEvent.IsBound())
-                window->maximizeEvent.Broadcast();
+            if (window->MaximizeEvent.IsBound())
+                window->MaximizeEvent.Broadcast();
         });
 
         glfwSetWindowMaximizeCallback(m_Handle, [](GLFWwindow* handle, const int32_t maximized){
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_IsMaximized = (bool)maximized;
-            if (window->maximizeEvent.IsBound())
-                window->maximizeEvent.Broadcast();
+            if (window->MaximizeEvent.IsBound())
+                window->MaximizeEvent.Broadcast();
         });
 
         glfwSetWindowPosCallback(m_Handle, [](GLFWwindow* handle, const int32_t newX, const int32_t newY){
@@ -97,8 +97,8 @@ namespace Nova
             DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
             window->m_Width = newWidth;
             window->m_Height = newHeight;
-            if (window->resizeEvent.IsBound())
-                window->resizeEvent.Broadcast(newWidth, newHeight);
+            if (window->ResizeEvent.IsBound())
+                window->ResizeEvent.Broadcast(newWidth, newHeight);
         });
 
         glfwSetWindowIconifyCallback(m_Handle, [](GLFWwindow* handle, const int32_t iconified)
@@ -135,6 +135,16 @@ namespace Nova
                 break;
             default: break;
             }
+        });
+
+        glfwSetDropCallback(m_Handle, [](GLFWwindow* handle, int32_t count, const char** paths)
+        {
+            DesktopWindow* window = (DesktopWindow*)glfwGetWindowUserPointer(handle);
+            Array<StringView> filepaths;
+            for (size_t i = 0; i < count; ++i)
+                filepaths.Add(paths[i]);
+            if (window->OnDropEvent.IsBound())
+                window->OnDropEvent.Broadcast(filepaths);
         });
 
         return true;

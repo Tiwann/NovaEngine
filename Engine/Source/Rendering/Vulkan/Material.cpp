@@ -29,9 +29,9 @@ namespace Nova::Vulkan
 
     void Material::SetSampler(const StringView name, Ref<Nova::Sampler> sampler)
     {
-        const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
-        const ShaderBindingSetLayout& setLayout = setLayouts[1];
-        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+        const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout->GetBindings();
 
         for (size_t i = 0; i < bindings.Count(); i++)
         {
@@ -47,9 +47,9 @@ namespace Nova::Vulkan
 
     void Material::SetTexture(const StringView name, Ref<Nova::Texture> texture)
     {
-        const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
-        const ShaderBindingSetLayout& setLayout = setLayouts[1];
-        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+        const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout->GetBindings();
 
         for (size_t i = 0; i < bindings.Count(); i++)
         {
@@ -65,9 +65,9 @@ namespace Nova::Vulkan
 
     void Material::SetSamplerAndTexture(const StringView name, Ref<Sampler> sampler, Ref<Nova::Texture> texture)
     {
-        const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
-        const ShaderBindingSetLayout& setLayout = setLayouts[1];
-        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+        const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout->GetBindings();
 
         for (size_t i = 0; i < bindings.Count(); i++)
         {
@@ -83,9 +83,9 @@ namespace Nova::Vulkan
 
     void Material::SetBuffer(const StringView name, Ref<Buffer> buffer, const size_t offset, const size_t size)
     {
-        const Array<ShaderBindingSetLayout>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
-        const ShaderBindingSetLayout& setLayout = setLayouts[1];
-        const ShaderBindingSetLayout::BindingMap& bindings = setLayout.GetBindings();
+        const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
+        const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
+        const ShaderBindingSetLayout::BindingMap& bindings = setLayout->GetBindings();
 
         for (size_t i = 0; i < bindings.Count(); i++)
         {

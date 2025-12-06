@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+#include "Runtime/Object.h"
+
 namespace Nova
 {
     class Device;
@@ -26,7 +28,7 @@ namespace Nova
         }
     };
 
-    class ShaderBindingSetLayout : public Iterable<Pair<uint32_t, ShaderBinding>>
+    class ShaderBindingSetLayout : public Object, public Iterable<Pair<uint32_t, ShaderBinding>>
     {
     public:
         using BindingMap = Map<uint32_t, ShaderBinding>;

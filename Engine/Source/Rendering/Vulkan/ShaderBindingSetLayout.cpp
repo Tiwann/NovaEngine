@@ -36,6 +36,7 @@ namespace Nova::Vulkan
 
     bool ShaderBindingSetLayout::Initialize(Nova::Device* device, uint32_t setIndex)
     {
+        if (!device) return false;
         m_Device = (Device*)device;
         m_SetIndex = setIndex;
         return true;

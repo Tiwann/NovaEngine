@@ -237,8 +237,6 @@ namespace Nova::Vulkan
             }
         };
 
-        std::unordered_map<uint32_t, ShaderBindingSetLayout> layouts;
-
         for (size_t moduleIndex = 0; moduleIndex < reflectModules.Count(); moduleIndex++)
         {
             const SpvReflectShaderModule* reflectModule = &reflectModules[moduleIndex];
@@ -264,22 +262,33 @@ namespace Nova::Vulkan
 
             for (const SpvReflectDescriptorSet* set : sets)
             {
-                ShaderBindingSetLayout& bindingSetLayout = layouts[set->set];
-                for (size_t bindingIndex = 0; bindingIndex < set->binding_count; ++bindingIndex)
+                Ref<ShaderBindingSetLayout>* bindingSetLayout = m_BindingSetLayouts.Single([&set](const Ref<ShaderBindingSetLayout>& layout) { return layout->GetSetIndex() == set->set; });
+                if (bindingSetLayout)
                 {
-                    SpvReflectDescriptorBinding* binding = set->bindings[bindingIndex];
-                    bindingSetLayout.SetBinding(binding->binding, {binding->name, stageFlags, GetBindingType(binding->descriptor_type), binding->count });
+                    for (size_t bindingIndex = 0; bindingIndex < set->binding_count; ++bindingIndex)
+                    {
+                        SpvReflectDescriptorBinding* binding = set->bindings[bindingIndex];
+                        (*bindingSetLayout)->SetBinding(binding->binding, {binding->name, stageFlags, GetBindingType(binding->descriptor_type), binding->count });
+                    }
+                } else
+                {
+                    Ref<ShaderBindingSetLayout> newBindingSetLayout = new ShaderBindingSetLayout();
+                    newBindingSetLayout->Initialize(createInfo.device, set->set);
+                    for (size_t bindingIndex = 0; bindingIndex < set->binding_count; ++bindingIndex)
+                    {
+                        SpvReflectDescriptorBinding* binding = set->bindings[bindingIndex];
+                        newBindingSetLayout->SetBinding(binding->binding, {binding->name, stageFlags, GetBindingType(binding->descriptor_type), binding->count });
+                    }
+                    m_BindingSetLayouts.Emplace(Memory::Move(newBindingSetLayout));
                 }
             }
         }
 
-        for (auto& [setIndex, bindingSetLayout] : layouts)
+        for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
         {
-            if (bindingSetLayout.BindingCount() > 0)
+            if (setLayout->BindingCount() > 0)
             {
-                bindingSetLayout.Initialize(createInfo.device, setIndex);
-                bindingSetLayout.Build();
-                m_BindingSetLayouts.Emplace(Memory::Move(bindingSetLayout));
+                setLayout->Build();
             }
         }
 
@@ -290,9 +299,9 @@ namespace Nova::Vulkan
         Device* device = (Device*)createInfo.device;
 
         Array<VkDescriptorSetLayout> descriptorSetLayouts = m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
-            [](const ShaderBindingSetLayout& setLayout)
+            [](const Ref<ShaderBindingSetLayout>& setLayout)
         {
-            return setLayout.GetHandle();
+            return setLayout->GetHandle();
         });
 
         Array<VkPushConstantRange> pushConstantRanges = ranges.Transform<VkPushConstantRange>([](const ShaderPushConstantRange& range)
@@ -319,8 +328,9 @@ namespace Nova::Vulkan
 
     void Shader::Destroy()
     {
-        for (auto& bindingSetLayout : m_BindingSetLayouts)
-            bindingSetLayout.Destroy();
+        for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
+            setLayout->Destroy();
+
 
         for (auto& shaderModule : m_ShaderModules)
             shaderModule.Destroy();
@@ -331,13 +341,13 @@ namespace Nova::Vulkan
 
     Ref<Nova::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
     {
-        const ShaderBindingSetLayout* setLayout = m_BindingSetLayouts.Single([&setIndex](const ShaderBindingSetLayout& setLayout) { return setLayout.GetSetIndex() == (uint32_t)setIndex; });
+        const Ref<ShaderBindingSetLayout>* setLayout = m_BindingSetLayouts.Single([&setIndex](const Ref<ShaderBindingSetLayout>& setLayout) { return setLayout->GetSetIndex() == (uint32_t)setIndex; });
         if (!setLayout) return nullptr;
 
         ShaderBindingSetCreateInfo createInfo;
         createInfo.device = (Nova::Device*)m_Device;
         createInfo.pool = m_Device->GetDescriptorPool();
-        createInfo.layout = setLayout;
+        createInfo.layout = *setLayout;
 
         ShaderBindingSet* bindingSet = new ShaderBindingSet();
         if (!bindingSet->Initialize(createInfo))
@@ -357,7 +367,7 @@ namespace Nova::Vulkan
             ShaderBindingSetCreateInfo createInfo;
             createInfo.device = (Nova::Device*)m_Device;
             createInfo.pool = m_Device->GetDescriptorPool();
-            createInfo.layout = &setLayout;
+            createInfo.layout = setLayout;
 
             ShaderBindingSet* bindingSet = new ShaderBindingSet();
             bindingSet->Initialize(createInfo);
@@ -381,7 +391,7 @@ namespace Nova::Vulkan
         throw;
     }
 
-    const Array<ShaderBindingSetLayout>& Shader::GetBindingSetLayouts() const
+    const Array<Ref<ShaderBindingSetLayout>>& Shader::GetBindingSetLayouts() const
     {
         return m_BindingSetLayouts;
     }
@@ -402,9 +412,9 @@ namespace Nova::Vulkan
     Array<VkDescriptorSetLayout> Shader::GetDescriptorSetLayouts() const
     {
         return m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
-            [](const ShaderBindingSetLayout& bindingSetLayout)
+            [](const Ref<ShaderBindingSetLayout>& bindingSetLayout)
             {
-                return bindingSetLayout.GetHandle();
+                return bindingSetLayout->GetHandle();
             });
     }
 }

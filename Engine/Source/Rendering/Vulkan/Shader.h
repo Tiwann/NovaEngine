@@ -22,7 +22,7 @@ namespace Nova::Vulkan
 
         const Array<ShaderModule>& GetShaderModules() const;
         const ShaderModule& GetShaderModule(ShaderStageFlagBits stage) const;
-        const Array<ShaderBindingSetLayout>& GetBindingSetLayouts() const;
+        const Array<Ref<ShaderBindingSetLayout>>& GetBindingSetLayouts() const;
         ShaderStageFlags GetShaderStageFlags() const;
         VkPipelineLayout GetPipelineLayout() const;
 
@@ -38,7 +38,7 @@ namespace Nova::Vulkan
 
         Array<ShaderPushConstantRange> m_PushConstantRanges;
         Array<ShaderModule> m_ShaderModules;
-        Array<ShaderBindingSetLayout> m_BindingSetLayouts;
+        Array<Ref<ShaderBindingSetLayout>> m_BindingSetLayouts;
         VkPipelineLayout m_PipelineLayout = nullptr;
     };
 }

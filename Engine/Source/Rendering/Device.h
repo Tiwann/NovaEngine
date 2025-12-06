@@ -30,6 +30,8 @@ namespace Nova
     struct ShaderCreateInfo;
     class Material;
     struct MaterialCreateInfo;
+    class Fence;
+    struct FenceCreateInfo;
 
     enum class DeviceType
     {
@@ -73,7 +75,10 @@ namespace Nova
         virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
         virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
         virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
+        virtual Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
 
+
+        Ref<Fence> CreateFence();
         Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);
         Ref<Texture> CreateTexture(TextureUsageFlags usageFlags, uint32_t width, uint32_t height, Format format);
         Ref<Material> CreateMaterial(Ref<Shader> material);

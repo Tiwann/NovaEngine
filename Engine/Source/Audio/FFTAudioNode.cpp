@@ -97,6 +97,11 @@ namespace Nova
 
     }
 
+    uint32_t FFTAudioNode::GetFFTSize() const
+    {
+        return m_FFTSize;
+    }
+
     void FFTAudioNode::SetFFTSize(const uint32_t fftSize)
     {
         NOVA_ASSERT((fftSize & (fftSize - 1)) == 0, "FFTSize must be a power of 2!");
@@ -110,9 +115,14 @@ namespace Nova
         m_FFTWindow = window;
     }
 
+    FFTWindow FFTAudioNode::GetFFTWindow() const
+    {
+        return m_FFTWindow;
+    }
+
     BufferView<float> FFTAudioNode::GetFrequencies()
     {
-        return { m_Magnitudes, m_FFTSize / 2 + 1 };
+        return { m_Magnitudes, m_FFTSize / 2 };
     }
 
     uint32_t FFTAudioNode::GetInputBusCount() const

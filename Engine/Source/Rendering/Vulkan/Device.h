@@ -48,6 +48,7 @@ namespace Nova::Vulkan
         Ref<Nova::ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) override;
         Ref<Nova::Shader> CreateShader(const ShaderCreateInfo& createInfo) override;
         Ref<Nova::Material> CreateMaterial(const MaterialCreateInfo& createInfo) override;
+        Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) override;
 
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;

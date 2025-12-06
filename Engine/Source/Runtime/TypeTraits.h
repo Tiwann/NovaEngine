@@ -162,4 +162,28 @@ namespace Nova
 
     template<typename From, typename To>
     static constexpr bool IsConvertible = __is_convertible_to(From, To);
+
+    template<typename T>
+    struct RemoveReference
+    {
+        using Type = T;
+    };
+
+    template<typename T>
+    struct RemoveReference<T&>
+    {
+        using Type = T;
+    };
+
+    template<typename T>
+    struct RemoveReference<T&&>
+    {
+        using Type = T;
+    };
+
+    template<typename T>
+    using RemoveRefenceType = RemoveReference<T>::Type;
+
+    template<typename T>
+    using ForwardReference = RemoveReference<T>::Type&&;
 }

@@ -28,11 +28,12 @@ namespace Nova
         }
 
         template <typename Class>
-        void BindMember(Class* instance, MemberPointerType<Class> memberFunction)
+        size_t BindMember(Class* instance, MemberPointerType<Class> memberFunction)
         {
             DelegateType subscriber;
             subscriber.BindMember(instance, memberFunction);
             m_Subscribers.Add(subscriber);
+            return m_Subscribers.Count() - 1;
         }
 
         void operator+=(DelegateType Subscriber)
@@ -43,6 +44,11 @@ namespace Nova
         void Unbind(DelegateType Subscriber)
         {
             m_Subscribers.RemoveAll(Subscriber);
+        }
+
+        void Unbind(size_t index)
+        {
+            m_Subscribers.RemoveAt(index);
         }
 
         void operator-=(DelegateType Subscriber)

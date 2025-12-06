@@ -26,7 +26,7 @@ namespace Nova
         }
     };
 
-    class ShaderBindingSetLayout : public Iterable<Map<uint32_t, ShaderBinding>::PairType>
+    class ShaderBindingSetLayout : public Iterable<Pair<uint32_t, ShaderBinding>>
     {
     public:
         using BindingMap = Map<uint32_t, ShaderBinding>;

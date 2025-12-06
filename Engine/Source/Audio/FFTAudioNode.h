@@ -35,15 +35,18 @@ namespace Nova
         bool Initialize(AudioSystem* system) override;
         void Destroy() override;
         void OnProcess(const float** inFrames, uint32_t inFrameCount, float** outFrames,uint32_t outFrameCount) override;
+        uint32_t GetFFTSize() const;
         void SetFFTSize(uint32_t fftSize);
         void SetFFTWindow(FFTWindow window);
+        FFTWindow GetFFTWindow() const;
 
         BufferView<float> GetFrequencies();
         uint32_t GetInputBusCount() const override;
         uint32_t GetOutputBusCount() const override;
         uint32_t GetNodeFlags() const override;
+
     private:
-        uint32_t m_FFTSize = 512;
+        uint32_t m_FFTSize = 256;
         FFTWindow m_FFTWindow = FFTWindow::Rectangular;
         kiss_fftr_cfg m_Config = nullptr;
         float m_InputBuffer[MaxFFTSize]{};

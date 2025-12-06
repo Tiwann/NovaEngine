@@ -76,6 +76,17 @@ namespace Nova
         }
 
         const CmdLineArgs& GetProgramArguments() { return m_Args; }
+
+        template<typename T>
+        Ref<EditorWindow> GetEditorWindow()
+        {
+            for (Ref<EditorWindow> editorWindow : m_EditorWindows)
+            {
+                if (Ref<T> window = editorWindow.As<T>())
+                    return window;
+            }
+            return nullptr;
+        }
     protected:
         void Update();
         void Render();

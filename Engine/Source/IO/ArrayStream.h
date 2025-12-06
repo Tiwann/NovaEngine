@@ -20,17 +20,17 @@ namespace Nova
         bool Seek(Nova::Seek seekMode, OffsetType offset) override;
         OffsetType Tell() const override;
 
-        BufferView<uint8_t> GetView() const { return { m_Data, m_Count }; }
+        BufferView<uint8_t> GetView() const { return { m_Data, m_Size }; }
         const uint8_t* Data() const { return m_Data; }
-        size_t Size() const { return m_Count; }
+        size_t Size() const { return m_Size; }
 
         Array<uint8_t>&& Transfer()
         {
-            return std::move<Array<uint8_t>>({m_Data, m_Count});
+            return std::move<Array<uint8_t>>({m_Data, m_Size});
         }
     private:
         uint8_t* m_Data = nullptr;
-        SizeType m_Count = 0;
+        SizeType m_Size = 0;
         SizeType m_Allocated = 0;
         OffsetType m_Position = 0;
     };

@@ -31,6 +31,11 @@ namespace Nova
         return Ref(device);
     }
 
+    Ref<Fence> Device::CreateFence()
+    {
+        return CreateFence({this, FenceCreateFlagBits::None});
+    }
+
     Ref<Buffer> Device::CreateBuffer(const BufferUsage usage, const size_t size)
     {
         const BufferCreateInfo bufferCreateInfo = BufferCreateInfo()

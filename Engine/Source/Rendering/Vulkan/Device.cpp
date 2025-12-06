@@ -412,6 +412,7 @@ namespace Nova::Vulkan
         .SetBindingTypeSize(BindingType::StorageTexture, 32)
         .SetBindingTypeSize(BindingType::CombinedTextureSampler, 512)
         .SetBindingTypeSize(BindingType::UniformBuffer, 32)
+        .SetBindingTypeSize(BindingType::StorageBuffer, 32)
         .SetMaxSets(4096);
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
         return true;
@@ -654,6 +655,18 @@ namespace Nova::Vulkan
             return nullptr;
         }
         return Ref(material);
+    }
+
+    Ref<Nova::Fence> Device::CreateFence(const FenceCreateInfo& createInfo)
+    {
+        Fence* fence = new Fence();
+        FenceCreateInfo fenceCreateInfo(createInfo);
+        if (!fence->Initialize(fenceCreateInfo.WithDevice(this)))
+        {
+            delete fence;
+            return nullptr;
+        }
+        return Ref(fence);
     }
 
     VkInstance Device::GetInstance() const

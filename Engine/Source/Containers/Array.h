@@ -301,7 +301,7 @@ namespace Nova
                 m_Data = Realloc;
             }
 
-            m_Data[m_Count++] = std::move(element);
+            m_Data[m_Count++] = Memory::Move(element);
         }
 
         Array Union(const Array& other)

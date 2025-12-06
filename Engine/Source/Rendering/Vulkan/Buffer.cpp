@@ -16,7 +16,7 @@ namespace Nova::Vulkan
         case BufferUsage::VertexBuffer: return VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         case BufferUsage::IndexBuffer: return VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         case BufferUsage::UniformBuffer: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        case BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        case BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         case BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         default: return 0;
         }
@@ -71,7 +71,7 @@ namespace Nova::Vulkan
         {
             bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
             bufferAllocationCreateInfo.priority = 0.5f;
-            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
+            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
             bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
         }
 
@@ -83,6 +83,14 @@ namespace Nova::Vulkan
         }
 
         if (createInfo.usage == BufferUsage::UniformBuffer)
+        {
+            bufferAllocationCreateInfo.priority = 1.0f;
+            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        }
+
+
+        if (createInfo.usage == BufferUsage::StorageBuffer)
         {
             bufferAllocationCreateInfo.priority = 1.0f;
             bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
@@ -131,6 +139,9 @@ namespace Nova::Vulkan
 
     bool Buffer::CPUCopy(const void* src, const size_t offset, const size_t size)
     {
+        if (!src) return false;
+        if (!size) return false;
+
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         const VkResult result = vmaCopyMemoryToAllocation(allocatorHandle, src, m_Allocation, offset, size);
         if (result != VK_SUCCESS)
@@ -168,6 +179,15 @@ namespace Nova::Vulkan
         commandBuffer.Free();
 
         return true;
+    }
+
+    void Buffer::Memset(const size_t value, const size_t size)
+    {
+        const VmaAllocator allocatorHandle = m_Device->GetAllocator();
+        void* data = nullptr;
+        vmaMapMemory(allocatorHandle, m_Allocation, &data);
+        std::memset(data, value, size);
+        vmaUnmapMemory(allocatorHandle, m_Allocation);
     }
 
     VkBuffer Buffer::GetHandle() const

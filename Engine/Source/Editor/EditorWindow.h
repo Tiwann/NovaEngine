@@ -19,6 +19,9 @@ namespace Nova
 
         void Show() { m_Show = true; }
         void Hide() { m_Show = false; }
+        void ToggleShow() { m_Show = !m_Show; }
+        bool IsShown() const { return m_Show; }
+        bool* GetShownPointer() { return &m_Show; }
 
         template<typename EditorWindowType, typename... Args>
         static Ref<EditorWindowType> CreateWindow(Args&&... args)

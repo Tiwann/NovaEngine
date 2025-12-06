@@ -40,6 +40,13 @@ namespace Nova
         virtual bool CPUCopy(size_t offset, size_t size, void* outBuffer) = 0;
         virtual bool GPUCopy(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
 
+        template<typename T>
+        bool CPUCopy(BufferView<T> buffer, size_t offset)
+        {
+            return CPUCopy(buffer.Data(), offset, Math::Min(buffer.Size(), m_Size));
+        }
+
+        virtual void Memset(size_t value, size_t size) = 0;
         BufferUsage GetUsage() const { return m_Usage; }
         BufferUsage GetUsage() { return m_Usage; }
     protected:

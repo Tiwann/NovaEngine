@@ -279,7 +279,7 @@ namespace Nova::Vulkan
             {
                 bindingSetLayout.Initialize(createInfo.device, setIndex);
                 bindingSetLayout.Build();
-                m_BindingSetLayouts.Add(bindingSetLayout);
+                m_BindingSetLayouts.Emplace(Memory::Move(bindingSetLayout));
             }
         }
 

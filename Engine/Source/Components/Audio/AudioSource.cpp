@@ -68,6 +68,31 @@ namespace Nova
             {
                 if (!playing) Play(); else; Stop();
             }
+
+            if (m_Clip)
+            {
+                if (Ref<FFTAudioNode> node = m_Clip->GetFFTAudioNode())
+                {
+                    if (ImGui::TreeNode("FFT Node"))
+                    {
+                        const char* windowNames []
+                        {
+                            "Rectangular",
+                            "Hann",
+                            "Hamming",
+                            "Blackman",
+                            "BlackmanHarris",
+                            "Triangle",
+                        };
+
+                        int window = (int)node->GetFFTWindow();
+                        if (ImGui::Combo("FFT Window", &window, windowNames, std::size(windowNames)))
+                            node->SetFFTWindow((FFTWindow)window);
+                        ImGui::TreePop();
+                    }
+
+                }
+            }
             ImGui::TreePop();
         }
 
@@ -76,6 +101,8 @@ namespace Nova
         ImGui::DragFloat("Pan", &m_Pan, 0.01f, -1.0f, 1.0f, "%.2f");
         ImGui::Checkbox("Looping", &m_Looping);
         ImGui::Checkbox("Spatialized", &m_Spatialized);
+
+
     }
 
 
@@ -163,8 +190,6 @@ namespace Nova
 
     BufferView<float> AudioSource::GetFrequencies() const
     {
-        if (!IsPlaying()) return { nullptr, 0 };
-
         Ref<FFTAudioNode> fftNode = m_Clip->GetFFTAudioNode();
         if (!fftNode) return { nullptr, 0 };
 

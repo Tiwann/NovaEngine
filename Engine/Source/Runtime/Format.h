@@ -34,6 +34,7 @@ namespace Nova
         R32G32B32A32_UINT,
         R32G32B32A32_SINT,
         R32G32B32A32_FLOAT,
+        R64G64B64A64_FLOAT,
         D32_FLOAT,
         D32_FLOAT_S8_UINT,
         D24_UNORM_S8_UINT,
@@ -139,6 +140,7 @@ namespace Nova
         case Format::R16G16B16A16_SHORT:   return 4ULL * 2ULL;
         case Format::R32G32B32A32_UINT:    return 4ULL * 4ULL;
         case Format::R32G32B32A32_SINT:    return 4ULL * 4ULL;
+        case Format::R64G64B64A64_FLOAT: return 4ULL * 8ULL;
         case Format::R8G8B8A8_SRGB:        return 4ULL * 1ULL;
         case Format::D32_FLOAT:            return 4ULL;
         case Format::D32_FLOAT_S8_UINT:    return 5ULL;
@@ -197,6 +199,7 @@ namespace Nova
         case Format::R32G32B32A32_UINT: return 4ULL;
         case Format::R32G32B32A32_SINT: return 4ULL;
         case Format::R32G32B32A32_FLOAT: return 4ULL;
+        case Format::R64G64B64A64_FLOAT: return 8ULL;
         case Format::R8G8B8A8_SRGB: return 1ULL;
         case Format::D32_FLOAT: return 4ULL;
         case Format::D32_FLOAT_S8_UINT: return 4ULL;
@@ -238,6 +241,7 @@ namespace Nova
         case Format::R32G32B32A32_UINT: return 4ULL;
         case Format::R32G32B32A32_SINT: return 4ULL;
         case Format::R32G32B32A32_FLOAT: return 4ULL;
+            case Format::R64G64B64A64_FLOAT: return 4ULL;
         case Format::R8G8B8A8_SRGB: return 4ULL;
         case Format::D32_FLOAT: return 1ULL;
         case Format::D32_FLOAT_S8_UINT: return 2ULL;

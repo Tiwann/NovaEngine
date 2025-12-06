@@ -38,6 +38,7 @@ namespace Nova
         ShaderCreateInfo& WithEntryPointsAdded(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints.AddRange(entryPoints); return *this; }
         ShaderCreateInfo& WithSlang(slang::IGlobalSession* slang) { this->slang = slang; return *this; }
         ShaderCreateInfo& AddEntryPoint(const ShaderEntryPoint& entryPoint) { this->entryPoints.Add(entryPoint); return *this; }
+        ShaderCreateInfo& AddEntryPoint(const String& name, ShaderStageFlagBits stage) { this->entryPoints.Add({name, stage}); return *this; }
     };
 
     class Shader : public Asset

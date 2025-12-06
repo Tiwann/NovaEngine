@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "TypeTraits.h"
 #include <cstdint>
 #include <cstring>
 
@@ -78,4 +79,7 @@ namespace Nova::Memory
     {
         memmove(dest, src, size);
     }
+
+    template<typename T>
+    ForwardReference<T> Move(T&& t) noexcept {  return static_cast<ForwardReference<T>>(t); }
 }

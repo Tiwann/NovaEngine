@@ -83,6 +83,7 @@ namespace Nova
         Ref<Texture> CreateTexture(TextureUsageFlags usageFlags, uint32_t width, uint32_t height, Format format);
         Ref<Material> CreateMaterial(Ref<Shader> material);
         Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
+        Ref<Sampler> CreateSampler();
 
         virtual uint32_t GetImageCount() const = 0;
 

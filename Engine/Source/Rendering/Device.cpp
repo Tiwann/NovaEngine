@@ -2,6 +2,7 @@
 #include "Vulkan/Device.h"
 
 #include "ComputePipeline.h"
+#include "Sampler.h"
 
 namespace Nova
 {
@@ -67,5 +68,13 @@ namespace Nova
     {
         const ComputePipelineCreateInfo createInfo = ComputePipelineCreateInfo().WithShader(shader);
         return CreateComputePipeline(createInfo);
+    }
+
+    Ref<Sampler> Device::CreateSampler()
+    {
+        const SamplerCreateInfo createInfo = SamplerCreateInfo()
+        .WithAddressMode(SamplerAddressMode::Repeat)
+        .WithFilter(Filter::Linear, Filter::Linear);
+        return CreateSampler(createInfo);
     }
 }

@@ -32,7 +32,7 @@ namespace Nova
     class Application
     {
     public:
-        explicit Application(CmdLineArgs&& cmdLineArgs) : m_Args(std::move(cmdLineArgs)){}
+        explicit Application(const int32_t argc, char** argv) : m_Args(argc, argv) {};
         virtual ~Application() = default;
 
         void Run();

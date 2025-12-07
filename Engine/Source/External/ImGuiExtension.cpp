@@ -178,13 +178,11 @@ namespace ImGui
         }
     }
 
-    void Image(const Ref<Texture>& texture, const Ref<Sampler>& sampler)
+    void Image(const Texture& texture, const Sampler& sampler)
     {
-        if (auto tex = texture.As<Vulkan::Texture>(); auto texSampler = sampler.As<Vulkan::Sampler>())
-        {
-            const ImTextureID id = (ImTextureID)ImGui_ImplVulkan_AddTexture(texSampler->GetHandle(), tex->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-            Image(id, ImVec2(tex->GetWidth(), tex->GetHeight()));
-
-        }
+        const Vulkan::Texture& tex = (const Vulkan::Texture&)texture;
+        const Vulkan::Sampler& samp = (const Vulkan::Sampler&)sampler;
+        const ImTextureID id = (ImTextureID)ImGui_ImplVulkan_AddTexture(samp.GetHandle(), tex.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        Image(id, ImVec2(tex.GetWidth(), tex.GetHeight()));
     }
 }

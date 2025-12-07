@@ -23,11 +23,6 @@ namespace Nova
         BufferView<uint8_t> GetView() const { return { m_Data, m_Size }; }
         const uint8_t* Data() const { return m_Data; }
         size_t Size() const { return m_Size; }
-
-        Array<uint8_t>&& Transfer()
-        {
-            return std::move<Array<uint8_t>>({m_Data, m_Size});
-        }
     private:
         uint8_t* m_Data = nullptr;
         SizeType m_Size = 0;

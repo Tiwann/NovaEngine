@@ -56,6 +56,7 @@ namespace Nova
         SwapchainBuffering m_Buffering = SwapchainBuffering::None;
         PresentMode m_ImagePresentMode = PresentMode::Unknown;
         uint32_t m_ImageWidth = 0, m_ImageHeight = 0;
+        bool m_HasVSync = false;
         bool m_Valid = true;
     };
 }

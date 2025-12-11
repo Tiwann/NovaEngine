@@ -49,6 +49,7 @@ namespace Nova
         virtual void OnGUI() {}
         virtual void OnDrawDebug() {}
         virtual void OnDestroy() {}
+        virtual DeviceType GetRenderDeviceType() const { return DeviceType::Vulkan; }
 
         float GetDeltaTime() const;
         const Ref<Window>& GetWindow() const;

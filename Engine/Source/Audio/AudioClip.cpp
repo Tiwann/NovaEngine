@@ -59,7 +59,7 @@ namespace Nova
 
         if (flags & AudioPlaybackFlagBits::ComputeFFT)
         {
-            m_FFTNode = new FFTAudioNode();
+            if (!m_FFTNode) m_FFTNode = new FFTAudioNode();
             if (!m_FFTNode->Initialize(audioSystem))
                 return false;
             if (!audioSystem->AttachAudioNodeToOutputBus(m_FFTNode))

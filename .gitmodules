@@ -30,3 +30,6 @@ branch = master
 [submodule "Engine/Vendor/kissfft"]
 	path = Engine/Vendor/kissfft
 	url = git@github.com:mborgerding/kissfft.git
+[submodule "Engine/Vendor/D3D12MemoryAllocator"]
+	path = Engine/Vendor/D3D12MemoryAllocator
+	url = git@github.com:GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git

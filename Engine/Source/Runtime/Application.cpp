@@ -43,7 +43,7 @@ namespace Nova
         rdCreateInfo.window = m_Window;
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
         rdCreateInfo.vSync = configuration.vsync;
-        m_Device = CreateRenderDevice(DeviceType::Vulkan, rdCreateInfo);
+        m_Device = CreateRenderDevice(GetRenderDeviceType(), rdCreateInfo);
         if (!m_Device) return;
 
 

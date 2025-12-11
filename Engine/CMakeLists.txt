@@ -10,6 +10,29 @@ elseif(LINUX)
     list(REMOVE_ITEM NOVA_ENGINE_SOURCES ${NOVA_ENGINE_WINDOWS_SOURCES})
 endif ()
 
+set(NOVA_ENGINE_D3D12_SOURCES
+        Source/Rendering/D3D12/Device.h
+        Source/Rendering/D3D12/Device.cpp
+        Source/Rendering/D3D12/Swapchain.h
+        Source/Rendering/D3D12/Swapchain.cpp
+        Source/Rendering/D3D12/Conversions.h
+        Source/Rendering/D3D12/Surface.h
+        Source/Rendering/D3D12/Surface.cpp
+        Source/Rendering/D3D12/Queue.h
+        Source/Rendering/D3D12/Queue.cpp
+        Source/Rendering/D3D12/Fence.h
+        Source/Rendering/D3D12/Fence.cpp
+        Source/Rendering/D3D12/CommandBuffer.h
+        Source/Rendering/D3D12/CommandBuffer.cpp
+        Source/Rendering/D3D12/CommandPool.h
+        Source/Rendering/D3D12/CommandPool.cpp
+        Source/Rendering/D3D12/Buffer.h
+        Source/Rendering/D3D12/Buffer.cpp
+)
+
+set(NOVA_ENGINE_NULL_SOURCES
+    Source/Rendering/Null/Device.h
+    Source/Rendering/Null/Device.cpp)
 
 add_library(NovaEngine STATIC)
 set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
@@ -22,6 +45,11 @@ target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PU
 if(WIN32)
     target_link_libraries(NovaEngine PUBLIC kernel32)
     target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_WINDOWS_SOURCES})
+    if(NOVA_ENGINE_BUILD_D3D12)
+        target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_D3D12_SOURCES})
+        target_compile_definitions(NovaEngine PUBLIC NOVA_HAS_D3D12)
+        target_link_libraries(NovaEngine PRIVATE Microsoft::DirectX-Headers d3d12 dxgi PUBLIC D3D12MemoryAllocator)
+    endif ()
 endif ()
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)
@@ -49,4 +77,3 @@ if(WIN32)
 elseif (LINUX)
     target_compile_definitions(NovaEngine PUBLIC NOVA_PLATFORM_LINUX)
 endif ()
-

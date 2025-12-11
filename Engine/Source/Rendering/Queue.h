@@ -16,6 +16,6 @@ namespace Nova
 
         virtual void Submit(CommandBuffer* commandBuffer, Semaphore* waitSemaphore, Semaphore* signalSemaphore, Fence* fence = nullptr, uint32_t waitStagesMask = 0) const = 0;
         virtual void Submit(const Array<CommandBuffer*>& commandBuffers, const Array<Semaphore*>& waitSemaphores, const Array<Semaphore*>& signalSemaphores, Fence* fence = nullptr, uint32_t waitStagesMask = 0) const = 0;
-        virtual bool Present(const Swapchain& swapchain, const Semaphore& waitSemaphore, uint32_t imageIndex) const = 0;
+        virtual bool Present(const Swapchain& swapchain, const Nova::Semaphore* waitSemaphore, uint32_t imageIndex) const = 0;
     };
 }

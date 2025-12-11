@@ -11,7 +11,7 @@ namespace Nova::Vulkan
     public:
         void Submit(Nova::CommandBuffer* commandBuffer, Nova::Semaphore* waitSemaphore, Nova::Semaphore* signalSemaphore, Nova::Fence* fence = nullptr, uint32_t waitStagesMask = 0) const override;
         void Submit(const Array<Nova::CommandBuffer*>& commandBuffers, const Array<Nova::Semaphore*>& waitSemaphores, const Array<Nova::Semaphore*>& signalSemaphores, Nova::Fence* fence, uint32_t waitStagesMask) const override;
-        bool Present(const Nova::Swapchain& swapchain, const Nova::Semaphore& waitSemaphore, uint32_t imageIndex) const override;
+        bool Present(const Nova::Swapchain& swapchain, const Nova::Semaphore* waitSemaphore, uint32_t imageIndex) const override;
 
         VkQueue GetHandle() const;
         VkQueue* GetHandlePtr();

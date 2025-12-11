@@ -46,7 +46,7 @@ namespace Nova
         RenderTarget* renderTarget = nullptr;
         switch (createInfo.device->GetDeviceType())
         {
-        case DeviceType::Unknown: return nullptr;
+        case DeviceType::Null: return nullptr;
         case DeviceType::Vulkan:
             {
                 renderTarget = new Vulkan::RenderTarget();
@@ -55,6 +55,12 @@ namespace Nova
                     delete renderTarget;
                     return nullptr;
                 }
+            }
+            break;
+        case DeviceType::D3D12:
+            {
+                return nullptr;
+                break;
             }
         }
         return Ref(renderTarget);

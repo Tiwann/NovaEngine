@@ -10,6 +10,8 @@
 #include "Buffer.h"
 #include "Texture.h"
 
+#define NOVA_MAX_IMAGE_COUNT 3
+
 namespace Nova
 {
     class Window;
@@ -35,8 +37,11 @@ namespace Nova
 
     enum class DeviceType
     {
-        Unknown,
-        Vulkan
+        Null,
+        Vulkan,
+#ifdef NOVA_HAS_D3D12
+        D3D12
+#endif
     };
 
     struct DeviceCreateInfo
@@ -88,8 +93,10 @@ namespace Nova
         virtual uint32_t GetImageCount() const = 0;
 
         StringView GetDeviceVendor() const;
+        bool HasVSync() const;
     protected:
         String m_DeviceVendor;
+        bool m_VSync;
     };
 
     Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);

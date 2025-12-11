@@ -43,8 +43,7 @@ namespace Nova
         ImGuiRenderer* renderer = nullptr;
         switch (device->GetDeviceType())
         {
-        case DeviceType::Unknown:
-            return nullptr;
+        case DeviceType::Null: return nullptr;
         case DeviceType::Vulkan:
             {
                 renderer = new Vulkan::ImGuiRenderer();

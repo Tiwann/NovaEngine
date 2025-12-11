@@ -63,7 +63,6 @@ namespace Nova::Vulkan
         vkDestroySwapchainKHR(deviceHandle, m_Handle, nullptr);
         m_Handle = swapchainHandle;
 
-
         m_Device = createInfo.device;
         m_Surface = createInfo.surface;
         m_Buffering = createInfo.buffering;

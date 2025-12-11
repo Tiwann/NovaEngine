@@ -54,14 +54,17 @@ namespace Nova::Vulkan
         vkQueueSubmit(m_Handle, 1, &submitInfo, fence ? ((Fence*)fence)->GetHandle() : nullptr);
     }
 
-    bool Queue::Present(const Nova::Swapchain& swapchain, const Nova::Semaphore& waitSemaphore, const uint32_t imageIndex) const
+    bool Queue::Present(const Nova::Swapchain& swapchain, const Nova::Semaphore* waitSemaphore, const uint32_t imageIndex) const
     {
         VkPresentInfoKHR presentInfo = { VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = ((Swapchain&)swapchain).GetHandlePtr();
         presentInfo.pImageIndices = &imageIndex;
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = ((Semaphore&)waitSemaphore).GetHandlePtr();
+        if (waitSemaphore)
+        {
+            presentInfo.waitSemaphoreCount = 1;
+            presentInfo.pWaitSemaphores = ((Semaphore&)*waitSemaphore).GetHandlePtr();
+        }
 
         if (vkQueuePresentKHR(m_Handle, &presentInfo) != VK_SUCCESS)
             return false;

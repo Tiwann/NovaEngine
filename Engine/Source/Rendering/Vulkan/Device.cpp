@@ -372,8 +372,8 @@ namespace Nova::Vulkan
         swapchainCreateInfo.recycle = false;
         swapchainCreateInfo.buffering = createInfo.buffering;
         swapchainCreateInfo.format = Format::R8G8B8A8_SRGB;
-        swapchainCreateInfo.width = createInfo.window->GetWidth();
-        swapchainCreateInfo.height = createInfo.window->GetHeight();
+        swapchainCreateInfo.width = m_Surface->GetWidth();
+        swapchainCreateInfo.height = m_Surface->GetHeight();
         swapchainCreateInfo.presentMode = GetPresentMode(createInfo.vSync);
 
         if (!m_Swapchain.Initialize(swapchainCreateInfo))
@@ -531,7 +531,7 @@ namespace Nova::Vulkan
     void Device::Present()
     {
         const Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
-        (void)m_GraphicsQueue.Present(m_Swapchain, submitSemaphore, m_CurrentFrameIndex);
+        (void)m_GraphicsQueue.Present(m_Swapchain, &submitSemaphore, m_CurrentFrameIndex);
         m_LastFrameIndex = m_CurrentFrameIndex;
     }
 

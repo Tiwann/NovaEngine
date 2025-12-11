@@ -1,8 +1,11 @@
 ﻿#include "Device.h"
 #include "Vulkan/Device.h"
-
 #include "ComputePipeline.h"
 #include "Sampler.h"
+
+#ifdef NOVA_HAS_D3D12
+#include "D3D12/Device.h"
+#endif
 
 namespace Nova
 {
@@ -13,12 +16,17 @@ namespace Nova
         return m_DeviceVendor;
     }
 
+    bool Device::HasVSync() const
+    {
+        return m_VSync;
+    }
+
     Ref<Device> CreateRenderDevice(const DeviceType type, const DeviceCreateInfo& createInfo)
     {
         Device* device = nullptr;
         switch (type)
         {
-        case DeviceType::Unknown: return nullptr;
+        case DeviceType::Null: return nullptr;
         case DeviceType::Vulkan:
             {
                 device = new Vulkan::Device();
@@ -28,6 +36,19 @@ namespace Nova
                     return nullptr;
                 }
             }
+            break;
+#ifdef NOVA_HAS_D3D12
+        case DeviceType::D3D12:
+            {
+                device = new D3D12::Device();
+                if (!device->Initialize(createInfo))
+                {
+                    delete device;
+                    return nullptr;
+                }
+            }
+            break;
+#endif
         }
         return Ref(device);
     }

@@ -52,3 +52,14 @@ set(SPIRV_REFLECT_EXECUTABLE OFF)
 set(SPIRV_REFLECT_INSTALL OFF)
 set(SPIRV_REFLECT_STATIC_LIB ON)
 add_subdirectory(Vendor/SPIRV-Reflect)
+
+if(NOVA_ENGINE_BUILD_D3D12)
+    include(FetchContent)
+    FetchContent_Declare(
+        directx-headers
+        GIT_REPOSITORY git@github.com:microsoft/DirectX-Headers.git
+        GIT_TAG v1.618.2)
+    FetchContent_MakeAvailable(directx-headers)
+
+    add_subdirectory(Vendor/D3D12MemoryAllocator)
+endif ()

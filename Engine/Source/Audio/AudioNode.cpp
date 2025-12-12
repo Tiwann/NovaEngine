@@ -37,6 +37,8 @@ namespace Nova
         nodeConfig.pInputChannels = &channels;
         nodeConfig.pOutputChannels = &channels;
 
+        ma_node_detach_all_output_buses(&m_NodeBase);
+        ma_node_uninit(&m_NodeBase, nullptr);
         const ma_result result = ma_node_init(graph, &nodeConfig, nullptr, &m_NodeBase);
         if (result != MA_SUCCESS) return false;
         m_NodeBase.pUserData = this;
@@ -45,6 +47,7 @@ namespace Nova
 
     void AudioNode::Destroy()
     {
+        ma_node_detach_all_output_buses(&m_NodeBase);
         ma_node_uninit(&m_NodeBase, nullptr);
     }
 

@@ -43,7 +43,7 @@ namespace Nova
         {
             ma_sound_uninit(&m_Handle);
             ma_decoder_uninit(&m_Decoder);
-            m_FFTNode->Destroy();
+            if (m_FFTNode) m_FFTNode->Destroy();
             m_InternalBuffer.Free();
         }
 
@@ -59,7 +59,7 @@ namespace Nova
 
         if (flags & AudioPlaybackFlagBits::ComputeFFT)
         {
-            if (!m_FFTNode) m_FFTNode = new FFTAudioNode();
+            m_FFTNode = new FFTAudioNode();
             if (!m_FFTNode->Initialize(audioSystem))
                 return false;
             if (!audioSystem->AttachAudioNodeToOutputBus(m_FFTNode))

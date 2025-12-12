@@ -70,7 +70,6 @@ namespace Nova
     bool FFTAudioNode::Initialize(AudioSystem* system)
     {
         if (!AudioNode::Initialize(system)) return false;
-
         std::free(m_Config);
         m_Config = kiss_fftr_alloc(m_FFTSize, 0, nullptr, nullptr);
         if (!m_Config) return false;

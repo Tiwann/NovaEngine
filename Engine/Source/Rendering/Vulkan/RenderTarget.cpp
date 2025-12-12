@@ -13,7 +13,7 @@ namespace Nova::Vulkan
     bool RenderTarget::Initialize(const RenderTargetCreateInfo& createInfo)
     {
         Device* device = (Device*)createInfo.device;
-        Swapchain* swapchain = device->GetSwapchain();
+        Swapchain* swapchain = static_cast<Swapchain*>(device->GetSwapchain());
         CommandPool* commandPool = device->GetCommandPool();
         const VkDevice deviceHandle = device->GetHandle();
         const VmaAllocator allocatorHandle = device->GetAllocator();
@@ -181,7 +181,7 @@ namespace Nova::Vulkan
     void RenderTarget::Destroy()
     {
         Device* device = static_cast<Device*>(m_Device);
-        const Swapchain* swapchain = device->GetSwapchain();
+        const Swapchain* swapchain = static_cast<Swapchain*>(m_Device->GetSwapchain());
         const VkDevice deviceHandle = device->GetHandle();
         const VmaAllocator allocatorHandle = device->GetAllocator();
 

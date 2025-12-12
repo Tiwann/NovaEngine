@@ -11,12 +11,10 @@
 #include "Rendering/Shader.h"
 #include "Rendering/Vulkan/Device.h"
 #include "Rendering/Vulkan/RenderTarget.h"
-#include "Rendering/Vulkan/Shader.h"
-#include "Rendering/Vulkan/Swapchain.h"
+#include "Utils/TextureUtils.h"
 
 #include <imgui.h>
 
-#include "Utils/TextureUtils.h"
 
 namespace Nova
 {
@@ -33,7 +31,11 @@ namespace Nova
         windowCreateInfo.height = configuration.windowHeight;
         windowCreateInfo.flags = configuration.windowFlags;
         m_Window = CreateWindow(windowCreateInfo);
-        if (!m_Window) return;
+        if (!m_Window)
+        {
+            Destroy();
+            return;
+        }
 
         m_Window->CloseEvent.BindMember(this, &Application::Exit);
 
@@ -44,7 +46,11 @@ namespace Nova
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
         rdCreateInfo.vSync = configuration.vsync;
         m_Device = CreateRenderDevice(GetRenderDeviceType(), rdCreateInfo);
-        if (!m_Device) return;
+        if (!m_Device)
+        {
+            Destroy();
+            return;
+        }
 
 
         // Creating render target
@@ -56,8 +62,12 @@ namespace Nova
         rtCreateInfo.colorFormat = Format::R8G8B8A8_SRGB;
         rtCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
         rtCreateInfo.sampleCount = 8;
-        m_RenderTarget = CreateRenderTarget(rtCreateInfo);
-        if (!m_RenderTarget) return;
+        m_RenderTarget = m_Device->CreateRenderTarget(rtCreateInfo);
+        if (!m_RenderTarget)
+        {
+            Destroy();
+            return;
+        }
 
         // Render target render pass
         {
@@ -96,21 +106,25 @@ namespace Nova
 
         m_Window->MaximizeEvent.Bind([this]
         {
-            if (Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain())
+            if (Nova::Swapchain* swapchain = m_Device->GetSwapchain())
                 swapchain->Invalidate();
         });
 
         m_Window->ResizeEvent.Bind([this](const int32_t newWidth, const int32_t newHeight)
         {
-            if (Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain())
+            if (Nova::Swapchain* swapchain = m_Device->GetSwapchain())
                 swapchain->Invalidate();
+
             m_RenderTarget->Resize(newWidth, newHeight);
             m_RenderPass.Resize(newWidth, newHeight);
             m_ImGuiRenderPass.Resize(newWidth, newHeight);
         });
 
         if (SLANG_FAILED(slang::createGlobalSession(&m_SlangSession)))
+        {
+            Destroy();
             return;
+        }
 
         AudioSystemCreateInfo audioSystemCreateInfo;
         audioSystemCreateInfo.channels = 2;
@@ -166,7 +180,10 @@ namespace Nova
         debugRendererCreateInfo.renderPass = &m_RenderPass;
         debugRendererCreateInfo.maxVertices = 64;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
+        {
+            Destroy();
             return;
+        }
 
 
         m_EditorWindows.Add(EditorWindow::CreateWindow<HierarchyWindow>());
@@ -174,6 +191,7 @@ namespace Nova
 
         OnInit();
         Update();
+        Destroy();
     }
 
     void Application::Exit()
@@ -220,7 +238,7 @@ namespace Nova
             m_SceneManager.OnPreRender(cmdBuffer);
             OnPreRender(cmdBuffer);
 
-            Vulkan::Swapchain* swapchain = m_Device.As<Vulkan::Device>()->GetSwapchain();
+            Swapchain* swapchain = m_Device->GetSwapchain();
             m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
             m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
             m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
@@ -255,16 +273,17 @@ namespace Nova
 
     void Application::Destroy()
     {
-        m_Device->WaitIdle();
+        m_SceneManager.Destroy();
+        if (m_Device) m_Device->WaitIdle();
         OnDestroy();
         DebugRenderer::Destroy();
         m_AssetDatabase.UnloadAll();
-        m_SlangSession->release();
+        if (m_SlangSession) m_SlangSession->release();
         slang::shutdown();
-        m_RenderTarget->Destroy();
-        m_ImGuiRenderer->Destroy();
-        m_Device->Destroy();
-        m_Window->Destroy();
+        if (m_RenderTarget) m_RenderTarget->Destroy();
+        if (m_ImGuiRenderer) m_ImGuiRenderer->Destroy();
+        if (m_Device) m_Device->Destroy();
+        if (m_Window) m_Window->Destroy();
     }
 
     float Application::GetDeltaTime() const

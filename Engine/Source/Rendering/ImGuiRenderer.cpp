@@ -1,4 +1,5 @@
 ﻿#include "ImGuiRenderer.h"
+#include "D3D12/ImGuiRenderer.h"
 #include "Vulkan/ImGuiRenderer.h"
 #include "Device.h"
 #include "External/ImGuiExtension.h"
@@ -35,6 +36,16 @@ namespace Nova
         return true;
     }
 
+#define NOVA_RETURN_IMPL(className) \
+{ \
+    renderer = new (className)(); \
+    if (!renderer->Initialize({window, device, sampleCount})) \
+    { \
+        delete renderer; \
+        return nullptr; \
+    } \
+} break;
+
     Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, Device* device, const uint32_t sampleCount)
     {
         if (!window) return nullptr;
@@ -44,16 +55,13 @@ namespace Nova
         switch (device->GetDeviceType())
         {
         case DeviceType::Null: return nullptr;
-        case DeviceType::Vulkan:
-            {
-                renderer = new Vulkan::ImGuiRenderer();
-                if (!renderer->Initialize({window, device, sampleCount}))
-                {
-                    delete renderer;
-                    return nullptr;
-                }
-            }
+        case DeviceType::Vulkan: NOVA_RETURN_IMPL(Vulkan::ImGuiRenderer)
+#ifdef NOVA_HAS_D3D12
+        case DeviceType::D3D12: NOVA_RETURN_IMPL(D3D12::ImGuiRenderer)
+#endif
         }
         return Ref(renderer);
     }
+
+#undef NOVA_RETURN_IMPL
 }

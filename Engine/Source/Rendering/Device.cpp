@@ -53,6 +53,10 @@ namespace Nova
         return Ref(device);
     }
 
+    Device::Device() : Object("Rendering Device")
+    {
+    }
+
     Ref<Fence> Device::CreateFence()
     {
         return CreateFence({this, FenceCreateFlagBits::None});

@@ -42,6 +42,12 @@ set(IMGUI_SRC ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/backends/imgui_impl_glfw.h
         ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
 
+if(NOVA_ENGINE_BUILD_D3D12)
+    list(APPEND IMGUI_SRC
+            ${IMGUI_DIR}/backends/imgui_impl_dx12.h
+            ${IMGUI_DIR}/backends/imgui_impl_dx12.cpp)
+endif ()
+
 add_library(imgui STATIC)
 set_target_properties(imgui PROPERTIES CXX_STANDARD 17)
 target_sources(imgui PRIVATE ${IMGUI_SRC})

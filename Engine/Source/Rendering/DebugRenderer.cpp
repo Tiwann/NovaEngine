@@ -86,10 +86,10 @@ namespace Nova
 
     void DebugRenderer::Destroy()
     {
-        s_Device->WaitIdle();
-        s_Pipeline->Destroy();
-        s_VertexBuffer->Destroy();
-        s_IndexBuffer->Destroy();
+        if (s_Device) s_Device->WaitIdle();
+        if (s_Pipeline) s_Pipeline->Destroy();
+        if (s_VertexBuffer) s_VertexBuffer->Destroy();
+        if (s_IndexBuffer) s_IndexBuffer->Destroy();
     }
 
     void DebugRenderer::Begin(const Matrix4& viewProjection)

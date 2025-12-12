@@ -2,12 +2,12 @@
 #include "Runtime/Memory.h"
 #include "Device.h"
 #include "Runtime/DesktopWindow.h"
+#include "Conversions.h"
 
 #include <print>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 
-#include "Conversions.h"
 
 namespace Nova::Vulkan
 {
@@ -23,7 +23,7 @@ namespace Nova::Vulkan
         }
 
         Device* device = (Device*)createInfo.device;
-        const Swapchain* swapchain = device->GetSwapchain();
+        const Nova::Swapchain* swapchain = device->GetSwapchain();
         const Queue* graphicsQueue = device->GetGraphicsQueue();
 
         ImGui_ImplVulkan_InitInfo initInfo;

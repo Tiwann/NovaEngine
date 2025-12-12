@@ -34,6 +34,9 @@ namespace Nova
     struct MaterialCreateInfo;
     class Fence;
     struct FenceCreateInfo;
+    class RenderTarget;
+    struct RenderTargetCreateInfo;
+    class Swapchain;
 
     enum class DeviceType
     {
@@ -55,9 +58,7 @@ namespace Nova
     class Device : public Object
     {
     public:
-        Device() : Object("Rendering Device")
-        {
-        }
+        Device();
 
         ~Device() override = default;
 
@@ -69,8 +70,10 @@ namespace Nova
         virtual void Present() = 0;
         virtual void WaitIdle() const = 0;
         virtual void SetName(StringView name) = 0;
+        virtual Nova::Swapchain* GetSwapchain() { return nullptr; }
         virtual DeviceType GetDeviceType() = 0;
 
+        virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
         virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
         virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
         virtual Ref<Texture> CreateTextureUnitialized() = 0;
@@ -96,7 +99,7 @@ namespace Nova
         bool HasVSync() const;
     protected:
         String m_DeviceVendor;
-        bool m_VSync;
+        bool m_VSync = false;
     };
 
     Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);

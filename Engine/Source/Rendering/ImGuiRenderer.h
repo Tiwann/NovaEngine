@@ -1,8 +1,7 @@
 ﻿#pragma once
 #include "Runtime/Object.h"
-#include <cstdint>
-
 #include "Runtime/Ref.h"
+#include <cstdint>
 
 
 struct ImGuiContext;
@@ -32,7 +31,7 @@ namespace Nova
 
         virtual void BeginFrame() = 0;
         virtual void EndFrame() = 0;
-        virtual void Render(CommandBuffer& commandBuffer) = 0;
+        virtual void Render(Nova::CommandBuffer& commandBuffer) = 0;
     protected:
         ImGuiContext* m_Context = nullptr;
     };

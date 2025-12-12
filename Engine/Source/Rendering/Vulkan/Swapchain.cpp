@@ -129,13 +129,7 @@ namespace Nova::Vulkan
         fence->Wait(~0);
 
         commandBuffer.Free();
-
-#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        if (!m_Name.IsEmpty())
-        {
-            SetName(m_Name);
-        }
-#endif
+        SetName("Main Swapchain");
         m_Valid = true;
         return true;
     }
@@ -185,7 +179,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    const Ref<Nova::Texture>& Swapchain::GetTexture(const uint32_t index)
+    Ref<Nova::Texture> Swapchain::GetTexture(const uint32_t index)
     {
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
@@ -206,7 +200,7 @@ namespace Nova::Vulkan
         return m_Textures[index].Get(createTexture);
     }
 
-    const Ref<Nova::Texture>& Swapchain::GetCurrentTexture()
+    Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
         const Device* device = (Device*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();

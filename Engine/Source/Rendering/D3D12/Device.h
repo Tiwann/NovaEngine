@@ -39,18 +39,20 @@ namespace Nova::D3D12
         void Present() override;
         void WaitIdle() const override;
         void SetName(Nova::StringView name) override;
+
         Nova::DeviceType GetDeviceType() override;
 
-        Nova::Ref<Nova::Surface> CreateSurface(const Nova::SurfaceCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Texture> CreateTexture(const Nova::TextureCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Texture> CreateTextureUnitialized() override;
-        Nova::Ref<Nova::Sampler> CreateSampler(const Nova::SamplerCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Buffer> CreateBuffer(const Nova::BufferCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Shader> CreateShader(const Nova::ShaderCreateInfo& createInfo) override;
-        Nova::Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo) override;
-        Nova::Ref<Nova::ComputePipeline> CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Material> CreateMaterial(const Nova::MaterialCreateInfo& createInfo) override;
-        Nova::Ref<Nova::Fence> CreateFence(const Nova::FenceCreateInfo& createInfo) override;
+        Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
+        Ref<Nova::Surface> CreateSurface(const Nova::SurfaceCreateInfo& createInfo) override;
+        Ref<Nova::Texture> CreateTexture(const Nova::TextureCreateInfo& createInfo) override;
+        Ref<Nova::Texture> CreateTextureUnitialized() override;
+        Ref<Nova::Sampler> CreateSampler(const Nova::SamplerCreateInfo& createInfo) override;
+        Ref<Nova::Buffer> CreateBuffer(const Nova::BufferCreateInfo& createInfo) override;
+        Ref<Nova::Shader> CreateShader(const Nova::ShaderCreateInfo& createInfo) override;
+        Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo) override;
+        Ref<Nova::ComputePipeline> CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo) override;
+        Ref<Nova::Material> CreateMaterial(const Nova::MaterialCreateInfo& createInfo) override;
+        Ref<Nova::Fence> CreateFence(const Nova::FenceCreateInfo& createInfo) override;
         uint32_t GetImageCount() const override;
 
         ID3D12Device13* GetHandle() { return m_Handle; }
@@ -72,6 +74,8 @@ namespace Nova::D3D12
         CommandBuffer& GetCurrentCommandBuffer();
         CommandPool& GetCommandPool();
         ID3D12Allocator* GetAllocator();
+        Nova::Swapchain* GetSwapchain() override;
+        uint32_t GetCurrentFrameIndex() const;
 
     private:
         uint32_t m_ImageCount = 0;

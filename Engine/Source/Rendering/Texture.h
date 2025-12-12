@@ -54,7 +54,7 @@ namespace Nova
         virtual bool IsValid() = 0;
         virtual Array<uint8_t> GetPixels() = 0;
 
-        AssetType GetAssetType() const override { return AssetType::Texture; }
+        AssetType GetAssetType() const final { return AssetType::Texture; }
 
         Format GetFormat() const { return m_Format; }
         uint32_t GetWidth() const { return m_Width; }

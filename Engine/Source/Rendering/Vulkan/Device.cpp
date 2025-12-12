@@ -12,18 +12,22 @@
 #include "Shader.h"
 #include "GraphicsPipeline.h"
 #include "ComputePipeline.h"
+#include "Material.h"
+#include "RenderTarget.h"
+#include "Utils/VulkanUtils.h"
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#define VMA_STATS_STRING_ENABLED 1
 #include <vma/vk_mem_alloc.h>
+#include <print>
 
-#include "Material.h"
-#include "Utils/VulkanUtils.h"
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
 #define VK_LAYER_KHRONOS_VALIDATION_NAME "VK_LAYER_KHRONOS_validation"
 #endif
+
 
 namespace Nova::Vulkan
 {
@@ -568,6 +572,17 @@ namespace Nova::Vulkan
 
     }
 
+    Ref<Nova::RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    {
+        RenderTarget* renderTarget = new RenderTarget;
+        if (!renderTarget->Initialize(createInfo))
+        {
+            delete renderTarget;
+            return nullptr;
+        }
+        return Ref(renderTarget);
+    }
+
     Ref<Nova::Texture> Device::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
@@ -694,10 +709,6 @@ namespace Nova::Vulkan
         return m_Surface;
     }
 
-    Swapchain* Device::GetSwapchain()
-    {
-        return &m_Swapchain;
-    }
 
     CommandPool* Device::GetCommandPool()
     {
@@ -757,5 +768,10 @@ namespace Nova::Vulkan
     uint32_t Device::GetCurrentFrameIndex() const
     {
         return m_CurrentFrameIndex;
+    }
+
+    Nova::Swapchain* Device::GetSwapchain()
+    {
+        return &m_Swapchain;
     }
 }

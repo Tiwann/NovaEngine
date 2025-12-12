@@ -36,7 +36,6 @@ namespace Nova
         }
     }
 
-
     AssetType StaticMesh::GetAssetType() const
     {
         return AssetType::StaticMesh;

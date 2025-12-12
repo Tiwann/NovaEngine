@@ -1,8 +1,10 @@
 ﻿#include "Device.h"
 #include "Containers/StringFormat.h"
+#include "RenderTarget.h"
 #include <directx/d3dx12.h>
 #include <dxgi1_6.h>
 #include <D3D12MemAlloc.h>
+
 
 using namespace D3D12MA;
 
@@ -147,11 +149,33 @@ namespace Nova::D3D12
         if (DX_FAILED(CreateAllocator(&allocatorDesc, &m_Allocator)))
             return false;
         
-        return false;
+        return true;
     }
 
     void Device::Destroy()
     {
+        m_Allocator->Release();
+        for (uint32_t frameIndex = 0; frameIndex < m_Swapchain.GetImageCount(); ++frameIndex)
+        {
+            Frame& frame = m_Frames[frameIndex];
+            frame.fence.Destroy();
+            frame.commandBuffer.Free();
+        }
+
+        m_CommandPool.Destroy();
+        m_Swapchain.Destroy();
+        m_TransferQueue.Destroy();
+        m_ComputeQueue.Destroy();
+        m_GraphicsQueue.Destroy();
+        m_Surface.Destroy();
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        m_InfoQueue->Release();
+        m_Debug->Release();
+#endif
+
+        m_Handle->Release();
+        m_Factory->Release();
+        m_Adapter->Release();
     }
 
     bool Device::BeginFrame()
@@ -206,52 +230,63 @@ namespace Nova::D3D12
         return Nova::DeviceType::D3D12;
     }
 
-    Nova::Ref<Nova::Surface> Device::CreateSurface(const Nova::SurfaceCreateInfo& createInfo)
+    Ref<Nova::RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    {
+        Nova::RenderTarget* renderTarget = new RenderTarget;
+        if (!renderTarget->Initialize(createInfo))
+        {
+            delete renderTarget;
+            return nullptr;
+        }
+        return Ref(renderTarget);
+    }
+
+    Ref<Nova::Surface> Device::CreateSurface(const Nova::SurfaceCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Texture> Device::CreateTexture(const Nova::TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> Device::CreateTexture(const Nova::TextureCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Texture> Device::CreateTextureUnitialized()
+    Ref<Nova::Texture> Device::CreateTextureUnitialized()
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Sampler> Device::CreateSampler(const Nova::SamplerCreateInfo& createInfo)
+    Ref<Nova::Sampler> Device::CreateSampler(const Nova::SamplerCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Buffer> Device::CreateBuffer(const Nova::BufferCreateInfo& createInfo)
+    Ref<Nova::Buffer> Device::CreateBuffer(const Nova::BufferCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Shader> Device::CreateShader(const Nova::ShaderCreateInfo& createInfo)
+    Ref<Nova::Shader> Device::CreateShader(const Nova::ShaderCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo)
+    Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo)
+    Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Material> Device::CreateMaterial(const Nova::MaterialCreateInfo& createInfo)
+    Ref<Nova::Material> Device::CreateMaterial(const Nova::MaterialCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Nova::Ref<Nova::Fence> Device::CreateFence(const Nova::FenceCreateInfo& createInfo)
+    Ref<Nova::Fence> Device::CreateFence(const Nova::FenceCreateInfo& createInfo)
     {
         return nullptr;
     }
@@ -274,5 +309,15 @@ namespace Nova::D3D12
     D3D12MA::Allocator* Device::GetAllocator()
     {
         return m_Allocator;
+    }
+
+    Nova::Swapchain* Device::GetSwapchain()
+    {
+        return &m_Swapchain;
+    }
+
+    uint32_t Device::GetCurrentFrameIndex() const
+    {
+        return m_CurrentFrameIndex;
     }
 }

@@ -3,7 +3,7 @@
 #include "Conversions.h"
 #include "Device.h"
 #include "Surface.h"
-
+#include "Texture.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
@@ -70,8 +70,10 @@ namespace Nova::D3D12
             if (DX_FAILED(image->QueryInterface(IID_PPV_ARGS(&m_Images[imageIndex]))))
                 return false;
 
-            m_ImageViewsHandles[imageIndex] = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize;
-            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {m_ImageViewsHandles[imageIndex]});
+            m_ImageViews[imageIndex] = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize;
+            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {m_ImageViews[imageIndex]});
+
+            m_Textures[imageIndex].SetDirty();
         }
 
         m_Device = createInfo.device;
@@ -87,6 +89,10 @@ namespace Nova::D3D12
     void Swapchain::Destroy()
     {
         if (m_Handle) m_Handle->Release();
+        for (size_t imageIndex = 0; imageIndex < m_Device->GetImageCount(); imageIndex++)
+        {
+            m_Images[imageIndex]->Release();
+        }
     }
 
     bool Swapchain::Recreate()
@@ -104,6 +110,54 @@ namespace Nova::D3D12
 
     void Swapchain::SetName(StringView name)
     {
+    }
+
+    Ref<Nova::Texture> Swapchain::GetTexture(const uint32_t index)
+    {
+        const auto createTexture = [this, &index]() -> Ref<Texture>
+        {
+            Ref<Texture> texture = new Texture();
+            texture->m_Device = (Device*)m_Device;
+            texture->m_Image = m_Images[index];
+            texture->m_ImageView = m_ImageViews[index];
+            texture->m_Width = m_ImageWidth;
+            texture->m_Height = m_ImageHeight;
+            texture->m_Allocation = nullptr;
+            texture->m_SampleCount = 1;
+            texture->m_Mips = 1;
+            texture->m_UsageFlags = TextureUsageFlagBits::Attachment;
+            texture->m_Format = m_ImageFormat;
+            return texture;
+        };
+
+        return m_Textures[index].Get(createTexture);
+    }
+
+    Ref<Nova::Texture> Swapchain::GetCurrentTexture()
+    {
+        const Device* device = (Device*)m_Device;
+        const size_t imageIndex = device->GetCurrentFrameIndex();
+        return GetTexture(imageIndex);
+    }
+
+    IDXGISwapChain4* Swapchain::GetHandle()
+    {
+        return m_Handle;
+    }
+
+    const IDXGISwapChain4* Swapchain::GetHandle() const
+    {
+        return m_Handle;
+    }
+
+    ID3D12Resource* Swapchain::GetImage(size_t index) const
+    {
+        return m_Images[index];
+    }
+
+    ID3D12ImageView Swapchain::GetImageView(size_t index) const
+    {
+        return m_ImageViews[index];
     }
 
     uint32_t Swapchain::AcquireNextFrame()

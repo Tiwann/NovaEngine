@@ -3,6 +3,8 @@
 #include "PresentMode.h"
 #include "SwpchainBuffering.h"
 #include "Containers/StringView.h"
+#include "Containers/Lazy.h"
+#include "Runtime/Ref.h"
 
 #include <cstdint>
 
@@ -11,6 +13,7 @@ namespace Nova
 {
     class Device;
     class Surface;
+    class Texture;
 
     struct SwapchainCreateInfo
     {
@@ -49,6 +52,8 @@ namespace Nova
 
         bool IsValid() const;
 
+        virtual Ref<Nova::Texture> GetTexture(uint32_t index) { return nullptr; }
+        virtual Ref<Nova::Texture> GetCurrentTexture() { return nullptr; }
     protected:
         Device* m_Device = nullptr;
         Surface* m_Surface = nullptr;
@@ -58,5 +63,6 @@ namespace Nova
         uint32_t m_ImageWidth = 0, m_ImageHeight = 0;
         bool m_HasVSync = false;
         bool m_Valid = true;
+        Lazy<Ref<Nova::Texture>> m_Textures[3] = { {nullptr}, {nullptr}, {nullptr} };
     };
 }

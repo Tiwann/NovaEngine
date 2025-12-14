@@ -50,6 +50,11 @@ namespace Nova
             return m_Data[index];
         }
 
+        SizeType Find(StringType::CharacterType character)
+        {
+            std::basic_string_view<CharacterType> view(m_Data, m_Count);
+            return view.find(character);
+        }
 
         SizeType Find(const StringViewBase& string) const
         {

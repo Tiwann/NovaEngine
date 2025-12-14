@@ -65,4 +65,12 @@ namespace Nova
         String resultPath = StringConvertToMultibyte(WideStringView(openFilename.lpstrFile));
         return result ? *resultPath : "";
     }
+
+    bool Path::Exists(StringView path)
+    {
+        WideString widePath = StringConvertToWide(path);
+        const DWORD attrib = GetFileAttributesW(*widePath);
+        DWORD a = (attrib & INVALID_FILE_ATTRIBUTES);
+        return a == 0;
+    }
 }

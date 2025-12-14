@@ -37,6 +37,11 @@ namespace Nova
             NOVA_ASSERT(index < m_Args.Count(), "Index was out of bounds!");
             return StringViewType(m_Args[index]);
         }
+
+        bool Any(const Function<bool(StringView)>& predicate) const
+        {
+            return m_Args.Any(predicate);
+        }
     private:
         Array<StringType> m_Args;
     };

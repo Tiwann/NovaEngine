@@ -464,11 +464,11 @@ namespace Nova
             return copy;
         }
 
-        StringBase TrimStart(const Array<CharacterType>& Characters) const
+        StringBase TrimStart(const Array<CharacterType>& characters) const
         {
             StringBase copy(*this);
             SizeType count = 0;
-            while (count < copy.m_Count && Characters.Contains(copy.m_Data[count]))
+            while (count < copy.m_Count && characters.Contains(copy.m_Data[count]))
                 ++count;
 
             if (count == 0)

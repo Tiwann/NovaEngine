@@ -18,7 +18,6 @@
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
-#define VMA_STATS_STRING_ENABLED 1
 #include <vma/vk_mem_alloc.h>
 #include <print>
 

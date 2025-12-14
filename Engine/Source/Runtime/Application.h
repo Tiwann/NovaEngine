@@ -23,10 +23,10 @@ namespace Nova
 
     struct ApplicationConfiguration
     {
-        String applicationName;
-        uint32_t windowWidth, windowHeight;
+        String applicationName = "Nova Application";
+        uint32_t windowWidth = 600, windowHeight = 400;
         WindowCreateFlags windowFlags = WindowCreateFlagBits::Default;
-        bool vsync;
+        bool vsync = false;
     };
 
     class Application

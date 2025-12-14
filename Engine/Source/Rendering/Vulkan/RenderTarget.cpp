@@ -4,7 +4,6 @@
 #include "CommandBuffer.h"
 #include "Rendering/CommandBuffer.h"
 
-#define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
 

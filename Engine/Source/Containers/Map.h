@@ -117,6 +117,11 @@ namespace Nova
 
         bool IsEmpty() const { return m_Data.IsEmpty(); }
 
+        bool Any(const Function<bool(const PairType&)>& predicate)
+        {
+            return m_Data.Any(predicate);
+        }
+
         Iterator begin() { return m_Data.begin(); }
         Iterator end()  { return m_Data.end(); }
         ConstIterator begin() const { return m_Data.begin(); }

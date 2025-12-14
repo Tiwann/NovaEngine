@@ -41,7 +41,7 @@ namespace Nova
 
         static String OpenFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
         static String SaveFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
-
+        static bool Exists(StringView path);
 #ifdef NOVA_PLATFORM_WINDOWS
         static inline String::CharacterType s_Separator = '\\';
 #else

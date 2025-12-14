@@ -2,7 +2,6 @@
 #pragma warning(disable:4146)
 #include "Pair.h"
 #include "Array.h"
-#include <map>
 
 namespace Nova
 {
@@ -22,8 +21,7 @@ namespace Nova
         Map(Map&&) noexcept = default;
         Map& operator=(const Map&) = default;
         Map& operator=(Map&&) = default;
-
-
+        
         ValueType& operator[](const KeyType& key)
         {
             SizeType index = FindKey(key);

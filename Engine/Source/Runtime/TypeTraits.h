@@ -186,4 +186,31 @@ namespace Nova
 
     template<typename T>
     using ForwardReference = RemoveReference<T>::Type&&;
+
+    template <bool Test, class T, class U>
+    struct Conditional;
+
+    template <class T, class U>
+    struct Conditional<true, T, U>
+    {
+        using Type = T;
+    };
+
+    template <class T, class U>
+    struct Conditional<false, T, U>
+    {
+        using Type = U;
+    };
+
+    template <bool Test, class T, class U>
+    using ConditionalType = typename Conditional<Test, T, U>::Type;
+
+    template<typename T, typename... U>
+    struct AnyOf : FalseType {};
+
+    template<typename T, typename U, typename... Ts>
+    struct AnyOf<T, U, Ts...> : ConditionalType<IsSameValue<T, U>, TrueType, AnyOf<T, Ts...>> {};
+
+    template<typename T, typename... U>
+    static constexpr bool IsAnyOf = AnyOf<T, U...>::value;
 }

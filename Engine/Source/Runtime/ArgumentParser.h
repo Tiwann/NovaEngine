@@ -39,15 +39,52 @@ namespace Nova
         explicit ArgumentParser(String name, const CmdLineArgs& args, const ArgumentParserSettings& settings);
         explicit ArgumentParser(String name, const CmdLineArgs& args, const ArgumentParserSettings& settings, const Array<CommandLineOption>& options);
 
-        void SetSettings(const ArgumentParserSettings& settings);
         void AddOption(const CommandLineOption& option);
         void AddOptions(const Array<CommandLineOption>& options);
+
         ParsingResult Parse();
+
         bool GetBool(const CommandLineOption& option);
+        bool GetBool(const String& optionName);
+        bool GetBool(String::CharacterType optionName);
+
         String GetString(const CommandLineOption& option);
+        String GetString(const String& optionName);
+        String GetString(String::CharacterType optionName);
+
         Array<String> GetValues(const CommandLineOption& option);
         Array<String> GetValues(const String& optionName);
         Array<String> GetValues(String::CharacterType optionName);
+
+        template<typename T> requires IsAnyOf<bool, String>
+        T GetValueAs(const CommandLineOption& option)
+        {
+            if constexpr (typeid(T) == typeid(bool))
+                return GetBool(option);
+            else if constexpr (typeid(T) == typeid(String))
+                return GetString(option);
+            return T(0);
+        }
+
+        template<typename T> requires IsAnyOf<bool, String>
+        T GetValueAs(const String& optionName)
+        {
+            if constexpr (typeid(T) == typeid(bool))
+                return GetBool(optionName);
+            else if constexpr (typeid(T) == typeid(String))
+                return GetString(optionName);
+            return T(0);
+        }
+
+        template<typename T> requires IsAnyOf<bool, String>
+        T GetValueAs(String::CharacterType optionName)
+        {
+            if constexpr (typeid(T) == typeid(bool))
+                return GetBool(optionName);
+            else if constexpr (typeid(T) == typeid(String))
+                return GetString(optionName);
+            return T(0);
+        }
 
         String GetHelpText();
     private:

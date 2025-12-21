@@ -1,6 +1,6 @@
 #pragma once
 #include "Object.h"
-#include "Uuid.h"
+#include "UUID.h"
 #include "Entity.h"
 #include "Ref.h"
 #include "Containers/Function.h"
@@ -73,7 +73,7 @@ namespace Nova
         EntityHandle CreateEntity(const String& name);
         bool DestroyEntity(EntityHandle& handle);
 
-        Uuid GetGuid() const { return m_Uuid; }
+        UUID GetGuid() const { return m_Uuid; }
         void ForEach(const Function<void(const EntityHandle&)>& function);
 
         Application* GetOwner() const;
@@ -94,7 +94,7 @@ namespace Nova
         Array<Entity*> GetEntities();
 
     private:
-        Uuid m_Uuid;
+        UUID m_Uuid;
         Array<Entity*> m_Entities;
         Application* m_Owner = nullptr;
 #ifdef NOVA_HAS_PHYSICS

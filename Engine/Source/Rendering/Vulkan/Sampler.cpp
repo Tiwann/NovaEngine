@@ -9,19 +9,19 @@ namespace Nova::Vulkan
     bool Sampler::Initialize(const SamplerCreateInfo& createInfo)
     {
         VkSamplerCreateInfo samplerCreateInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-        samplerCreateInfo.addressModeU = Convert<SamplerAddressMode, VkSamplerAddressMode>(createInfo.addressModeU);
-        samplerCreateInfo.addressModeV = Convert<SamplerAddressMode, VkSamplerAddressMode>(createInfo.addressModeV);
-        samplerCreateInfo.addressModeW = Convert<SamplerAddressMode, VkSamplerAddressMode>(createInfo.addressModeW);
+        samplerCreateInfo.addressModeU = Convert<VkSamplerAddressMode>(createInfo.addressModeU);
+        samplerCreateInfo.addressModeV = Convert<VkSamplerAddressMode>(createInfo.addressModeV);
+        samplerCreateInfo.addressModeW = Convert<VkSamplerAddressMode>(createInfo.addressModeW);
         samplerCreateInfo.anisotropyEnable = createInfo.anisotropyEnable;
         samplerCreateInfo.compareEnable = createInfo.compareEnable;
-        samplerCreateInfo.compareOp = Convert<CompareOperation, VkCompareOp>(createInfo.compareOp);
-        samplerCreateInfo.minFilter = Convert<Filter, VkFilter>(createInfo.minFilter);
-        samplerCreateInfo.magFilter = Convert<Filter, VkFilter>(createInfo.magFilter);
+        samplerCreateInfo.compareOp = Convert<VkCompareOp>(createInfo.compareOp);
+        samplerCreateInfo.minFilter = Convert<VkFilter>(createInfo.minFilter);
+        samplerCreateInfo.magFilter = Convert<VkFilter>(createInfo.magFilter);
         samplerCreateInfo.minLod = createInfo.minLod;
         samplerCreateInfo.maxLod = createInfo.maxLod;
         samplerCreateInfo.unnormalizedCoordinates = createInfo.unnormalizedCoordinates;
         samplerCreateInfo.mipLodBias = 0.0f;
-        samplerCreateInfo.mipmapMode = Convert<Filter, VkSamplerMipmapMode>(createInfo.mipmapFilter);
+        samplerCreateInfo.mipmapMode = Convert<VkSamplerMipmapMode>(createInfo.mipmapFilter);
 
         const VkDevice deviceHandle = ((Device*)createInfo.device)->GetHandle();
         const VkResult result = vkCreateSampler(deviceHandle, &samplerCreateInfo,nullptr, &m_Handle);

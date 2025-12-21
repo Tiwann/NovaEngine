@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Object.h"
-#include "Uuid.h"
+#include "UUID.h"
 #include "Containers/String.h"
 #include "Flags.h"
 
@@ -53,11 +53,11 @@ namespace Nova
         bool IsEnabled() const;
         void SetEnabled(bool enabled);
 
-        Uuid GetUuid() const;
+        UUID GetUuid() const;
         void SetComponentFlags(ComponentFlags flags);
         ComponentFlags GetComponentFlags() const;
     protected:
-        Uuid m_Uuid = Uuid::Zero;
+        UUID m_Uuid = UUID::Zero;
         bool m_Enabled = false;
         Entity* m_Entity = nullptr;
         ComponentFlags m_ComponentFlags = ComponentFlagBits::None;

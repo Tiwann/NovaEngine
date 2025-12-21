@@ -13,6 +13,7 @@
 
 #include "Material.h"
 #include "Shader.h"
+#include "Rendering/ResourceBarrier.h"
 #include "Utils/VulkanUtils.h"
 
 namespace Nova::Vulkan
@@ -147,7 +148,7 @@ namespace Nova::Vulkan
     {
         const Buffer& indexBuff = (const Buffer&)indexBuffer;
         const VkCommandBuffer cmdBuff = GetHandle();
-        vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<Format, VkIndexType>(indexFormat));
+        vkCmdBindIndexBuffer(cmdBuff, indexBuff.GetHandle(), offset, Convert<VkIndexType>(indexFormat));
     }
 
     void CommandBuffer::BindShaderBindingSet(const Nova::Shader& shader, const Nova::ShaderBindingSet& bindingSet)
@@ -159,7 +160,7 @@ namespace Nova::Vulkan
         info.firstSet = bindingSet.GetSetIndex();
         info.descriptorSetCount = 1;
         info.pDescriptorSets = ((const ShaderBindingSet&)bindingSet).GetHandlePtr();
-        info.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(sh.GetShaderStageFlags());
+        info.stageFlags = Convert<VkShaderStageFlags>(sh.GetShaderStageFlags());
         info.dynamicOffsetCount = 0;
         info.pDynamicOffsets = nullptr;
         vkCmdBindDescriptorSets2(m_Handle, &info);
@@ -215,12 +216,48 @@ namespace Nova::Vulkan
 
     void CommandBuffer::PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
     {
-        vkCmdPushConstants(m_Handle, ((const Shader&)shader).GetPipelineLayout(), Convert<ShaderStageFlags, VkShaderStageFlags>(stageFlags), offset, size, values);
+        vkCmdPushConstants(m_Handle, ((const Shader&)shader).GetPipelineLayout(), Convert<VkShaderStageFlags>(stageFlags), offset, size, values);
     }
 
     void CommandBuffer::UpdateBuffer(const Nova::Buffer& buffer, const size_t offset, const size_t size, const void* data)
     {
         vkCmdUpdateBuffer(m_Handle, ((const Buffer&)buffer).GetHandle(), offset, size, data);
+    }
+
+    void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)
+    {
+        Texture* texture = dynamic_cast<Texture*>(barrier.texture);
+        if (!texture) return;
+
+        const VkImageMemoryBarrier vkBarrier = MakeTextureBarrier(barrier);
+        const VkPipelineStageFlags srcStageFlags = GetPipelineStageFlags(barrier.sourceAccess);
+        const VkPipelineStageFlags dstStageFlags = GetPipelineStageFlags(barrier.destAccess);
+        vkCmdPipelineBarrier(m_Handle, srcStageFlags, dstStageFlags, 0, 0, nullptr, 0, nullptr, 1, &vkBarrier);
+        texture->SetState(barrier.destState);
+    }
+
+    void CommandBuffer::BufferBarrier(const Nova::BufferBarrier& barrier)
+    {
+        const VkBufferMemoryBarrier vkBarrier = MakeBufferBarrier(barrier);
+        vkCmdPipelineBarrier(m_Handle, 0, 0, 0, 0, nullptr, 1, &vkBarrier, 0, nullptr);
+    }
+
+    void CommandBuffer::MemoryBarrier(const Nova::MemoryBarrier& memoryBarrier)
+    {
+        Array<VkImageMemoryBarrier> textureBarriers;
+        for (uint32_t i = 0; i < memoryBarrier.textureBarrierCount; i++)
+        {
+            Nova::TextureBarrier& barrier = memoryBarrier.textureBarriers[i];
+            Texture* texture = static_cast<Texture*>(barrier.texture);
+            textureBarriers.Add(MakeTextureBarrier(barrier));
+            texture->SetState(barrier.destState);
+        }
+
+        Array<VkBufferMemoryBarrier> bufferBarriers;
+        for (uint32_t i = 0; i < memoryBarrier.bufferBarrierCount; i++)
+            bufferBarriers.Add(MakeBufferBarrier(memoryBarrier.bufferBarriers[i]));
+
+        vkCmdPipelineBarrier(m_Handle, 0, 0, 0, 0, nullptr, bufferBarriers.Count(), bufferBarriers.Data(), textureBarriers.Count(), textureBarriers.Data());
     }
 
     void CommandBuffer::BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, const size_t srcOffset, const size_t destOffset, const size_t size)
@@ -240,12 +277,12 @@ namespace Nova::Vulkan
 
     void CommandBuffer::Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, const Filter filter)
     {
-        const Texture& source = (Texture&)src;
-        const Texture& destination = (Texture&)dest;
+        const Texture& source = static_cast<const Texture&>(src);
+        const Texture& destination = static_cast<const Texture&>(dest);
         //NOVA_ASSERT(source.GetFormat() != destination.GetFormat(), "Source and destination textures must have the same format");
 
-        const VkImageLayout sourceInitialLayout = (VkImageLayout)source.GetImageLayout();
-        const VkImageLayout destInitialLayout = (VkImageLayout)destination.GetImageLayout();
+        const VkImageLayout sourceInitialLayout = Convert<VkImageLayout>(source.GetState());
+        const VkImageLayout destInitialLayout = Convert<VkImageLayout>(destination.GetState());
 
         VkImageMemoryBarrier2 inBarriers[2] = {  };
         inBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
@@ -299,7 +336,7 @@ namespace Nova::Vulkan
         region.dstOffsets[1] = VkOffset3D { (int32_t)destRegion.width, (int32_t)destRegion.height, 1 };
 
         VkBlitImageInfo2 blitInfo = { VK_STRUCTURE_TYPE_BLIT_IMAGE_INFO_2 };
-        blitInfo.filter = Convert<Filter, VkFilter>(filter);
+        blitInfo.filter = Convert<VkFilter>(filter);
         blitInfo.srcImage = source.GetImage();
         blitInfo.dstImage = destination.GetImage();
         blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
@@ -363,14 +400,14 @@ namespace Nova::Vulkan
             const Color& clearColor = attachment.clearValue.color;
 
             VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-            colorAttachmentInfo.loadOp = Convert<LoadOperation, VkAttachmentLoadOp>(attachment.loadOp);
-            colorAttachmentInfo.storeOp = Convert<StoreOperation, VkAttachmentStoreOp>(attachment.storeOp);
+            colorAttachmentInfo.loadOp = Convert<VkAttachmentLoadOp>(attachment.loadOp);
+            colorAttachmentInfo.storeOp = Convert<VkAttachmentStoreOp>(attachment.storeOp);
             colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             colorAttachmentInfo.imageView = ((Texture*)attachment.texture)->GetImageView();
             colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
             if (attachment.resolveTexture)
             {
-                colorAttachmentInfo.resolveMode = Convert<ResolveMode, VkResolveModeFlagBits>(attachment.resolveMode);
+                colorAttachmentInfo.resolveMode = Convert<VkResolveModeFlagBits>(attachment.resolveMode);
                 colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 colorAttachmentInfo.resolveImageView = ((Texture*)attachment.resolveTexture)->GetImageView();
             }
@@ -382,14 +419,14 @@ namespace Nova::Vulkan
         VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
         if (renderPass.HasDepthAttachment())
         {
-            depthAttachmentInfo.loadOp = Convert<LoadOperation, VkAttachmentLoadOp>(depthAttachment->loadOp);
-            depthAttachmentInfo.storeOp = Convert<StoreOperation, VkAttachmentStoreOp>(depthAttachment->storeOp);
+            depthAttachmentInfo.loadOp = Convert<VkAttachmentLoadOp>(depthAttachment->loadOp);
+            depthAttachmentInfo.storeOp = Convert<VkAttachmentStoreOp>(depthAttachment->storeOp);
             depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
             depthAttachmentInfo.imageView = ((Texture*)depthAttachment->texture)->GetImageView();
             depthAttachmentInfo.clearValue.depthStencil = { depthAttachment->clearValue.depth, depthAttachment->clearValue.stencil};
             if (depthAttachment->resolveTexture)
             {
-                depthAttachmentInfo.resolveMode = Convert<ResolveMode, VkResolveModeFlagBits>(depthAttachment->resolveMode);
+                depthAttachmentInfo.resolveMode = Convert<VkResolveModeFlagBits>(depthAttachment->resolveMode);
                 depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
                 depthAttachmentInfo.resolveImageView = ((Texture*)depthAttachment->resolveTexture)->GetImageView();
             }

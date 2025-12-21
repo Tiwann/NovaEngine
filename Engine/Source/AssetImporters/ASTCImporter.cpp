@@ -114,7 +114,6 @@ namespace Nova
         .WithHeight(height)
         .WithDepth(depth)
         .WithFormat(GetFormatFromHeader(m_ImportFormat, header))
-        .WithFlags(TextureUsageFlagBits::Sampled)
         .WithMips(1)
         .WithSampleCount(1)
         .WithData(compressedBlocks);

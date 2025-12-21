@@ -39,7 +39,7 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindSampler(binding.key, sampler);
+                m_BindingSet->BindSampler(binding.key, *sampler);
                 return;
             }
         }
@@ -57,13 +57,13 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindTexture(binding.key, texture);
+                m_BindingSet->BindTexture(binding.key, *texture, BindingType::SampledTexture);
                 return;
             }
         }
     }
 
-    void Material::SetSamplerAndTexture(const StringView name, Ref<Sampler> sampler, Ref<Nova::Texture> texture)
+    void Material::SetSamplerAndTexture(const StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::Texture> texture)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
@@ -75,13 +75,13 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindCombinedSamplerTexture(binding.key, sampler, texture);
+                m_BindingSet->BindCombinedSamplerTexture(binding.key, *sampler, *texture);
                 return;
             }
         }
     }
 
-    void Material::SetBuffer(const StringView name, Ref<Buffer> buffer, const size_t offset, const size_t size)
+    void Material::SetBuffer(const StringView name, Ref<Nova::Buffer> buffer, const size_t offset, const size_t size)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[1];
@@ -93,7 +93,7 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindBuffer(binding.key, buffer, offset, size);
+                m_BindingSet->BindBuffer(binding.key, *buffer, offset, size);
                 return;
             }
         }

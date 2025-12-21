@@ -1,22 +1,14 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
-#include "Runtime/Flags.h"
+#include "TextureUsage.h"
+#include "ResourceState.h"
 #include "Runtime/Asset.h"
 #include <cstdint>
+
 
 namespace Nova
 {
     class Device;
-
-    enum class TextureUsageFlagBits
-    {
-        None = 0,
-        Sampled,
-        Storage,
-        Attachment
-    };
-
-    typedef Flags<TextureUsageFlagBits> TextureUsageFlags;
 
     struct TextureCreateInfo
     {
@@ -32,7 +24,7 @@ namespace Nova
         size_t dataSize = 0;
 
         TextureCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
-        TextureCreateInfo& WithFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
+        TextureCreateInfo& WithUsageFlags(TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
         TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
         TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }
         TextureCreateInfo& WithHeight(const uint32_t inHeight) { height = inHeight; return *this; }
@@ -61,8 +53,9 @@ namespace Nova
         uint32_t GetHeight() const { return m_Height; }
         uint32_t GetMips() const { return m_Mips; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
-        TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
-
+        ResourceState GetState() const { return m_State; }
+        void SetState(const ResourceState state) { m_State = state; }
+        TextureUsageFlags GetusageFlags() const { return m_UsageFlags; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;
@@ -70,6 +63,7 @@ namespace Nova
         uint32_t m_Depth = 0;
         uint32_t m_Mips = 0;
         uint32_t m_SampleCount = 0;
+        ResourceState m_State = ResourceState::Undefined;
         TextureUsageFlags m_UsageFlags = TextureUsageFlagBits::None;
     };
 }

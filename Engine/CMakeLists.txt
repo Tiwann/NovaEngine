@@ -229,6 +229,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/VertexLayout.h
         Source/Rendering/Null/Device.cpp
         Source/Rendering/Null/Device.h
+        Source/Rendering/ResourceBarrier.h
+        Source/Rendering/ResourceBarrier.cpp
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h

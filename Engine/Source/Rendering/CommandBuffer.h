@@ -24,6 +24,9 @@ namespace Nova
     class StaticMesh;
     struct Color;
     class Camera;
+    struct TextureBarrier;
+    struct BufferBarrier;
+    struct MemoryBarrier;
 
     enum class CommandBufferLevel
     {
@@ -83,6 +86,9 @@ namespace Nova
         virtual void EndRenderPass() = 0;
         virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;
         virtual void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) = 0;
+        virtual void TextureBarrier(const TextureBarrier& barrier) = 0;
+        virtual void BufferBarrier(const BufferBarrier& barrier) = 0;
+        virtual void MemoryBarrier(const MemoryBarrier& barrier) = 0;
 
         // Compute Commands
         virtual void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;

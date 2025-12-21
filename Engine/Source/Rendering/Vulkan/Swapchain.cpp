@@ -26,9 +26,9 @@ namespace Nova::Vulkan
 
         VkSwapchainCreateInfoKHR swapchainCreateInfo = { VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR };
         swapchainCreateInfo.surface = surfaceHandle;
-        swapchainCreateInfo.imageFormat = Convert<Format, VkFormat>(createInfo.format);
+        swapchainCreateInfo.imageFormat = Convert<VkFormat>(createInfo.format);
         swapchainCreateInfo.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-        swapchainCreateInfo.presentMode = Convert<PresentMode, VkPresentModeKHR>(createInfo.presentMode);
+        swapchainCreateInfo.presentMode = Convert<VkPresentModeKHR>(createInfo.presentMode);
         swapchainCreateInfo.clipped = true;
         swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         swapchainCreateInfo.imageExtent.width = createInfo.width;
@@ -82,7 +82,7 @@ namespace Nova::Vulkan
 
             VkImageViewCreateInfo ImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             ImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            ImageViewCreateInfo.format = Convert<Format, VkFormat>(m_ImageFormat);
+            ImageViewCreateInfo.format = Convert<VkFormat>(m_ImageFormat);
             ImageViewCreateInfo.image = m_Images[i];
             ImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             ImageViewCreateInfo.subresourceRange.layerCount = 1;
@@ -192,7 +192,7 @@ namespace Nova::Vulkan
             texture->m_Allocation = nullptr;
             texture->m_SampleCount = 1;
             texture->m_Mips = 1;
-            texture->m_UsageFlags = TextureUsageFlagBits::Attachment;
+            texture->m_State = ResourceState::ColorAttachment;
             texture->m_Format = m_ImageFormat;
             return texture;
         };

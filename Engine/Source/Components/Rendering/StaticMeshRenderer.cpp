@@ -84,8 +84,8 @@ namespace Nova
         m_Sampler = device->CreateSampler(samplerCreateInfo);
 
         m_BindingSet = m_Shader->CreateBindingSet();
-        m_BindingSet->BindBuffer(0, m_SceneUniformBuffer, 0, ~0);
-        m_BindingSet->BindSampler(1, m_Sampler);
+        m_BindingSet->BindBuffer(0, *m_SceneUniformBuffer, 0, ~0);
+        m_BindingSet->BindSampler(1, *m_Sampler);
     }
 
     void StaticMeshRenderer::OnDestroy()

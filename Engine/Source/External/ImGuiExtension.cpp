@@ -7,7 +7,7 @@
 #include "Components/Rendering/SpriteRenderer.h"
 #include "Runtime/Component.h"
 #include "Runtime/Entity.h"
-#include "Runtime/Uuid.h"
+#include "Runtime/UUID.h"
 #include "Rendering/Device.h"
 #include "Rendering/Vulkan/Sampler.h"
 #include "Rendering/Vulkan/Texture.h"
@@ -24,7 +24,7 @@ namespace ImGui
         return Begin(*name);
     }
 
-    void PushID(const Uuid& id)
+    void PushID(const UUID& id)
     {
         const uint64_t* begin = id.GetValues();
         const uint64_t* end = id.GetValues() + 2;

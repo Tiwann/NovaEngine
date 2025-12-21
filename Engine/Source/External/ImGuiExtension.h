@@ -6,7 +6,7 @@
 
 namespace Nova
 {
-    class Uuid;
+    class UUID;
     class Component;
     class Entity;
     class Texture;
@@ -19,13 +19,13 @@ using Nova::Entity;
 using Nova::Ref;
 using Nova::Texture;
 using Nova::Sampler;
-using Nova::Uuid;
+using Nova::UUID;
 using Nova::Component;
 
 namespace ImGui
 {
     bool IMGUI_API Begin(StringView name);
-    void IMGUI_API PushID(const Uuid& id);
+    void IMGUI_API PushID(const UUID& id);
     void IMGUI_API PushID(const Component* component);
     void IMGUI_API AddComponent(Entity* entity);
     void IMGUI_API ConvertColorToLinear(ImVec4& color);

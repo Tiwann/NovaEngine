@@ -7,11 +7,11 @@ namespace Nova
 
     bool EntityHandle::IsValid() const
     {
-        if (m_EntityID == Uuid::Zero || m_Context == nullptr)
+        if (m_EntityID == UUID::Zero || m_Context == nullptr)
             return false;
 
         const Array<Entity*> entities = m_Context->GetEntities();
-        const Array<Uuid> entitiesUuids = entities.Transform<Uuid>([](const Entity* entity) { return entity->GetUUID(); });
+        const Array<UUID> entitiesUuids = entities.Transform<UUID>([](const Entity* entity) { return entity->GetUUID(); });
         return entitiesUuids.Contains(m_EntityID);
     }
 

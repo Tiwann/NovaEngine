@@ -88,8 +88,8 @@ namespace Nova
         pipelineCreateInfo.scissorInfo.height = renderPass->GetHeight();
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
-        m_BindingSet->BindSampler(0, m_Sampler);
-        m_BindingSet->BindBuffer(2, m_UniformBuffer, 0, sizeof(Uniforms));
+        m_BindingSet->BindSampler(0, *m_Sampler);
+        m_BindingSet->BindBuffer(2, *m_UniformBuffer, 0, sizeof(Uniforms));
     }
 
     void SpriteRenderer::OnUpdate(const float deltaTime)
@@ -155,7 +155,7 @@ namespace Nova
         const RenderPass* renderPass = application->GetRenderPass();
 
 
-        m_BindingSet->BindTexture(1, m_Sprite.texture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.BindVertexBuffer(*m_VertexBuffer, 0);
@@ -226,7 +226,7 @@ namespace Nova
 
         m_SpriteIndex = 0;
         m_Time = 0.0f;
-        m_BindingSet->BindTexture(1, m_Sprite.texture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
     }
 
     void SpriteRenderer::SetSprite(Ref<Texture> texture)
@@ -244,7 +244,7 @@ namespace Nova
         m_SpriteIndex = 0;
         m_Time = 0.0f;
         m_Sprite = spriteAnimation->GetSprite(m_SpriteIndex);
-        m_BindingSet->BindTexture(1, m_Sprite.texture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
     }
 
     SpriteAnimation* SpriteRenderer::GetSpriteAnimation() const

@@ -1,5 +1,5 @@
 #pragma once
-#include "Uuid.h"
+#include "UUID.h"
 
 namespace Nova
 {
@@ -9,8 +9,8 @@ namespace Nova
     class EntityHandle
     {
     public:
-        EntityHandle(decltype(nullptr)) : m_EntityID(Uuid(0, 0)), m_Context(nullptr) {}
-        EntityHandle(const Uuid& id, Scene* context) : m_EntityID(id), m_Context(context) {}
+        EntityHandle(decltype(nullptr)) : m_EntityID(UUID(0, 0)), m_Context(nullptr) {}
+        EntityHandle(const UUID& id, Scene* context) : m_EntityID(id), m_Context(context) {}
         EntityHandle(const EntityHandle& other) : m_EntityID(other.m_EntityID), m_Context(other.m_Context) {}
         EntityHandle(EntityHandle&& other) noexcept
         {
@@ -19,7 +19,7 @@ namespace Nova
 
             m_EntityID = other.m_EntityID;
             m_Context = other.m_Context;
-            other.m_EntityID = Uuid::Zero;
+            other.m_EntityID = UUID::Zero;
             other.m_Context = nullptr;
         }
 
@@ -36,7 +36,7 @@ namespace Nova
                 return *this;
             m_EntityID = other.m_EntityID;
             m_Context = other.m_Context;
-            other.m_EntityID = Uuid::Zero;
+            other.m_EntityID = UUID::Zero;
             other.m_Context = nullptr;
             return *this;
         }
@@ -52,7 +52,7 @@ namespace Nova
 
         bool operator==(const EntityHandle& other) const;
     private:
-        Uuid m_EntityID;
+        UUID m_EntityID;
         Scene* m_Context = nullptr;
     };
 }

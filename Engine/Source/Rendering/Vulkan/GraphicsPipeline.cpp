@@ -16,7 +16,7 @@ namespace Nova::Vulkan
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
         inputAssemblyState.primitiveRestartEnable = createInfo.inputAssemblyInfo.primitiveRestartEnable;
-        inputAssemblyState.topology = Convert<PrimitiveTopology, VkPrimitiveTopology>(createInfo.inputAssemblyInfo.topology);
+        inputAssemblyState.topology = Convert<VkPrimitiveTopology>(createInfo.inputAssemblyInfo.topology);
 
 
         const Array<VertexAttribute>& vertexAttributes = createInfo.vertexInputInfo.layout.GetAttributes();
@@ -28,7 +28,7 @@ namespace Nova::Vulkan
             VkVertexInputAttributeDescription attributeDesc;
             attributeDesc.binding = 0;
             attributeDesc.location = i;
-            attributeDesc.format = Convert<Format, VkFormat>(vertexAttribute.format);
+            attributeDesc.format = Convert<VkFormat>(vertexAttribute.format);
             attributeDesc.offset = createInfo.vertexInputInfo.layout.GetOffset(vertexAttribute);
             attributeDescriptions.Add(attributeDesc);
         }
@@ -47,9 +47,9 @@ namespace Nova::Vulkan
         vertexInputState.vertexBindingDescriptionCount = vertexAttributes.Count() > 0 ? 1 : 0;
 
         VkPipelineRasterizationStateCreateInfo rasterizationState { VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO };
-        rasterizationState.cullMode = Convert<CullMode, VkCullModeFlags>(createInfo.rasterizationInfo.cullMode);
-        rasterizationState.frontFace = Convert<FrontFace, VkFrontFace>(createInfo.rasterizationInfo.frontFace);
-        rasterizationState.polygonMode = Convert<PolygonMode, VkPolygonMode>(createInfo.rasterizationInfo.polygonMode);
+        rasterizationState.cullMode = Convert<VkCullModeFlags>(createInfo.rasterizationInfo.cullMode);
+        rasterizationState.frontFace = Convert<VkFrontFace>(createInfo.rasterizationInfo.frontFace);
+        rasterizationState.polygonMode = Convert<VkPolygonMode>(createInfo.rasterizationInfo.polygonMode);
         rasterizationState.rasterizerDiscardEnable = createInfo.rasterizationInfo.discardEnable;
         rasterizationState.depthClampEnable = createInfo.rasterizationInfo.depthClampEnable;
         rasterizationState.depthBiasEnable = createInfo.rasterizationInfo.depthBiasEnable;
@@ -63,12 +63,12 @@ namespace Nova::Vulkan
         colorBlendAttachmentState.colorWriteMask = createInfo.colorBlendInfo.colorWriteMask;
         if (createInfo.colorBlendInfo.colorBlendEnable)
         {
-            colorBlendAttachmentState.alphaBlendOp = Convert<BlendOperation, VkBlendOp>(createInfo.colorBlendInfo.blendFunction.alphaOp);
-            colorBlendAttachmentState.colorBlendOp = Convert<BlendOperation, VkBlendOp>(createInfo.colorBlendInfo.blendFunction.colorOp);
-            colorBlendAttachmentState.dstAlphaBlendFactor = Convert<BlendFactor, VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.alphaDest);
-            colorBlendAttachmentState.dstColorBlendFactor = Convert<BlendFactor, VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.colorDest);
-            colorBlendAttachmentState.srcAlphaBlendFactor = Convert<BlendFactor, VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.alphaSource);
-            colorBlendAttachmentState.srcColorBlendFactor = Convert<BlendFactor, VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.colorSource);
+            colorBlendAttachmentState.alphaBlendOp = Convert<VkBlendOp>(createInfo.colorBlendInfo.blendFunction.alphaOp);
+            colorBlendAttachmentState.colorBlendOp = Convert<VkBlendOp>(createInfo.colorBlendInfo.blendFunction.colorOp);
+            colorBlendAttachmentState.dstAlphaBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.alphaDest);
+            colorBlendAttachmentState.dstColorBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.colorDest);
+            colorBlendAttachmentState.srcAlphaBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.alphaSource);
+            colorBlendAttachmentState.srcColorBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendInfo.blendFunction.colorSource);
         }
 
 
@@ -81,7 +81,7 @@ namespace Nova::Vulkan
         depthStencilState.depthTestEnable = createInfo.depthStencilInfo.depthTestEnable;
         depthStencilState.depthWriteEnable = createInfo.depthStencilInfo.depthWriteEnable;
         depthStencilState.stencilTestEnable = createInfo.depthStencilInfo.stencilTestEnable;
-        depthStencilState.depthCompareOp = Convert<CompareOperation, VkCompareOp>(createInfo.depthStencilInfo.depthCompareOp);
+        depthStencilState.depthCompareOp = Convert<VkCompareOp>(createInfo.depthStencilInfo.depthCompareOp);
 
         depthStencilState.depthBoundsTestEnable = false;
         depthStencilState.minDepthBounds = 0.0f; // Optional
@@ -127,7 +127,7 @@ namespace Nova::Vulkan
             RenderPassAttachment& attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
             if (attachment.type != AttachmentType::Color)
                 continue;
-            colorAttachmentFormats.Add(Convert<Format, VkFormat>(attachment.texture->GetFormat()));
+            colorAttachmentFormats.Add(Convert<VkFormat>(attachment.texture->GetFormat()));
         }
 
 
@@ -139,8 +139,8 @@ namespace Nova::Vulkan
         {
             const RenderPassAttachment* depthAttachment = createInfo.renderPass->GetDepthAttachment();
             const Nova::Texture* depthTexture = depthAttachment->texture;
-            renderingInfo.depthAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
-            renderingInfo.stencilAttachmentFormat = Convert<Format, VkFormat>(depthTexture->GetFormat());
+            renderingInfo.depthAttachmentFormat = Convert<VkFormat>(depthTexture->GetFormat());
+            renderingInfo.stencilAttachmentFormat = Convert<VkFormat>(depthTexture->GetFormat());
         }
 
         Array<VkPipelineShaderStageCreateInfo> shaderStages;
@@ -149,7 +149,7 @@ namespace Nova::Vulkan
             VkPipelineShaderStageCreateInfo shaderStage { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
             shaderStage.module = shaderModule.GetHandle();
             shaderStage.pName = "main";
-            shaderStage.stage = Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(shaderModule.GetStage());
+            shaderStage.stage = Convert<VkShaderStageFlagBits>(shaderModule.GetStage());
             shaderStages.Add(shaderStage);
         }
 

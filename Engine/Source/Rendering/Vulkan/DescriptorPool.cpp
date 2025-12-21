@@ -14,7 +14,7 @@ namespace Nova::Vulkan
         for (const Pair<BindingType, uint32_t>& poolSize : createInfo.sizes)
         {
             VkDescriptorPoolSize descriptorPoolSize = {};
-            descriptorPoolSize.type = Convert<BindingType, VkDescriptorType>(poolSize.key);
+            descriptorPoolSize.type = Convert<VkDescriptorType>(poolSize.key);
             descriptorPoolSize.descriptorCount = poolSize.value;
             poolSizes.Add(descriptorPoolSize);
         }

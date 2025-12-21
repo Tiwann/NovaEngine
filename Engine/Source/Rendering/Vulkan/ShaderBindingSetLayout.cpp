@@ -15,8 +15,8 @@ namespace Nova::Vulkan
             VkDescriptorSetLayoutBinding vkBinding = { };
             vkBinding.binding = i;
             vkBinding.descriptorCount = 1;
-            vkBinding.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(binding.stageFlags);
-            vkBinding.descriptorType = Convert<BindingType, VkDescriptorType>(binding.bindingType);
+            vkBinding.stageFlags = Convert<VkShaderStageFlags>(binding.stageFlags);
+            vkBinding.descriptorType = Convert<VkDescriptorType>(binding.bindingType);
             vkBinding.pImmutableSamplers = nullptr;
             bindings.Add(vkBinding);
         }

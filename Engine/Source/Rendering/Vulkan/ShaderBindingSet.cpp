@@ -7,6 +7,8 @@
 #include "ShaderBindingSetLayout.h"
 #include <vulkan/vulkan.h>
 
+#include "Conversions.h"
+
 
 namespace Nova::Vulkan
 {
@@ -48,20 +50,18 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Ref<Nova::Texture>& texture)
+    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::Texture& texture, BindingType bindingType)
     {
-        if (!texture) return false;
+        if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
+            return false;
 
+        const Texture& tex = dynamic_cast<const Texture&>(texture);
         VkDescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = (VkImageLayout)texture.As<Texture>()->GetImageLayout();
-        imageInfo.imageView = texture.As<Texture>()->GetImageView();
-
-        VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-        if (texture->GetUsageFlags().Contains(TextureUsageFlagBits::Storage))
-            descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+        imageInfo.imageLayout = Convert<VkImageLayout>(tex.GetState());
+        imageInfo.imageView = tex.GetImageView();
 
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
-        write.descriptorType = descriptorType;
+        write.descriptorType = Convert<VkDescriptorType>(bindingType);
         write.descriptorCount = 1;
         write.dstBinding = binding;
         write.dstArrayElement = 0;
@@ -71,12 +71,10 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindSampler(const uint32_t binding, const Ref<Nova::Sampler>& sampler)
+    bool ShaderBindingSet::BindSampler(const uint32_t binding, const Nova::Sampler& sampler)
     {
-        if (!sampler) return false;
-
         VkDescriptorImageInfo imageInfo;
-        imageInfo.sampler = sampler.As<Sampler>()->GetHandle();
+        imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
 
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
         write.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -89,15 +87,12 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Ref<Nova::Sampler>& sampler, const Ref<Nova::Texture>& texture)
+    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture)
     {
-        if (!sampler) return false;
-        if (!texture) return false;
-
         VkDescriptorImageInfo imageInfo;
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = texture.As<Texture>()->GetImageView();
-        imageInfo.sampler = sampler.As<Sampler>()->GetHandle();
+        imageInfo.imageView = static_cast<const Texture&>(texture).GetImageView();
+        imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
 
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
         write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -110,17 +105,15 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindBuffer(const uint32_t binding, const Ref<Nova::Buffer>& buffer, const size_t offset, const size_t size)
+    bool ShaderBindingSet::BindBuffer(const uint32_t binding, const Nova::Buffer& buffer, const size_t offset, const size_t size)
     {
-        if (!buffer) return false;
-
         VkDescriptorBufferInfo bufferInfo;
-        bufferInfo.buffer = buffer.As<Buffer>()->GetHandle();
+        bufferInfo.buffer = static_cast<const Buffer&>(buffer).GetHandle();
         bufferInfo.offset = offset;
         bufferInfo.range = size;
 
         VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
-        switch (buffer->GetUsage())
+        switch (buffer.GetUsage())
         {
         case BufferUsage::None:
         case BufferUsage::VertexBuffer:

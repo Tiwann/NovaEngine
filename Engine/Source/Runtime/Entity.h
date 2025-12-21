@@ -4,7 +4,7 @@
 #include "Containers/Function.h"
 #include "Containers/String.h"
 #include "Containers/StringFormat.h"
-#include "Uuid.h"
+#include "UUID.h"
 #include "Flags.h"
 #include "Object.h"
 
@@ -119,7 +119,7 @@ namespace Nova
                 function(component);
         }
 
-        Uuid GetUUID() const { return m_Uuid; }
+        UUID GetUUID() const { return m_Uuid; }
     
         bool IsEnabled() const;
         void SetEnabled(bool enabled);
@@ -138,7 +138,7 @@ namespace Nova
 
     private:
         friend class Scene;
-        Uuid m_Uuid = Uuid::Zero;
+        UUID m_Uuid = UUID::Zero;
         Array<Component*> m_Components;
         bool m_Enabled = false;
         Array<Entity*> m_Children;

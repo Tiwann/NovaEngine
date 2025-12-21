@@ -16,7 +16,7 @@ namespace Nova
     }
 
     template <typename AssetType> requires IsBaseOfValue<Asset, AssetType>
-    Ref<AssetType> AssetPack::GetAssetByUuid(const Uuid uuid)
+    Ref<AssetType> AssetPack::GetAssetByUuid(const UUID uuid)
     {
         return GetAssetByUuid(uuid).As<AssetType>();
     }

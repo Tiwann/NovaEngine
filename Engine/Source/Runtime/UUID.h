@@ -4,20 +4,20 @@
 
 namespace Nova
 {
-    class Uuid
+    class UUID
     {
     public:
-        Uuid() = default;
-        Uuid(const Uuid& uuid);
-        explicit Uuid(uint64_t low, uint64_t high);
+        UUID() = default;
+        UUID(const UUID& uuid);
+        explicit UUID(uint64_t low, uint64_t high);
 
-        static Uuid Generate();
+        static UUID Generate();
         const uint64_t* GetValues() const;
         String GetString() const;
 
-        bool operator==(const Uuid&) const;
+        bool operator==(const UUID&) const;
 
-        static Uuid Zero;
+        static UUID Zero;
     private:
         uint64_t m_Values[2] = { 0, 0 };
     };

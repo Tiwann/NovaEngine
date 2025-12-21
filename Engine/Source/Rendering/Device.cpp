@@ -70,10 +70,10 @@ namespace Nova
         return CreateBuffer(bufferCreateInfo);
     }
 
-    Ref<Texture> Device::CreateTexture(const TextureUsageFlags usageFlags, const uint32_t width, const uint32_t height, const Format format)
+    Ref<Texture> Device::CreateTexture(TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
     {
         const TextureCreateInfo createInfo = TextureCreateInfo()
-        .WithFlags(usageFlags)
+        .WithUsageFlags(usage)
         .WithWidth(width)
         .WithHeight(height)
         .WithDepth(1)

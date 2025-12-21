@@ -1,35 +1,35 @@
-#include "Uuid.h"
+#include "UUID.h"
 #include "Random.h"
 
 namespace Nova
 {
 
-    Uuid Uuid::Zero = Uuid(0, 0);
+    UUID UUID::Zero = UUID(0, 0);
 
-    Uuid::Uuid(const Uuid& uuid) : m_Values { uuid.m_Values[0], uuid.m_Values[1] }
+    UUID::UUID(const UUID& uuid) : m_Values { uuid.m_Values[0], uuid.m_Values[1] }
     {
         
     }
 
-    Uuid::Uuid(const uint64_t low, const uint64_t high) : m_Values{ low, high }
+    UUID::UUID(const uint64_t low, const uint64_t high) : m_Values{ low, high }
     {
     }
 
-    Uuid Uuid::Generate()
+    UUID UUID::Generate()
     {
-        Uuid result;
+        UUID result;
         result.m_Values[0] = Random::Integer<uint64_t>();
         result.m_Values[1] = Random::Integer<uint64_t>();
         return result;
     }
 
-    const uint64_t* Uuid::GetValues() const
+    const uint64_t* UUID::GetValues() const
     {
         return m_Values;
     }
 
     /* From ChatGPT */
-    String Uuid::GetString() const
+    String UUID::GetString() const
     {
         const uint8_t* data = reinterpret_cast<const uint8_t*>(m_Values);
         char str[37] = { 0 };
@@ -47,7 +47,7 @@ namespace Nova
         return String(str, 37);
     }
 
-    bool Uuid::operator==(const Uuid& Other) const
+    bool UUID::operator==(const UUID& Other) const
     {
         return m_Values[0] == Other.m_Values[0] && m_Values[1] == Other.m_Values[1];
     }

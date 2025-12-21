@@ -24,10 +24,7 @@ namespace Nova::Vulkan
         VkImage GetImage() const;
         VkImageView GetImageView() const;
         VmaAllocation GetAllocation() const;
-        uint32_t GetImageLayout() const;
-
         Array<uint8_t> GetPixels() override;
-        void SetImageLayout(uint32_t imageLayout);
     private:
         friend Swapchain;
         friend RenderTarget;
@@ -36,6 +33,5 @@ namespace Nova::Vulkan
         VkImage m_Image = nullptr;
         VkImageView m_ImageView = nullptr;
         VmaAllocation m_Allocation = nullptr;
-        uint32_t m_ImageLayout = 0;
     };
 }

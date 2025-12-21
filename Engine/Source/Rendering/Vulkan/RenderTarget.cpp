@@ -27,7 +27,7 @@ namespace Nova::Vulkan
             colorImageCreateInfo.extent.width = createInfo.width;
             colorImageCreateInfo.extent.height = createInfo.height;
             colorImageCreateInfo.extent.depth = createInfo.depth;
-            colorImageCreateInfo.format = Convert<Format, VkFormat>(createInfo.colorFormat);
+            colorImageCreateInfo.format = Convert<VkFormat>(createInfo.colorFormat);
             colorImageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
             colorImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             colorImageCreateInfo.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
@@ -56,7 +56,7 @@ namespace Nova::Vulkan
 
             VkImageViewCreateInfo colorImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             colorImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            colorImageViewCreateInfo.format = Convert<Format, VkFormat>(createInfo.colorFormat);
+            colorImageViewCreateInfo.format = Convert<VkFormat>(createInfo.colorFormat);
             colorImageViewCreateInfo.image = m_ColorImages[imageIndex];
             colorImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             colorImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
@@ -90,7 +90,7 @@ namespace Nova::Vulkan
             depthImageCreateInfo.extent.width = createInfo.width;
             depthImageCreateInfo.extent.height = createInfo.height;
             depthImageCreateInfo.extent.depth = createInfo.depth;
-            depthImageCreateInfo.format = Convert<Format, VkFormat>(createInfo.depthFormat);
+            depthImageCreateInfo.format = Convert<VkFormat>(createInfo.depthFormat);
             depthImageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
             depthImageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             depthImageCreateInfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -114,7 +114,7 @@ namespace Nova::Vulkan
 
             VkImageViewCreateInfo depthImageViewCreateInfo = {VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
             depthImageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            depthImageViewCreateInfo.format = Convert<Format, VkFormat>(createInfo.depthFormat);
+            depthImageViewCreateInfo.format = Convert<VkFormat>(createInfo.depthFormat);
             depthImageViewCreateInfo.image = m_DepthImages[imageIndex];
             depthImageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
             depthImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
@@ -235,7 +235,7 @@ namespace Nova::Vulkan
             texture.m_Format = m_ColorFormat;
             texture.m_Allocation = m_ColorAllocations[imageIndex];
             texture.m_Mips = 1;
-            texture.m_UsageFlags = TextureUsageFlagBits::Attachment;
+            texture.m_State = ResourceState::ColorAttachment;
             texture.m_SampleCount = m_SampleCount;
             return texture;
         };
@@ -258,7 +258,7 @@ namespace Nova::Vulkan
             texture.m_Format = m_DepthFormat;
             texture.m_Allocation = m_DepthAllocations[imageIndex];
             texture.m_Mips = 1;
-            texture.m_UsageFlags = TextureUsageFlagBits::Attachment;
+            texture.m_State = ResourceState::DepthStencilAttachment;
             texture.m_SampleCount = m_SampleCount;
             return texture;
         };

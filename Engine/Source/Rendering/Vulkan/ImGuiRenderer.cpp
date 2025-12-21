@@ -46,7 +46,7 @@ namespace Nova::Vulkan
         initInfo.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         initInfo.PipelineRenderingCreateInfo.depthAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
         initInfo.PipelineRenderingCreateInfo.stencilAttachmentFormat = VK_FORMAT_D32_SFLOAT_S8_UINT;
-        const VkFormat ColorAttachment = Convert<Format, VkFormat>(swapchain->GetFormat());
+        const VkFormat ColorAttachment = Convert<VkFormat>(swapchain->GetFormat());
         initInfo.PipelineRenderingCreateInfo.pColorAttachmentFormats = &ColorAttachment;
         initInfo.MSAASamples = (VkSampleCountFlagBits)createInfo.sampleCount;
 

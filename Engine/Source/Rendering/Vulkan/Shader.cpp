@@ -309,7 +309,7 @@ namespace Nova::Vulkan
             VkPushConstantRange pcRange;
             pcRange.offset = range.offset;
             pcRange.size = range.size;
-            pcRange.stageFlags = Convert<ShaderStageFlags, VkShaderStageFlags>(range.stageFlags);
+            pcRange.stageFlags = Convert<VkShaderStageFlags>(range.stageFlags);
             return pcRange;
         });
 

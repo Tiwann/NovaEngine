@@ -36,7 +36,10 @@ namespace Nova::Vulkan
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;
         void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) override;
-
+        void TextureBarrier(const Nova::TextureBarrier& barrier) override;
+        void BufferBarrier(const Nova::BufferBarrier& barrier) override;
+        void MemoryBarrier(const Nova::MemoryBarrier& memoryBarrier) override;
+        
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
         void DispatchIndirect(const Nova::Buffer& buffer, size_t offset) override;
 

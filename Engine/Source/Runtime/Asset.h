@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Uuid.h"
+#include "UUID.h"
 #include "Object.h"
 #include "AssetType.h"
 
@@ -8,17 +8,17 @@ namespace Nova
     class Asset : public Object
     {
     public:
-        Asset() : m_Uuid(Uuid::Generate()) {}
+        Asset() : m_Uuid(UUID::Generate()) {}
         ~Asset() override = default;
 
-        explicit Asset(const String& name) : Object(name), m_Uuid(Uuid::Generate()) {}
+        explicit Asset(const String& name) : Object(name), m_Uuid(UUID::Generate()) {}
 
         virtual AssetType GetAssetType() const = 0;
 
-        void SetUuid(const Uuid& uuid) { m_Uuid = uuid; }
-        Uuid GetUuid() const { return m_Uuid; }
+        void SetUuid(const UUID& uuid) { m_Uuid = uuid; }
+        UUID GetUuid() const { return m_Uuid; }
 
     private:
-        Uuid m_Uuid;
+        UUID m_Uuid;
     };
 }

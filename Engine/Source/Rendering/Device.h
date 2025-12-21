@@ -91,7 +91,7 @@ namespace Nova
 
         Ref<Fence> CreateFence();
         Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);
-        Ref<Texture> CreateTexture(TextureUsageFlags usageFlags, uint32_t width, uint32_t height, Format format);
+        Ref<Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
         Ref<Material> CreateMaterial(Ref<Shader> material);
         Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
         Ref<Sampler> CreateSampler();

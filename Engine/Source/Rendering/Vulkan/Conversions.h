@@ -15,16 +15,22 @@
 #include "Rendering/LoadOperation.h"
 #include "Rendering/ResolveMode.h"
 #include "Rendering/StoreOperation.h"
+#include "Rendering/ResourceState.h"
+#include "Rendering/ResourceBarrier.h"
+#include "Rendering/TextureUsage.h"
 
 #include <vulkan/vulkan.h>
 
+#include "Rendering/TextureAspect.h"
+
+
 namespace Nova::Vulkan
 {
-    template<typename NovaType, typename VulkanType>
+    template<typename VulkanType, typename NovaType>
     VulkanType Convert(const NovaType& value);
 
     template<>
-    inline VkFormat Convert<Format, VkFormat>(const Format& value)
+    inline VkFormat Convert(const Format& value)
     {
         switch (value)
         {
@@ -139,7 +145,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkPresentModeKHR Convert<PresentMode, VkPresentModeKHR>(const PresentMode& value)
+    inline VkPresentModeKHR Convert(const PresentMode& value)
     {
         switch (value)
         {
@@ -152,7 +158,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkFilter Convert<Filter, VkFilter>(const Filter& filter)
+    inline VkFilter Convert(const Filter& filter)
     {
         switch (filter)
         {
@@ -163,7 +169,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkPrimitiveTopology Convert<PrimitiveTopology, VkPrimitiveTopology>(const PrimitiveTopology& value)
+    inline VkPrimitiveTopology Convert(const PrimitiveTopology& value)
     {
         switch (value)
         {
@@ -178,7 +184,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkCullModeFlags Convert<CullMode, VkCullModeFlags>(const CullMode& value)
+    inline VkCullModeFlags Convert(const CullMode& value)
     {
         switch (value)
         {
@@ -191,7 +197,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkFrontFace Convert<FrontFace, VkFrontFace>(const FrontFace& value)
+    inline VkFrontFace Convert(const FrontFace& value)
     {
         switch (value)
         {
@@ -202,7 +208,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkPolygonMode Convert<PolygonMode, VkPolygonMode>(const PolygonMode& value)
+    inline VkPolygonMode Convert(const PolygonMode& value)
     {
         switch (value)
         {
@@ -214,7 +220,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkCompareOp Convert<CompareOperation, VkCompareOp>(const CompareOperation& value)
+    inline VkCompareOp Convert(const CompareOperation& value)
     {
         switch (value)
         {
@@ -231,7 +237,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkSamplerAddressMode Convert<SamplerAddressMode, VkSamplerAddressMode>(const SamplerAddressMode& value)
+    inline VkSamplerAddressMode Convert(const SamplerAddressMode& value)
     {
         switch (value)
         {
@@ -245,7 +251,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkBlendOp Convert<BlendOperation, VkBlendOp>(const BlendOperation& value)
+    inline VkBlendOp Convert(const BlendOperation& value)
     {
         switch (value)
         {
@@ -259,7 +265,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkBlendFactor Convert<BlendFactor, VkBlendFactor>(const BlendFactor& value)
+    inline VkBlendFactor Convert(const BlendFactor& value)
     {
         switch (value) {
         case BlendFactor::Zero: return VK_BLEND_FACTOR_ZERO;
@@ -286,7 +292,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkIndexType Convert<Format, VkIndexType>(const Format& value)
+    inline VkIndexType Convert(const Format& value)
     {
         switch (value)
         {
@@ -298,7 +304,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkDescriptorType Convert<BindingType, VkDescriptorType>(const BindingType& value)
+    inline VkDescriptorType Convert(const BindingType& value)
     {
         switch (value)
         {
@@ -318,7 +324,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkSamplerMipmapMode Convert<Filter, VkSamplerMipmapMode>(const Filter& value)
+    inline VkSamplerMipmapMode Convert(const Filter& value)
     {
         switch (value)
         {
@@ -329,7 +335,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkAttachmentLoadOp Convert<LoadOperation, VkAttachmentLoadOp>(const LoadOperation& value)
+    inline VkAttachmentLoadOp Convert(const LoadOperation& value)
     {
         switch (value)
         {
@@ -341,7 +347,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkAttachmentStoreOp Convert<StoreOperation, VkAttachmentStoreOp>(const StoreOperation& value)
+    inline VkAttachmentStoreOp Convert(const StoreOperation& value)
     {
         switch (value)
         {
@@ -353,7 +359,7 @@ namespace Nova::Vulkan
 
 
     template<>
-    inline VkShaderStageFlags Convert<ShaderStageFlags, VkShaderStageFlags>(const ShaderStageFlags& value)
+    inline VkShaderStageFlags Convert(const ShaderStageFlags& value)
     {
         VkShaderStageFlags result = 0;
         const uint32_t val = value;
@@ -375,7 +381,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkShaderStageFlagBits Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(const ShaderStageFlagBits& value)
+    inline VkShaderStageFlagBits Convert(const ShaderStageFlagBits& value)
     {
         switch (value)
         {
@@ -392,7 +398,7 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkResolveModeFlagBits Convert<ResolveMode, VkResolveModeFlagBits>(const ResolveMode& value)
+    inline VkResolveModeFlagBits Convert(const ResolveMode& value)
     {
         switch (value)
         {
@@ -402,6 +408,133 @@ namespace Nova::Vulkan
         case ResolveMode::Min: return VK_RESOLVE_MODE_MIN_BIT;
         case ResolveMode::Max: return VK_RESOLVE_MODE_MAX_BIT;
         default: return VK_RESOLVE_MODE_NONE;
+        }
+    }
+
+    template<>
+    inline VkAccessFlags Convert(const AccessFlags& value)
+    {
+        VkAccessFlags result = VK_ACCESS_NONE;
+        if (value == AccessFlagBits::None)
+            return VK_ACCESS_NONE;
+
+        if (value & AccessFlagBits::ShaderRead)
+            result |= VK_ACCESS_SHADER_READ_BIT;
+        if (value & AccessFlagBits::ShaderWrite)
+            result |= VK_ACCESS_SHADER_WRITE_BIT;
+        if (value & AccessFlagBits::ColorAttachmentRead)
+            result |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+        if (value & AccessFlagBits::ColorAttachmentWrite)
+            result |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        if (value & AccessFlagBits::DepthStencilAttachmentRead)
+            result |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
+        if (value & AccessFlagBits::DepthStencilAttachmentWrite)
+            result |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+        if (value & AccessFlagBits::TransferRead)
+            result |= VK_ACCESS_TRANSFER_READ_BIT;
+        if (value & AccessFlagBits::TransferWrite)
+            result |= VK_ACCESS_TRANSFER_WRITE_BIT;
+        if (value & AccessFlagBits::HostRead)
+            result |= VK_ACCESS_HOST_READ_BIT;
+        if (value & AccessFlagBits::HostWrite)
+            result |= VK_ACCESS_HOST_WRITE_BIT;
+
+        return result;
+    }
+
+    template<>
+    inline VkImageLayout Convert(const ResourceState& value)
+    {
+        switch (value)
+        {
+        case ResourceState::Undefined: return VK_IMAGE_LAYOUT_UNDEFINED;
+        case ResourceState::General: return VK_IMAGE_LAYOUT_GENERAL;
+        case ResourceState::ShaderRead: return VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        case ResourceState::ShaderWrite: return VK_IMAGE_LAYOUT_GENERAL;
+        case ResourceState::ColorAttachment: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        case ResourceState::DepthStencilAttachment: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        case ResourceState::TransferSource: return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        case ResourceState::TransferDest: return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        case ResourceState::Present: return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        default: return VK_IMAGE_LAYOUT_UNDEFINED;
+        }
+    }
+
+    template<>
+    inline VkImageUsageFlags Convert(const TextureUsageFlags& value)
+    {
+        VkImageUsageFlags flags = 0;
+        if (value == TextureUsageFlagBits::None)
+            return 0;
+
+        if (value & TextureUsageFlagBits::Sampled)
+            flags |= VK_IMAGE_USAGE_SAMPLED_BIT;
+        if (value & TextureUsageFlagBits::Storage)
+            flags |= VK_IMAGE_USAGE_STORAGE_BIT;
+        if (value & TextureUsageFlagBits::Transfer)
+            flags |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        return flags;
+    }
+
+    template<>
+    inline VkImageAspectFlags Convert(const TextureAspectFlags& value)
+    {
+        VkImageAspectFlags flags = 0;
+        if (value == TextureAspectFlagBits::None)
+            return VK_IMAGE_ASPECT_NONE;
+        if (value & TextureAspectFlagBits::Color)
+            flags |= VK_IMAGE_ASPECT_COLOR_BIT;
+        if (value & TextureAspectFlagBits::Depth)
+            flags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+        if (value & TextureAspectFlagBits::Stencil)
+            flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        return flags;
+    }
+
+    inline VkImageAspectFlags Convert(const Format& value)
+    {
+        VkImageAspectFlags flags = 0;
+        switch (value)
+        {
+        case Format::None: return 0;
+        case Format::R8_UNORM:
+        case Format::R8_SNORM:
+        case Format::R16_USHORT:
+        case Format::R16_SHORT:
+        case Format::R32_FLOAT:
+        case Format::R32_UINT:
+        case Format::R32_SINT:
+        case Format::R8G8_UNORM:
+        case Format::R8G8_SNORM:
+        case Format::R16G16_USHORT:
+        case Format::R16G16_SHORT:
+        case Format::R32G32_UINT:
+        case Format::R32G32_SINT:
+        case Format::R32G32_FLOAT:
+        case Format::R8G8B8_UNORM:
+        case Format::R8G8B8_SNORM:
+        case Format::R16G16B16_USHORT:
+        case Format::R16G16B16_SHORT:
+        case Format::R32G32B32_UINT:
+        case Format::R32G32B32_SINT:
+        case Format::R32G32B32_FLOAT:
+        case Format::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_SNORM:
+        case Format::R8G8B8A8_SRGB:
+        case Format::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_SHORT:
+        case Format::R32G32B32A32_UINT:
+        case Format::R32G32B32A32_SINT:
+        case Format::R32G32B32A32_FLOAT:
+        case Format::R64G64B64A64_FLOAT:
+            return VK_IMAGE_ASPECT_COLOR_BIT;
+        case Format::D32_FLOAT:
+            return VK_IMAGE_ASPECT_DEPTH_BIT;
+        case Format::D32_FLOAT_S8_UINT:
+            return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        case Format::D24_UNORM_S8_UINT:
+            return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+        default: return VK_IMAGE_ASPECT_COLOR_BIT;
         }
     }
 }

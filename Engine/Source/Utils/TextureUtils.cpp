@@ -12,6 +12,7 @@ namespace Nova
         if (!pixels) return nullptr;
 
         TextureCreateInfo createInfo;
+        createInfo.usageFlags = TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer;
         createInfo.device = device;
         createInfo.width = width;
         createInfo.height = height;
@@ -19,7 +20,6 @@ namespace Nova
         createInfo.format = Format::R8G8B8A8_UNORM;
         createInfo.mips = 1;
         createInfo.sampleCount = 1;
-        createInfo.usageFlags = TextureUsageFlagBits::Sampled;
         createInfo.data = pixels;
         createInfo.dataSize = width * height * 4 * sizeof(stbi_uc);
 
@@ -49,7 +49,6 @@ namespace Nova
         createInfo.format = Format::R8G8B8A8_SRGB;
         createInfo.mips = 1;
         createInfo.sampleCount = 1;
-        createInfo.usageFlags = TextureUsageFlagBits::Sampled;
         createInfo.data = pixels;
         createInfo.dataSize = width * height * 4 * sizeof(stbi_uc);
 

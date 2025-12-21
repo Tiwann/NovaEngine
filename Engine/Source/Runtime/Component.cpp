@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    Component::Component(Entity* owner, const String& name) : Object(name), m_Uuid(Uuid::Generate()), m_Enabled(true), m_Entity(owner)
+    Component::Component(Entity* owner, const String& name) : Object(name), m_Uuid(UUID::Generate()), m_Enabled(true), m_Entity(owner)
     {
     }
 
@@ -42,7 +42,7 @@ namespace Nova
         m_Enabled = Enabled;
     }
 
-    Uuid Component::GetUuid() const
+    UUID Component::GetUuid() const
     {
         return m_Uuid;
     }

@@ -48,4 +48,7 @@ namespace Nova
 
     using CmdLineArgs = CmdLineArgsBase<char>;
     using WideCmdLineArgs = CmdLineArgsBase<wchar_t>;
+    using CmdLineArgs16 = CmdLineArgsBase<char16_t>;
+    using CmdLineArgs32 = CmdLineArgsBase<char32_t>;
+    using CmdLineArgs8 = CmdLineArgsBase<char8_t>;
 }

@@ -207,7 +207,7 @@ namespace Nova
         return value ? "true" : "false";
     }
 
-    bool ArgumentParser::GetBool(const CommandLineOption& option)
+    bool ArgumentParser::GetBool(const CommandLineOption& option) const
     {
         if (m_ParsedArguments.Contains(option))
         {
@@ -222,12 +222,12 @@ namespace Nova
         return false;
     }
 
-    bool ArgumentParser::GetBool(const String& optionName)
+    bool ArgumentParser::GetBool(const String& optionName) const
     {
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.longName != optionName)
                 continue;
@@ -243,12 +243,12 @@ namespace Nova
         return false;
     }
 
-    bool ArgumentParser::GetBool(String::CharacterType optionName)
+    bool ArgumentParser::GetBool(String::CharacterType optionName) const
     {
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.shortName != optionName)
                 continue;
@@ -264,7 +264,7 @@ namespace Nova
         return false;
     }
 
-    String ArgumentParser::GetString(const CommandLineOption& option)
+    String ArgumentParser::GetString(const CommandLineOption& option) const
     {
         if (m_ParsedArguments.Contains(option))
         {
@@ -278,12 +278,12 @@ namespace Nova
         return "";
     }
 
-    String ArgumentParser::GetString(const String& optionName)
+    String ArgumentParser::GetString(const String& optionName) const
     {
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.longName != optionName)
                 continue;
@@ -299,12 +299,12 @@ namespace Nova
         return "";
     }
 
-    String ArgumentParser::GetString(String::CharacterType optionName)
+    String ArgumentParser::GetString(String::CharacterType optionName) const
     {
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.shortName != optionName)
                 continue;
@@ -320,7 +320,7 @@ namespace Nova
         return "";
     }
 
-    Array<String> ArgumentParser::GetValues(const CommandLineOption& option)
+    Array<String> ArgumentParser::GetValues(const CommandLineOption& option) const
     {
         Array<String> result;
         if (m_ParsedArguments.Contains(option))
@@ -333,13 +333,13 @@ namespace Nova
         return result;
     }
 
-    Array<String> ArgumentParser::GetValues(const String& optionName)
+    Array<String> ArgumentParser::GetValues(const String& optionName) const
     {
         Array<String> result;
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.longName != optionName)
                 continue;
@@ -350,13 +350,13 @@ namespace Nova
         return result;
     }
 
-    Array<String> ArgumentParser::GetValues(String::CharacterType optionName)
+    Array<String> ArgumentParser::GetValues(String::CharacterType optionName) const
     {
         Array<String> result;
-        for (Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
+        for (const Pair<CommandLineOption, Array<std::any>>& parsedArgument : m_ParsedArguments)
         {
-            CommandLineOption& option = parsedArgument.key;
-            Array<std::any>& values = parsedArgument.value;
+            const CommandLineOption& option = parsedArgument.key;
+            const Array<std::any>& values = parsedArgument.value;
 
             if (option.shortName != optionName)
                 continue;
@@ -369,9 +369,9 @@ namespace Nova
 
     String ArgumentParser::GetOptionNameFromArgument(const String& argument) const
     {
-        const String::SizeType assignmentPos = argument.Find(m_Settings.assigmentCharacter);
         String trimmedArgument = argument.TrimStart(m_PrefixCharacters);
-        return assignmentPos == -1 ? trimmedArgument : trimmedArgument.Substring(0, assignmentPos - 2);
+        const String::SizeType assignmentPos = trimmedArgument.Find(m_Settings.assigmentCharacter);
+        return assignmentPos == -1 ? trimmedArgument : trimmedArgument.Substring(0, assignmentPos - 1);
     }
 
     Pair<String, std::any> ArgumentParser::SplitArgument(const String& argument) const
@@ -403,7 +403,7 @@ namespace Nova
 
         for (const String::CharacterType* shortName : shortNames)
         {
-            if (!shortNameCheck) continue;
+            if (!shortName) continue;
             if (*shortName == optionName[0] && optionName.Count() <= 1)
             {
                 shortNameCheck = true;
@@ -422,7 +422,8 @@ namespace Nova
             }
         }
 
-        const std::regex regex = m_Settings.GetRegex();
-        return std::regex_match(*argument, regex) && (shortNameCheck || longNameCheck);
+        //const std::regex regex = m_Settings.GetRegex();
+        //return std::regex_match(*argument, regex) && (shortNameCheck || longNameCheck);
+        return shortNameCheck || longNameCheck;
     }
 }

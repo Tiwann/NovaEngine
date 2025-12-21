@@ -71,7 +71,7 @@ namespace Nova::D3D12
         Queue* GetTransferQueue() { return &m_TransferQueue; }
         const Queue* GetTransferQueue() const { return &m_TransferQueue; }
 
-        CommandBuffer& GetCurrentCommandBuffer();
+        Nova::CommandBuffer* GetCurrentCommandBuffer() override ;
         CommandPool& GetCommandPool();
         ID3D12Allocator* GetAllocator();
         Nova::Swapchain* GetSwapchain() override;

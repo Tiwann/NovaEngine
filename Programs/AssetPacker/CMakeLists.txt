@@ -1,6 +1,13 @@
-﻿file(GLOB_RECURSE NOVA_ASSET_PACKER_SRC Source/*.cpp Source/*.h)
+﻿include(../../CMake/Nova.cmake)
 
-add_executable(AssetPacker)
+set(NOVA_ASSET_PACKER_SRC
+        Source/AssetPackerApplication.cpp
+        Source/AssetPackerApplication.h
+        Source/AssetPack.cpp
+        Source/AssetPack.h
+)
+
+add_executable(AssetPacker ${NOVA_ASSET_PACKER_SRC})
 set_target_properties(AssetPacker PROPERTIES CXX_STANDARD 23)
 target_sources(AssetPacker PRIVATE ${NOVA_ASSET_PACKER_SRC})
 target_link_libraries(AssetPacker PUBLIC NovaEngine)

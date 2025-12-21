@@ -476,7 +476,7 @@ namespace Nova
 
             ::memmove(copy.m_Data, copy.m_Data + count, (copy.m_Count - count) * CharacterSize);
             copy.m_Count -= count;
-            copy.m_Data[m_Count] = 0;
+            copy.m_Data[copy.m_Count] = 0;
             return copy;
         }
 

@@ -11,6 +11,7 @@ namespace Nova::Vulkan
         if (!instance) return false;
         NOVA_LOAD_VK_FUNC_EXT(vkSetDebugUtilsObjectName);
         NOVA_LOAD_VK_FUNC_EXT(vkCreateDebugUtilsMessenger);
+        NOVA_LOAD_VK_FUNC_EXT(vkDestroyDebugUtilsMessenger);
         return true;
     }
 }

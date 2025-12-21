@@ -37,15 +37,25 @@ set(IMGUI_SRC ${IMGUI_DIR}/imconfig.h
         ${IMGUI_DIR}/imstb_rectpack.h
         ${IMGUI_DIR}/imstb_textedit.h
         ${IMGUI_DIR}/imstb_truetype.h
-        ${IMGUI_DIR}/backends/imgui_impl_vulkan.h
-        ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp
         ${IMGUI_DIR}/backends/imgui_impl_glfw.h
         ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp)
+
+if(NOVA_ENGINE_BUILD_VULKAN)
+    list(APPEND IMGUI_SRC
+            ${IMGUI_DIR}/backends/imgui_impl_vulkan.h
+            ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp)
+endif ()
 
 if(NOVA_ENGINE_BUILD_D3D12)
     list(APPEND IMGUI_SRC
             ${IMGUI_DIR}/backends/imgui_impl_dx12.h
             ${IMGUI_DIR}/backends/imgui_impl_dx12.cpp)
+endif ()
+
+if(NOVA_ENGINE_BUILD_OPENGL)
+    list(APPEND IMGUI_SRC
+            ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
+            ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp)
 endif ()
 
 add_library(imgui STATIC)

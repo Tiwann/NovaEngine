@@ -68,7 +68,8 @@ namespace Nova::Vulkan
         Semaphore& GetCurrentSubmitSemaphore();
         Semaphore& GetCurrentPresentSemaphore();
         Fence& GetCurrentFence();
-        CommandBuffer& GetCurrentCommandBuffer();
+        Nova::CommandBuffer* GetCurrentCommandBuffer() override;
+
 
         uint32_t GetCurrentFrameIndex() const;
 

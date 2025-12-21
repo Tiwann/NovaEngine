@@ -9,11 +9,14 @@
 #include "Editor/InspectorWindow.h"
 #include "Rendering/DebugRenderer.h"
 #include "Rendering/Shader.h"
-#include "Rendering/Vulkan/Device.h"
-#include "Rendering/Vulkan/RenderTarget.h"
+#include "Rendering/CommandBuffer.h"
+#include "Rendering/Swapchain.h"
 #include "Utils/TextureUtils.h"
 
 #include <imgui.h>
+#include <slang/slang.h>
+
+
 
 
 namespace Nova
@@ -88,8 +91,8 @@ namespace Nova
             depthAttachment.resolveMode = ResolveMode::Average;
             m_RenderPass.AddAttachment(depthAttachment);
 
-            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
-            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
+            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget->GetColorTexture());
+            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget->GetDepthTexture());
             m_RenderPass.Initialize(0, 0, m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight());
         }
 
@@ -134,19 +137,20 @@ namespace Nova
 
 
         // Load engine shaders
-        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath) -> Ref<Shader>
+        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName,
+                                            const String& shaderPath) -> Ref<Shader>
         {
-            const ShaderEntryPoint entryPoints []
+            const ShaderEntryPoint entryPoints[]
             {
-                { "vert", ShaderStageFlagBits::Vertex },
-                { "frag", ShaderStageFlagBits::Fragment }
+                {"vert", ShaderStageFlagBits::Vertex},
+                {"frag", ShaderStageFlagBits::Fragment}
             };
 
             ShaderCreateInfo shaderCreateInfo;
             shaderCreateInfo.slang = m_SlangSession;
             shaderCreateInfo.target = ShaderTarget::SPIRV;
             shaderCreateInfo.entryPoints.AddRange(entryPoints);
-            shaderCreateInfo.moduleInfo = { moduleName, shaderPath };
+            shaderCreateInfo.moduleInfo = {moduleName, shaderPath};
 
             Ref<Shader> shader = m_Device->CreateShader(shaderCreateInfo);
             if (!shader) return nullptr;
@@ -166,7 +170,8 @@ namespace Nova
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
+        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",
+                                                  Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
@@ -220,7 +225,8 @@ namespace Nova
             OnUpdate(m_DeltaTime);
 
             m_ImGuiRenderer->BeginFrame();
-            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(),
+                                         ImGuiDockNodeFlags_PassthruCentralNode);
             for (Ref<EditorWindow>& window : m_EditorWindows)
                 window->OnGui();
             OnGUI();
@@ -234,13 +240,20 @@ namespace Nova
     {
         if (m_Device->BeginFrame())
         {
-            Vulkan::CommandBuffer& cmdBuffer = m_Device.As<Vulkan::Device>()->GetCurrentCommandBuffer();
-            m_SceneManager.OnPreRender(cmdBuffer);
-            OnPreRender(cmdBuffer);
+            CommandBuffer* cmdBuffer = m_Device->GetCurrentCommandBuffer();
+            if (!cmdBuffer)
+            {
+                m_Device->EndFrame();
+                m_Device->Present();
+                return;
+            }
+
+            m_SceneManager.OnPreRender(*cmdBuffer);
+            OnPreRender(*cmdBuffer);
 
             Swapchain* swapchain = m_Device->GetSwapchain();
-            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget.As<Vulkan::RenderTarget>()->GetColorTexture());
-            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget.As<Vulkan::RenderTarget>()->GetDepthTexture());
+            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget->GetColorTexture());
+            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget->GetDepthTexture());
             m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
 
             if (Scene* scene = m_SceneManager.GetActiveScene())
@@ -250,21 +263,21 @@ namespace Nova
                     DebugRenderer::Begin(camera->GetViewProjectionMatrix());
                     m_SceneManager.OnDrawDebug();
                     OnDrawDebug();
-                    DebugRenderer::End(cmdBuffer);
+                    DebugRenderer::End(*cmdBuffer);
                 }
             }
 
 
-            cmdBuffer.BeginRenderPass(m_RenderPass);
-            m_SceneManager.OnRender(cmdBuffer);
-            OnRender(cmdBuffer);
-            DebugRenderer::Render(cmdBuffer);
-            cmdBuffer.EndRenderPass();
+            cmdBuffer->BeginRenderPass(m_RenderPass);
+            m_SceneManager.OnRender(*cmdBuffer);
+            OnRender(*cmdBuffer);
+            DebugRenderer::Render(*cmdBuffer);
+            cmdBuffer->EndRenderPass();
 
             m_ImGuiRenderPass.SetAttachmentTexture(0, *swapchain->GetCurrentTexture());
-            cmdBuffer.BeginRenderPass(m_ImGuiRenderPass);
-            m_ImGuiRenderer->Render(cmdBuffer);
-            cmdBuffer.EndRenderPass();
+            cmdBuffer->BeginRenderPass(m_ImGuiRenderPass);
+            m_ImGuiRenderer->Render(*cmdBuffer);
+            cmdBuffer->EndRenderPass();
 
             m_Device->EndFrame();
             m_Device->Present();
@@ -344,5 +357,15 @@ namespace Nova
     slang::IGlobalSession* Application::GetSlangSession() const
     {
         return m_SlangSession;
+    }
+
+    uint32_t Application::GetWindowWidth() const
+    {
+        return m_Window->GetWidth();
+    }
+
+    uint32_t Application::GetWindowHeight() const
+    {
+        return m_Window->GetHeight();
     }
 }

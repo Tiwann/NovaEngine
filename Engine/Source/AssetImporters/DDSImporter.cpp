@@ -1,7 +1,8 @@
 ﻿#include "DDSImporter.h"
-#include "../IO/FileStream.h"
+#include "IO/FileStream.h"
 #include "Runtime/FileUtils.h"
 #include "Runtime/Path.h"
+#include "Containers/StringFormat.h"
 
 namespace Nova
 {

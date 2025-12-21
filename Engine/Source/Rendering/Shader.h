@@ -6,11 +6,7 @@
 #include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
 
-#include <slang/slang.h>
-#include <slang/slang-com-ptr.h>
-
-
-
+namespace slang { class IGlobalSession; }
 
 namespace Nova
 {
@@ -23,7 +19,7 @@ namespace Nova
     struct ShaderCreateInfo
     {
         Device* device = nullptr;
-        Slang::ComPtr<slang::IGlobalSession> slang = nullptr;
+        slang::IGlobalSession* slang = nullptr;
         ShaderModuleInfo moduleInfo;
         ShaderTarget target = ShaderTarget::SPIRV;
         Array<StringView> includes;

@@ -2,7 +2,6 @@
 #include "RenderTarget.h"
 #include "Vulkan/RenderTarget.h"
 
-
 namespace Nova
 {
     uint32_t RenderTarget::GetWidth() const
@@ -38,31 +37,5 @@ namespace Nova
     uint32_t RenderTarget::GetImageCount() const
     {
         return m_ImageCount;
-    }
-
-    Ref<RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
-    {
-        if (!createInfo.device) return nullptr;
-        RenderTarget* renderTarget = nullptr;
-        switch (createInfo.device->GetDeviceType())
-        {
-        case DeviceType::Null: return nullptr;
-        case DeviceType::Vulkan:
-            {
-                renderTarget = new Vulkan::RenderTarget();
-                if (!renderTarget->Initialize(createInfo))
-                {
-                    delete renderTarget;
-                    return nullptr;
-                }
-            }
-            break;
-        case DeviceType::D3D12:
-            {
-                return nullptr;
-                break;
-            }
-        }
-        return Ref(renderTarget);
     }
 }

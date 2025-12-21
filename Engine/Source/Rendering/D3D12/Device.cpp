@@ -4,6 +4,7 @@
 #include <directx/d3dx12.h>
 #include <dxgi1_6.h>
 #include <D3D12MemAlloc.h>
+#include <print>
 
 
 using namespace D3D12MA;
@@ -296,9 +297,9 @@ namespace Nova::D3D12
         return 0;
     }
 
-    CommandBuffer& Device::GetCurrentCommandBuffer()
+    Nova::CommandBuffer* Device::GetCurrentCommandBuffer()
     {
-        return m_Frames[m_CurrentFrameIndex].commandBuffer;
+        return &m_Frames[m_CurrentFrameIndex].commandBuffer;
     }
 
     CommandPool& Device::GetCommandPool()

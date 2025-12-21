@@ -1,5 +1,10 @@
 ﻿#include "AssetPackerApplication.h"
 #include "Runtime/ArgumentParser.h"
+#include "Runtime/Path.h"
+#include "Runtime/LogCategory.h"
+#include "Runtime/Log.h"
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(AssetPacker, "AssetPacker")
 
 namespace Nova
 {
@@ -15,27 +20,45 @@ namespace Nova
         return config;
     }
 
+    static Array<String> GetAssetList(const ArgumentParser& parser)
+    {
+        Array<String> assetList;
+
+        Array<String> files = parser.GetValues('f');
+        Array<String> dirs = parser.GetValues('d');
+
+        for (const String& file : files)
+            if (Path::Exists(file))
+                assetList.Add(file);
+
+        for (const String& dir : dirs)
+            assetList.AddRange(Path::GetFiles(dir));
+
+        return assetList;
+    }
+
     void AssetPackerApplication::OnInit()
     {
         const CmdLineArgs& args = GetProgramArguments();
-        const ArgumentParserSettings parserSettings = ArgumentParserSettings::DefaultStyle();
+        const ArgumentParserSettings parserSettings = ArgumentParserSettings::LinuxStyle();
 
         CommandLineOption fileOption = {'f', "file", false, true, "Add a file to the asset list"};
         CommandLineOption directoryOption = {'d', "directory", false, true, "Add a directory to the asset list"};
-        CommandLineOption versionOption = {'v', "version", true, false, "Specify the .nepack version to use"};
-        CommandLineOption compressOption = {'c', "comp", false, false, "Specify wether to compress the assets or not"};
+        CommandLineOption outputOption = {'o', "output", true, false, "Specify the output asset pack file"};
+        CommandLineOption projectOption = {'p', "project", false, false, "Specify a project directory"};
 
+        const StringView engineDir = Path::GetEngineDirectory();
         ArgumentParser parser("AssetPacker", args, parserSettings);
-        parser.AddOptions({fileOption, directoryOption, versionOption, compressOption});
+        parser.AddOptions({fileOption, directoryOption, outputOption});
 
         ParsingResult result = parser.Parse();
         if (result != ParsingResult::Success)
         {
-            String helpText = parser.GetHelpText();
-            std::cout << helpText << std::endl;
+            NOVA_LOG(AssetPacker, Verbosity::Trace, parser.GetHelpText());
             Exit();
         }
 
+        String projectDir = parser.GetString('p');
 
     }
 

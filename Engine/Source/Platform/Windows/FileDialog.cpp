@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+#include <filesystem>
 
 namespace Nova
 {
@@ -68,9 +69,26 @@ namespace Nova
 
     bool Path::Exists(StringView path)
     {
-        WideString widePath = StringConvertToWide(path);
-        const DWORD attrib = GetFileAttributesW(*widePath);
-        DWORD a = (attrib & INVALID_FILE_ATTRIBUTES);
-        return a == 0;
+        return std::filesystem::exists({*path});
+    }
+
+    bool Path::IsFile(StringView path)
+    {
+        return !IsDirectory(path);
+    }
+
+    bool Path::IsDirectory(StringView path)
+    {
+        return std::filesystem::is_directory({*path});
+    }
+
+    Array<String> Path::GetFiles(StringView path)
+    {
+        if (!IsDirectory(path)) return {};
+        std::filesystem::path directory(*path);
+        Array<String> files;
+        for (auto it : std::filesystem::directory_iterator(directory))
+            files.Add(it.path().string().c_str());
+        return files;
     }
 }

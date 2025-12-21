@@ -37,6 +37,12 @@ namespace Nova::Memory
         return (T*)NOVA_MEMSET((void*)ptr, value, count * sizeof(T));
     }
 
+    template<>
+    inline void* Memset<void>(void* ptr, int32_t value, const size_t count)
+    {
+        return NOVA_MEMSET(ptr, value, count);
+    }
+
     template<typename T>
     T* Memzero(T* ptr)
     {

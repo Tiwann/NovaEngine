@@ -4,6 +4,8 @@
 #include "ShaderBindingSet.h"
 #include "ShaderModule.h"
 #include "Rendering/ShaderPushConstantRange.h"
+#include <slang/slang.h>
+#include <slang/slang-com-ptr.h>
 
 typedef struct VkPipelineLayout_T* VkPipelineLayout;
 

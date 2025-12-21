@@ -5,12 +5,9 @@
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
 #include "Material.h"
-#include <cstdint>
-
 #include "Buffer.h"
 #include "Texture.h"
-
-#define NOVA_MAX_IMAGE_COUNT 3
+#include <cstdint>
 
 namespace Nova
 {
@@ -37,13 +34,19 @@ namespace Nova
     class RenderTarget;
     struct RenderTargetCreateInfo;
     class Swapchain;
+    class CommandBuffer;
 
     enum class DeviceType
     {
         Null,
+#ifdef NOVA_HAS_VULKAN
         Vulkan,
+#endif
 #ifdef NOVA_HAS_D3D12
-        D3D12
+        D3D12,
+#endif
+#ifdef NOVA_HAS_OPENGL
+        OpenGL
 #endif
     };
 
@@ -84,7 +87,7 @@ namespace Nova
         virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
         virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
         virtual Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
-
+        virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr;}
 
         Ref<Fence> CreateFence();
         Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);

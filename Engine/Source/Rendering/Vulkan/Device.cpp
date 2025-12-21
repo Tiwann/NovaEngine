@@ -433,9 +433,13 @@ namespace Nova::Vulkan
 
         m_CommandPool.Destroy();
         m_TransferCommandPool.Destroy();
+        m_DescriptorPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);
         m_Surface->Destroy();
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+        vkDestroyDebugUtilsMessenger(m_Instance, m_DebugMessenger, nullptr);
+#endif
         vkDestroyDevice(m_Handle, nullptr);
         vkDestroyInstance(m_Instance, nullptr);
     }
@@ -498,7 +502,7 @@ namespace Nova::Vulkan
 
     void Device::EndFrame()
     {
-        CommandBuffer& commandBuffer = GetCurrentCommandBuffer();
+        CommandBuffer& commandBuffer = *dynamic_cast<CommandBuffer*>(GetCurrentCommandBuffer());
 
         VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
@@ -759,9 +763,9 @@ namespace Nova::Vulkan
         return m_Frames[m_CurrentFrameIndex].fence;
     }
 
-    CommandBuffer& Device::GetCurrentCommandBuffer()
+    Nova::CommandBuffer* Device::GetCurrentCommandBuffer()
     {
-        return m_Frames[m_CurrentFrameIndex].commandBuffer;
+        return &m_Frames[m_CurrentFrameIndex].commandBuffer;
     }
 
     uint32_t Device::GetCurrentFrameIndex() const

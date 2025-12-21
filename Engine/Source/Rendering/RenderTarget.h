@@ -35,6 +35,9 @@ namespace Nova
         virtual void Destroy() = 0;
         virtual bool Resize(uint32_t newX, uint32_t newY) = 0;
 
+        virtual const Texture& GetColorTexture() = 0;
+        virtual const Texture& GetDepthTexture() = 0;
+
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
         uint32_t GetDepth() const;
@@ -52,6 +55,4 @@ namespace Nova
         uint32_t m_SampleCount = 0;
         uint32_t m_ImageCount = 0;
     };
-
-    Ref<RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
 }

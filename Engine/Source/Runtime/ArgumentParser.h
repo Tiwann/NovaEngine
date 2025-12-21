@@ -44,20 +44,20 @@ namespace Nova
 
         ParsingResult Parse();
 
-        bool GetBool(const CommandLineOption& option);
-        bool GetBool(const String& optionName);
-        bool GetBool(String::CharacterType optionName);
+        bool GetBool(const CommandLineOption& option) const;
+        bool GetBool(const String& optionName) const;
+        bool GetBool(String::CharacterType optionName) const;
 
-        String GetString(const CommandLineOption& option);
-        String GetString(const String& optionName);
-        String GetString(String::CharacterType optionName);
+        String GetString(const CommandLineOption& option) const;
+        String GetString(const String& optionName) const;
+        String GetString(String::CharacterType optionName) const;
 
-        Array<String> GetValues(const CommandLineOption& option);
-        Array<String> GetValues(const String& optionName);
-        Array<String> GetValues(String::CharacterType optionName);
+        Array<String> GetValues(const CommandLineOption& option) const;
+        Array<String> GetValues(const String& optionName) const;
+        Array<String> GetValues(String::CharacterType optionName) const;
 
         template<typename T> requires IsAnyOf<bool, String>
-        T GetValueAs(const CommandLineOption& option)
+        T GetValueAs(const CommandLineOption& option) const
         {
             if constexpr (typeid(T) == typeid(bool))
                 return GetBool(option);
@@ -67,7 +67,7 @@ namespace Nova
         }
 
         template<typename T> requires IsAnyOf<bool, String>
-        T GetValueAs(const String& optionName)
+        T GetValueAs(const String& optionName) const
         {
             if constexpr (typeid(T) == typeid(bool))
                 return GetBool(optionName);
@@ -77,7 +77,7 @@ namespace Nova
         }
 
         template<typename T> requires IsAnyOf<bool, String>
-        T GetValueAs(String::CharacterType optionName)
+        T GetValueAs(String::CharacterType optionName) const
         {
             if constexpr (typeid(T) == typeid(bool))
                 return GetBool(optionName);

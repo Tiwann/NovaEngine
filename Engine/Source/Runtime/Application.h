@@ -12,7 +12,10 @@
 
 #include <cstdint>
 
-namespace slang { class IGlobalSession; }
+namespace slang
+{
+    struct IGlobalSession;
+}
 
 namespace Nova
 {
@@ -32,7 +35,7 @@ namespace Nova
     class Application
     {
     public:
-        explicit Application(const int32_t argc, char** argv) : m_Args(argc, argv) {};
+        explicit Application(const int32_t argc, char** argv) : m_Args(argc, argv){};
         virtual ~Application() = default;
 
         void Run();
@@ -41,14 +44,16 @@ namespace Nova
         static Application& GetCurrentApplication();
 
         virtual ApplicationConfiguration GetConfiguration() const = 0;
-        virtual void OnInit() {}
-        virtual void OnUpdate(float deltaTime) {}
-        virtual void OnPreRender(CommandBuffer& cmdBuffer) {}
-        virtual void OnRender(CommandBuffer& cmdBuffer) {}
-        virtual void OnPostRender(CommandBuffer& cmdBuffer) {}
-        virtual void OnGUI() {}
-        virtual void OnDrawDebug() {}
-        virtual void OnDestroy() {}
+
+        virtual void OnInit(){}
+        virtual void OnUpdate(float deltaTime){}
+        virtual void OnPreRender(CommandBuffer& cmdBuffer){}
+        virtual void OnRender(CommandBuffer& cmdBuffer){}
+        virtual void OnPostRender(CommandBuffer& cmdBuffer){}
+        virtual void OnGUI(){}
+        virtual void OnDrawDebug(){}
+        virtual void OnDestroy(){}
+
         virtual DeviceType GetRenderDeviceType() const { return DeviceType::Vulkan; }
 
         float GetDeltaTime() const;
@@ -66,10 +71,10 @@ namespace Nova
         AssetDatabase& GetAssetDatabase();
         slang::IGlobalSession* GetSlangSession() const;
 
-        uint32_t GetWindowWidth() const { return m_Window->GetWidth(); }
-        uint32_t GetWindowHeight() const { return m_Window->GetHeight(); }
+        uint32_t GetWindowWidth() const;
+        uint32_t GetWindowHeight() const;
 
-        template<typename T> requires std::is_base_of_v<Asset, T>
+        template <typename T> requires std::is_base_of_v<Asset, T>
         Ref<T> CreateAsset(const String& name)
         {
             Ref<T> asset = m_AssetDatabase.CreateAsset<T>(name);
@@ -78,7 +83,7 @@ namespace Nova
 
         const CmdLineArgs& GetProgramArguments() { return m_Args; }
 
-        template<typename T>
+        template <typename T>
         Ref<EditorWindow> GetEditorWindow()
         {
             for (Ref<EditorWindow> editorWindow : m_EditorWindows)
@@ -88,10 +93,12 @@ namespace Nova
             }
             return nullptr;
         }
+
     protected:
         void Update();
         void Render();
         void Destroy();
+
     private:
         CmdLineArgs m_Args;
         Ref<Window> m_Window = nullptr;

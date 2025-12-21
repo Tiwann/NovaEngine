@@ -42,6 +42,11 @@ namespace Nova::Vulkan
             colorImageAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
             colorImageAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
+            vkDestroyImageView(deviceHandle, m_ColorImageViews[imageIndex], nullptr);
+            vkDestroyImageView(deviceHandle, m_DepthImageViews[imageIndex], nullptr);
+            vmaDestroyImage(allocatorHandle, m_ColorImages[imageIndex], nullptr);
+            vmaDestroyImage(allocatorHandle, m_ColorImages[imageIndex], nullptr);
+
             if (vmaCreateImage(allocatorHandle,
                 &colorImageCreateInfo,
                 &colorImageAllocationCreateInfo,

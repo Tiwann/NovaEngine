@@ -5,6 +5,7 @@
 
 namespace Nova
 {
+
     StringView Path::GetUserDirectory()
     {
         static String userDirectory;

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Containers/String.h"
 #include "Containers/StringView.h"
-#include "Containers/StringFormat.h"
+
 #include "Runtime/DialogFilters.h"
 
 namespace Nova
@@ -10,10 +10,15 @@ namespace Nova
 
     struct Path
     {
-        static String Combine(const StringView path, const StringView other)
-        {
-            return StringFormat("{}{}{}", path, s_Separator,other).ReplaceAll('/', s_Separator);
-        }
+#ifdef NOVA_PLATFORM_WINDOWS
+        static inline String::CharacterType s_Separator = '\\';
+        static inline String::CharacterType s_OtherSeparator = '/';
+
+#else
+        static inline String::CharacterType s_Separator = '/';
+        static inline String::CharacterType s_OtherSeparator = '\\';
+#endif
+        static String Combine(const StringView path, const StringView other);
 
         template<typename... Args>
         static String Combine(const StringView path, const StringView other, const Args&... args)
@@ -22,16 +27,21 @@ namespace Nova
         }
 
 
-        static StringView GetEngineDirectory() { return NOVA_ENGINE_ROOT_DIR; }
-        static String GetEngineAssetsDirectory() { return Combine(GetEngineDirectory(), "Assets"); }
-        static String GetEngineAssetPath(const StringView filepath) { return Combine(GetEngineAssetsDirectory(), filepath); }
+        static StringView GetEngineDirectory();
+        static String GetEngineAssetsDirectory();
+        static String GetEngineAssetPath(const StringView filepath);
 
-        #ifdef NOVA_CLIENT
+#ifdef NOVA_CLIENT
+        static StringView GetApplicationDirectory()
+        {
+            return NOVA_APPLICATION_DIR;
+        }
+
         static String GetAssetPath(const StringView filepath)
         {
             return Combine(StringView(NOVA_APPLICATION_DIR), "Assets", filepath);
         }
-        #endif
+#endif
 
         static StringView GetUserDirectory();
         static StringView GetDocumentsDirectory();
@@ -42,10 +52,8 @@ namespace Nova
         static String OpenFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
         static String SaveFileDialog(StringView title, StringView defaultPath, const DialogFilters& filters, Window& owningWindow);
         static bool Exists(StringView path);
-#ifdef NOVA_PLATFORM_WINDOWS
-        static inline String::CharacterType s_Separator = '\\';
-#else
-        static inline String::CharacterType s_Separator = '/';
-#endif
+        static bool IsFile(StringView path);
+        static bool IsDirectory(StringView path);
+        static Array<String> GetFiles(StringView path);
     };
 }

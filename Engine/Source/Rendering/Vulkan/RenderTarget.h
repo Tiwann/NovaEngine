@@ -9,8 +9,6 @@ typedef struct VmaAllocation_T* VmaAllocation;
 
 namespace Nova::Vulkan
 {
-    class CommandBuffer;
-
     class RenderTarget final : public Nova::RenderTarget
     {
     public:
@@ -18,10 +16,8 @@ namespace Nova::Vulkan
         void Destroy() override;
 
         bool Resize(uint32_t newWidth, uint32_t newHeight) override;
-
-        const Texture& GetColorTexture();
-        const Texture& GetDepthTexture();
-
+        const Texture& GetColorTexture() override;
+        const Texture& GetDepthTexture() override;
         VkImage GetColorImage(size_t index) const;
         VkImageView GetColorImageView(size_t index) const;
         VmaAllocation GetColorImageAllocation(size_t index) const;
@@ -35,7 +31,6 @@ namespace Nova::Vulkan
         VkImage m_DepthImages[3] { nullptr, nullptr, nullptr };
         VkImageView m_DepthImageViews[3] { nullptr, nullptr, nullptr };
         VmaAllocation m_DepthAllocations[3] { nullptr, nullptr, nullptr };
-        CommandBuffer* m_CommandBuffer = nullptr;
         Lazy<Texture> m_ColorTexture;
         Lazy<Texture> m_DepthTexture;
     };

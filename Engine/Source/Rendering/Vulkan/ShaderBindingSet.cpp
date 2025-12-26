@@ -5,9 +5,8 @@
 #include "Buffer.h"
 #include "Sampler.h"
 #include "ShaderBindingSetLayout.h"
-#include <vulkan/vulkan.h>
-
 #include "Conversions.h"
+#include <vulkan/vulkan.h>
 
 
 namespace Nova::Vulkan
@@ -48,6 +47,32 @@ namespace Nova::Vulkan
     const VkDescriptorSet* ShaderBindingSet::GetHandlePtr() const
     {
         return &m_Handle;
+    }
+
+    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::Texture* textures, size_t textureCount, BindingType bindingType)
+    {
+        if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
+            return false;
+
+        Array<VkDescriptorImageInfo> imageInfos;
+        for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
+        {
+            const Texture* texture = static_cast<const Texture*>(textures + textureIndex);
+            VkDescriptorImageInfo imageInfo;
+            imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
+            imageInfo.imageView = texture->GetImageView();
+            imageInfos.Add(imageInfo);
+        }
+
+        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        write.descriptorType = Convert<VkDescriptorType>(bindingType);
+        write.descriptorCount = textureCount;
+        write.dstBinding = binding;
+        write.dstArrayElement = 0;
+        write.pImageInfo = imageInfos.Data();
+        write.dstSet = m_Handle;
+        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
+        return true;
     }
 
     bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::Texture& texture, BindingType bindingType)

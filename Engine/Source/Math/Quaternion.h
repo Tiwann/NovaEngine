@@ -5,8 +5,8 @@ namespace Nova
 {
     struct Vector3;
     struct Vector4;
-    struct Matrix4;
-    struct Matrix3;
+    class Matrix4;
+    class Matrix3;
 
     struct Quaternion
     {
@@ -50,6 +50,7 @@ namespace Nova
         void ToAxisAngle(Vector3& axis, float& radians) const;
         void ToAxisAngleDegrees(Vector3& axis, float& degrees) const;
 
+        static Quaternion FromMatrix(const Matrix3& matrix);
         static Quaternion FromAxisAngle(const Vector3& axis, float radians);
         static Quaternion FromAxisAngleDegrees(const Vector3& axis, float degrees);
         static Quaternion FromEuler(const Vector3& eulerAngles);

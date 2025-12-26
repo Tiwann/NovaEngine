@@ -76,6 +76,4 @@ if(NOVA_ENGINE_BUILD_D3D12)
         GIT_REPOSITORY git@github.com:microsoft/DirectX-Headers.git
         GIT_TAG v1.618.2)
     FetchContent_MakeAvailable(directx-headers)
-
-    add_subdirectory(Vendor/D3D12MemoryAllocator)
 endif ()

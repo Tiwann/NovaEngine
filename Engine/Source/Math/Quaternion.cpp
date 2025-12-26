@@ -206,6 +206,14 @@ namespace Nova
         degrees = Math::Degrees(radians);
     }
 
+    Quaternion Quaternion::FromMatrix(const Matrix3& matrix)
+    {
+        Quaternion result;
+
+
+        return result;
+    }
+
     Quaternion Quaternion::FromAxisAngle(const Vector3& axis, const float radians)
     {
         const Vector3 a = Math::Normalize(axis);

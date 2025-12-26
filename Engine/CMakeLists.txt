@@ -231,6 +231,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/Null/Device.h
         Source/Rendering/ResourceBarrier.h
         Source/Rendering/ResourceBarrier.cpp
+        Source/Rendering/SpriteBatchRenderer.cpp
+        Source/Rendering/SpriteBatchRenderer.h
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h

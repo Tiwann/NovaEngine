@@ -6,6 +6,8 @@
 #include "Runtime/Assertion.h"
 #include <algorithm>
 
+#include "Matrix3.h"
+
 namespace Nova
 {
     Matrix4 Matrix4::Identity = Matrix4();
@@ -13,18 +15,18 @@ namespace Nova
     
     Matrix4::Matrix4()
     {
-        Columns[0] = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
-        Columns[1] = Vector4(0.0f, 1.0f, 0.0f, 0.0f);
-        Columns[2] = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
-        Columns[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+        columns[0] = Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+        columns[1] = Vector4(0.0f, 1.0f, 0.0f, 0.0f);
+        columns[2] = Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+        columns[3] = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     Matrix4::Matrix4(const Vector4& Col1, const Vector4& Col2, const Vector4& Col3, const Vector4& Col4)
     {
-        Columns[0] = Col1;
-        Columns[1] = Col2;
-        Columns[2] = Col3;
-        Columns[3] = Col4;
+        columns[0] = Col1;
+        columns[1] = Col2;
+        columns[2] = Col3;
+        columns[3] = Col4;
     }
 
     const float* Matrix4::ValuePtr() const
@@ -50,29 +52,29 @@ namespace Nova
 
     Matrix4 Matrix4::Inverted() const
     {
-	    const float Coef00 = Columns[2].z * Columns[3].w - Columns[3].z * Columns[2].w;
-	    const float Coef02 = Columns[1].z * Columns[3].w - Columns[3].z * Columns[1].w;
-	    const float Coef03 = Columns[1].z * Columns[2].w - Columns[2].z * Columns[1].w;
+	    const float Coef00 = columns[2].z * columns[3].w - columns[3].z * columns[2].w;
+	    const float Coef02 = columns[1].z * columns[3].w - columns[3].z * columns[1].w;
+	    const float Coef03 = columns[1].z * columns[2].w - columns[2].z * columns[1].w;
 
-	    const float Coef04 = Columns[2].y * Columns[3].w - Columns[3].y * Columns[2].w;
-	    const float Coef06 = Columns[1].y * Columns[3].w - Columns[3].y * Columns[1].w;
-	    const float Coef07 = Columns[1].y * Columns[2].w - Columns[2].y * Columns[1].w;
+	    const float Coef04 = columns[2].y * columns[3].w - columns[3].y * columns[2].w;
+	    const float Coef06 = columns[1].y * columns[3].w - columns[3].y * columns[1].w;
+	    const float Coef07 = columns[1].y * columns[2].w - columns[2].y * columns[1].w;
 
-	    const float Coef08 = Columns[2].y * Columns[3].z - Columns[3].y * Columns[2].z;
-	    const float Coef10 = Columns[1].y * Columns[3].z - Columns[3].y * Columns[1].z;
-	    const float Coef11 = Columns[1].y * Columns[2].z - Columns[2].y * Columns[1].z;
+	    const float Coef08 = columns[2].y * columns[3].z - columns[3].y * columns[2].z;
+	    const float Coef10 = columns[1].y * columns[3].z - columns[3].y * columns[1].z;
+	    const float Coef11 = columns[1].y * columns[2].z - columns[2].y * columns[1].z;
 
-	    const float Coef12 = Columns[2].x * Columns[3].w - Columns[3].x * Columns[2].w;
-	    const float Coef14 = Columns[1].x * Columns[3].w - Columns[3].x * Columns[1].w;
-	    const float Coef15 = Columns[1].x * Columns[2].w - Columns[2].x * Columns[1].w;
+	    const float Coef12 = columns[2].x * columns[3].w - columns[3].x * columns[2].w;
+	    const float Coef14 = columns[1].x * columns[3].w - columns[3].x * columns[1].w;
+	    const float Coef15 = columns[1].x * columns[2].w - columns[2].x * columns[1].w;
 
-	    const float Coef16 = Columns[2].x * Columns[3].z - Columns[3].x * Columns[2].z;
-	    const float Coef18 = Columns[1].x * Columns[3].z - Columns[3].x * Columns[1].z;
-	    const float Coef19 = Columns[1].x * Columns[2].z - Columns[2].x * Columns[1].z;
+	    const float Coef16 = columns[2].x * columns[3].z - columns[3].x * columns[2].z;
+	    const float Coef18 = columns[1].x * columns[3].z - columns[3].x * columns[1].z;
+	    const float Coef19 = columns[1].x * columns[2].z - columns[2].x * columns[1].z;
 
-	    const float Coef20 = Columns[2].x * Columns[3].y - Columns[3].x * Columns[2].y;
-	    const float Coef22 = Columns[1].x * Columns[3].y - Columns[3].x * Columns[1].y;
-	    const float Coef23 = Columns[1].x * Columns[2].y - Columns[2].x * Columns[1].y;
+	    const float Coef20 = columns[2].x * columns[3].y - columns[3].x * columns[2].y;
+	    const float Coef22 = columns[1].x * columns[3].y - columns[3].x * columns[1].y;
+	    const float Coef23 = columns[1].x * columns[2].y - columns[2].x * columns[1].y;
 
 	    const Vector4 Fac0(Coef00, Coef00, Coef02, Coef03);
 	    const Vector4 Fac1(Coef04, Coef04, Coef06, Coef07);
@@ -81,10 +83,10 @@ namespace Nova
 	    const Vector4 Fac4(Coef16, Coef16, Coef18, Coef19);
 	    const Vector4 Fac5(Coef20, Coef20, Coef22, Coef23);
 
-	    const Vector4 Vec0(Columns[1].x, Columns[0].x, Columns[0].x, Columns[0].x);
-	    const Vector4 Vec1(Columns[1].y, Columns[0].y, Columns[0].y, Columns[0].y);
-	    const Vector4 Vec2(Columns[1].z, Columns[0].z, Columns[0].z, Columns[0].z);
-	    const Vector4 Vec3(Columns[1].w, Columns[0].w, Columns[0].w, Columns[0].w);
+	    const Vector4 Vec0(columns[1].x, columns[0].x, columns[0].x, columns[0].x);
+	    const Vector4 Vec1(columns[1].y, columns[0].y, columns[0].y, columns[0].y);
+	    const Vector4 Vec2(columns[1].z, columns[0].z, columns[0].z, columns[0].z);
+	    const Vector4 Vec3(columns[1].w, columns[0].w, columns[0].w, columns[0].w);
 
 	    const Vector4 Inv0(Vec1 * Fac0 - Vec2 * Fac1 + Vec3 * Fac2);
 	    const Vector4 Inv1(Vec0 * Fac0 - Vec2 * Fac3 + Vec3 * Fac4);
@@ -97,7 +99,7 @@ namespace Nova
 
 	    const Vector4 Row0(Inverse[0].x, Inverse[1].x, Inverse[2].x, Inverse[3].x);
 
-	    const Vector4 Dot0(Columns[0] * Row0);
+	    const Vector4 Dot0(columns[0] * Row0);
 	    const float Dot1 = (Dot0.x + Dot0.y) + (Dot0.z + Dot0.w);
 
 	    const float OneOverDeterminant = 1.0f / Dot1;
@@ -146,10 +148,10 @@ namespace Nova
     	Vector4 Row2 = GetRow(2);
     	Vector4 Row3 = GetRow(3);
 
-    	const Vector4& Col0 = Mat.Columns[0];
-    	const Vector4& Col1 = Mat.Columns[1];
-    	const Vector4& Col2 = Mat.Columns[2];
-    	const Vector4& Col3 = Mat.Columns[3];
+    	const Vector4& Col0 = Mat.columns[0];
+    	const Vector4& Col1 = Mat.columns[1];
+    	const Vector4& Col2 = Mat.columns[2];
+    	const Vector4& Col3 = Mat.columns[3];
 
     	const Vector4 NewCol0 { Row0.Dot(Col0), Row1.Dot(Col0), Row2.Dot(Col0), Row3.Dot(Col0) };
     	const Vector4 NewCol1 { Row0.Dot(Col1), Row1.Dot(Col1), Row2.Dot(Col1), Row3.Dot(Col1) };
@@ -161,13 +163,13 @@ namespace Nova
     Vector4& Matrix4::operator[](const size_t i)
     {
         NOVA_ASSERT(i < 4, "Cannot access Mat4 element: index out of bounds.");
-        return Columns[i];
+        return columns[i];
     }
 
     const Vector4& Matrix4::operator[](const size_t i) const
     {
         NOVA_ASSERT(i < 4, "Cannot access Mat4 element: index out of bounds.");
-        return Columns[i];
+        return columns[i];
     }
 
 	Vector4 Matrix4::GetRow(const size_t i) const
@@ -175,10 +177,10 @@ namespace Nova
     	NOVA_ASSERT(i < 4, "Cannot access Mat4 element: index out of bounds.");
     	switch (i)
     	{
-    	case 0: return { Columns[0].x, Columns[1].x, Columns[2].x, Columns[3].x };
-    	case 1: return { Columns[0].y, Columns[1].y, Columns[2].y, Columns[3].y };
-    	case 2: return { Columns[0].z, Columns[1].z, Columns[2].z, Columns[3].z };
-    	case 3: return { Columns[0].w, Columns[1].w, Columns[2].w, Columns[3].w };
+    	case 0: return { columns[0].x, columns[1].x, columns[2].x, columns[3].x };
+    	case 1: return { columns[0].y, columns[1].y, columns[2].y, columns[3].y };
+    	case 2: return { columns[0].z, columns[1].z, columns[2].z, columns[3].z };
+    	case 3: return { columns[0].w, columns[1].w, columns[2].w, columns[3].w };
     	default: throw;
     	}
     }
@@ -187,10 +189,10 @@ namespace Nova
     Matrix4 Matrix4::operator*(const float Scalar) const
     {
     	Matrix4 Result = *this;
-        Result.Columns[0] *= Scalar;
-        Result.Columns[1] *= Scalar;
-        Result.Columns[2] *= Scalar;
-        Result.Columns[3] *= Scalar;
+        Result.columns[0] *= Scalar;
+        Result.columns[1] *= Scalar;
+        Result.columns[2] *= Scalar;
+        Result.columns[3] *= Scalar;
         return  Result;
     }
 
@@ -236,9 +238,51 @@ namespace Nova
         *this = Math::Translate(*this, Translation);
     }
 
+    void Matrix4::Decompose(Vector3* position, Quaternion* rotation, Vector3* scale) const
+    {
+	    if(!(position || rotation || scale))
+	    	return;
+
+	    if (position)
+	    	*position = Vector3(columns[3].x, columns[3].y, columns[3].z);
+
+	    Vector3 newScale;
+	    newScale.x = Vector3(columns[0]).Magnitude();
+	    newScale.y = Vector3(columns[1]).Magnitude();
+	    newScale.z = Vector3(columns[2]).Magnitude();
+
+    	if (Determinant() < 0) newScale = -newScale;
+
+	    if (scale)
+		    *scale = newScale;
+
+
+	    if (!rotation)
+		    return;
+
+	    if (newScale.x == 0.0f || newScale.y == 0.0f || newScale.z == 0.0f)
+	    {
+		    *rotation = Quaternion::Identity;
+		    return;
+	    }
+
+	    Vector3 xAxis = Vector3(columns[0]) / newScale.x;
+	    Vector3 yAxis = Vector3(columns[1]) / newScale.y;
+	    Vector3 zAxis = Vector3(columns[2]) / newScale.z;
+
+	    xAxis = xAxis.Normalized();
+	    yAxis = (yAxis - xAxis * xAxis.Dot(yAxis)).Normalized();
+	    zAxis = xAxis.Cross(yAxis);
+
+	    Matrix3 rotationMatrix(xAxis, yAxis, zAxis);
+
+	    *rotation = Quaternion::FromMatrix(rotationMatrix);
+    }
+
+
     Matrix4 Matrix4::TRS(const Vector3& Position, const Vector3& EulerAnglesDegrees, const Vector3& Scale)
     {
-    	Matrix4 Result = Matrix4::Identity;
+    	Matrix4 Result;
     	Result.Scale(Scale);
     	Result.RotateDegrees(EulerAnglesDegrees);
     	Result.Translate(Position);

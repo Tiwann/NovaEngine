@@ -5,23 +5,23 @@
 
 namespace Nova
 {
-    Vector2 Vector2::Zero    = { 0.0f, 0.0f };
-    Vector2 Vector2::One     = { 1.0f, 1.0f };
-    Vector2 Vector2::Right   = { 1.0f, 0.0f };
-    Vector2 Vector2::Up      = { 0.0f, 1.0f };
-    Vector2 Vector2::Left    = { -1.0f, 0.0f };
-    Vector2 Vector2::Down    = { 0.0f, -1.0f };
+    const Vector2 Vector2::Zero    = { 0.0f, 0.0f };
+    const Vector2 Vector2::One     = { 1.0f, 1.0f };
+    const Vector2 Vector2::Right   = { 1.0f, 0.0f };
+    const Vector2 Vector2::Up      = { 0.0f, 1.0f };
+    const Vector2 Vector2::Left    = { -1.0f, 0.0f };
+    const Vector2 Vector2::Down    = { 0.0f, -1.0f };
     
 
-    Vector2::Vector2(const float X, const float Y): x(X), y(Y)
+    Vector2::Vector2(const float x, const float y): x(x), y(y)
     {
     }
 
-    Vector2::Vector2(const float Value): x(Value), y(Value)
+    Vector2::Vector2(const float value): x(value), y(value)
     {
     }
 
-    Vector2::Vector2(const Vector3& Vec) : x(Vec.x), y(Vec.y)
+    Vector2::Vector2(const Vector3& vector) : x(vector.x), y(vector.y)
     {
     }
 
@@ -40,24 +40,24 @@ namespace Nova
         return (const float*)this;
     }
 
-    float Vector2::Dot(const Vector2& Vec) const
+    float Vector2::Dot(const Vector2& vector) const
     {
-        return x * Vec.x + y * Vec.y;
+        return x * vector.x + y * vector.y;
     }
 
-    float Vector2::Dot(const Vector2& VecA, const Vector2& VecB)
+    float Vector2::Dot(const Vector2& vectorA, const Vector2& vectorB)
     {
-        return VecA.Dot(VecB);
+        return vectorA.Dot(vectorB);
     }
 
-    Vector2 Vector2::Normalize(const Vector2& Vec)
+    Vector2 Vector2::Normalize(const Vector2& vector)
     {
-        return Vec.Normalized();
+        return vector.Normalized();
     }
 
-    float Vector2::Angle(const Vector2& VecA, const Vector2& VecB)
+    float Vector2::Angle(const Vector2& vectorA, const Vector2& vectorB)
     {
-        return Math::Acos(VecA.Dot(VecB) / (VecA.Magnitude() * VecB.Magnitude()));
+        return Math::Acos(vectorA.Dot(vectorB) / (vectorA.Magnitude() * vectorB.Magnitude()));
     }
 
     Vector2 Vector2::Lerp(const Vector2& A, const Vector2& B, const float Alpha)
@@ -79,14 +79,14 @@ namespace Nova
         return Lerp(P0, P1, Alpha);
     }
 
-    Vector2 Vector2::WithX(float X) const
+    Vector2 Vector2::WithX(float x) const
     {
-        return {X, y};
+        return {x, y};
     }
 
-    Vector2 Vector2::WithY(float Y) const
+    Vector2 Vector2::WithY(float y) const
     {
-        return {x, Y};
+        return {x, y};
     }
 
     Vector2 Vector2::Normalized() const
@@ -94,14 +94,14 @@ namespace Nova
         return {x / Magnitude(), y / Magnitude()};
     }
 
-    Vector2 Vector2::operator+(const Vector2& Vec) const
+    Vector2 Vector2::operator+(const Vector2& vector) const
     {
-        return {x + Vec.x, y + Vec.y};
+        return {x + vector.x, y + vector.y};
     }
 
-    Vector2 Vector2::operator-(const Vector2& Vec) const
+    Vector2 Vector2::operator-(const Vector2& vector) const
     {
-        return {x - Vec.x, y - Vec.y};
+        return {x - vector.x, y - vector.y};
     }
 
     Vector2 Vector2::operator-() const
@@ -109,89 +109,89 @@ namespace Nova
         return {-x, -y};
     }
 
-    Vector2 operator*(const float Scalar, const Vector2& Vec)
+    Vector2 operator*(const float scalar, const Vector2& vector)
     {
-        return {Vec.x * Scalar, Vec.y * Scalar};
+        return {vector.x * scalar, vector.y * scalar};
     }
 
-    Vector2 operator*(const Vector2& Vec, const float Scalar)
+    Vector2 operator*(const Vector2& vector, const float scalar)
     {
-        return {Vec.x * Scalar, Vec.y * Scalar};
+        return {vector.x * scalar, vector.y * scalar};
     }
 
-    Vector2 operator/(const Vector2& Vec, const float Scalar)
+    Vector2 operator/(const Vector2& vector, const float scalar)
     {
-        return { Vec.x / Scalar, Vec.y / Scalar };
+        return { vector.x / scalar, vector.y / scalar };
     }
 
-    Vector2& Vector2::operator*=(const float Scalar)
+    Vector2& Vector2::operator*=(const float scalar)
     {
-        x *= Scalar;
-        y *= Scalar;
+        x *= scalar;
+        y *= scalar;
         return *this;
     }
 
-    Vector2& Vector2::operator*=(const Vector2& Scalar)
+    Vector2& Vector2::operator*=(const Vector2& scalar)
     {
-        x *= Scalar.x;
-        y *= Scalar.y;
+        x *= scalar.x;
+        y *= scalar.y;
         return *this;
     }
 
-    Vector2& Vector2::operator/=(const float Scalar)
+    Vector2& Vector2::operator/=(const float scalar)
     {
-        x /= Scalar;
-        y /= Scalar;
+        x /= scalar;
+        y /= scalar;
         return *this;
     }
 
-    Vector2& Vector2::operator/=(const Vector2& Vec)
+    Vector2& Vector2::operator/=(const Vector2& vector)
     {
-        x /= Vec.x;
-        y /= Vec.y;
+        x /= vector.x;
+        y /= vector.y;
         return *this;
     }
 
-    Vector2& Vector2::operator+=(const Vector2& Vec)
+    Vector2& Vector2::operator+=(const Vector2& vector)
     {
-        x *= Vec.x;
-        y *= Vec.y;
+        x *= vector.x;
+        y *= vector.y;
         return *this;
     }
 
-    Vector2& Vector2::operator-=(const Vector2& Vec)
+    Vector2& Vector2::operator-=(const Vector2& vector)
     {
-        x -= Vec.x;
-        y -= Vec.y;
+        x -= vector.x;
+        y -= vector.y;
         return *this;
     }
 
-    Vector2 Vector2::Apply(float(* Function)(float)) const
+    Vector2 Vector2::Apply(float(* function)(float)) const
     {
-        NOVA_ASSERT(Function, "Supplied a nullptr function!");
-        float x = Function(this->x);
-        float y = Function(this->y);
+        NOVA_ASSERT(function, "Supplied a nullptr function!");
+        float x = function(this->x);
+        float y = function(this->y);
         return { x, y };
     }
 
-    bool Vector2::operator==(const Vector2& Vec) const
+    bool Vector2::operator==(const Vector2& vector) const
     {
-        return Math::AreSame(x, Vec.x)
-            && Math::AreSame(y, Vec.y);
+        return Math::AreSame(x, vector.x)
+            && Math::AreSame(y, vector.y);
     }
 
-    Vector2 Vector2::operator*(const Vector2& Vec) const
+    Vector2 Vector2::operator*(const Vector2& vector) const
     {
-        return {x * Vec.x, y * Vec.y};
+        return {x * vector.x, y * vector.y};
     }
 
-    float& Vector2::operator[](const size_t Index)
+    float& Vector2::operator[](const size_t index)
     {
-        return ValuePtr()[Index];
+        return ValuePtr()[index];
     }
 
-    const float& Vector2::operator[](const size_t Index) const
+    const float& Vector2::operator[](const size_t index) const
     {
-        return ValuePtr()[Index];
+        return ValuePtr()[index];
     }
 }

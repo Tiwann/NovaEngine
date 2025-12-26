@@ -30,5 +30,5 @@ namespace ImGui
     void IMGUI_API AddComponent(Entity* entity);
     void IMGUI_API ConvertColorToLinear(ImVec4& color);
     void IMGUI_API NovaStyle(ImGuiStyle* style = nullptr);
-    void IMGUI_API Image(const Texture& texture, const Sampler& sampler);
+    void IMGUI_API Image(const Texture& texture, uint32_t width, uint32_t height);
 }

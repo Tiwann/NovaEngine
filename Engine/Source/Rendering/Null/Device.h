@@ -25,5 +25,6 @@ namespace Nova::Null
         Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) override;
         Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) override;
         uint32_t GetImageCount() const override;
+        Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
     };
 }

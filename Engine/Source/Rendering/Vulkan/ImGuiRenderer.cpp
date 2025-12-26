@@ -1,12 +1,14 @@
 ﻿#include "ImGuiRenderer.h"
 #include "Runtime/Memory.h"
-#include "Device.h"
 #include "Runtime/DesktopWindow.h"
+#include "Device.h"
+#include "Sampler.h"
 #include "Conversions.h"
 
 #include <print>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <vulkan/vulkan.h>
 
 
 namespace Nova::Vulkan
@@ -61,16 +63,25 @@ namespace Nova::Vulkan
         if(!ImGui_ImplVulkan_Init(&initInfo))
             return false;
 
+
+        SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
+        .WithAddressMode(SamplerAddressMode::Repeat)
+        .WithFilter(Filter::Linear, Filter::Linear);
+        m_Sampler = device->CreateSampler(samplerCreateInfo);
+        if (!m_Sampler) return false;
+
         m_Device = device;
         return true;
     }
 
     void ImGuiRenderer::Destroy()
     {
-        m_Device->WaitIdle();
+        for (const auto& pair : m_Textures)
+            ImGui_ImplVulkan_RemoveTexture(reinterpret_cast<VkDescriptorSet>(pair.value));
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext(m_Context);
+        m_Sampler->Destroy();
     }
 
     void ImGuiRenderer::BeginFrame()
@@ -96,5 +107,28 @@ namespace Nova::Vulkan
         commandBuffer.SetViewport(0, 0, width, height, 0.0f, 1.0f);
         commandBuffer.SetScissor(0, 0, width, height);
         ImGui_ImplVulkan_RenderDrawData(drawData, cmdBuffer);
+    }
+
+    void ImGuiRenderer::DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height)
+    {
+        const ImTextureID textureId = GetOrAddTexture(texture);
+        ImGui::Image(textureId, ImVec2(width, height));
+    }
+
+    uint64_t ImGuiRenderer::GetOrAddTexture(const Nova::Texture& texture)
+    {
+        return m_Textures.Contains(&texture) ? m_Textures[&texture] : AddTexture(texture);
+    }
+
+    uint64_t ImGuiRenderer::AddTexture(const Nova::Texture& texture)
+    {
+        const Texture& tex = static_cast<const Texture&>(texture);
+        const Sampler& sampler = static_cast<const Sampler&>(*m_Sampler);
+        VkDescriptorSet descriptorSet = ImGui_ImplVulkan_AddTexture(sampler.GetHandle(), tex.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        if (!descriptorSet) return 0;
+
+        const ImTextureID textureId = reinterpret_cast<ImTextureID>(descriptorSet);
+        m_Textures[&texture] = textureId;
+        return textureId;
     }
 }

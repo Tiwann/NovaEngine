@@ -1,10 +1,17 @@
 ﻿#pragma once
+#include "Containers/Map.h"
 #include "Rendering/ImGuiRenderer.h"
 
+namespace Nova
+{
+    class Texture;
+    class Sampler;
+}
 
 namespace Nova::Vulkan
 {
     class Device;
+
 
     class ImGuiRenderer final : public Nova::ImGuiRenderer
     {
@@ -14,7 +21,14 @@ namespace Nova::Vulkan
         void BeginFrame() override;
         void EndFrame() override;
         void Render(CommandBuffer& commandBuffer) override;
+
+        void DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height) override;
+        uint64_t AddTexture(const Texture& texture);
+        uint64_t GetOrAddTexture(const Texture& texture);
+
     private:
         Device* m_Device = nullptr;
+        Map<const Texture*, uint64_t> m_Textures;
+        Ref<Sampler> m_Sampler = nullptr;
     };
 }

@@ -15,6 +15,9 @@
 #include <imgui_impl_vulkan.h>
 #include <cstdint>
 
+#include "Rendering/Vulkan/ImGuiRenderer.h"
+#include "Runtime/Application.h"
+
 using namespace Nova;
 
 namespace ImGui
@@ -178,11 +181,12 @@ namespace ImGui
         }
     }
 
-    void Image(const Texture& texture, const Sampler& sampler)
+    void Image(const Texture& texture, const uint32_t width, const uint32_t height)
     {
-        const Vulkan::Texture& tex = (const Vulkan::Texture&)texture;
-        const Vulkan::Sampler& samp = (const Vulkan::Sampler&)sampler;
-        const ImTextureID id = (ImTextureID)ImGui_ImplVulkan_AddTexture(samp.GetHandle(), tex.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        Image(id, ImVec2(tex.GetWidth(), tex.GetHeight()));
+        const Application& application = Application::GetCurrentApplication();
+        Ref<ImGuiRenderer> renderer = application.GetImGuiRenderer();
+        if (!renderer) return;
+
+        renderer->DrawTexture(texture, width, height);
     }
 }

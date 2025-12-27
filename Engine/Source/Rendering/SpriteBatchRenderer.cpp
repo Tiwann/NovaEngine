@@ -2,6 +2,7 @@
 #include "GraphicsPipeline.h"
 #include "Buffer.h"
 #include "CommandBuffer.h"
+#include "Sampler.h"
 #include "Shader.h"
 #include "ShaderBindingSet.h"
 #include "Components/Transform.h"
@@ -33,6 +34,7 @@ namespace Nova
     static Ref<Buffer> storageBuffer = nullptr;
     static Ref<ShaderBindingSet> bindingSet = nullptr;
     static Ref<Shader> shader = nullptr;
+    static Ref<Sampler> sampler = nullptr;
     static RenderPass* renderPass = nullptr;
     static bool begin = false;
     static Array<Texture*> textures;
@@ -63,6 +65,7 @@ namespace Nova
         bindingSet = shader->CreateBindingSet(0);
         if (!bindingSet) return false;
 
+        sampler = createInfo.device->GetOrCreateSampler(SamplerCreateInfo());
         device = createInfo.device;
         renderPass = createInfo.renderPass;
         return true;

@@ -81,7 +81,7 @@ namespace Nova
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear)
         .WithLODRange(0.0f, 1.0f);
-        m_Sampler = device->CreateSampler(samplerCreateInfo);
+        m_Sampler = device->GetOrCreateSampler(samplerCreateInfo);
 
         m_BindingSet = m_Shader->CreateBindingSet();
         m_BindingSet->BindBuffer(0, *m_SceneUniformBuffer, 0, ~0);

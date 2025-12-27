@@ -8,6 +8,7 @@
 #include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
+#include "Rendering/SamplerManager.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
@@ -44,6 +45,7 @@ namespace Nova::Vulkan
         Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
+        Ref<Nova::Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
         Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) override;
         Ref<Nova::ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) override;
@@ -73,6 +75,7 @@ namespace Nova::Vulkan
 
         uint32_t GetCurrentFrameIndex() const;
 
+
     private:
         VkInstance m_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;
@@ -83,6 +86,7 @@ namespace Nova::Vulkan
         CommandPool m_CommandPool;
         CommandPool m_TransferCommandPool;
         DescriptorPool m_DescriptorPool;
+        SamplerManager m_SamplerManager;
 
         Queue m_GraphicsQueue;
         Queue m_PresentQueue;

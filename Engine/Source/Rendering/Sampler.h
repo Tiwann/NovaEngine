@@ -30,6 +30,22 @@ namespace Nova
         SamplerCreateInfo& WithAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this;  }
         SamplerCreateInfo& WithFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }
         SamplerCreateInfo& WithLODRange(const float min, const float max) { minLod = min; maxLod = max; return *this; }
+
+        bool operator==(const SamplerCreateInfo& other) const
+        {
+            return addressModeU == other.addressModeU &&
+            addressModeV == other.addressModeV &&
+            addressModeW == other.addressModeW &&
+            minFilter == other.minFilter &&
+            magFilter == other.magFilter &&
+            anisotropyEnable == other.anisotropyEnable &&
+            compareEnable == other.compareEnable &&
+            compareOp == other.compareOp &&
+            unnormalizedCoordinates == other.unnormalizedCoordinates &&
+            minLod == other.minLod &&
+            maxLod == other.maxLod &&
+            mipmapFilter == other.mipmapFilter;
+        }
     };
 
     class Sampler : public Object
@@ -40,6 +56,8 @@ namespace Nova
 
         virtual bool Initialize(const SamplerCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
+
+
     protected:
         SamplerAddressMode m_AddressModeU = SamplerAddressMode::Repeat;
         SamplerAddressMode m_AddressModeV = SamplerAddressMode::Repeat;

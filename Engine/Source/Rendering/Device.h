@@ -77,16 +77,17 @@ namespace Nova
         virtual DeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
-        virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
-        virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
-        virtual Ref<Texture> CreateTextureUnitialized() = 0;
-        virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
-        virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
-        virtual Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
-        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
-        virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
-        virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
-        virtual Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
+        virtual Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
         virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr;}
 
         Ref<Fence> CreateFence();
@@ -95,6 +96,7 @@ namespace Nova
         Ref<Material> CreateMaterial(Ref<Shader> material);
         Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
         Ref<Sampler> CreateSampler();
+
 
         virtual uint32_t GetImageCount() const = 0;
 

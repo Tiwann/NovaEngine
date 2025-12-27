@@ -1,10 +1,16 @@
 ﻿#include "ImGuiRenderer.h"
-#include "D3D12/ImGuiRenderer.h"
-#include "Vulkan/ImGuiRenderer.h"
 #include "Device.h"
 #include "External/ImGuiExtension.h"
 
 #include <imgui.h>
+
+#ifdef NOVA_HAS_VULKAN
+#include "Vulkan/ImGuiRenderer.h"
+#endif
+
+#ifdef NOVA_HAS_D3D12
+#include "D3D12/ImGuiRenderer.h"
+#endif
 
 namespace Nova
 {
@@ -55,7 +61,9 @@ namespace Nova
         switch (device->GetDeviceType())
         {
         case DeviceType::Null: return nullptr;
+#ifdef NOVA_HAS_VULKAN
         case DeviceType::Vulkan: NOVA_RETURN_IMPL(Vulkan::ImGuiRenderer)
+#endif
 #ifdef NOVA_HAS_D3D12
         case DeviceType::D3D12: NOVA_RETURN_IMPL(D3D12::ImGuiRenderer)
 #endif

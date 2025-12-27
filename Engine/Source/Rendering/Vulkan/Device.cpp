@@ -418,11 +418,14 @@ namespace Nova::Vulkan
         .SetBindingTypeSize(BindingType::StorageBuffer, 32)
         .SetMaxSets(4096);
         m_DescriptorPool.Initialize(descriptorPoolCreateInfo);
+
+        m_SamplerManager.Initialize(this);
         return true;
     }
 
     void Device::Destroy()
     {
+        m_SamplerManager.Destroy();
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
             m_Frames[imageIndex].submitSemaphore.Destroy();
@@ -613,6 +616,11 @@ namespace Nova::Vulkan
             return nullptr;
         }
         return Ref(sampler);
+    }
+
+    Ref<Nova::Sampler> Device::GetOrCreateSampler(const SamplerCreateInfo& createInfo)
+    {
+        return m_SamplerManager.GetOrCreateSampler(createInfo);
     }
 
     Ref<Nova::Buffer> Device::CreateBuffer(const BufferCreateInfo& createInfo)

@@ -16,7 +16,7 @@
 #include <imgui.h>
 #include <slang/slang.h>
 
-
+#include "Rendering/SpriteBatchRenderer.h"
 
 
 namespace Nova
@@ -170,8 +170,8 @@ namespace Nova
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",
-                                                  Path::GetEngineAssetPath("Shaders/Debug.slang"));
+        LoadShaderBasic("SpriteBatch", "SpriteBatchShader", Path::GetEngineAssetPath("Shaders/SpriteBatch.slang"));
+        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
@@ -186,6 +186,13 @@ namespace Nova
         debugRendererCreateInfo.maxVertices = 64;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
         {
+            Destroy();
+            return;
+        }
+
+        if (!SpriteBatchRenderer::Initialize({m_Device, &m_RenderPass}))
+        {
+            std::println(std::cerr, "Failed to init sprite batch renderer!");
             Destroy();
             return;
         }
@@ -260,7 +267,8 @@ namespace Nova
             {
                 if (Camera* camera = scene->GetFirstComponent<Camera>())
                 {
-                    DebugRenderer::Begin(camera->GetViewProjectionMatrix());
+                    const Matrix4& viewProj = camera->GetViewProjectionMatrix();
+                    DebugRenderer::Begin(viewProj);
                     m_SceneManager.OnDrawDebug();
                     OnDrawDebug();
                     DebugRenderer::End(*cmdBuffer);
@@ -289,6 +297,7 @@ namespace Nova
         m_SceneManager.Destroy();
         if (m_Device) m_Device->WaitIdle();
         OnDestroy();
+        SpriteBatchRenderer::Destroy();
         DebugRenderer::Destroy();
         m_AssetDatabase.UnloadAll();
         if (m_SlangSession) m_SlangSession->release();

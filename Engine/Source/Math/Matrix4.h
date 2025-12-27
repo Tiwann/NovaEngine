@@ -43,8 +43,8 @@ namespace Nova
         void Translate(const Vector3& Translation);
         void Decompose(Vector3* position, Quaternion* rotation, Vector3* scale) const;
 
-        static Matrix4 Identity;
-        static Matrix4 One;
+        static const Matrix4 Identity;
+        static const Matrix4 One;
         static Matrix4 TRS(const Vector3& Position, const Vector3& EulerAnglesDegrees, const Vector3& Scale);
         static Matrix4 TRS(const Vector3& Position, const Quaternion& Orientation, const Vector3& Scale);
     private:

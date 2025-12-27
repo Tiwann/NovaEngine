@@ -72,18 +72,18 @@ namespace Nova
         return {Math::Lerp(a.r, b.r, t), Math::Lerp(a.g, b.g, t), Math::Lerp(a.b, b.b, t), Math::Lerp(a.a, b.a, t)};
     }
 
-    Color Color::Red        { 0xFF0000FF };
-    Color Color::Green      { 0x00FF00FF };
-    Color Color::Blue       { 0x0000FFFF };
-    Color Color::Magenta    { 0xFF00FFFF };
-    Color Color::Cyan       { 0x00FFFFFF };
-    Color Color::Yellow     { 0xFFFF00FF };
-    Color Color::Black      { 0x000000FF };
-    Color Color::White      { 0xFFFFFFFF };
-    Color Color::Orange     { 0xFF8000FF };
-    Color Color::Pink       { 0xFFC0CBFF };
-    Color Color::Brown      { 0x00000000 };
-    Color Color::Purple     { 0x800080FF };
-    Color Color::Turquoise  { 0x40E0D0FF };
-    Color Color::Grey       { 0x808080FF };
+    const Color Color::Red        { 0xFF0000FF };
+    const Color Color::Green      { 0x00FF00FF };
+    const Color Color::Blue       { 0x0000FFFF };
+    const Color Color::Magenta    { 0xFF00FFFF };
+    const Color Color::Cyan       { 0x00FFFFFF };
+    const Color Color::Yellow     { 0xFFFF00FF };
+    const Color Color::Black      { 0x000000FF };
+    const Color Color::White      { 0xFFFFFFFF };
+    const Color Color::Orange     { 0xFF8000FF };
+    const Color Color::Pink       { 0xFFC0CBFF };
+    const Color Color::Brown      { 0x00000000 };
+    const Color Color::Purple     { 0x800080FF };
+    const Color Color::Turquoise  { 0x40E0D0FF };
+    const Color Color::Grey       { 0x808080FF };
 }

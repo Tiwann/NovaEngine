@@ -204,6 +204,11 @@ namespace Nova::Vulkan
         vkCmdDraw(m_Handle, vertexCount, instanceCount, firstIndex, firstInstance);
     }
 
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride)
+    {
+        vkCmdDrawIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, stride);
+    }
+
     void CommandBuffer::Dispatch(const uint32_t groupCountX, const uint32_t groupCountY, const uint32_t groupCountZ)
     {
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
@@ -211,7 +216,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, const size_t offset)
     {
-        vkCmdDispatchIndirect(m_Handle, ((const Buffer&)buffer).GetHandle(), offset);
+        vkCmdDispatchIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset);
     }
 
     void CommandBuffer::PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values)
@@ -221,7 +226,7 @@ namespace Nova::Vulkan
 
     void CommandBuffer::UpdateBuffer(const Nova::Buffer& buffer, const size_t offset, const size_t size, const void* data)
     {
-        vkCmdUpdateBuffer(m_Handle, ((const Buffer&)buffer).GetHandle(), offset, size, data);
+        vkCmdUpdateBuffer(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, size, data);
     }
 
     void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)

@@ -49,7 +49,7 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::Texture* textures, size_t textureCount, BindingType bindingType)
+    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType)
     {
         if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
             return false;
@@ -57,7 +57,7 @@ namespace Nova::Vulkan
         Array<VkDescriptorImageInfo> imageInfos;
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
         {
-            const Texture* texture = static_cast<const Texture*>(textures + textureIndex);
+            const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
             VkDescriptorImageInfo imageInfo;
             imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
             imageInfo.imageView = texture->GetImageView();

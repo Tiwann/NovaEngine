@@ -30,7 +30,7 @@ namespace Nova
         virtual bool Initialize(const ShaderBindingSetCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        virtual bool BindTextures(uint32_t binding, const Nova::Texture* textures, size_t textureCount, BindingType bindingType) = 0;
+        virtual bool BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType) = 0;
         virtual bool BindTexture(uint32_t binding, const Nova::Texture& texture, BindingType bindingType) = 0;
         virtual bool BindSampler(uint32_t binding, const Nova::Sampler& sampler) = 0;
         virtual bool BindCombinedSamplerTexture(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture) = 0;

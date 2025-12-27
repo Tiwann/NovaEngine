@@ -1,6 +1,7 @@
 ﻿#include "SpriteBatchRenderer.h"
 #include "GraphicsPipeline.h"
 #include "Buffer.h"
+#include "CommandBuffer.h"
 #include "Shader.h"
 #include "ShaderBindingSet.h"
 #include "Components/Transform.h"
@@ -13,37 +14,42 @@ namespace Nova
 {
     struct SpriteData
     {
+        uint32_t id;
         int32_t frameIndex;
         int32_t cols;
         int32_t rows;
         int32_t flags;
+        uint32_t padding0;
         Vector2 tiling;
         Vector2 offset;
-        Vector4 scale[2];
+        Matrix2 scale;
         Color color;
-        uint32_t textureIndex;
+        Matrix4 worldToClip;
     };
 
     static Matrix4 viewProjection;
+    static Ref<Device> device = nullptr;
     static Ref<GraphicsPipeline> graphicsPipeline = nullptr;
-    static Ref<Buffer> uniformBuffer = nullptr;
+    static Ref<Buffer> storageBuffer = nullptr;
     static Ref<ShaderBindingSet> bindingSet = nullptr;
-    static uint32_t spriteCount = 0;
+    static Ref<Shader> shader = nullptr;
+    static RenderPass* renderPass = nullptr;
     static bool begin = false;
     static Array<Texture*> textures;
-    static Array<SpriteData> uniforms;
+    static Array<SpriteData> spriteData;
 
     bool SpriteBatchRenderer::Initialize(const SpriteBatchRendererCreateInfo& createInfo)
     {
         if (!createInfo.device) return false;
+        if (!createInfo.renderPass) return false;
 
         const Application& application = Application::GetCurrentApplication();
         const AssetDatabase& assetDatabase = application.GetAssetDatabase();
 
-        Ref<Shader> shader = assetDatabase.Get<Shader>("SpriteBatchShader");
+        shader = assetDatabase.Get<Shader>("SpriteBatchShader");
         if (!shader) return false;
 
-        GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
+        const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
         .SetDevice(createInfo.device)
         .SetRenderPass(createInfo.renderPass)
         .SetShader(shader)
@@ -56,21 +62,28 @@ namespace Nova
 
         bindingSet = shader->CreateBindingSet(0);
         if (!bindingSet) return false;
+
+        device = createInfo.device;
+        renderPass = createInfo.renderPass;
         return true;
     }
 
     void SpriteBatchRenderer::Destroy()
     {
+        if (bindingSet) bindingSet->Destroy();
+        if (graphicsPipeline) graphicsPipeline->Destroy();
+        if (storageBuffer) storageBuffer->Destroy();
+        renderPass = nullptr;
+        shader = nullptr;
+        device = nullptr;
     }
 
     bool SpriteBatchRenderer::BeginFrame(const Matrix4& inViewProjection)
     {
         NOVA_ASSERT(!begin, "SpriteBatchRenderer::Begin/End call mismatch!");
-        if (begin) return false;
-        spriteCount = 0;
         viewProjection = inViewProjection;
         textures.Clear();
-        uniforms.Clear();
+        spriteData.Clear();
         begin = true;
         return true;
     }
@@ -80,14 +93,41 @@ namespace Nova
         NOVA_ASSERT(begin, "SpriteBatchRenderer::End/End call mismatch!");
         if (!begin) return false;
 
-        bindingSet->BindTexture()
-        // Update buffers
+        if (!bindingSet->BindTextures(1, textures.Data(), textures.Count(), BindingType::SampledTexture))
+        {
+            begin = false;
+            return false;
+        }
+
+        if (!storageBuffer || storageBuffer->GetSize() < spriteData.Size())
+        {
+            Ref<Buffer> buffer = device->CreateBuffer(BufferUsage::StorageBuffer, spriteData.Size());
+            if (!buffer)
+            {
+                begin = false;
+                return false;
+            }
+
+            if (storageBuffer)
+                storageBuffer->Destroy();
+            storageBuffer = buffer;
+            bindingSet->BindBuffer(2, *storageBuffer, 0, spriteData.Size());
+        }
+
+        cmdBuffer.UpdateBuffer(*storageBuffer, 0, spriteData.Size(), spriteData.Data());
         begin = false;
+        return true;
     }
 
     void SpriteBatchRenderer::Render(CommandBuffer& cmdBuffer)
     {
-        if (spriteCount <= 0) return;
+        if (spriteData.IsEmpty()) return;
+
+        cmdBuffer.BindGraphicsPipeline(*graphicsPipeline);
+        cmdBuffer.BindShaderBindingSet(*shader, *bindingSet);
+        cmdBuffer.SetViewport(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight(), 0.0f, 1.0f);
+        cmdBuffer.SetScissor(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight());
+        cmdBuffer.Draw(6, spriteData.Count(), 0, 0);
     }
 
     void SpriteBatchRenderer::DrawSprite(Sprite sprite, const Matrix4& transform, const SpriteRendererFlags flags, const Color& colorTint, Vector2 tiling, Vector2 offset, float pixelsPerUnit)
@@ -105,17 +145,17 @@ namespace Nova
 
         const Matrix2 spriteScale = Math::Scale(Matrix2::Identity, Vector2(sprite.width, sprite.height) / pixelsPerUnit);
 
-        SpriteData spriteData;
-        spriteData.flags = flags.As<int32_t>();
-        spriteData.frameIndex = 0;
-        spriteData.rows = 0;
-        spriteData.cols = 0;
-        spriteData.tiling = finalTiling;
-        spriteData.offset = offset;
-        spriteData.scale[0] = Vector4(spriteScale[0].x, spriteScale[0].y, 0.0f, 0.0f);
-        spriteData.scale[1] = Vector4(spriteScale[1].x, spriteScale[1].y, 0.0f, 0.0f);
-        spriteData.color = colorTint;
-        uniforms.Add(spriteData);
-        spriteCount++;
+        SpriteData data;
+        data.id = textures.Find(sprite.texture);
+        data.frameIndex = 0;
+        data.rows = 0;
+        data.cols = 0;
+        data.flags = flags.As<int32_t>();
+        data.tiling = finalTiling;
+        data.offset = offset;
+        data.scale = spriteScale;
+        data.color = colorTint;
+        data.worldToClip = mvp;
+        spriteData.Add(data);
     }
 }

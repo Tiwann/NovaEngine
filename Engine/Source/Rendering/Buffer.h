@@ -49,6 +49,7 @@ namespace Nova
         virtual void Memset(size_t value, size_t size) = 0;
         BufferUsage GetUsage() const { return m_Usage; }
         BufferUsage GetUsage() { return m_Usage; }
+        size_t GetSize() const { return m_Size; }
     protected:
         size_t m_Size = 0;
         BufferUsage m_Usage = BufferUsage::None;

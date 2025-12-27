@@ -8,20 +8,34 @@ namespace Nova::Vulkan
     bool ShaderBindingSetLayout::Build()
     {
         Array<VkDescriptorSetLayoutBinding> bindings;
+        Array<VkDescriptorBindingFlags> bindingFlags;
 
         for (size_t i = 0; i < m_Bindings.Count(); i++)
         {
             const ShaderBinding& binding = m_Bindings[i];
             VkDescriptorSetLayoutBinding vkBinding = { };
             vkBinding.binding = i;
-            vkBinding.descriptorCount = 1;
+            vkBinding.descriptorCount = binding.arrayCount;
             vkBinding.stageFlags = Convert<VkShaderStageFlags>(binding.stageFlags);
             vkBinding.descriptorType = Convert<VkDescriptorType>(binding.bindingType);
             vkBinding.pImmutableSamplers = nullptr;
+
+            uint32_t bindingFlag = binding.arrayCount > 0 && binding.bindingType == BindingType::SampledTexture
+                                       ? VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
+                                       VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
+                                       VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT
+                                       : 0;
+            bindingFlags.Add(bindingFlag);
             bindings.Add(vkBinding);
         }
 
+        VkDescriptorSetLayoutBindingFlagsCreateInfo bindingFlagCreateInfo = {VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO};
+        bindingFlagCreateInfo.bindingCount = m_Bindings.Count();
+        bindingFlagCreateInfo.pBindingFlags = bindingFlags.Data();
+
         VkDescriptorSetLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
+        layoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+        layoutCreateInfo.pNext = &bindingFlagCreateInfo;
         layoutCreateInfo.bindingCount = bindings.Count();
         layoutCreateInfo.pBindings = bindings.Data();
 

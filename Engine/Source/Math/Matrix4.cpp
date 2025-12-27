@@ -10,8 +10,8 @@
 
 namespace Nova
 {
-    Matrix4 Matrix4::Identity = Matrix4();
-    Matrix4 Matrix4::One = { Vector4(1.0f), Vector4(1.0f), Vector4(1.0f), Vector4(1.0f) };
+    const Matrix4 Matrix4::Identity = Matrix4();
+    const Matrix4 Matrix4::One = { Vector4(1.0f), Vector4(1.0f), Vector4(1.0f), Vector4(1.0f) };
     
     Matrix4::Matrix4()
     {

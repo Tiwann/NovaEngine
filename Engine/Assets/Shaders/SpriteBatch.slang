@@ -2,7 +2,7 @@
 
 struct VertexInput
 {
-	float2 position
+    float2 position;
     float2 texCoords;
 }
 
@@ -10,6 +10,8 @@ struct VertexOutput
 {
 	float4 position : SV_Position;
     float2 texCoords;
+    float4 color;
+    uint32_t spriteId;
 }
 
 static const VertexInput input[] =
@@ -20,69 +22,73 @@ static const VertexInput input[] =
     {float2(-1.0, -1.0), float2(0.0, 0.0)},
 };
 
-static const uint indices[] = { 0, 2, 1, 0, 3, 2 };
+static const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
 
 struct SpriteData
 {
+	uint32_t id;
     int32_t frameIndex;
     int32_t cols;
     int32_t rows;
     int32_t flags;
+    int32_t padding0;
     float2 tiling;
     float2 offset;
-    float2x2 spriteScale;
+    float2x2 scale;
     float4 color;
-    uint32_t textureIndex;
+    float4x4 worldToClip;
 }
 
 [vk::binding(0, 0)] SamplerState sampler;
 [vk::binding(1, 0)] Texture2D textures[];
-[vk::binding(2, 0)] uniform SpriteData spriteData[];
-
-[[vk::push_constant]] float4x4 mvp;
+[vk::binding(2, 0)] StructuredBuffer<SpriteData> sprites;
 
 enum Flags
 {
 	None = 0,
-	FlipHorizontal = 1 << 1,
-	FlipVertical = 1 << 2,
+	FlipHorizontal = 1 << 0,
+	FlipVertical = 1 << 1,
 }
 
 [shader("vertex")]
-VertexOutput vert(uint vertexID : SV_VertexID)
+VertexOutput vert(uint32_t vertexID : SV_VertexID, uint32_t instanceID : SV_InstanceID)
 {
-    uint index = indices[vertexID];
+    uint32_t vertexIndex = indices[vertexID];
+    SpriteData sprite = sprites[instanceID];
 
-    VertexOutput output;
-    float2 texCoords = input[index].texCoords;
-	if(spriteData.cols != 0 && spriteData.rows != 0)
+    float2 inputPosition = input[vertexIndex].position;
+    float2 texCoords = input[vertexIndex].texCoords;
+
+	if(sprite.cols != 0 && sprite.rows != 0)
 	{
-        const int col = spriteData.frameIndex % spriteData.cols;
-        const int row = spriteData.frameIndex / spriteData.cols;
+        const int col = sprite.frameIndex % sprite.cols;
+        const int row = sprite.frameIndex / sprite.cols;
 
-		const float2 frameSize = float2(1.0 / spriteData.cols, 1.0 / spriteData.rows);
-        texCoords = input[index].texCoords * frameSize + float2(col, row) * frameSize;
+		const float2 frameSize = float2(1.0 / sprite.cols, 1.0 / sprite.rows);
+        texCoords = input[vertexIndex].texCoords * frameSize + float2(col, row) * frameSize;
 
-        if ((spriteData.flags & Flags.FlipHorizontal) == 0)
-            texCoords.x *= -1;
+        if ((sprite.flags & Flags.FlipHorizontal) != 0)
+            texCoords.x = 1.0 - texCoords.x;
 
-        if ((spriteData.flags & Flags.FlipVertical) == 0)
-                texCoords.y *= -1;
+        if ((sprite.flags & Flags.FlipVertical) != 0)
+            texCoords.y = 1.0 - texCoords.y;
     }
 
+    float2 scaledPosition = mul(sprite.scale, inputPosition);
 
-	float2 scaledPosition = mul(spriteData.spriteScale, input[index].position);
-    output.position = mul(mvp, float4(scaledPosition, 0.0, 1.0));
-    output.texCoords = spriteData.tiling * texCoords + spriteData.offset;
-	return out;
+    VertexOutput output;
+    output.position = mul(sprite.worldToClip, float4(scaledPosition, 0.0, 1.0));
+    output.texCoords = sprite.tiling * texCoords + sprite.offset;
+    output.color = sprite.color;
+    output.spriteId = sprite.id;
+    return output;
 }
 
 [shader("fragment")]
 float4 frag(VertexOutput input) : SV_Target
 {
-    uint32_t textureIndex = spriteData.textureIndex;
-    float4 sample = textures[textureIndex].Sample(sampler, input.texCoords);
-    float4 color = sample * spriteData.color;
+    float4 sample = textures[NonUniformResourceIndex(input.spriteId)].Sample(sampler, input.texCoords);
+    float4 color = sample * input.color;
 
 	if (color.a < 0.01)
 		discard;

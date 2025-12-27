@@ -16,7 +16,7 @@ namespace Nova::Vulkan
 
         VkDescriptorSet GetHandle() const;
         const VkDescriptorSet* GetHandlePtr() const;
-        bool BindTextures(uint32_t binding, const Nova::Texture* textures, size_t textureCount, BindingType bindingType) override;
+        bool BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType) override;
         bool BindTexture(uint32_t binding, const Nova::Texture& texture, BindingType bindingType) override;
         bool BindSampler(uint32_t binding, const Nova::Sampler& sampler) override;
         bool BindCombinedSamplerTexture(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture) override;

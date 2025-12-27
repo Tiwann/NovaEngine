@@ -30,19 +30,19 @@ namespace Nova
 
         static Color Lerp(Color a, Color b, float t);
 
-        static Color Red;
-        static Color Green;
-        static Color Blue;
-        static Color Magenta;
-        static Color Cyan;
-        static Color Yellow;
-        static Color Black;
-        static Color White;
-        static Color Orange;
-        static Color Pink;
-        static Color Brown;
-        static Color Purple;
-        static Color Turquoise;
-        static Color Grey;
+        static const Color Red;
+        static const Color Green;
+        static const Color Blue;
+        static const Color Magenta;
+        static const Color Cyan;
+        static const Color Yellow;
+        static const Color Black;
+        static const Color White;
+        static const Color Orange;
+        static const Color Pink;
+        static const Color Brown;
+        static const Color Purple;
+        static const Color Turquoise;
+        static const Color Grey;
     };
 }

@@ -229,7 +229,6 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
-
         VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES };
         shaderDrawParametersFeatures.shaderDrawParameters = true;
 
@@ -239,10 +238,11 @@ namespace Nova::Vulkan
 
         VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES };
         indexingFeatures.pNext = &synchronization2Features;
+        indexingFeatures.shaderSampledImageArrayNonUniformIndexing = true;
         indexingFeatures.runtimeDescriptorArray = true;
         indexingFeatures.descriptorBindingVariableDescriptorCount = true;
         indexingFeatures.descriptorBindingPartiallyBound = true;
-        indexingFeatures.shaderSampledImageArrayNonUniformIndexing = true;
+        indexingFeatures.descriptorBindingSampledImageUpdateAfterBind = true;
 
         VkPhysicalDeviceIndexTypeUint8Features uint8Features = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_INDEX_TYPE_UINT8_FEATURES };
         uint8Features.indexTypeUint8 = true;

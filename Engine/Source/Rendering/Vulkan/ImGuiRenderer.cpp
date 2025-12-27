@@ -64,10 +64,10 @@ namespace Nova::Vulkan
             return false;
 
 
-        SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
+        const SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear);
-        m_Sampler = device->CreateSampler(samplerCreateInfo);
+        m_Sampler = device->GetOrCreateSampler(samplerCreateInfo);
         if (!m_Sampler) return false;
 
         m_Device = device;
@@ -76,8 +76,9 @@ namespace Nova::Vulkan
 
     void ImGuiRenderer::Destroy()
     {
-        for (const auto& pair : m_Textures)
-            ImGui_ImplVulkan_RemoveTexture(reinterpret_cast<VkDescriptorSet>(pair.value));
+        for (const auto& [texture, id] : m_Textures)
+            ImGui_ImplVulkan_RemoveTexture(reinterpret_cast<VkDescriptorSet>(id));
+        ImGui_ImplVulkan_Shutdown();
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext(m_Context);

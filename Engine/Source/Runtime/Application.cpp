@@ -137,8 +137,7 @@ namespace Nova
 
 
         // Load engine shaders
-        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName,
-                                            const String& shaderPath) -> Ref<Shader>
+        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath) -> Ref<Shader>
         {
             const ShaderEntryPoint entryPoints[]
             {
@@ -170,7 +169,7 @@ namespace Nova
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        LoadShaderBasic("SpriteBatch", "SpriteBatchShader", Path::GetEngineAssetPath("Shaders/SpriteBatch.slang"));
+        Ref<Shader> spriteShader = LoadShaderBasic("SpriteBatch", "SpriteBatchShader", Path::GetEngineAssetPath("Shaders/SpriteBatch.slang"));
         Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
@@ -190,7 +189,7 @@ namespace Nova
             return;
         }
 
-        if (!SpriteBatchRenderer::Initialize({m_Device, &m_RenderPass}))
+        if (!SpriteBatchRenderer::Initialize({m_Device, &m_RenderPass, spriteShader}))
         {
             std::println(std::cerr, "Failed to init sprite batch renderer!");
             Destroy();

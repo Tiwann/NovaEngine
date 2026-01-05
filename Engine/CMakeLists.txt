@@ -363,6 +363,7 @@ set(NOVA_ENGINE_VULKAN_SOURCES
         Source/Rendering/Vulkan/CommandPool.h
         Source/Rendering/Vulkan/ComputePipeline.cpp
         Source/Rendering/Vulkan/ComputePipeline.h
+        Source/Rendering/Vulkan/Conversions.cpp
         Source/Rendering/Vulkan/Conversions.h
         Source/Rendering/Vulkan/DescriptorPool.cpp
         Source/Rendering/Vulkan/DescriptorPool.h

@@ -24,7 +24,7 @@ namespace Nova
         size_t dataSize = 0;
 
         TextureCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
-        TextureCreateInfo& WithUsageFlags(TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
+        TextureCreateInfo& WithUsageFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
         TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
         TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }
         TextureCreateInfo& WithHeight(const uint32_t inHeight) { height = inHeight; return *this; }
@@ -33,6 +33,46 @@ namespace Nova
         TextureCreateInfo& WithSampleCount(const uint32_t inSampleCount) { sampleCount = inSampleCount; return *this; }
         TextureCreateInfo& WithData(const uint8_t* inData, const size_t inSize) { data = inData; dataSize = inSize; return *this; }
         TextureCreateInfo& WithData(const Array<uint8_t>& inData) { data = inData.Data(); dataSize = inData.Size(); return *this; }
+
+        static TextureCreateInfo Texture1D(const uint32_t width, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        {
+            return TextureCreateInfo()
+            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
+            .WithWidth(width)
+            .WithHeight(1)
+            .WithDepth(1)
+            .WithFormat(format)
+            .WithMips(mips)
+            .WithSampleCount(sampleCount)
+            .WithData(data.Data(), data.Size());
+        }
+
+        static TextureCreateInfo Texture2D(const uint32_t width, const uint32_t height, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        {
+            return TextureCreateInfo()
+            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
+            .WithWidth(width)
+            .WithHeight(height)
+            .WithDepth(1)
+            .WithFormat(format)
+            .WithMips(mips)
+            .WithSampleCount(sampleCount)
+            .WithData(data.Data(), data.Size());
+        }
+
+        static TextureCreateInfo Texture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        {
+            return TextureCreateInfo()
+            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
+            .WithWidth(width)
+            .WithHeight(height)
+            .WithDepth(depth)
+            .WithFormat(format)
+            .WithMips(mips)
+            .WithSampleCount(sampleCount)
+            .WithData(data.Data(), data.Size());
+        }
+
     };
 
     class Texture : public Asset

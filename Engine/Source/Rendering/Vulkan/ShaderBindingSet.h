@@ -20,6 +20,7 @@ namespace Nova::Vulkan
         bool BindTexture(uint32_t binding, const Nova::Texture& texture, BindingType bindingType) override;
         bool BindSampler(uint32_t binding, const Nova::Sampler& sampler) override;
         bool BindCombinedSamplerTexture(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture) override;
+        bool BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture* const* textures, size_t textureCount) override;
         bool BindBuffer(uint32_t binding, const Nova::Buffer& buffer, size_t offset, size_t size) override;
     private:
         Device* m_Device = nullptr;

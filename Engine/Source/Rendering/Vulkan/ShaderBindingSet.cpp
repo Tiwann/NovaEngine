@@ -130,6 +130,30 @@ namespace Nova::Vulkan
         return true;
     }
 
+    bool ShaderBindingSet::BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture* const* textures, size_t textureCount)
+    {
+        Array<VkDescriptorImageInfo> imageInfos;
+        for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
+        {
+            const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
+            VkDescriptorImageInfo imageInfo;
+            imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
+            imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
+            imageInfo.imageView = texture->GetImageView();
+            imageInfos.Add(imageInfo);
+        }
+
+        VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
+        write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write.descriptorCount = textureCount;
+        write.dstBinding = binding;
+        write.dstArrayElement = 0;
+        write.pImageInfo = imageInfos.Data();
+        write.dstSet = m_Handle;
+        vkUpdateDescriptorSets(m_Device->GetHandle(), 1, &write, 0, nullptr);
+        return true;
+    }
+
     bool ShaderBindingSet::BindBuffer(const uint32_t binding, const Nova::Buffer& buffer, const size_t offset, const size_t size)
     {
         VkDescriptorBufferInfo bufferInfo;

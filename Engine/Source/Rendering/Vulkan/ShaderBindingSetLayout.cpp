@@ -5,6 +5,7 @@
 
 namespace Nova::Vulkan
 {
+    static constexpr uint32_t MAX_TEXTURES = 1024;
     bool ShaderBindingSetLayout::Build()
     {
         Array<VkDescriptorSetLayoutBinding> bindings;
@@ -15,12 +16,15 @@ namespace Nova::Vulkan
             const ShaderBinding& binding = m_Bindings[i];
             VkDescriptorSetLayoutBinding vkBinding = { };
             vkBinding.binding = i;
-            vkBinding.descriptorCount = binding.arrayCount;
+            if (binding.bindingType == BindingType::SampledTexture && binding.arrayCount == 0)
+                vkBinding.descriptorCount = MAX_TEXTURES;
+            else
+                vkBinding.descriptorCount = binding.arrayCount;
             vkBinding.stageFlags = Convert<VkShaderStageFlags>(binding.stageFlags);
             vkBinding.descriptorType = Convert<VkDescriptorType>(binding.bindingType);
             vkBinding.pImmutableSamplers = nullptr;
 
-            uint32_t bindingFlag = binding.arrayCount > 0 && binding.bindingType == BindingType::SampledTexture
+            uint32_t bindingFlag = binding.arrayCount > 1 && binding.bindingType == BindingType::SampledTexture
                                        ? VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT |
                                        VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
                                        VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT

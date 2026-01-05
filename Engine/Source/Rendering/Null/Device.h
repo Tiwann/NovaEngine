@@ -26,5 +26,6 @@ namespace Nova::Null
         Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) override;
         uint32_t GetImageCount() const override;
         Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
+        Ref<Nova::Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo) override { return nullptr; }
     };
 }

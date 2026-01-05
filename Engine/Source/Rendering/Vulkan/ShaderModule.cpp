@@ -3,7 +3,6 @@
 
 #include <vulkan/vulkan.h>
 
-
 namespace Nova::Vulkan
 {
     bool ShaderModule::Initialize(const ShaderModuleCreateInfo& createInfo)
@@ -35,13 +34,4 @@ namespace Nova::Vulkan
     {
         return m_Handle;
     }
-
-    /*VkPipelineShaderStageCreateInfo ShaderModule::GetShaderStageCreateInfo() const
-    {
-        VkPipelineShaderStageCreateInfo shaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
-        shaderStageCreateInfo.module = m_Handle;
-        shaderStageCreateInfo.pName = "main";
-        shaderStageCreateInfo.stage = Convert<ShaderStageFlagBits, VkShaderStageFlagBits>(m_Stage);
-        return shaderStageCreateInfo;
-    }*/
 }

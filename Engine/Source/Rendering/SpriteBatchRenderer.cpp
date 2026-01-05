@@ -33,9 +33,9 @@ namespace Nova
     static Ref<GraphicsPipeline> graphicsPipeline = nullptr;
     static Ref<Buffer> storageBuffer = nullptr;
     static Ref<ShaderBindingSet> bindingSet = nullptr;
-    static Ref<Shader> shader = nullptr;
     static Ref<Sampler> sampler = nullptr;
     static RenderPass* renderPass = nullptr;
+    static Shader* shader = nullptr;
     static bool begin = false;
     static Array<Texture*> textures;
     static Array<SpriteData> spriteData;
@@ -44,17 +44,12 @@ namespace Nova
     {
         if (!createInfo.device) return false;
         if (!createInfo.renderPass) return false;
-
-        const Application& application = Application::GetCurrentApplication();
-        const AssetDatabase& assetDatabase = application.GetAssetDatabase();
-
-        shader = assetDatabase.Get<Shader>("SpriteBatchShader");
-        if (!shader) return false;
+        if (!createInfo.shader) return false;
 
         const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
         .SetDevice(createInfo.device)
         .SetRenderPass(createInfo.renderPass)
-        .SetShader(shader)
+        .SetShader(createInfo.shader)
         .SetMultisampleInfo({8})
         .SetViewportInfo({0, 0, createInfo.renderPass->GetWidth(), createInfo.renderPass->GetHeight()})
         .SetScissorInfo({0, 0, createInfo.renderPass->GetWidth(), createInfo.renderPass->GetHeight()});
@@ -62,12 +57,13 @@ namespace Nova
         graphicsPipeline = createInfo.device->CreateGraphicsPipeline(pipelineCreateInfo);
         if (!graphicsPipeline) return false;
 
-        bindingSet = shader->CreateBindingSet(0);
+        bindingSet = createInfo.shader->CreateBindingSet(0);
         if (!bindingSet) return false;
 
         sampler = createInfo.device->GetOrCreateSampler(SamplerCreateInfo());
         device = createInfo.device;
         renderPass = createInfo.renderPass;
+        shader = createInfo.shader;
         return true;
     }
 
@@ -77,8 +73,8 @@ namespace Nova
         if (graphicsPipeline) graphicsPipeline->Destroy();
         if (storageBuffer) storageBuffer->Destroy();
         renderPass = nullptr;
-        shader = nullptr;
         device = nullptr;
+        shader = nullptr;
     }
 
     bool SpriteBatchRenderer::BeginFrame(const Matrix4& inViewProjection)
@@ -96,7 +92,7 @@ namespace Nova
         NOVA_ASSERT(begin, "SpriteBatchRenderer::End/End call mismatch!");
         if (!begin) return false;
 
-        if (!bindingSet->BindTextures(1, textures.Data(), textures.Count(), BindingType::SampledTexture))
+        if (!bindingSet->BindCombinedSamplerTextures(1, *sampler, textures.Data(), textures.Count()))
         {
             begin = false;
             return false;

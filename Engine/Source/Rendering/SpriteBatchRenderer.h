@@ -13,11 +13,13 @@ namespace Nova
     class Device;
     class RenderPass;
     class Transform;
+    class Shader;
 
     struct SpriteBatchRendererCreateInfo
     {
         Device* device = nullptr;
         RenderPass* renderPass = nullptr;
+        Shader* shader = nullptr;
     };
 
     class SpriteBatchRenderer

@@ -1,14 +1,6 @@
 ﻿include(Vendor/Vendor.cmake)
 
 set(NOVA_ENGINE_SOURCES
-        Source/AssetImporters/ASTCImporter.cpp
-        Source/AssetImporters/ASTCImporter.h
-        Source/AssetImporters/ASTCImporter.cpp
-        Source/AssetImporters/DDSImporter.cpp
-        Source/AssetImporters/DDSImporter.h
-        Source/AssetImporters/TextureImporter.cpp
-        Source/AssetImporters/TextureImporter.h
-
         Source/Audio/AudioClip.cpp
         Source/Audio/AudioClip.h
         Source/Audio/AudioFormat.h

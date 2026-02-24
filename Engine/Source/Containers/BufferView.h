@@ -7,8 +7,6 @@ namespace Nova
     class BufferView
     {
     public:
-        using Iterator = Iterator<Type>;
-        using ConstIterator = ConstIterator<Type>;
 
         BufferView(const Type* data, size_t count) : m_Data(data), m_Count(count)
         {
@@ -18,8 +16,8 @@ namespace Nova
         {
         }
 
-        ConstIterator Begin() const { return m_Data; }
-        ConstIterator End() const { return m_Data + m_Count; }
+        const Type* begin() const { return m_Data; }
+        const Type* end() const { return m_Data + m_Count; }
 
         template <typename OtherType>
         BufferView<OtherType> As() const

@@ -231,6 +231,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/Null/Device.h
         Source/Rendering/ResourceBarrier.h
         Source/Rendering/ResourceBarrier.cpp
+        Source/Rendering/DeferredRenderer.cpp
+        Source/Rendering/DeferredRenderer.h
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h

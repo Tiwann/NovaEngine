@@ -70,8 +70,8 @@ namespace Nova::D3D12
             if (DX_FAILED(image->QueryInterface(IID_PPV_ARGS(&m_Images[imageIndex]))))
                 return false;
 
-            m_ImageViews[imageIndex] = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize;
-            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {m_ImageViews[imageIndex]});
+            m_ImageViews[imageIndex] = reinterpret_cast<void*>(m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize);
+            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {reinterpret_cast<SIZE_T>(m_ImageViews[imageIndex])});
 
             m_Textures[imageIndex].SetDirty();
         }
@@ -125,7 +125,6 @@ namespace Nova::D3D12
             texture->m_Allocation = nullptr;
             texture->m_SampleCount = 1;
             texture->m_Mips = 1;
-            texture->m_UsageFlags = TextureUsageFlagBits::Attachment;
             texture->m_Format = m_ImageFormat;
             return texture;
         };
@@ -155,7 +154,7 @@ namespace Nova::D3D12
         return m_Images[index];
     }
 
-    ID3D12ImageView Swapchain::GetImageView(size_t index) const
+    ID3D12ImageView* Swapchain::GetImageView(size_t index) const
     {
         return m_ImageViews[index];
     }

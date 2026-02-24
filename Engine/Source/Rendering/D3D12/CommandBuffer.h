@@ -37,9 +37,13 @@ namespace Nova::D3D12
         void Blit(const Nova::Texture& src, const Nova::BlitRegion& srcRegion, const Nova::Texture& dest, const Nova::BlitRegion& destRegion, Filter filter) override;
         void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
         void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) override;
+        void TextureBarrier(const Nova::TextureBarrier& barrier) override;
+        void BufferBarrier(const Nova::BufferBarrier& barrier) override;
+        void MemoryBarrier(const Nova::MemoryBarrier& barrier) override;
 
         ID3D12GraphicsCommandList10* GetHandle() { return m_Handle; }
         const ID3D12GraphicsCommandList10* GetHandle() const { return m_Handle; }
+
     private:
         Device* m_Device = nullptr;
         ID3D12GraphicsCommandList10* m_Handle = nullptr;

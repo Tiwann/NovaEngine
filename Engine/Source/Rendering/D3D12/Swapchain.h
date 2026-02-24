@@ -5,7 +5,7 @@ struct IDXGISwapChain4;
 struct ID3D12Resource;
 struct ID3D12DescriptorHeap;
 typedef ID3D12Resource ID3D12Image;
-typedef uint64_t ID3D12ImageView;
+typedef void ID3D12ImageView;
 
 namespace Nova::D3D12
 {
@@ -23,12 +23,12 @@ namespace Nova::D3D12
         const IDXGISwapChain4* GetHandle() const;
         uint32_t AcquireNextFrame();
         ID3D12Resource* GetImage(size_t index) const;
-        ID3D12ImageView GetImageView(size_t index) const;
+        ID3D12ImageView* GetImageView(size_t index) const;
 
     private:
         IDXGISwapChain4* m_Handle = nullptr;
         ID3D12DescriptorHeap* m_DescriptorHeap = nullptr;
         ID3D12Image* m_Images[3] = {nullptr, nullptr, nullptr};
-        ID3D12ImageView m_ImageViews[3] = {0, 0, 0};
+        ID3D12ImageView* m_ImageViews[3] = {nullptr, nullptr, nullptr};
     };
 }

@@ -6,6 +6,7 @@
 #include "RenderTarget.h"
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
+#include "Sampler.h"
 
 #include <vulkan/vulkan.h>
 

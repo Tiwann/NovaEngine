@@ -182,10 +182,10 @@ namespace Nova::D3D12
     bool Device::BeginFrame()
     {
         m_CurrentFrameIndex = m_Swapchain.AcquireNextFrame();
-        CommandBuffer& cmdBuffer = GetCurrentCommandBuffer();
+        CommandBuffer& cmdBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
         ID3D12GraphicsCommandList10* cmdBufferHandle = cmdBuffer.GetHandle();
         ID3D12Image* swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
-        ID3D12ImageView swapchainImageView = m_Swapchain.GetImageView(m_CurrentFrameIndex);
+        ID3D12ImageView* swapchainImageView = m_Swapchain.GetImageView(m_CurrentFrameIndex);
 
         if (!cmdBuffer.Begin({CommandBufferUsageFlagBits::None}))
             return false;
@@ -194,14 +194,14 @@ namespace Nova::D3D12
         cmdBufferHandle->ResourceBarrier(1, &barrier);
 
         // This needs to be render passes
-        const D3D12_CPU_DESCRIPTOR_HANDLE renderTargets[] { {swapchainImageView} };
+        const D3D12_CPU_DESCRIPTOR_HANDLE renderTargets[] { D3D12_TO_HANDLE(swapchainImageView) };
         cmdBufferHandle->OMSetRenderTargets(1, renderTargets, false, nullptr);
         return false;
     }
 
     void Device::EndFrame()
     {
-        CommandBuffer& cmdBuffer = GetCurrentCommandBuffer();
+        CommandBuffer& cmdBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
         Fence& fence = m_Frames[m_CurrentFrameIndex].fence;
         ID3D12GraphicsCommandList10* cmdBufferHandle = cmdBuffer.GetHandle();
         ID3D12Image* swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);

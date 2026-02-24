@@ -3,7 +3,12 @@
 #include "CommandPool.h"
 #include "Buffer.h"
 #include "Containers/StringConversion.h"
+#include "Rendering/ResourceBarrier.h"
+
+#pragma push_macro("MemoryBarrier")
+#undef MemoryBarrier
 #include <directx/d3dx12.h>
+#pragma pop_macro("MemoryBarrier")
 
 namespace Nova::D3D12
 {
@@ -154,5 +159,17 @@ namespace Nova::D3D12
     void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
     {
 
+    }
+
+    void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)
+    {
+    }
+
+    void CommandBuffer::BufferBarrier(const Nova::BufferBarrier& barrier)
+    {
+    }
+
+    void CommandBuffer::MemoryBarrier(const Nova::MemoryBarrier& barrier)
+    {
     }
 }

@@ -71,7 +71,7 @@ namespace Nova::D3D12
         Queue* GetTransferQueue() { return &m_TransferQueue; }
         const Queue* GetTransferQueue() const { return &m_TransferQueue; }
 
-        Nova::CommandBuffer* GetCurrentCommandBuffer() override ;
+        Nova::CommandBuffer* GetCurrentCommandBuffer() override;
         CommandPool& GetCommandPool();
         ID3D12Allocator* GetAllocator();
         Nova::Swapchain* GetSwapchain() override;
@@ -93,7 +93,7 @@ namespace Nova::D3D12
         Queue m_ComputeQueue;
         Queue m_TransferQueue;
         CommandPool m_CommandPool;
-        Frame m_Frames[NOVA_MAX_IMAGE_COUNT];
+        Frame m_Frames[3];
 
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         ID3D12Debug6* m_Debug = nullptr;

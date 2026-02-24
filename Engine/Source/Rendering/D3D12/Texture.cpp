@@ -89,7 +89,7 @@ namespace Nova::D3D12
         return m_Image;
     }
 
-    ID3D12ImageView Texture::GetImageView() const
+    ID3D12ImageView* Texture::GetImageView() const
     {
         return m_ImageView;
     }

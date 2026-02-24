@@ -7,6 +7,10 @@
 #include "D3D12/Device.h"
 #endif
 
+#ifdef NOVA_HAS_OPENGL
+#include "OpenGL/Device.h"
+#endif
+
 namespace Nova
 {
 
@@ -101,5 +105,17 @@ namespace Nova
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear);
         return CreateSampler(createInfo);
+    }
+
+    Ref<Sampler> Device::GetOrCreateSampler(const SamplerCreateInfo& createInfo)
+    {
+        if (!m_Samplers.Contains(createInfo))
+        {
+            Ref<Sampler> sampler = CreateSampler(createInfo);
+            m_Samplers[createInfo] = sampler;
+            return sampler;
+        }
+
+        return m_Samplers[createInfo];
     }
 }

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Containers/String.h"
 #include "Containers/StringView.h"
+#include "Containers/Map.h"
 #include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
@@ -8,6 +9,7 @@
 #include "Buffer.h"
 #include "Texture.h"
 #include <cstdint>
+
 
 namespace Nova
 {
@@ -87,7 +89,7 @@ namespace Nova
         virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
         virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
         virtual Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
-        virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr;}
+        virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr; }
 
         Ref<Fence> CreateFence();
         Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);
@@ -95,6 +97,7 @@ namespace Nova
         Ref<Material> CreateMaterial(Ref<Shader> material);
         Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
         Ref<Sampler> CreateSampler();
+        Ref<Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo);
 
         virtual uint32_t GetImageCount() const = 0;
 
@@ -103,6 +106,8 @@ namespace Nova
     protected:
         String m_DeviceVendor;
         bool m_VSync = false;
+    private:
+        Map<SamplerCreateInfo, Ref<Sampler>> m_Samplers;
     };
 
     Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);

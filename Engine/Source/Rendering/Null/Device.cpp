@@ -101,4 +101,10 @@ namespace Nova::Null
     {
         return 0;
     }
+
+    Ref<RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    {
+        (void)createInfo;
+        return nullptr;
+    }
 }

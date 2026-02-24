@@ -55,7 +55,7 @@ namespace Nova
         uint32_t GetSampleCount() const { return m_SampleCount; }
         ResourceState GetState() const { return m_State; }
         void SetState(const ResourceState state) { m_State = state; }
-        TextureUsageFlags GetusageFlags() const { return m_UsageFlags; }
+        TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;

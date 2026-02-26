@@ -44,7 +44,7 @@ namespace Nova
 
     struct DeferredRendererCreateInfo
     {
-        class Device* device = nullptr;
+        class RenderDevice* device = nullptr;
         class RenderTarget* renderTarget = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
@@ -64,7 +64,7 @@ namespace Nova
         bool IsValid() const;
         void Invalidate();
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         RenderPass* m_RenderPass = nullptr;
         RenderTarget* m_RenderTarget = nullptr;
         uint32_t m_Width = 0;

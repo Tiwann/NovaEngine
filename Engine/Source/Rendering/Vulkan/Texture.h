@@ -7,7 +7,7 @@ typedef struct VmaAllocation_T* VmaAllocation;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
     class Swapchain;
     class RenderTarget;
 
@@ -29,7 +29,7 @@ namespace Nova::Vulkan
         friend Swapchain;
         friend RenderTarget;
 
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkImage m_Image = nullptr;
         VkImageView m_ImageView = nullptr;
         VmaAllocation m_Allocation = nullptr;

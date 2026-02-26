@@ -2,15 +2,15 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Shader;
 
     struct ComputePipelineCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         Shader* shader = nullptr;
 
-        ComputePipelineCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
+        ComputePipelineCreateInfo& WithDevice(RenderDevice* device) { this->device = device; return *this; }
         ComputePipelineCreateInfo& WithShader(Shader* shader) { this->shader = shader; return *this; }
     };
 
@@ -23,8 +23,8 @@ namespace Nova
         virtual bool Initialize(const ComputePipelineCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        Device* GetDevice() const { return m_Device; }
+        RenderDevice* GetDevice() const { return m_Device; }
     protected:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
     };
 }

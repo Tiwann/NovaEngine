@@ -3,7 +3,7 @@
 
 namespace Nova::OpenGL
 {
-    class Device final : public Nova::Device
+    class RenderDevice final : public Nova::Device
     {
     public:
         bool Initialize(const DeviceCreateInfo& createInfo) override;

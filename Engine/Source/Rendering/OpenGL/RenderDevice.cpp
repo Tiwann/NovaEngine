@@ -1,4 +1,4 @@
-﻿#include "Device.h"
+﻿#include "RenderDevice.h"
 #include "Runtime/DesktopWindow.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -11,7 +11,7 @@ namespace Nova::OpenGL
 
     };
 
-    bool Device::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
     {
         if (DesktopWindow* window = dynamic_cast<DesktopWindow*>(createInfo.window))
         {
@@ -34,94 +34,94 @@ namespace Nova::OpenGL
         return true;
     }
 
-    void Device::Destroy()
+    void RenderDevice::Destroy()
     {
     }
 
-    bool Device::BeginFrame()
+    bool RenderDevice::BeginFrame()
     {
         return false;
     }
 
-    void Device::EndFrame()
+    void RenderDevice::EndFrame()
     {
     }
 
-    void Device::Present()
+    void RenderDevice::Present()
     {
     }
 
-    void Device::WaitIdle() const
+    void RenderDevice::WaitIdle() const
     {
 
     }
 
-    void Device::SetName(StringView name)
+    void RenderDevice::SetName(StringView name)
     {
     }
 
 
-    DeviceType Device::GetDeviceType()
+    DeviceType RenderDevice::GetDeviceType()
     {
         return DeviceType::OpenGL;
     }
 
-    Ref<Nova::RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Surface> Device::CreateSurface(const SurfaceCreateInfo& createInfo)
+    Ref<Nova::Surface> RenderDevice::CreateSurface(const SurfaceCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Texture> Device::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Texture> Device::CreateTextureUnitialized()
+    Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
     {
         return nullptr;
     }
 
-    Ref<Nova::Sampler> Device::CreateSampler(const SamplerCreateInfo& createInfo)
+    Ref<Nova::Sampler> RenderDevice::CreateSampler(const SamplerCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Buffer> Device::CreateBuffer(const BufferCreateInfo& createInfo)
+    Ref<Nova::Buffer> RenderDevice::CreateBuffer(const BufferCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Shader> Device::CreateShader(const ShaderCreateInfo& createInfo)
+    Ref<Nova::Shader> RenderDevice::CreateShader(const ShaderCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
+    Ref<Nova::GraphicsPipeline> RenderDevice::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
+    Ref<Nova::ComputePipeline> RenderDevice::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Material> Device::CreateMaterial(const MaterialCreateInfo& createInfo)
+    Ref<Nova::Material> RenderDevice::CreateMaterial(const MaterialCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Fence> Device::CreateFence(const FenceCreateInfo& createInfo)
+    Ref<Nova::Fence> RenderDevice::CreateFence(const FenceCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    uint32_t Device::GetImageCount() const
+    uint32_t RenderDevice::GetImageCount() const
     {
         return 0;
     }

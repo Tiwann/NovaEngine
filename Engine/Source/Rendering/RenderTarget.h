@@ -10,13 +10,13 @@ namespace Nova { struct Color; }
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class CommandBuffer;
     class Texture;
 
     struct RenderTargetCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         uint32_t width = 0;
         uint32_t height = 0;
         uint32_t depth = 0;
@@ -46,7 +46,7 @@ namespace Nova
         uint32_t GetSampleCount() const;
         uint32_t GetImageCount() const;
     protected:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         uint32_t m_Width = 0;
         uint32_t m_Height = 0;
         uint32_t m_Depth = 0;

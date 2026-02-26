@@ -1,5 +1,5 @@
 ﻿#include "CommandPool.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <vulkan/vulkan.h>
 
 
@@ -7,7 +7,7 @@ namespace Nova::Vulkan
 {
     bool CommandPool::Initialize(const CommandPoolCreateInfo& createInfo)
     {
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
 
         VkCommandPoolCreateInfo poolCreateInfo = { VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };

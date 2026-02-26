@@ -3,7 +3,7 @@
 
 typedef struct VkSurfaceKHR_T* VkSurfaceKHR;
 
-namespace Nova { class Device; }
+namespace Nova { class RenderDevice; }
 
 namespace Nova::Vulkan
 {

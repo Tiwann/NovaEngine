@@ -1,5 +1,5 @@
 ﻿#include "CommandPool.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <directx/d3d12.h>
 
 
@@ -10,7 +10,7 @@ namespace Nova::D3D12
         if (!createInfo.device) return false;
         if (!createInfo.queue) return false;
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         Queue* queue = (Queue*)createInfo.queue;
 
         D3D12_COMMAND_LIST_TYPE type;

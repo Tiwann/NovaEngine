@@ -1,5 +1,5 @@
 ﻿#include "Texture.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "Buffer.h"
 
@@ -13,7 +13,7 @@ namespace Nova::Vulkan
         if (createInfo.width == 0 || createInfo.height == 0)
             return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
         const VkDevice deviceHandle = device->GetHandle();
 

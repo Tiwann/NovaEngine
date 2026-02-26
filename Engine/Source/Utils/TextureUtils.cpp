@@ -1,10 +1,10 @@
 ﻿#include "TextureUtils.h"
 #include "External/stb_image.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 
 namespace Nova
 {
-    Ref<Texture> LoadTexture(Ref<Device>& device, StringView filepath)
+    Ref<Texture> LoadTexture(Ref<RenderDevice>& device, StringView filepath)
     {
         stbi_set_flip_vertically_on_load(true);
         int32_t width = 0, height = 0;
@@ -34,7 +34,7 @@ namespace Nova
         return texture;
     }
 
-    Ref<Texture> LoadTexture(Ref<Device>& device, const void* data, size_t dataSize)
+    Ref<Texture> LoadTexture(Ref<RenderDevice>& device, const void* data, size_t dataSize)
     {
         stbi_set_flip_vertically_on_load(true);
         int32_t width = 0, height = 0;

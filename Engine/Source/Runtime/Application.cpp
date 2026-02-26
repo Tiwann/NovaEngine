@@ -58,7 +58,7 @@ namespace Nova
 
         // Creating render target
         RenderTargetCreateInfo rtCreateInfo;
-        rtCreateInfo.device = GetDevice();
+        rtCreateInfo.device = GetRenderDevice();
         rtCreateInfo.width = m_Window->GetWidth();
         rtCreateInfo.height = m_Window->GetHeight();
         rtCreateInfo.depth = 1;
@@ -162,7 +162,7 @@ namespace Nova
 
         const auto LoadTextureBasic = [this](StringView filepath, const String& assetName)
         {
-            Ref<Texture> texture = LoadTexture(GetDevice(), filepath);
+            Ref<Texture> texture = LoadTexture(GetRenderDevice(), filepath);
             m_AssetDatabase.AddAsset(texture, assetName);
             return texture;
         };
@@ -170,8 +170,7 @@ namespace Nova
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",
-                                                  Path::GetEngineAssetPath("Shaders/Debug.slang"));
+        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
@@ -314,12 +313,12 @@ namespace Nova
         return m_Window;
     }
 
-    const Ref<Device>& Application::GetDevice() const
+    const Ref<RenderDevice>& Application::GetRenderDevice() const
     {
         return m_Device;
     }
 
-    Ref<Device>& Application::GetDevice()
+    Ref<RenderDevice>& Application::GetRenderDevice()
     {
         return m_Device;
     }
@@ -340,6 +339,11 @@ namespace Nova
     }
 
     const Ref<RenderTarget>& Application::GetRenderTarget() const
+    {
+        return m_RenderTarget;
+    }
+
+    Ref<RenderTarget>& Application::GetRenderTarget()
     {
         return m_RenderTarget;
     }

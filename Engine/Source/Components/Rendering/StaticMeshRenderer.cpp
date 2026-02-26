@@ -7,7 +7,7 @@
 #include "Runtime/AssetDatabase.h"
 #include "Rendering/Shader.h"
 #include "Runtime/Application.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 #include "Runtime/Scene.h"
 #include "Runtime/Window.h"
 #include "Math/Matrix3x4.h"
@@ -44,7 +44,7 @@ namespace Nova
         const Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
         Application* application = scene->GetOwner();
-        Ref<Device> device = application->GetDevice();
+        Ref<RenderDevice> device = application->GetRenderDevice();
 
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Shader>("BlinnPhongShader");
@@ -94,7 +94,7 @@ namespace Nova
         const Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
         Application* application = scene->GetOwner();
-        Ref<Device> device = application->GetDevice();
+        Ref<RenderDevice> device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_BindingSet->Destroy();
@@ -214,7 +214,7 @@ namespace Nova
     void StaticMeshRenderer::SetStaticMesh(const Ref<StaticMesh>& newMesh)
     {
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_StaticMesh = newMesh;

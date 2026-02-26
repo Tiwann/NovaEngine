@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 
 namespace Nova::Null
 {
-    class Device final : public Nova::Device
+    class RenderDevice final : public Nova::RenderDevice
     {
     public:
         bool Initialize(const DeviceCreateInfo& createInfo) override;
@@ -13,7 +13,7 @@ namespace Nova::Null
         void Present() override;
         void WaitIdle() const override;
         void SetName(StringView name) override;
-        DeviceType GetDeviceType() override;
+        RenderDeviceType GetDeviceType() override;
         Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) override;
         Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Texture> CreateTextureUnitialized() override;

@@ -9,7 +9,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class CommandPool;
     class Buffer;
     class GraphicsPipeline;
@@ -36,7 +36,7 @@ namespace Nova
 
     struct CommandBufferAllocateInfo
     {
-        Device* device;
+        RenderDevice* device;
         CommandPool* commandPool;
         CommandBufferLevel level = CommandBufferLevel::Primary;
     };

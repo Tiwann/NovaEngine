@@ -1,13 +1,13 @@
 ﻿#include "DebugRenderer.h"
 #include "Buffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "GraphicsPipeline.h"
 #include "RenderPass.h"
 #include "ShaderBindingSet.h"
 #include "Math/Matrix4.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
-#include "Vulkan/Device.h"
+#include "Vulkan/RenderDevice.h"
 
 namespace Nova
 {

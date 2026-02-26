@@ -1,7 +1,7 @@
 ﻿#include "Runtime/DesktopWindow.h"
 #include "Swapchain.h"
 #include "Conversions.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Surface.h"
 #include "Texture.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -17,7 +17,7 @@ namespace Nova::D3D12
         if (!createInfo.device) return false;
         if (!createInfo.surface) return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         Surface* surface = static_cast<Surface*>(createInfo.surface);
         DesktopWindow* window = static_cast<DesktopWindow*>(surface->GetWindow());
         IDXGIFactory7* factory = device->GetFactory();
@@ -117,7 +117,7 @@ namespace Nova::D3D12
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
             Ref<Texture> texture = new Texture();
-            texture->m_Device = (Device*)m_Device;
+            texture->m_Device = (RenderDevice*)m_Device;
             texture->m_Image = m_Images[index];
             texture->m_ImageView = m_ImageViews[index];
             texture->m_Width = m_ImageWidth;
@@ -134,7 +134,7 @@ namespace Nova::D3D12
 
     Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();
         return GetTexture(imageIndex);
     }

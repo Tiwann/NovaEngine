@@ -1,5 +1,5 @@
 ﻿#include "Semaphore.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
@@ -7,7 +7,7 @@ namespace Nova::Vulkan
     bool Semaphore::Initialize(const SemaphoreCreateInfo& createInfo)
     {
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
         constexpr VkSemaphoreCreateInfo semaphoreCreateInfo = { VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO };
         if (vkCreateSemaphore(deviceHandle, &semaphoreCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)

@@ -3,7 +3,7 @@
 #include "Rendering/BlitRegion.h"
 #include "CommandPool.h"
 #include "Buffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "GraphicsPipeline.h"
 #include "Rendering/RenderPass.h"
@@ -23,7 +23,7 @@ namespace Nova::Vulkan
 
     bool CommandBuffer::Allocate(const CommandBufferAllocateInfo& allocateInfo)
     {
-        Device* device = static_cast<Device*>(allocateInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(allocateInfo.device);
         m_CommandPool = allocateInfo.commandPool;
         m_Level = allocateInfo.level;
         m_Device = device;

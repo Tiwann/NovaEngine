@@ -1,10 +1,10 @@
-﻿#include "Device.h"
-#include "Vulkan/Device.h"
+﻿#include "RenderDevice.h"
+#include "Vulkan/RenderDevice.h"
 #include "ComputePipeline.h"
 #include "Sampler.h"
 
 #ifdef NOVA_HAS_D3D12
-#include "D3D12/Device.h"
+#include "D3D12/RenderDevice.h"
 #endif
 
 #ifdef NOVA_HAS_OPENGL
@@ -15,25 +15,25 @@ namespace Nova
 {
 
 
-    StringView Device::GetDeviceVendor() const
+    StringView RenderDevice::GetDeviceVendor() const
     {
         return m_DeviceVendor;
     }
 
-    bool Device::HasVSync() const
+    bool RenderDevice::HasVSync() const
     {
         return m_VSync;
     }
 
-    Ref<Device> CreateRenderDevice(const DeviceType type, const DeviceCreateInfo& createInfo)
+    Ref<RenderDevice> CreateRenderDevice(const RenderDeviceType type, const DeviceCreateInfo& createInfo)
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         switch (type)
         {
-        case DeviceType::Null: return nullptr;
-        case DeviceType::Vulkan:
+        case RenderDeviceType::Null: return nullptr;
+        case RenderDeviceType::Vulkan:
             {
-                device = new Vulkan::Device();
+                device = new Vulkan::RenderDevice();
                 if (!device->Initialize(createInfo))
                 {
                     delete device;
@@ -42,9 +42,9 @@ namespace Nova
             }
             break;
 #ifdef NOVA_HAS_D3D12
-        case DeviceType::D3D12:
+        case RenderDeviceType::D3D12:
             {
-                device = new D3D12::Device();
+                device = new D3D12::RenderDevice();
                 if (!device->Initialize(createInfo))
                 {
                     delete device;
@@ -57,16 +57,16 @@ namespace Nova
         return Ref(device);
     }
 
-    Device::Device() : Object("Rendering Device")
+    RenderDevice::RenderDevice() : Object("Rendering Device")
     {
     }
 
-    Ref<Fence> Device::CreateFence()
+    Ref<Fence> RenderDevice::CreateFence()
     {
         return CreateFence({this, FenceCreateFlagBits::None});
     }
 
-    Ref<Buffer> Device::CreateBuffer(const BufferUsage usage, const size_t size)
+    Ref<Buffer> RenderDevice::CreateBuffer(const BufferUsage usage, const size_t size)
     {
         const BufferCreateInfo bufferCreateInfo = BufferCreateInfo()
         .WithUsage(usage)
@@ -74,7 +74,7 @@ namespace Nova
         return CreateBuffer(bufferCreateInfo);
     }
 
-    Ref<Texture> Device::CreateTexture(TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
+    Ref<Texture> RenderDevice::CreateTexture(TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
     {
         const TextureCreateInfo createInfo = TextureCreateInfo()
         .WithUsageFlags(usage)
@@ -87,19 +87,19 @@ namespace Nova
         return CreateTexture(createInfo);
     }
 
-    Ref<Material> Device::CreateMaterial(Ref<Shader> material)
+    Ref<Material> RenderDevice::CreateMaterial(Ref<Shader> material)
     {
         const MaterialCreateInfo materialCreateInfo = MaterialCreateInfo().WithShader(material);
         return CreateMaterial(materialCreateInfo);
     }
 
-    Ref<ComputePipeline> Device::CreateComputePipeline(Ref<Shader> shader)
+    Ref<ComputePipeline> RenderDevice::CreateComputePipeline(Ref<Shader> shader)
     {
         const ComputePipelineCreateInfo createInfo = ComputePipelineCreateInfo().WithShader(shader);
         return CreateComputePipeline(createInfo);
     }
 
-    Ref<Sampler> Device::CreateSampler()
+    Ref<Sampler> RenderDevice::CreateSampler()
     {
         const SamplerCreateInfo createInfo = SamplerCreateInfo()
         .WithAddressMode(SamplerAddressMode::Repeat)
@@ -107,7 +107,7 @@ namespace Nova
         return CreateSampler(createInfo);
     }
 
-    Ref<Sampler> Device::GetOrCreateSampler(const SamplerCreateInfo& createInfo)
+    Ref<Sampler> RenderDevice::GetOrCreateSampler(const SamplerCreateInfo& createInfo)
     {
         if (!m_Samplers.Contains(createInfo))
         {

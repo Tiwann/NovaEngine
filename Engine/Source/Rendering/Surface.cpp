@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    Device* Surface::GetDevice() const
+    RenderDevice* Surface::GetDevice() const
     {
         return m_Device;
     }

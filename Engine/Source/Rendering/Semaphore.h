@@ -2,11 +2,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct SemaphoreCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
     };
 
     class Semaphore

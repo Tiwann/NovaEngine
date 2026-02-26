@@ -5,7 +5,7 @@ struct ID3D12GraphicsCommandList10;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
 
     class CommandBuffer final : public Nova::CommandBuffer
     {
@@ -45,7 +45,7 @@ namespace Nova::D3D12
         const ID3D12GraphicsCommandList10* GetHandle() const { return m_Handle; }
 
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         ID3D12GraphicsCommandList10* m_Handle = nullptr;
     };
 }

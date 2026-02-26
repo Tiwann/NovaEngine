@@ -8,7 +8,7 @@ namespace Nova { class ShaderBindingSetLayout; }
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class DescriptorPool final : public Nova::DescriptorPool
     {
@@ -21,7 +21,7 @@ namespace Nova::Vulkan
 
         VkDescriptorSet AllocateDescriptorSet(const ShaderBindingSetLayout& bindingSetLayout) const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkDescriptorPool m_Handle = nullptr;
     };
 }

@@ -14,6 +14,6 @@ namespace Nova
     {\
         extern "C" ::Nova::Application* CreateApplication(int argc, char** argv)\
         {\
-            return new ::userClass(CmdLineArgs(argc, argv));\
+            return new ::userClass(Nova::CmdLineArgs(argc, argv));\
         }\
     }

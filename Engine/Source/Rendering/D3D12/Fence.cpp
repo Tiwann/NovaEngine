@@ -1,5 +1,5 @@
 ﻿#include "Fence.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <directx/d3d12.h>
 
 namespace Nova::D3D12
@@ -8,7 +8,7 @@ namespace Nova::D3D12
     {
         if (!createInfo.device) return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         ID3D12Device13* deviceHandle = device->GetHandle();
 
         const HANDLE event = CreateEventA(nullptr, FALSE, FALSE, nullptr);

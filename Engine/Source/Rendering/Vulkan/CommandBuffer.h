@@ -6,7 +6,7 @@ typedef struct VkCommandBuffer_T* VkCommandBuffer;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class CommandBuffer final : public Nova::CommandBuffer
     {
@@ -53,7 +53,7 @@ namespace Nova::Vulkan
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkCommandBuffer m_Handle = nullptr;
     };
 }

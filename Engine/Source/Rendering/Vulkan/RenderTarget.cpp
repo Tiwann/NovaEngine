@@ -1,5 +1,5 @@
 ﻿#include "RenderTarget.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "CommandBuffer.h"
 #include "Rendering/CommandBuffer.h"
@@ -11,7 +11,7 @@ namespace Nova::Vulkan
 {
     bool RenderTarget::Initialize(const RenderTargetCreateInfo& createInfo)
     {
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         Swapchain* swapchain = static_cast<Swapchain*>(device->GetSwapchain());
         CommandPool* commandPool = device->GetCommandPool();
         const VkDevice deviceHandle = device->GetHandle();
@@ -184,7 +184,7 @@ namespace Nova::Vulkan
 
     void RenderTarget::Destroy()
     {
-        Device* device = static_cast<Device*>(m_Device);
+        RenderDevice* device = static_cast<RenderDevice*>(m_Device);
         const Swapchain* swapchain = static_cast<Swapchain*>(m_Device->GetSwapchain());
         const VkDevice deviceHandle = device->GetHandle();
         const VmaAllocator allocatorHandle = device->GetAllocator();
@@ -222,7 +222,7 @@ namespace Nova::Vulkan
 
     const Texture& RenderTarget::GetColorTexture()
     {
-        const size_t imageIndex = ((Device*)m_Device)->GetCurrentFrameIndex();
+        const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
         const auto createTexture = [this, &imageIndex]() -> Texture
         {
             Texture texture;
@@ -231,7 +231,7 @@ namespace Nova::Vulkan
             texture.m_Image = m_ColorImages[imageIndex];
             texture.m_ImageView = m_ColorImageViews[imageIndex];
             texture.m_SampleCount = m_SampleCount;
-            texture.m_Device = (Device*)m_Device;
+            texture.m_Device = (RenderDevice*)m_Device;
             texture.m_Format = m_ColorFormat;
             texture.m_Allocation = m_ColorAllocations[imageIndex];
             texture.m_Mips = 1;
@@ -245,7 +245,7 @@ namespace Nova::Vulkan
 
     const Texture& RenderTarget::GetDepthTexture()
     {
-        const size_t imageIndex = ((Device*)m_Device)->GetCurrentFrameIndex();
+        const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
         const auto createTexture = [this, &imageIndex]() -> Texture
         {
             Texture texture;
@@ -254,7 +254,7 @@ namespace Nova::Vulkan
             texture.m_Image = m_DepthImages[imageIndex];
             texture.m_ImageView = m_DepthImageViews[imageIndex];
             texture.m_SampleCount = m_SampleCount;
-            texture.m_Device = (Device*)m_Device;
+            texture.m_Device = (RenderDevice*)m_Device;
             texture.m_Format = m_DepthFormat;
             texture.m_Allocation = m_DepthAllocations[imageIndex];
             texture.m_Mips = 1;

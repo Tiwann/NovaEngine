@@ -1,5 +1,5 @@
 ﻿#include "DeferredRenderer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "GraphicsPipeline.h"
 #include "RenderPass.h"
 #include "Texture.h"

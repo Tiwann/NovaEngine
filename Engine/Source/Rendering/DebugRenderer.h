@@ -10,7 +10,7 @@ namespace Nova
     class Matrix4;
     struct Color;
     class CommandBuffer;
-    class Device;
+    class RenderDevice;
     class Shader;
     class RenderPass;
 }
@@ -19,7 +19,7 @@ namespace Nova
 {
     struct DebugRendererCreateInfo
     {
-        Ref<Device> device = nullptr;
+        Ref<RenderDevice> device = nullptr;
         Ref<Shader> shader = nullptr;
         RenderPass* renderPass = nullptr;
         uint32_t maxVertices = 0;
@@ -42,6 +42,6 @@ namespace Nova
         static void DrawCircle(const Vector3& position, const Quaternion& rotation, float radius, const Color& color, float thickness = 1.0f);
         static void DrawCapsule(const Vector3& position, float height, float radius, const Color& color, float thickness = 1.0f);
     private:
-        static inline Ref<Device> s_Device = nullptr;
+        static inline Ref<RenderDevice> s_Device = nullptr;
     };
 }

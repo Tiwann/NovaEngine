@@ -1,5 +1,5 @@
 ﻿#include "Material.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Shader.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Rendering/ShaderBindingSet.h"

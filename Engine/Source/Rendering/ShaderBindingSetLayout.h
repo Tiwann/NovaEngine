@@ -10,7 +10,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct ShaderBinding
     {
@@ -36,7 +36,7 @@ namespace Nova
         ShaderBindingSetLayout() = default;
         ~ShaderBindingSetLayout() override = default;
 
-        virtual bool Initialize(Device* device, uint32_t setIndex) = 0;
+        virtual bool Initialize(RenderDevice* device, uint32_t setIndex) = 0;
         virtual void Destroy() = 0;
         virtual bool Build() = 0;
 

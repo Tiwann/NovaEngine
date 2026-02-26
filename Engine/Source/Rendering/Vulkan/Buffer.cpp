@@ -1,5 +1,5 @@
 ﻿#include "Buffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Rendering/Scoped.h"
 
 #include <vulkan/vulkan.h>
@@ -98,7 +98,7 @@ namespace Nova::Vulkan
         }
 
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
         vmaDestroyBuffer(allocatorHandle, m_Handle, m_Allocation);
         const VkResult result = vmaCreateBuffer(allocatorHandle, &bufferCreateInfo, &bufferAllocationCreateInfo, &m_Handle, &m_Allocation, nullptr);

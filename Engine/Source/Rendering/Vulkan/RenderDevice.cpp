@@ -1,4 +1,4 @@
-﻿#include "Device.h"
+﻿#include "RenderDevice.h"
 #include "Runtime/Window.h"
 #include "Runtime/DesktopWindow.h"
 #include "Conversions.h"
@@ -30,7 +30,7 @@
 
 namespace Nova::Vulkan
 {
-    bool Device::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
     {
         if (!createInfo.window)
             return false;
@@ -421,7 +421,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    void Device::Destroy()
+    void RenderDevice::Destroy()
     {
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
@@ -445,7 +445,7 @@ namespace Nova::Vulkan
     }
 
 
-    bool Device::BeginFrame()
+    bool RenderDevice::BeginFrame()
     {
         if (!m_Surface->IsAvailable())
             return false;
@@ -500,7 +500,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    void Device::EndFrame()
+    void RenderDevice::EndFrame()
     {
         CommandBuffer& commandBuffer = *dynamic_cast<CommandBuffer*>(GetCurrentCommandBuffer());
 
@@ -535,29 +535,29 @@ namespace Nova::Vulkan
         m_GraphicsQueue.Submit(&commandBuffer, &presentSemaphore, &submitSemaphore, &fence, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
     }
 
-    void Device::Present()
+    void RenderDevice::Present()
     {
         const Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
         (void)m_GraphicsQueue.Present(m_Swapchain, &submitSemaphore, m_CurrentFrameIndex);
         m_LastFrameIndex = m_CurrentFrameIndex;
     }
 
-    void Device::WaitIdle() const
+    void RenderDevice::WaitIdle() const
     {
         vkDeviceWaitIdle(m_Handle);
     }
 
-    void Device::SetName(StringView name)
+    void RenderDevice::SetName(StringView name)
     {
         SetVkObjectDebugName(this, VK_OBJECT_TYPE_DEVICE, m_Handle, name);
     }
 
-    DeviceType Device::GetDeviceType()
+    RenderDeviceType RenderDevice::GetDeviceType()
     {
-        return DeviceType::Vulkan;
+        return RenderDeviceType::Vulkan;
     }
 
-    Ref<Nova::Surface> Device::CreateSurface(const SurfaceCreateInfo& createInfo)
+    Ref<Nova::Surface> RenderDevice::CreateSurface(const SurfaceCreateInfo& createInfo)
     {
         Surface* surface = new Surface();
         SurfaceCreateInfo surfaceCreateInfo(createInfo);
@@ -569,13 +569,13 @@ namespace Nova::Vulkan
         return Ref(surface);
     }
 
-    uint32_t Device::GetImageCount() const
+    uint32_t RenderDevice::GetImageCount() const
     {
         return m_Swapchain.GetImageCount();
 
     }
 
-    Ref<Nova::RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
     {
         RenderTarget* renderTarget = new RenderTarget;
         if (!renderTarget->Initialize(createInfo))
@@ -586,7 +586,7 @@ namespace Nova::Vulkan
         return Ref(renderTarget);
     }
 
-    Ref<Nova::Texture> Device::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
         TextureCreateInfo textureCreateInfo(createInfo);
@@ -598,12 +598,12 @@ namespace Nova::Vulkan
         return Ref(texture);
     }
 
-    Ref<Nova::Texture> Device::CreateTextureUnitialized()
+    Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
     {
         return MakeRef<Texture>();
     }
 
-    Ref<Nova::Sampler> Device::CreateSampler(const SamplerCreateInfo& createInfo)
+    Ref<Nova::Sampler> RenderDevice::CreateSampler(const SamplerCreateInfo& createInfo)
     {
         Sampler* sampler = new Sampler();
         SamplerCreateInfo samplerCreateInfo(createInfo);
@@ -615,7 +615,7 @@ namespace Nova::Vulkan
         return Ref(sampler);
     }
 
-    Ref<Nova::Buffer> Device::CreateBuffer(const BufferCreateInfo& createInfo)
+    Ref<Nova::Buffer> RenderDevice::CreateBuffer(const BufferCreateInfo& createInfo)
     {
         Buffer* buffer = new Buffer();
         BufferCreateInfo bufferCreateInfo(createInfo);
@@ -627,7 +627,7 @@ namespace Nova::Vulkan
         return Ref(buffer);
     }
 
-    Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
+    Ref<Nova::GraphicsPipeline> RenderDevice::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
     {
         GraphicsPipeline* pipeline = new GraphicsPipeline();
         GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
@@ -639,7 +639,7 @@ namespace Nova::Vulkan
         return Ref<GraphicsPipeline>(pipeline);
     }
 
-    Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
+    Ref<Nova::ComputePipeline> RenderDevice::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
     {
         ComputePipeline* pipeline = new ComputePipeline();
         ComputePipelineCreateInfo pipelineCreateInfo(createInfo);
@@ -651,7 +651,7 @@ namespace Nova::Vulkan
         return Ref(pipeline);
     }
 
-    Ref<Nova::Shader> Device::CreateShader(const ShaderCreateInfo& createInfo)
+    Ref<Nova::Shader> RenderDevice::CreateShader(const ShaderCreateInfo& createInfo)
     {
         Shader* shader = new Shader();
         ShaderCreateInfo shaderCreateInfo(createInfo);
@@ -663,7 +663,7 @@ namespace Nova::Vulkan
         return Ref(shader);
     }
 
-    Ref<Nova::Material> Device::CreateMaterial(const MaterialCreateInfo& createInfo)
+    Ref<Nova::Material> RenderDevice::CreateMaterial(const MaterialCreateInfo& createInfo)
     {
         Material* material = new Material();
         MaterialCreateInfo matCreateInfo(createInfo);
@@ -675,7 +675,7 @@ namespace Nova::Vulkan
         return Ref(material);
     }
 
-    Ref<Nova::Fence> Device::CreateFence(const FenceCreateInfo& createInfo)
+    Ref<Nova::Fence> RenderDevice::CreateFence(const FenceCreateInfo& createInfo)
     {
         Fence* fence = new Fence();
         FenceCreateInfo fenceCreateInfo(createInfo);
@@ -687,93 +687,93 @@ namespace Nova::Vulkan
         return Ref(fence);
     }
 
-    VkInstance Device::GetInstance() const
+    VkInstance RenderDevice::GetInstance() const
     {
         return m_Instance;
     }
 
-    VkDevice Device::GetHandle() const
+    VkDevice RenderDevice::GetHandle() const
     {
         return m_Handle;
     }
 
-    VmaAllocator Device::GetAllocator() const
+    VmaAllocator RenderDevice::GetAllocator() const
     {
         return m_Allocator;
     }
 
-    VkPhysicalDevice Device::GetPhysicalDevice() const
+    VkPhysicalDevice RenderDevice::GetPhysicalDevice() const
     {
         return m_PhysicalDevice;
     }
 
-    Ref<Nova::Surface> Device::GetSurface()
+    Ref<Nova::Surface> RenderDevice::GetSurface()
     {
         return m_Surface;
     }
 
 
-    CommandPool* Device::GetCommandPool()
+    CommandPool* RenderDevice::GetCommandPool()
     {
         return &m_CommandPool;
     }
 
-    CommandPool* Device::GetTransferCommandPool()
+    CommandPool* RenderDevice::GetTransferCommandPool()
     {
         return &m_TransferCommandPool;
     }
 
-    Queue* Device::GetGraphicsQueue()
+    Queue* RenderDevice::GetGraphicsQueue()
     {
         return &m_GraphicsQueue;
     }
 
-    Queue* Device::GetPresentQueue()
+    Queue* RenderDevice::GetPresentQueue()
     {
         return &m_PresentQueue;
     }
 
-    Queue* Device::GetComputeQueue()
+    Queue* RenderDevice::GetComputeQueue()
     {
         return &m_ComputeQueue;
     }
 
-    Queue* Device::GetTransferQueue()
+    Queue* RenderDevice::GetTransferQueue()
     {
         return &m_TransferQueue;
     }
 
-    DescriptorPool* Device::GetDescriptorPool()
+    DescriptorPool* RenderDevice::GetDescriptorPool()
     {
         return &m_DescriptorPool;
     }
 
-    Semaphore& Device::GetCurrentSubmitSemaphore()
+    Semaphore& RenderDevice::GetCurrentSubmitSemaphore()
     {
         return m_Frames[m_CurrentFrameIndex].submitSemaphore;
     }
 
-    Semaphore& Device::GetCurrentPresentSemaphore()
+    Semaphore& RenderDevice::GetCurrentPresentSemaphore()
     {
         return m_Frames[m_CurrentFrameIndex].presentSemaphore;
     }
 
-    Fence& Device::GetCurrentFence()
+    Fence& RenderDevice::GetCurrentFence()
     {
         return m_Frames[m_CurrentFrameIndex].fence;
     }
 
-    Nova::CommandBuffer* Device::GetCurrentCommandBuffer()
+    Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()
     {
         return &m_Frames[m_CurrentFrameIndex].commandBuffer;
     }
 
-    uint32_t Device::GetCurrentFrameIndex() const
+    uint32_t RenderDevice::GetCurrentFrameIndex() const
     {
         return m_CurrentFrameIndex;
     }
 
-    Nova::Swapchain* Device::GetSwapchain()
+    Nova::Swapchain* RenderDevice::GetSwapchain()
     {
         return &m_Swapchain;
     }

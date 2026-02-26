@@ -8,7 +8,7 @@
 #include "Runtime/Component.h"
 #include "Runtime/Entity.h"
 #include "Runtime/UUID.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 #include "Rendering/Vulkan/Sampler.h"
 #include "Rendering/Vulkan/Texture.h"
 

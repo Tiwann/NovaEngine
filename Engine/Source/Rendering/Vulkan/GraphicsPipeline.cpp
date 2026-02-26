@@ -1,5 +1,5 @@
 ﻿#include "GraphicsPipeline.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "Rendering/RenderPass.h"
 #include "Shader.h"
@@ -11,7 +11,7 @@ namespace Nova::Vulkan
 {
     bool GraphicsPipeline::Initialize(const GraphicsPipelineCreateInfo& createInfo)
     {
-        m_Device = static_cast<Device*>(createInfo.device);
+        m_Device = static_cast<RenderDevice*>(createInfo.device);
         VkDevice deviceHandle = m_Device->GetHandle();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };

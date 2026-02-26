@@ -1,9 +1,18 @@
 ﻿#include "HelloTriangleApp.h"
+
+#include "Rendering/GraphicsPipeline.h"
+#include "Rendering/Shader.h"
+#include "Runtime/Log.h"
+#include "Runtime/LogCategory.h"
+#include "Runtime/Path.h"
+
 using namespace Nova;
 
-extern "C" ::Nova::Application* CreateApplication(int argc, char** argv)
+NOVA_DECLARE_LOG_CATEGORY_STATIC(HelloTriangle, "HelloTriangle")
+
+extern "C" Application* CreateApplication(int argc, char** argv)
 {
-    return new ::HelloTriangleApp(argc, argv);
+    return new HelloTriangleApp(argc, argv);
 }
 
 Nova::ApplicationConfiguration HelloTriangleApp::GetConfiguration() const
@@ -19,7 +28,31 @@ Nova::ApplicationConfiguration HelloTriangleApp::GetConfiguration() const
 
 void HelloTriangleApp::OnInit()
 {
+    Ref<RenderDevice> renderDevice = GetRenderDevice();
 
+    ShaderCreateInfo shaderCreateInfo;
+    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultVertex());
+    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultFragment());
+    shaderCreateInfo.moduleInfo.name = "HelloTriangle";
+    shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
+    shaderCreateInfo.slang = GetSlangSession();
+    shaderCreateInfo.target = ShaderTarget::SPIRV;
+
+    m_Shader = renderDevice->CreateShader(shaderCreateInfo);
+    if (!m_Shader)
+    {
+        NOVA_LOG(HelloTriangle, Verbosity::Error, "Failed to create shader.");
+        Exit();
+    }
+
+    GraphicsPipelineCreateInfo pipelineCreateInfo;
+    pipelineCreateInfo.shader = m_Shader;
+    pipelineCreateInfo.renderPass = GetRenderPass();
+}
+
+void HelloTriangleApp::OnDestroy()
+{
+    Application::OnDestroy();
 }
 
 void HelloTriangleApp::OnUpdate(const float deltaTime)
@@ -32,11 +65,7 @@ void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)
 
 }
 
-Nova::DeviceType HelloTriangleApp::GetRenderDeviceType() const
+Nova::RenderDeviceType HelloTriangleApp::GetRenderDeviceType() const
 {
-#ifdef NOVA_HAS_D3D12
-    return DeviceType::D3D12;
-#else
-    return DeviceType::Vulkan;
-#endif
+    return RenderDeviceType::Vulkan;
 }

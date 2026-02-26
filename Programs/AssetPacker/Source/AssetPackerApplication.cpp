@@ -67,8 +67,8 @@ namespace Nova
         Application::OnDestroy();
     }
 
-    DeviceType AssetPackerApplication::GetRenderDeviceType() const
+    RenderDeviceType AssetPackerApplication::GetRenderDeviceType() const
     {
-        return DeviceType::Vulkan;
+        return RenderDeviceType::Vulkan;
     }
 }

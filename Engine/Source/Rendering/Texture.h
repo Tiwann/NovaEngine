@@ -8,11 +8,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct TextureCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         TextureUsageFlags usageFlags = TextureUsageFlagBits::None;
         Format format = Format::None;
         uint32_t width = 0;
@@ -23,7 +23,7 @@ namespace Nova
         const uint8_t* data = nullptr;
         size_t dataSize = 0;
 
-        TextureCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
+        TextureCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
         TextureCreateInfo& WithUsageFlags(TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
         TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
         TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }

@@ -7,7 +7,7 @@
 #include "Components/Transform.h"
 #include "Components/Camera.h"
 #include "Utils/BufferUtils.h"
-#include "Rendering/Vulkan/Device.h"
+#include "Rendering/Vulkan/RenderDevice.h"
 #include "Rendering/Shader.h"
 #include "Runtime/SpriteAnimation.h"
 #include "Rendering/ShaderBindingSet.h"
@@ -45,7 +45,7 @@ namespace Nova
     void SpriteRenderer::OnInit()
     {
         Application* application = GetApplication();
-        Ref<Device> device = application->GetDevice();
+        Ref<RenderDevice> device = application->GetRenderDevice();
         RenderPass* renderPass = application->GetRenderPass();
 
         const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
@@ -168,7 +168,7 @@ namespace Nova
     void SpriteRenderer::OnDestroy()
     {
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_BindingSet->Destroy();
@@ -218,7 +218,7 @@ namespace Nova
         if (sprite == m_Sprite) return;
 
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_Sprite = sprite;
@@ -237,7 +237,7 @@ namespace Nova
     void SpriteRenderer::SetSpriteAnimation(SpriteAnimation* spriteAnimation)
     {
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_SpriteAnimation = spriteAnimation;

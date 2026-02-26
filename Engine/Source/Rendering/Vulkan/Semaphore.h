@@ -5,7 +5,7 @@ typedef struct VkSemaphore_T* VkSemaphore;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class Semaphore final : public Nova::Semaphore
     {
@@ -17,6 +17,6 @@ namespace Nova::Vulkan
         const VkSemaphore* GetHandlePtr() const;
     private:
         VkSemaphore m_Handle = nullptr;
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
     };
 }

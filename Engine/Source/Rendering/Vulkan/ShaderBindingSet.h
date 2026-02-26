@@ -5,7 +5,7 @@ typedef struct VkDescriptorSet_T* VkDescriptorSet;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
     class DescriptorPool;
 
     class ShaderBindingSet final : public Nova::ShaderBindingSet
@@ -22,7 +22,7 @@ namespace Nova::Vulkan
         bool BindBuffer(uint32_t binding, const Nova::Buffer& buffer, size_t offset, size_t size) override;
 
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         DescriptorPool* m_DescriptorPool = nullptr;
         VkDescriptorSet m_Handle = nullptr;
     };

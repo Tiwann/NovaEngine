@@ -2,7 +2,7 @@
 #include "Shader.h"
 #include "Buffer.h"
 #include "DescriptorPool.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Sampler.h"
 #include "Conversions.h"
 
@@ -296,7 +296,7 @@ namespace Nova::Vulkan
         for (SpvReflectShaderModule& reflectModule : reflectModules)
             spvReflectDestroyShaderModule(&reflectModule);
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
 
         Array<VkDescriptorSetLayout> descriptorSetLayouts = m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
             [](const Ref<ShaderBindingSetLayout>& setLayout)
@@ -345,7 +345,7 @@ namespace Nova::Vulkan
         if (!setLayout) return nullptr;
 
         ShaderBindingSetCreateInfo createInfo;
-        createInfo.device = (Nova::Device*)m_Device;
+        createInfo.device = (Nova::RenderDevice*)m_Device;
         createInfo.pool = m_Device->GetDescriptorPool();
         createInfo.layout = *setLayout;
 
@@ -365,7 +365,7 @@ namespace Nova::Vulkan
         for (const auto& setLayout : m_BindingSetLayouts)
         {
             ShaderBindingSetCreateInfo createInfo;
-            createInfo.device = (Nova::Device*)m_Device;
+            createInfo.device = (Nova::RenderDevice*)m_Device;
             createInfo.pool = m_Device->GetDescriptorPool();
             createInfo.layout = setLayout;
 

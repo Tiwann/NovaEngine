@@ -5,7 +5,7 @@ typedef struct VkShaderModule_T* VkShaderModule;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class ShaderModule final : public Nova::ShaderModule
     {
@@ -16,7 +16,7 @@ namespace Nova::Vulkan
         VkShaderModule GetHandle() const;
         // VkPipelineShaderStageCreateInfo GetShaderStageCreateInfo() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkShaderModule m_Handle = nullptr;
 
     };

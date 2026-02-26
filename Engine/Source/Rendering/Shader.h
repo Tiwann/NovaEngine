@@ -10,7 +10,7 @@ namespace slang { class IGlobalSession; }
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Texture;
     class Sampler;
     class Buffer;
@@ -18,14 +18,14 @@ namespace Nova
 
     struct ShaderCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         slang::IGlobalSession* slang = nullptr;
         ShaderModuleInfo moduleInfo;
         ShaderTarget target = ShaderTarget::SPIRV;
         Array<StringView> includes;
         Array<ShaderEntryPoint> entryPoints;
 
-        ShaderCreateInfo& WithDevice(Device* device) { this->device = device; return *this; }
+        ShaderCreateInfo& WithDevice(RenderDevice* device) { this->device = device; return *this; }
         ShaderCreateInfo& WithModuleInfo(const ShaderModuleInfo& moduleInfo) { this->moduleInfo = moduleInfo; return *this; }
         ShaderCreateInfo& WithTarget(const ShaderTarget& target) { this->target = target; return *this; }
         ShaderCreateInfo& WithIncludes(const Array<StringView>& includes) { this->includes = includes; return *this; }

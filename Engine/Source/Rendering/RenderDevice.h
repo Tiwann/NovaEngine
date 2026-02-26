@@ -38,7 +38,7 @@ namespace Nova
     class Swapchain;
     class CommandBuffer;
 
-    enum class DeviceType
+    enum class RenderDeviceType
     {
         Null,
 #ifdef NOVA_HAS_VULKAN
@@ -60,12 +60,12 @@ namespace Nova
         bool vSync = false;
     };
 
-    class Device : public Object
+    class RenderDevice : public Object
     {
     public:
-        Device();
+        RenderDevice();
 
-        ~Device() override = default;
+        ~RenderDevice() override = default;
 
         virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
@@ -76,7 +76,7 @@ namespace Nova
         virtual void WaitIdle() const = 0;
         virtual void SetName(StringView name) = 0;
         virtual Nova::Swapchain* GetSwapchain() { return nullptr; }
-        virtual DeviceType GetDeviceType() = 0;
+        virtual RenderDeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
         virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
@@ -110,5 +110,5 @@ namespace Nova
         Map<SamplerCreateInfo, Ref<Sampler>> m_Samplers;
     };
 
-    Ref<Device> CreateRenderDevice(DeviceType type, const DeviceCreateInfo& createInfo);
+    Ref<RenderDevice> CreateRenderDevice(RenderDeviceType type, const DeviceCreateInfo& createInfo);
 }

@@ -5,7 +5,7 @@ typedef struct VkFence_T* VkFence;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class Fence final : public Nova::Fence
     {
@@ -18,7 +18,7 @@ namespace Nova::Vulkan
         VkFence GetHandle() const;
         const VkFence* GetHandlePtr() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkFence m_Handle = nullptr;
     };
 }

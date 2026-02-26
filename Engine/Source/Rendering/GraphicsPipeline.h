@@ -11,7 +11,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class RenderPass;
     class RenderTarget;
     class Shader;
@@ -84,7 +84,7 @@ namespace Nova
             uint32_t height = 0;
         } scissorInfo;
 
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         RenderPass* renderPass = nullptr;
         Shader* shader = nullptr;
 
@@ -106,7 +106,7 @@ namespace Nova
         GraphicsPipelineCreateInfo& SetPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
         GraphicsPipelineCreateInfo& SetShader(Shader* inShader) { this->shader = inShader; return *this; }
         GraphicsPipelineCreateInfo& SetShader(Ref<Shader> inShader) { this->shader = inShader; return *this; }
-        GraphicsPipelineCreateInfo& SetDevice(Device* inDevice) { this->device = inDevice; return *this; }
+        GraphicsPipelineCreateInfo& SetDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
         GraphicsPipelineCreateInfo& SetRenderPass(RenderPass* inRenderPass) { this->renderPass = inRenderPass; return *this; }
     };
 
@@ -118,8 +118,8 @@ namespace Nova
 
         virtual bool Initialize(const GraphicsPipelineCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
-        Device* GetDevice() const { return m_Device; }
+        RenderDevice* GetDevice() const { return m_Device; }
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
     };
 }

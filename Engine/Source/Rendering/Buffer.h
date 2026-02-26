@@ -3,7 +3,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     enum class BufferUsage
     {
@@ -17,11 +17,11 @@ namespace Nova
 
     struct BufferCreateInfo
     {
-        Device* device;
+        RenderDevice* device;
         BufferUsage usage = BufferUsage::None;
         size_t size = 0;
 
-        BufferCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
+        BufferCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
         BufferCreateInfo& WithUsage(const BufferUsage inUsage) { usage = inUsage; return *this; }
         BufferCreateInfo& WithSize(const size_t inSize) { size = inSize; return *this; }
     };

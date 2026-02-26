@@ -1,5 +1,5 @@
 ﻿#include "Buffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <D3D12MemAlloc.h>
 #include <directx/d3d12.h>
 
@@ -29,7 +29,7 @@ namespace Nova::D3D12
         resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
         resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         ID3D12Allocator* allocator = device->GetAllocator();
         if (!allocator) return false;
 

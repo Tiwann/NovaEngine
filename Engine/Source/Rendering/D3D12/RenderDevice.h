@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 #include "Swapchain.h"
 #include "Surface.h"
 #include "Queue.h"
@@ -29,7 +29,7 @@ namespace Nova::D3D12
         CommandBuffer commandBuffer;
     };
 
-    class Device final : public Nova::Device
+    class RenderDevice final : public Nova::RenderDevice
     {
     public:
         bool Initialize(const Nova::DeviceCreateInfo& createInfo) override;
@@ -40,7 +40,7 @@ namespace Nova::D3D12
         void WaitIdle() const override;
         void SetName(Nova::StringView name) override;
 
-        Nova::DeviceType GetDeviceType() override;
+        Nova::RenderDeviceType GetDeviceType() override;
 
         Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
         Ref<Nova::Surface> CreateSurface(const Nova::SurfaceCreateInfo& createInfo) override;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Containers/String.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 #include "Rendering/RenderPass.h"
 #include "Rendering/RenderTarget.h"
 #include "Rendering/ImGuiRenderer.h"
@@ -54,18 +54,19 @@ namespace Nova
         virtual void OnDrawDebug(){}
         virtual void OnDestroy(){}
 
-        virtual DeviceType GetRenderDeviceType() const { return DeviceType::Vulkan; }
+        virtual RenderDeviceType GetRenderDeviceType() const { return RenderDeviceType::Vulkan; }
 
         float GetDeltaTime() const;
         const Ref<Window>& GetWindow() const;
         Ref<Window>& GetWindow();
-        const Ref<Device>& GetDevice() const;
-        Ref<Device>& GetDevice();
+        const Ref<RenderDevice>& GetRenderDevice() const;
+        Ref<RenderDevice>& GetRenderDevice();
         const Ref<ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 
         RenderPass* GetRenderPass();
         const Ref<RenderTarget>& GetRenderTarget() const;
+        Ref<RenderTarget>& GetRenderTarget();
 
         const AssetDatabase& GetAssetDatabase() const;
         AssetDatabase& GetAssetDatabase();
@@ -95,7 +96,7 @@ namespace Nova
     private:
         CmdLineArgs m_Args;
         Ref<Window> m_Window = nullptr;
-        Ref<Device> m_Device = nullptr;
+        Ref<RenderDevice> m_Device = nullptr;
         Ref<AudioSystem> m_AudioSystem = nullptr;
         slang::IGlobalSession* m_SlangSession = nullptr;
 

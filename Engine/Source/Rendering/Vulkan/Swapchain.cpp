@@ -1,5 +1,5 @@
 ﻿#include "Swapchain.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "Containers/StringFormat.h"
 #include "CommandBuffer.h"
@@ -16,7 +16,7 @@ namespace Nova::Vulkan
 {
     bool Swapchain::Initialize(const SwapchainCreateInfo& createInfo)
     {
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const Surface* surface = static_cast<const Surface*>(createInfo.surface);
         const VkSurfaceKHR surfaceHandle = surface->GetHandle();
         const VkDevice deviceHandle = device->GetHandle();
@@ -112,7 +112,7 @@ namespace Nova::Vulkan
             barriers.Add(barrier);
         }
 
-        CommandPool* commandPool = ((Device*)m_Device)->GetCommandPool();
+        CommandPool* commandPool = ((RenderDevice*)m_Device)->GetCommandPool();
         CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
         commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit });
@@ -137,7 +137,7 @@ namespace Nova::Vulkan
 
     void Swapchain::Destroy()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
 
         for (size_t i = 0; i < GetImageCount(); i++)
@@ -171,7 +171,7 @@ namespace Nova::Vulkan
         if (!semaphore)
             return false;
 
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
         const VkResult result = vkAcquireNextImageKHR(deviceHandle, m_Handle, 1000000000, semaphore->GetHandle(), fence ? fence->GetHandle() : nullptr, &frameIndex);
         if (result != VK_SUCCESS)
@@ -185,7 +185,7 @@ namespace Nova::Vulkan
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
             Ref<Texture> texture = new Texture();
-            texture->m_Device = (Device*)m_Device;
+            texture->m_Device = (RenderDevice*)m_Device;
             texture->m_Image = m_Images[index];
             texture->m_ImageView = m_ImageViews[index];
             texture->m_Width = m_ImageWidth;
@@ -203,7 +203,7 @@ namespace Nova::Vulkan
 
     Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();
         return GetTexture(imageIndex);
     }

@@ -1,5 +1,5 @@
 ﻿#include "Surface.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Runtime/DesktopWindow.h"
 
 #include <vulkan/vulkan.h>
@@ -14,7 +14,7 @@ namespace Nova::Vulkan
 
         m_Device = createInfo.device;
         m_Window = createInfo.window;
-        const Device* device = static_cast<Device*>(createInfo.device);
+        const RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VkInstance instance = device->GetInstance();
 
         if (DesktopWindow* window = dynamic_cast<DesktopWindow*>(createInfo.window))
@@ -30,7 +30,7 @@ namespace Nova::Vulkan
 
     void Surface::Destroy()
     {
-        const Device* device = static_cast<Device*>(m_Device);
+        const RenderDevice* device = static_cast<RenderDevice*>(m_Device);
         const VkInstance instance = device->GetInstance();
         vkDestroySurfaceKHR(instance, m_Handle, nullptr);
     }

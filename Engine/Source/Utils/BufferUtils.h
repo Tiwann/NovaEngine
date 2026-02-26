@@ -3,9 +3,9 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Buffer;
 
-    Ref<Buffer> CreateVertexBuffer(Ref<Device>& device, const void* data, size_t size);
-    Ref<Buffer> CreateIndexBuffer(Ref<Device>& device, const void* data, size_t size);
+    Ref<Buffer> CreateVertexBuffer(Ref<RenderDevice>& device, const void* data, size_t size);
+    Ref<Buffer> CreateIndexBuffer(Ref<RenderDevice>& device, const void* data, size_t size);
 }

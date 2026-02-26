@@ -1,4 +1,4 @@
-﻿#include "Device.h"
+﻿#include "RenderDevice.h"
 #include "Containers/StringFormat.h"
 #include "RenderTarget.h"
 #include <directx/d3dx12.h>
@@ -28,7 +28,7 @@ namespace Nova::D3D12
     }
 #endif
 
-    bool Device::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
     {
         if (DX_FAILED(CreateDXGIFactory2(0, IID_PPV_ARGS(&m_Factory))))
             return false;
@@ -153,7 +153,7 @@ namespace Nova::D3D12
         return true;
     }
 
-    void Device::Destroy()
+    void RenderDevice::Destroy()
     {
         m_Allocator->Release();
         for (uint32_t frameIndex = 0; frameIndex < m_Swapchain.GetImageCount(); ++frameIndex)
@@ -179,7 +179,7 @@ namespace Nova::D3D12
         m_Adapter->Release();
     }
 
-    bool Device::BeginFrame()
+    bool RenderDevice::BeginFrame()
     {
         m_CurrentFrameIndex = m_Swapchain.AcquireNextFrame();
         CommandBuffer& cmdBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
@@ -199,7 +199,7 @@ namespace Nova::D3D12
         return false;
     }
 
-    void Device::EndFrame()
+    void RenderDevice::EndFrame()
     {
         CommandBuffer& cmdBuffer = m_Frames[m_CurrentFrameIndex].commandBuffer;
         Fence& fence = m_Frames[m_CurrentFrameIndex].fence;
@@ -213,25 +213,25 @@ namespace Nova::D3D12
         m_GraphicsQueue.Submit(&cmdBuffer, nullptr, nullptr, &fence, 0);
     }
 
-    void Device::Present()
+    void RenderDevice::Present()
     {
         (void)m_GraphicsQueue.Present(m_Swapchain, nullptr, m_CurrentFrameIndex);
     }
 
-    void Device::WaitIdle() const
+    void RenderDevice::WaitIdle() const
     {
     }
 
-    void Device::SetName(Nova::StringView name)
+    void RenderDevice::SetName(Nova::StringView name)
     {
     }
 
-    Nova::DeviceType Device::GetDeviceType()
+    Nova::RenderDeviceType RenderDevice::GetDeviceType()
     {
-        return Nova::DeviceType::D3D12;
+        return Nova::RenderDeviceType::D3D12;
     }
 
-    Ref<Nova::RenderTarget> Device::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
     {
         Nova::RenderTarget* renderTarget = new RenderTarget;
         if (!renderTarget->Initialize(createInfo))
@@ -242,82 +242,82 @@ namespace Nova::D3D12
         return Ref(renderTarget);
     }
 
-    Ref<Nova::Surface> Device::CreateSurface(const Nova::SurfaceCreateInfo& createInfo)
+    Ref<Nova::Surface> RenderDevice::CreateSurface(const Nova::SurfaceCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Texture> Device::CreateTexture(const Nova::TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> RenderDevice::CreateTexture(const Nova::TextureCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Texture> Device::CreateTextureUnitialized()
+    Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
     {
         return nullptr;
     }
 
-    Ref<Nova::Sampler> Device::CreateSampler(const Nova::SamplerCreateInfo& createInfo)
+    Ref<Nova::Sampler> RenderDevice::CreateSampler(const Nova::SamplerCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Buffer> Device::CreateBuffer(const Nova::BufferCreateInfo& createInfo)
+    Ref<Nova::Buffer> RenderDevice::CreateBuffer(const Nova::BufferCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Shader> Device::CreateShader(const Nova::ShaderCreateInfo& createInfo)
+    Ref<Nova::Shader> RenderDevice::CreateShader(const Nova::ShaderCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::GraphicsPipeline> Device::CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo)
+    Ref<Nova::GraphicsPipeline> RenderDevice::CreateGraphicsPipeline(const Nova::GraphicsPipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::ComputePipeline> Device::CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo)
+    Ref<Nova::ComputePipeline> RenderDevice::CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Material> Device::CreateMaterial(const Nova::MaterialCreateInfo& createInfo)
+    Ref<Nova::Material> RenderDevice::CreateMaterial(const Nova::MaterialCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    Ref<Nova::Fence> Device::CreateFence(const Nova::FenceCreateInfo& createInfo)
+    Ref<Nova::Fence> RenderDevice::CreateFence(const Nova::FenceCreateInfo& createInfo)
     {
         return nullptr;
     }
 
-    uint32_t Device::GetImageCount() const
+    uint32_t RenderDevice::GetImageCount() const
     {
         return 0;
     }
 
-    Nova::CommandBuffer* Device::GetCurrentCommandBuffer()
+    Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()
     {
         return &m_Frames[m_CurrentFrameIndex].commandBuffer;
     }
 
-    CommandPool& Device::GetCommandPool()
+    CommandPool& RenderDevice::GetCommandPool()
     {
         return m_CommandPool;
     }
 
-    D3D12MA::Allocator* Device::GetAllocator()
+    D3D12MA::Allocator* RenderDevice::GetAllocator()
     {
         return m_Allocator;
     }
 
-    Nova::Swapchain* Device::GetSwapchain()
+    Nova::Swapchain* RenderDevice::GetSwapchain()
     {
         return &m_Swapchain;
     }
 
-    uint32_t Device::GetCurrentFrameIndex() const
+    uint32_t RenderDevice::GetCurrentFrameIndex() const
     {
         return m_CurrentFrameIndex;
     }

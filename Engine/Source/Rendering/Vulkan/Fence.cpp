@@ -1,12 +1,12 @@
 ﻿#include "Fence.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
     bool Fence::Initialize(const FenceCreateInfo& createInfo)
     {
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         const VkDevice deviceHandle = device->GetHandle();
 
         VkFenceCreateInfo fenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };

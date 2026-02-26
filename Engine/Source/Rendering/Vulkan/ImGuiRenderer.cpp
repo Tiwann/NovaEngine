@@ -1,6 +1,6 @@
 ﻿#include "ImGuiRenderer.h"
 #include "Runtime/Memory.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Runtime/DesktopWindow.h"
 #include "Conversions.h"
 
@@ -22,7 +22,7 @@ namespace Nova::Vulkan
                 return false;
         }
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         const Nova::Swapchain* swapchain = device->GetSwapchain();
         const Queue* graphicsQueue = device->GetGraphicsQueue();
 

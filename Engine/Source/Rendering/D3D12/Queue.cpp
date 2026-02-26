@@ -1,5 +1,5 @@
 ﻿#include "Queue.h"
-#include "Device.h"
+#include "RenderDevice.h"
 
 #include <directx/d3d12.h>
 #include <dxgi1_6.h>
@@ -8,7 +8,7 @@
 namespace Nova::D3D12
 {
 
-    bool Queue::Initialize(Device* device, QueueType queueType)
+    bool Queue::Initialize(RenderDevice* device, QueueType queueType)
     {
         if (!device) return false;
         auto* deviceHandle = device->GetHandle();

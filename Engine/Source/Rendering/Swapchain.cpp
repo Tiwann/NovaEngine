@@ -28,7 +28,7 @@ namespace Nova
         return (uint32_t)m_Buffering;
     }
 
-    Device* Swapchain::GetDevice() const
+    RenderDevice* Swapchain::GetDevice() const
     {
         return m_Device;
     }

@@ -11,6 +11,6 @@ namespace Nova
         ApplicationConfiguration GetConfiguration() const override;
         void OnInit() override;
         void OnDestroy() override;
-        DeviceType GetRenderDeviceType() const override;
+        RenderDeviceType GetRenderDeviceType() const override;
     };
 }

@@ -6,11 +6,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct ShaderModuleCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         const uint32_t* code = nullptr;
         size_t codeSize = 0;
         ShaderStageFlagBits stage = ShaderStageFlagBits::None;
@@ -26,7 +26,7 @@ namespace Nova
         virtual void Destroy() = 0;
 
         template<typename ShaderModuleType> requires IsBaseOf<ShaderModule, ShaderModuleType>::value
-        static ShaderModuleType Create(Device& device, ShaderStageFlagBits stage, const Array<uint32_t>& spirvCode)
+        static ShaderModuleType Create(RenderDevice& device, ShaderStageFlagBits stage, const Array<uint32_t>& spirvCode)
         {
             ShaderModuleCreateInfo createInfo;
             createInfo.device = &device;

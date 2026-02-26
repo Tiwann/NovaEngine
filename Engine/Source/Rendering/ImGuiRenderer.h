@@ -10,13 +10,13 @@ namespace Nova { class Window; }
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class CommandBuffer;
 
     struct ImGuiRendererCreateInfo
     {
         Window* window = nullptr;
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         uint32_t sampleCount = 0;
     };
 
@@ -36,5 +36,5 @@ namespace Nova
         ImGuiContext* m_Context = nullptr;
     };
 
-    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, Device* device, uint32_t sampleCount);
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, RenderDevice* device, uint32_t sampleCount);
 }

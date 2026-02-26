@@ -12,7 +12,7 @@ typedef void ID3D12ImageView;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
     class RenderTarget;
     class Swapchain;
 
@@ -31,7 +31,7 @@ namespace Nova::D3D12
         friend Swapchain;
         friend RenderTarget;
 
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         ID3D12Image* m_Image = nullptr;
         ID3D12ImageView* m_ImageView = nullptr;
         ID3D12Allocation* m_Allocation = nullptr;

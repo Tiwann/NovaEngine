@@ -4,7 +4,7 @@
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class ImGuiRenderer final : public Nova::ImGuiRenderer
     {
@@ -15,6 +15,6 @@ namespace Nova::Vulkan
         void EndFrame() override;
         void Render(CommandBuffer& commandBuffer) override;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
     };
 }

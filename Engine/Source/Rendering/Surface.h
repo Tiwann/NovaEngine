@@ -5,14 +5,14 @@
 namespace Nova
 {
     class Window;
-    class Device;
+    class RenderDevice;
 
     struct SurfaceCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         Window* window = nullptr;
 
-        SurfaceCreateInfo& withDevice(Device* inDevice) { device = inDevice; return *this; };
+        SurfaceCreateInfo& withDevice(RenderDevice* inDevice) { device = inDevice; return *this; };
         SurfaceCreateInfo& withWindow(Window* inWindow) { window = inWindow; return *this; };
     };
 
@@ -25,7 +25,7 @@ namespace Nova
         virtual bool Initialize(const SurfaceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        Device* GetDevice() const;
+        RenderDevice* GetDevice() const;
         Window* GetWindow() const;
 
         uint32_t GetWidth() const;
@@ -33,7 +33,7 @@ namespace Nova
 
         bool IsAvailable() const;
     protected:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         Window* m_Window = nullptr;
     };
 }

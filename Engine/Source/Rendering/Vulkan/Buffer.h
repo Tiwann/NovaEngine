@@ -8,7 +8,7 @@ struct VmaAllocationInfo2;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class Buffer final : public Nova::Buffer
     {
@@ -29,7 +29,7 @@ namespace Nova::Vulkan
         const VkBuffer* GetHandlePtr() const;
         void GetAllocationInfo(VmaAllocationInfo2& outAllocationInfo) const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkBuffer m_Handle = nullptr;
         VmaAllocation m_Allocation = nullptr;
     };

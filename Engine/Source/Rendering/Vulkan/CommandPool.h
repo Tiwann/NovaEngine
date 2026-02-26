@@ -6,7 +6,7 @@ typedef struct VkCommandPool_T* VkCommandPool;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
     class CommandBuffer;
 
 
@@ -22,7 +22,7 @@ namespace Nova::Vulkan
 
         CommandBuffer AllocateCommandBuffer(CommandBufferLevel level);
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkCommandPool m_Handle = nullptr;
     };
 }

@@ -119,7 +119,7 @@ namespace Nova
         .WithData(compressedBlocks);
 
         Application& application = Application::GetCurrentApplication();
-        Ref<Device> device = application.GetDevice();
+        Ref<RenderDevice> device = application.GetRenderDevice();
         Ref<Texture> texture = device->CreateTexture(textureCreateInfo);
 
         return true;

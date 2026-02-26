@@ -1,7 +1,7 @@
 ﻿#include "ShaderBindingSet.h"
 #include "DescriptorPool.h"
 #include "Texture.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Buffer.h"
 #include "Sampler.h"
 #include "ShaderBindingSetLayout.h"
@@ -26,10 +26,10 @@ namespace Nova::Vulkan
         descriptorSetAllocateInfo.descriptorSetCount = 1;
         descriptorSetAllocateInfo.pSetLayouts = &descriptorSetLayout;
 
-        if (vkAllocateDescriptorSets(((Device*)createInfo.device)->GetHandle(), &descriptorSetAllocateInfo, &m_Handle) != VK_SUCCESS)
+        if (vkAllocateDescriptorSets(((RenderDevice*)createInfo.device)->GetHandle(), &descriptorSetAllocateInfo, &m_Handle) != VK_SUCCESS)
             return false;
 
-        m_Device = (Device*)createInfo.device;
+        m_Device = (RenderDevice*)createInfo.device;
         m_DescriptorPool = (DescriptorPool*)createInfo.pool;
         m_BindingSetLayout = (ShaderBindingSetLayout*)createInfo.layout;
         return true;

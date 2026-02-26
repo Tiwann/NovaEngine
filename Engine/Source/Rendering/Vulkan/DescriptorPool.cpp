@@ -3,7 +3,7 @@
 #include <vulkan/vulkan.h>
 
 #include "Conversions.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "ShaderBindingSetLayout.h"
 
 namespace Nova::Vulkan
@@ -25,7 +25,7 @@ namespace Nova::Vulkan
         descriptorPoolCreateInfo.pPoolSizes = poolSizes.Data();
         descriptorPoolCreateInfo.poolSizeCount = poolSizes.Count();
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         const VkDevice deviceHandle = device->GetHandle();
         const VkResult result = vkCreateDescriptorPool(deviceHandle, &descriptorPoolCreateInfo, nullptr, &m_Handle);
         if (result != VK_SUCCESS)

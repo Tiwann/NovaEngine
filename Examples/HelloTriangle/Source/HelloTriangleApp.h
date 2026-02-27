@@ -9,10 +9,10 @@ public:
     Nova::ApplicationConfiguration GetConfiguration() const override;
     void OnInit() override;
     void OnDestroy() override;
-    void OnUpdate(float deltaTime) override;
+    void OnPreRender(Nova::CommandBuffer& cmdBuffer) override;
     void OnRender(Nova::CommandBuffer& cmdBuffer) override;
     Nova::RenderDeviceType GetRenderDeviceType() const override;
 private:
-    Nova::Ref<Nova::Shader> m_Shader;
-    Nova::Ref<Nova::GraphicsPipeline> m_GraphicsPipeline;
+    Nova::Ref<Nova::Shader> m_Shader = nullptr;
+    Nova::Ref<Nova::GraphicsPipeline> m_GraphicsPipeline = nullptr;
 };

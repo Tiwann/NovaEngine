@@ -60,8 +60,7 @@ namespace Nova
 
         const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
         .SetDevice(device)
-        .SetShader(m_Shader)
-        .SetRenderPass(application->GetRenderPass())
+        .SetShader(*m_Shader)
         .SetVertexLayout(vertexAttributes)
         .SetMultisampleInfo({8})
         .SetDepthStencilInfo({

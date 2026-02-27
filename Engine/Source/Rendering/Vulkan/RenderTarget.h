@@ -16,8 +16,8 @@ namespace Nova::Vulkan
         void Destroy() override;
 
         bool Resize(uint32_t newWidth, uint32_t newHeight) override;
-        const Texture& GetColorTexture() override;
-        const Texture& GetDepthTexture() override;
+        Ref<Nova::Texture> GetColorTexture() override;
+        Ref<Nova::Texture> GetDepthTexture() override;
         VkImage GetColorImage(size_t index) const;
         VkImageView GetColorImageView(size_t index) const;
         VmaAllocation GetColorImageAllocation(size_t index) const;
@@ -31,7 +31,7 @@ namespace Nova::Vulkan
         VkImage m_DepthImages[3] { nullptr, nullptr, nullptr };
         VkImageView m_DepthImageViews[3] { nullptr, nullptr, nullptr };
         VmaAllocation m_DepthAllocations[3] { nullptr, nullptr, nullptr };
-        Lazy<Texture> m_ColorTexture;
-        Lazy<Texture> m_DepthTexture;
+        Lazy<Ref<Texture>> m_ColorTexture;
+        Lazy<Ref<Texture>> m_DepthTexture;
     };
 }

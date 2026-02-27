@@ -14,8 +14,8 @@ namespace Nova::D3D12
         bool Initialize(const RenderTargetCreateInfo& createInfo) override;
         void Destroy() override;
         bool Resize(uint32_t newX, uint32_t newY) override;
-        const Texture& GetColorTexture() override;
-        const Texture& GetDepthTexture() override;
+        Ref<Nova::Texture> GetColorTexture() override;
+        Ref<Nova::Texture> GetDepthTexture() override;
     private:
         ID3D12Image* m_ColorImages[3] { nullptr, nullptr, nullptr };
         ID3D12ImageView* m_ColorImageViews[3] { nullptr, nullptr, nullptr };
@@ -23,7 +23,7 @@ namespace Nova::D3D12
         ID3D12Image* m_DepthImages[3] { nullptr, nullptr, nullptr };
         ID3D12ImageView* m_DepthImageViews[3] { nullptr, nullptr, nullptr };
         ID3D12Allocation* m_DepthAllocations[3] { nullptr, nullptr, nullptr };
-        Lazy<Texture> m_ColorTexture;
-        Lazy<Texture> m_DepthTexture;
+        Lazy<Ref<Texture>> m_ColorTexture;
+        Lazy<Ref<Texture>> m_DepthTexture;
     };
 }

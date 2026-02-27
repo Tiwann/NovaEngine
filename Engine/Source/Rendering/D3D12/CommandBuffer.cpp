@@ -71,7 +71,7 @@ namespace Nova::D3D12
         //m_Handle->ClearRenderTargetView()
     }
 
-    void CommandBuffer::ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex)
+    void CommandBuffer::ClearDepthStencil(float depth, uint32_t stencil)
     {
     }
 
@@ -124,10 +124,10 @@ namespace Nova::D3D12
         m_Handle->DrawIndexedInstanced(count, 1, 0, offset, 0);
     }
 
-    void CommandBuffer::BeginRenderPass(const RenderPass& renderPass)
+    void CommandBuffer::BeginRenderPass(const RenderPassBeginInfo& beginInfo)
     {
     }
-
+    
     void CommandBuffer::EndRenderPass()
     {
     }

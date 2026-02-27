@@ -30,6 +30,7 @@ namespace Nova
         uint32_t windowWidth = 600, windowHeight = 400;
         WindowCreateFlags windowFlags = WindowCreateFlagBits::Default;
         bool vsync = false;
+        uint32_t msaaSamples = 8;
     };
 
     class Application
@@ -64,7 +65,6 @@ namespace Nova
         const Ref<ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 
-        RenderPass* GetRenderPass();
         const Ref<RenderTarget>& GetRenderTarget() const;
         Ref<RenderTarget>& GetRenderTarget();
 
@@ -101,10 +101,7 @@ namespace Nova
         slang::IGlobalSession* m_SlangSession = nullptr;
 
         Ref<RenderTarget> m_RenderTarget = nullptr;
-        RenderPass m_RenderPass;
-
         Ref<ImGuiRenderer> m_ImGuiRenderer = nullptr;
-        RenderPass m_ImGuiRenderPass;
 
         SceneManager m_SceneManager;
         AssetDatabase m_AssetDatabase;

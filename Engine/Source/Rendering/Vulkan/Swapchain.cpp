@@ -184,18 +184,21 @@ namespace Nova::Vulkan
     {
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
-            Ref<Texture> texture = new Texture();
-            texture->m_Device = (RenderDevice*)m_Device;
-            texture->m_Image = m_Images[index];
-            texture->m_ImageView = m_ImageViews[index];
-            texture->m_Width = m_ImageWidth;
-            texture->m_Height = m_ImageHeight;
-            texture->m_Allocation = nullptr;
-            texture->m_SampleCount = 1;
-            texture->m_Mips = 1;
-            texture->m_State = ResourceState::ColorAttachment;
-            texture->m_Format = m_ImageFormat;
-            return texture;
+            Texture texture;
+            texture.m_Device = (RenderDevice*)m_Device;
+            texture.m_Image = m_Images[index];
+            texture.m_ImageView = m_ImageViews[index];
+            texture.m_Width = m_ImageWidth;
+            texture.m_Height = m_ImageHeight;
+            texture.m_Depth = 1;
+            texture.m_UsageFlags = TextureUsageFlagBits::None;
+            texture.m_Name = StringFormat("Swapchain Texture {}", index);
+            texture.m_Allocation = nullptr;
+            texture.m_SampleCount = 1;
+            texture.m_Mips = 1;
+            texture.m_State = ResourceState::ColorAttachment;
+            texture.m_Format = m_ImageFormat;
+            return MakeRef<Texture>(texture);
         };
 
         return m_Textures[index].Get(createTexture);

@@ -19,20 +19,6 @@ namespace Nova
 
         const BufferView<GBufferPassDescription> passesDescriptions{createInfo.gBufferDescription.passesDescriptions, createInfo.gBufferDescription.numPasses};
 
-        m_RenderPass = new RenderPass();
-        for (const GBufferPassDescription& passDesc : passesDescriptions)
-        {
-            RenderPassAttachment attachement;
-            attachement.type = AttachmentType::Color;
-            attachement.loadOp = LoadOperation::Clear;
-            attachement.storeOp = StoreOperation::Store;
-            attachement.clearValue.color = Color::Black;
-            attachement.resolveMode = ResolveMode::Average;
-            m_RenderPass->AddAttachment(attachement);
-        }
-        m_RenderPass->Initialize(0, 0, createInfo.width, createInfo.height);
-
-
         for (const GBufferPassDescription& passDesc : passesDescriptions)
         {
             if (!passDesc.shader)
@@ -51,8 +37,7 @@ namespace Nova
 
             const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
                 .SetDevice(createInfo.device)
-                .SetShader(passDesc.shader)
-                .SetRenderPass(m_RenderPass)
+                .SetShader(*passDesc.shader)
                 .SetVertexLayout(VertexLayout())
                 .SetMultisampleInfo({1})
                 .SetDepthStencilInfo({
@@ -132,7 +117,6 @@ namespace Nova
             pass.pipeline->Destroy();
         }
         m_GBufferPasses.Clear();
-        delete m_RenderPass;
         m_IsValid = false;
         m_Width = 0;
         m_Height = 0;

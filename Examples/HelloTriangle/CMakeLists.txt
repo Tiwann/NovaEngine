@@ -1,0 +1,11 @@
+﻿file(GLOB_RECURSE HELLOTRIANGLE_SOURCES Source/*.cpp Source/*.h)
+
+add_executable(HelloTriangle)
+set_target_properties(HelloTriangle PROPERTIES CXX_STANDARD 23)
+target_sources(HelloTriangle PRIVATE ${HELLOTRIANGLE_SOURCES})
+target_link_libraries(HelloTriangle PUBLIC NovaEngine)
+target_compile_definitions(HelloTriangle PRIVATE NOVA_APPLICATION_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(HelloTriangle PRIVATE Source)
+if(CMAKE_BUILD_TYPE MATCHES Release OR CMAKE_BUILD_TYPE MATCHES MinSizeRel)
+    set_target_properties(HelloTriangle PROPERTIES WIN32_EXECUTABLE TRUE)
+endif ()

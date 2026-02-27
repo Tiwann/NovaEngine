@@ -67,7 +67,7 @@ namespace Nova::Vulkan
         const SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear);
-        m_Sampler = device->GetOrCreateSampler(samplerCreateInfo);
+        m_Sampler = device->CreateSampler(samplerCreateInfo);
         if (!m_Sampler) return false;
 
         m_Device = device;

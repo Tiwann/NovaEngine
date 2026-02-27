@@ -18,8 +18,7 @@
 
 namespace Nova::Vulkan
 {
-
-    static const RenderPass* s_CurrentRenderPass = nullptr;
+    static RenderPassBeginInfo* s_RenderPass = nullptr;
 
     bool CommandBuffer::Allocate(const CommandBufferAllocateInfo& allocateInfo)
     {
@@ -105,23 +104,22 @@ namespace Nova::Vulkan
         clearAttachment.clearValue.color = VkClearColorValue{ { color.r, color.g, color.b, color.a }};
 
         VkClearRect clearRect;
-        clearRect.rect.extent = VkExtent2D{ s_CurrentRenderPass->GetWidth(), s_CurrentRenderPass->GetHeight() };
-        clearRect.rect.offset = VkOffset2D{ (int32_t)s_CurrentRenderPass->GetOffsetX(), (int32_t)s_CurrentRenderPass->GetOffsetY() };
+        clearRect.rect.extent = VkExtent2D{ s_RenderPass->renderArea.width, s_RenderPass->renderArea.height };
+        clearRect.rect.offset = VkOffset2D{ static_cast<int32_t>(s_RenderPass->renderArea.x), static_cast<int32_t>(s_RenderPass->renderArea.y) };
         clearRect.baseArrayLayer = 0;
         clearRect.layerCount = 1;
         vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
     }
 
-    void CommandBuffer::ClearDepthStencil(const float depth, const uint32_t stencil, const uint32_t attachmentIndex)
+    void CommandBuffer::ClearDepthStencil(const float depth, const uint32_t stencil)
     {
         VkClearAttachment clearAttachment;
-        clearAttachment.colorAttachment = attachmentIndex;
         clearAttachment.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
         clearAttachment.clearValue.depthStencil = { depth, stencil };
 
         VkClearRect clearRect;
-        clearRect.rect.extent = VkExtent2D{ s_CurrentRenderPass->GetWidth(), s_CurrentRenderPass->GetHeight() };
-        clearRect.rect.offset = VkOffset2D{ (int32_t)s_CurrentRenderPass->GetOffsetX(), (int32_t)s_CurrentRenderPass->GetOffsetY() };
+        clearRect.rect.extent = VkExtent2D{ s_RenderPass->renderArea.width, s_RenderPass->renderArea.height };
+        clearRect.rect.offset = VkOffset2D{ static_cast<int32_t>(s_RenderPass->renderArea.x), static_cast<int32_t>(s_RenderPass->renderArea.y) };
         clearRect.baseArrayLayer = 0;
         clearRect.layerCount = 1;
         vkCmdClearAttachments(m_Handle, 1, &clearAttachment, 1, &clearRect);
@@ -388,66 +386,82 @@ namespace Nova::Vulkan
         Blit(src, srcRegion, dest, destRegion, filter);
     }
 
-    void CommandBuffer::BeginRenderPass(const RenderPass& renderPass)
+    static VkRenderingAttachmentInfo GetRenderingAttachmentInfo(const RenderPassAttachmentInfo& attachmentInfo)
     {
-        Array<VkRenderingAttachmentInfo> colorAttachments;
+        const Texture* texture = static_cast<const Texture*>(attachmentInfo.texture);
+        const Texture* resolveTexture = static_cast<const Texture*>(attachmentInfo.resolveTexture);
 
-        for (const RenderPassAttachment& attachment : renderPass)
+        VkRenderingAttachmentInfo renderingInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
+        renderingInfo.loadOp = Convert<VkAttachmentLoadOp>(attachmentInfo.loadOp);
+        renderingInfo.storeOp = Convert<VkAttachmentStoreOp>(attachmentInfo.storeOp);
+        renderingInfo.imageLayout = Convert<VkImageLayout>(attachmentInfo.type);
+        renderingInfo.imageView = texture->GetImageView();
+
+        switch (attachmentInfo.type)
         {
-            if (attachment.type == AttachmentType::Depth)
-                continue;
-
-            const Color& clearColor = attachment.clearValue.color;
-
-            VkRenderingAttachmentInfo colorAttachmentInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-            colorAttachmentInfo.loadOp = Convert<VkAttachmentLoadOp>(attachment.loadOp);
-            colorAttachmentInfo.storeOp = Convert<VkAttachmentStoreOp>(attachment.storeOp);
-            colorAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            colorAttachmentInfo.imageView = ((Texture*)attachment.texture)->GetImageView();
-            colorAttachmentInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
-            if (attachment.resolveTexture)
+        case RenderPassAttachmentType::Color:
             {
-                colorAttachmentInfo.resolveMode = Convert<VkResolveModeFlagBits>(attachment.resolveMode);
-                colorAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                colorAttachmentInfo.resolveImageView = ((Texture*)attachment.resolveTexture)->GetImageView();
+                const Color& clearColor = attachmentInfo.clearValue.color;
+                renderingInfo.clearValue.color = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
             }
-            colorAttachments.Add(colorAttachmentInfo);
+            break;
+        case RenderPassAttachmentType::Depth:
+            {
+                const ClearValue clearValue = attachmentInfo.clearValue;
+                renderingInfo.clearValue.depthStencil = { clearValue.depth, clearValue.stencil };
+            }
+            break;
         }
 
-
-        const RenderPassAttachment* depthAttachment = renderPass.GetDepthAttachment();
-        VkRenderingAttachmentInfo depthAttachmentInfo = { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
-        if (renderPass.HasDepthAttachment())
+        if (resolveTexture)
         {
-            depthAttachmentInfo.loadOp = Convert<VkAttachmentLoadOp>(depthAttachment->loadOp);
-            depthAttachmentInfo.storeOp = Convert<VkAttachmentStoreOp>(depthAttachment->storeOp);
-            depthAttachmentInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-            depthAttachmentInfo.imageView = ((Texture*)depthAttachment->texture)->GetImageView();
-            depthAttachmentInfo.clearValue.depthStencil = { depthAttachment->clearValue.depth, depthAttachment->clearValue.stencil};
-            if (depthAttachment->resolveTexture)
-            {
-                depthAttachmentInfo.resolveMode = Convert<VkResolveModeFlagBits>(depthAttachment->resolveMode);
-                depthAttachmentInfo.resolveImageLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL;
-                depthAttachmentInfo.resolveImageView = ((Texture*)depthAttachment->resolveTexture)->GetImageView();
-            }
+            renderingInfo.resolveMode = Convert<VkResolveModeFlagBits>(attachmentInfo.resolveMode);
+            renderingInfo.resolveImageLayout = Convert<VkImageLayout>(attachmentInfo.type);
+            renderingInfo.resolveImageView = resolveTexture->GetImageView();
+        }
+
+        return renderingInfo;
+    }
+
+    void CommandBuffer::BeginRenderPass(const RenderPassBeginInfo& beginInfo)
+    {
+        if (!s_RenderPass)
+        {
+            s_RenderPass = new RenderPassBeginInfo(beginInfo);
+        }
+        Array<VkRenderingAttachmentInfo> colorAttachments;
+        VkRenderingAttachmentInfo depthAttachment;
+        for (uint32_t i = 0; i < beginInfo.colorAttachmentCount; i++)
+        {
+            const RenderPassAttachmentInfo& colorAttachmentInfo = beginInfo.colorAttachments[i];
+            colorAttachments.Add(GetRenderingAttachmentInfo(colorAttachmentInfo));
         }
 
         VkRenderingInfo renderingInfo { VK_STRUCTURE_TYPE_RENDERING_INFO };
         renderingInfo.layerCount = 1;
         renderingInfo.viewMask = 0;
-        renderingInfo.renderArea.extent = { renderPass.GetWidth(), renderPass.GetHeight() };
-        renderingInfo.renderArea.offset = { (int32_t)renderPass.GetOffsetX(), (int32_t)renderPass.GetOffsetY() };
-        renderingInfo.colorAttachmentCount = renderPass.GetColorAttachmentCount();
+        renderingInfo.renderArea.extent = { beginInfo.renderArea.width, beginInfo.renderArea.height };
+        renderingInfo.renderArea.offset = { (int32_t)beginInfo.renderArea.x, (int32_t)beginInfo.renderArea.y };
+        renderingInfo.colorAttachmentCount = colorAttachments.Count();
         renderingInfo.pColorAttachments = colorAttachments.Data();
-        renderingInfo.pDepthAttachment = renderPass.HasDepthAttachment() ? &depthAttachmentInfo : nullptr;
-        vkCmdBeginRendering(m_Handle, &renderingInfo);
 
-        s_CurrentRenderPass = &renderPass;
+        if (beginInfo.depthAttachment)
+        {
+            depthAttachment = GetRenderingAttachmentInfo(*beginInfo.depthAttachment);
+            renderingInfo.pDepthAttachment = &depthAttachment;
+        } else
+        {
+            renderingInfo.pDepthAttachment = nullptr;
+        }
+
+        vkCmdBeginRendering(m_Handle, &renderingInfo);
     }
 
     void CommandBuffer::EndRenderPass()
     {
         vkCmdEndRendering(m_Handle);
+        delete s_RenderPass;
+        s_RenderPass = nullptr;
     }
 
     VkCommandBuffer CommandBuffer::GetHandle() const

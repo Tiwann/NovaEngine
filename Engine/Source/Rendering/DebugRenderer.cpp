@@ -7,6 +7,7 @@
 #include "Math/Matrix4.h"
 #include "Math/Quaternion.h"
 #include "Math/Vector3.h"
+#include "Runtime/Application.h"
 #include "Vulkan/RenderDevice.h"
 
 namespace Nova
@@ -26,7 +27,6 @@ namespace Nova
     static Ref<Buffer> s_IndexBuffer = nullptr;
     static Ref<GraphicsPipeline> s_Pipeline = nullptr;
     static Ref<ShaderBindingSet> s_BindingSet = nullptr;
-    static RenderPass* s_RenderPass = nullptr;
     static bool s_Begin = false;
 
     // CAREFUL THIS MIGHT INCREASE VERTEX COUNT
@@ -36,16 +36,15 @@ namespace Nova
     {
         if (!createInfo.device) return false;
         if (!createInfo.shader) return false;
-        if (!createInfo.renderPass) return false;
 
         s_Device = createInfo.device;
         s_Shader = createInfo.shader;
-        s_RenderPass = createInfo.renderPass;
 
         GraphicsPipelineCreateInfo pipelineInfo = GraphicsPipelineCreateInfo();
         pipelineInfo.device = s_Device;
         pipelineInfo.shader = s_Shader;
-        pipelineInfo.renderPass = s_RenderPass;
+        pipelineInfo.colorAttachmentFormats = { Format::R8G8B8A8_UNORM };
+        pipelineInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
 
         pipelineInfo.vertexInputInfo.layout.AddAttribute({"POSITION", Format::Vector3});
         pipelineInfo.vertexInputInfo.layout.AddAttribute({"COLOR", Format::Vector4});
@@ -120,12 +119,16 @@ namespace Nova
     {
         if (s_Vertices.IsEmpty()) return;
 
+        Application& application = Application::GetCurrentApplication();
+        const auto window = application.GetWindow();
+        const auto viewport = window->GetBounds();
+
         cmdBuffer.BindGraphicsPipeline(*s_Pipeline);
         cmdBuffer.BindVertexBuffer(*s_VertexBuffer, 0);
         cmdBuffer.BindIndexBuffer(*s_IndexBuffer, 0, Format::Uint32);
         cmdBuffer.PushConstants(*s_Shader, ShaderStageFlagBits::Vertex | ShaderStageFlagBits::Fragment, 0, sizeof(Matrix4), s_ViewProjection.ValuePtr());
-        cmdBuffer.SetViewport(s_RenderPass->GetOffsetX(), s_RenderPass->GetOffsetY(), s_RenderPass->GetWidth(), s_RenderPass->GetHeight(), 0.0f, 1.0f);
-        cmdBuffer.SetScissor(s_RenderPass->GetOffsetX(), s_RenderPass->GetOffsetY(), s_RenderPass->GetWidth(), s_RenderPass->GetHeight());
+        cmdBuffer.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0.0f, 1.0f);
+        cmdBuffer.SetScissor(viewport.x, viewport.y, viewport.width, viewport.height);
         cmdBuffer.DrawIndexed(s_Indices.Count(), 0);
     }
 

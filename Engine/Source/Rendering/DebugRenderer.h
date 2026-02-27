@@ -12,7 +12,6 @@ namespace Nova
     class CommandBuffer;
     class RenderDevice;
     class Shader;
-    class RenderPass;
 }
 
 namespace Nova
@@ -21,7 +20,6 @@ namespace Nova
     {
         Ref<RenderDevice> device = nullptr;
         Ref<Shader> shader = nullptr;
-        RenderPass* renderPass = nullptr;
         uint32_t maxVertices = 0;
     };
 

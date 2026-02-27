@@ -61,6 +61,12 @@ namespace Nova
     {
     }
 
+    void RenderDevice::Destroy()
+    {
+        for (auto& [_, sampler] : m_Samplers)
+            sampler->Destroy();
+    }
+
     Ref<Fence> RenderDevice::CreateFence()
     {
         return CreateFence({this, FenceCreateFlagBits::None});

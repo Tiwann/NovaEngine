@@ -423,6 +423,8 @@ namespace Nova::Vulkan
 
     void RenderDevice::Destroy()
     {
+        Nova::RenderDevice::Destroy();
+
         for (size_t imageIndex = 0; imageIndex < m_Swapchain.GetImageCount(); ++imageIndex)
         {
             m_Frames[imageIndex].submitSemaphore.Destroy();

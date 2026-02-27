@@ -10,6 +10,9 @@
 #include "Texture.h"
 #include <cstdint>
 
+#include "Runtime/LogCategory.h"
+
+NOVA_DECLARE_LOG_CATEGORY_STATIC(RenderDevice, "RENDER DEVICE")
 
 namespace Nova
 {
@@ -68,7 +71,7 @@ namespace Nova
         ~RenderDevice() override = default;
 
         virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
-        virtual void Destroy() = 0;
+        virtual void Destroy();
 
         virtual bool BeginFrame() = 0;
         virtual void EndFrame() = 0;

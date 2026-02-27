@@ -8,7 +8,6 @@ namespace Nova
     class Texture;
     class Shader;
     class GraphicsPipeline;
-    class RenderPass;
 
     enum class GBufferPassType
     {
@@ -65,7 +64,6 @@ namespace Nova
         void Invalidate();
     private:
         RenderDevice* m_Device = nullptr;
-        RenderPass* m_RenderPass = nullptr;
         RenderTarget* m_RenderTarget = nullptr;
         uint32_t m_Width = 0;
         uint32_t m_Height = 0;

@@ -14,7 +14,6 @@ namespace Nova
     class Buffer;
     class GraphicsPipeline;
     class ComputePipeline;
-    class RenderPass;
     class Texture;
     struct BlitRegion;
     class ShaderBindingSetLayout;
@@ -27,6 +26,7 @@ namespace Nova
     struct TextureBarrier;
     struct BufferBarrier;
     struct MemoryBarrier;
+    struct RenderPassBeginInfo;
 
     enum class CommandBufferLevel
     {
@@ -71,7 +71,7 @@ namespace Nova
 
         // Graphics Commands
         virtual void ClearColor(const Color& color, uint32_t attachmentIndex) = 0;
-        virtual void ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex) = 0;
+        virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
         virtual void BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline) = 0;
         virtual void BindComputePipeline(const Nova::ComputePipeline& pipeline) = 0;
         virtual void BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset) = 0;
@@ -82,7 +82,7 @@ namespace Nova
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
         virtual void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) = 0;
         virtual void DrawIndexed(size_t count, size_t offset) = 0;
-        virtual void BeginRenderPass(const Nova::RenderPass& renderPass) = 0;
+        virtual void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPass) = 0;
         virtual void EndRenderPass() = 0;
         virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;
         virtual void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) = 0;

@@ -39,10 +39,10 @@ namespace Nova::D3D12
         return false;
     }
 
-    const Texture& RenderTarget::GetColorTexture()
+    Ref<Nova::Texture> RenderTarget::GetColorTexture()
     {
         const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
-        const auto createTexture = [this, &imageIndex]() -> Texture
+        const auto createTexture = [this, &imageIndex]()
         {
             Texture texture;
             texture.m_Width = m_Width;
@@ -56,16 +56,16 @@ namespace Nova::D3D12
             texture.m_Mips = 1;
             texture.m_State = ResourceState::ColorAttachment;
             texture.m_SampleCount = m_SampleCount;
-            return texture;
+            return MakeRef<Texture>(texture);
         };
 
         return m_ColorTexture.Get(createTexture);
     }
 
-    const Texture& RenderTarget::GetDepthTexture()
+    Ref<Nova::Texture> RenderTarget::GetDepthTexture()
     {
         const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
-        const auto createTexture = [this, &imageIndex]() -> Texture
+        const auto createTexture = [this, &imageIndex]()
         {
             Texture texture;
             texture.m_Width = m_Width;
@@ -79,7 +79,7 @@ namespace Nova::D3D12
             texture.m_Mips = 1;
             texture.m_State = ResourceState::DepthStencilAttachment;
             texture.m_SampleCount = m_SampleCount;
-            return texture;
+            return MakeRef<Texture>(texture);
         };
 
         return m_DepthTexture.Get(createTexture);

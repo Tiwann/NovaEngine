@@ -19,20 +19,19 @@ namespace Nova
     struct ShaderCreateInfo
     {
         RenderDevice* device = nullptr;
-        slang::IGlobalSession* slang = nullptr;
         ShaderModuleInfo moduleInfo;
         ShaderTarget target = ShaderTarget::SPIRV;
+
         Array<StringView> includes;
         Array<ShaderEntryPoint> entryPoints;
 
-        ShaderCreateInfo& WithDevice(RenderDevice* device) { this->device = device; return *this; }
-        ShaderCreateInfo& WithModuleInfo(const ShaderModuleInfo& moduleInfo) { this->moduleInfo = moduleInfo; return *this; }
+        ShaderCreateInfo& WithDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
+        ShaderCreateInfo& WithModuleInfo(const ShaderModuleInfo& inModuleInfo) { this->moduleInfo = inModuleInfo; return *this; }
         ShaderCreateInfo& WithTarget(const ShaderTarget& target) { this->target = target; return *this; }
         ShaderCreateInfo& WithIncludes(const Array<StringView>& includes) { this->includes = includes; return *this; }
         ShaderCreateInfo& WithIncludesAdded(const Array<StringView>& includes) { this->includes.AddRange(includes); return *this; }
         ShaderCreateInfo& WithEntryPoints(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints = entryPoints; return *this; }
         ShaderCreateInfo& WithEntryPointsAdded(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints.AddRange(entryPoints); return *this; }
-        ShaderCreateInfo& WithSlang(slang::IGlobalSession* slang) { this->slang = slang; return *this; }
         ShaderCreateInfo& AddEntryPoint(const ShaderEntryPoint& entryPoint) { this->entryPoints.Add(entryPoint); return *this; }
         ShaderCreateInfo& AddEntryPoint(const String& name, ShaderStageFlagBits stage) { this->entryPoints.Add({name, stage}); return *this; }
     };

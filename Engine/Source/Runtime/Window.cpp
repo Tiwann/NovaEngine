@@ -36,4 +36,9 @@ namespace Nova
     {
         return m_Height;
     }
+
+    Rect2D<uint32_t> Window::GetBounds() const
+    {
+        return {0, 0, m_Width, m_Height};
+    }
 }

@@ -6,6 +6,8 @@
 
 #include <vma/vk_mem_alloc.h>
 
+#include "Containers/StringFormat.h"
+
 
 namespace Nova::Vulkan
 {
@@ -220,14 +222,17 @@ namespace Nova::Vulkan
         return Initialize(createInfo);
     }
 
-    const Texture& RenderTarget::GetColorTexture()
+    Ref<Nova::Texture> RenderTarget::GetColorTexture()
     {
         const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
-        const auto createTexture = [this, &imageIndex]() -> Texture
+        const auto createTexture = [this, &imageIndex]()
         {
             Texture texture;
             texture.m_Width = m_Width;
             texture.m_Height = m_Height;
+            texture.m_Depth = m_Depth;
+            texture.m_UsageFlags = TextureUsageFlagBits::None;
+            texture.m_Name = StringFormat("Render Target Color Texture {}", imageIndex);
             texture.m_Image = m_ColorImages[imageIndex];
             texture.m_ImageView = m_ColorImageViews[imageIndex];
             texture.m_SampleCount = m_SampleCount;
@@ -237,20 +242,23 @@ namespace Nova::Vulkan
             texture.m_Mips = 1;
             texture.m_State = ResourceState::ColorAttachment;
             texture.m_SampleCount = m_SampleCount;
-            return texture;
+            return MakeRef<Texture>(texture);
         };
 
         return m_ColorTexture.Get(createTexture);
     }
 
-    const Texture& RenderTarget::GetDepthTexture()
+    Ref<Nova::Texture> RenderTarget::GetDepthTexture()
     {
         const size_t imageIndex = ((RenderDevice*)m_Device)->GetCurrentFrameIndex();
-        const auto createTexture = [this, &imageIndex]() -> Texture
+        const auto createTexture = [this, &imageIndex]()
         {
             Texture texture;
             texture.m_Width = m_Width;
             texture.m_Height = m_Height;
+            texture.m_Depth = m_Depth;
+            texture.m_UsageFlags = TextureUsageFlagBits::None;
+            texture.m_Name = StringFormat("Render Target Depth Texture {}", imageIndex);
             texture.m_Image = m_DepthImages[imageIndex];
             texture.m_ImageView = m_DepthImageViews[imageIndex];
             texture.m_SampleCount = m_SampleCount;
@@ -260,7 +268,7 @@ namespace Nova::Vulkan
             texture.m_Mips = 1;
             texture.m_State = ResourceState::DepthStencilAttachment;
             texture.m_SampleCount = m_SampleCount;
-            return texture;
+            return MakeRef<Texture>(texture);
         };
 
         return m_DepthTexture.Get(createTexture);

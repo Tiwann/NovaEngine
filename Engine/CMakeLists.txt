@@ -192,8 +192,6 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/PresentMode.h
         Source/Rendering/PrimitiveTopology.h
         Source/Rendering/Queue.h
-        Source/Rendering/RenderPass.cpp
-        Source/Rendering/RenderPass.h
         Source/Rendering/RenderTarget.cpp
         Source/Rendering/RenderTarget.h
         Source/Rendering/ResolveMode.h

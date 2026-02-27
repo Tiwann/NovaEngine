@@ -4,6 +4,7 @@
 #include "Containers/MulticastDelegate.h"
 #include "Ref.h"
 #include "Flags.h"
+#include "Math/Rect.h"
 #include <cstdint>
 
 
@@ -50,6 +51,8 @@ namespace Nova
         const String& GetTitle() const;
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;
+        Rect2D<uint32_t> GetBounds() const;
+
 
         CloseDelegate CloseEvent;
         ResizeDelegate ResizeEvent;

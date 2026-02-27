@@ -21,6 +21,7 @@
 
 #include <vulkan/vulkan.h>
 
+#include "Rendering/RenderPass.h"
 #include "Rendering/TextureAspect.h"
 
 
@@ -535,6 +536,17 @@ namespace Nova::Vulkan
         case Format::D24_UNORM_S8_UINT:
             return VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
         default: return VK_IMAGE_ASPECT_COLOR_BIT;
+        }
+    }
+
+    template<>
+    inline VkImageLayout Convert(const RenderPassAttachmentType& value)
+    {
+        switch (value)
+        {
+        case RenderPassAttachmentType::Color: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        case RenderPassAttachmentType::Depth: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        default: return VK_IMAGE_LAYOUT_UNDEFINED;
         }
     }
 }

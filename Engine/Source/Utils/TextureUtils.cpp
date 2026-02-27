@@ -42,6 +42,7 @@ namespace Nova
         if (!pixels) return nullptr;
 
         TextureCreateInfo createInfo;
+        createInfo.usageFlags = TextureUsageFlagBits::Default;
         createInfo.device = device;
         createInfo.width = width;
         createInfo.height = height;

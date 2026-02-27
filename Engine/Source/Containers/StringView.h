@@ -18,8 +18,8 @@ namespace Nova
         StringViewBase() = default;
         StringViewBase(const StringType& string) : m_Data(string.Data()), m_Count(string.Count()) { }
         StringViewBase(ConstPointerType data) : m_Data(data), m_Count(StringLength(data)){}
-        StringViewBase(ConstPointerType data, SizeType count) : m_Data(data), m_Count(count){}
-        StringViewBase(decltype(nullptr)) : m_Data(nullptr), m_Count(0){}
+        constexpr StringViewBase(ConstPointerType data, SizeType count) : m_Data(data), m_Count(count){}
+        constexpr StringViewBase(decltype(nullptr)) : m_Data(nullptr), m_Count(0){}
 
         StringViewBase(const StringViewBase&) = default;
         StringViewBase(StringViewBase&&) noexcept = default;

@@ -9,6 +9,8 @@ namespace Nova
         Sampled = BIT(0),
         Storage = BIT(1),
         Transfer = BIT(2),
+
+        Default = Sampled | Transfer
     };
 
     using TextureUsageFlags = Flags<TextureUsageFlagBits>;

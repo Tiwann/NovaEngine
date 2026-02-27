@@ -73,4 +73,8 @@ namespace Nova::D3D12
         cmdBufferHandle->SetDescriptorHeaps(1, &m_DescriptorHeap);
         ImGui_ImplDX12_RenderDrawData(drawData, cmdBufferHandle);
     }
+
+    void ImGuiRenderer::DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height)
+    {
+    }
 }

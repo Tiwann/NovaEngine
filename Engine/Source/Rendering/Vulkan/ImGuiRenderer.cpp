@@ -1,6 +1,7 @@
 ﻿#include "ImGuiRenderer.h"
-#include "Runtime/Memory.h"
 #include "RenderDevice.h"
+#include "Sampler.h"
+#include "Runtime/Memory.h"
 #include "Runtime/DesktopWindow.h"
 #include "Conversions.h"
 
@@ -77,7 +78,6 @@ namespace Nova::Vulkan
     {
         for (const auto& [texture, id] : m_Textures)
             ImGui_ImplVulkan_RemoveTexture(reinterpret_cast<VkDescriptorSet>(id));
-        ImGui_ImplVulkan_Shutdown();
         ImGui_ImplVulkan_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext(m_Context);

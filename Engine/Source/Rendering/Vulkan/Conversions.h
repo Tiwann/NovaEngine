@@ -20,6 +20,7 @@
 #include "Rendering/TextureUsage.h"
 #include "Rendering/TextureAspect.h"
 #include "Rendering/TextureDimension.h"
+#include "Rendering/RenderPass.h"
 
 #include <vulkan/vulkan.h>
 
@@ -546,6 +547,19 @@ namespace Nova::Vulkan
         case RenderPassAttachmentType::Color: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         case RenderPassAttachmentType::Depth: return VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         default: return VK_IMAGE_LAYOUT_UNDEFINED;
+        }
+    }
+
+    template<>
+    inline VkImageType Convert(const TextureDimension& value)
+    {
+        switch (value)
+        {
+        case TextureDimension::None: return VK_IMAGE_TYPE_MAX_ENUM;
+        case TextureDimension::Dim1D: return VK_IMAGE_TYPE_1D;
+        case TextureDimension::Dim2D: return VK_IMAGE_TYPE_2D;
+        case TextureDimension::Dim3D: return VK_IMAGE_TYPE_3D;
+        default: return VK_IMAGE_TYPE_MAX_ENUM;
         }
     }
 }

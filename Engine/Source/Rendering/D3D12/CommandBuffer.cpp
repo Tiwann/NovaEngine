@@ -124,6 +124,11 @@ namespace Nova::D3D12
         m_Handle->DrawIndexedInstanced(count, 1, 0, offset, 0);
     }
 
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride)
+    {
+
+    }
+
     void CommandBuffer::BeginRenderPass(const RenderPassBeginInfo& beginInfo)
     {
     }

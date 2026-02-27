@@ -38,7 +38,6 @@ void HelloTriangleApp::OnInit()
     shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultFragment());
     shaderCreateInfo.moduleInfo.name = "HelloTriangle";
     shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
-    shaderCreateInfo.slang = GetSlangSession();
     shaderCreateInfo.target = ShaderTarget::SPIRV;
 
     m_Shader = renderDevice->CreateShader(shaderCreateInfo);

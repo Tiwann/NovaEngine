@@ -10,6 +10,8 @@
 #include <spirv_reflect.h>
 #include <unordered_map>
 
+#include "Runtime/Application.h"
+
 namespace Nova::Vulkan
 {
     static SlangCompileTarget GetCompileTarget(const ShaderTarget target)
@@ -88,11 +90,14 @@ namespace Nova::Vulkan
         m_ShaderModules.Clear();
         m_BindingSetLayouts.Clear();
 
+        Application& application = Application::GetCurrentApplication();
+        slang::IGlobalSession* slangSession = application.GetSlangSession();
+
         slang::TargetDesc shaderTargetDesc;
         shaderTargetDesc.format = GetCompileTarget(createInfo.target);
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
-        shaderTargetDesc.profile = createInfo.slang->findProfile("spirv_1_5");
+        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_5");
 
         slang::CompilerOptionEntry entries[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
@@ -107,7 +112,7 @@ namespace Nova::Vulkan
         sessionDesc.compilerOptionEntries = entries;
         sessionDesc.compilerOptionEntryCount = std::size(entries);
 
-        SlangResult result = createInfo.slang->createSession(sessionDesc, m_Session.writeRef());
+        SlangResult result = slangSession->createSession(sessionDesc, m_Session.writeRef());
         if (SLANG_FAILED(result)) return false;
 
         Slang::ComPtr<slang::IBlob> errorBlob = nullptr;

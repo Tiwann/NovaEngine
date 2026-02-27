@@ -110,7 +110,6 @@ namespace Nova
             };
 
             ShaderCreateInfo shaderCreateInfo;
-            shaderCreateInfo.slang = m_SlangSession;
             shaderCreateInfo.target = ShaderTarget::SPIRV;
             shaderCreateInfo.entryPoints.AddRange(entryPoints);
             shaderCreateInfo.moduleInfo = {moduleName, shaderPath};

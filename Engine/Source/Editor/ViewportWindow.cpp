@@ -5,8 +5,8 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 
-#include "Rendering/Device.h"
-#include "Rendering/Vulkan/Device.h"
+#include "Rendering/RenderDevice.h"
+#include "Rendering/Vulkan/RenderDevice.h"
 
 
 namespace Nova
@@ -52,7 +52,7 @@ namespace Nova
         EditorWindow::OnGui();
         if (ImGui::Begin(GetObjectName()))
         {
-            if (Ref<Vulkan::Device> device = m_Device.As<Vulkan::Device>())
+            if (Ref<Vulkan::RenderDevice> device = m_Device.As<Vulkan::RenderDevice>())
             {
                 const uint32_t frameIndex = device->GetCurrentFrameIndex();
                 ImGui::Image(ImTextureRef(m_TextureIds[frameIndex]), ImVec2(m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight()));

@@ -9,12 +9,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class CommandPool;
     class Buffer;
     class GraphicsPipeline;
     class ComputePipeline;
-    class RenderPass;
     class Texture;
     struct BlitRegion;
     class ShaderBindingSetLayout;
@@ -27,6 +26,7 @@ namespace Nova
     struct TextureBarrier;
     struct BufferBarrier;
     struct MemoryBarrier;
+    struct RenderPassBeginInfo;
 
     struct DrawIndirectParameters
     {
@@ -44,7 +44,7 @@ namespace Nova
 
     struct CommandBufferAllocateInfo
     {
-        Device* device;
+        RenderDevice* device;
         CommandPool* commandPool;
         CommandBufferLevel level = CommandBufferLevel::Primary;
     };
@@ -79,7 +79,7 @@ namespace Nova
 
         // Graphics Commands
         virtual void ClearColor(const Color& color, uint32_t attachmentIndex) = 0;
-        virtual void ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex) = 0;
+        virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
         virtual void BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline) = 0;
         virtual void BindComputePipeline(const Nova::ComputePipeline& pipeline) = 0;
         virtual void BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset) = 0;
@@ -91,7 +91,7 @@ namespace Nova
         virtual void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) = 0;
         virtual void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride = sizeof(DrawIndirectParameters)) = 0;
         virtual void DrawIndexed(size_t count, size_t offset) = 0;
-        virtual void BeginRenderPass(const Nova::RenderPass& renderPass) = 0;
+        virtual void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPass) = 0;
         virtual void EndRenderPass() = 0;
         virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;
         virtual void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) = 0;

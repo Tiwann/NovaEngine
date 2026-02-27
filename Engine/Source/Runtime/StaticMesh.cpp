@@ -3,7 +3,7 @@
 #include "Math/Vector2.h"
 #include "Math/Vector3.h"
 #include "Math/Vector4.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/Vertex.h"
 #include "Utils/BufferUtils.h"
@@ -59,7 +59,7 @@ namespace Nova
         if (!loadedScene) return false;
         if (!loadedScene->HasMeshes()) return false;
 
-        Ref<Device>& device = Application::GetCurrentApplication().GetDevice();
+        Ref<RenderDevice>& device = Application::GetCurrentApplication().GetRenderDevice();
 
         Array<Vertex> allVertices;
         Array<uint32_t> allIndices;

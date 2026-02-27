@@ -1,8 +1,7 @@
 ﻿#include "ImGuiRenderer.h"
 #include "Runtime/Memory.h"
+#include "RenderDevice.h"
 #include "Runtime/DesktopWindow.h"
-#include "Device.h"
-#include "Sampler.h"
 #include "Conversions.h"
 
 #include <print>
@@ -24,7 +23,7 @@ namespace Nova::Vulkan
                 return false;
         }
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
         const Nova::Swapchain* swapchain = device->GetSwapchain();
         const Queue* graphicsQueue = device->GetGraphicsQueue();
 
@@ -64,7 +63,7 @@ namespace Nova::Vulkan
             return false;
 
 
-        const SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
+        SamplerCreateInfo samplerCreateInfo = SamplerCreateInfo()
         .WithAddressMode(SamplerAddressMode::Repeat)
         .WithFilter(Filter::Linear, Filter::Linear);
         m_Sampler = device->CreateSampler(samplerCreateInfo);

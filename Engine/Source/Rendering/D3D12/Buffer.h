@@ -7,7 +7,7 @@ typedef D3D12MA::Allocation ID3D12Allocation;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
 
     class Buffer final : public Nova::Buffer
     {
@@ -20,7 +20,7 @@ namespace Nova::D3D12
         bool GPUCopy(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
         void Memset(size_t value, size_t size) override;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         ID3D12Allocation* m_Allocation = nullptr;
         ID3D12Resource* m_Handle = nullptr;
     };

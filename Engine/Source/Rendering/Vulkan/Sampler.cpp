@@ -1,5 +1,5 @@
 ﻿#include "Sampler.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include <vulkan/vulkan.h>
 
@@ -23,12 +23,12 @@ namespace Nova::Vulkan
         samplerCreateInfo.mipLodBias = 0.0f;
         samplerCreateInfo.mipmapMode = Convert<VkSamplerMipmapMode>(createInfo.mipmapFilter);
 
-        const VkDevice deviceHandle = ((Device*)createInfo.device)->GetHandle();
+        const VkDevice deviceHandle = ((RenderDevice*)createInfo.device)->GetHandle();
         const VkResult result = vkCreateSampler(deviceHandle, &samplerCreateInfo,nullptr, &m_Handle);
         if (result != VK_SUCCESS)
             return false;
 
-        m_Device = (Device*)createInfo.device;
+        m_Device = (RenderDevice*)createInfo.device;
         m_AddressModeU = createInfo.addressModeU;
         m_AddressModeV = createInfo.addressModeV;
         m_AddressModeW = createInfo.addressModeW;

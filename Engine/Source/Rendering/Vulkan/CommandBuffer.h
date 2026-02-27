@@ -6,7 +6,7 @@ typedef struct VkCommandBuffer_T* VkCommandBuffer;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class CommandBuffer final : public Nova::CommandBuffer
     {
@@ -21,7 +21,7 @@ namespace Nova::Vulkan
         void End() override;
 
         void ClearColor(const Color& color, uint32_t attachmentIndex) override;
-        void ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex) override;
+        void ClearDepthStencil(float depth, uint32_t stencil) override;
         void BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline) override;
         void BindComputePipeline(const Nova::ComputePipeline& pipeline) override;
         void BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset) override;
@@ -33,7 +33,7 @@ namespace Nova::Vulkan
         void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) override;
         void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride) override;
         void DrawIndexed(size_t count, size_t offset) override;
-        void BeginRenderPass(const Nova::RenderPass& renderPass) override;
+        void BeginRenderPass(const Nova::RenderPassBeginInfo& beginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;
         void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) override;
@@ -54,7 +54,7 @@ namespace Nova::Vulkan
         VkCommandBuffer GetHandle() const;
         const VkCommandBuffer* GetHandlePtr() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkCommandBuffer m_Handle = nullptr;
     };
 }

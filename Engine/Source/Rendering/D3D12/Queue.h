@@ -5,7 +5,7 @@ struct ID3D12CommandQueue;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
 
     enum class QueueType
     {
@@ -18,7 +18,7 @@ namespace Nova::D3D12
     class Queue final : public Nova::Queue
     {
     public:
-        bool Initialize(Device* device, QueueType queueType);
+        bool Initialize(RenderDevice* device, QueueType queueType);
         void Destroy();
 
         void Submit(Nova::CommandBuffer* commandBuffer, Nova::Semaphore* waitSemaphore, Nova::Semaphore* signalSemaphore, Nova::Fence* fence, uint32_t waitStagesMask) const override;
@@ -32,7 +32,7 @@ namespace Nova::D3D12
 
     private:
         QueueType m_Type = QueueType::None;
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         ID3D12CommandQueue* m_Handle = nullptr;
     };
 }

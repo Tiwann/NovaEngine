@@ -1,5 +1,5 @@
 ﻿#include "ComputePipeline.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "ShaderModule.h"
 
 #include <vulkan/vulkan.h>
@@ -21,7 +21,7 @@ namespace Nova::Vulkan
         if (!stageFlags.Contains(ShaderStageFlagBits::Compute))
             return false;
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
 
         VkPipelineShaderStageCreateInfo shaderStageCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO };
         shaderStageCreateInfo.stage = VK_SHADER_STAGE_COMPUTE_BIT;

@@ -7,7 +7,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Buffer;
     class Sampler;
     class Texture;
@@ -16,7 +16,7 @@ namespace Nova
 
     struct ShaderBindingSetCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         DescriptorPool* pool = nullptr;
         const ShaderBindingSetLayout* layout = nullptr;
     };

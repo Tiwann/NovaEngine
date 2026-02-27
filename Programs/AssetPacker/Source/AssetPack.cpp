@@ -79,7 +79,7 @@ namespace Nova
         switch (entry.assetType)
         {
         case AssetType::Texture:
-            return LoadTexture(application.GetDevice(), assetData, assetDataSize);
+            return LoadTexture(application.GetRenderDevice(), assetData, assetDataSize);
         case AssetType::AudioClip:
             {
                 Ref<AudioClip> loadedClip = new AudioClip();

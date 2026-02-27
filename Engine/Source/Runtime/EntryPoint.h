@@ -10,10 +10,10 @@ namespace Nova
 }
 
 #define NOVA_DEFINE_APPLICATION_CLASS(userClass) \
-    namespace Nova \
+    namespace ::Nova \
     {\
         extern "C" ::Nova::Application* CreateApplication(int argc, char** argv)\
         {\
-            return new ::userClass(argc, argv);\
+            return new ::userClass(Nova::CmdLineArgs(argc, argv));\
         }\
     }

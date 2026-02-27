@@ -1,5 +1,5 @@
 ﻿#include "ShaderModule.h"
-#include "Device.h"
+#include "RenderDevice.h"
 
 #include <vulkan/vulkan.h>
 
@@ -7,7 +7,7 @@ namespace Nova::Vulkan
 {
     bool ShaderModule::Initialize(const ShaderModuleCreateInfo& createInfo)
     {
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
 
         VkShaderModuleCreateInfo shaderModuleCreateInfo = { VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO };
         shaderModuleCreateInfo.codeSize = createInfo.codeSize;

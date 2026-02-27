@@ -4,14 +4,14 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     struct DescriptorPoolCreateInfo
     {
-        Device* device;
+        RenderDevice* device;
         Map<BindingType, uint32_t> sizes;
         size_t maxSets;
 
-        DescriptorPoolCreateInfo& SetDevice(Device* device) { this->device = device; return *this; }
+        DescriptorPoolCreateInfo& SetDevice(RenderDevice* device) { this->device = device; return *this; }
         DescriptorPoolCreateInfo& SetBindingTypeSize(const BindingType bindingType, const uint32_t size) { sizes[bindingType] = size; return *this; }
         DescriptorPoolCreateInfo& SetMaxSets(const uint32_t maxSets) { this->maxSets = maxSets; return *this; }
     };

@@ -5,7 +5,7 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Shader;
     class ShaderBindingSet;
     class Texture;
@@ -14,10 +14,10 @@ namespace Nova
 
     struct MaterialCreateInfo
     {
-        Ref<Device> device = nullptr;
+        Ref<RenderDevice> device = nullptr;
         Ref<Shader> shader = nullptr;
 
-        MaterialCreateInfo& WithDevice(Device* inDevice) { this->device = inDevice; return *this; }
+        MaterialCreateInfo& WithDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
         MaterialCreateInfo& WithShader(Shader* inShader) { this->shader = inShader; return *this; }
     };
 
@@ -40,7 +40,7 @@ namespace Nova
 
         Ref<Shader> GetShader() const { return m_Shader; }
     protected:
-        Ref<Device> m_Device = nullptr;
+        Ref<RenderDevice> m_Device = nullptr;
         Ref<Shader> m_Shader = nullptr;
         Ref<ShaderBindingSet> m_BindingSet = nullptr;
     };

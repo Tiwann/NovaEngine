@@ -1,5 +1,5 @@
 ﻿#include "Texture.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include <directx/d3dx12.h>
 #include <D3D12MemAlloc.h>
@@ -20,7 +20,7 @@ namespace Nova::D3D12
         if (!createInfo.device)
             return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         ID3D12Allocator* allocator = device->GetAllocator();
         ID3D12Device13* deviceHandle = device->GetHandle();
 
@@ -89,7 +89,7 @@ namespace Nova::D3D12
         return m_Image;
     }
 
-    ID3D12ImageView Texture::GetImageView() const
+    ID3D12ImageView* Texture::GetImageView() const
     {
         return m_ImageView;
     }

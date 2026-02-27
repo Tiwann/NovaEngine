@@ -1,7 +1,7 @@
 ﻿#include "Runtime/DesktopWindow.h"
 #include "Swapchain.h"
 #include "Conversions.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Surface.h"
 #include "Texture.h"
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -17,7 +17,7 @@ namespace Nova::D3D12
         if (!createInfo.device) return false;
         if (!createInfo.surface) return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         Surface* surface = static_cast<Surface*>(createInfo.surface);
         DesktopWindow* window = static_cast<DesktopWindow*>(surface->GetWindow());
         IDXGIFactory7* factory = device->GetFactory();
@@ -70,8 +70,8 @@ namespace Nova::D3D12
             if (DX_FAILED(image->QueryInterface(IID_PPV_ARGS(&m_Images[imageIndex]))))
                 return false;
 
-            m_ImageViews[imageIndex] = m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize;
-            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {m_ImageViews[imageIndex]});
+            m_ImageViews[imageIndex] = reinterpret_cast<void*>(m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize);
+            deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {reinterpret_cast<SIZE_T>(m_ImageViews[imageIndex])});
 
             m_Textures[imageIndex].SetDirty();
         }
@@ -117,7 +117,7 @@ namespace Nova::D3D12
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
             Ref<Texture> texture = new Texture();
-            texture->m_Device = (Device*)m_Device;
+            texture->m_Device = (RenderDevice*)m_Device;
             texture->m_Image = m_Images[index];
             texture->m_ImageView = m_ImageViews[index];
             texture->m_Width = m_ImageWidth;
@@ -125,7 +125,6 @@ namespace Nova::D3D12
             texture->m_Allocation = nullptr;
             texture->m_SampleCount = 1;
             texture->m_Mips = 1;
-            texture->m_UsageFlags = TextureUsageFlagBits::Attachment;
             texture->m_Format = m_ImageFormat;
             return texture;
         };
@@ -135,7 +134,7 @@ namespace Nova::D3D12
 
     Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();
         return GetTexture(imageIndex);
     }
@@ -155,7 +154,7 @@ namespace Nova::D3D12
         return m_Images[index];
     }
 
-    ID3D12ImageView Swapchain::GetImageView(size_t index) const
+    ID3D12ImageView* Swapchain::GetImageView(size_t index) const
     {
         return m_ImageViews[index];
     }

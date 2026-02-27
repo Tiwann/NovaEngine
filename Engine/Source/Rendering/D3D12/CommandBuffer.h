@@ -5,7 +5,7 @@ struct ID3D12GraphicsCommandList10;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
 
     class CommandBuffer final : public Nova::CommandBuffer
     {
@@ -16,7 +16,7 @@ namespace Nova::D3D12
         bool Begin(const CommandBufferBeginInfo& beginInfo) override;
         void End() override;
         void ClearColor(const Color& color, uint32_t attachmentIndex) override;
-        void ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex) override;
+        void ClearDepthStencil(float depth, uint32_t stencil) override;
         void BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline) override;
         void BindComputePipeline(const Nova::ComputePipeline& pipeline) override;
         void BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset) override;
@@ -27,7 +27,7 @@ namespace Nova::D3D12
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) override;
         void DrawIndexed(size_t count, size_t offset) override;
-        void BeginRenderPass(const Nova::RenderPass& renderPass) override;
+        void BeginRenderPass(const RenderPassBeginInfo& beginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size,const void* values) override;
         void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) override;
@@ -37,11 +37,15 @@ namespace Nova::D3D12
         void Blit(const Nova::Texture& src, const Nova::BlitRegion& srcRegion, const Nova::Texture& dest, const Nova::BlitRegion& destRegion, Filter filter) override;
         void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
         void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) override;
+        void TextureBarrier(const Nova::TextureBarrier& barrier) override;
+        void BufferBarrier(const Nova::BufferBarrier& barrier) override;
+        void MemoryBarrier(const Nova::MemoryBarrier& barrier) override;
 
         ID3D12GraphicsCommandList10* GetHandle() { return m_Handle; }
         const ID3D12GraphicsCommandList10* GetHandle() const { return m_Handle; }
+
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         ID3D12GraphicsCommandList10* m_Handle = nullptr;
     };
 }

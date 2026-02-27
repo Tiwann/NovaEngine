@@ -17,9 +17,9 @@ namespace Nova
         m_Height = height;
     }
 
-    void RenderPass::AddAttachment(const RenderPassAttachment& attachment)
+    void RenderPass::AddAttachment(const RenderPassAttachmentInfo& attachment)
     {
-        if (GetDepthAttachmentCount() > 0 && attachment.type == AttachmentType::Depth)
+        if (GetDepthAttachmentCount() > 0 && attachment.type == RenderPassAttachmentType::Depth)
             NOVA_ASSERT(false, "Only one depth attachment is allowed");
         m_Attachments.Add(attachment);
     }
@@ -52,9 +52,9 @@ namespace Nova
     uint32_t RenderPass::GetColorAttachmentCount() const
     {
         uint32_t result = 0;
-        for (const RenderPassAttachment& attachment : m_Attachments)
+        for (const RenderPassAttachmentInfo& attachment : m_Attachments)
         {
-            if (attachment.type == AttachmentType::Color)
+            if (attachment.type == RenderPassAttachmentType::Color)
                 result++;
         }
         return result;
@@ -63,24 +63,24 @@ namespace Nova
     uint32_t RenderPass::GetDepthAttachmentCount() const
     {
         uint32_t result = 0;
-        for (const RenderPassAttachment& attachment : m_Attachments)
+        for (const RenderPassAttachmentInfo& attachment : m_Attachments)
         {
-            if (attachment.type == AttachmentType::Depth)
+            if (attachment.type == RenderPassAttachmentType::Depth)
                 result++;
         }
         return result;
     }
 
-    RenderPassAttachment& RenderPass::GetAttachment(const uint32_t index)
+    RenderPassAttachmentInfo& RenderPass::GetAttachment(const uint32_t index)
     {
         return m_Attachments[index];
     }
 
-    RenderPassAttachment* RenderPass::GetDepthAttachment() const
+    RenderPassAttachmentInfo* RenderPass::GetDepthAttachment() const
     {
-        RenderPassAttachment* result = m_Attachments.Single([](const RenderPassAttachment& attachment)
+        RenderPassAttachmentInfo* result = m_Attachments.Single([](const RenderPassAttachmentInfo& attachment)
         {
-            return attachment.type == AttachmentType::Depth;
+            return attachment.type == RenderPassAttachmentType::Depth;
         });
 
         return result ? result : nullptr;
@@ -106,22 +106,22 @@ namespace Nova
         return false;
     }
 
-    Array<RenderPassAttachment>::Iterator RenderPass::begin()
+    Array<RenderPassAttachmentInfo>::Iterator RenderPass::begin()
     {
         return m_Attachments.begin();
     }
 
-    Array<RenderPassAttachment>::Iterator RenderPass::end()
+    Array<RenderPassAttachmentInfo>::Iterator RenderPass::end()
     {
         return m_Attachments.end();
     }
 
-    Array<RenderPassAttachment>::ConstIterator RenderPass::begin() const
+    Array<RenderPassAttachmentInfo>::ConstIterator RenderPass::begin() const
     {
         return m_Attachments.begin();
     }
 
-    Array<RenderPassAttachment>::ConstIterator RenderPass::end() const
+    Array<RenderPassAttachmentInfo>::ConstIterator RenderPass::end() const
     {
         return m_Attachments.end();
     }

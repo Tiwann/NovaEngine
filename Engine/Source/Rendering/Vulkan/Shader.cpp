@@ -2,13 +2,15 @@
 #include "Shader.h"
 #include "Buffer.h"
 #include "DescriptorPool.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Sampler.h"
 #include "Conversions.h"
 
 #include <vulkan/vulkan.h>
 #include <spirv_reflect.h>
 #include <unordered_map>
+
+#include "Runtime/Application.h"
 
 namespace Nova::Vulkan
 {
@@ -88,27 +90,29 @@ namespace Nova::Vulkan
         m_ShaderModules.Clear();
         m_BindingSetLayouts.Clear();
 
+        Application& application = Application::GetCurrentApplication();
+        slang::IGlobalSession* slangSession = application.GetSlangSession();
+
         slang::TargetDesc shaderTargetDesc;
         shaderTargetDesc.format = GetCompileTarget(createInfo.target);
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
-        shaderTargetDesc.profile = createInfo.slang->findProfile("spirv_1_6");
+        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_5");
 
-        Array<slang::CompilerOptionEntry>  entries = {
+        slang::CompilerOptionEntry entries[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
             {slang::CompilerOptionName::Optimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, SLANG_OPTIMIZATION_LEVEL_NONE)},
         };
-
         slang::SessionDesc sessionDesc;
         sessionDesc.targets = &shaderTargetDesc;
         sessionDesc.targetCount = 1;
         sessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
         sessionDesc.searchPaths = createInfo.includes.Transform<const char*>([](const StringView includeDir) { return *includeDir; }).Data();
         sessionDesc.searchPathCount = createInfo.includes.Count();
-        sessionDesc.compilerOptionEntries = entries.Data();
-        sessionDesc.compilerOptionEntryCount = entries.Count();
+        sessionDesc.compilerOptionEntries = entries;
+        sessionDesc.compilerOptionEntryCount = std::size(entries);
 
-        SlangResult result = createInfo.slang->createSession(sessionDesc, m_Session.writeRef());
+        SlangResult result = slangSession->createSession(sessionDesc, m_Session.writeRef());
         if (SLANG_FAILED(result)) return false;
 
         Slang::ComPtr<slang::IBlob> errorBlob = nullptr;
@@ -297,7 +301,7 @@ namespace Nova::Vulkan
         for (SpvReflectShaderModule& reflectModule : reflectModules)
             spvReflectDestroyShaderModule(&reflectModule);
 
-        Device* device = (Device*)createInfo.device;
+        RenderDevice* device = (RenderDevice*)createInfo.device;
 
         Array<VkDescriptorSetLayout> descriptorSetLayouts = m_BindingSetLayouts.Transform<VkDescriptorSetLayout>(
             [](const Ref<ShaderBindingSetLayout>& setLayout)
@@ -346,7 +350,7 @@ namespace Nova::Vulkan
         if (!setLayout) return nullptr;
 
         ShaderBindingSetCreateInfo createInfo;
-        createInfo.device = (Nova::Device*)m_Device;
+        createInfo.device = (Nova::RenderDevice*)m_Device;
         createInfo.pool = m_Device->GetDescriptorPool();
         createInfo.layout = *setLayout;
 
@@ -366,7 +370,7 @@ namespace Nova::Vulkan
         for (const auto& setLayout : m_BindingSetLayouts)
         {
             ShaderBindingSetCreateInfo createInfo;
-            createInfo.device = (Nova::Device*)m_Device;
+            createInfo.device = (Nova::RenderDevice*)m_Device;
             createInfo.pool = m_Device->GetDescriptorPool();
             createInfo.layout = setLayout;
 

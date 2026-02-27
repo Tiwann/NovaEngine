@@ -6,7 +6,7 @@
 namespace Nova
 {
     class StaticMesh;
-    class Device;
+    class RenderDevice;
     class GraphicsPipeline;
     class Buffer;
     class Shader;

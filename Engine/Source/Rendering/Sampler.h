@@ -7,11 +7,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct SamplerCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         SamplerAddressMode addressModeU = SamplerAddressMode::Repeat;
         SamplerAddressMode addressModeV = SamplerAddressMode::Repeat;
         SamplerAddressMode addressModeW = SamplerAddressMode::Repeat;
@@ -25,7 +25,7 @@ namespace Nova
         float maxLod = 1.0f;
         Filter mipmapFilter = Filter::Nearest;
 
-        SamplerCreateInfo& WithDevice(Device* inDevice) {  device = inDevice; return *this; }
+        SamplerCreateInfo& WithDevice(RenderDevice* inDevice) {  device = inDevice; return *this; }
         SamplerCreateInfo& WithAddressModeUVW(const SamplerAddressMode inU, const SamplerAddressMode inV, const SamplerAddressMode inW) { addressModeU = inU; addressModeV = inV; addressModeW = inW; return *this; }
         SamplerCreateInfo& WithAddressMode(const SamplerAddressMode in) { addressModeU = in; addressModeV = in; addressModeW = in; return *this;  }
         SamplerCreateInfo& WithFilter(const Filter inMinFilter, const Filter inMagFilter) { minFilter = inMinFilter; magFilter = inMagFilter; return *this; }

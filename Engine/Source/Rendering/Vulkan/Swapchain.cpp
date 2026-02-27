@@ -1,11 +1,12 @@
 ﻿#include "Swapchain.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "Containers/StringFormat.h"
 #include "CommandBuffer.h"
 #include "RenderTarget.h"
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
+#include "Sampler.h"
 
 #include <vulkan/vulkan.h>
 
@@ -15,7 +16,7 @@ namespace Nova::Vulkan
 {
     bool Swapchain::Initialize(const SwapchainCreateInfo& createInfo)
     {
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const Surface* surface = static_cast<const Surface*>(createInfo.surface);
         const VkSurfaceKHR surfaceHandle = surface->GetHandle();
         const VkDevice deviceHandle = device->GetHandle();
@@ -111,7 +112,7 @@ namespace Nova::Vulkan
             barriers.Add(barrier);
         }
 
-        CommandPool* commandPool = ((Device*)m_Device)->GetCommandPool();
+        CommandPool* commandPool = ((RenderDevice*)m_Device)->GetCommandPool();
         CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
 
         commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit });
@@ -136,7 +137,7 @@ namespace Nova::Vulkan
 
     void Swapchain::Destroy()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
 
         for (size_t i = 0; i < GetImageCount(); i++)
@@ -170,7 +171,7 @@ namespace Nova::Vulkan
         if (!semaphore)
             return false;
 
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const VkDevice deviceHandle = device->GetHandle();
         const VkResult result = vkAcquireNextImageKHR(deviceHandle, m_Handle, 1000000000, semaphore->GetHandle(), fence ? fence->GetHandle() : nullptr, &frameIndex);
         if (result != VK_SUCCESS)
@@ -183,18 +184,21 @@ namespace Nova::Vulkan
     {
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
-            Ref<Texture> texture = new Texture();
-            texture->m_Device = (Device*)m_Device;
-            texture->m_Image = m_Images[index];
-            texture->m_ImageView = m_ImageViews[index];
-            texture->m_Width = m_ImageWidth;
-            texture->m_Height = m_ImageHeight;
-            texture->m_Allocation = nullptr;
-            texture->m_SampleCount = 1;
-            texture->m_Mips = 1;
-            texture->m_State = ResourceState::ColorAttachment;
-            texture->m_Format = m_ImageFormat;
-            return texture;
+            Texture texture;
+            texture.m_Device = (RenderDevice*)m_Device;
+            texture.m_Image = m_Images[index];
+            texture.m_ImageView = m_ImageViews[index];
+            texture.m_Width = m_ImageWidth;
+            texture.m_Height = m_ImageHeight;
+            texture.m_Depth = 1;
+            texture.m_UsageFlags = TextureUsageFlagBits::None;
+            texture.m_Name = StringFormat("Swapchain Texture {}", index);
+            texture.m_Allocation = nullptr;
+            texture.m_SampleCount = 1;
+            texture.m_Mips = 1;
+            texture.m_State = ResourceState::ColorAttachment;
+            texture.m_Format = m_ImageFormat;
+            return MakeRef<Texture>(texture);
         };
 
         return m_Textures[index].Get(createTexture);
@@ -202,7 +206,7 @@ namespace Nova::Vulkan
 
     Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
-        const Device* device = (Device*)m_Device;
+        const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t imageIndex = device->GetCurrentFrameIndex();
         return GetTexture(imageIndex);
     }

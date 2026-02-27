@@ -1,9 +1,19 @@
 ﻿#include "CommandBuffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "CommandPool.h"
 #include "Buffer.h"
+#include "Texture.h"
 #include "Containers/StringConversion.h"
+#include "Rendering/ResourceBarrier.h"
+#include "Conversions.h"
+
+
 #include <directx/d3dx12.h>
+
+#ifdef MemoryBarrier
+#undef MemoryBarrier
+#endif
+
 
 namespace Nova::D3D12
 {
@@ -12,7 +22,7 @@ namespace Nova::D3D12
         if (!allocateInfo.device) return false;
         if (!allocateInfo.commandPool) return false;
 
-        Device* device = static_cast<Device*>(allocateInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(allocateInfo.device);
         CommandPool* commandPool = static_cast<CommandPool*>(allocateInfo.commandPool);
         ID3D12Device13* deviceHandle = device->GetHandle();
         ID3D12CommandAllocator* commandAllocator = commandPool->GetHandle();
@@ -25,7 +35,8 @@ namespace Nova::D3D12
         if (DX_FAILED(commandBuffer->QueryInterface(IID_PPV_ARGS(&m_Handle))))
             return false;
 
-        m_Handle->Close();
+        if (DX_FAILED(m_Handle->Close()))
+            return false;
 
         m_Device = device;
         return true;
@@ -60,7 +71,7 @@ namespace Nova::D3D12
         //m_Handle->ClearRenderTargetView()
     }
 
-    void CommandBuffer::ClearDepthStencil(float depth, uint32_t stencil, uint32_t attachmentIndex)
+    void CommandBuffer::ClearDepthStencil(float depth, uint32_t stencil)
     {
     }
 
@@ -75,6 +86,7 @@ namespace Nova::D3D12
 
     void CommandBuffer::BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset)
     {
+
     }
 
     void CommandBuffer::BindIndexBuffer(const Nova::Buffer& indexBuffer, size_t offset, Format indexFormat)
@@ -112,10 +124,10 @@ namespace Nova::D3D12
         m_Handle->DrawIndexedInstanced(count, 1, 0, offset, 0);
     }
 
-    void CommandBuffer::BeginRenderPass(const RenderPass& renderPass)
+    void CommandBuffer::BeginRenderPass(const RenderPassBeginInfo& beginInfo)
     {
     }
-
+    
     void CommandBuffer::EndRenderPass()
     {
     }
@@ -143,15 +155,38 @@ namespace Nova::D3D12
     {
     }
 
-    void CommandBuffer::Blit(const Texture& src, const BlitRegion& srcRegion, const Texture& dest, const BlitRegion& destRegion, Filter filter)
+    void CommandBuffer::Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter)
     {
     }
 
-    void CommandBuffer::Blit(const Texture& src, const Texture& dest, Filter filter)
+    void CommandBuffer::Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter)
     {
     }
 
     void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
+    {
+
+    }
+
+    void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)
+    {
+        const Texture* texture = static_cast<const Texture*>(barrier.texture);
+        const ResourceState currentState = texture->GetState();
+        if (currentState != barrier.destState)
+        {
+            const auto dxBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
+                const_cast<ID3D12Image*>(texture->GetImage()),
+                Convert<D3D12_RESOURCE_STATES>(currentState),
+                Convert<D3D12_RESOURCE_STATES>(barrier.destState));
+            m_Handle->ResourceBarrier(1, &dxBarrier);
+        }
+    }
+
+    void CommandBuffer::MemoryBarrier(const Nova::MemoryBarrier& barrier)
+    {
+    }
+
+    void CommandBuffer::BufferBarrier(const Nova::BufferBarrier& barrier)
     {
 
     }

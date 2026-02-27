@@ -11,13 +11,13 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class Surface;
     class Texture;
 
     struct SwapchainCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         Surface* surface = nullptr;
         Format format = Format::None;
         SwapchainBuffering buffering = SwapchainBuffering::None;
@@ -45,7 +45,7 @@ namespace Nova
         PresentMode GetPresentMode() const;
         uint32_t GetImageCount() const;
 
-        Device* GetDevice() const;
+        RenderDevice* GetDevice() const;
         Surface* GetSurface() const;
 
         void Invalidate();
@@ -55,7 +55,7 @@ namespace Nova
         virtual Ref<Nova::Texture> GetTexture(uint32_t index) { return nullptr; }
         virtual Ref<Nova::Texture> GetCurrentTexture() { return nullptr; }
     protected:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         Surface* m_Surface = nullptr;
         Format m_ImageFormat = Format::None;
         SwapchainBuffering m_Buffering = SwapchainBuffering::None;

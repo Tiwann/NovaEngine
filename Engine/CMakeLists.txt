@@ -170,8 +170,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/DebugRenderer.cpp
         Source/Rendering/DebugRenderer.h
         Source/Rendering/DescriptorPool.h
-        Source/Rendering/Device.cpp
-        Source/Rendering/Device.h
+        Source/Rendering/RenderDevice.cpp
+        Source/Rendering/RenderDevice.h
         Source/Rendering/Fence.h
         Source/Rendering/Filter.h
         Source/Rendering/FrontFace.h
@@ -184,8 +184,6 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/PresentMode.h
         Source/Rendering/PrimitiveTopology.h
         Source/Rendering/Queue.h
-        Source/Rendering/RenderPass.cpp
-        Source/Rendering/RenderPass.h
         Source/Rendering/RenderTarget.cpp
         Source/Rendering/RenderTarget.h
         Source/Rendering/ResolveMode.h
@@ -219,14 +217,10 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/Vertex.h
         Source/Rendering/VertexLayout.cpp
         Source/Rendering/VertexLayout.h
-        Source/Rendering/Null/Device.cpp
-        Source/Rendering/Null/Device.h
+        Source/Rendering/Null/RenderDevice.cpp
+        Source/Rendering/Null/RenderDevice.h
         Source/Rendering/ResourceBarrier.h
         Source/Rendering/ResourceBarrier.cpp
-        Source/Rendering/SpriteBatchRenderer.cpp
-        Source/Rendering/SpriteBatchRenderer.h
-        Source/Rendering/SamplerManager.cpp
-        Source/Rendering/SamplerManager.h
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h
@@ -327,8 +321,8 @@ set(NOVA_ENGINE_D3D12_SOURCES
         Source/Rendering/D3D12/CommandPool.cpp
         Source/Rendering/D3D12/CommandPool.h
         Source/Rendering/D3D12/Conversions.h
-        Source/Rendering/D3D12/Device.cpp
-        Source/Rendering/D3D12/Device.h
+        Source/Rendering/D3D12/RenderDevice.cpp
+        Source/Rendering/D3D12/RenderDevice.h
         Source/Rendering/D3D12/Fence.cpp
         Source/Rendering/D3D12/Fence.h
         Source/Rendering/D3D12/ImGuiRenderer.cpp
@@ -355,12 +349,11 @@ set(NOVA_ENGINE_VULKAN_SOURCES
         Source/Rendering/Vulkan/CommandPool.h
         Source/Rendering/Vulkan/ComputePipeline.cpp
         Source/Rendering/Vulkan/ComputePipeline.h
-        Source/Rendering/Vulkan/Conversions.cpp
         Source/Rendering/Vulkan/Conversions.h
         Source/Rendering/Vulkan/DescriptorPool.cpp
         Source/Rendering/Vulkan/DescriptorPool.h
-        Source/Rendering/Vulkan/Device.cpp
-        Source/Rendering/Vulkan/Device.h
+        Source/Rendering/Vulkan/RenderDevice.cpp
+        Source/Rendering/Vulkan/RenderDevice.h
         Source/Rendering/Vulkan/Fence.cpp
         Source/Rendering/Vulkan/Fence.h
         Source/Rendering/Vulkan/GraphicsPipeline.cpp
@@ -406,8 +399,8 @@ set(NOVA_ENGINE_OPENGL_SOURCES
         Source/External/glad/include/khr/khrplatform.h
         Source/Rendering/OpenGL/Buffer.cpp
         Source/Rendering/OpenGL/Buffer.h
-        Source/Rendering/OpenGL/Device.cpp
-        Source/Rendering/OpenGL/Device.h
+        Source/Rendering/OpenGL/RenderDevice.cpp
+        Source/Rendering/OpenGL/RenderDevice.h
         Source/Rendering/OpenGL/Texture.cpp
         Source/Rendering/OpenGL/Texture.h
 )

@@ -1,13 +1,15 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
 #include "Rendering/PresentMode.h"
+#include "Rendering/ResourceState.h"
 #include <dxgi1_6.h>
+#include <directx/d3dx12.h>
 
 
 namespace Nova::D3D12
 {
-    template<typename D3D12Type, typename NovaType>
-    D3D12Type Convert(const NovaType& value);
+    template<typename OutType, typename InType>
+    OutType Convert(const InType& value);
 
     template <>
     inline DXGI_FORMAT Convert<DXGI_FORMAT, Format>(const Format& value)
@@ -125,5 +127,28 @@ namespace Nova::D3D12
         case PresentMode::Fifo: return DXGI_SWAP_EFFECT_FLIP_DISCARD;
         default: throw;
         }
+    }
+
+    template<>
+    inline D3D12_RESOURCE_STATES Convert<D3D12_RESOURCE_STATES, ResourceState>(const ResourceState& resourceState)
+    {
+        switch (resourceState)
+        {
+        case ResourceState::Undefined: return D3D12_RESOURCE_STATE_COMMON;
+        case ResourceState::General: return D3D12_RESOURCE_STATE_COMMON;
+        case ResourceState::ShaderRead: return D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
+        case ResourceState::ShaderWrite: return D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        case ResourceState::ColorAttachment: return D3D12_RESOURCE_STATE_RENDER_TARGET;
+        case ResourceState::DepthStencilAttachment: return D3D12_RESOURCE_STATE_DEPTH_WRITE;
+        case ResourceState::TransferSource: return D3D12_RESOURCE_STATE_COPY_SOURCE;
+        case ResourceState::TransferDest: return D3D12_RESOURCE_STATE_COPY_DEST;
+        case ResourceState::Present: return D3D12_RESOURCE_STATE_PRESENT;
+        default: return D3D12_RESOURCE_STATE_COMMON;
+        }
+    }
+    template<>
+    inline ResourceState Convert<ResourceState, D3D12_RESOURCE_STATES>(const D3D12_RESOURCE_STATES& resourceState)
+    {
+        return ResourceState::Undefined;
     }
 }

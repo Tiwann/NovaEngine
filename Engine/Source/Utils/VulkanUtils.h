@@ -2,13 +2,13 @@
 #include <type_traits>
 #include <vulkan/vulkan.h>
 #include "Containers/StringView.h"
-#include "Rendering/Vulkan/Device.h"
+#include "Rendering/Vulkan/RenderDevice.h"
 #include "Rendering/Vulkan/VulkanExtensions.h"
 
 namespace Nova::Vulkan
 {
     template<typename T> requires std::is_pointer_v<T>
-    void SetVkObjectDebugName(Device* device, const VkObjectType objectType, T handle, StringView name)
+    void SetVkObjectDebugName(RenderDevice* device, const VkObjectType objectType, T handle, StringView name)
     {
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         const VkDevice deviceHandle = device->GetHandle();
@@ -21,9 +21,9 @@ namespace Nova::Vulkan
     }
 
     template<typename T> requires std::is_pointer_v<T>
-    void SetVkObjectDebugName(Nova::Device* device, const VkObjectType objectType, T handle, StringView name)
+    void SetVkObjectDebugName(Nova::RenderDevice* device, const VkObjectType objectType, T handle, StringView name)
     {
-        if (Device* vulkanDevice = dynamic_cast<Device*>(device))
+        if (RenderDevice* vulkanDevice = dynamic_cast<RenderDevice*>(device))
             SetVkObjectDebugName(vulkanDevice, objectType, handle, name);
     }
 }

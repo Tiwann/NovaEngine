@@ -3,6 +3,7 @@ project(NovaEngine)
 include(CMakeDependentOption)
 
 option(NOVA_ENGINE_CUSTOM_ENTRY_POINT "Provide a way to the user to define a custom entry point" OFF)
+option(NOVA_ENGINE_BUILD_EXAMPLES "Build the example projects" OFF)
 option(NOVA_ENGINE_INCLUDE_AUDIO "Compile engine with audio support" ON)
 option(NOVA_ENGINE_INCLUDE_PHYSICS "Compile engine with physics support" ON)
 option(NOVA_ENGINE_BUILD_ASSET_PACKER "Compile the Asset Packer program" ON)
@@ -18,5 +19,9 @@ add_subdirectory(Engine)
 add_subdirectory(Editor)
 
 if(NOVA_ENGINE_BUILD_ASSET_PACKER)
-add_subdirectory(Programs/AssetPacker)
+    add_subdirectory(Programs/AssetPacker)
+endif ()
+
+if(NOVA_ENGINE_BUILD_EXAMPLES)
+    add_subdirectory(Examples/HelloTriangle)
 endif ()

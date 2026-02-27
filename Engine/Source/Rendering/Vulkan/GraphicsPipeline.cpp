@@ -1,23 +1,36 @@
 ﻿#include "GraphicsPipeline.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "Conversions.h"
 #include "Rendering/RenderPass.h"
+#include "Runtime/Log.h"
 #include "Shader.h"
 #include "ShaderModule.h"
 
 #include <vulkan/vulkan.h>
 
+#define CHECK_VALUE(value, message, ...) \
+        do { \
+            if (!(value)) \
+            { \
+                NOVA_LOG(RenderDevice, Verbosity::Error, message, __VA_ARGS__); \
+                return false; \
+            } \
+        } while(0)
+
 namespace Nova::Vulkan
 {
     bool GraphicsPipeline::Initialize(const GraphicsPipelineCreateInfo& createInfo)
     {
-        m_Device = static_cast<Device*>(createInfo.device);
-        VkDevice deviceHandle = m_Device->GetHandle();
+        CHECK_VALUE(createInfo.device, "Failed to create Graphics Pipeline: invalid render device!");
+        CHECK_VALUE(createInfo.shader, "Failed to create Graphics Pipeline: invalid shader!");
+        CHECK_VALUE(createInfo.shader, "Failed to create Graphics Pipeline: invalid render pass desc!");
+
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
+        VkDevice deviceHandle = device->GetHandle();
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyState { VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO };
         inputAssemblyState.primitiveRestartEnable = createInfo.inputAssemblyInfo.primitiveRestartEnable;
         inputAssemblyState.topology = Convert<VkPrimitiveTopology>(createInfo.inputAssemblyInfo.topology);
-
 
         const Array<VertexAttribute>& vertexAttributes = createInfo.vertexInputInfo.layout.GetAttributes();
         Array<VkVertexInputAttributeDescription> attributeDescriptions;
@@ -38,7 +51,6 @@ namespace Nova::Vulkan
         bindingDescription.binding = 0;
         bindingDescription.stride = createInfo.vertexInputInfo.layout.Stride();
         bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
 
         VkPipelineVertexInputStateCreateInfo vertexInputState { VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO };
         vertexInputState.pVertexAttributeDescriptions = attributeDescriptions.Data();
@@ -121,27 +133,15 @@ namespace Nova::Vulkan
         dynamicState.dynamicStateCount = dynamicStates.Count();
         dynamicState.pDynamicStates =  dynamicStates.Data();
 
-        Array<VkFormat> colorAttachmentFormats;
-        for (size_t attachmentIndex = 0; attachmentIndex < createInfo.renderPass->GetAttachmentCount(); attachmentIndex++)
-        {
-            RenderPassAttachment& attachment = createInfo.renderPass->GetAttachment(attachmentIndex);
-            if (attachment.type != AttachmentType::Color)
-                continue;
-            colorAttachmentFormats.Add(Convert<VkFormat>(attachment.texture->GetFormat()));
-        }
-
+        Array<VkFormat> colorAttachmentFormats = createInfo.colorAttachmentFormats.Transform<VkFormat>([](const Format& format) { return Convert<VkFormat>(format); });
+        VkFormat depthAttachmentFormat = Convert<VkFormat>(createInfo.depthAttachmentFormat);
 
         VkPipelineRenderingCreateInfo renderingInfo { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         renderingInfo.viewMask = 0;
-        renderingInfo.colorAttachmentCount = createInfo.renderPass->GetColorAttachmentCount();
+        renderingInfo.colorAttachmentCount = colorAttachmentFormats.Count();
         renderingInfo.pColorAttachmentFormats = colorAttachmentFormats.Data();
-        if (createInfo.renderPass->HasDepthAttachment())
-        {
-            const RenderPassAttachment* depthAttachment = createInfo.renderPass->GetDepthAttachment();
-            const Nova::Texture* depthTexture = depthAttachment->texture;
-            renderingInfo.depthAttachmentFormat = Convert<VkFormat>(depthTexture->GetFormat());
-            renderingInfo.stencilAttachmentFormat = Convert<VkFormat>(depthTexture->GetFormat());
-        }
+        renderingInfo.depthAttachmentFormat = depthAttachmentFormat;
+        renderingInfo.stencilAttachmentFormat = depthAttachmentFormat;
 
         Array<VkPipelineShaderStageCreateInfo> shaderStages;
         for (const ShaderModule& shaderModule : ((Shader*)createInfo.shader)->GetShaderModules())
@@ -169,17 +169,18 @@ namespace Nova::Vulkan
         pipelineCreateInfo.layout = ((Shader*)createInfo.shader)->GetPipelineLayout();
 
         if (m_Handle)
-        {
             vkDestroyPipeline(deviceHandle, m_Handle, nullptr);
-        }
 
         if (vkCreateGraphicsPipelines(deviceHandle, nullptr, 1, &pipelineCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
             return false;
+
+        m_Device = device;
         return true;
     }
 
     void GraphicsPipeline::Destroy()
     {
+        NOVA_ASSERT(m_Device, "Device is null. Object may not be initialized!");
         const VkDevice deviceHandle = m_Device->GetHandle();
         vkDestroyPipeline(deviceHandle, m_Handle, nullptr);
     }
@@ -194,3 +195,5 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 }
+
+#undef CHECK_VALUE

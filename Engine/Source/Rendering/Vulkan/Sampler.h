@@ -5,7 +5,7 @@ typedef struct VkSampler_T* VkSampler;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class Sampler final : public Nova::Sampler
     {
@@ -15,7 +15,7 @@ namespace Nova::Vulkan
 
         VkSampler GetHandle() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkSampler m_Handle = nullptr;
     };
 }

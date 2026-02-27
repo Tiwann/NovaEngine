@@ -16,8 +16,6 @@
 #include <imgui.h>
 #include <slang/slang.h>
 
-#include "Rendering/SpriteBatchRenderer.h"
-
 
 namespace Nova
 {
@@ -58,13 +56,13 @@ namespace Nova
 
         // Creating render target
         RenderTargetCreateInfo rtCreateInfo;
-        rtCreateInfo.device = GetDevice();
+        rtCreateInfo.device = GetRenderDevice();
         rtCreateInfo.width = m_Window->GetWidth();
         rtCreateInfo.height = m_Window->GetHeight();
         rtCreateInfo.depth = 1;
         rtCreateInfo.colorFormat = Format::R8G8B8A8_SRGB;
         rtCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
-        rtCreateInfo.sampleCount = 8;
+        rtCreateInfo.sampleCount = configuration.msaaSamples;
         m_RenderTarget = m_Device->CreateRenderTarget(rtCreateInfo);
         if (!m_RenderTarget)
         {
@@ -72,40 +70,8 @@ namespace Nova
             return;
         }
 
-        // Render target render pass
-        {
-            RenderPassAttachment colorAttachment;
-            colorAttachment.type = AttachmentType::Color;
-            colorAttachment.loadOp = LoadOperation::Clear;
-            colorAttachment.storeOp = StoreOperation::Store;
-            colorAttachment.clearValue.color = Color::Black;
-            colorAttachment.resolveMode = ResolveMode::Average;
-            m_RenderPass.AddAttachment(colorAttachment);
-
-            RenderPassAttachment depthAttachment;
-            depthAttachment.type = AttachmentType::Depth;
-            depthAttachment.loadOp = LoadOperation::Clear;
-            depthAttachment.storeOp = StoreOperation::Store;
-            depthAttachment.clearValue.depth = 1.0f;
-            depthAttachment.clearValue.stencil = 0;
-            depthAttachment.resolveMode = ResolveMode::Average;
-            m_RenderPass.AddAttachment(depthAttachment);
-
-            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget->GetColorTexture());
-            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget->GetDepthTexture());
-            m_RenderPass.Initialize(0, 0, m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight());
-        }
-
         // Creating imgui renderer
-        m_ImGuiRenderer = CreateImGuiRenderer(m_Window, m_Device, 1);
-
-        // Setup imgui render pass
-        RenderPassAttachment colorAttachment;
-        colorAttachment.type = AttachmentType::Color;
-        colorAttachment.loadOp = LoadOperation::Load;
-        colorAttachment.storeOp = StoreOperation::Store;
-        m_ImGuiRenderPass.Initialize(0, 0, m_Window->GetWidth(), m_Window->GetHeight());
-        m_ImGuiRenderPass.AddAttachment(colorAttachment);
+        m_ImGuiRenderer = CreateImGuiRenderer(m_Window, m_Device, configuration.msaaSamples);
 
         m_Window->MaximizeEvent.Bind([this]
         {
@@ -119,8 +85,6 @@ namespace Nova
                 swapchain->Invalidate();
 
             m_RenderTarget->Resize(newWidth, newHeight);
-            m_RenderPass.Resize(newWidth, newHeight);
-            m_ImGuiRenderPass.Resize(newWidth, newHeight);
         });
 
         if (SLANG_FAILED(slang::createGlobalSession(&m_SlangSession)))
@@ -137,7 +101,7 @@ namespace Nova
 
 
         // Load engine shaders
-        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName, const String& shaderPath) -> Ref<Shader>
+        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName,const String& shaderPath) -> Ref<Shader>
         {
             const ShaderEntryPoint entryPoints[]
             {
@@ -146,7 +110,6 @@ namespace Nova
             };
 
             ShaderCreateInfo shaderCreateInfo;
-            shaderCreateInfo.slang = m_SlangSession;
             shaderCreateInfo.target = ShaderTarget::SPIRV;
             shaderCreateInfo.entryPoints.AddRange(entryPoints);
             shaderCreateInfo.moduleInfo = {moduleName, shaderPath};
@@ -161,7 +124,7 @@ namespace Nova
 
         const auto LoadTextureBasic = [this](StringView filepath, const String& assetName)
         {
-            Ref<Texture> texture = LoadTexture(GetDevice(), filepath);
+            Ref<Texture> texture = LoadTexture(GetRenderDevice(), filepath);
             m_AssetDatabase.AddAsset(texture, assetName);
             return texture;
         };
@@ -169,8 +132,7 @@ namespace Nova
         LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
         LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
         LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        Ref<Shader> spriteShader = LoadShaderBasic("SpriteBatch", "SpriteBatchShader", Path::GetEngineAssetPath("Shaders/SpriteBatch.slang"));
-        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader", Path::GetEngineAssetPath("Shaders/Debug.slang"));
+        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",Path::GetEngineAssetPath("Shaders/Debug.slang"));
 
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
         LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
@@ -181,17 +143,9 @@ namespace Nova
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;
         debugRendererCreateInfo.shader = debugShader;
-        debugRendererCreateInfo.renderPass = &m_RenderPass;
         debugRendererCreateInfo.maxVertices = 64;
         if (!DebugRenderer::Initialize(debugRendererCreateInfo))
         {
-            Destroy();
-            return;
-        }
-
-        if (!SpriteBatchRenderer::Initialize({m_Device, &m_RenderPass, spriteShader}))
-        {
-            std::println(std::cerr, "Failed to init sprite batch renderer!");
             Destroy();
             return;
         }
@@ -257,17 +211,11 @@ namespace Nova
             m_SceneManager.OnPreRender(*cmdBuffer);
             OnPreRender(*cmdBuffer);
 
-            Swapchain* swapchain = m_Device->GetSwapchain();
-            m_RenderPass.SetAttachmentTexture(0, m_RenderTarget->GetColorTexture());
-            m_RenderPass.SetAttachmentTexture(1, m_RenderTarget->GetDepthTexture());
-            m_RenderPass.SetAttachmentResolveTexture(0, *swapchain->GetCurrentTexture());
-
             if (Scene* scene = m_SceneManager.GetActiveScene())
             {
                 if (Camera* camera = scene->GetFirstComponent<Camera>())
                 {
-                    const Matrix4& viewProj = camera->GetViewProjectionMatrix();
-                    DebugRenderer::Begin(viewProj);
+                    DebugRenderer::Begin(camera->GetViewProjectionMatrix());
                     m_SceneManager.OnDrawDebug();
                     OnDrawDebug();
                     DebugRenderer::End(*cmdBuffer);
@@ -275,14 +223,54 @@ namespace Nova
             }
 
 
-            cmdBuffer->BeginRenderPass(m_RenderPass);
+            Swapchain* swapchain = m_Device->GetSwapchain();
+
+            RenderPassAttachmentInfo colorAttachment;
+            colorAttachment.type = RenderPassAttachmentType::Color;
+            colorAttachment.loadOp = LoadOperation::Clear;
+            colorAttachment.storeOp = StoreOperation::Store;
+            colorAttachment.clearValue.color = Color::Black;
+            colorAttachment.resolveMode = ResolveMode::Average;
+            colorAttachment.texture = m_RenderTarget->GetColorTexture();
+            colorAttachment.resolveTexture = swapchain->GetCurrentTexture();
+
+            RenderPassAttachmentInfo depthAttachment;
+            depthAttachment.type = RenderPassAttachmentType::Depth;
+            depthAttachment.loadOp = LoadOperation::Clear;
+            depthAttachment.storeOp = StoreOperation::Store;
+            depthAttachment.clearValue.depth = 1.0f;
+            depthAttachment.clearValue.stencil = 0;
+            depthAttachment.resolveMode = ResolveMode::Average;
+            depthAttachment.texture = m_RenderTarget->GetDepthTexture();
+
+            RenderPassBeginInfo renderPassBeginInfo;
+            renderPassBeginInfo.renderArea = {0, 0, GetWindowWidth(), GetWindowHeight()};
+            renderPassBeginInfo.colorAttachmentCount = 1;
+            renderPassBeginInfo.colorAttachments = &colorAttachment;
+            renderPassBeginInfo.depthAttachment = &depthAttachment;
+
+            cmdBuffer->BeginRenderPass(renderPassBeginInfo);
             m_SceneManager.OnRender(*cmdBuffer);
             OnRender(*cmdBuffer);
             DebugRenderer::Render(*cmdBuffer);
             cmdBuffer->EndRenderPass();
 
-            m_ImGuiRenderPass.SetAttachmentTexture(0, *swapchain->GetCurrentTexture());
-            cmdBuffer->BeginRenderPass(m_ImGuiRenderPass);
+
+            RenderPassAttachmentInfo imguiColorAttachment;
+            imguiColorAttachment.type = RenderPassAttachmentType::Color;
+            imguiColorAttachment.loadOp = LoadOperation::Load;
+            imguiColorAttachment.storeOp = StoreOperation::Store;
+            imguiColorAttachment.texture = m_RenderTarget->GetColorTexture();
+            imguiColorAttachment.resolveMode = ResolveMode::Average;
+            imguiColorAttachment.resolveTexture = swapchain->GetCurrentTexture();
+
+            RenderPassBeginInfo imguiRenderPassBeginInfo;
+            imguiRenderPassBeginInfo.renderArea = {0, 0, GetWindowWidth(), GetWindowHeight()};
+            imguiRenderPassBeginInfo.colorAttachmentCount = 1;
+            imguiRenderPassBeginInfo.colorAttachments = &imguiColorAttachment;
+            imguiRenderPassBeginInfo.depthAttachment = nullptr;
+
+            cmdBuffer->BeginRenderPass(imguiRenderPassBeginInfo);
             m_ImGuiRenderer->Render(*cmdBuffer);
             cmdBuffer->EndRenderPass();
 
@@ -296,7 +284,6 @@ namespace Nova
         m_SceneManager.Destroy();
         if (m_Device) m_Device->WaitIdle();
         OnDestroy();
-        SpriteBatchRenderer::Destroy();
         DebugRenderer::Destroy();
         m_AssetDatabase.UnloadAll();
         if (m_SlangSession) m_SlangSession->release();
@@ -322,12 +309,12 @@ namespace Nova
         return m_Window;
     }
 
-    const Ref<Device>& Application::GetDevice() const
+    const Ref<RenderDevice>& Application::GetRenderDevice() const
     {
         return m_Device;
     }
 
-    Ref<Device>& Application::GetDevice()
+    Ref<RenderDevice>& Application::GetRenderDevice()
     {
         return m_Device;
     }
@@ -342,12 +329,12 @@ namespace Nova
         return &m_SceneManager;
     }
 
-    RenderPass* Application::GetRenderPass()
+    const Ref<RenderTarget>& Application::GetRenderTarget() const
     {
-        return &m_RenderPass;
+        return m_RenderTarget;
     }
 
-    const Ref<RenderTarget>& Application::GetRenderTarget() const
+    Ref<RenderTarget>& Application::GetRenderTarget()
     {
         return m_RenderTarget;
     }

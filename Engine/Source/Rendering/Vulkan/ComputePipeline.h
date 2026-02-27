@@ -5,7 +5,7 @@ typedef struct VkPipeline_T* VkPipeline;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class ComputePipeline final : public Nova::ComputePipeline
     {
@@ -16,7 +16,7 @@ namespace Nova::Vulkan
         VkPipeline GetHandle() const;
         const VkPipeline* GetHandlePtr() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         VkPipeline m_Handle = nullptr;
     };
 }

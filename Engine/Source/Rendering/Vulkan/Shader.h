@@ -11,7 +11,7 @@ typedef struct VkPipelineLayout_T* VkPipelineLayout;
 
 namespace Nova::Vulkan
 {
-    class Device;
+    class RenderDevice;
 
     class Shader final : public Nova::Shader
     {
@@ -30,7 +30,7 @@ namespace Nova::Vulkan
 
         Array<VkDescriptorSetLayout> GetDescriptorSetLayouts() const;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         Slang::ComPtr<slang::IGlobalSession> m_Slang = nullptr;
         Slang::ComPtr<slang::ISession> m_Session = nullptr;
         Slang::ComPtr<slang::IModule> m_Module = nullptr;

@@ -6,7 +6,7 @@ struct ID3D12CommandAllocator;
 
 namespace Nova::D3D12
 {
-    class Device;
+    class RenderDevice;
     class Queue;
 
     class CommandPool final : public Nova::CommandPool
@@ -22,12 +22,12 @@ namespace Nova::D3D12
         Queue* GetQueue() { return m_Queue; }
         const Queue* GetQueue() const { return m_Queue; }
 
-        Device* GetDevice() { return m_Device; }
-        const Device* GetDevice() const { return m_Device; }
+        RenderDevice* GetDevice() { return m_Device; }
+        const RenderDevice* GetDevice() const { return m_Device; }
         CommandBuffer AllocateCommandBuffer(CommandBufferLevel level);
 
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         Queue* m_Queue = nullptr;
         ID3D12CommandAllocator* m_Handle = nullptr;
     };

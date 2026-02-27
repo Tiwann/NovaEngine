@@ -12,14 +12,14 @@ namespace Nova
     typedef Flags<FenceCreateFlagBits> FenceCreateFlags;
 
 
-    class Device;
+    class RenderDevice;
 
     struct FenceCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         FenceCreateFlags flags = FenceCreateFlagBits::None;
 
-        FenceCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
+        FenceCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
         FenceCreateInfo& WithFlags(const FenceCreateFlags inFlags) { flags = inFlags; return *this; }
     };
 

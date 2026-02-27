@@ -8,11 +8,11 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
 
     struct TextureCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         TextureUsageFlags usageFlags = TextureUsageFlagBits::None;
         Format format = Format::None;
         uint32_t width = 0;
@@ -23,8 +23,8 @@ namespace Nova
         const uint8_t* data = nullptr;
         size_t dataSize = 0;
 
-        TextureCreateInfo& WithDevice(Device* inDevice) { device = inDevice; return *this; }
-        TextureCreateInfo& WithUsageFlags(const TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
+        TextureCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
+        TextureCreateInfo& WithUsageFlags(TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
         TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
         TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }
         TextureCreateInfo& WithHeight(const uint32_t inHeight) { height = inHeight; return *this; }
@@ -95,7 +95,7 @@ namespace Nova
         uint32_t GetSampleCount() const { return m_SampleCount; }
         ResourceState GetState() const { return m_State; }
         void SetState(const ResourceState state) { m_State = state; }
-        TextureUsageFlags GetusageFlags() const { return m_UsageFlags; }
+        TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;

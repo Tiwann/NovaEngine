@@ -7,12 +7,12 @@ namespace Nova
 {
     class RenderTarget;
     class Sampler;
-    class Device;
+    class RenderDevice;
 
     class ViewportWindow final : public EditorWindow
     {
     public:
-        explicit ViewportWindow(Ref<Device> device) : EditorWindow("Viewport"), m_Device(device) {}
+        explicit ViewportWindow(Ref<RenderDevice> device) : EditorWindow("Viewport"), m_Device(device) {}
         ~ViewportWindow() override = default;
 
         void OnInit() override;
@@ -22,7 +22,7 @@ namespace Nova
         void SetRenderTarget(Ref<RenderTarget> renderTarget);
         void UpdateResources();
     private:
-        Ref<Device> m_Device = nullptr;
+        Ref<RenderDevice> m_Device = nullptr;
         Ref<Sampler> m_Sampler = nullptr;
         Ref<RenderTarget> m_RenderTarget = nullptr;
         uint64_t m_TextureIds[3] = { 0, 0, 0 };

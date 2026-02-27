@@ -12,7 +12,7 @@ typedef struct VkImageView_T* VkImageView;
 namespace Nova::Vulkan
 {
     class Semaphore;
-    class Device;
+    class RenderDevice;
     class RenderTarget;
     class CommandBuffer;
 

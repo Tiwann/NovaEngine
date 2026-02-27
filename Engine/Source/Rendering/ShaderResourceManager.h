@@ -3,12 +3,12 @@
 
 namespace Nova
 {
-    class Device;
+    class RenderDevice;
     class ShaderBindingSetLayout;
 
     struct ShaderResourceManagerCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
     };
 
     class ShaderResourceManager

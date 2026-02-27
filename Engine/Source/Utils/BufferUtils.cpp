@@ -1,12 +1,12 @@
 ﻿#include "BufferUtils.h"
 
 #include "Rendering/Buffer.h"
-#include "Rendering/Device.h"
+#include "Rendering/RenderDevice.h"
 
 
 namespace Nova
 {
-    Ref<Buffer> CreateVertexBuffer(Ref<Device>& device, const void* data, const size_t size)
+    Ref<Buffer> CreateVertexBuffer(Ref<RenderDevice>& device, const void* data, const size_t size)
     {
         BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.size = size;
@@ -25,7 +25,7 @@ namespace Nova
         return vertexBuffer;
     }
 
-    Ref<Buffer> CreateIndexBuffer(Ref<Device>& device, const void* data, const size_t size)
+    Ref<Buffer> CreateIndexBuffer(Ref<RenderDevice>& device, const void* data, const size_t size)
     {
         BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.device = device;

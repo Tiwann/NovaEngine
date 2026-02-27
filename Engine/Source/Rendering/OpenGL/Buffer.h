@@ -3,7 +3,7 @@
 
 namespace Nova::OpenGL
 {
-    class Device;
+    class RenderDevice;
 
     class Buffer final : public Nova::Buffer
     {
@@ -23,7 +23,7 @@ namespace Nova::OpenGL
 
         uint32_t GetHandle() const { return m_Handle; }
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         uint32_t m_Handle = 0xFFFFFFFF;
     };
 }

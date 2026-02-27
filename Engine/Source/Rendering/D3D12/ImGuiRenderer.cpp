@@ -1,5 +1,5 @@
 ﻿#include "ImGuiRenderer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "CommandBuffer.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_dx12.h>
@@ -13,7 +13,7 @@ namespace Nova::D3D12
         if (!createInfo.device) return false;
         if (!createInfo.window) return false;
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         Queue* graphicsQueue = device->GetGraphicsQueue();
 
         ID3D12CommandQueue* queueHandle = graphicsQueue->GetHandle();

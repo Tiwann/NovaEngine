@@ -1,5 +1,5 @@
 ﻿#include "ImGuiRenderer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include "External/ImGuiExtension.h"
 
 #include <imgui.h>
@@ -52,7 +52,7 @@ namespace Nova
     } \
 } break;
 
-    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, Device* device, const uint32_t sampleCount)
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, RenderDevice* device, const uint32_t sampleCount)
     {
         if (!window) return nullptr;
         if (!device) return nullptr;
@@ -60,12 +60,12 @@ namespace Nova
         ImGuiRenderer* renderer = nullptr;
         switch (device->GetDeviceType())
         {
-        case DeviceType::Null: return nullptr;
+        case RenderDeviceType::Null: return nullptr;
 #ifdef NOVA_HAS_VULKAN
-        case DeviceType::Vulkan: NOVA_RETURN_IMPL(Vulkan::ImGuiRenderer)
+        case RenderDeviceType::Vulkan: NOVA_RETURN_IMPL(Vulkan::ImGuiRenderer)
 #endif
 #ifdef NOVA_HAS_D3D12
-        case DeviceType::D3D12: NOVA_RETURN_IMPL(D3D12::ImGuiRenderer)
+        case RenderDeviceType::D3D12: NOVA_RETURN_IMPL(D3D12::ImGuiRenderer)
 #endif
         }
         return Ref(renderer);

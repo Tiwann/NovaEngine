@@ -7,7 +7,7 @@
 #include "Components/Transform.h"
 #include "Components/Camera.h"
 #include "Utils/BufferUtils.h"
-#include "Rendering/Vulkan/Device.h"
+#include "Rendering/Vulkan/RenderDevice.h"
 #include "Rendering/Shader.h"
 #include "Runtime/SpriteAnimation.h"
 #include "Rendering/ShaderBindingSet.h"
@@ -45,8 +45,9 @@ namespace Nova
     void SpriteRenderer::OnInit()
     {
         Application* application = GetApplication();
-        Ref<Device> device = application->GetDevice();
-        RenderPass* renderPass = application->GetRenderPass();
+        Ref<RenderDevice> device = application->GetRenderDevice();
+        const Ref<Window> window = application->GetWindow();
+        const Rect2D<uint32_t> viewport = window->GetBounds();
 
         const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
         m_IndexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
@@ -70,22 +71,21 @@ namespace Nova
 
         GraphicsPipelineCreateInfo pipelineCreateInfo;
         pipelineCreateInfo.device = device;
-        pipelineCreateInfo.renderPass = renderPass;
         pipelineCreateInfo.shader = m_Shader;
 
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector2 });
         pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
         pipelineCreateInfo.multisampleInfo.sampleCount = 8;
 
-        pipelineCreateInfo.viewportInfo.x = 0;
-        pipelineCreateInfo.viewportInfo.y = 0;
-        pipelineCreateInfo.viewportInfo.width = renderPass->GetWidth();
-        pipelineCreateInfo.viewportInfo.height = renderPass->GetHeight();
+        pipelineCreateInfo.viewportInfo.x = viewport.x;
+        pipelineCreateInfo.viewportInfo.y = viewport.y;
+        pipelineCreateInfo.viewportInfo.width = viewport.width;
+        pipelineCreateInfo.viewportInfo.height = viewport.height;
 
-        pipelineCreateInfo.scissorInfo.x = 0;
-        pipelineCreateInfo.scissorInfo.y = 0;
-        pipelineCreateInfo.scissorInfo.width = renderPass->GetWidth();
-        pipelineCreateInfo.scissorInfo.height = renderPass->GetHeight();
+        pipelineCreateInfo.scissorInfo.x =  viewport.x;
+        pipelineCreateInfo.scissorInfo.y = viewport.y;
+        pipelineCreateInfo.scissorInfo.width = viewport.width;
+        pipelineCreateInfo.scissorInfo.height = viewport.height;
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
         m_BindingSet->BindSampler(0, *m_Sampler);
@@ -152,7 +152,9 @@ namespace Nova
         if(!m_Sprite.texture) return;
 
         Application* application = GetApplication();
-        const RenderPass* renderPass = application->GetRenderPass();
+        const auto window = application->GetWindow();
+        const auto viewport = window->GetBounds();
+
 
 
         m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
@@ -160,15 +162,15 @@ namespace Nova
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.BindVertexBuffer(*m_VertexBuffer, 0);
         cmdBuffer.BindIndexBuffer(*m_IndexBuffer, 0, Format::Uint32);
-        cmdBuffer.SetViewport(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight(), 0.0f, 1.0f);
-        cmdBuffer.SetScissor(renderPass->GetOffsetX(), renderPass->GetOffsetY(), renderPass->GetWidth(), renderPass->GetHeight());
+        cmdBuffer.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0.0f, 1.0f);
+        cmdBuffer.SetScissor(viewport.x, viewport.y, viewport.width, viewport.height);
         cmdBuffer.DrawIndexed(6, 0);
     }
 
     void SpriteRenderer::OnDestroy()
     {
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_BindingSet->Destroy();
@@ -218,7 +220,7 @@ namespace Nova
         if (sprite == m_Sprite) return;
 
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_Sprite = sprite;
@@ -237,7 +239,7 @@ namespace Nova
     void SpriteRenderer::SetSpriteAnimation(SpriteAnimation* spriteAnimation)
     {
         const Application* application = GetApplication();
-        const Ref<Device>& device = application->GetDevice();
+        const Ref<RenderDevice>& device = application->GetRenderDevice();
         device->WaitIdle();
 
         m_SpriteAnimation = spriteAnimation;

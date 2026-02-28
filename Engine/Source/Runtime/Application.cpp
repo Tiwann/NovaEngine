@@ -24,6 +24,7 @@ namespace Nova
     void Application::Run()
     {
         ApplicationConfiguration configuration = GetConfiguration();
+        const RenderDeviceType deviceType = GetRenderDeviceType();
 
         // Creating window
         WindowCreateInfo windowCreateInfo;
@@ -31,6 +32,7 @@ namespace Nova
         windowCreateInfo.width = configuration.windowWidth;
         windowCreateInfo.height = configuration.windowHeight;
         windowCreateInfo.flags = configuration.windowFlags;
+        windowCreateInfo.deviceType = deviceType;
         m_Window = CreateWindow(windowCreateInfo);
         if (!m_Window)
         {
@@ -46,7 +48,7 @@ namespace Nova
         rdCreateInfo.window = m_Window;
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
         rdCreateInfo.vSync = configuration.vsync;
-        m_Device = CreateRenderDevice(GetRenderDeviceType(), rdCreateInfo);
+        m_Device = CreateRenderDevice(deviceType, rdCreateInfo);
         if (!m_Device)
         {
             Destroy();
@@ -56,7 +58,7 @@ namespace Nova
 
         // Creating render target
         RenderTargetCreateInfo rtCreateInfo;
-        rtCreateInfo.device = GetRenderDevice();
+        rtCreateInfo.device = m_Device;
         rtCreateInfo.width = m_Window->GetWidth();
         rtCreateInfo.height = m_Window->GetHeight();
         rtCreateInfo.depth = 1;
@@ -72,6 +74,11 @@ namespace Nova
 
         // Creating imgui renderer
         m_ImGuiRenderer = CreateImGuiRenderer(m_Window, m_Device, configuration.msaaSamples);
+        if (!m_ImGuiRenderer)
+        {
+            Destroy();
+            return;
+        }
 
         m_Window->MaximizeEvent.Bind([this]
         {
@@ -98,7 +105,11 @@ namespace Nova
         audioSystemCreateInfo.sampleRate = 44100;
         audioSystemCreateInfo.listenerCount = 1;
         m_AudioSystem = CreateAudioSystem(audioSystemCreateInfo);
-
+        if (!m_AudioSystem)
+        {
+            Destroy();
+            return;
+        }
 
         // Load engine shaders
         const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName,const String& shaderPath) -> Ref<Shader>
@@ -111,8 +122,8 @@ namespace Nova
 
             ShaderCreateInfo shaderCreateInfo;
             shaderCreateInfo.target = ShaderTarget::SPIRV;
-            shaderCreateInfo.entryPoints.AddRange(entryPoints);
-            shaderCreateInfo.moduleInfo = {moduleName, shaderPath};
+            shaderCreateInfo.entryPoints.AddRange<2>(entryPoints);
+            shaderCreateInfo.moduleInfo = { moduleName, shaderPath };
 
             Ref<Shader> shader = m_Device->CreateShader(shaderCreateInfo);
             if (!shader) return nullptr;
@@ -317,6 +328,11 @@ namespace Nova
     Ref<RenderDevice>& Application::GetRenderDevice()
     {
         return m_Device;
+    }
+
+    Ref<ImGuiRenderer>& Application::GetImGuiRenderer()
+    {
+        return m_ImGuiRenderer;
     }
 
     const Ref<ImGuiRenderer>& Application::GetImGuiRenderer() const

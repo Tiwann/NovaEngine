@@ -458,6 +458,12 @@ namespace Nova
             return result;
         }
 
+        template<typename U> requires std::is_convertible_v<T, U>
+        Array<U> As()
+        {
+            return Transform<U>([](ConstReferenceType element) { return U(element); });
+        }
+
         Iterator begin() override { return m_Data; }
         Iterator end() override { return m_Data + m_Count; }
 

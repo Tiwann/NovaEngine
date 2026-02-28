@@ -186,6 +186,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/Queue.h
         Source/Rendering/RenderTarget.cpp
         Source/Rendering/RenderTarget.h
+        Source/Rendering/RenderDeviceType.h
         Source/Rendering/ResolveMode.h
         Source/Rendering/ResourceState.h
         Source/Rendering/Sampler.h
@@ -214,6 +215,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/SwpchainBuffering.h
         Source/Rendering/Texture.h
         Source/Rendering/TextureDimension.h
+        Source/Rendering/TextureAspect.h
         Source/Rendering/Vertex.h
         Source/Rendering/VertexLayout.cpp
         Source/Rendering/VertexLayout.h
@@ -221,6 +223,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/Null/RenderDevice.h
         Source/Rendering/ResourceBarrier.h
         Source/Rendering/ResourceBarrier.cpp
+        Source/Rendering/SlangCommon.h
+        Source/Rendering/SlangCommon.cpp
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h
@@ -403,6 +407,25 @@ set(NOVA_ENGINE_OPENGL_SOURCES
         Source/Rendering/OpenGL/RenderDevice.h
         Source/Rendering/OpenGL/Texture.cpp
         Source/Rendering/OpenGL/Texture.h
+        Source/Rendering/OpenGL/RenderTarget.h
+        Source/Rendering/OpenGL/RenderTarget.cpp
+        Source/Rendering/OpenGL/Swapchain.h
+        Source/Rendering/OpenGL/Swapchain.cpp
+        Source/Rendering/OpenGL/Surface.h
+        Source/Rendering/OpenGL/Surface.cpp
+        Source/Rendering/OpenGL/Common.h
+        Source/Rendering/OpenGL/Conversions.h
+        Source/Rendering/OpenGL/Format.h
+        Source/Rendering/OpenGL/ImGuiRenderer.cpp
+        Source/Rendering/OpenGL/ImGuiRenderer.h
+        Source/Rendering/OpenGL/Shader.cpp
+        Source/Rendering/OpenGL/Shader.h
+        Source/Rendering/OpenGL/ShaderModule.cpp
+        Source/Rendering/OpenGL/ShaderModule.h
+        Source/Rendering/OpenGL/GraphicsPipeline.cpp
+        Source/Rendering/OpenGL/GraphicsPipeline.h
+        Source/Rendering/OpenGL/Sampler.cpp
+        Source/Rendering/OpenGL/Sampler.h
 )
 
 

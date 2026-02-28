@@ -3,10 +3,9 @@
 #include "Conversions.h"
 #include "CommandBuffer.h"
 #include "Rendering/CommandBuffer.h"
+#include "Containers/StringFormat.h"
 
 #include <vma/vk_mem_alloc.h>
-
-#include "Containers/StringFormat.h"
 
 
 namespace Nova::Vulkan

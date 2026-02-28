@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "EditorWindow.h"
 #include "External/ImGuiExtension.h"
-#include <cstdint>
 
 namespace Nova
 {
@@ -20,11 +19,9 @@ namespace Nova
         void OnDestroy() override;
 
         void SetRenderTarget(Ref<RenderTarget> renderTarget);
-        void UpdateResources();
     private:
         Ref<RenderDevice> m_Device = nullptr;
         Ref<Sampler> m_Sampler = nullptr;
         Ref<RenderTarget> m_RenderTarget = nullptr;
-        uint64_t m_TextureIds[3] = { 0, 0, 0 };
     };
 }

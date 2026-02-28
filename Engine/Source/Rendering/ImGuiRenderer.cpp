@@ -12,6 +12,10 @@
 #include "D3D12/ImGuiRenderer.h"
 #endif
 
+#ifdef NOVA_HAS_OPENGL
+#include "OpenGL/ImGuiRenderer.h"
+#endif
+
 namespace Nova
 {
     bool ImGuiRenderer::Initialize(const ImGuiRendererCreateInfo& createInfo)
@@ -66,6 +70,9 @@ namespace Nova
 #endif
 #ifdef NOVA_HAS_D3D12
         case RenderDeviceType::D3D12: NOVA_RETURN_IMPL(D3D12::ImGuiRenderer)
+#endif
+#ifdef NOVA_HAS_OPENGL
+        case RenderDeviceType::OpenGL: NOVA_RETURN_IMPL(OpenGL::ImGuiRenderer)
 #endif
         }
         return Ref(renderer);

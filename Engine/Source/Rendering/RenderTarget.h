@@ -1,9 +1,8 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
 #include "Runtime/Object.h"
-#include <cstdint>
-
 #include "Runtime/Ref.h"
+#include <cstdint>
 
 
 namespace Nova { struct Color; }

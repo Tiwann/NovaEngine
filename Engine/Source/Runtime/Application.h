@@ -62,6 +62,7 @@ namespace Nova
         Ref<Window>& GetWindow();
         const Ref<RenderDevice>& GetRenderDevice() const;
         Ref<RenderDevice>& GetRenderDevice();
+        Ref<ImGuiRenderer>& GetImGuiRenderer();
         const Ref<ImGuiRenderer>& GetImGuiRenderer() const;
         SceneManager* GetSceneManager();
 

@@ -2,6 +2,7 @@
 #include "Object.h"
 #include "Containers/String.h"
 #include "Containers/MulticastDelegate.h"
+#include "Rendering/RenderDeviceType.h"
 #include "Ref.h"
 #include "Flags.h"
 #include "Math/Rect.h"
@@ -30,6 +31,7 @@ namespace Nova
         uint32_t width;
         uint32_t height;
         WindowCreateFlags flags;
+        RenderDeviceType deviceType;
     };
 
     class Window : public Object

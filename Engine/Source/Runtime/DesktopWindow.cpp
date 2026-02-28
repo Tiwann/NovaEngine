@@ -42,7 +42,19 @@ namespace Nova
         glfwWindowHint(GLFW_RESIZABLE, createInfo.flags.Contains(WindowCreateFlagBits::Resizable));
         glfwWindowHint(GLFW_DECORATED, createInfo.flags.Contains(WindowCreateFlagBits::Decorated));
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+        if (RenderDeviceIsD3D12(createInfo.deviceType) || RenderDeviceIsVulkan(createInfo.deviceType))
+        {
+            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        } else if (RenderDeviceIsOpenGL(createInfo.deviceType))
+        {
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#if defined(NOVA_DEBUG) || defined(NOVA_DEV)
+            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+        }
 
         m_Handle = glfwCreateWindow(createInfo.width, createInfo.height, *createInfo.title, nullptr, nullptr);
 

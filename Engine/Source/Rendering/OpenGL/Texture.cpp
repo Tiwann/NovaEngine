@@ -1,5 +1,5 @@
 ﻿#include "Texture.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <glad/glad.h>
 
 namespace Nova::OpenGL
@@ -17,7 +17,7 @@ namespace Nova::OpenGL
         /*if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
             return false;*/
 
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         if (!device) return false;
 
         GLenum textureType = GL_TEXTURE_1D;

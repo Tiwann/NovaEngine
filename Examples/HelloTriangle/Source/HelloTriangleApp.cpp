@@ -39,7 +39,6 @@ void HelloTriangleApp::OnInit()
     shaderCreateInfo.moduleInfo.name = "HelloTriangle";
     shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
     shaderCreateInfo.target = ShaderTarget::SPIRV;
-
     m_Shader = renderDevice->CreateShader(shaderCreateInfo);
     if (!m_Shader)
     {
@@ -87,5 +86,5 @@ void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)
 
 Nova::RenderDeviceType HelloTriangleApp::GetRenderDeviceType() const
 {
-    return RenderDeviceType::Vulkan;
+    return RenderDeviceType::OpenGL;
 }

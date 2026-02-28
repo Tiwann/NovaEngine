@@ -1,88 +1,20 @@
 ﻿#include "Containers/StringFormat.h"
 #include "Shader.h"
-#include "Buffer.h"
+#include "Rendering/SlangCommon.h"
 #include "DescriptorPool.h"
 #include "RenderDevice.h"
-#include "Sampler.h"
 #include "Conversions.h"
+#include "Runtime/Application.h"
 
 #include <vulkan/vulkan.h>
 #include <spirv_reflect.h>
 #include <unordered_map>
 
-#include "Runtime/Application.h"
+#include "Runtime/Log.h"
+
 
 namespace Nova::Vulkan
 {
-    static SlangCompileTarget GetCompileTarget(const ShaderTarget target)
-    {
-        switch (target)
-        {
-        case ShaderTarget::SPIRV: return SLANG_SPIRV;
-        case ShaderTarget::GLSL: return SLANG_GLSL;
-        case ShaderTarget::HLSL: return SLANG_HLSL;
-        case ShaderTarget::DXBC: return SLANG_DXBC;
-        case ShaderTarget::DXIL: return SLANG_DXIL;
-        default: return SLANG_SPIRV;
-        }
-    }
-
-    static ShaderStageFlagBits GetStage(const SlangStage stage)
-    {
-        switch (stage)
-        {
-        case SLANG_STAGE_NONE: return ShaderStageFlagBits::None;
-        case SLANG_STAGE_VERTEX: return ShaderStageFlagBits::Vertex;
-        case SLANG_STAGE_GEOMETRY: return ShaderStageFlagBits::Geometry;
-        case SLANG_STAGE_FRAGMENT: return ShaderStageFlagBits::Fragment;
-        case SLANG_STAGE_COMPUTE: return ShaderStageFlagBits::Compute;
-        case SLANG_STAGE_RAY_GENERATION: return ShaderStageFlagBits::RayGeneration;
-        case SLANG_STAGE_HULL: return ShaderStageFlagBits::Tessellation;
-        case SLANG_STAGE_MESH: return ShaderStageFlagBits::Mesh;
-        default: return ShaderStageFlagBits::None;
-        }
-    }
-
-    static BindingType GetBindingType(const slang::BindingType bindingType)
-    {
-        switch (bindingType) {
-        case slang::BindingType::Sampler: return BindingType::Sampler;
-        case slang::BindingType::Texture: return BindingType::SampledTexture;
-        case slang::BindingType::ConstantBuffer:
-        case slang::BindingType::ParameterBlock: return BindingType::UniformBuffer;
-        case slang::BindingType::TypedBuffer: return BindingType::UniformTexelBuffer;
-        case slang::BindingType::RawBuffer: return BindingType::UniformBuffer;
-        case slang::BindingType::CombinedTextureSampler: return BindingType::CombinedTextureSampler;
-        case slang::BindingType::InputRenderTarget: return BindingType::InputAttachment;
-        case slang::BindingType::InlineUniformData: return BindingType::InlineUniformBlock;
-        case slang::BindingType::RayTracingAccelerationStructure: return BindingType::AccelerationStructure;
-        case slang::BindingType::VaryingInput:
-            break;
-        case slang::BindingType::VaryingOutput:
-            break;
-        case slang::BindingType::ExistentialValue:
-            break;
-        case slang::BindingType::PushConstant: return BindingType::PushConstant;
-        case slang::BindingType::MutableFlag:
-            break;
-        case slang::BindingType::MutableTexture: return BindingType::StorageTexture;
-        case slang::BindingType::MutableTypedBuffer: return BindingType::StorageBuffer;
-        case slang::BindingType::MutableRawBuffer: return BindingType::StorageBuffer;
-        case slang::BindingType::BaseMask:
-            break;
-        case slang::BindingType::ExtMask:
-            break;
-        default: ;
-        }
-        return BindingType::PushConstant;
-    }
-
-    static StringView GetErrorString(const Slang::ComPtr<slang::IBlob>& blob)
-    {
-        const StringView errorString = { (const char*)blob->getBufferPointer(), blob->getBufferSize() };
-        return errorString;
-    };
-
     bool Shader::Initialize(const ShaderCreateInfo& createInfo)
     {
         // TODO: /!\ MEMORY LEAK HERE
@@ -125,7 +57,7 @@ namespace Nova::Vulkan
 
         if (!m_Module)
         {
-            std::println(std::cerr, "Failed to load slang module [{}]: {}", *createInfo.moduleInfo.name, *GetErrorString(errorBlob));
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to load slang module [{}]: {}", *createInfo.moduleInfo.name, *GetErrorString(errorBlob));
             return false;
         }
 
@@ -135,7 +67,7 @@ namespace Nova::Vulkan
             result = m_Module->findEntryPointByName(*shaderEntryPoint.name, entryPoint.writeRef());
             if (SLANG_FAILED(result))
             {
-                std::println(std::cerr, "Entry point '{}' not found. Compilation failed.", *shaderEntryPoint.name);
+                NOVA_LOG(RenderDevice, Verbosity::Error, "Entry point '{}' not found. Compilation failed.", *shaderEntryPoint.name);
                 return false;
             }
             m_EntryPoints.Add(entryPoint);
@@ -147,14 +79,14 @@ namespace Nova::Vulkan
         result = m_Session->createCompositeComponentType(entryPoints.Data(), entryPoints.Count(), m_Program.writeRef(), errorBlob.writeRef());
         if (SLANG_FAILED(result))
         {
-            std::println(std::cerr, "Failed to create shader program: {}", *GetErrorString(errorBlob));
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to create shader program: {}", *GetErrorString(errorBlob));
             return false;
         }
 
         result = m_Program->link(m_LinkedProgram.writeRef(), errorBlob.writeRef());
         if (SLANG_FAILED(result))
         {
-            std::println(std::cerr, "Failed to link shader program: {}", *GetErrorString(errorBlob));
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to link shader program: {}", *GetErrorString(errorBlob));
             return false;
         }
 
@@ -167,7 +99,7 @@ namespace Nova::Vulkan
             result = m_LinkedProgram->getEntryPointCode(entryPointIndex, 0, entryPointCode.writeRef(), errorBlob.writeRef());
             if (SLANG_FAILED(result))
             {
-                std::println(std::cerr, "Failed to get entry point code: {}", *GetErrorString(errorBlob));
+                NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to get entry point code: {}", *GetErrorString(errorBlob));
                 return false;
             }
 
@@ -225,7 +157,7 @@ namespace Nova::Vulkan
             switch (bits)
             {
             case SPV_REFLECT_SHADER_STAGE_VERTEX_BIT: return ShaderStageFlagBits::Vertex;
-            case SPV_REFLECT_SHADER_STAGE_TESSELLATION_CONTROL_BIT: return ShaderStageFlagBits::Tessellation;
+            case SPV_REFLECT_SHADER_STAGE_TESSELLATION_CONTROL_BIT: return ShaderStageFlagBits::TessellationControl;
             case SPV_REFLECT_SHADER_STAGE_TESSELLATION_EVALUATION_BIT: return ShaderStageFlagBits::None;
             case SPV_REFLECT_SHADER_STAGE_GEOMETRY_BIT: return ShaderStageFlagBits::Geometry;
             case SPV_REFLECT_SHADER_STAGE_FRAGMENT_BIT: return ShaderStageFlagBits::Fragment;

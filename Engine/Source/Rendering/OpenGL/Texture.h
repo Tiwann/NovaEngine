@@ -18,7 +18,7 @@ namespace Nova::OpenGL
         uint32_t GetHandle() const;
         Array<uint8_t> GetPixels() override;
     private:
-        Device* m_Device = nullptr;
+        RenderDevice* m_Device = nullptr;
         uint32_t m_Handle = 0xFFFFFFFF;
     };
 }

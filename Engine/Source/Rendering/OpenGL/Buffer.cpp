@@ -1,5 +1,5 @@
 ﻿#include "Buffer.h"
-#include "Device.h"
+#include "RenderDevice.h"
 #include <glad/glad.h>
 
 namespace Nova::OpenGL
@@ -39,8 +39,11 @@ namespace Nova::OpenGL
 
     bool Buffer::Initialize(const BufferCreateInfo& createInfo)
     {
+        if (m_Handle != 0xFFFFFFFF) 
+            glDeleteBuffers(1, &m_Handle);
+        
         glCreateBuffers(1, &m_Handle);
-        Device* device = static_cast<Device*>(createInfo.device);
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         m_Device = device;
         m_Size = createInfo.size;
         m_Usage = createInfo.usage;

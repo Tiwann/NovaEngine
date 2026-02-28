@@ -8,6 +8,7 @@
 #include "Material.h"
 #include "Buffer.h"
 #include "Texture.h"
+#include "RenderDeviceType.h"
 #include <cstdint>
 
 #include "Runtime/LogCategory.h"
@@ -41,19 +42,6 @@ namespace Nova
     class Swapchain;
     class CommandBuffer;
 
-    enum class RenderDeviceType
-    {
-        Null,
-#ifdef NOVA_HAS_VULKAN
-        Vulkan,
-#endif
-#ifdef NOVA_HAS_D3D12
-        D3D12,
-#endif
-#ifdef NOVA_HAS_OPENGL
-        OpenGL
-#endif
-    };
 
     struct DeviceCreateInfo
     {

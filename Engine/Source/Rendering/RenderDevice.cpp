@@ -1,20 +1,21 @@
 ﻿#include "RenderDevice.h"
-#include "Vulkan/RenderDevice.h"
 #include "ComputePipeline.h"
 #include "Sampler.h"
+
+#ifdef NOVA_HAS_VULKAN
+#include "Vulkan/RenderDevice.h"
+#endif
 
 #ifdef NOVA_HAS_D3D12
 #include "D3D12/RenderDevice.h"
 #endif
 
 #ifdef NOVA_HAS_OPENGL
-#include "OpenGL/Device.h"
+#include "OpenGL/RenderDevice.h"
 #endif
 
 namespace Nova
 {
-
-
     StringView RenderDevice::GetDeviceVendor() const
     {
         return m_DeviceVendor;
@@ -31,6 +32,7 @@ namespace Nova
         switch (type)
         {
         case RenderDeviceType::Null: return nullptr;
+#ifdef NOVA_HAS_VULKAN
         case RenderDeviceType::Vulkan:
             {
                 device = new Vulkan::RenderDevice();
@@ -41,6 +43,7 @@ namespace Nova
                 }
             }
             break;
+#endif
 #ifdef NOVA_HAS_D3D12
         case RenderDeviceType::D3D12:
             {
@@ -53,6 +56,19 @@ namespace Nova
             }
             break;
 #endif
+#ifdef NOVA_HAS_OPENGL
+        case RenderDeviceType::OpenGL:
+            {
+                device = new OpenGL::RenderDevice();
+                if (!device->Initialize(createInfo))
+                {
+                    delete device;
+                    return nullptr;
+                }
+            }
+            break;
+#endif
+        default: return nullptr;
         }
         return Ref(device);
     }

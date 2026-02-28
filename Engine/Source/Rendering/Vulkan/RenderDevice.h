@@ -8,7 +8,6 @@
 #include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
-#include "Rendering/SamplerManager.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
@@ -85,7 +84,6 @@ namespace Nova::Vulkan
         CommandPool m_CommandPool;
         CommandPool m_TransferCommandPool;
         DescriptorPool m_DescriptorPool;
-        SamplerManager m_SamplerManager;
 
         Queue m_GraphicsQueue;
         Queue m_PresentQueue;

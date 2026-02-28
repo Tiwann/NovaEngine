@@ -11,8 +11,9 @@ namespace Nova
         Fragment = BIT(2),
         Compute = BIT(3),
         RayGeneration = BIT(4),
-        Tessellation = BIT(5),
-        Mesh = BIT(6),
+        TessellationControl = BIT(5),
+        TessellationEvaluation = BIT(6),
+        Mesh = BIT(7),
     };
 
     typedef Flags<ShaderStageFlagBits> ShaderStageFlags;

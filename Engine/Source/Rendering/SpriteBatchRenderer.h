@@ -17,7 +17,7 @@ namespace Nova
 
     struct SpriteBatchRendererCreateInfo
     {
-        Device* device = nullptr;
+        RenderDevice* device = nullptr;
         RenderPass* renderPass = nullptr;
         Shader* shader = nullptr;
     };

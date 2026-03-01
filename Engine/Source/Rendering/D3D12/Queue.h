@@ -1,19 +1,12 @@
 ﻿#pragma once
 #include "Rendering/Queue.h"
+#include "Rendering/QueueType.h"
 
 struct ID3D12CommandQueue;
 
 namespace Nova::D3D12
 {
     class RenderDevice;
-
-    enum class QueueType
-    {
-        None,
-        Graphics,
-        Compute,
-        Transfer
-    };
 
     class Queue final : public Nova::Queue
     {

@@ -48,12 +48,12 @@ namespace Nova::OpenGL
         for (uint32_t i = 0; i < imageCount; i++)
         {
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_ColorTextures[i]);
-            const GLFormat colorFormat = Convert<GLFormat>(createInfo.colorFormat);
+            const GLformat colorFormat = Convert<GLformat>(createInfo.colorFormat);
             glTextureStorage2DMultisample(m_ColorTextures[i], createInfo.sampleCount, colorFormat.internalFormat, createInfo.width, createInfo.height, true);
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_DepthTextures[i]);
-            const GLFormat depthFormat = Convert<GLFormat>(createInfo.depthFormat);
+            const GLformat depthFormat = Convert<GLformat>(createInfo.depthFormat);
             glTextureStorage2DMultisample(m_DepthTextures[i], createInfo.sampleCount, depthFormat.internalFormat, createInfo.width, createInfo.height, true);
             glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 

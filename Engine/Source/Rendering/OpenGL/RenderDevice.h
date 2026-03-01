@@ -2,6 +2,8 @@
 #include "Rendering/RenderDevice.h"
 #include "Swapchain.h"
 #include "Surface.h"
+#include "Queue.h"
+#include "CommandBuffer.h"
 
 namespace Nova::OpenGL
 {
@@ -35,5 +37,9 @@ namespace Nova::OpenGL
     private:
         Surface m_Surface;
         Swapchain m_Swapchain;
+        CommandBuffer m_CommandBuffers[3];
+        Queue m_GraphicsQueue{QueueType::Graphics};
+        Queue m_ComputeQueue{QueueType::Compute};
+        uint32_t m_CurrentFrameIndex = 0;
     };
 }

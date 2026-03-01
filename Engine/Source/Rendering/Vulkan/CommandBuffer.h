@@ -30,9 +30,9 @@ namespace Nova::Vulkan
         void BindMaterial(const Nova::Material& material) override;
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
-        void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) override;
+        void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
         void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride) override;
-        void DrawIndexed(size_t count, size_t offset) override;
+        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
         void BeginRenderPass(const Nova::RenderPassBeginInfo& beginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, const ShaderStageFlags stageFlags, const size_t offset, const size_t size, const void* values) override;

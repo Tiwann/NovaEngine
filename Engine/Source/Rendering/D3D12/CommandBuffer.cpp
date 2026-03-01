@@ -113,7 +113,7 @@ namespace Nova::D3D12
         m_Handle->RSSetScissorRects(1, &scissorRect);
     }
 
-    void CommandBuffer::Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance)
+    void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance)
     {
         m_Handle->IASetIndexBuffer(nullptr);
         m_Handle->DrawInstanced(vertexCount, instanceCount, firstIndex, firstInstance);

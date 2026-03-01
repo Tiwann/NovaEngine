@@ -261,7 +261,7 @@ namespace Nova::Vulkan
         commandBuffer.Free();
 
         Array<uint8_t> result(size);
-        if (!buffer->CPUCopy(0, size, result.Data()))
+        if (!buffer->CopyDataTo(0, size, result.Data()))
             return {};
         return result;
     }

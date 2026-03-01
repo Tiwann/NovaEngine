@@ -65,7 +65,7 @@ namespace Nova::D3D12
         return false;
     }
 
-    bool Buffer::CPUCopy(const void* src, size_t offset, size_t size)
+    bool Buffer::WriteData(const void* src, size_t offset, size_t size)
     {
         if (!m_Handle) return false;
 

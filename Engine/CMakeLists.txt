@@ -48,7 +48,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Containers/Map.h
         Source/Containers/MulticastDelegate.h
         Source/Containers/Pair.h
-        Source/Containers/Queue.h
+        Source/Containers/Fifo.h
         Source/Containers/StaticArray.h
         Source/Containers/Std140Buffer.cpp
         Source/Containers/Std140Buffer.h
@@ -184,6 +184,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/PresentMode.h
         Source/Rendering/PrimitiveTopology.h
         Source/Rendering/Queue.h
+        Source/Rendering/QueueType.h
         Source/Rendering/RenderTarget.cpp
         Source/Rendering/RenderTarget.h
         Source/Rendering/RenderDeviceType.h
@@ -426,6 +427,11 @@ set(NOVA_ENGINE_OPENGL_SOURCES
         Source/Rendering/OpenGL/GraphicsPipeline.h
         Source/Rendering/OpenGL/Sampler.cpp
         Source/Rendering/OpenGL/Sampler.h
+        Source/Rendering/OpenGL/CommandBuffer.h
+        Source/Rendering/OpenGL/CommandBuffer.cpp
+        Source/Rendering/OpenGL/Commands.h
+        Source/Rendering/OpenGL/Queue.h
+        Source/Rendering/OpenGL/Queue.cpp
 )
 
 

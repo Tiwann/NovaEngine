@@ -88,9 +88,9 @@ namespace Nova
         virtual void BindMaterial(const Nova::Material& material) = 0;
         virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
-        virtual void Draw(size_t vertexCount, size_t instanceCount, size_t firstIndex, size_t firstInstance) = 0;
+        virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
         virtual void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride = sizeof(DrawIndirectParameters)) = 0;
-        virtual void DrawIndexed(size_t count, size_t offset) = 0;
+        virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
         virtual void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPass) = 0;
         virtual void EndRenderPass() = 0;
         virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;

@@ -1,19 +1,10 @@
 ﻿#pragma once
 #include "Runtime/Object.h"
+#include "BufferUsage.h"
 
 namespace Nova
 {
     class RenderDevice;
-
-    enum class BufferUsage
-    {
-        None,
-        VertexBuffer,
-        IndexBuffer,
-        UniformBuffer,
-        StorageBuffer,
-        StagingBuffer
-    };
 
     struct BufferCreateInfo
     {
@@ -36,9 +27,9 @@ namespace Nova
         virtual void Destroy() = 0;
 
         virtual bool Resize(size_t newSize, bool keepData = true) = 0;
-        virtual bool CPUCopy(const void* src, size_t offset, size_t size) = 0;
-        virtual bool CPUCopy(size_t offset, size_t size, void* outBuffer) = 0;
-        virtual bool GPUCopy(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
+        virtual bool WriteData(const void* src, size_t offset, size_t size) = 0;
+        virtual bool CopyDataTo(size_t offset, size_t size, void* outBuffer) = 0;
+        virtual bool CopyDataTo(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
 
         template<typename T>
         bool CPUCopy(BufferView<T> buffer, size_t offset)

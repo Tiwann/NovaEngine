@@ -1,13 +1,19 @@
 ﻿#pragma once
+#include "Containers/Fifo.h"
 #include "Rendering/CommandBuffer.h"
+#include "Commands.h"
 
-struct ID3D12GraphicsCommandList10;
-
-namespace Nova::D3D12
+namespace Nova::OpenGL
 {
-    class RenderDevice;
+    enum class CommandBufferState
+    {
+        Invalid,
+        Closed,
+        Opened,
+        Pending,
+    };
 
-    class CommandBuffer final : public Nova::CommandBuffer
+    class CommandBuffer final: public Nova::CommandBuffer
     {
     public:
         bool Allocate(const CommandBufferAllocateInfo& allocateInfo) override;
@@ -26,27 +32,26 @@ namespace Nova::D3D12
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
-        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount) override;
+        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
         void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride) override;
-        void BeginRenderPass(const RenderPassBeginInfo& beginInfo) override;
+        void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPassBeginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size,const void* values) override;
         void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) override;
-        void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
-        void DispatchIndirect(const Nova::Buffer& buffer, size_t offset) override;
-        void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset,size_t size) override;
-        void Blit(const Nova::Texture& src, const Nova::BlitRegion& srcRegion, const Nova::Texture& dest, const Nova::BlitRegion& destRegion, Filter filter) override;
-        void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
-        void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) override;
         void TextureBarrier(const Nova::TextureBarrier& barrier) override;
         void BufferBarrier(const Nova::BufferBarrier& barrier) override;
         void MemoryBarrier(const Nova::MemoryBarrier& barrier) override;
-
-        ID3D12GraphicsCommandList10* GetHandle() { return m_Handle; }
-        const ID3D12GraphicsCommandList10* GetHandle() const { return m_Handle; }
+        void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
+        void DispatchIndirect(const Nova::Buffer& buffer, size_t offset) override;
+        void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
+        void Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter) override;
+        void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
+        void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) override;
 
     private:
-        RenderDevice* m_Device = nullptr;
-        ID3D12GraphicsCommandList10* m_Handle = nullptr;
+        friend class Queue;
+        String m_Name;
+        CommandBufferState m_State = CommandBufferState::Closed;
+        Fifo<Command> m_Commands;
     };
 }

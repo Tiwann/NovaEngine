@@ -129,7 +129,7 @@ namespace Nova
         cmdBuffer.PushConstants(*s_Shader, ShaderStageFlagBits::Vertex | ShaderStageFlagBits::Fragment, 0, sizeof(Matrix4), s_ViewProjection.ValuePtr());
         cmdBuffer.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(viewport.x, viewport.y, viewport.width, viewport.height);
-        cmdBuffer.DrawIndexed(s_Indices.Count(), 0);
+        cmdBuffer.DrawIndexed(s_Indices.Count(), 1, 0, 0, 0);
     }
 
     void DebugRenderer::DrawLine(const Vector3& start, const Vector3& end, const Color& color, float thickness)

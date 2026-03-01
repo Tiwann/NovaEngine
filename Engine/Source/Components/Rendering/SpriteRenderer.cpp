@@ -165,7 +165,7 @@ namespace Nova
         cmdBuffer.BindIndexBuffer(*m_IndexBuffer, 0, Format::Uint32);
         cmdBuffer.SetViewport(viewport.x, viewport.y, viewport.width, viewport.height, 0.0f, 1.0f);
         cmdBuffer.SetScissor(viewport.x, viewport.y, viewport.width, viewport.height);
-        cmdBuffer.DrawIndexed(6, 0);
+        cmdBuffer.DrawIndexed(6, 1, 0, 0, 0);
     }
 
     void SpriteRenderer::OnDestroy()

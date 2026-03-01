@@ -21,7 +21,7 @@ namespace Nova::OpenGL
         glCreateTextures(GL_TEXTURE_2D, imageCount, m_Textures);
         for (uint32_t i = 0; i < imageCount; ++i)
         {
-            const GLFormat format = Convert<GLFormat>(createInfo.format);
+            const GLformat format = Convert<GLformat>(createInfo.format);
             glBindTexture(GL_TEXTURE_2D, m_Textures[i]);
             glTextureStorage2D(m_Textures[i], 1, format.internalFormat, createInfo.width, createInfo.height);
         }
@@ -73,5 +73,19 @@ namespace Nova::OpenGL
     Ref<Nova::Texture> Swapchain::GetCurrentTexture()
     {
         return nullptr;
+    }
+
+    bool Swapchain::AcquireNextImage(uint32_t& nextImage)
+    {
+        static bool firstFrame = true;
+        if (firstFrame)
+        {
+            nextImage = 0;
+            firstFrame = false;
+            return true;
+        }
+
+        nextImage = (nextImage + 1) % GetImageCount();
+        return true;
     }
 }

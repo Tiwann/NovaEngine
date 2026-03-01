@@ -13,6 +13,8 @@ namespace Nova::OpenGL
         void SetName(StringView name) override;
         Ref<Nova::Texture> GetTexture(uint32_t index) override;
         Ref<Nova::Texture> GetCurrentTexture() override;
+
+        bool AcquireNextImage(uint32_t& nextImage);
     private:
         uint32_t m_Textures[3] { INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t> };
     };

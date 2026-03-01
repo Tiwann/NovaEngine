@@ -10,8 +10,8 @@ namespace Nova::OpenGL
         bool Initialize(const RenderTargetCreateInfo& createInfo) override;
         void Destroy() override;
         bool Resize(uint32_t newX, uint32_t newY) override;
-        Ref<Texture> GetColorTexture() override;
-        Ref<Texture> GetDepthTexture() override;
+        Ref<Nova::Texture> GetColorTexture() override;
+        Ref<Nova::Texture> GetDepthTexture() override;
     private:
         uint32_t m_FrameBuffers[3] { INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t> };
         uint32_t m_ColorTextures[3] { INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t>, INVALID_HANDLE<uint32_t> };

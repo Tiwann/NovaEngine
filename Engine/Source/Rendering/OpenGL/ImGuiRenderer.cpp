@@ -3,10 +3,8 @@
 #include "RenderDevice.h"
 #include "Swapchain.h"
 #include <imgui.h>
-
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <glad/glad.h>
 
 namespace Nova::OpenGL
 {
@@ -51,14 +49,13 @@ namespace Nova::OpenGL
     {
         ImGui::Render();
         ImDrawData* drawData = ImGui::GetDrawData();
-        if (!drawData) return;
+        if (!drawData || drawData->CmdListsCount <= 0) return;
 
         const Swapchain* swapchain = static_cast<Swapchain*>(m_Device->GetSwapchain());
         const uint32_t width = swapchain->GetWidth();
         const uint32_t height = swapchain->GetHeight();
-        // WAITING FOR VIEWPORT CONCEPT AND CMDBUFFER OPENGL IMPLEMENTATION
-        glViewport(0, 0, width, height);
-        glScissor(0, 0, width, height);
+        commandBuffer.SetViewport(0, 0, width, height, 0.0f, 1.0f);
+        commandBuffer.SetScissor(0, 0, width, height);
         ImGui_ImplOpenGL3_RenderDrawData(drawData);
     }
 

@@ -192,17 +192,17 @@ namespace Nova::Vulkan
         vkCmdSetScissor(m_Handle, 0, 1, &rect);
     }
 
-    void CommandBuffer::DrawIndexed(const size_t count, const size_t offset)
+    void CommandBuffer::Draw(const uint32_t vertexCount, const uint32_t instanceCount, const uint32_t firstVertex, const uint32_t firstInstance)
     {
-        vkCmdDrawIndexed(m_Handle, count, 1, 0, offset, 0);
+        vkCmdDraw(m_Handle, vertexCount, instanceCount, firstVertex, firstInstance);
     }
 
-    void CommandBuffer::Draw(const size_t vertexCount, const size_t instanceCount, const size_t firstIndex, const size_t firstInstance)
+    void CommandBuffer::DrawIndexed(const uint32_t indexCount, const uint32_t instanceCount, const uint32_t firstIndex, const int32_t vertexOffset, const uint32_t firstInstance)
     {
-        vkCmdDraw(m_Handle, vertexCount, instanceCount, firstIndex, firstInstance);
+        vkCmdDrawIndexed(m_Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride)
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, const size_t offset, const uint32_t drawCount, const size_t stride)
     {
         vkCmdDrawIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, stride);
     }

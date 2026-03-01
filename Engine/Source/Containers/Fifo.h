@@ -4,7 +4,7 @@
 namespace Nova
 {
     template <typename T>
-    class Queue
+    class Fifo
     {
     public:
         using ArrayType = Array<T>;
@@ -16,11 +16,11 @@ namespace Nova
         using Iterator = typename ArrayType::Iterator;
         using ConstIterator = typename ArrayType::ConstIterator;
 
-        Queue() = default;
-        Queue(const Queue&) = default;
-        Queue(Queue&&) = default;
-        Queue& operator=(const Queue&) = default;
-        Queue& operator=(Queue&&) = default;
+        Fifo() = default;
+        Fifo(const Fifo&) = default;
+        Fifo(Fifo&&) = default;
+        Fifo& operator=(const Fifo&) = default;
+        Fifo& operator=(Fifo&&) = default;
         
         void Enqueue(ConstReferenceType item)
         {
@@ -30,7 +30,7 @@ namespace Nova
         template<typename... Args>
         void Enqueue(Args&&... args)
         {
-            m_Data.Emplace(args);
+            m_Data.Emplace(args...);
         }
 
         ValueType Dequeue()
@@ -42,7 +42,15 @@ namespace Nova
 
         bool IsEmpty() const { return m_Data.IsEmpty(); }
 
-        
+        void Clear()
+        {
+            m_Data.Clear();
+        }
+
+        void Free()
+        {
+            m_Data.Free();
+        }
     private:
         ArrayType m_Data;
     };

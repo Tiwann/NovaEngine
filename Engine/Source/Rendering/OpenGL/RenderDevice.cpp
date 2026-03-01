@@ -3,7 +3,9 @@
 #include "Runtime/Log.h"
 #include "Shader.h"
 #include "Sampler.h"
+#include "Buffer.h"
 #include "RenderTarget.h"
+#include "GraphicsPipeline.h"
 #include "Rendering/Surface.h"
 
 #include <glad/glad.h>
@@ -112,15 +114,30 @@ namespace Nova::OpenGL
             return false;
         }
 
-        return false;
+        if (!m_Swapchain.AcquireNextImage(m_CurrentFrameIndex))
+        {
+            m_Swapchain.Invalidate();
+            return false;
+        }
+
+        CommandBuffer& commandBuffer = m_CommandBuffers[m_CurrentFrameIndex];
+        const CommandBufferBeginInfo beginInfo { CommandBufferUsageFlagBits::OneTimeSubmit };
+        if (!commandBuffer.Begin(beginInfo))
+            return false;
+
+        return true;
     }
 
     void RenderDevice::EndFrame()
     {
+        CommandBuffer& commandBuffer = m_CommandBuffers[m_CurrentFrameIndex];
+        commandBuffer.End();
+        m_GraphicsQueue.Submit(&commandBuffer, nullptr, nullptr, nullptr, 0);
     }
 
     void RenderDevice::Present()
     {
+        (void)m_GraphicsQueue.Present(m_Swapchain, nullptr, m_CurrentFrameIndex);
     }
 
     void RenderDevice::WaitIdle() const
@@ -178,7 +195,14 @@ namespace Nova::OpenGL
 
     Ref<Nova::Buffer> RenderDevice::CreateBuffer(const BufferCreateInfo& createInfo)
     {
-        return nullptr;
+        Buffer* buffer = new Buffer();
+        BufferCreateInfo bufferCreateInfo(createInfo);
+        if (!buffer->Initialize(bufferCreateInfo.WithDevice(this)))
+        {
+            delete buffer;
+            return nullptr;
+        }
+        return Ref(buffer);
     }
 
     Ref<Nova::Shader> RenderDevice::CreateShader(const ShaderCreateInfo& createInfo)
@@ -195,7 +219,14 @@ namespace Nova::OpenGL
 
     Ref<Nova::GraphicsPipeline> RenderDevice::CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo)
     {
-        return nullptr;
+        GraphicsPipeline* pipeline = new GraphicsPipeline();
+        GraphicsPipelineCreateInfo pipelineCreateInfo(createInfo);
+        if (!pipeline->Initialize(pipelineCreateInfo.SetDevice(this)))
+        {
+            delete pipeline;
+            return nullptr;
+        }
+        return Ref(pipeline);
     }
 
     Ref<Nova::ComputePipeline> RenderDevice::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)
@@ -225,6 +256,6 @@ namespace Nova::OpenGL
 
     Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()
     {
-        return Nova::RenderDevice::GetCurrentCommandBuffer();
+        return &m_CommandBuffers[m_CurrentFrameIndex];
     }
 }

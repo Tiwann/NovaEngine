@@ -128,7 +128,7 @@ namespace Nova::Vulkan
         Buffer newBuffer;
         newBuffer.Initialize(bufferCreateInfo);
 
-        if (!GPUCopy(newBuffer, 0, 0, newSize))
+        if (!CopyDataTo(newBuffer, 0, 0, newSize))
             return false;
 
         Destroy();
@@ -137,7 +137,7 @@ namespace Nova::Vulkan
         return false;
     }
 
-    bool Buffer::CPUCopy(const void* src, const size_t offset, const size_t size)
+    bool Buffer::WriteData(const void* src, const size_t offset, const size_t size)
     {
         if (!src) return false;
         if (!size) return false;
@@ -149,7 +149,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool Buffer::CPUCopy(const size_t offset, const size_t size, void* outBuffer)
+    bool Buffer::CopyDataTo(const size_t offset, const size_t size, void* outBuffer)
     {
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         const VkResult result = vmaCopyAllocationToMemory(allocatorHandle, m_Allocation, offset, outBuffer, size);
@@ -158,7 +158,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool Buffer::GPUCopy(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
+    bool Buffer::CopyDataTo(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
         CommandPool* commandPool = m_Device->GetTransferCommandPool();
         CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);

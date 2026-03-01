@@ -15,9 +15,9 @@ namespace Nova::OpenGL
         bool Initialize(const BufferCreateInfo& createInfo) override;
         void Destroy() override;
         bool Resize(size_t newSize, bool keepData) override;
-        bool CPUCopy(const void* src, size_t offset, size_t size) override;
-        bool CPUCopy(size_t offset, size_t size, void* outBuffer) override;
-        bool GPUCopy(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
+        bool WriteData(const void* src, size_t offset, size_t size) override;
+        bool CopyDataTo(size_t offset, size_t size, void* outBuffer) override;
+        bool CopyDataTo(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
 
         void Memset(size_t value, size_t size) override;
 

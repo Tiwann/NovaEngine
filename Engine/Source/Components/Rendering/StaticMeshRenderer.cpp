@@ -200,7 +200,7 @@ namespace Nova
             {
                 cmdBuffer.BindVertexBuffer(*vertexBuffer, subMesh.vertexBufferOffset);
                 cmdBuffer.BindIndexBuffer(*indexBuffer, subMesh.indexBufferOffset, Format::Uint32);
-                cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 0);
+                cmdBuffer.DrawIndexed(subMesh.indexBufferSize / sizeof(uint32_t), 1, 0, 0, 0);
             }
         }
     }

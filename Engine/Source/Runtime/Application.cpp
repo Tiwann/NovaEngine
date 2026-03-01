@@ -196,8 +196,7 @@ namespace Nova
             OnUpdate(m_DeltaTime);
 
             m_ImGuiRenderer->BeginFrame();
-            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(),
-                                         ImGuiDockNodeFlags_PassthruCentralNode);
+            ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
             for (Ref<EditorWindow>& window : m_EditorWindows)
                 window->OnGui();
             OnGUI();

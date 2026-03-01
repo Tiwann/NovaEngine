@@ -4,9 +4,16 @@
 #include "Format.h"
 #include <glad/glad.h>
 
+#include "Rendering/BlendFactor.h"
+#include "Rendering/BlendOperation.h"
 #include "Rendering/CompareOperation.h"
 #include "Rendering/Filter.h"
 #include "Rendering/SamplerAddressMode.h"
+#include "Rendering/BufferUsage.h"
+#include "Rendering/CullMode.h"
+#include "Rendering/FrontFace.h"
+#include "Rendering/PolygonMode.h"
+#include "Rendering/PrimitiveTopology.h"
 
 
 namespace Nova::OpenGL
@@ -15,7 +22,7 @@ namespace Nova::OpenGL
     Out Convert(const In& value);
 
     template<>
-    inline GLFormat Convert(const Format& format)
+    inline GLformat Convert(const Format& format)
     {
         switch (format)
         {
@@ -116,6 +123,114 @@ namespace Nova::OpenGL
         case CompareOperation::Greater: return GL_GREATER;
         case CompareOperation::GreaterOrEqual: return GL_GEQUAL;
         default: return GL_GREATER;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const BufferUsage& usage)
+    {
+        switch (usage)
+        {
+        case BufferUsage::None: return GL_INVALID_INDEX;
+        case BufferUsage::VertexBuffer: return GL_ARRAY_BUFFER;
+        case BufferUsage::IndexBuffer: return GL_ELEMENT_ARRAY_BUFFER;
+        case BufferUsage::UniformBuffer: return GL_UNIFORM_BUFFER;
+        case BufferUsage::StorageBuffer: return GL_SHADER_STORAGE_BUFFER;
+        case BufferUsage::StagingBuffer: return GL_INVALID_INDEX;
+        default: return GL_INVALID_INDEX;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const CullMode& value)
+    {
+        switch (value)
+        {
+        case CullMode::None: return GL_NONE;
+        case CullMode::BackFace: return GL_BACK;
+        case CullMode::FrontFace: return GL_FRONT;
+        case CullMode::FrontAndBackFaces: return GL_FRONT_AND_BACK;
+        default: return GL_NONE;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const FrontFace& value)
+    {
+        switch (value)
+        {
+        case FrontFace::Clockwise: return GL_CW;
+        case FrontFace::CounterClockwise: return GL_CCW;
+            default: return GL_CCW;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const PolygonMode& value)
+    {
+        switch (value)
+        {
+        case PolygonMode::Fill: return GL_FILL;
+        case PolygonMode::Line: return GL_LINE;
+        case PolygonMode::Point: return GL_POINT;
+        default: return GL_FILL;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const BlendFactor& value)
+    {
+        switch (value)
+        {
+        case BlendFactor::Zero: return GL_ZERO;
+        case BlendFactor::One: return GL_ONE;
+        case BlendFactor::SourceColor: return GL_SRC_COLOR;
+        case BlendFactor::OneMinusSourceColor: return GL_ONE_MINUS_SRC_COLOR;
+        case BlendFactor::DestColor: return GL_DST_COLOR;
+        case BlendFactor::OneMinusDestColor: return GL_ONE_MINUS_DST_COLOR;
+        case BlendFactor::SourceAlpha: return GL_SRC_ALPHA;
+        case BlendFactor::OneMinusSourceAlpha: return GL_ONE_MINUS_SRC_ALPHA;
+        case BlendFactor::DestAlpha: return GL_DST_ALPHA;
+        case BlendFactor::OneMinusDestAlpha: return GL_ONE_MINUS_DST_ALPHA;
+        case BlendFactor::ConstantColor: return GL_CONSTANT_COLOR;
+        case BlendFactor::OnMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::ConstantAlpha: return GL_CONSTANT_ALPHA;
+        case BlendFactor::OneMinusConstantAlpha: return GL_ONE_MINUS_CONSTANT_ALPHA;
+        case BlendFactor::SourceAlphaSaturated: return GL_SRC_ALPHA_SATURATE;
+        case BlendFactor::Source1Color: return GL_SRC1_COLOR;
+        case BlendFactor::OneMinusSource1Color: return GL_ONE_MINUS_SRC1_COLOR;
+        case BlendFactor::Source1Alpha: return GL_SRC1_ALPHA;
+        case BlendFactor::OneMinusSource1Alpha: return GL_ONE_MINUS_SRC1_ALPHA;
+        default: return GL_INVALID_ENUM;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const BlendOperation& value)
+    {
+        switch (value)
+        {
+        case BlendOperation::Add: return GL_FUNC_ADD;
+        case BlendOperation::Min: return GL_MIN;
+        case BlendOperation::Max: return GL_MAX;
+        case BlendOperation::Subtract: return GL_FUNC_SUBTRACT;
+        case BlendOperation::ReverseSubtract: return GL_FUNC_REVERSE_SUBTRACT;
+        default: return GL_INVALID_ENUM;
+        }
+    }
+
+    template<>
+    inline GLenum Convert(const PrimitiveTopology& value)
+    {
+        switch (value)
+        {
+        case PrimitiveTopology::PointList: return GL_POINTS;
+        case PrimitiveTopology::LineList: return GL_LINES;
+        case PrimitiveTopology::LineStrip: return GL_LINE_STRIP;
+        case PrimitiveTopology::TriangleList: return GL_TRIANGLES;
+        case PrimitiveTopology::TriangleStrip: return GL_TRIANGLE_STRIP;
+        case PrimitiveTopology::TriangleFan: return GL_TRIANGLE_FAN;
+        default: return GL_INVALID_ENUM;
         }
     }
 }

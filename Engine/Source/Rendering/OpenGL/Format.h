@@ -3,7 +3,7 @@
 
 namespace Nova::OpenGL
 {
-    struct GLFormat
+    struct GLformat
     {
         uint32_t internalFormat;
         uint32_t format;

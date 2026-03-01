@@ -14,7 +14,7 @@ namespace Nova::OpenGL
         m_Size = other.m_Size;
         m_Usage = other.m_Usage;
 
-        other.m_Handle = 0xFFFFFFFF;
+        other.m_Handle = INVALID_HANDLE<uint32_t>;
         other.m_Device = nullptr;
         other.m_Size = 0;
         other.m_Usage = BufferUsage::None;
@@ -30,7 +30,7 @@ namespace Nova::OpenGL
         m_Size = other.m_Size;
         m_Usage = other.m_Usage;
 
-        other.m_Handle = 0xFFFFFFFF;
+        other.m_Handle = INVALID_HANDLE<uint32_t>;
         other.m_Device = nullptr;
         other.m_Size = 0;
         other.m_Usage = BufferUsage::None;
@@ -39,10 +39,15 @@ namespace Nova::OpenGL
 
     bool Buffer::Initialize(const BufferCreateInfo& createInfo)
     {
-        if (m_Handle != 0xFFFFFFFF) 
+        if (!createInfo.device) return false;
+        if (createInfo.size <= 0) return false;
+        if (createInfo.usage == BufferUsage::None) return false;
+
+        if (HandleIsValid(m_Handle))
             glDeleteBuffers(1, &m_Handle);
         
         glCreateBuffers(1, &m_Handle);
+        glNamedBufferStorage(m_Handle, createInfo.size, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT);
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         m_Device = device;
         m_Size = createInfo.size;
@@ -65,7 +70,7 @@ namespace Nova::OpenGL
         Buffer newBuffer;
         newBuffer.Initialize(bufferCreateInfo);
 
-        if (!GPUCopy(newBuffer, 0, 0, newSize))
+        if (!CopyDataTo(newBuffer, 0, 0, newSize))
             return false;
 
         Destroy();
@@ -74,40 +79,42 @@ namespace Nova::OpenGL
         return false;
     }
 
-    bool Buffer::CPUCopy(const void* src, const size_t offset, const size_t size)
+    bool Buffer::WriteData(const void* src, const size_t offset, const size_t size)
     {
         if (m_Handle == 0xFFFFFFFF) return false;
         if (!src) return false;
         if (!size) return false;
 
-        GLenum usage = GL_INVALID_INDEX;
-        switch (m_Usage)
-        {
-        case BufferUsage::None: usage = GL_INVALID_INDEX; break;
-        case BufferUsage::VertexBuffer: usage = GL_ARRAY_BUFFER; break;
-        case BufferUsage::IndexBuffer: usage = GL_ELEMENT_ARRAY_BUFFER; break;
-        case BufferUsage::UniformBuffer: usage = GL_UNIFORM_BUFFER; break;
-        case BufferUsage::StorageBuffer: usage = GL_SHADER_STORAGE_BUFFER; break;
-        case BufferUsage::StagingBuffer: break;
-        }
-
-        glNamedBufferData(m_Handle, size, src, usage);
+        void* mapped = glMapNamedBufferRange(m_Handle, 0, size, GL_MAP_WRITE_BIT);
+        Memory::Memcpy(mapped, src, size);
+        glUnmapNamedBuffer(m_Handle);
         return true;
     }
 
-    bool Buffer::CPUCopy(const size_t offset, const size_t size, void* outBuffer)
+    bool Buffer::CopyDataTo(const size_t offset, const size_t size, void* outBuffer)
     {
+        if (!outBuffer || !size || !HandleIsValid(m_Handle))
+            return false;
+
+        const void* mapped = glMapNamedBufferRange(m_Handle, offset, size, GL_MAP_READ_BIT);
+        Memory::Memcpy(outBuffer, mapped, size);
+        glUnmapNamedBuffer(m_Handle);
         return true;
     }
 
-    bool Buffer::GPUCopy(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
+    bool Buffer::CopyDataTo(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
     {
+        const Buffer& otherBuffer = static_cast<Buffer&>(other);
+        if (!HandleIsValid(m_Handle) || !HandleIsValid(otherBuffer.m_Handle))
+            return false;
+
+        glCopyNamedBufferSubData(m_Handle, otherBuffer.m_Handle, srcOffset, destOffset, size);
         return true;
     }
 
     void Buffer::Memset(const size_t value, const size_t size)
     {
-        void* mapped = glMapNamedBuffer(m_Handle, GL_WRITE_ONLY);
+        void* mapped = glMapNamedBufferRange(m_Handle, 0, size, GL_MAP_WRITE_BIT);
         Memory::Memset(mapped, value, size);
         glUnmapNamedBuffer(m_Handle);
     }

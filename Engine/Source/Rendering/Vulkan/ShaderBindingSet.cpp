@@ -167,14 +167,9 @@ namespace Nova::Vulkan
         case BufferUsage::None:
         case BufferUsage::VertexBuffer:
         case BufferUsage::IndexBuffer:
-        case BufferUsage::UniformBuffer:
-            descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            break;
-        case BufferUsage::StorageBuffer:
-            descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            break;
-        case BufferUsage::StagingBuffer:
-            break;
+        case BufferUsage::UniformBuffer:    descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; break;
+        case BufferUsage::StorageBuffer:    descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;break;
+        default: break;
         }
 
         if (descriptorType == VK_DESCRIPTOR_TYPE_MAX_ENUM)

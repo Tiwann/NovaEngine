@@ -1,14 +1,98 @@
 ﻿#include "GraphicsPipeline.h"
 #include <glad/glad.h>
+#include "Conversions.h"
+#include "Format.h"
+
 
 namespace Nova::OpenGL
 {
     bool GraphicsPipeline::Initialize(const GraphicsPipelineCreateInfo& createInfo)
     {
-       return false;
+        if (HandleIsValid(m_VertexArrayObject))
+            glDeleteVertexArrays(1, &m_VertexArrayObject);
+
+        glCreateVertexArrays(1, &m_VertexArrayObject);
+
+        const VertexLayout& vertexLayout = createInfo.vertexInputInfo.layout;
+        const Array<VertexAttribute>& vertexAttributes = vertexLayout.GetAttributes();
+        for (uint32_t i = 0; i < vertexAttributes.Count(); i++)
+        {
+            const VertexAttribute& vertexAttribute = vertexAttributes[i];
+
+            glEnableVertexArrayAttrib(m_VertexArrayObject, i);
+            glVertexArrayAttribBinding(m_VertexArrayObject, i, 0);
+            glVertexArrayAttribFormat(m_VertexArrayObject, i,
+                                      GetFormatComponentCount(vertexAttribute.format),
+                                      Convert<GLformat>(vertexAttribute.format).type,
+                                      GL_FALSE,
+                                      vertexLayout.GetOffset(vertexAttribute));
+
+        }
+
+        m_PipelineDesc = createInfo;
+        return true;
     }
 
     void GraphicsPipeline::Destroy()
     {
+        if (HandleIsValid(m_VertexArrayObject))
+            glDeleteVertexArrays(1, &m_VertexArrayObject);
+    }
+
+    void GraphicsPipeline::Bind() const
+    {
+        glBindVertexArray(m_VertexArrayObject);
+
+        const auto glEnableState = [](GLenum state, bool value)
+        {
+            const auto enableFunc = value ? glEnable : glDisable;
+            enableFunc(state);
+        };
+
+        // RASTERIZATION STATE
+        glEnableState(GL_CULL_FACE, m_PipelineDesc.rasterizationInfo.cullMode != CullMode::None);
+        glCullFace(Convert<GLenum>(m_PipelineDesc.rasterizationInfo.cullMode));
+
+        glFrontFace(Convert<GLenum>(m_PipelineDesc.rasterizationInfo.frontFace));
+        glPolygonMode(GL_FRONT_AND_BACK, Convert<GLenum>(m_PipelineDesc.rasterizationInfo.polygonMode));
+        glEnableState(GL_RASTERIZER_DISCARD, m_PipelineDesc.rasterizationInfo.discardEnable);
+        glEnableState(GL_DEPTH_CLAMP, m_PipelineDesc.rasterizationInfo.depthClampEnable);
+        glLineWidth(m_PipelineDesc.rasterizationInfo.lineWidth);
+
+
+        // COLOR BLEND
+        const auto& colorBlendState = m_PipelineDesc.colorBlendInfo;
+        const auto& blendFunc = colorBlendState.blendFunction;
+        glEnableState(GL_BLEND, colorBlendState.colorBlendEnable);
+        glBlendFuncSeparate(Convert<GLenum>(blendFunc.colorSource), Convert<GLenum>(blendFunc.colorDest),
+            Convert<GLenum>(blendFunc.alphaSource), Convert<GLenum>(blendFunc.alphaDest));
+        glBlendEquationSeparate(Convert<GLenum>(blendFunc.colorOp), Convert<GLenum>(blendFunc.alphaOp));
+        const auto& colorWriteMask = colorBlendState.colorWriteMask;
+        const bool writeRed = colorWriteMask.Contains(ColorChannelFlagBits::Red);
+        const bool writeGreen = colorWriteMask.Contains(ColorChannelFlagBits::Green);
+        const bool writeBlue = colorWriteMask.Contains(ColorChannelFlagBits::Blue);
+        const bool writeAlpha = colorWriteMask.Contains(ColorChannelFlagBits::Alpha);
+        glColorMask(writeRed, writeGreen, writeBlue, writeAlpha);
+
+        // DEPTH STENCIL
+        const auto& depthStencilState = m_PipelineDesc.depthStencilInfo;
+        glEnableState(GL_DEPTH_TEST, depthStencilState.depthTestEnable);
+        glEnableState(GL_STENCIL_TEST, depthStencilState.stencilTestEnable);
+        glDepthMask(depthStencilState.depthWriteEnable);
+
+        // MULTISAMPLE
+        const auto& multisampleState = m_PipelineDesc.multisampleInfo;
+        glEnableState(GL_SAMPLE_SHADING, multisampleState.sampleShadingEnable);
+        glEnableState(GL_SAMPLE_ALPHA_TO_ONE, multisampleState.alphaToOneEnable);
+        glEnableState(GL_SAMPLE_ALPHA_TO_COVERAGE, multisampleState.alphaToCoverageEnable);
+
+        //VIEWPORT
+        const auto& viewportState = m_PipelineDesc.viewportInfo;
+        glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height);
+        glDepthRangef(viewportState.minDepth, viewportState.maxDepth);
+
+        //SCISSOR
+        const auto scissorState = m_PipelineDesc.scissorInfo;
+        glScissor(scissorState.x, scissorState.y, scissorState.width, scissorState.height);
     }
 }

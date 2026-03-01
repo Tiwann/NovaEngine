@@ -13,14 +13,14 @@ namespace Nova
         stagingBufferCreateInfo.usage = BufferUsage::StagingBuffer;
 
         Ref<Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
-        stagingBuffer->CPUCopy(data, 0, size);
+        stagingBuffer->WriteData(data, 0, size);
 
         BufferCreateInfo vertexBufferCreateInfo;
         vertexBufferCreateInfo.size = size;
         vertexBufferCreateInfo.usage = BufferUsage::VertexBuffer;
 
         Ref<Buffer> vertexBuffer = device->CreateBuffer(vertexBufferCreateInfo);
-        stagingBuffer->GPUCopy(*vertexBuffer, 0, 0, size);
+        stagingBuffer->CopyDataTo(*vertexBuffer, 0, 0, size);
         stagingBuffer->Destroy();
         return vertexBuffer;
     }
@@ -33,7 +33,7 @@ namespace Nova
         stagingBufferCreateInfo.usage = BufferUsage::StagingBuffer;
 
         Ref<Buffer> stagingBuffer = device->CreateBuffer(stagingBufferCreateInfo);
-        stagingBuffer->CPUCopy(data, 0, size);
+        stagingBuffer->WriteData(data, 0, size);
 
         BufferCreateInfo indexBufferCreateInfo;
         indexBufferCreateInfo.device = device;
@@ -41,7 +41,7 @@ namespace Nova
         indexBufferCreateInfo.usage = BufferUsage::IndexBuffer;
 
         Ref<Buffer> indexBuffer = device->CreateBuffer(indexBufferCreateInfo);
-        stagingBuffer->GPUCopy(*indexBuffer, 0, 0, size);
+        stagingBuffer->CopyDataTo(*indexBuffer, 0, 0, size);
         stagingBuffer->Destroy();
         return indexBuffer;
     }

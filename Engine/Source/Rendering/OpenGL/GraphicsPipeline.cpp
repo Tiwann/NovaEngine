@@ -1,13 +1,26 @@
 ﻿#include "GraphicsPipeline.h"
-#include <glad/glad.h>
+#include "Shader.h"
 #include "Conversions.h"
 #include "Format.h"
+#include <glad/glad.h>
 
 
 namespace Nova::OpenGL
 {
     bool GraphicsPipeline::Initialize(const GraphicsPipelineCreateInfo& createInfo)
     {
+        if(!createInfo.device)
+        {
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to create graphics pipeline: device is null!");
+            return false;
+        }
+
+        if(!createInfo.shader)
+        {
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Failed to create graphics pipeline: shader is null!");
+            return false;
+        }
+
         if (HandleIsValid(m_VertexArrayObject))
             glDeleteVertexArrays(1, &m_VertexArrayObject);
 
@@ -94,5 +107,8 @@ namespace Nova::OpenGL
         //SCISSOR
         const auto scissorState = m_PipelineDesc.scissorInfo;
         glScissor(scissorState.x, scissorState.y, scissorState.width, scissorState.height);
+
+        const Shader* shader = static_cast<const Shader*>(m_PipelineDesc.shader);
+        glUseProgram(shader->GetHandle()); 
     }
 }

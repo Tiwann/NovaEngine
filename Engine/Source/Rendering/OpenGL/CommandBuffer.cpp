@@ -1,6 +1,7 @@
 ﻿#include "CommandBuffer.h"
 #include "Texture.h"
 #include "GraphicsPipeline.h"
+#include "ComputePipeline.h"
 #include "Buffer.h"
 
 #define COMMAND_BUFFER_CHECK() NOVA_ASSERT(m_State == CommandBufferState::Opened, "Command buffer should be opened!")
@@ -67,7 +68,7 @@ namespace Nova::OpenGL
     {
         COMMAND_BUFFER_CHECK();
         Command command{CommandType::BindComputePipeline};
-        //command.data.bindComputePipeline.pipeline = static_cast<const ComputePipeline*>(&pipeline);
+        command.data.bindComputePipeline.pipeline = static_cast<const ComputePipeline*>(&pipeline);
         m_Commands.Enqueue(command);
     }
 

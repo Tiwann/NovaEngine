@@ -10,6 +10,7 @@ option(NOVA_ENGINE_BUILD_ASSET_PACKER "Compile the Asset Packer program" ON)
 cmake_dependent_option(NOVA_ENGINE_BUILD_D3D12 "Build the engine with D3D12 backend" ON WIN32 OFF)
 option(NOVA_ENGINE_BUILD_VULKAN "Build the engine with Vulkan backend" ON)
 option(NOVA_ENGINE_BUILD_OPENGL "Build the engine with OpenGL backend" ON)
+cmake_dependent_option(NOVA_ENGINE_OPENGL_USES_SPIRV "Compile shader to spirv instead of glsl for OpenGL" ON NOVA_ENGINE_BUILD_OPENGL OFF)
 
 if(NOVA_ENGINE_BUILD_VULKAN)
     include(CMake/Vulkan.cmake)

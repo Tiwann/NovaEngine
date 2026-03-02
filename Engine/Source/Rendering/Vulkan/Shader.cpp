@@ -26,7 +26,7 @@ namespace Nova::Vulkan
         slang::IGlobalSession* slangSession = application.GetSlangSession();
 
         slang::TargetDesc shaderTargetDesc;
-        shaderTargetDesc.format = GetCompileTarget(createInfo.target);
+        shaderTargetDesc.format = GetCompileTarget(createInfo.target, createInfo.device->GetDeviceType());
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
         shaderTargetDesc.profile = slangSession->findProfile("spirv_1_5");

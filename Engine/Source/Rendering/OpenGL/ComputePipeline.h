@@ -3,11 +3,11 @@
 
 namespace Nova::OpenGL
 {
-    class ComputePipeline : public Nova::ComputePipeline
+    class ComputePipeline final : public Nova::ComputePipeline
     {
     public:
-        bool Initialize(const ComputePipelineCreateInfo& createInfo);
-        void Destroy();
+        bool Initialize(const ComputePipelineCreateInfo& createInfo) override;
+        void Destroy() override;
 
     private:
         friend class Queue;

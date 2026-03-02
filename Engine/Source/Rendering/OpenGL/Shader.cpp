@@ -14,10 +14,11 @@ namespace Nova::OpenGL
         slang::IGlobalSession* slangSession = application.GetSlangSession();
 
         slang::TargetDesc shaderTargetDesc;
-        shaderTargetDesc.format = GetCompileTarget(createInfo.target);
+        shaderTargetDesc.format = GetCompileTarget(createInfo.target, createInfo.device->GetDeviceType());
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
-        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_6");
+
+        shaderTargetDesc.profile = slangSession->findProfile("glsl_460");
 
         slang::CompilerOptionEntry options[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
@@ -107,35 +108,35 @@ namespace Nova::OpenGL
             m_ShaderModules.Add(shaderModule);
         }
 
-        m_ProgramId = glCreateProgram();
+        m_Handle = glCreateProgram();
         for (const ShaderModule& module : m_ShaderModules)
-            glAttachShader(m_ProgramId, module.GetHandle());
+            glAttachShader(m_Handle, module.GetHandle());
 
-        glLinkProgram(m_ProgramId);
+        glLinkProgram(m_Handle);
         GLint linkSuccess = false;
-        glGetProgramiv(m_ProgramId, GL_LINK_STATUS, &linkSuccess);
+        glGetProgramiv(m_Handle, GL_LINK_STATUS, &linkSuccess);
         if (!linkSuccess)
         {
             GLint size = 0;
-            glGetProgramiv(m_ProgramId, GL_INFO_LOG_LENGTH, &size);
+            glGetProgramiv(m_Handle, GL_INFO_LOG_LENGTH, &size);
 
             String message(size);
-            glGetProgramInfoLog(m_ProgramId, size, nullptr, message.Data());
+            glGetProgramInfoLog(m_Handle, size, &size, message.Data());
 
             NOVA_LOG(RenderDevice, Verbosity::Error, "Shader linking failed: {}", message);
             return false;
         }
 
-        glValidateProgram(m_ProgramId);
+        glValidateProgram(m_Handle);
         GLint validationSuccess = false;
-        glGetProgramiv(m_ProgramId, GL_VALIDATE_STATUS, &validationSuccess);
+        glGetProgramiv(m_Handle, GL_VALIDATE_STATUS, &validationSuccess);
         if (!validationSuccess)
         {
             GLint size = 0;
-            glGetProgramiv(m_ProgramId, GL_INFO_LOG_LENGTH, &size);
+            glGetProgramiv(m_Handle, GL_INFO_LOG_LENGTH, &size);
 
             String message(size);
-            glGetProgramInfoLog(m_ProgramId, size, nullptr, message.Data());
+            glGetProgramInfoLog(m_Handle, size, &size, message.Data());
 
             NOVA_LOG(RenderDevice, Verbosity::Error, "Shader validation failed: {}", message);
             return false;
@@ -146,6 +147,8 @@ namespace Nova::OpenGL
 
     void Shader::Destroy()
     {
+        for (ShaderModule& shaderModule : m_ShaderModules)
+            shaderModule.Destroy();
     }
 
     Ref<ShaderBindingSet> Shader::CreateBindingSet(size_t setIndex) const

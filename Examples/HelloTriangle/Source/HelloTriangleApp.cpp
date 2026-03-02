@@ -1,5 +1,4 @@
 ﻿#include "HelloTriangleApp.h"
-
 #include "Editor/InspectorWindow.h"
 #include "Rendering/CommandBuffer.h"
 #include "Rendering/GraphicsPipeline.h"
@@ -8,6 +7,7 @@
 #include "Runtime/LogCategory.h"
 #include "Runtime/Path.h"
 #include "Runtime/Time.h"
+
 
 using namespace Nova;
 
@@ -34,11 +34,10 @@ void HelloTriangleApp::OnInit()
     Ref<RenderDevice> renderDevice = GetRenderDevice();
 
     ShaderCreateInfo shaderCreateInfo;
+    shaderCreateInfo.moduleInfo.name = "HelloTriangle";
     shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultVertex());
     shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultFragment());
-    shaderCreateInfo.moduleInfo.name = "HelloTriangle";
     shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
-    shaderCreateInfo.target = ShaderTarget::SPIRV;
     m_Shader = renderDevice->CreateShader(shaderCreateInfo);
     if (!m_Shader)
     {
@@ -50,6 +49,9 @@ void HelloTriangleApp::OnInit()
     pipelineCreateInfo.shader = m_Shader;
     pipelineCreateInfo.colorAttachmentFormats = { Format::R8G8B8A8_SRGB };
     pipelineCreateInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
+    pipelineCreateInfo.depthStencilInfo.depthTestEnable = false;
+    pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
+    pipelineCreateInfo.depthStencilInfo.depthWriteEnable = false;
     pipelineCreateInfo.SetMultisampleInfo({8});
     m_GraphicsPipeline = renderDevice->CreateGraphicsPipeline(pipelineCreateInfo);
     if (!m_GraphicsPipeline)
@@ -68,12 +70,6 @@ void HelloTriangleApp::OnDestroy()
     m_GraphicsPipeline.Release();
     m_Shader->Destroy();
     m_Shader.Release();
-}
-
-void HelloTriangleApp::OnPreRender(Nova::CommandBuffer& cmdBuffer)
-{
-    const float time = Time::Get();
-    cmdBuffer.PushConstants(*m_Shader, ShaderStageFlagBits::Vertex, 0, sizeof(float), &time);
 }
 
 void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)

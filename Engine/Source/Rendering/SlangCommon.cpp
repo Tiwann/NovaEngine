@@ -2,16 +2,38 @@
 
 namespace Nova
 {
-    SlangCompileTarget GetCompileTarget(const ShaderTarget target)
+    SlangCompileTarget GetCompileTarget(const ShaderCompileTarget target, const RenderDeviceType deviceType)
     {
+
         switch (target)
         {
-        case ShaderTarget::SPIRV: return SLANG_SPIRV;
-        case ShaderTarget::GLSL: return SLANG_GLSL;
-        case ShaderTarget::HLSL: return SLANG_HLSL;
-        case ShaderTarget::DXBC: return SLANG_DXBC;
-        case ShaderTarget::DXIL: return SLANG_DXIL;
-        default: return SLANG_SPIRV;
+        case ShaderCompileTarget::SPIRV: return SLANG_SPIRV;
+        case ShaderCompileTarget::GLSL: return SLANG_GLSL;
+        case ShaderCompileTarget::HLSL: return SLANG_HLSL;
+        case ShaderCompileTarget::DXBC: return SLANG_DXBC;
+        case ShaderCompileTarget::DXIL: return SLANG_DXIL;
+        case ShaderCompileTarget::AUTO:
+            {
+                switch (deviceType)
+                {
+                case RenderDeviceType::Null: return SLANG_TARGET_NONE;
+#ifdef NOVA_HAS_VULKAN
+                case RenderDeviceType::Vulkan: return SLANG_SPIRV;
+#endif
+#ifdef NOVA_HAS_D3D12
+                case RenderDeviceType::D3D12: return SLANG_DXIL;
+#endif
+#ifdef NOVA_HAS_OPENGL
+#ifdef NOVA_OPENGL_USES_SPIRV
+                case RenderDeviceType::OpenGL: return SLANG_SPIRV;
+#else
+                case RenderDeviceType::OpenGL: return SLANG_GLSL;
+#endif
+#endif
+                default: return SLANG_TARGET_NONE;
+                }
+            }
+        default: return SLANG_TARGET_UNKNOWN;
         }
     }
 

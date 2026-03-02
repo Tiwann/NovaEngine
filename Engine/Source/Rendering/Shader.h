@@ -2,9 +2,10 @@
 #include "Containers/StringView.h"
 #include "ShaderModuleInfo.h"
 #include "ShaderEntryPoint.h"
-#include "ShaderTarget.h"
+#include "ShaderCompileTarget.h"
 #include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
+
 
 namespace slang { class IGlobalSession; }
 
@@ -20,14 +21,14 @@ namespace Nova
     {
         RenderDevice* device = nullptr;
         ShaderModuleInfo moduleInfo;
-        ShaderTarget target = ShaderTarget::SPIRV;
+        ShaderCompileTarget target = ShaderCompileTarget::AUTO;
 
         Array<StringView> includes;
         Array<ShaderEntryPoint> entryPoints;
 
         ShaderCreateInfo& WithDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
         ShaderCreateInfo& WithModuleInfo(const ShaderModuleInfo& inModuleInfo) { this->moduleInfo = inModuleInfo; return *this; }
-        ShaderCreateInfo& WithTarget(const ShaderTarget& target) { this->target = target; return *this; }
+        ShaderCreateInfo& WithTarget(const ShaderCompileTarget& target) { this->target = target; return *this; }
         ShaderCreateInfo& WithIncludes(const Array<StringView>& includes) { this->includes = includes; return *this; }
         ShaderCreateInfo& WithIncludesAdded(const Array<StringView>& includes) { this->includes.AddRange(includes); return *this; }
         ShaderCreateInfo& WithEntryPoints(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints = entryPoints; return *this; }

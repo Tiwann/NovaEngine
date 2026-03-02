@@ -49,8 +49,8 @@ namespace Nova
         Surface* GetSurface() const;
 
         void Invalidate();
-
         bool IsValid() const;
+        bool HasVSync() const;
 
         virtual Ref<Nova::Texture> GetTexture(uint32_t index) { return nullptr; }
         virtual Ref<Nova::Texture> GetCurrentTexture() { return nullptr; }

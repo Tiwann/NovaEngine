@@ -3,10 +3,15 @@
 #include "Buffer.h"
 #include "Texture.h"
 #include "GraphicsPipeline.h"
+#include "ComputePipeline.h"
 #include "Conversions.h"
 #include "Rendering/Vulkan/Conversions.h"
-
+#include "Common.h"
 #include <glad/glad.h>
+
+#include "Rendering/Surface.h"
+#include "Rendering/Swapchain.h"
+
 
 #define CHECK_VALID_GRAPHICS_PIPELINE(pipeline) NOVA_ASSERT(pipeline, "A valid graphics pipeline should be bound before executing this command!");
 #define CHECK_VALID_COMPUTE_PIPELINE(pipeline) NOVA_ASSERT(pipeline, "A valid compute pipeline should be bound before executing this command!");
@@ -20,7 +25,7 @@ namespace Nova::OpenGL
         CommandBuffer* cmdBuffer = static_cast<CommandBuffer*>(commandBuffer);
         NOVA_ASSERT(cmdBuffer->m_State == CommandBufferState::Pending, "CommandBuffer must be in a pending state for submit!");
 
-        Fifo<Command>& commandsFifo = cmdBuffer->m_Commands;
+        Fifo<Command>& commandQueue = cmdBuffer->m_Commands;
         const GraphicsPipeline* graphicsPipeline = nullptr;
         const ComputePipeline* computePipeline = nullptr;
         PrimitiveTopology primitiveTopology = PrimitiveTopology::TriangleList;
@@ -28,9 +33,9 @@ namespace Nova::OpenGL
         Format indexFormat = Format::None;
         bool insideRenderPass = false;
 
-        while (!commandsFifo.IsEmpty())
+        while (!commandQueue.IsEmpty())
         {
-            const Command command = commandsFifo.Dequeue();
+            const Command command = commandQueue.Dequeue();
             const CommandData& data = command.data;
             switch (command.type)
             {
@@ -58,8 +63,8 @@ namespace Nova::OpenGL
             case CommandType::BindComputePipeline:
                 {
                     const BindComputePipelineCommand& cmd = data.bindComputePipeline;
+                    cmd.pipeline->Bind();
                     computePipeline = cmd.pipeline;
-                    //cmd.pipeline->Bind();
                     break;
                 }
             case CommandType::BindVertexBuffer:
@@ -145,11 +150,12 @@ namespace Nova::OpenGL
                     break;
                 }
             case CommandType::TextureBarrier:
-                break;
             case CommandType::BufferBarrier:
-                break;
             case CommandType::MemoryBarrier:
-                break;
+                {
+                    // Noop
+                    break;
+                }
             case CommandType::BufferCopy:
                 {
                     const BufferCopyCommand& cmd = data.bufferCopy;
@@ -164,44 +170,21 @@ namespace Nova::OpenGL
                     break;
                 }
             case CommandType::Blit:
-                break;
+                {
+                    break;
+                }
             case CommandType::RenderPassBegin:
                 {
                     const RenderPassBeginCommand& cmd = data.renderPassBegin;
                     const RenderPassBeginInfo* info = cmd.info;
                     BufferView colorAttachments(info->colorAttachments, info->colorAttachmentCount);
-
-                    for (uint32_t i = 0; i < colorAttachments.Size(); i++)
-                    {
-                        const RenderPassAttachmentInfo& attachment = colorAttachments[i];
-                        const Texture* texture = static_cast<const Texture*>(attachment.texture);
-
-                        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texture->GetHandle(), 0);
-
-                        if (attachment.resolveMode != ResolveMode::None && attachment.resolveTexture)
-                        {
-                            // Will be resolved at RenderPassEnd — store for later
-                            // (you'd want to track these in local state)
-                        }
-
-                        switch (attachment.loadOp)
-                        {
-                        case LoadOperation::Load:
-                            break;
-                        case LoadOperation::Clear:
-                            glClearBufferfv(GL_COLOR, i, reinterpret_cast<const GLfloat*>(&attachment.clearValue.color));
-                            break;
-                        case LoadOperation::DontCare:
-                            break;
-                        }
-                    }
-
                     insideRenderPass = true;
                     break;
                 }
             case CommandType::RenderPassEnd:
                 {
                     insideRenderPass = false;
+                    break;
                 }
             case CommandType::ExecuteCommandBuffers:
                 {
@@ -215,7 +198,8 @@ namespace Nova::OpenGL
         }
 
         // May assert BEFORE starting executing.
-        NOVA_ASSERT(insideRenderPass, "A renderpass instance is begun and was never ended!");
+        NOVA_ASSERT(!insideRenderPass, "A renderpass instance is begun and was never ended!");
+        cmdBuffer->m_State = CommandBufferState::Closed;
     }
 
     void Queue::Submit(const Array<Nova::CommandBuffer*>& commandBuffers, const Array<Semaphore*>& waitSemaphores, const Array<Semaphore*>& signalSemaphores, Fence* fence, uint32_t waitStagesMask) const
@@ -225,5 +209,10 @@ namespace Nova::OpenGL
 
     bool Queue::Present(const Swapchain& swapchain, const Nova::Semaphore* waitSemaphore, uint32_t imageIndex) const
     {
+        const Surface* surface = swapchain.GetSurface();
+        if (!surface->IsAvailable())
+            return false;
+        surface->SwapBuffers();
+        return true;
     }
 }

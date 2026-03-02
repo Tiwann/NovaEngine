@@ -2,8 +2,9 @@
 
 namespace Nova
 {
-    enum class ShaderTarget
+    enum class ShaderCompileTarget
     {
+        AUTO,
         SPIRV,
         GLSL,
         HLSL,

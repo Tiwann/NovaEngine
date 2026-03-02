@@ -32,6 +32,7 @@ namespace Nova
         uint32_t GetHeight() const;
 
         bool IsAvailable() const;
+        void SwapBuffers() const;
     protected:
         RenderDevice* m_Device = nullptr;
         Window* m_Window = nullptr;

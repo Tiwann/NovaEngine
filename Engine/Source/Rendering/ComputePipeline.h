@@ -8,10 +8,10 @@ namespace Nova
     struct ComputePipelineCreateInfo
     {
         RenderDevice* device = nullptr;
-        Shader* shader = nullptr;
+        const Shader* shader = nullptr;
 
-        ComputePipelineCreateInfo& WithDevice(RenderDevice* device) { this->device = device; return *this; }
-        ComputePipelineCreateInfo& WithShader(Shader* shader) { this->shader = shader; return *this; }
+        ComputePipelineCreateInfo& WithDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
+        ComputePipelineCreateInfo& WithShader(const Shader* inShader) { this->shader = inShader; return *this; }
     };
 
     class ComputePipeline

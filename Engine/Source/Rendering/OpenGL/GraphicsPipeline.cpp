@@ -2,6 +2,8 @@
 #include "Shader.h"
 #include "Conversions.h"
 #include "Format.h"
+#include "Runtime/Log.h"
+#include "RenderDevice.h"
 #include <glad/glad.h>
 
 
@@ -63,11 +65,19 @@ namespace Nova::OpenGL
         };
 
         // RASTERIZATION STATE
-        glEnableState(GL_CULL_FACE, m_PipelineDesc.rasterizationInfo.cullMode != CullMode::None);
-        glCullFace(Convert<GLenum>(m_PipelineDesc.rasterizationInfo.cullMode));
+        const bool enableCullFace = m_PipelineDesc.rasterizationInfo.cullMode != CullMode::None;
+        glEnableState(GL_CULL_FACE, enableCullFace);
+        if (enableCullFace)
+        {
+            const GLenum cullMode = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.cullMode);
+            glCullFace(cullMode);
+        }
 
-        glFrontFace(Convert<GLenum>(m_PipelineDesc.rasterizationInfo.frontFace));
-        glPolygonMode(GL_FRONT_AND_BACK, Convert<GLenum>(m_PipelineDesc.rasterizationInfo.polygonMode));
+        const GLenum frontFace = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.frontFace);
+        glFrontFace(frontFace);
+
+        const GLenum polygonMode = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.polygonMode);
+        glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
         glEnableState(GL_RASTERIZER_DISCARD, m_PipelineDesc.rasterizationInfo.discardEnable);
         glEnableState(GL_DEPTH_CLAMP, m_PipelineDesc.rasterizationInfo.depthClampEnable);
         glLineWidth(m_PipelineDesc.rasterizationInfo.lineWidth);
@@ -77,9 +87,12 @@ namespace Nova::OpenGL
         const auto& colorBlendState = m_PipelineDesc.colorBlendInfo;
         const auto& blendFunc = colorBlendState.blendFunction;
         glEnableState(GL_BLEND, colorBlendState.colorBlendEnable);
-        glBlendFuncSeparate(Convert<GLenum>(blendFunc.colorSource), Convert<GLenum>(blendFunc.colorDest),
-            Convert<GLenum>(blendFunc.alphaSource), Convert<GLenum>(blendFunc.alphaDest));
-        glBlendEquationSeparate(Convert<GLenum>(blendFunc.colorOp), Convert<GLenum>(blendFunc.alphaOp));
+        if (colorBlendState.colorBlendEnable)
+        {
+            glBlendFuncSeparate(Convert<GLenum>(blendFunc.colorSource), Convert<GLenum>(blendFunc.colorDest),
+               Convert<GLenum>(blendFunc.alphaSource), Convert<GLenum>(blendFunc.alphaDest));
+            glBlendEquationSeparate(Convert<GLenum>(blendFunc.colorOp), Convert<GLenum>(blendFunc.alphaOp));
+        }
         const auto& colorWriteMask = colorBlendState.colorWriteMask;
         const bool writeRed = colorWriteMask.Contains(ColorChannelFlagBits::Red);
         const bool writeGreen = colorWriteMask.Contains(ColorChannelFlagBits::Green);
@@ -102,13 +115,13 @@ namespace Nova::OpenGL
         //VIEWPORT
         const auto& viewportState = m_PipelineDesc.viewportInfo;
         glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height);
-        glDepthRangef(viewportState.minDepth, viewportState.maxDepth);
+        glDepthRange(viewportState.minDepth, viewportState.maxDepth);
 
         //SCISSOR
         const auto scissorState = m_PipelineDesc.scissorInfo;
         glScissor(scissorState.x, scissorState.y, scissorState.width, scissorState.height);
 
         const Shader* shader = static_cast<const Shader*>(m_PipelineDesc.shader);
-        glUseProgram(shader->GetHandle()); 
+        glUseProgram(shader->GetHandle());
     }
 }

@@ -1,7 +1,7 @@
 ﻿#include "Surface.h"
 #include "Runtime/DesktopWindow.h"
 #include "Runtime/Window.h"
-
+#include <GLFW/glfw3.h>
 namespace Nova
 {
     RenderDevice* Surface::GetDevice() const
@@ -33,5 +33,13 @@ namespace Nova
         }
 
         return true;
+    }
+
+    void Surface::SwapBuffers() const
+    {
+        if (DesktopWindow* desktopWindow = dynamic_cast<DesktopWindow*>(m_Window))
+        {
+            glfwSwapBuffers(desktopWindow->GetHandle());
+        }
     }
 }

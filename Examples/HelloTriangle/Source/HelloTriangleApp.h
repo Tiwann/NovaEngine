@@ -9,7 +9,6 @@ public:
     Nova::ApplicationConfiguration GetConfiguration() const override;
     void OnInit() override;
     void OnDestroy() override;
-    void OnPreRender(Nova::CommandBuffer& cmdBuffer) override;
     void OnRender(Nova::CommandBuffer& cmdBuffer) override;
     Nova::RenderDeviceType GetRenderDeviceType() const override;
 private:

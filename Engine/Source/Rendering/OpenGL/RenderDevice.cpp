@@ -37,10 +37,10 @@ namespace Nova::OpenGL
         case Verbosity::Info:
             NOVA_LOG(RenderDevice, Verbosity::Info, "OpenGL: {}", messageView);
         case Verbosity::Warning:
-            NOVA_LOG(RenderDevice, Verbosity::Warning, "OpenGL Warning {} [{:#08X}]: {}", id, id, messageView);
+            NOVA_LOG(RenderDevice, Verbosity::Warning, "OpenGL Warning {} [{:#06x}]: {}", id, id, messageView);
             break;
         case Verbosity::Error:
-            NOVA_LOG(RenderDevice, Verbosity::Error, "OpenGL Error {} [{:#08X}]: {}", id, id, messageView);
+            NOVA_LOG(RenderDevice, Verbosity::Error, "OpenGL Error {} [{:#06x}]: {}", id, id, messageView);
             break;
         }
     };

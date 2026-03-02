@@ -34,6 +34,8 @@ namespace Nova::OpenGL
 
         Nova::Swapchain* GetSwapchain() override;
         Nova::CommandBuffer* GetCurrentCommandBuffer() override;
+        Queue* GetGraphicsQueue() { return &m_GraphicsQueue; }
+        Queue* GetComputeQueue() { return &m_ComputeQueue; }
     private:
         Surface m_Surface;
         Swapchain m_Swapchain;

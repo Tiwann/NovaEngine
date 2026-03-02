@@ -32,6 +32,7 @@ namespace Nova
     {
         for (auto& [name, asset] : m_Data)
         {
+            if (!asset) continue;
             if (asset->GetAssetType() == AssetType::Texture)
                 asset.As<Texture>()->Destroy();
             if (asset->GetAssetType() == AssetType::Shader)

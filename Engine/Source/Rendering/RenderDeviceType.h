@@ -52,7 +52,7 @@ namespace Nova
         }
     }
 
-    static constexpr bool RenderDeviceIsOpenGL(RenderDeviceType type)
+    static constexpr bool RenderDeviceIsOpenGL(const RenderDeviceType type)
     {
         switch (type)
         {
@@ -70,7 +70,7 @@ namespace Nova
         }
     }
 
-    static constexpr bool RenderDeviceIsVulkan(RenderDeviceType type)
+    static constexpr bool RenderDeviceIsVulkan(const RenderDeviceType type)
     {
         switch (type)
         {
@@ -88,7 +88,7 @@ namespace Nova
         }
     }
 
-    static constexpr bool RenderDeviceIsD3D12(RenderDeviceType type)
+    static constexpr bool RenderDeviceIsD3D12(const RenderDeviceType type)
     {
         switch (type)
         {

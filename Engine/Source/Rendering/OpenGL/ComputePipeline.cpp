@@ -1,6 +1,9 @@
 #include "ComputePipeline.h"
+#include "RenderDevice.h"
+#include "Shader.h"
 #include "Runtime/Log.h"
 #include <glad/glad.h>
+
 
 namespace Nova::OpenGL
 {

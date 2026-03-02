@@ -205,7 +205,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/ShaderResourceManager.cpp
         Source/Rendering/ShaderResourceManager.h
         Source/Rendering/ShaderStage.h
-        Source/Rendering/ShaderTarget.h
+        Source/Rendering/ShaderCompileTarget.h
         Source/Rendering/ShadingLanguage.h
         Source/Rendering/SpriteRendererFlags.h
         Source/Rendering/StoreOperation.h
@@ -425,6 +425,8 @@ set(NOVA_ENGINE_OPENGL_SOURCES
         Source/Rendering/OpenGL/ShaderModule.h
         Source/Rendering/OpenGL/GraphicsPipeline.cpp
         Source/Rendering/OpenGL/GraphicsPipeline.h
+        Source/Rendering/OpenGL/ComputePipeline.cpp
+        Source/Rendering/OpenGL/ComputePipeline.h
         Source/Rendering/OpenGL/Sampler.cpp
         Source/Rendering/OpenGL/Sampler.h
         Source/Rendering/OpenGL/CommandBuffer.h
@@ -465,6 +467,9 @@ if(NOVA_ENGINE_BUILD_OPENGL)
     target_compile_definitions(NovaEngine PUBLIC NOVA_HAS_OPENGL)
     target_include_directories(NovaEngine PUBLIC Source/External/glad/include)
     target_link_libraries(NovaEngine PRIVATE )
+    if(NOVA_ENGINE_OPENGL_USES_SPIRV)
+        target_compile_definitions(NovaEngine PUBLIC NOVA_OPENGL_USES_SPIRV)
+    endif ()
 endif ()
 
 if(NOVA_ENGINE_CUSTOM_ENTRY_POINT)

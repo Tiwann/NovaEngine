@@ -46,4 +46,9 @@ namespace Nova
     {
         return m_Valid;
     }
+
+    bool Swapchain::HasVSync() const
+    {
+        return m_HasVSync;
+    }
 }

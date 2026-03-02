@@ -7,14 +7,13 @@
 #include "Conversions.h"
 #include "GraphicsPipeline.h"
 #include "Rendering/RenderPass.h"
-#include "VulkanExtensions.h"
 #include "VulkanUtils.h"
-#include <vulkan/vulkan.h>
-
 #include "Material.h"
 #include "Shader.h"
 #include "Rendering/ResourceBarrier.h"
 #include "Utils/VulkanUtils.h"
+
+#include <vulkan/vulkan.h>
 
 namespace Nova::Vulkan
 {
@@ -162,7 +161,6 @@ namespace Nova::Vulkan
         info.dynamicOffsetCount = 0;
         info.pDynamicOffsets = nullptr;
         vkCmdBindDescriptorSets2(m_Handle, &info);
-
     }
 
     void CommandBuffer::BindMaterial(const Nova::Material& material)
@@ -202,9 +200,14 @@ namespace Nova::Vulkan
         vkCmdDrawIndexed(m_Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, const size_t offset, const uint32_t drawCount, const size_t stride)
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, const size_t offset, const uint32_t drawCount)
     {
-        vkCmdDrawIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, stride);
+        vkCmdDrawIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, sizeof(DrawIndirectParameters));
+    }
+
+    void CommandBuffer::DrawIndexedIndirect(const Nova::Buffer& buffer, const uint64_t offset, const uint32_t drawCount)
+    {
+        vkCmdDrawIndexedIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, sizeof(DrawIndexedIndirectParameters));
     }
 
     void CommandBuffer::Dispatch(const uint32_t groupCountX, const uint32_t groupCountY, const uint32_t groupCountZ)

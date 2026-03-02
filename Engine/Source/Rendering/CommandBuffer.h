@@ -6,7 +6,6 @@
 #include "ShaderStage.h"
 #include "Containers/StringView.h"
 
-
 namespace Nova
 {
     class RenderDevice;
@@ -33,6 +32,15 @@ namespace Nova
         uint32_t    vertexCount;
         uint32_t    instanceCount;
         uint32_t    firstVertex;
+        uint32_t    firstInstance;
+    };
+
+    struct DrawIndexedIndirectParameters
+    {
+        uint32_t    indexCount;
+        uint32_t    instanceCount;
+        uint32_t    firstIndex;
+        int32_t     vertexOffset;
         uint32_t    firstInstance;
     };
 
@@ -82,26 +90,27 @@ namespace Nova
         virtual void ClearDepthStencil(float depth, uint32_t stencil) = 0;
         virtual void BindGraphicsPipeline(const Nova::GraphicsPipeline& pipeline) = 0;
         virtual void BindComputePipeline(const Nova::ComputePipeline& pipeline) = 0;
-        virtual void BindVertexBuffer(const Nova::Buffer& vertexBuffer, size_t offset) = 0;
-        virtual void BindIndexBuffer(const Nova::Buffer& indexBuffer, size_t offset, Format indexFormat) = 0;
+        virtual void BindVertexBuffer(const Nova::Buffer& vertexBuffer, uint64_t offset) = 0;
+        virtual void BindIndexBuffer(const Nova::Buffer& indexBuffer, uint64_t offset, Format indexFormat) = 0;
         virtual void BindShaderBindingSet(const Nova::Shader& shader, const Nova::ShaderBindingSet& bindingSet) = 0;
         virtual void BindMaterial(const Nova::Material& material) = 0;
         virtual void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) = 0;
         virtual void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) = 0;
         virtual void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
-        virtual void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride = sizeof(DrawIndirectParameters)) = 0;
         virtual void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
+        virtual void DrawIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount) = 0;
+        virtual void DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount) = 0;
         virtual void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPass) = 0;
         virtual void EndRenderPass() = 0;
-        virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size, const void* values) = 0;
-        virtual void UpdateBuffer(const Nova::Buffer& buffer, size_t offset, size_t size, const void* data) = 0;
+        virtual void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, uint64_t offset, size_t size, const void* values) = 0;
+        virtual void UpdateBuffer(const Nova::Buffer& buffer, uint64_t offset, size_t size, const void* data) = 0;
         virtual void TextureBarrier(const TextureBarrier& barrier) = 0;
         virtual void BufferBarrier(const BufferBarrier& barrier) = 0;
         virtual void MemoryBarrier(const MemoryBarrier& barrier) = 0;
 
         // Compute Commands
         virtual void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
-        virtual void DispatchIndirect(const Buffer& buffer, size_t offset) = 0;
+        virtual void DispatchIndirect(const Buffer& buffer, uint64_t offset) = 0;
 
         // Transfer Commands
         virtual void BufferCopy(const Buffer& src, const Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) = 0;

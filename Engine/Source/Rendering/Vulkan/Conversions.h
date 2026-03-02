@@ -372,6 +372,8 @@ namespace Nova::Vulkan
             result |= VK_SHADER_STAGE_GEOMETRY_BIT;
         if (val & (uint32_t)ShaderStageFlagBits::TessellationControl)
             result |= VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+        if (val & (uint32_t)ShaderStageFlagBits::TessellationEvaluation)
+            result |= VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
         if (val & (uint32_t)ShaderStageFlagBits::Mesh)
             result |= VK_SHADER_STAGE_MESH_BIT_EXT;
         if (val & (uint32_t)ShaderStageFlagBits::Compute)
@@ -394,6 +396,7 @@ namespace Nova::Vulkan
         case ShaderStageFlagBits::RayGeneration: return VK_SHADER_STAGE_RAYGEN_BIT_KHR;
         case ShaderStageFlagBits::TessellationControl: return VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
         case ShaderStageFlagBits::Mesh: return VK_SHADER_STAGE_MESH_BIT_EXT;
+        case ShaderStageFlagBits::TessellationEvaluation: return VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
         default: return (VkShaderStageFlagBits)0;
         }
     }

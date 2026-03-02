@@ -18,8 +18,8 @@ namespace Nova
 {
     struct DebugRendererCreateInfo
     {
-        Ref<RenderDevice> device = nullptr;
-        Ref<Shader> shader = nullptr;
+        RenderDevice* device = nullptr;
+        Shader* shader = nullptr;
         uint32_t maxVertices = 0;
     };
 

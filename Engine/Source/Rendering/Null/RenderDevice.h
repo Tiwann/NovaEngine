@@ -14,7 +14,6 @@ namespace Nova::Null
         void WaitIdle() const override;
         void SetName(StringView name) override;
         RenderDeviceType GetDeviceType() override;
-        Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) override;
         Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Texture> CreateTextureUnitialized() override;
         Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;

@@ -4,6 +4,7 @@
 #include "Shader.h"
 #include "Sampler.h"
 #include "Buffer.h"
+#include "Texture.h"
 #include "RenderTarget.h"
 #include "GraphicsPipeline.h"
 #include "Rendering/Surface.h"
@@ -71,6 +72,8 @@ namespace Nova::OpenGL
         glEnable(GL_DEBUG_OUTPUT);
         glDebugMessageCallback(OpenGLErrorCallback, nullptr);
 #endif
+
+        glEnable(GL_FRAMEBUFFER_SRGB);
 
         SurfaceCreateInfo surfaceCreateInfo;
         surfaceCreateInfo.device = this;
@@ -166,14 +169,16 @@ namespace Nova::OpenGL
         return Ref(renderTarget);
     }
 
-    Ref<Nova::Surface> RenderDevice::CreateSurface(const SurfaceCreateInfo& createInfo)
-    {
-        return nullptr;
-    }
-
     Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
-        return nullptr;
+        Texture* texture = new Texture();
+        TextureCreateInfo textureCreateInfo(createInfo);
+        if (!texture->Initialize(textureCreateInfo.WithDevice(this)))
+        {
+            delete texture;
+            return nullptr;
+        }
+        return Ref(texture);
     }
 
     Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()

@@ -108,9 +108,14 @@ namespace Nova::OpenGL
 
         // MULTISAMPLE
         const auto& multisampleState = m_PipelineDesc.multisampleInfo;
-        glEnableState(GL_SAMPLE_SHADING, multisampleState.sampleShadingEnable);
-        glEnableState(GL_SAMPLE_ALPHA_TO_ONE, multisampleState.alphaToOneEnable);
-        glEnableState(GL_SAMPLE_ALPHA_TO_COVERAGE, multisampleState.alphaToCoverageEnable);
+        const bool enableMultisample = multisampleState.sampleCount > 1 && multisampleState.sampleCount % 2 == 0 && multisampleState.sampleCount <= 16;
+        glEnableState(GL_MULTISAMPLE, enableMultisample);
+        if (enableMultisample)
+        {
+            glEnableState(GL_SAMPLE_SHADING, multisampleState.sampleShadingEnable);
+            glEnableState(GL_SAMPLE_ALPHA_TO_ONE, multisampleState.alphaToOneEnable);
+            glEnableState(GL_SAMPLE_ALPHA_TO_COVERAGE, multisampleState.alphaToCoverageEnable);
+        }
 
         //VIEWPORT
         const auto& viewportState = m_PipelineDesc.viewportInfo;

@@ -33,7 +33,8 @@ namespace Nova::OpenGL
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
-        void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride) override;
+        void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount) override;
+        void DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount) override;
         void BeginRenderPass(const Nova::RenderPassBeginInfo& renderPassBeginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size,const void* values) override;

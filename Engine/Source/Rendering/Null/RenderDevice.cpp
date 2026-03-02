@@ -38,12 +38,6 @@ namespace Nova::Null
         return RenderDeviceType::Null;
     }
 
-    Ref<Surface> RenderDevice::CreateSurface(const SurfaceCreateInfo& createInfo)
-    {
-        (void)createInfo;
-        return nullptr;
-    }
-
     Ref<Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         (void)createInfo;

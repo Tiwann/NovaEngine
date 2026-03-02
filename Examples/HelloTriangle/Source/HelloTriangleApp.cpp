@@ -67,13 +67,12 @@ void HelloTriangleApp::OnInit()
 void HelloTriangleApp::OnDestroy()
 {
     m_GraphicsPipeline->Destroy();
-    m_GraphicsPipeline.Release();
     m_Shader->Destroy();
-    m_Shader.Release();
 }
 
 void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)
 {
+    cmdBuffer.ClearColor(Color::Black, 0);
     cmdBuffer.BindGraphicsPipeline(*m_GraphicsPipeline);
     cmdBuffer.SetViewport(0.0f, 0.0f, GetWindowWidth(), GetWindowHeight(), 0.0f, 1.0f);
     cmdBuffer.SetScissor(0, 0, GetWindowWidth(), GetWindowHeight());

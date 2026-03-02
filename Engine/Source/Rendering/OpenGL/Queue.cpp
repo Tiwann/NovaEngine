@@ -99,14 +99,18 @@ namespace Nova::OpenGL
                 {
                     CHECK_VALID_GRAPHICS_PIPELINE(graphicsPipeline);
                     const DrawCommand& cmd = data.draw;
-                    glDrawArrays(Convert<GLenum>(primitiveTopology), cmd.firstVertex, cmd.vertexCount);
+                    const GLenum topology = Convert<GLenum>(primitiveTopology);
+                    glDrawArraysInstancedBaseInstance(topology, cmd.firstVertex, cmd.vertexCount, cmd.instanceCount, cmd.firstInstance);
                     break;
                 }
             case CommandType::DrawIndexed:
                 {
                     CHECK_VALID_GRAPHICS_PIPELINE(graphicsPipeline);
                     const DrawIndexedCommand& cmd = data.drawIndexed;
-                    glDrawElements(Convert<GLenum>(primitiveTopology), cmd.indexCount, Convert<GLformat>(indexFormat).type, nullptr);
+                    const GLenum topology = Convert<GLenum>(primitiveTopology);
+                    const GLenum type = Convert<GLformat>(indexFormat).type;
+                    const uint32_t typeSize = GetFormatBytesPerChannel(indexFormat);
+                    glDrawElementsInstancedBaseVertexBaseInstance(topology, cmd.indexCount, type, reinterpret_cast<const void*>(cmd.firstIndex * typeSize), cmd.instanceCount, cmd.vertexOffset, cmd.firstInstance);
                     break;
                 }
             case CommandType::DrawIndirect:

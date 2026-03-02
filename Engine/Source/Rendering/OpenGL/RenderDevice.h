@@ -20,7 +20,6 @@ namespace Nova::OpenGL
         RenderDeviceType GetDeviceType() override;
 
         Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
-        Ref<Nova::Surface> CreateSurface(const SurfaceCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;

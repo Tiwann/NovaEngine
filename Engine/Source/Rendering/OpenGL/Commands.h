@@ -63,13 +63,13 @@ namespace Nova::OpenGL
     {
         const class Buffer* buffer = nullptr;
         uint32_t binding = 0;
-        size_t offset = 0;
+        uint64_t offset = 0;
     };
 
     struct BindIndexBufferCommand
     {
         const Buffer* buffer = nullptr;
-        size_t offset = 0;
+        uint64_t offset = 0;
         Format indexFormat = Format::None;
     };
 
@@ -111,7 +111,7 @@ namespace Nova::OpenGL
     struct DrawIndirectCommand
     {
         const Buffer* buffer = nullptr;
-        size_t offset = 0;
+        uint64_t offset = 0;
         uint32_t drawCount = 0;
         uint32_t stride = 0;
     };
@@ -119,7 +119,7 @@ namespace Nova::OpenGL
     struct DrawIndexedIndirectCommand
     {
         const Buffer* buffer = nullptr;
-        size_t offset = 0;
+        uint64_t offset = 0;
         uint32_t drawCount = 0;
         uint32_t stride = 0;
     };
@@ -134,7 +134,7 @@ namespace Nova::OpenGL
     struct DispatchIndirectCommand
     {
         const Buffer* buffer = nullptr;
-        size_t offset = 0;
+        uint64_t offset = 0;
     };
 
     struct TextureBarrierCommand

@@ -26,6 +26,7 @@ namespace Nova::OpenGL
             glTextureStorage2D(m_Textures[i], 1, format.internalFormat, createInfo.width, createInfo.height);
         }
 
+
         m_Device = createInfo.device;
         m_Buffering = createInfo.buffering;
         m_HasVSync = createInfo.presentMode == PresentMode::Fifo;

@@ -1,6 +1,7 @@
 ﻿#include "RenderDevice.h"
 #include "Runtime/Window.h"
 #include "Runtime/DesktopWindow.h"
+#include "Runtime/Log.h"
 #include "Conversions.h"
 #include "Rendering/Surface.h"
 #include "Rendering/Swapchain.h"
@@ -20,7 +21,6 @@
 #include <GLFW/glfw3.h>
 #include <vma/vk_mem_alloc.h>
 #include <print>
-
 
 
 #ifndef VK_LAYER_KHRONOS_VALIDATION_NAME
@@ -69,7 +69,7 @@ namespace Nova::Vulkan
 
         if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) != VK_SUCCESS)
         {
-            std::println(std::cerr, "Failed to create instance!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create instance!");
             return false;
         }
 
@@ -85,13 +85,13 @@ namespace Nova::Vulkan
         {
             if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
             {
-                std::println(std::cerr, "[VULKAN ERROR] {}", pCallbackData->pMessage);
+                NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN ERROR] {}", pCallbackData->pMessage);
                 return true;
             }
 
             if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
             {
-                std::println(std::cerr, "[VULKAN WARNING] {}", pCallbackData->pMessage);
+                NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN WARNING] {}", pCallbackData->pMessage);
                 return true;
             }
             return false;
@@ -139,16 +139,14 @@ namespace Nova::Vulkan
         vkGetPhysicalDeviceProperties2(m_PhysicalDevice, &physicalDeviceProperties);
         m_DeviceVendor = physicalDeviceProperties.properties.deviceName;
 
-        const SurfaceCreateInfo surfaceCreateInfo = SurfaceCreateInfo()
-        .withDevice(this)
-        .withWindow(createInfo.window);
-        m_Surface = CreateSurface(surfaceCreateInfo);
-        if (!m_Surface)
+        SurfaceCreateInfo surfaceCreateInfo;
+        surfaceCreateInfo.device = this;
+        surfaceCreateInfo.window = createInfo.window;
+        if (!m_Surface.Initialize(surfaceCreateInfo))
         {
-            std::println(std::cerr, "[VULKAN] Failed to initialize surface!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to initialize surface!");
             return false;
         }
-
 
         uint32_t queueFamilyPropertiesCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties2(m_PhysicalDevice, &queueFamilyPropertiesCount, nullptr);
@@ -178,7 +176,7 @@ namespace Nova::Vulkan
         for (uint32_t i = 0; i < queueFamilyProperties.Count(); ++i)
         {
             VkBool32 supportsSurface = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface->GetHandle(), &supportsSurface);
+            vkGetPhysicalDeviceSurfaceSupportKHR(m_PhysicalDevice, i, m_Surface.GetHandle(), &supportsSurface);
             if (supportsSurface)
             {
                 m_PresentQueue.SetIndex(i);
@@ -269,7 +267,7 @@ namespace Nova::Vulkan
 
         if (vkCreateDevice(m_PhysicalDevice, &deviceCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
         {
-            std::println(std::cerr, "Failed to create logical device!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create logical device!");
             return false;
         }
 
@@ -280,7 +278,7 @@ namespace Nova::Vulkan
         vkGetDeviceQueue2(m_Handle, &queueInfo, m_GraphicsQueue.GetHandlePtr());
         if (!m_GraphicsQueue.GetHandle())
         {
-            std::println(std::cerr, "Failed to retrieve graphics queue!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to retrieve graphics queue!");
             return false;
         }
 
@@ -289,7 +287,7 @@ namespace Nova::Vulkan
         vkGetDeviceQueue2(m_Handle, &queueInfo, m_PresentQueue.GetHandlePtr());
         if (!m_PresentQueue.GetHandle())
         {
-            std::println(std::cerr, "Failed to retrieve present queue!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to retrieve present queue!");
             return false;
         }
 
@@ -298,7 +296,7 @@ namespace Nova::Vulkan
         vkGetDeviceQueue2(m_Handle, &queueInfo, m_ComputeQueue.GetHandlePtr());
         if (!m_ComputeQueue.GetHandle())
         {
-            std::println(std::cerr, "Failed to retrieve compute queue!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to retrieve compute queue!");
             return false;
         }
 
@@ -307,7 +305,7 @@ namespace Nova::Vulkan
         vkGetDeviceQueue2(m_Handle, &queueInfo, m_TransferQueue.GetHandlePtr());
         if (!m_TransferQueue.GetHandle())
         {
-            std::println(std::cerr, "Failed to retrieve transfer queue!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to retrieve transfer queue!");
             return false;
         }
 
@@ -318,7 +316,7 @@ namespace Nova::Vulkan
         allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
         if (vmaCreateAllocator(&allocatorCreateInfo, &m_Allocator) != VK_SUCCESS)
         {
-            std::println(std::cerr, "Failed to create allocator!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create allocator!");
             return false;
         }
 
@@ -328,14 +326,14 @@ namespace Nova::Vulkan
         commandPoolCreateInfo.queue = &m_GraphicsQueue;
         if (!m_CommandPool.Initialize(commandPoolCreateInfo))
         {
-            std::println(std::cerr, "Failed to create graphics command pool!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create graphics command pool!");
             return false;
         }
 
         commandPoolCreateInfo.queue = &m_TransferQueue;
         if (!m_TransferCommandPool.Initialize(commandPoolCreateInfo))
         {
-            std::println(std::cerr, "Failed to create transfer command pool!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create transfer command pool!");
             return false;
         }
 
@@ -348,9 +346,9 @@ namespace Nova::Vulkan
                 result = VK_PRESENT_MODE_FIFO_KHR;
 
                 uint32_t presentModeCount;
-                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface->GetHandle(), &presentModeCount, nullptr);
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, nullptr);
                 Array<VkPresentModeKHR> presentModes(presentModeCount);
-                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface->GetHandle(), &presentModeCount, presentModes.Data());
+                vkGetPhysicalDeviceSurfacePresentModesKHR(m_PhysicalDevice, m_Surface.GetHandle(), &presentModeCount, presentModes.Data());
 
                 if (presentModes.Contains(VK_PRESENT_MODE_MAILBOX_KHR))
                     result = VK_PRESENT_MODE_MAILBOX_KHR;
@@ -371,17 +369,17 @@ namespace Nova::Vulkan
 
         SwapchainCreateInfo swapchainCreateInfo;
         swapchainCreateInfo.device = this;
-        swapchainCreateInfo.surface = m_Surface;
+        swapchainCreateInfo.surface = &m_Surface;
         swapchainCreateInfo.recycle = false;
         swapchainCreateInfo.buffering = createInfo.buffering;
         swapchainCreateInfo.format = Format::R8G8B8A8_SRGB;
-        swapchainCreateInfo.width = m_Surface->GetWidth();
-        swapchainCreateInfo.height = m_Surface->GetHeight();
+        swapchainCreateInfo.width = m_Surface.GetWidth();
+        swapchainCreateInfo.height = m_Surface.GetHeight();
         swapchainCreateInfo.presentMode = GetPresentMode(createInfo.vSync);
 
         if (!m_Swapchain.Initialize(swapchainCreateInfo))
         {
-            std::println(std::cerr, "Failed to create swapchain!");
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create swapchain!");
             return false;
         }
 
@@ -438,7 +436,7 @@ namespace Nova::Vulkan
         m_DescriptorPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);
-        m_Surface->Destroy();
+        m_Surface.Destroy();
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         vkDestroyDebugUtilsMessenger(m_Instance, m_DebugMessenger, nullptr);
 #endif
@@ -449,7 +447,7 @@ namespace Nova::Vulkan
 
     bool RenderDevice::BeginFrame()
     {
-        if (!m_Surface->IsAvailable())
+        if (!m_Surface.IsAvailable())
             return false;
 
         if (!m_Swapchain.IsValid())
@@ -559,17 +557,6 @@ namespace Nova::Vulkan
         return RenderDeviceType::Vulkan;
     }
 
-    Ref<Nova::Surface> RenderDevice::CreateSurface(const SurfaceCreateInfo& createInfo)
-    {
-        Surface* surface = new Surface();
-        SurfaceCreateInfo surfaceCreateInfo(createInfo);
-        if (!surface->Initialize(surfaceCreateInfo.withDevice(this)))
-        {
-            delete surface;
-            return nullptr;
-        }
-        return Ref(surface);
-    }
 
     uint32_t RenderDevice::GetImageCount() const
     {
@@ -709,9 +696,9 @@ namespace Nova::Vulkan
         return m_PhysicalDevice;
     }
 
-    Ref<Nova::Surface> RenderDevice::GetSurface()
+    Nova::Surface* RenderDevice::GetSurface()
     {
-        return m_Surface;
+        return &m_Surface;
     }
 
 

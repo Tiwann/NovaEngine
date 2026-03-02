@@ -27,7 +27,7 @@ namespace Nova::D3D12
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
         void DrawIndexed(uint32_t indexCount, uint32_t instanceCount) override;
-        void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride) override;
+        void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount) override;
         void BeginRenderPass(const RenderPassBeginInfo& beginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size,const void* values) override;

@@ -29,7 +29,7 @@ namespace Nova::Vulkan
         shaderTargetDesc.format = GetCompileTarget(createInfo.target, createInfo.device->GetDeviceType());
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
-        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_5");
+        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_6");
 
         slang::CompilerOptionEntry entries[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},

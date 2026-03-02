@@ -66,11 +66,12 @@ namespace Nova
         virtual void Present() = 0;
         virtual void WaitIdle() const = 0;
         virtual void SetName(StringView name) = 0;
+
+        virtual Nova::Surface* GetSurface() { return nullptr; }
         virtual Nova::Swapchain* GetSwapchain() { return nullptr; }
         virtual RenderDeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
-        virtual Ref<Surface> CreateSurface(const SurfaceCreateInfo& createInfo) = 0;
         virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
         virtual Ref<Texture> CreateTextureUnitialized() = 0;
         virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;

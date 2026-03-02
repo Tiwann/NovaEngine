@@ -40,7 +40,6 @@ namespace Nova::Vulkan
         uint32_t GetImageCount() const override;
 
         Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
-        Ref<Nova::Surface> CreateSurface(const SurfaceCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
@@ -55,7 +54,7 @@ namespace Nova::Vulkan
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
         VkPhysicalDevice GetPhysicalDevice() const;
-        Ref<Nova::Surface> GetSurface();
+        Nova::Surface* GetSurface() override;
         Nova::Swapchain* GetSwapchain() override;
         CommandPool* GetCommandPool();
         CommandPool* GetTransferCommandPool();
@@ -79,7 +78,7 @@ namespace Nova::Vulkan
         VkPhysicalDevice m_PhysicalDevice = nullptr;
         VkDevice m_Handle = nullptr;
         VmaAllocator m_Allocator = nullptr;
-        Ref<Surface> m_Surface = nullptr;
+        Surface m_Surface;
         Swapchain m_Swapchain;
         CommandPool m_CommandPool;
         CommandPool m_TransferCommandPool;

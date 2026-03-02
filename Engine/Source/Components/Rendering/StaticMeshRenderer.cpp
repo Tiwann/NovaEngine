@@ -175,14 +175,12 @@ namespace Nova
         // THIS NEEDS TO BE OPTIMIZED BY FILTER THE AVAILABLE LIGHTS
         Entity* owner = GetOwner();
         const Scene* scene = owner->GetOwner();
-        const Application* application = scene->GetOwner();
-        const Window* window = application->GetWindow();
 
         const Camera* camera = scene->GetFirstComponent<Camera>();
         if (!camera) return;
 
-        const float width = window->GetWidth();
-        const float height = window->GetHeight();
+        const float width = camera->GetWidth();
+        const float height = camera->GetHeight();
 
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);

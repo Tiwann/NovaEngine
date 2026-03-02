@@ -26,7 +26,6 @@ namespace Nova
         ApplicationConfiguration configuration = GetConfiguration();
         const RenderDeviceType deviceType = GetRenderDeviceType();
 
-        // Creating window
         WindowCreateInfo windowCreateInfo;
         windowCreateInfo.title = configuration.applicationName;
         windowCreateInfo.width = configuration.windowWidth;
@@ -191,8 +190,13 @@ namespace Nova
             for (Ref<EditorWindow>& window : m_EditorWindows)
                 window->OnUpdate(m_DeltaTime);
 
+            const Scene* activeScene = m_SceneManager.GetActiveScene();
+            const Camera* activeCamera = activeScene->GetFirstComponent<Camera>();
+            m_SceneRenderer.SetScene(activeScene);
+            m_SceneRenderer.Begin(activeCamera);
             m_SceneManager.OnUpdate(m_DeltaTime);
             OnUpdate(m_DeltaTime);
+            m_SceneRenderer.End();
 
             m_ImGuiRenderer->BeginFrame();
             ImGui::DockSpaceOverViewport(ImGui::GetID("Dockspace"), ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
@@ -217,7 +221,8 @@ namespace Nova
                 return;
             }
 
-            m_SceneManager.OnPreRender(*cmdBuffer);
+            m_SceneRenderer.PrepareForRender(*cmdBuffer);
+            //m_SceneManager.OnPreRender(*cmdBuffer);
             OnPreRender(*cmdBuffer);
 
             if (Scene* scene = m_SceneManager.GetActiveScene())
@@ -259,7 +264,8 @@ namespace Nova
             renderPassBeginInfo.depthAttachment = &depthAttachment;
 
             cmdBuffer->BeginRenderPass(renderPassBeginInfo);
-            m_SceneManager.OnRender(*cmdBuffer);
+            m_SceneRenderer.RenderScene(*cmdBuffer);
+            //m_SceneManager.OnRender(*cmdBuffer);
             OnRender(*cmdBuffer);
             DebugRenderer::Render(*cmdBuffer);
             cmdBuffer->EndRenderPass();

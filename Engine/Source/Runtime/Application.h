@@ -12,6 +12,8 @@
 
 #include <cstdint>
 
+#include "Rendering/SceneRenderer.h"
+
 namespace slang
 {
     struct IGlobalSession;
@@ -106,6 +108,7 @@ namespace Nova
 
         SceneManager m_SceneManager;
         AssetDatabase m_AssetDatabase;
+        SceneRenderer m_SceneRenderer;
 
         Array<Ref<EditorWindow>> m_EditorWindows;
 

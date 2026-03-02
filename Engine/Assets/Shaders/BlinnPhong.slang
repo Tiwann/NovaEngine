@@ -23,19 +23,27 @@ public struct VertexOutput
 
 public typedef VertexOutput FragmentInput;
 
+// Set 0
 [[vk::binding(0, 0)]] ConstantBuffer<Nova::Scene, Std140DataLayout> scene;
 [[vk::binding(1, 0)]] SamplerState sampler;
+[[vk::binding(2, 0)]] ConstantBuffer<float4x4> worldSpaceMatrices;
 
+// Set 1
 [[vk::binding(0, 1)]] Texture2D diffuseTex;
 //[[vk::binding(1, 1)]] Texture2D specularTex;
 //[[vk::binding(2, 1)]] Texture2D glossinessTex;
 //[[vk::binding(3, 1)]] Texture2D normalTex;
 
 [shader("vertex")]
-VertexOutput vert(VertexInput input) 
+VertexOutput vert(VertexInput input, uint32_t instanceID : SV_InstanceID)
 {
+	float4x4 worldSpaceMatrix = worldSpaceMatrices[instanceID];
+	float4x4 viewMatrix = scene.camera.viewMatrix;
+	float4x4 projectionMatrix = scene.camera.projectionMatrix;
+	float4x4 mvp = projectionMatrix * viewMatrix * worldSpaceMatrix;
+
 	VertexOutput out;
-	out.position = scene.LocalToClipPosition(float4(input.position, 1.0));
+	out.position = mvp * float4(input.position, 1.0);
 	out.texCoord = input.texCoord;
     out.normal = scene.LocalToWorldNormal(input.normal);
     out.tangent = scene.LocalToWorldDirection(input.tangent);

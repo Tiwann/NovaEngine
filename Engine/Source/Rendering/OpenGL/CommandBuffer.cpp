@@ -139,14 +139,25 @@ namespace Nova::OpenGL
         m_Commands.Enqueue(command);
     }
 
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride)
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount)
     {
         COMMAND_BUFFER_CHECK();
         Command command{CommandType::DrawIndirect};
         command.data.drawIndirect.buffer = static_cast<const Buffer*>(&buffer);
         command.data.drawIndirect.offset = offset;
         command.data.drawIndirect.drawCount = drawCount;
-        command.data.drawIndirect.stride = static_cast<uint32_t>(stride);
+        command.data.drawIndirect.stride = sizeof(DrawIndirectParameters);
+        m_Commands.Enqueue(command);
+    }
+
+    void CommandBuffer::DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount)
+    {
+        COMMAND_BUFFER_CHECK();
+        Command command{CommandType::DrawIndexedIndirect};
+        command.data.drawIndexedIndirect.buffer = static_cast<const Buffer*>(&buffer);
+        command.data.drawIndexedIndirect.offset = offset;
+        command.data.drawIndexedIndirect.drawCount = drawCount;
+        command.data.drawIndexedIndirect.stride = sizeof(DrawIndexedIndirectParameters);
         m_Commands.Enqueue(command);
     }
 

@@ -28,7 +28,7 @@ namespace Nova::OpenGL
 
         glCreateVertexArrays(1, &m_VertexArrayObject);
 
-        const VertexLayout& vertexLayout = createInfo.vertexInputInfo.layout;
+        /*const VertexLayout& vertexLayout = createInfo.vertexInputState.layout;
         const Array<VertexAttribute>& vertexAttributes = vertexLayout.GetAttributes();
         for (uint32_t i = 0; i < vertexAttributes.Count(); i++)
         {
@@ -42,7 +42,7 @@ namespace Nova::OpenGL
                                       GL_FALSE,
                                       vertexLayout.GetOffset(vertexAttribute));
 
-        }
+        }*/
 
         m_PipelineDesc = createInfo;
         return true;
@@ -65,26 +65,26 @@ namespace Nova::OpenGL
         };
 
         // RASTERIZATION STATE
-        const bool enableCullFace = m_PipelineDesc.rasterizationInfo.cullMode != CullMode::None;
+        const bool enableCullFace = m_PipelineDesc.rasterizationState.cullMode != CullMode::None;
         glEnableState(GL_CULL_FACE, enableCullFace);
         if (enableCullFace)
         {
-            const GLenum cullMode = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.cullMode);
+            const GLenum cullMode = Convert<GLenum>(m_PipelineDesc.rasterizationState.cullMode);
             glCullFace(cullMode);
         }
 
-        const GLenum frontFace = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.frontFace);
+        const GLenum frontFace = Convert<GLenum>(m_PipelineDesc.rasterizationState.frontFace);
         glFrontFace(frontFace);
 
-        const GLenum polygonMode = Convert<GLenum>(m_PipelineDesc.rasterizationInfo.polygonMode);
+        const GLenum polygonMode = Convert<GLenum>(m_PipelineDesc.rasterizationState.polygonMode);
         glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
-        glEnableState(GL_RASTERIZER_DISCARD, m_PipelineDesc.rasterizationInfo.discardEnable);
-        glEnableState(GL_DEPTH_CLAMP, m_PipelineDesc.rasterizationInfo.depthClampEnable);
-        glLineWidth(m_PipelineDesc.rasterizationInfo.lineWidth);
+        glEnableState(GL_RASTERIZER_DISCARD, m_PipelineDesc.rasterizationState.discardEnable);
+        glEnableState(GL_DEPTH_CLAMP, m_PipelineDesc.rasterizationState.depthClampEnable);
+        glLineWidth(m_PipelineDesc.rasterizationState.lineWidth);
 
 
         // COLOR BLEND
-        const auto& colorBlendState = m_PipelineDesc.colorBlendInfo;
+        const auto& colorBlendState = m_PipelineDesc.colorBlendState;
         const auto& blendFunc = colorBlendState.blendFunction;
         glEnableState(GL_BLEND, colorBlendState.colorBlendEnable);
         if (colorBlendState.colorBlendEnable)
@@ -101,13 +101,13 @@ namespace Nova::OpenGL
         glColorMask(writeRed, writeGreen, writeBlue, writeAlpha);
 
         // DEPTH STENCIL
-        const auto& depthStencilState = m_PipelineDesc.depthStencilInfo;
+        const auto& depthStencilState = m_PipelineDesc.depthStencilState;
         glEnableState(GL_DEPTH_TEST, depthStencilState.depthTestEnable);
         glEnableState(GL_STENCIL_TEST, depthStencilState.stencilTestEnable);
         glDepthMask(depthStencilState.depthWriteEnable);
 
         // MULTISAMPLE
-        const auto& multisampleState = m_PipelineDesc.multisampleInfo;
+        const auto& multisampleState = m_PipelineDesc.multisampleState;
         const bool enableMultisample = multisampleState.sampleCount > 1 && multisampleState.sampleCount % 2 == 0 && multisampleState.sampleCount <= 16;
         glEnableState(GL_MULTISAMPLE, enableMultisample);
         if (enableMultisample)
@@ -118,12 +118,12 @@ namespace Nova::OpenGL
         }
 
         //VIEWPORT
-        const auto& viewportState = m_PipelineDesc.viewportInfo;
+        const auto& viewportState = m_PipelineDesc.viewportState;
         glViewport(viewportState.x, viewportState.y, viewportState.width, viewportState.height);
         glDepthRange(viewportState.minDepth, viewportState.maxDepth);
 
         //SCISSOR
-        const auto scissorState = m_PipelineDesc.scissorInfo;
+        const auto scissorState = m_PipelineDesc.scissorState;
         glScissor(scissorState.x, scissorState.y, scissorState.width, scissorState.height);
 
         const Shader* shader = static_cast<const Shader*>(m_PipelineDesc.shader);

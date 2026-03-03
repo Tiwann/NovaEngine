@@ -46,22 +46,25 @@ namespace Nova
         pipelineInfo.colorAttachmentFormats = { Format::R8G8B8A8_UNORM };
         pipelineInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
 
-        pipelineInfo.vertexInputInfo.layout.AddAttribute({"POSITION", Format::Vector3});
-        pipelineInfo.vertexInputInfo.layout.AddAttribute({"COLOR", Format::Vector4});
+        VertexLayout vertexLayout;
+        vertexLayout.AddInputBinding(0, VertexInputRate::Vertex);
+        vertexLayout.AddInputAttribute("POSITION", ShaderDataType::Float3, 0);
+        vertexLayout.AddInputAttribute("COLOR", ShaderDataType::Float4, 0);
+        pipelineInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
 
-        pipelineInfo.rasterizationInfo.cullMode = CullMode::FrontAndBackFaces;
-        pipelineInfo.rasterizationInfo.discardEnable = false;
-        pipelineInfo.rasterizationInfo.frontFace = FrontFace::CounterClockwise;
-        pipelineInfo.rasterizationInfo.lineWidth = 3.0f;
-        pipelineInfo.rasterizationInfo.polygonMode = PolygonMode::Line;
+        pipelineInfo.rasterizationState.cullMode = CullMode::FrontAndBackFaces;
+        pipelineInfo.rasterizationState.discardEnable = false;
+        pipelineInfo.rasterizationState.frontFace = FrontFace::CounterClockwise;
+        pipelineInfo.rasterizationState.lineWidth = 3.0f;
+        pipelineInfo.rasterizationState.polygonMode = PolygonMode::Line;
 
-        pipelineInfo.inputAssemblyInfo.topology = PrimitiveTopology::LineList;
+        pipelineInfo.inputAssemblyState.topology = PrimitiveTopology::LineList;
 
-        pipelineInfo.depthStencilInfo.depthTestEnable = false;
-        pipelineInfo.depthStencilInfo.depthWriteEnable = false;
-        pipelineInfo.depthStencilInfo.depthCompareOp = CompareOperation::Less;
+        pipelineInfo.depthStencilState.depthTestEnable = false;
+        pipelineInfo.depthStencilState.depthWriteEnable = false;
+        pipelineInfo.depthStencilState.depthCompareOp = CompareOperation::Less;
 
-        pipelineInfo.multisampleInfo.sampleCount = 8;
+        pipelineInfo.multisampleState.sampleCount = 8;
 
         s_Pipeline = s_Device->CreateGraphicsPipeline(pipelineInfo);
         if (!s_Pipeline) return false;

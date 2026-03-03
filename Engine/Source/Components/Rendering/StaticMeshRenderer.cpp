@@ -49,25 +49,21 @@ namespace Nova
         const AssetDatabase& assetDatabase = application->GetAssetDatabase();
         m_Shader = assetDatabase.Get<Shader>("BlinnPhongShader");
 
-        const Array vertexAttributes
-        {
-            VertexAttribute{"POSITION", Format::Vector3},
-            VertexAttribute{"TEXCOORDINATE", Format::Vector2},
-            VertexAttribute{"NORMAL", Format::Vector3},
-            VertexAttribute{"TANGENT", Format::Vector3},
-            VertexAttribute{"COLOR", Format::Vector4},
-        };
+        VertexLayout vertexLayout;
+        vertexLayout.AddInputBinding(0, VertexInputRate::Vertex);
+        vertexLayout.AddInputAttribute("POSITION", ShaderDataType::Float2, 0);
+        vertexLayout.AddInputAttribute("TEXCOORDINATE", ShaderDataType::Float2, 0);
+        vertexLayout.AddInputAttribute("NORMAL", ShaderDataType::Float3, 0);
+        vertexLayout.AddInputAttribute("TANGENT", ShaderDataType::Float3, 0);
+        vertexLayout.AddInputAttribute("COLOR", ShaderDataType::Float4, 0);
 
-        const GraphicsPipelineCreateInfo pipelineCreateInfo = GraphicsPipelineCreateInfo()
-        .SetDevice(device)
-        .SetShader(*m_Shader)
-        .SetVertexLayout(vertexAttributes)
-        .SetMultisampleInfo({8})
-        .SetDepthStencilInfo({
-            .depthTestEnable = true,
-            .depthWriteEnable = true,
-        });
-
+        GraphicsPipelineCreateInfo pipelineCreateInfo;
+        pipelineCreateInfo.device = device;
+        pipelineCreateInfo.shader = m_Shader;
+        pipelineCreateInfo.multisampleState.sampleCount = 8;
+        pipelineCreateInfo.depthStencilState.depthWriteEnable = true;
+        pipelineCreateInfo.depthStencilState.depthTestEnable = true;
+        pipelineCreateInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
         BufferCreateInfo uniformBufferCreateInfo;

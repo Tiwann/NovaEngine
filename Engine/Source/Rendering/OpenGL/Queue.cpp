@@ -55,8 +55,8 @@ namespace Nova::OpenGL
                 {
                     const BindGraphicsPipelineCommand& cmd = data.bindGraphicsPipeline;
                     cmd.pipeline->Bind();
-                    primitiveTopology = cmd.pipeline->m_PipelineDesc.inputAssemblyInfo.topology;
-                    vertexBufferStride = cmd.pipeline->m_PipelineDesc.vertexInputInfo.layout.Stride();
+                    primitiveTopology = cmd.pipeline->m_PipelineDesc.inputAssemblyState.topology;
+                    //vertexBufferStride = cmd.pipeline->m_PipelineDesc.vertexInputState.layout.Stride();
                     graphicsPipeline = static_cast<const GraphicsPipeline*>(cmd.pipeline);
                     break;
                 }

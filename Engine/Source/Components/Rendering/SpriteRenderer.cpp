@@ -74,19 +74,23 @@ namespace Nova
         pipelineCreateInfo.device = device;
         pipelineCreateInfo.shader = m_Shader;
 
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "Position", Format::Vector2 });
-        pipelineCreateInfo.vertexInputInfo.layout.AddAttribute({ "TexCoords", Format::Vector2 });
-        pipelineCreateInfo.multisampleInfo.sampleCount = 8;
+        VertexLayout vertexLayout;
+        vertexLayout.AddInputBinding(0, VertexInputRate::Vertex);
+        vertexLayout.AddInputAttribute("POSITION", ShaderDataType::Float2, 0);
+        vertexLayout.AddInputAttribute("TEXCOORDS", ShaderDataType::Float2, 0);
+        pipelineCreateInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
 
-        pipelineCreateInfo.viewportInfo.x = viewport.x;
-        pipelineCreateInfo.viewportInfo.y = viewport.y;
-        pipelineCreateInfo.viewportInfo.width = viewport.width;
-        pipelineCreateInfo.viewportInfo.height = viewport.height;
+        pipelineCreateInfo.multisampleState.sampleCount = 8;
 
-        pipelineCreateInfo.scissorInfo.x =  viewport.x;
-        pipelineCreateInfo.scissorInfo.y = viewport.y;
-        pipelineCreateInfo.scissorInfo.width = viewport.width;
-        pipelineCreateInfo.scissorInfo.height = viewport.height;
+        pipelineCreateInfo.viewportState.x = viewport.x;
+        pipelineCreateInfo.viewportState.y = viewport.y;
+        pipelineCreateInfo.viewportState.width = viewport.width;
+        pipelineCreateInfo.viewportState.height = viewport.height;
+
+        pipelineCreateInfo.scissorState.x =  viewport.x;
+        pipelineCreateInfo.scissorState.y = viewport.y;
+        pipelineCreateInfo.scissorState.width = viewport.width;
+        pipelineCreateInfo.scissorState.height = viewport.height;
         m_Pipeline = device->CreateGraphicsPipeline(pipelineCreateInfo);
 
         m_BindingSet->BindSampler(0, *m_Sampler);

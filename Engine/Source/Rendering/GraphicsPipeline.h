@@ -7,6 +7,8 @@
 #include "PolygonMode.h"
 #include "PrimitiveTopology.h"
 #include "VertexLayout.h"
+#include "VertexInputBindingDesc.h"
+#include "VertexInputAttributeDesc.h"
 
 namespace Nova
 {
@@ -15,18 +17,19 @@ namespace Nova
     class RenderTarget;
     class Shader;
 
-    struct InputAssemblyInfo
+    struct InputAssemblyState
     {
         bool primitiveRestartEnable = false;
         PrimitiveTopology topology = PrimitiveTopology::TriangleList;
     };
 
-    struct VertexInputInfo
+    struct VertexInputState
     {
-        VertexLayout layout;
+        Array<VertexInputBindingDesc> vertexInputBindings;
+        Array<VertexInputAttributeDesc> vertexInputAttributes;
     };
 
-    struct RasterizationInfo
+    struct RasterizationState
     {
         CullMode cullMode = CullMode::BackFace;
         FrontFace frontFace = FrontFace::CounterClockwise;
@@ -40,14 +43,14 @@ namespace Nova
         float lineWidth = 1.0f;
     };
 
-    struct ColorBlendInfo
+    struct ColorBlendState
     {
         bool colorBlendEnable = false;
         BlendFunction blendFunction;
         ColorChannelFlags colorWriteMask = ColorChannelFlags::All();
     };
 
-    struct DepthStencilInfo
+    struct DepthStencilState
     {
         bool depthTestEnable = false;
         bool depthWriteEnable = false;
@@ -55,7 +58,7 @@ namespace Nova
         CompareOperation depthCompareOp = CompareOperation::Less;
     };
 
-    struct MultisampleInfo
+    struct MultisampleState
     {
         uint32_t sampleCount = 1;
         bool alphaToCoverageEnable = false;
@@ -63,7 +66,7 @@ namespace Nova
         bool sampleShadingEnable = false;
     };
 
-    struct ViewportInfo
+    struct ViewportState
     {
         uint32_t x = 0;
         uint32_t y = 0;
@@ -73,7 +76,7 @@ namespace Nova
         float maxDepth = 1.0f;
     };
 
-    struct ScissorInfo
+    struct ScissorState
     {
         uint32_t x = 0;
         uint32_t y = 0;
@@ -83,38 +86,38 @@ namespace Nova
 
     struct GraphicsPipelineCreateInfo
     {
-        InputAssemblyInfo inputAssemblyInfo;
-        VertexInputInfo vertexInputInfo;
-        RasterizationInfo rasterizationInfo;
-        ColorBlendInfo colorBlendInfo;
-        DepthStencilInfo depthStencilInfo;
-        MultisampleInfo multisampleInfo;
-        ViewportInfo viewportInfo;
-        ScissorInfo scissorInfo;
+        InputAssemblyState inputAssemblyState;
+        VertexInputState vertexInputState;
+        RasterizationState rasterizationState;
+        ColorBlendState colorBlendState;
+        DepthStencilState depthStencilState;
+        MultisampleState multisampleState;
+        ViewportState viewportState;
+        ScissorState scissorState;
         Array<Format> colorAttachmentFormats;
-        Format depthAttachmentFormat;
+        Format depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
 
         RenderDevice* device = nullptr;
         const Shader* shader = nullptr;
 
         GraphicsPipelineCreateInfo() = default;
 
-        GraphicsPipelineCreateInfo& SetInputAssemblyInfo(const InputAssemblyInfo& inputAssembly) { inputAssemblyInfo = inputAssembly; return *this; }
-        GraphicsPipelineCreateInfo& SetVertexLayout(const VertexLayout& vertexLayout) { vertexInputInfo.layout = vertexLayout; return *this; }
-        GraphicsPipelineCreateInfo& AddVertexAttribute(const VertexAttribute& attribute) { vertexInputInfo.layout.AddAttribute(attribute); return *this; }
-        GraphicsPipelineCreateInfo& SetRasterizationInfo(const RasterizationInfo& rasterization) { rasterizationInfo = rasterization; return *this; }
-        GraphicsPipelineCreateInfo& SetColorBlendInfo(const ColorBlendInfo& colorBlend) { colorBlendInfo = colorBlend; return *this; }
-        GraphicsPipelineCreateInfo& SetDepthStencilInfo(const DepthStencilInfo& depthStencil) { depthStencilInfo = depthStencil; return *this; }
-        GraphicsPipelineCreateInfo& SetMultisampleInfo(const MultisampleInfo& multisample) { multisampleInfo = multisample; return *this; }
-        GraphicsPipelineCreateInfo& SetViewportInfo(const ViewportInfo& viewport) { viewportInfo = viewport; return *this; }
-        GraphicsPipelineCreateInfo& SetScissorInfo(const ScissorInfo& scissor) { scissorInfo = scissor; return *this; }
-        GraphicsPipelineCreateInfo& SetPrimitiveTopology(const PrimitiveTopology topology) { inputAssemblyInfo.topology = topology; return *this; }
-        GraphicsPipelineCreateInfo& SetCullMode(const CullMode cullMode) { rasterizationInfo.cullMode = cullMode; return *this; }
-        GraphicsPipelineCreateInfo& SetFrontFace(const FrontFace frontFace) { rasterizationInfo.frontFace = frontFace; return *this; }
-        GraphicsPipelineCreateInfo& SetPolygonMode(const PolygonMode polygonMode) { rasterizationInfo.polygonMode = polygonMode; return *this; }
+        GraphicsPipelineCreateInfo& SetInputAssemblyInfo(const InputAssemblyState& inputAssembly) { inputAssemblyState = inputAssembly; return *this; }
+        GraphicsPipelineCreateInfo& SetRasterizationInfo(const RasterizationState& rasterization) { rasterizationState = rasterization; return *this; }
+        GraphicsPipelineCreateInfo& SetColorBlendInfo(const ColorBlendState& colorBlend) { colorBlendState = colorBlend; return *this; }
+        GraphicsPipelineCreateInfo& SetDepthStencilInfo(const DepthStencilState& depthStencil) { depthStencilState = depthStencil; return *this; }
+        GraphicsPipelineCreateInfo& SetMultisampleInfo(const MultisampleState& multisample) { multisampleState = multisample; return *this; }
+        GraphicsPipelineCreateInfo& SetViewportInfo(const ViewportState& viewport) { viewportState = viewport; return *this; }
+        GraphicsPipelineCreateInfo& SetScissorInfo(const ScissorState& scissor) { scissorState = scissor; return *this; }
+        GraphicsPipelineCreateInfo& SetPrimitiveTopology(const PrimitiveTopology topology) { inputAssemblyState.topology = topology; return *this; }
+        GraphicsPipelineCreateInfo& SetCullMode(const CullMode cullMode) { rasterizationState.cullMode = cullMode; return *this; }
+        GraphicsPipelineCreateInfo& SetFrontFace(const FrontFace frontFace) { rasterizationState.frontFace = frontFace; return *this; }
+        GraphicsPipelineCreateInfo& SetPolygonMode(const PolygonMode polygonMode) { rasterizationState.polygonMode = polygonMode; return *this; }
         GraphicsPipelineCreateInfo& SetShader(const Shader& inShader) { this->shader = &inShader; return *this; }
         GraphicsPipelineCreateInfo& SetDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
     };
+
+    VertexInputState CreateInputStateFromVertexLayout(const VertexLayout& vertexLayout);
 
     class GraphicsPipeline
     {

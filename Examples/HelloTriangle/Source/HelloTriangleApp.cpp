@@ -49,9 +49,9 @@ void HelloTriangleApp::OnInit()
     pipelineCreateInfo.shader = m_Shader;
     pipelineCreateInfo.colorAttachmentFormats = { Format::R8G8B8A8_SRGB };
     pipelineCreateInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
-    pipelineCreateInfo.depthStencilInfo.depthTestEnable = false;
-    pipelineCreateInfo.depthStencilInfo.stencilTestEnable = false;
-    pipelineCreateInfo.depthStencilInfo.depthWriteEnable = false;
+    pipelineCreateInfo.depthStencilState.depthTestEnable = false;
+    pipelineCreateInfo.depthStencilState.stencilTestEnable = false;
+    pipelineCreateInfo.depthStencilState.depthWriteEnable = false;
     pipelineCreateInfo.SetMultisampleInfo({8});
     m_GraphicsPipeline = renderDevice->CreateGraphicsPipeline(pipelineCreateInfo);
     if (!m_GraphicsPipeline)

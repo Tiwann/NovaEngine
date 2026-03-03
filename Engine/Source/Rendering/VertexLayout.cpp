@@ -2,58 +2,86 @@
 
 namespace Nova
 {
-    bool VertexAttribute::operator==(const VertexAttribute& Other) const
+    bool VertexAttribute::operator==(const VertexAttribute& other) const
     {
-        return name == Other.name && format == Other.format;
+        return name == other.name && type == other.type && binding == other.binding;
     }
 
-    VertexLayout::VertexLayout(const Array<VertexAttribute>& attributes) : m_Attributes(attributes)
+    void VertexLayout::AddInputBinding(const uint32_t binding, const VertexInputRate inputRateBinding)
     {
-        
+        if (!m_InputBindings.FindKey(binding))
+            m_InputBindings[binding] = inputRateBinding;
     }
 
-    void VertexLayout::AddAttribute(const VertexAttribute& attribute)
+    void VertexLayout::AddInputAttribute(const VertexAttribute& attribute)
     {
-        m_Attributes.Add(attribute);
+        m_InputAttributes.Add(attribute);
     }
 
-    size_t VertexLayout::Count() const
+    void VertexLayout::AddInputAttribute(const String& name, const ShaderDataType type, const uint32_t binding)
     {
-        return m_Attributes.Count();
+        m_InputAttributes.Add(VertexAttribute(name, type, binding));
     }
 
-    size_t VertexLayout::Stride() const
+    uint32_t VertexLayout::GetStride(const uint32_t binding) const
     {
-        size_t Result = 0;
-        for(const VertexAttribute& Attribute : m_Attributes)
-            Result += GetFormatSize(Attribute.format);
-        return Result;
-    }
-
-    size_t VertexLayout::GetOffset(const VertexAttribute& attribute) const
-    {
-        const Array<VertexAttribute>::SizeType Index = m_Attributes.Find(attribute);
-        NOVA_ASSERT(Index != -1, "Invalid vertex attribute!");
-        size_t Result = 0;
-        for(Array<VertexAttribute>::SizeType i = 0; i < Index; i++)
+        uint32_t result = 0;
+        for(const VertexAttribute& attribute : m_InputAttributes)
         {
-            Result += GetFormatSize(m_Attributes[i].format);
+            if (attribute.binding == binding)
+                result += GetDataTypeSize(attribute.type);
         }
-        return Result;
+        return result;
     }
 
-    const Array<VertexAttribute>& VertexLayout::GetAttributes() const
+    uint32_t VertexLayout::GetAttributeCount() const
     {
-        return m_Attributes;
+        return m_InputAttributes.Count();
     }
 
-    VertexAttribute& VertexLayout::operator[](size_t index)
+    uint32_t VertexLayout::GetBindingCount() const
     {
-        return m_Attributes[index];
+        return m_InputBindings.Count();
     }
 
-    const VertexAttribute& VertexLayout::operator[](size_t index) const
+    uint32_t VertexLayout::GetAttributeOffset(const VertexAttribute& attribute) const
     {
-        return m_Attributes[index];
+        const size_t index = m_InputAttributes.Find(attribute);
+        NOVA_ASSERT(index != -1, "Invalid vertex attribute!");
+        uint32_t result = 0;
+        for(size_t i = 0; i < index; i++)
+            result += GetDataTypeSize(m_InputAttributes[i].type);
+        return result;
+    }
+
+    uint32_t VertexLayout::GetAttributeOffset(const String& name) const
+    {
+        const auto predicate = [&name](const VertexAttribute& attribute) { return attribute.name == name; };
+        const VertexAttribute* attribute = m_InputAttributes.Single(predicate);
+        NOVA_ASSERT(attribute, "Invalid vertex attribute!");
+        const auto index = m_InputAttributes.Find(*attribute);
+        uint32_t result = 0;
+        for(size_t i = 0; i < index; i++)
+            result += GetDataTypeSize(m_InputAttributes[i].type);
+        return result;
+    }
+
+    uint32_t VertexLayout::GetAttributeOffset(const uint32_t index) const
+    {
+        NOVA_ASSERT(index < m_InputAttributes.Count(), "Invalid vertex attribute!");
+        uint32_t result = 0;
+        for(size_t i = 0; i < index; i++)
+            result += GetDataTypeSize(m_InputAttributes[i].type);
+        return result;
+    }
+
+    const Array<VertexAttribute>& VertexLayout::GetInputAttributes() const
+    {
+        return m_InputAttributes;
+    }
+
+    const Map<uint32_t, VertexInputRate>& VertexLayout::GetInputBindings() const
+    {
+        return m_InputBindings;
     }
 }

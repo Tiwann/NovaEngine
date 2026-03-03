@@ -1,14 +1,17 @@
 #pragma once
 #include "Containers/Array.h"
 #include "Containers/String.h"
-#include "Runtime/Format.h"
+#include "ShaderDataType.h"
+#include "VertexInputRate.h"
+#include "Containers/Map.h"
 
 namespace Nova
 {
     struct VertexAttribute
     {
         String name;
-        Format format;
+        ShaderDataType type;
+        uint32_t binding;
         bool operator==(const VertexAttribute&) const;
     };
 
@@ -16,22 +19,22 @@ namespace Nova
     {
     public:
         VertexLayout() = default;
-        VertexLayout(const Array<VertexAttribute>& attributes);
-        
-        void AddAttribute(const VertexAttribute& attribute);
-        
-        size_t Count() const;
-        size_t Stride() const;
-        size_t GetOffset(const VertexAttribute& attribute) const;
 
-        const Array<VertexAttribute>& GetAttributes() const;
+        void AddInputBinding(uint32_t binding, VertexInputRate inputRateBinding);
+        void AddInputAttribute(const VertexAttribute& attribute);
+        void AddInputAttribute(const String& name, ShaderDataType type, uint32_t binding);
 
-        VertexAttribute& operator[](size_t index);
-        const VertexAttribute& operator[](size_t index) const;
-        
-        Array<VertexAttribute>::Iterator begin() { return m_Attributes.begin(); }
-        Array<VertexAttribute>::Iterator end() { return m_Attributes.end(); }
+        uint32_t GetStride(uint32_t binding) const;
+        uint32_t GetAttributeCount() const;
+        uint32_t GetBindingCount() const;
+        uint32_t GetAttributeOffset(const VertexAttribute& attribute) const;
+        uint32_t GetAttributeOffset(const String& name) const;
+        uint32_t GetAttributeOffset(uint32_t index) const;
+
+        const Array<VertexAttribute>& GetInputAttributes() const;
+        const Map<uint32_t, VertexInputRate>& GetInputBindings() const;
     private:
-        Array<VertexAttribute> m_Attributes;
+        Map<uint32_t, VertexInputRate> m_InputBindings;
+        Array<VertexAttribute> m_InputAttributes;
     };
 }

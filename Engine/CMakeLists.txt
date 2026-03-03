@@ -226,6 +226,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/ResourceBarrier.cpp
         Source/Rendering/SlangCommon.h
         Source/Rendering/SlangCommon.cpp
+        Source/Rendering/GraphicsPipeline.cpp
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h

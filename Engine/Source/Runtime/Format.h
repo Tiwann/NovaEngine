@@ -105,6 +105,11 @@ namespace Nova
         Uint32 = R32_UINT,
         Uint16 = R16_USHORT,
         Uint8 = R8_UNORM,
+
+
+        Float2 = Vector2,
+        Float3 = Vector3,
+        Float4 = Vector4,
     };
 
     static size_t GetFormatSize(const Format Format)

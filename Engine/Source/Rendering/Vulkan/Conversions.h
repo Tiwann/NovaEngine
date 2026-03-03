@@ -21,6 +21,7 @@
 #include "Rendering/TextureAspect.h"
 #include "Rendering/TextureDimension.h"
 #include "Rendering/RenderPass.h"
+#include "Rendering/VertexInputRate.h"
 
 #include <vulkan/vulkan.h>
 
@@ -563,6 +564,17 @@ namespace Nova::Vulkan
         case TextureDimension::Dim2D: return VK_IMAGE_TYPE_2D;
         case TextureDimension::Dim3D: return VK_IMAGE_TYPE_3D;
         default: return VK_IMAGE_TYPE_MAX_ENUM;
+        }
+    }
+
+    template<>
+    inline VkVertexInputRate Convert(const VertexInputRate& value)
+    {
+        switch (value)
+        {
+        case VertexInputRate::Vertex: return VK_VERTEX_INPUT_RATE_VERTEX;
+        case VertexInputRate::Instance: return VK_VERTEX_INPUT_RATE_INSTANCE;
+        default: return VK_VERTEX_INPUT_RATE_VERTEX;
         }
     }
 }

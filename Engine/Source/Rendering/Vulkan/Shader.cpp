@@ -11,6 +11,7 @@
 #include <unordered_map>
 
 #include "Runtime/Log.h"
+#include "Runtime/Path.h"
 
 
 namespace Nova::Vulkan
@@ -33,13 +34,19 @@ namespace Nova::Vulkan
 
         slang::CompilerOptionEntry entries[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
-            {slang::CompilerOptionName::Optimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, SLANG_OPTIMIZATION_LEVEL_NONE)},
+            {slang::CompilerOptionName::Optimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, SLANG_OPTIMIZATION_LEVEL_MAXIMAL)},
         };
+
+        const auto ToConstChar = [](const StringView includeDir) -> const char* { return includeDir; };
+        Array<const char*> includes = createInfo.includes.Transform<const char*>(ToConstChar);
+        String enginIncludes = Path::GetEngineAssetPath("Shaders/Include");
+        includes.Add(*enginIncludes);
+
         slang::SessionDesc sessionDesc;
         sessionDesc.targets = &shaderTargetDesc;
         sessionDesc.targetCount = 1;
         sessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
-        sessionDesc.searchPaths = createInfo.includes.Transform<const char*>([](const StringView includeDir) { return *includeDir; }).Data();
+        sessionDesc.searchPaths = includes.Data();
         sessionDesc.searchPathCount = createInfo.includes.Count();
         sessionDesc.compilerOptionEntries = entries;
         sessionDesc.compilerOptionEntryCount = std::size(entries);

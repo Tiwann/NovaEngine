@@ -9,7 +9,7 @@ namespace Nova
 
     void VertexLayout::AddInputBinding(const uint32_t binding, const VertexInputRate inputRateBinding)
     {
-        if (!m_InputBindings.FindKey(binding))
+        if (m_InputBindings.FindKey(binding) == -1)
             m_InputBindings[binding] = inputRateBinding;
     }
 

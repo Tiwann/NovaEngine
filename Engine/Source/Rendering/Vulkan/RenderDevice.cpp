@@ -14,6 +14,7 @@
 #include "GraphicsPipeline.h"
 #include "ComputePipeline.h"
 #include "Material.h"
+#include "TextureView.h"
 #include "RenderTarget.h"
 #include "Utils/VulkanUtils.h"
 
@@ -590,6 +591,19 @@ namespace Nova::Vulkan
     Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
     {
         return MakeRef<Texture>();
+    }
+
+    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    {
+        TextureView* view = new TextureView();
+        TextureViewCreateInfo viewCreateInfo(createInfo);
+        viewCreateInfo.device = this;
+        if (!view->Initialize(viewCreateInfo))
+        {
+            delete view;
+            return nullptr;
+        }
+        return Ref(view);
     }
 
     Ref<Nova::Sampler> RenderDevice::CreateSampler(const SamplerCreateInfo& createInfo)

@@ -5,13 +5,13 @@
 #include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
-#include "Material.h"
-#include "Buffer.h"
-#include "Texture.h"
 #include "RenderDeviceType.h"
-#include <cstdint>
-
+#include "BufferUsage.h"
+#include "TextureUsage.h"
+#include "Runtime/Format.h"
 #include "Runtime/LogCategory.h"
+
+#include <cstdint>
 
 NOVA_DECLARE_LOG_CATEGORY_STATIC(RenderDevice, "RENDER DEVICE")
 
@@ -41,6 +41,8 @@ namespace Nova
     struct RenderTargetCreateInfo;
     class Swapchain;
     class CommandBuffer;
+    class TextureView;
+    struct TextureViewCreateInfo;
 
 
     struct DeviceCreateInfo
@@ -72,15 +74,16 @@ namespace Nova
         virtual RenderDeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
-        virtual Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
-        virtual Ref<Texture> CreateTextureUnitialized() = 0;
-        virtual Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
-        virtual Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
-        virtual Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
-        virtual Ref<GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
-        virtual Ref<ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
-        virtual Ref<Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
-        virtual Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
+        virtual Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Shader> CreateShader(const ShaderCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::ComputePipeline> CreateComputePipeline(const ComputePipelineCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Material> CreateMaterial(const MaterialCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
         virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr; }
 
         Ref<Fence> CreateFence();

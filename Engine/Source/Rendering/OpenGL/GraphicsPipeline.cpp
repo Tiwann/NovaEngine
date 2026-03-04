@@ -1,7 +1,6 @@
 ﻿#include "GraphicsPipeline.h"
 #include "Shader.h"
 #include "Conversions.h"
-#include "Format.h"
 #include "Runtime/Log.h"
 #include "RenderDevice.h"
 #include <glad/glad.h>

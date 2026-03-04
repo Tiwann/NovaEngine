@@ -4,7 +4,6 @@
 #include "Runtime/Object.h"
 #include <cstdint>
 
-
 namespace Nova
 {
     class RenderDevice;

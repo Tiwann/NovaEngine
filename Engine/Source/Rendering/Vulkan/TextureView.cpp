@@ -5,7 +5,6 @@
 
 #include <vulkan/vulkan.h>
 
-
 namespace Nova::Vulkan
 {
     bool TextureView::Initialize(const TextureViewCreateInfo& createInfo)
@@ -23,7 +22,7 @@ namespace Nova::Vulkan
         imageViewCreateInfo.image = texture->GetImage();
         imageViewCreateInfo.viewType = viewType;
         imageViewCreateInfo.format = Convert<VkFormat>(createInfo.format);
-        imageViewCreateInfo.subresourceRange.aspectMask = Convert(createInfo.format);
+        imageViewCreateInfo.subresourceRange.aspectMask = Convert<VkImageAspectFlags>(createInfo.aspectFlags);
         imageViewCreateInfo.subresourceRange.baseMipLevel = createInfo.baseMipLevel;
         imageViewCreateInfo.subresourceRange.levelCount = createInfo.mipCount;
         imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;

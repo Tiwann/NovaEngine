@@ -42,6 +42,7 @@ namespace Nova::Vulkan
         Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
+        Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
         Ref<Nova::GraphicsPipeline> CreateGraphicsPipeline(const GraphicsPipelineCreateInfo& createInfo) override;

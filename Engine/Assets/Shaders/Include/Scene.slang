@@ -1,16 +1,13 @@
 ﻿module Scene;
 import LightTypes;
 
-public struct Scene
+public struct SceneData
 {
-	DirectionalLight directionalLight;
-	AmbientLight ambientLight;
-	uint32_t pointLightCount;
-	ConstantBuffer<PointLight> pointLights;
-	uint32_t spotLightCount;
-	ConstantBuffer<SpotLight> spotLights;
+	public DirectionalLight directionalLight;
+	public AmbientLight ambientLight;
+	public uint32_t pointLightCount;
+	public uint32_t spotLightCount;
 }
 
-[[vk::binding(1, 2)]] ConstantBuffer<Scene> u_Scene;
-
+[vk::binding(1, 2)] public ConstantBuffer<SceneData> u_SceneData : register(b1, space2);
 

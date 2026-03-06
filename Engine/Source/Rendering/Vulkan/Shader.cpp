@@ -30,26 +30,40 @@ namespace Nova::Vulkan
         shaderTargetDesc.format = GetCompileTarget(createInfo.target, createInfo.device->GetDeviceType());
         shaderTargetDesc.floatingPointMode = SLANG_FLOATING_POINT_MODE_DEFAULT;
         shaderTargetDesc.lineDirectiveMode = SLANG_LINE_DIRECTIVE_MODE_DEFAULT;
-        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_6");
+        shaderTargetDesc.profile = slangSession->findProfile("spirv_1_5");
 
         slang::CompilerOptionEntry entries[] = {
             {slang::CompilerOptionName::MinimumSlangOptimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, 1)},
             {slang::CompilerOptionName::Optimization, slang::CompilerOptionValue(slang::CompilerOptionValueKind::Int, SLANG_OPTIMIZATION_LEVEL_MAXIMAL)},
         };
 
+        Array<String> includes;
+        includes.Add(Path::GetEngineAssetPath("Shaders/Include"));
+        includes.AddRange(createInfo.includes);
+
         const auto ToConstChar = [](const StringView includeDir) -> const char* { return includeDir; };
-        Array<const char*> includes = createInfo.includes.Transform<const char*>(ToConstChar);
-        String enginIncludes = Path::GetEngineAssetPath("Shaders/Include");
-        includes.Add(*enginIncludes);
+        Array<const char*> cstrIncludes = includes.Transform<const char*>(ToConstChar);
+
+        Array<slang::PreprocessorMacroDesc> macros;
+        for (size_t i = 0; i < createInfo.defines.Count(); ++i)
+        {
+            const auto& define = createInfo.defines.GetAt(i);
+            slang::PreprocessorMacroDesc desc;
+            desc.name = *define.key;
+            desc.value = *define.value;
+            macros.Add(desc);
+        }
 
         slang::SessionDesc sessionDesc;
         sessionDesc.targets = &shaderTargetDesc;
         sessionDesc.targetCount = 1;
         sessionDesc.defaultMatrixLayoutMode = SLANG_MATRIX_LAYOUT_COLUMN_MAJOR;
-        sessionDesc.searchPaths = includes.Data();
-        sessionDesc.searchPathCount = createInfo.includes.Count();
+        sessionDesc.searchPaths = cstrIncludes.Data();
+        sessionDesc.searchPathCount = cstrIncludes.Count();
         sessionDesc.compilerOptionEntries = entries;
         sessionDesc.compilerOptionEntryCount = std::size(entries);
+        sessionDesc.preprocessorMacros = macros.Data();
+        sessionDesc.preprocessorMacroCount = macros.Count();
 
         SlangResult result = slangSession->createSession(sessionDesc, m_Session.writeRef());
         if (SLANG_FAILED(result)) return false;
@@ -231,10 +245,13 @@ namespace Nova::Vulkan
         for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
         {
             if (setLayout->BindingCount() > 0)
-            {
                 setLayout->Build();
-            }
         }
+
+        const auto compareFunc = [](const Ref<ShaderBindingSet>& lhs, const Ref<ShaderBindingSet>& rhs) {
+            return lhs->GetSetIndex() < rhs->GetSetIndex();
+        };
+        m_BindingSetLayouts.Sort(compareFunc);
 
 
         for (SpvReflectShaderModule& reflectModule : reflectModules)
@@ -285,7 +302,8 @@ namespace Nova::Vulkan
 
     Ref<Nova::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const
     {
-        const Ref<ShaderBindingSetLayout>* setLayout = m_BindingSetLayouts.Single([&setIndex](const Ref<ShaderBindingSetLayout>& setLayout) { return setLayout->GetSetIndex() == (uint32_t)setIndex; });
+        const auto predicate = [&setIndex](const Ref<ShaderBindingSetLayout>& setLayout) { return setLayout->GetSetIndex() == (uint32_t)setIndex; };
+        const Ref<ShaderBindingSetLayout>* setLayout = m_BindingSetLayouts.Single(predicate);
         if (!setLayout) return nullptr;
 
         ShaderBindingSetCreateInfo createInfo;

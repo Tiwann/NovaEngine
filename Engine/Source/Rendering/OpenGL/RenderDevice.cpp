@@ -186,6 +186,11 @@ namespace Nova::OpenGL
         return nullptr;
     }
 
+    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    {
+        return nullptr;
+    }
+
     Ref<Nova::Sampler> RenderDevice::CreateSampler(const SamplerCreateInfo& createInfo)
     {
         Sampler* sampler = new Sampler();

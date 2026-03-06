@@ -24,7 +24,7 @@ namespace Nova
         ImGui::Combo("Light Type", (int*)&m_Type, lightTypes, std::size(lightTypes));
         ImGui::EndDisabled();
         ImGui::Separator();
-        ImGui::DragFloat("Intensity", &m_Intensity, 0.1f, 0.0f, 20.0f);
+        ImGui::DragFloat("Intensity", &m_Intensity, 0.001f, 0.0f, 20.0f);
         ImGui::ColorEdit3("Color", (float*)&m_Color);
     }
 

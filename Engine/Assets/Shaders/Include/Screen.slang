@@ -2,8 +2,8 @@
 
 public struct ScreenData
 {
-    float2 FullResolution;
-    float2 HalfResolution;
+    public float2 fullResolution;
+    public float2 halfResolution;
 };
 
-[[vk::binding(1, 2)]] ConstantBuffer<ScreenData> u_ScreenData;
+//[vk::binding(2, 2)] public ConstantBuffer<ScreenData> u_ScreenData : register(b2, space2);

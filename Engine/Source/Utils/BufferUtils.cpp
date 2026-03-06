@@ -25,6 +25,11 @@ namespace Nova
         return vertexBuffer;
     }
 
+    Ref<Buffer> CreateVertexBuffer(Ref<RenderDevice>& device, const Array<uint8_t>& data)
+    {
+        return CreateVertexBuffer(device, data.Data(), data.Size());
+    }
+
     Ref<Buffer> CreateIndexBuffer(Ref<RenderDevice>& device, const void* data, const size_t size)
     {
         BufferCreateInfo stagingBufferCreateInfo;
@@ -44,5 +49,10 @@ namespace Nova
         stagingBuffer->CopyDataTo(*indexBuffer, 0, 0, size);
         stagingBuffer->Destroy();
         return indexBuffer;
+    }
+
+    Ref<Buffer> CreateIndexBuffer(Ref<RenderDevice>& device, const Array<uint8_t>& data)
+    {
+        return CreateVertexBuffer(device, data.Data(), data.Size());
     }
 }

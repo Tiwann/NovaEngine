@@ -1,6 +1,9 @@
 ﻿#include "RenderDevice.h"
 #include "ComputePipeline.h"
 #include "Sampler.h"
+#include "Buffer.h"
+#include "Material.h"
+#include "Shader.h"
 
 #ifdef NOVA_HAS_VULKAN
 #include "Vulkan/RenderDevice.h"
@@ -117,7 +120,7 @@ namespace Nova
 
     Ref<ComputePipeline> RenderDevice::CreateComputePipeline(Ref<Shader> shader)
     {
-        const ComputePipelineCreateInfo createInfo = ComputePipelineCreateInfo().WithShader(shader);
+        const ComputePipelineCreateInfo createInfo = ComputePipelineCreateInfo().WithShader(shader.Get());
         return CreateComputePipeline(createInfo);
     }
 

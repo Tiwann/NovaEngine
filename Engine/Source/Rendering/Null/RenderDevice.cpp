@@ -49,6 +49,11 @@ namespace Nova::Null
         return nullptr;
     }
 
+    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    {
+        return nullptr;
+    }
+
     Ref<Sampler> RenderDevice::CreateSampler(const SamplerCreateInfo& createInfo)
     {
         (void)createInfo;

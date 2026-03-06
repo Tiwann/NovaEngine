@@ -59,8 +59,8 @@ namespace Nova
         static Quaternion Angle(const Quaternion& a, const Quaternion& b);
         static Quaternion Lerp(const Quaternion& a, const Quaternion& b, float t);
         static Quaternion Slerp(const Quaternion& a, const Quaternion& b, float t);
-        static Quaternion One;
-        static Quaternion Identity;
+        static const Quaternion One;
+        static const Quaternion Identity;
     };
 }
 

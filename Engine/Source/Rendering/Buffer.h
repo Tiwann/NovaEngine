@@ -32,9 +32,9 @@ namespace Nova
         virtual bool CopyDataTo(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
 
         template<typename T>
-        bool CPUCopy(BufferView<T> buffer, size_t offset)
+        bool WriteData(BufferView<T> buffer, size_t offset)
         {
-            return CPUCopy(buffer.Data(), offset, Math::Min(buffer.Size(), m_Size));
+            return WriteData(buffer.Data(), offset, Math::Min(buffer.Size(), m_Size));
         }
 
         virtual void Memset(size_t value, size_t size) = 0;

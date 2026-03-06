@@ -227,6 +227,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/SlangCommon.h
         Source/Rendering/SlangCommon.cpp
         Source/Rendering/GraphicsPipeline.cpp
+        Source/Rendering/TextureView.h
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h
@@ -397,6 +398,8 @@ set(NOVA_ENGINE_VULKAN_SOURCES
         Source/Rendering/Vulkan/VulkanUtils.cpp
         Source/Rendering/Vulkan/VulkanUtils.h
         Source/Utils/VulkanUtils.h
+        Source/Rendering/Vulkan/TextureView.h
+        Source/Rendering/Vulkan/TextureView.cpp
 )
 
 set(NOVA_ENGINE_OPENGL_SOURCES

@@ -21,6 +21,42 @@ namespace Nova
 {
     extern Application* g_Application;
 
+    static Ref<Shader> LoadShaderBasic(AssetDatabase& database,
+        Ref<RenderDevice> device,
+        const String& moduleName,
+        const String& shaderPath,
+        const Array<String>& includes =  {},
+        const Array<Pair<String, String>>& defines = {})
+    {
+        const ShaderEntryPoint entryPoints[]
+        {
+            {"vert", ShaderStageFlagBits::Vertex},
+            {"frag", ShaderStageFlagBits::Fragment}
+        };
+
+        ShaderCreateInfo shaderCreateInfo;
+        shaderCreateInfo.entryPoints.AddRange<2>(entryPoints);
+        shaderCreateInfo.moduleInfo = { moduleName, Path::GetEngineAssetPath(shaderPath) };
+        shaderCreateInfo.defines = defines;
+        shaderCreateInfo.includes = includes;
+
+        Ref<Shader> shader = device->CreateShader(shaderCreateInfo);
+        if (!shader) return nullptr;
+
+        const String shaderName = StringFormat("{}Shader", moduleName);
+        shader->SetObjectName(shaderName);
+        database.AddAsset(shader, shaderName);
+        return shader;
+    }
+
+
+    static Ref<Texture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
+    {
+        Ref<Texture> texture = LoadTexture(device, Path::GetEngineAssetPath(filepath));
+        database.AddAsset(texture, assetName);
+        return texture;
+    };
+
     void Application::Run()
     {
         ApplicationConfiguration configuration = GetConfiguration();
@@ -112,43 +148,23 @@ namespace Nova
         }
 
         // Load engine shaders
-        const auto LoadShaderBasic = [this](const String& moduleName, const String& shaderName,const String& shaderPath) -> Ref<Shader>
-        {
-            const ShaderEntryPoint entryPoints[]
-            {
-                {"vert", ShaderStageFlagBits::Vertex},
-                {"frag", ShaderStageFlagBits::Fragment}
-            };
+        AssetDatabase& database = GetAssetDatabase();
+        Ref<RenderDevice> device = GetRenderDevice();
+        LoadShaderBasic(database, device, "Sprite", "Shaders/Sprite.slang");
+        //LoadShaderBasic(database, device, "BlinnPhongOpaque", "Shaders/BlinnPhong.slang");
+        //LoadShaderBasic(database, device, "BlinnPhongTransparent", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
+        //LoadShaderBasic(database, device, "BlinnPhongCutout", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
+        LoadShaderBasic(database, device, "PBRShading", "Shaders/PBRShading.slang");
+        LoadShaderBasic(database, device, "PBRShadingTransparent", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
+        LoadShaderBasic(database, device, "PBRShadingCutout", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
+        LoadShaderBasic(database, device, "Fullscreen", "Shaders/Fullscreen.slang");
+        Ref<Shader> debugShader = LoadShaderBasic(database, device, "Debug", "Shaders/Debug.slang");
 
-            ShaderCreateInfo shaderCreateInfo;
-            shaderCreateInfo.entryPoints.AddRange<2>(entryPoints);
-            shaderCreateInfo.moduleInfo = { moduleName, shaderPath };
-
-            Ref<Shader> shader = m_Device->CreateShader(shaderCreateInfo);
-            if (!shader) return nullptr;
-
-            shader->SetObjectName(shaderName);
-            m_AssetDatabase.AddAsset(shader, shaderName);
-            return shader;
-        };
-
-        const auto LoadTextureBasic = [this](StringView filepath, const String& assetName)
-        {
-            Ref<Texture> texture = LoadTexture(GetRenderDevice(), filepath);
-            m_AssetDatabase.AddAsset(texture, assetName);
-            return texture;
-        };
-
-        LoadShaderBasic("Sprite", "SpriteShader", Path::GetEngineAssetPath("Shaders/Sprite.slang"));
-        LoadShaderBasic("BlinnPhong", "BlinnPhongShader", Path::GetEngineAssetPath("Shaders/BlinnPhong.slang"));
-        LoadShaderBasic("Fullscreen", "FullscreenShader", Path::GetEngineAssetPath("Shaders/Fullscreen.slang"));
-        Ref<Shader> debugShader = LoadShaderBasic("Debug", "DebugShader",Path::GetEngineAssetPath("Shaders/Debug.slang"));
-
-        LoadTextureBasic(Path::GetEngineAssetPath("Textures/BlackTexPlaceholder.png"), "BlackTexPlaceholder");
-        LoadTextureBasic(Path::GetEngineAssetPath("Textures/WhiteTexPlaceholder.png"), "WhiteTexPlaceholder");
-        LoadTextureBasic(Path::GetEngineAssetPath("Textures/GreyTexPlaceholder.png"), "GreyTexPlaceholder");
-        LoadTextureBasic(Path::GetEngineAssetPath("Textures/CheckerTexPlaceholder.png"), "CheckerTexPlaceholder");
-        LoadTextureBasic(Path::GetEngineAssetPath("Textures/NormalTexPlaceholder.png"), "NormalTexPlaceholder");
+        LoadTextureBasic(database, device, "Textures/BlackTexPlaceholder.png", "BlackTexPlaceholder");
+        LoadTextureBasic(database, device, "Textures/WhiteTexPlaceholder.png", "WhiteTexPlaceholder");
+        LoadTextureBasic(database, device, "Textures/GreyTexPlaceholder.png", "GreyTexPlaceholder");
+        LoadTextureBasic(database, device, "Textures/CheckerTexPlaceholder.png", "CheckerTexPlaceholder");
+        LoadTextureBasic(database, device, "Textures/NormalTexPlaceholder.png", "NormalTexPlaceholder");
 
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;

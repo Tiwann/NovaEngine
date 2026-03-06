@@ -31,7 +31,6 @@ namespace Nova::Vulkan
         Array<VkDescriptorSetLayout> GetDescriptorSetLayouts() const;
     private:
         RenderDevice* m_Device = nullptr;
-        Slang::ComPtr<slang::IGlobalSession> m_Slang = nullptr;
         Slang::ComPtr<slang::ISession> m_Session = nullptr;
         Slang::ComPtr<slang::IModule> m_Module = nullptr;
         Array<Slang::ComPtr<slang::IEntryPoint>> m_EntryPoints;

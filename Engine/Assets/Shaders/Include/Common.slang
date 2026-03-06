@@ -1,8 +1,8 @@
 ﻿module Common;
 import Camera;
 import Scene;
+import Object;
 
-#ifdef NOVA_USE_GLSL_TYPEALISES
 public typealias vec2 = float2;
 public typealias vec3 = float3;
 public typealias vec4 = float4;
@@ -48,7 +48,11 @@ public typealias dmat3x4 = double3x4;
 
 public typealias dmat4x2 = double4x2;
 public typealias dmat4x3 = double4x3;
-#endif
+
+public vector<T, N> operator*<T, int N>(matrix<T, N, N> lhs, vector<T, N> rhs) where T : __BuiltinFloatingPointType
+{
+	return mul(lhs, rhs);
+}
 
 public float remap(float val, float inmin, float inmax, float outmin, float outmax)
 {
@@ -79,24 +83,7 @@ public float4 remap(float4 val, float inmin, float inmax, float outmin, float ou
     return float4(x, y, z, w);
 }
 
-public float2x2 constructSpace(float2 i, float2 j)
-{
-    return {
-        i.x, j.x,
-        i.y, j.y,
-    };
-}
-
-public float3x3 constructSpace(float3 i, float3 j, float3 k)
-{
-    return {
-        i.x, j.x, k.x,
-        i.y, j.y, k.y,
-        i.z, j.z, k.z,
-    };
-}
-
-public struct Contants<T> where T : __BuiltinFloatingPointType
+public struct Constants<T> where T : __BuiltinFloatingPointType
 {
 	public static const T PI = (T)3.14159265359;
 	public static const T TAU = T(2.0) * PI;
@@ -104,7 +91,7 @@ public struct Contants<T> where T : __BuiltinFloatingPointType
 }
 
 // From Hazel Engine
-float convertSRGBFromLinear(float linear)
+public float linearToSRGB(float linear)
 {
 	return linear <= 0.0031308f
 		? linear * 12.92f
@@ -112,7 +99,7 @@ float convertSRGBFromLinear(float linear)
 }
 
 // From Hazel Engine, adapted
-vector<T, N> convertSRGBToLinear<T, int N>(vector<T, N> srgb) where T : __BuiltinFloatingPointType
+public vector<T, N> srgbToLinear<T, int N>(vector<T, N> srgb) where T : __BuiltinFloatingPointType
 {
     vector<T, N> cutoff = vector<T, N>(0.04045);
     vector<T, N> a = vector<T, N>(0.055);
@@ -126,4 +113,29 @@ vector<T, N> convertSRGBToLinear<T, int N>(vector<T, N> srgb) where T : __Builti
     vector<bool, N> mask = srgb < cutoff;
 
     return select(mask, lower, higher);
+}
+
+public float4 localToWorldPosition(float4 position)
+{
+	return u_ObjectData.worldSpaceMatrix * position;
+}
+
+public float4 localToViewPosition(float4 position)
+{
+	return u_CameraData.viewMatrix * localToWorldPosition(position);
+}
+
+public float4 localToClipPosition(float4 position)
+{
+	return u_CameraData.viewProjectionMatrix * localToViewPosition(position);
+}
+
+public float3 localToWorldNormal(float3 normal)
+{
+    return float3x3(u_ObjectData.normalMatrix) * normal;
+}
+
+public float3 localToWorldDirection(float3 direction)
+{
+    return float3x3(u_ObjectData.worldSpaceMatrix) * direction;
 }

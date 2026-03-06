@@ -16,6 +16,7 @@ namespace Nova::Null
         RenderDeviceType GetDeviceType() override;
         Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Texture> CreateTextureUnitialized() override;
+        Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
         Ref<Shader> CreateShader(const ShaderCreateInfo& createInfo) override;

@@ -9,12 +9,16 @@
 #include "Utils/BufferUtils.h"
 #include "Utils/TextureUtils.h"
 #include "Rendering/Shader.h"
-
+#include "Rendering/Material.h"
+#include "Math/Matrix4.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/GltfMaterial.h>
 
-#include "Math/Matrix4.h"
+#include "FileUtils.h"
+#include "Path.h"
+#include "Containers/StringFormat.h"
 
 
 namespace Nova
@@ -25,15 +29,8 @@ namespace Nova
 
     StaticMesh::~StaticMesh()
     {
-        if (m_VertexBuffer)
-        {
-            m_VertexBuffer->Destroy();
-        }
-
-        if (m_IndexBuffer)
-        {
-            m_IndexBuffer->Destroy();
-        }
+        if (m_VertexBuffer) m_VertexBuffer->Destroy();
+        if (m_IndexBuffer) m_IndexBuffer->Destroy();
     }
 
     AssetType StaticMesh::GetAssetType() const
@@ -141,30 +138,67 @@ namespace Nova
 
         if (loadResources && !m_MaterialInfos.IsEmpty())
         {
-            const AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
-            const Ref<Shader> blinnPhongShader = assetDatabase.Get<Shader>("BlinnPhongShader");
+            AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
+            const Ref<Shader> pbrShader = assetDatabase.Get<Shader>("PBRShadingShader");
 
             for (uint32_t i = 0; i < m_MaterialInfos.Count(); ++i)
             {
                 const aiMaterial* loadedMaterial = loadedScene->mMaterials[i];
+                aiString alphaMode;
+                Ref<Material> material = nullptr;
+                if (loadedMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) != AI_SUCCESS)
+                    continue;
 
-                Ref<Material> material = device->CreateMaterial({device, blinnPhongShader});
-                if (!material) continue;
-                m_MaterialInfos[i].material = material;
+                if (alphaMode == aiString("OPAQUE"))
+                {
+                    material = device->CreateMaterial({device, pbrShader});
+                    if (!material) continue;
+                    m_MaterialInfos[i].material = material;
+                    m_MaterialInfos[i].materialType = MaterialType::Opaque;
+                }
+                else if (alphaMode == aiString("MASK"))
+                {
+                    material = device->CreateMaterial({device, pbrShader});
+                    if (!material) continue;
+                    m_MaterialInfos[i].material = material;
+                    m_MaterialInfos[i].materialType = MaterialType::Cutout;
+                }
+                else if (alphaMode == aiString("BLEND"))
+                {
+                    material = device->CreateMaterial({device, pbrShader});
+                    if (!material) continue;
+                    m_MaterialInfos[i].material = material;
+                    m_MaterialInfos[i].materialType = MaterialType::Transparent;
+                }
 
                 const auto FindAndAssignTexture = [&](aiTextureType textureType, StringView variableName, const String& placeholderTextureName)
                 {
                     if (loadedMaterial->GetTextureCount(textureType) > 0)
                     {
+                        aiString materialName = loadedMaterial->GetName();
                         aiString path;
                         if (loadedMaterial->GetTexture(textureType, 0, &path) == AI_SUCCESS)
                         {
                             const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
-                            
+                            if (loadedTexture)
+                            {
+                                Ref<Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
+                                assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), loadedTexture->mFilename.C_Str()));
+                                if (!texture) return;
+                                m_MaterialInfos[i].textures.Add(texture);
+                                material->SetTexture(variableName, texture);
+                            } else
+                            {
+                                Array fileContent = FileUtils::ReadToBuffer({path.data, path.length});
+                                if (fileContent.IsEmpty())
+                                    return;
+                                Ref<Texture> texture = LoadTexture(device, fileContent.Data(), fileContent.Size());
+                                assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), path.C_Str()));
+                                if (!texture) return;
+                                m_MaterialInfos[i].textures.Add(texture);
+                                material->SetTexture(variableName, texture);
+                            }
 
-                            Ref<Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
-                            m_MaterialInfos[i].textures.Add(texture);
-                            material->SetTexture(variableName, texture);
                         }
                     } else
                     {
@@ -172,9 +206,8 @@ namespace Nova
                     }
                 };
 
-                FindAndAssignTexture(aiTextureType_DIFFUSE, "diffuseTex", "CheckerTexPlaceholder");
-                FindAndAssignTexture(aiTextureType_SPECULAR, "specularTex", "GreyTexPlaceholder");
-                FindAndAssignTexture(aiTextureType_SHININESS, "glossinessTex", "BlackTexPlaceholder");
+                FindAndAssignTexture(aiTextureType_BASE_COLOR, "albedoTex", "CheckerTexPlaceholder");
+                FindAndAssignTexture(aiTextureType_GLTF_METALLIC_ROUGHNESS, "metallnessRoughnessTex", "BlackTexPlaceholder");
                 FindAndAssignTexture(aiTextureType_NORMALS, "normalTex", "NormalTexPlaceholder");
             }
         }
@@ -189,23 +222,16 @@ namespace Nova
 
     void StaticMesh::SetMaterial(const uint32_t slot, Ref<Material> material)
     {
-        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
-        {
-            return info.slot == slot;
-        });
-
+        const auto predicate = [&slot](const MaterialInfo& info) { return info.slot == slot; };
+        MaterialInfo* info = m_MaterialInfos.Single(predicate);
         if (info)
-        {
             info->material = material;
-        }
     }
 
     Ref<Material> StaticMesh::GetMaterial(const uint32_t slot)
     {
-        MaterialInfo* info = m_MaterialInfos.Single([&slot](const MaterialInfo& info)
-        {
-            return info.slot == slot;
-        });
+        const auto predicate = [&slot](const MaterialInfo& info) { return info.slot == slot; };
+        MaterialInfo* info = m_MaterialInfos.Single(predicate);
         return info ? info->material : nullptr;
     }
 

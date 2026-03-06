@@ -7,8 +7,8 @@
 
 namespace Nova
 {
-    Quaternion Quaternion::One = { 1.0f, 1.0f, 1.0f, 1.0f };
-    Quaternion Quaternion::Identity = { 1.0f, 0.0f, 0.0f, 0.0f };
+    const Quaternion Quaternion::One = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const Quaternion Quaternion::Identity = { 1.0f, 0.0f, 0.0f, 0.0f };
 
     Quaternion::Quaternion() : w(1.0f), x(0.0f), y(0.0f), z(0.0f)
     {
@@ -103,9 +103,9 @@ namespace Nova
     Vector3 Quaternion::operator*(const Vector3& other) const
     {
         const Vector3 QuatVector(x, y, z);
-        const Vector3 UV(QuatVector.Cross(other));
-        const Vector3 UUV(QuatVector.Cross(UV));
-        return other + (UV * w + UUV) * 2.0f;
+        const Vector3 uv(QuatVector.Cross(other));
+        const Vector3 uuv(QuatVector.Cross(uv));
+        return other + (uv * w + uuv) * 2.0f;
     }
 
     Vector4 Quaternion::operator*(const Vector4& other) const
@@ -172,17 +172,17 @@ namespace Nova
     {
         const float sinr_cosp = 2.0f * (w * x + y * z);
         const float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
-        const float EulerX = Math::Atan2(sinr_cosp, cosr_cosp);
+        const float eulerX = Math::Atan2(sinr_cosp, cosr_cosp);
 
         const float sinp = Math::Sqrt(1.0f + 2.0f * (w * y - x * z));
         const float cosp = Math::Sqrt(1.0f - 2.0f * (w * y - x * z));
-        const float EulerY = 2.0f * Math::Atan2(sinp, cosp) - Math::Pi * 0.5f;
+        const float eulerY = 2.0f * Math::Atan2(sinp, cosp) - Math::Pi * 0.5f;
 
         const float siny_cosp = 2.0f * (w * z + x * y);
         const float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
-        const float EulerZ = Math::Atan2(siny_cosp, cosy_cosp);
+        const float eulerZ = Math::Atan2(siny_cosp, cosy_cosp);
 
-        return { EulerX, EulerY, EulerZ };
+        return { eulerX, eulerY, eulerZ };
     }
 
     Vector3 Quaternion::ToEulerDegrees() const
@@ -310,9 +310,9 @@ namespace Nova
 
     Quaternion Quaternion::Inverted() const
     {
-        const float Dot = this->Dot(*this);
-        const Quaternion Conjugate = this->Conjugated();
-        return Conjugate / Dot;
+        const float dot = this->Dot(*this);
+        const Quaternion conjugate = this->Conjugated();
+        return conjugate / dot;
     }
 
     Quaternion Quaternion::Cross(const Quaternion& other) const
@@ -328,6 +328,4 @@ namespace Nova
     {
         return Math::Sqrt(x * other.x + y * other.y + z * other.z + w * other.w);
     }
-    
-
 }

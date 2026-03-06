@@ -11,6 +11,8 @@ public:
     void OnDestroy() override;
     void OnRender(Nova::CommandBuffer& cmdBuffer) override;
     Nova::RenderDeviceType GetRenderDeviceType() const override;
+
+    void SetupPipeline();
 private:
     Nova::Ref<Nova::Shader> m_Shader = nullptr;
     Nova::Ref<Nova::GraphicsPipeline> m_GraphicsPipeline = nullptr;

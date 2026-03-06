@@ -13,7 +13,7 @@ struct VertexOutput
     float4 color;
 };
 
-[vk::push_constant] ConstantBuffer<float4x4, Std430DataLayout> viewProj;
+[vk::push_constant] uniform float4x4 viewProj;
 
 [shader("vertex")]
 VertexOutput vert(VertexInput input)

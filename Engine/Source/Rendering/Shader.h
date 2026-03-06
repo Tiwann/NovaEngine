@@ -3,6 +3,7 @@
 #include "ShaderModuleInfo.h"
 #include "ShaderEntryPoint.h"
 #include "ShaderCompileTarget.h"
+#include "Containers/Map.h"
 #include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
 
@@ -23,14 +24,15 @@ namespace Nova
         ShaderModuleInfo moduleInfo;
         ShaderCompileTarget target = ShaderCompileTarget::AUTO;
 
-        Array<StringView> includes;
+        Array<String> includes;
+        Array<Pair<String, String>> defines;
         Array<ShaderEntryPoint> entryPoints;
 
         ShaderCreateInfo& WithDevice(RenderDevice* inDevice) { this->device = inDevice; return *this; }
         ShaderCreateInfo& WithModuleInfo(const ShaderModuleInfo& inModuleInfo) { this->moduleInfo = inModuleInfo; return *this; }
         ShaderCreateInfo& WithTarget(const ShaderCompileTarget& target) { this->target = target; return *this; }
-        ShaderCreateInfo& WithIncludes(const Array<StringView>& includes) { this->includes = includes; return *this; }
-        ShaderCreateInfo& WithIncludesAdded(const Array<StringView>& includes) { this->includes.AddRange(includes); return *this; }
+        ShaderCreateInfo& WithIncludes(const Array<String>& includes) { this->includes = includes; return *this; }
+        ShaderCreateInfo& WithIncludesAdded(const Array<String>& includes) { this->includes.AddRange(includes); return *this; }
         ShaderCreateInfo& WithEntryPoints(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints = entryPoints; return *this; }
         ShaderCreateInfo& WithEntryPointsAdded(const Array<ShaderEntryPoint>& entryPoints) { this->entryPoints.AddRange(entryPoints); return *this; }
         ShaderCreateInfo& AddEntryPoint(const ShaderEntryPoint& entryPoint) { this->entryPoints.Add(entryPoint); return *this; }

@@ -6,7 +6,6 @@
 #include "Runtime/Log.h"
 #include "Runtime/LogCategory.h"
 #include "Runtime/Path.h"
-#include "Runtime/Time.h"
 
 
 using namespace Nova;
@@ -31,35 +30,7 @@ Nova::ApplicationConfiguration HelloTriangleApp::GetConfiguration() const
 
 void HelloTriangleApp::OnInit()
 {
-    Ref<RenderDevice> renderDevice = GetRenderDevice();
-
-    ShaderCreateInfo shaderCreateInfo;
-    shaderCreateInfo.moduleInfo.name = "HelloTriangle";
-    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultVertex());
-    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultFragment());
-    shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
-    m_Shader = renderDevice->CreateShader(shaderCreateInfo);
-    if (!m_Shader)
-    {
-        NOVA_LOG(HelloTriangle, Verbosity::Error, "Failed to create shader.");
-        Exit();
-    }
-
-    GraphicsPipelineCreateInfo pipelineCreateInfo;
-    pipelineCreateInfo.shader = m_Shader;
-    pipelineCreateInfo.colorAttachmentFormats = { Format::R8G8B8A8_SRGB };
-    pipelineCreateInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
-    pipelineCreateInfo.depthStencilState.depthTestEnable = false;
-    pipelineCreateInfo.depthStencilState.stencilTestEnable = false;
-    pipelineCreateInfo.depthStencilState.depthWriteEnable = false;
-    pipelineCreateInfo.SetMultisampleInfo({8});
-    m_GraphicsPipeline = renderDevice->CreateGraphicsPipeline(pipelineCreateInfo);
-    if (!m_GraphicsPipeline)
-    {
-        NOVA_LOG(HelloTriangle, Verbosity::Error, "Failed to create graphics pipeline.");
-        Exit();
-    }
-
+    SetupPipeline();
     GetEditorWindow<InspectorWindow>()->Hide();
     GetEditorWindow<EditorWindow>()->Hide();
 }
@@ -81,5 +52,44 @@ void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)
 
 Nova::RenderDeviceType HelloTriangleApp::GetRenderDeviceType() const
 {
-    return RenderDeviceType::OpenGL;
+    return RenderDeviceType::Vulkan;
+}
+
+void HelloTriangleApp::SetupPipeline()
+{
+    Ref<RenderDevice> renderDevice = GetRenderDevice();
+
+    ShaderCreateInfo shaderCreateInfo;
+    shaderCreateInfo.moduleInfo.name = "HelloTriangle";
+    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultVertex());
+    shaderCreateInfo.entryPoints.Add(ShaderEntryPoint::DefaultFragment());
+    shaderCreateInfo.moduleInfo.filepath = Path::GetAssetPath("Shaders/HelloTriangle.slang");
+    m_Shader = renderDevice->CreateShader(shaderCreateInfo);
+    if (!m_Shader)
+    {
+        NOVA_LOG(HelloTriangle, Verbosity::Error, "Failed to create shader.");
+        Exit();
+    }
+
+
+    VertexLayout vertexLayout;
+    vertexLayout.AddInputBinding(0, VertexInputRate::Vertex);
+    vertexLayout.AddInputAttribute("POSITION", ShaderDataType::Float3, 0);
+    vertexLayout.AddInputAttribute("COLOR", ShaderDataType::Float4, 0);
+
+    GraphicsPipelineCreateInfo pipelineCreateInfo;
+    pipelineCreateInfo.shader = m_Shader;
+    pipelineCreateInfo.colorAttachmentFormats = { Format::R8G8B8A8_SRGB };
+    pipelineCreateInfo.depthAttachmentFormat = Format::D32_FLOAT_S8_UINT;
+    pipelineCreateInfo.depthStencilState.depthTestEnable = false;
+    pipelineCreateInfo.depthStencilState.stencilTestEnable = false;
+    pipelineCreateInfo.depthStencilState.depthWriteEnable = false;
+    pipelineCreateInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
+    pipelineCreateInfo.SetMultisampleInfo({8});
+    m_GraphicsPipeline = renderDevice->CreateGraphicsPipeline(pipelineCreateInfo);
+    if (!m_GraphicsPipeline)
+    {
+        NOVA_LOG(HelloTriangle, Verbosity::Error, "Failed to create graphics pipeline.");
+        Exit();
+    }
 }

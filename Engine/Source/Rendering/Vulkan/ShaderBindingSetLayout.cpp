@@ -38,7 +38,7 @@ namespace Nova::Vulkan
         bindingFlagCreateInfo.pBindingFlags = bindingFlags.Data();
 
         VkDescriptorSetLayoutCreateInfo layoutCreateInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
-        layoutCreateInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+        layoutCreateInfo.flags = 0;
         layoutCreateInfo.pNext = &bindingFlagCreateInfo;
         layoutCreateInfo.bindingCount = bindings.Count();
         layoutCreateInfo.pBindings = bindings.Data();

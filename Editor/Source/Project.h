@@ -1,8 +1,12 @@
 ﻿#pragma once
+#include "Containers/String.h"
 
-namespace nova
+namespace Nova
 {
     class Project
     {
+    private:
+        String m_ProjectName;
+        String m_ProjectPath;
     };
 }

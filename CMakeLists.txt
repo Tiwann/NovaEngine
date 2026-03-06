@@ -25,4 +25,5 @@ endif ()
 
 if(NOVA_ENGINE_BUILD_EXAMPLES)
     add_subdirectory(Examples/HelloTriangle)
+    add_subdirectory(Examples/HelloModel)
 endif ()

@@ -13,7 +13,7 @@
 #include "Rendering/ShaderBindingSet.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/CommandBuffer.h"
-
+#include "Rendering/Texture.h"
 #include <imgui.h>
 
 namespace Nova

@@ -18,6 +18,13 @@ namespace Nova
         size_t indexBufferSize = 0;
     };
 
+    enum class MaterialType
+    {
+        Opaque,
+        Transparent,
+        Cutout
+    };
+
     struct MaterialInfo
     {
         String slotName;
@@ -25,6 +32,7 @@ namespace Nova
         Array<Ref<Texture>> textures;
         Ref<Material> material = nullptr;
         Array<SubMeshInfo> subMeshes;
+        MaterialType materialType;
     };
 
     class StaticMesh final : public Asset

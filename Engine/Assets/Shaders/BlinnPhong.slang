@@ -1,5 +1,9 @@
 ﻿module BlinnPhong;
 import Common;
+import Object;
+import Camera;
+import Scene;
+import LightTypes;
 
 public struct VertexInput
 {
@@ -21,61 +25,85 @@ public struct VertexOutput
     public float3 worldPos;
 };
 
-public typedef VertexOutput FragmentInput;
+struct MaterialParameters
+{
+	float3 albedoColor;
+	float specular;
+	float glossiness;
+#ifdef NOVA_MATERIAL_TRANSPARENT
+	float opacity;
+#else
+#ifdef NOVA_MATERIAL_CUTOUT
+	float opacity;
+	float alphaCutoff;
+#endif
+#endif
+}
 
-[[vk::binding(0, 0)]] ConstantBuffer<Nova::Scene, Std140DataLayout> scene;
-[[vk::binding(1, 0)]] SamplerState sampler;
-
-[[vk::binding(0, 1)]] Texture2D diffuseTex;
-//[[vk::binding(1, 1)]] Texture2D specularTex;
-//[[vk::binding(2, 1)]] Texture2D glossinessTex;
-//[[vk::binding(3, 1)]] Texture2D normalTex;
+[[vk::binding(0, 0)]] ConstantBuffer<MaterialParameters> material;
+[[vk::binding(1, 0)]] Sampler2D diffuseTex;
+[[vk::binding(2, 0)]] Sampler2D specularTex;
+[[vk::binding(3, 0)]] Sampler2D glossinessTex;
+[[vk::binding(4, 0)]] Sampler2D normalTex;
 
 [shader("vertex")]
 VertexOutput vert(VertexInput input) 
 {
 	VertexOutput out;
-	out.position = scene.LocalToClipPosition(float4(input.position, 1.0));
+	out.position = localToClipPosition(float4(input.position, 1.0));
 	out.texCoord = input.texCoord;
-    out.normal = scene.LocalToWorldNormal(input.normal);
-    out.tangent = scene.LocalToWorldDirection(input.tangent);
+    out.normal = localToWorldNormal(input.normal);
+    out.tangent = localToWorldDirection(input.tangent);
     out.bitangent = cross(out.normal, out.tangent);
     out.color = input.color;
-    out.worldPos = scene.LocalToWorldPosition(float4(input.position, 1.0)).xyz;
+    out.worldPos = localToWorldPosition(float4(input.position, 1.0)).xyz;
 	return out;
 }
 
 [shader("fragment")]
-float4 frag(FragmentInput input) : SV_Target
+float4 frag(VertexOutput input) : SV_Target
 {
-    //float3x3 tangentToWorld = constructSpace(input.tangent, input.bitangent, input.normal);
-//
-    //float4 normalMap = normalTex.Sample(sampler, input.texCoord);
-    //if (normalMap.a == 0)
-    //    normalMap = float4(0.5, 0.5, 1, 0);
-//
-    //float3 unpackedNormalMap = normalMap.rgb * 2.0 - 1.0;
-
-    //float3 N = tangentToWorld * unpackedNormalMap;
     float3 N = normalize(input.normal);
-	float3 L = normalize(scene.dirLightDir);
-	float3 V = normalize(scene.cameraWorldPos - input.worldPos);
-    float3 H = normalize(L + V);
-    float3 R = reflect(-L, N);
+    float3 T = normalize(input.tangent);
+    float3 B = normalize(input.bitangent);
 
-    float3 dirLight = scene.dirLightColor * scene.dirLightIntensity;
-    float3 ambientLight = scene.ambLightColor * scene.ambLightIntensity;
+    float3x3 TBN = float3x3(T, B, N);
 
-    float diffuse = max(dot(N, L), 0.0);
-    float4 diffuseMap = diffuseTex.Sample(sampler, input.texCoord);
-    float3 diffuseLight = (diffuse + ambientLight) * diffuseMap.rgb * dirLight;
+    float4 albedoMap = diffuseTex.Sample(input.texCoord);
+    float specMap = specularTex.Sample(input.texCoord).r;
+    float glossMap = glossinessTex.Sample(input.texCoord).r;
+    float3 normalMap = normalTex.Sample(input.texCoord).rgb;
 
-    // float specularMap = specularTex.Sample(sampler, input.texCoord).r;
-    // float glossinessMap = glossinessTex.Sample(sampler, input.texCoord).r;
-    float glossinessMap = 0.5;
-    float3 specular = pow(max(dot(N, H), 0.0), exp2(glossinessMap * 11.0 + 2.0));
-    float3 specularLight = specular * dirLight;
+#ifdef NOVA_MATERIAL_CUTOUT
+	float finalOpacity = albedoMap.a * material.opacity;
+	if(finalOpacity < material.alphaCutoff)
+		discard;
+#endif
 
-    float3 finalColor = diffuseLight + specularLight;
+    float3 tangentNormal = normalize(normalMap * 2.0 - 1.0);
+    float3 worldNormal = normalize(TBN * tangentNormal);
+
+    DirectionalLight dirLight = u_SceneData.directionalLight;
+    AmbientLight ambLight = u_SceneData.ambientLight;
+
+    float3 lightDir = normalize(-dirLight.direction);
+    float3 viewDir = normalize(u_CameraData.cameraPos - input.worldPos);
+    float3 halfDir = normalize(lightDir + viewDir);
+
+    float NdotL = max(dot(worldNormal, lightDir), 0.0);
+    float3 diffuse = albedoMap.rgb * material.albedoColor.rgb * dirLight.color * NdotL;
+
+    float shininess = max(glossMap * material.glossiness * 256.0, 1.0);
+    float NdotH = max(dot(worldNormal, halfDir), 0.0);
+    float specularFactor = pow(NdotH, shininess);
+
+    float3 specular = dirLight.color * specularFactor * specMap * material.specular;
+    float3 ambient = albedoMap.rgb * ambLight.color;
+    float3 finalColor = ambient + diffuse + specular;
+
+#ifdef NOVA_MATERIAL_TRANSPARENT
+    return float4(finalColor, material.opacity);
+#else
 	return float4(finalColor, 1.0);
+#endif
 }

@@ -485,8 +485,47 @@ namespace Nova
         }
 
 
+        void Sort(const Function<bool(ConstReferenceType, ConstReferenceType)>& compareFunc)
+        {
+            if (m_Count <= 1)
+                return;
 
+            QuickSort(0, m_Count - 1, compareFunc);
+        }
     private:
+        void QuickSort(SizeType low, SizeType high,
+               const Function<bool(ConstReferenceType, ConstReferenceType)>& compareFunc)
+        {
+            if (low >= high)
+                return;
+
+            SizeType pivotIndex = Partition(low, high, compareFunc);
+
+            if (pivotIndex > 0)
+                QuickSort(low, pivotIndex - 1, compareFunc);
+
+            QuickSort(pivotIndex + 1, high, compareFunc);
+        }
+
+        SizeType Partition(SizeType low, SizeType high,
+                           const Function<bool(ConstReferenceType, ConstReferenceType)>& compareFunc)
+        {
+            auto& pivot = m_Data[high];
+            SizeType i = low;
+
+            for (SizeType j = low; j < high; ++j)
+            {
+                if (compareFunc(m_Data[j], pivot))
+                {
+                    std::swap(m_Data[i], m_Data[j]);
+                    ++i;
+                }
+            }
+
+            std::swap(m_Data[i], m_Data[high]);
+            return i;
+        }
+
         PointerType m_Data = nullptr;
         SizeType m_Count = 0;
         SizeType m_Allocated = 0;

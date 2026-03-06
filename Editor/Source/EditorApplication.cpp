@@ -2,9 +2,6 @@
 #include "Runtime/EntryPoint.h"
 #include <imgui.h>
 
-#include "Rendering/CommandBuffer.h"
-
-NOVA_DEFINE_APPLICATION_CLASS(Nova::EditorApplication);
 
 namespace Nova
 {
@@ -69,6 +66,6 @@ namespace Nova
 
     void EditorApplication::OnRender(CommandBuffer& cmdBuffer)
     {
-        cmdBuffer.ClearColor(Color::Red, 0);
+
     }
 }

@@ -33,6 +33,9 @@ namespace Nova
         Ref<Sampler> m_Sampler = nullptr;
         Ref<GraphicsPipeline> m_Pipeline = nullptr;
         Ref<Buffer> m_SceneUniformBuffer = nullptr;
-        Ref<ShaderBindingSet> m_BindingSet = nullptr;
+        Ref<Buffer> m_ObjectUniformBuffer = nullptr;
+        Ref<Buffer> m_CameraUniformBuffer = nullptr;
+        Ref<ShaderBindingSet> m_BindingSet1 = nullptr;
+        Ref<ShaderBindingSet> m_BindingSet2 = nullptr;
     };
 }

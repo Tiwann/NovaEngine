@@ -39,7 +39,6 @@ namespace Nova::Vulkan
         RenderDeviceType GetDeviceType() override;
         uint32_t GetImageCount() const override;
 
-        Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
@@ -51,6 +50,8 @@ namespace Nova::Vulkan
         Ref<Nova::Material> CreateMaterial(const MaterialCreateInfo& createInfo) override;
         Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) override;
 
+        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+
         VkInstance GetInstance() const;
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
@@ -59,10 +60,10 @@ namespace Nova::Vulkan
         Nova::Swapchain* GetSwapchain() override;
         CommandPool* GetCommandPool();
         CommandPool* GetTransferCommandPool();
-        Queue* GetGraphicsQueue();
+        Queue* GetGraphicsQueue() override;
         Queue* GetPresentQueue();
-        Queue* GetComputeQueue();
-        Queue* GetTransferQueue();
+        Queue* GetComputeQueue() override;
+        Queue* GetTransferQueue() override;
         DescriptorPool* GetDescriptorPool();
 
         Semaphore& GetCurrentSubmitSemaphore();
@@ -71,9 +72,7 @@ namespace Nova::Vulkan
         Nova::CommandBuffer* GetCurrentCommandBuffer() override;
 
 
-        uint32_t GetCurrentFrameIndex() const;
-
-
+        uint32_t GetCurrentFrameIndex() const override;
     private:
         VkInstance m_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;

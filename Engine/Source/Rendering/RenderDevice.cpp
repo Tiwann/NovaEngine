@@ -3,6 +3,7 @@
 #include "Sampler.h"
 #include "Buffer.h"
 #include "Material.h"
+#include "RenderTarget.h"
 #include "Shader.h"
 
 #ifdef NOVA_HAS_VULKAN
@@ -76,7 +77,7 @@ namespace Nova
         return Ref(device);
     }
 
-    RenderDevice::RenderDevice() : Object("Rendering Device")
+    RenderDevice::RenderDevice() : Object("Render Device")
     {
     }
 
@@ -84,6 +85,17 @@ namespace Nova
     {
         for (auto& [_, sampler] : m_Samplers)
             sampler->Destroy();
+    }
+
+    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
+    {
+        RenderTarget* renderTarget = new RenderTarget();
+        if (!renderTarget->Initialize(createInfo))
+        {
+            delete renderTarget;
+            return nullptr;
+        }
+        return Ref(renderTarget);
     }
 
     Ref<Fence> RenderDevice::CreateFence()
@@ -99,16 +111,16 @@ namespace Nova
         return CreateBuffer(bufferCreateInfo);
     }
 
-    Ref<Texture> RenderDevice::CreateTexture(TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
+    Ref<Texture> RenderDevice::CreateTexture(const TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
     {
-        const TextureCreateInfo createInfo = TextureCreateInfo()
-        .WithUsageFlags(usage)
-        .WithWidth(width)
-        .WithHeight(height)
-        .WithDepth(1)
-        .WithFormat(format)
-        .WithMips(1)
-        .WithSampleCount(1);
+        TextureCreateInfo createInfo;
+        createInfo.width = width;
+        createInfo.height = height;
+        createInfo.depth = 1;
+        createInfo.format = format;
+        createInfo.usageFlags = usage;
+        createInfo.sampleCount = 1;
+        createInfo.mips = 1;
         return CreateTexture(createInfo);
     }
 

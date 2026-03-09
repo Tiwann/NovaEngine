@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
 #include "TextureUsage.h"
+#include "TextureDimension.h"
 #include "ResourceState.h"
 #include "Runtime/Asset.h"
 #include <cstdint>
@@ -19,58 +20,45 @@ namespace Nova
         uint32_t height = 0;
         uint32_t depth = 1;
         uint32_t mips = 1;
-        uint32_t sampleCount = 0;
-        const uint8_t* data = nullptr;
-        size_t dataSize = 0;
+        uint32_t sampleCount = 1;
 
-        TextureCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
-        TextureCreateInfo& WithUsageFlags(TextureUsageFlags inFlags) { usageFlags = inFlags; return *this; }
-        TextureCreateInfo& WithFormat(const Format inFormat) { format = inFormat; return *this; }
-        TextureCreateInfo& WithWidth(const uint32_t inWidth) { width = inWidth; return *this; }
-        TextureCreateInfo& WithHeight(const uint32_t inHeight) { height = inHeight; return *this; }
-        TextureCreateInfo& WithDepth(const uint32_t inDepth) { depth = inDepth; return *this; }
-        TextureCreateInfo& WithMips(const uint32_t inMips) { mips = inMips; return *this; }
-        TextureCreateInfo& WithSampleCount(const uint32_t inSampleCount) { sampleCount = inSampleCount; return *this; }
-        TextureCreateInfo& WithData(const uint8_t* inData, const size_t inSize) { data = inData; dataSize = inSize; return *this; }
-        TextureCreateInfo& WithData(const Array<uint8_t>& inData) { data = inData.Data(); dataSize = inData.Size(); return *this; }
-
-        static TextureCreateInfo Texture1D(const uint32_t width, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        static TextureCreateInfo Texture1D(const uint32_t width, const Format format, const uint32_t mips, const uint32_t sampleCount)
         {
-            return TextureCreateInfo()
-            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
-            .WithWidth(width)
-            .WithHeight(1)
-            .WithDepth(1)
-            .WithFormat(format)
-            .WithMips(mips)
-            .WithSampleCount(sampleCount)
-            .WithData(data.Data(), data.Size());
+            TextureCreateInfo createInfo;
+            createInfo.usageFlags = TextureUsageFlagBits::Default;
+            createInfo.format = format;
+            createInfo.width = width;
+            createInfo.height = 1;
+            createInfo.depth = 1;
+            createInfo.mips = mips;
+            createInfo.sampleCount = sampleCount;
+            return createInfo;
         }
 
-        static TextureCreateInfo Texture2D(const uint32_t width, const uint32_t height, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        static TextureCreateInfo Texture2D(const uint32_t width, const uint32_t height, const Format format, const uint32_t mips, const uint32_t sampleCount)
         {
-            return TextureCreateInfo()
-            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
-            .WithWidth(width)
-            .WithHeight(height)
-            .WithDepth(1)
-            .WithFormat(format)
-            .WithMips(mips)
-            .WithSampleCount(sampleCount)
-            .WithData(data.Data(), data.Size());
+            TextureCreateInfo createInfo;
+            createInfo.usageFlags = TextureUsageFlagBits::Default;
+            createInfo.format = format;
+            createInfo.width = width;
+            createInfo.height = height;
+            createInfo.depth = 1;
+            createInfo.mips = mips;
+            createInfo.sampleCount = sampleCount;
+            return createInfo;
         }
 
-        static TextureCreateInfo Texture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const Format format, const uint32_t mips, const uint32_t sampleCount, const BufferView<uint8_t> data)
+        static TextureCreateInfo Texture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const Format format, const uint32_t mips, const uint32_t sampleCount)
         {
-            return TextureCreateInfo()
-            .WithUsageFlags(TextureUsageFlagBits::Sampled | TextureUsageFlagBits::Transfer)
-            .WithWidth(width)
-            .WithHeight(height)
-            .WithDepth(depth)
-            .WithFormat(format)
-            .WithMips(mips)
-            .WithSampleCount(sampleCount)
-            .WithData(data.Data(), data.Size());
+            TextureCreateInfo createInfo;
+            createInfo.usageFlags = TextureUsageFlagBits::Default;
+            createInfo.format = format;
+            createInfo.width = width;
+            createInfo.height = height;
+            createInfo.depth = depth;
+            createInfo.mips = mips;
+            createInfo.sampleCount = sampleCount;
+            return createInfo;
         }
 
     };
@@ -91,11 +79,13 @@ namespace Nova
         Format GetFormat() const { return m_Format; }
         uint32_t GetWidth() const { return m_Width; }
         uint32_t GetHeight() const { return m_Height; }
+        uint32_t GetDepth() const { return m_Depth; }
         uint32_t GetMips() const { return m_Mips; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
         ResourceState GetState() const { return m_State; }
         void SetState(const ResourceState state) { m_State = state; }
         TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
+        TextureDimension GetDimension() const { return m_Dimension; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;
@@ -105,5 +95,6 @@ namespace Nova
         uint32_t m_SampleCount = 0;
         ResourceState m_State = ResourceState::Undefined;
         TextureUsageFlags m_UsageFlags = TextureUsageFlagBits::None;
+        TextureDimension m_Dimension = TextureDimension::None;
     };
 }

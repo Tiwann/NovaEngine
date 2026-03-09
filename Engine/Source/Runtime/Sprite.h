@@ -3,7 +3,7 @@
 #include <cstdint>
 namespace Nova
 {
-    class Texture;
+    class TextureView;
     
     struct Sprite
     {
@@ -11,11 +11,11 @@ namespace Nova
         uint32_t y = 0;
         uint32_t width = 0;
         uint32_t height = 0;
-        Ref<Texture> texture = nullptr;
+        Ref<TextureView> textureView = nullptr;
 
         bool operator==(const Sprite& other) const
         {
-            return x == other.x && y == other.y && width == other.width && height == other.height && texture == other.texture;
+            return x == other.x && y == other.y && width == other.width && height == other.height && textureView == other.textureView;
         }
     };
 }

@@ -46,6 +46,7 @@ namespace Nova::Vulkan
         void DispatchIndirect(const Nova::Buffer& buffer, size_t offset) override;
 
         void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
+        void BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayLayer, uint32_t mipLevel) override;
         void Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter) override;
         void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
 

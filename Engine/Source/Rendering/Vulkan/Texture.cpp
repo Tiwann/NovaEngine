@@ -2,27 +2,39 @@
 #include "RenderDevice.h"
 #include "Conversions.h"
 #include "Buffer.h"
+#include "Runtime/Log.h"
 
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
+
 
 namespace Nova::Vulkan
 {
     bool Texture::Initialize(const TextureCreateInfo& createInfo)
     {
-        if (createInfo.width == 0 || createInfo.height == 0)
-            return false;
+        if (createInfo.format == Format::None) return false;
+        if (createInfo.sampleCount <= 0) return false;
+        if (createInfo.mips <= 0) return false;
+        if (createInfo.width == 0 || createInfo.height == 0) return false;
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
-        const VkDevice deviceHandle = device->GetHandle();
-
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
-        vkDestroyImageView(deviceHandle, m_ImageView, nullptr);
 
         VkImageType imageType = VK_IMAGE_TYPE_1D;
-        if (createInfo.height > 1) imageType = VK_IMAGE_TYPE_2D;
-        if (createInfo.depth > 1) imageType = VK_IMAGE_TYPE_3D;
+        TextureDimension dimension = TextureDimension::Dim1D;
+
+        if (createInfo.height > 1)
+        {
+            imageType = VK_IMAGE_TYPE_2D;
+            dimension = TextureDimension::Dim2D;
+        }
+
+        if (createInfo.depth > 1)
+        {
+            imageType = VK_IMAGE_TYPE_3D;
+            dimension = TextureDimension::Dim3D;
+        }
 
         VkImageCreateInfo imageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         imageCreateInfo.imageType = imageType;
@@ -42,17 +54,13 @@ namespace Nova::Vulkan
         allocationCreateInfo.priority = 1.0f;
         allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
 
-        VkResult result = vmaCreateImage(allocatorHandle,
+        const VkResult result = vmaCreateImage(allocatorHandle,
            &imageCreateInfo,
            &allocationCreateInfo,
            &m_Image,
            &m_Allocation,
            nullptr);
         if (result != VK_SUCCESS)
-        return false;
-
-        Fence fence;
-        if (!fence.Initialize({device, FenceCreateFlagBits::None}))
             return false;
 
         m_Device = device;
@@ -63,124 +71,62 @@ namespace Nova::Vulkan
         m_Mips = createInfo.mips;
         m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;
+        m_Dimension = dimension;
 
-        if (createInfo.data && createInfo.dataSize > 0)
+        // DECIDED TO EXPLICITLY TRANSITION TO LAYOUT GENERAL BY DEFAULT
+        const bool isColorAttachment = createInfo.usageFlags.Contains(TextureUsageFlagBits::ColorAttachment);
+        const bool isDepthAttachment = createInfo.usageFlags.Contains(TextureUsageFlagBits::DepthStencilAttachment);
+        const bool isSampled = createInfo.usageFlags.Contains(TextureUsageFlagBits::Sampled);
+
+        TextureBarrier barrier;
+        barrier.texture = this;
+        barrier.sourceAccess = AccessFlagBits::None;
+        barrier.destAccess = isColorAttachment ? AccessFlagBits::ColorAttachmentWrite : isDepthAttachment ? AccessFlagBits::DepthStencilAttachmentWrite : isSampled ? AccessFlagBits::ShaderRead : AccessFlagBits::None;
+        barrier.destState = isColorAttachment ? ResourceState::ColorAttachment : isDepthAttachment ? ResourceState::DepthStencilAttachment : isSampled ? ResourceState::ShaderRead : ResourceState::General;
+        barrier.destQueue = nullptr;
+        barrier.destQueue = nullptr;
+
+        CommandPool* commandPool = device->GetCommandPool();
+        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
+        Fence fence;
+        fence.Initialize({device, 0});
+
+        if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
         {
-            VkBufferCreateInfo stagingBufferCreateInfo = {VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
-            stagingBufferCreateInfo.size = createInfo.dataSize;
-            stagingBufferCreateInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-
-            VmaAllocationCreateInfo stagingBufferAllocateInfo = {};
-            stagingBufferAllocateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
-            stagingBufferAllocateInfo.usage = VMA_MEMORY_USAGE_CPU_ONLY;
-            stagingBufferAllocateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-            VkBuffer stagingBuffer = nullptr;
-            VmaAllocation stagingBufferAllocation = nullptr;
-            result = vmaCreateBuffer(allocatorHandle, &stagingBufferCreateInfo, &stagingBufferAllocateInfo,&stagingBuffer, &stagingBufferAllocation, nullptr);
-            if (result != VK_SUCCESS)
-                return false;
-
-            result = vmaCopyMemoryToAllocation(allocatorHandle, createInfo.data, stagingBufferAllocation, 0, createInfo.dataSize);
-            if (result != VK_SUCCESS)
-                return false;
-
-
-
-            CommandPool* commandPool = device->GetCommandPool();
-            CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
-
-            commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit});
-            TextureBarrier toTransferBarrier = {this, ResourceState::TransferDest, AccessFlagBits::None, AccessFlagBits::TransferWrite};
-            commandBuffer.TextureBarrier(toTransferBarrier);
-
-            VkBufferImageCopy imageCopyRegion{};
-            imageCopyRegion.bufferOffset = 0;
-            imageCopyRegion.bufferRowLength = 0;
-            imageCopyRegion.bufferImageHeight = 0;
-            imageCopyRegion.imageSubresource.aspectMask = Convert(createInfo.format);
-            imageCopyRegion.imageSubresource.mipLevel = 0;
-            imageCopyRegion.imageSubresource.baseArrayLayer = 0;
-            imageCopyRegion.imageSubresource.layerCount = 1;
-            imageCopyRegion.imageOffset = {0, 0, 0};
-            imageCopyRegion.imageExtent = {createInfo.width, createInfo.height, 1};
-            vkCmdCopyBufferToImage(commandBuffer.GetHandle(), stagingBuffer, m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopyRegion);
-
-            TextureBarrier toReadBarrier = {this, ResourceState::ShaderRead, AccessFlagBits::TransferWrite, AccessFlagBits::ShaderRead};
-            commandBuffer.TextureBarrier(toReadBarrier);
+            commandBuffer.TextureBarrier(barrier);
             commandBuffer.End();
-
 
             Queue* graphicsQueue = device->GetGraphicsQueue();
             graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-            fence.Wait(~0);
-            fence.Destroy();
-            commandBuffer.Free();
-            vmaDestroyBuffer(allocatorHandle, stagingBuffer, stagingBufferAllocation);
+
+            fence.Wait(FENCE_WAIT_INFINITE);
         } else
         {
-            CommandPool* commandPool = device->GetCommandPool();
-            CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
-
-            commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit});
-            TextureBarrier toTransferBarrier = {this, ResourceState::General, AccessFlagBits::None, AccessFlagBits::None};
-            commandBuffer.TextureBarrier(toTransferBarrier);
-            commandBuffer.End();
-
-            Queue* graphicsQueue = device->GetGraphicsQueue();
-            graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-            fence.Wait(~0);
-            fence.Destroy();
-            commandBuffer.Free();
+            NOVA_LOG(RenderDevice, Verbosity::Error, "Couldn't transition texture to layout general. Command buffer failed to begin!");
         }
 
-        VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_1D;
-        if (createInfo.height > 1) viewType = VK_IMAGE_VIEW_TYPE_2D;
-        if (createInfo.depth > 1) viewType = VK_IMAGE_VIEW_TYPE_3D;
-
-        VkImageViewCreateInfo imageViewCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-        imageViewCreateInfo.image = m_Image;
-        imageViewCreateInfo.viewType = viewType;
-        imageViewCreateInfo.format = Convert<VkFormat>(createInfo.format);
-        imageViewCreateInfo.subresourceRange.aspectMask = Convert(createInfo.format);
-        imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-        imageViewCreateInfo.subresourceRange.levelCount = createInfo.mips;
-        imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-        imageViewCreateInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(deviceHandle, &imageViewCreateInfo, nullptr, &m_ImageView) != VK_SUCCESS)
-        {
-            vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
-            return false;
-        }
-
+        commandBuffer.Free();
+        fence.Destroy();
         return true;
     }
 
     void Texture::Destroy()
     {
-        const VkDevice deviceHandle = m_Device->GetHandle();
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
-        vkDestroyImageView(deviceHandle, m_ImageView, nullptr);
         m_Device = nullptr;
+        m_Image = nullptr;
     }
 
     bool Texture::IsValid()
     {
-        return m_Device && m_Image && m_ImageView && m_Allocation;
+        return m_Device && m_Image && m_Allocation;
     }
 
     VkImage Texture::GetImage() const
     {
         return m_Image;
     }
-
-    VkImageView Texture::GetImageView() const
-    {
-        return m_ImageView;
-    }
-
     VmaAllocation Texture::GetAllocation() const
     {
         return m_Allocation;

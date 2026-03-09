@@ -22,7 +22,6 @@ namespace Nova::Vulkan
         bool IsValid() override;
 
         VkImage GetImage() const;
-        VkImageView GetImageView() const;
         VmaAllocation GetAllocation() const;
         Array<uint8_t> GetPixels() override;
     private:
@@ -31,7 +30,6 @@ namespace Nova::Vulkan
 
         RenderDevice* m_Device = nullptr;
         VkImage m_Image = nullptr;
-        VkImageView m_ImageView = nullptr;
         VmaAllocation m_Allocation = nullptr;
     };
 }

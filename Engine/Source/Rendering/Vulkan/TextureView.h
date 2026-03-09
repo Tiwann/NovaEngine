@@ -14,8 +14,8 @@ namespace Nova::Vulkan
 
         VkImage GetImage() const;
         VkImageView GetHandle() const;
-
     private:
+        friend class Swapchain;
         VkImageView m_Handle = nullptr;
     };
 }

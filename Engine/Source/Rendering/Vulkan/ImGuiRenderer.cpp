@@ -1,6 +1,7 @@
 ﻿#include "ImGuiRenderer.h"
 #include "RenderDevice.h"
 #include "Sampler.h"
+#include "TextureView.h"
 #include "Runtime/Memory.h"
 #include "Runtime/DesktopWindow.h"
 #include "Conversions.h"
@@ -109,22 +110,22 @@ namespace Nova::Vulkan
         ImGui_ImplVulkan_RenderDrawData(drawData, cmdBuffer);
     }
 
-    void ImGuiRenderer::DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height)
+    void ImGuiRenderer::DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height)
     {
         const ImTextureID textureId = GetOrAddTexture(texture);
         ImGui::Image(textureId, ImVec2(width, height));
     }
 
-    uint64_t ImGuiRenderer::GetOrAddTexture(const Nova::Texture& texture)
+    uint64_t ImGuiRenderer::GetOrAddTexture(const Nova::TextureView& texture)
     {
         return m_Textures.Contains(&texture) ? m_Textures[&texture] : AddTexture(texture);
     }
 
-    uint64_t ImGuiRenderer::AddTexture(const Nova::Texture& texture)
+    uint64_t ImGuiRenderer::AddTexture(const Nova::TextureView& texture)
     {
-        const Texture& tex = static_cast<const Texture&>(texture);
+        const TextureView& tex = static_cast<const TextureView&>(texture);
         const Sampler& sampler = static_cast<const Sampler&>(*m_Sampler);
-        VkDescriptorSet descriptorSet = ImGui_ImplVulkan_AddTexture(sampler.GetHandle(), tex.GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        VkDescriptorSet descriptorSet = ImGui_ImplVulkan_AddTexture(sampler.GetHandle(), tex.GetHandle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         if (!descriptorSet) return 0;
 
         const ImTextureID textureId = reinterpret_cast<ImTextureID>(descriptorSet);

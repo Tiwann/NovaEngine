@@ -14,6 +14,7 @@ namespace Nova
     class RenderDevice;
     class Surface;
     class Texture;
+    class TextureView;
 
     struct SwapchainCreateInfo
     {
@@ -52,8 +53,8 @@ namespace Nova
         bool IsValid() const;
         bool HasVSync() const;
 
-        virtual Ref<Nova::Texture> GetTexture(uint32_t index) { return nullptr; }
-        virtual Ref<Nova::Texture> GetCurrentTexture() { return nullptr; }
+        virtual Ref<Nova::Texture> GetTexture() { return nullptr; }
+        virtual Ref<Nova::TextureView> GetTextureView() { return nullptr; }
     protected:
         RenderDevice* m_Device = nullptr;
         Surface* m_Surface = nullptr;
@@ -64,5 +65,6 @@ namespace Nova
         bool m_HasVSync = false;
         bool m_Valid = true;
         Lazy<Ref<Nova::Texture>> m_Textures[3] = { {nullptr}, {nullptr}, {nullptr} };
+        Lazy<Ref<Nova::TextureView>> m_TextureView[3] = { {nullptr}, {nullptr}, {nullptr} };
     };
 }

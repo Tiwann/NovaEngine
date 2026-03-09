@@ -254,4 +254,48 @@ namespace Nova
         default: throw;
         }
     }
+
+    static bool IsDepthFormat(const Format format)
+    {
+        switch (format)
+        {
+        case Format::None: return false;
+        case Format::R8_UNORM:
+        case Format::R8_SNORM:
+        case Format::R16_USHORT:
+        case Format::R16_SHORT:
+        case Format::R32_FLOAT:
+        case Format::R32_UINT:
+        case Format::R32_SINT:
+        case Format::R8G8_UNORM:
+        case Format::R8G8_SNORM:
+        case Format::R16G16_USHORT:
+        case Format::R16G16_SHORT:
+        case Format::R32G32_UINT:
+        case Format::R32G32_SINT:
+        case Format::R32G32_FLOAT:
+        case Format::R8G8B8_UNORM:
+        case Format::R8G8B8_SNORM:
+        case Format::R16G16B16_USHORT:
+        case Format::R16G16B16_SHORT:
+        case Format::R32G32B32_UINT:
+        case Format::R32G32B32_SINT:
+        case Format::R32G32B32_FLOAT:
+        case Format::R8G8B8A8_UNORM:
+        case Format::R8G8B8A8_SNORM:
+        case Format::R8G8B8A8_SRGB:
+        case Format::R16G16B16A16_USHORT:
+        case Format::R16G16B16A16_SHORT:
+        case Format::R32G32B32A32_UINT:
+        case Format::R32G32B32A32_SINT:
+        case Format::R32G32B32A32_FLOAT:
+        case Format::R64G64B64A64_FLOAT:
+            return false;
+        case Format::D32_FLOAT:
+        case Format::D32_FLOAT_S8_UINT:
+        case Format::D24_UNORM_S8_UINT:
+            return true;
+        default: return false;
+        }
+    }
 }

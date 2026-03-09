@@ -336,8 +336,6 @@ set(NOVA_ENGINE_D3D12_SOURCES
         Source/Rendering/D3D12/ImGuiRenderer.h
         Source/Rendering/D3D12/Queue.cpp
         Source/Rendering/D3D12/Queue.h
-        Source/Rendering/D3D12/RenderTarget.cpp
-        Source/Rendering/D3D12/RenderTarget.h
         Source/Rendering/D3D12/Surface.cpp
         Source/Rendering/D3D12/Surface.h
         Source/Rendering/D3D12/Swapchain.cpp
@@ -371,8 +369,6 @@ set(NOVA_ENGINE_VULKAN_SOURCES
         Source/Rendering/Vulkan/Material.h
         Source/Rendering/Vulkan/Queue.cpp
         Source/Rendering/Vulkan/Queue.h
-        Source/Rendering/Vulkan/RenderTarget.cpp
-        Source/Rendering/Vulkan/RenderTarget.h
         Source/Rendering/Vulkan/Sampler.cpp
         Source/Rendering/Vulkan/Sampler.h
         Source/Rendering/Vulkan/Semaphore.cpp
@@ -412,8 +408,6 @@ set(NOVA_ENGINE_OPENGL_SOURCES
         Source/Rendering/OpenGL/RenderDevice.h
         Source/Rendering/OpenGL/Texture.cpp
         Source/Rendering/OpenGL/Texture.h
-        Source/Rendering/OpenGL/RenderTarget.h
-        Source/Rendering/OpenGL/RenderTarget.cpp
         Source/Rendering/OpenGL/Swapchain.h
         Source/Rendering/OpenGL/Swapchain.cpp
         Source/Rendering/OpenGL/Surface.h

@@ -15,7 +15,6 @@
 #include "ComputePipeline.h"
 #include "Material.h"
 #include "TextureView.h"
-#include "RenderTarget.h"
 #include "Utils/VulkanUtils.h"
 
 #include <vulkan/vulkan.h>
@@ -460,7 +459,7 @@ namespace Nova::Vulkan
         }
 
         Fence& fence = m_Frames[m_LastFrameIndex].fence;
-        fence.Wait(1000000000);
+        fence.Wait(FENCE_WAIT_INFINITE);
         fence.Reset();
 
         const Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
@@ -565,22 +564,12 @@ namespace Nova::Vulkan
 
     }
 
-    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
-    {
-        RenderTarget* renderTarget = new RenderTarget;
-        if (!renderTarget->Initialize(createInfo))
-        {
-            delete renderTarget;
-            return nullptr;
-        }
-        return Ref(renderTarget);
-    }
-
     Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
         TextureCreateInfo textureCreateInfo(createInfo);
-        if (!texture->Initialize(textureCreateInfo.WithDevice(this)))
+        textureCreateInfo.device = this;
+        if (!texture->Initialize(textureCreateInfo))
         {
             delete texture;
             return nullptr;
@@ -688,6 +677,18 @@ namespace Nova::Vulkan
             return nullptr;
         }
         return Ref(fence);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateCommandBuffer()
+    {
+        CommandBuffer* commandBuffer = new CommandBuffer();
+        CommandPool* commandPool = GetCommandPool();
+        if (!commandBuffer->Allocate({this, commandPool, CommandBufferLevel::Primary}))
+        {
+            delete commandBuffer;
+            return nullptr;
+        }
+        return Ref(commandBuffer);
     }
 
     VkInstance RenderDevice::GetInstance() const

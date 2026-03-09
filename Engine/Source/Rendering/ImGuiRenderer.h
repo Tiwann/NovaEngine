@@ -12,7 +12,7 @@ namespace Nova
 {
     class RenderDevice;
     class CommandBuffer;
-    class Texture;
+    class TextureView;
 
     struct ImGuiRendererCreateInfo
     {
@@ -34,7 +34,7 @@ namespace Nova
         virtual void EndFrame() = 0;
         virtual void Render(Nova::CommandBuffer& commandBuffer) = 0;
 
-        virtual void DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height) = 0;
+        virtual void DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height) = 0;
     protected:
         ImGuiContext* m_Context = nullptr;
     };

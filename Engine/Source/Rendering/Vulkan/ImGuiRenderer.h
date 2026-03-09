@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    class Texture;
+    class TextureView;
     class Sampler;
 }
 
@@ -22,13 +22,13 @@ namespace Nova::Vulkan
         void EndFrame() override;
         void Render(CommandBuffer& commandBuffer) override;
 
-        void DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height) override;
-        uint64_t AddTexture(const Texture& texture);
-        uint64_t GetOrAddTexture(const Texture& texture);
+        void DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height) override;
+        uint64_t AddTexture(const Nova::TextureView& texture);
+        uint64_t GetOrAddTexture(const TextureView& texture);
 
     private:
         RenderDevice* m_Device = nullptr;
-        Map<const Texture*, uint64_t> m_Textures;
+        Map<const TextureView*, uint64_t> m_Textures;
         Ref<Sampler> m_Sampler = nullptr;
     };
 }

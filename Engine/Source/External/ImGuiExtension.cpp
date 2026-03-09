@@ -181,12 +181,12 @@ namespace ImGui
         }
     }
 
-    void Image(const Texture& texture, const uint32_t width, const uint32_t height)
+    void Image(const TextureView& textureView, const uint32_t width, const uint32_t height)
     {
         const Application& application = Application::GetCurrentApplication();
         Ref<ImGuiRenderer> renderer = application.GetImGuiRenderer();
         if (!renderer) return;
 
-        renderer->DrawTexture(texture, width, height);
+        renderer->DrawTexture(textureView, width, height);
     }
 }

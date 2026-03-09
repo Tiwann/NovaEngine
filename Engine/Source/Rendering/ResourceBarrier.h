@@ -53,4 +53,36 @@ namespace Nova
         uint32_t bufferBarrierCount = 0;
         BufferBarrier* bufferBarriers = nullptr;
     };
+
+    static AccessFlags GetSourceAccessFlags(const ResourceState resourceState)
+    {
+        switch (resourceState)
+        {
+        case ResourceState::Undefined: return AccessFlagBits::None;
+        case ResourceState::ColorAttachment: return AccessFlagBits::ColorAttachmentWrite;
+        case ResourceState::DepthStencilAttachment: return AccessFlagBits::DepthStencilAttachmentWrite;
+        case ResourceState::TransferSource: return AccessFlagBits::TransferRead;
+        case ResourceState::TransferDest: return AccessFlagBits::TransferWrite;
+        case ResourceState::ShaderRead: return AccessFlagBits::ShaderRead;
+        case ResourceState::ShaderWrite: return AccessFlagBits::ShaderWrite;
+        case ResourceState::General: return AccessFlagBits::None;
+        default: return AccessFlagBits::None;
+        }
+    }
+
+    static AccessFlags GetDestAccessFlags(const ResourceState resourceState)
+    {
+        switch (resourceState)
+        {
+        case ResourceState::Undefined: return AccessFlagBits::None;
+        case ResourceState::ColorAttachment: return AccessFlagBits::ColorAttachmentRead;
+        case ResourceState::DepthStencilAttachment: return AccessFlagBits::DepthStencilAttachmentRead;
+        case ResourceState::TransferSource: return AccessFlagBits::TransferWrite;
+        case ResourceState::TransferDest: return AccessFlagBits::TransferRead;
+        case ResourceState::ShaderRead: return AccessFlagBits::ShaderRead;
+        case ResourceState::ShaderWrite: return AccessFlagBits::ShaderWrite;
+        case ResourceState::General: return AccessFlagBits::None;
+        default: return AccessFlagBits::None;
+        }
+    }
 }

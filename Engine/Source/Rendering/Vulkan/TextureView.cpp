@@ -51,6 +51,7 @@ namespace Nova::Vulkan
         const RenderDevice* device = static_cast<RenderDevice*>(m_Device);
         const VkDevice deviceHandle = device->GetHandle();
         vkDestroyImageView(deviceHandle, m_Handle, nullptr);
+        m_Handle = nullptr;
     }
 
     VkImage TextureView::GetImage() const

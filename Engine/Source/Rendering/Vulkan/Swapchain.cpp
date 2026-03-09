@@ -3,14 +3,14 @@
 #include "Conversions.h"
 #include "Containers/StringFormat.h"
 #include "CommandBuffer.h"
-#include "RenderTarget.h"
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
 #include "Sampler.h"
+#include "Utils/VulkanUtils.h"
+#include "TextureView.h"
 
 #include <vulkan/vulkan.h>
 
-#include "Utils/VulkanUtils.h"
 
 namespace Nova::Vulkan
 {
@@ -180,14 +180,16 @@ namespace Nova::Vulkan
         return true;
     }
 
-    Ref<Nova::Texture> Swapchain::GetTexture(const uint32_t index)
+    Ref<Nova::Texture> Swapchain::GetTexture()
     {
+        const RenderDevice* device = (RenderDevice*)m_Device;
+        const size_t index = device->GetCurrentFrameIndex();
+
         const auto createTexture = [this, &index]() -> Ref<Texture>
         {
             Texture texture;
             texture.m_Device = (RenderDevice*)m_Device;
             texture.m_Image = m_Images[index];
-            texture.m_ImageView = m_ImageViews[index];
             texture.m_Width = m_ImageWidth;
             texture.m_Height = m_ImageHeight;
             texture.m_Depth = 1;
@@ -204,11 +206,26 @@ namespace Nova::Vulkan
         return m_Textures[index].Get(createTexture);
     }
 
-    Ref<Nova::Texture> Swapchain::GetCurrentTexture()
+    Ref<Nova::TextureView> Swapchain::GetTextureView()
     {
-        const RenderDevice* device = (RenderDevice*)m_Device;
-        const size_t imageIndex = device->GetCurrentFrameIndex();
-        return GetTexture(imageIndex);
+        const size_t index = m_Device->GetCurrentFrameIndex();
+        const auto createTextureView = [this, &index]() -> Ref<TextureView>
+        {
+            TextureView textureView;
+            textureView.m_Device = (RenderDevice*)m_Device;
+            textureView.m_Handle = m_ImageViews[index];
+            textureView.m_Width = m_ImageWidth;
+            textureView.m_Height = m_ImageHeight;
+            textureView.m_Depth = 1;
+            textureView.m_Name = StringFormat("Swapchain Texture {}", index);
+            textureView.m_BaseMipLevel = 0;
+            textureView.m_MipCount = 1;
+            textureView.m_AspectFlags = TextureAspectFlagBits::Color;
+            textureView.m_Format = m_ImageFormat;
+            return MakeRef<TextureView>(textureView);
+        };
+
+        return m_Textures[index].Get(createTextureView);
     }
 
     VkSwapchainKHR Swapchain::GetHandle() const

@@ -9,7 +9,8 @@ namespace Nova
         Sampled = BIT(0),
         Storage = BIT(1),
         Transfer = BIT(2),
-
+        ColorAttachment = BIT(3),
+        DepthStencilAttachment = BIT(4),
         Default = Sampled | Transfer
     };
 

@@ -52,7 +52,7 @@ namespace Nova
 
     static Ref<Texture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
     {
-        Ref<Texture> texture = LoadTexture(device, Path::GetEngineAssetPath(filepath));
+        Ref<Texture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
         database.AddAsset(texture, assetName);
         return texture;
     };
@@ -97,7 +97,6 @@ namespace Nova
         rtCreateInfo.device = m_Device;
         rtCreateInfo.width = m_Window->GetWidth();
         rtCreateInfo.height = m_Window->GetHeight();
-        rtCreateInfo.depth = 1;
         rtCreateInfo.colorFormat = Format::R8G8B8A8_SRGB;
         rtCreateInfo.depthFormat = Format::D32_FLOAT_S8_UINT;
         rtCreateInfo.sampleCount = configuration.msaaSamples;
@@ -256,8 +255,8 @@ namespace Nova
             colorAttachment.storeOp = StoreOperation::Store;
             colorAttachment.clearValue.color = Color::Black;
             colorAttachment.resolveMode = ResolveMode::Average;
-            colorAttachment.texture = m_RenderTarget->GetColorTexture();
-            colorAttachment.resolveTexture = swapchain->GetCurrentTexture();
+            colorAttachment.textureView = m_RenderTarget->GetColorTextureView();
+            colorAttachment.resolveTextureView = swapchain->GetTextureView();
 
             RenderPassAttachmentInfo depthAttachment;
             depthAttachment.type = RenderPassAttachmentType::Depth;
@@ -266,7 +265,7 @@ namespace Nova
             depthAttachment.clearValue.depth = 1.0f;
             depthAttachment.clearValue.stencil = 0;
             depthAttachment.resolveMode = ResolveMode::Average;
-            depthAttachment.texture = m_RenderTarget->GetDepthTexture();
+            depthAttachment.textureView = m_RenderTarget->GetDepthTextureView();
 
             RenderPassBeginInfo renderPassBeginInfo;
             renderPassBeginInfo.renderArea = {0, 0, GetWindowWidth(), GetWindowHeight()};
@@ -285,9 +284,9 @@ namespace Nova
             imguiColorAttachment.type = RenderPassAttachmentType::Color;
             imguiColorAttachment.loadOp = LoadOperation::Load;
             imguiColorAttachment.storeOp = StoreOperation::Store;
-            imguiColorAttachment.texture = m_RenderTarget->GetColorTexture();
+            imguiColorAttachment.textureView = m_RenderTarget->GetColorTextureView();
             imguiColorAttachment.resolveMode = ResolveMode::Average;
-            imguiColorAttachment.resolveTexture = swapchain->GetCurrentTexture();
+            imguiColorAttachment.resolveTextureView = swapchain->GetTextureView();
 
             RenderPassBeginInfo imguiRenderPassBeginInfo;
             imguiRenderPassBeginInfo.renderArea = {0, 0, GetWindowWidth(), GetWindowHeight()};

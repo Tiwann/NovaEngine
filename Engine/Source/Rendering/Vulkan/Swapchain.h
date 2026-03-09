@@ -26,8 +26,8 @@ namespace Nova::Vulkan
 
         bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const;
 
-        Ref<Nova::Texture> GetTexture(uint32_t index) override;
-        Ref<Nova::Texture> GetCurrentTexture() override;
+        Ref<Nova::Texture> GetTexture() override;
+        Ref<Nova::TextureView> GetTextureView() override;
 
         VkSwapchainKHR GetHandle() const;
         const VkSwapchainKHR* GetHandlePtr() const;
@@ -37,6 +37,5 @@ namespace Nova::Vulkan
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };
-        Lazy<Ref<Nova::Texture>> m_Textures[3] = { Ref<Nova::Texture>(nullptr), Ref<Nova::Texture>(nullptr), Ref<Nova::Texture>(nullptr) };
     };
 }

@@ -182,7 +182,7 @@ namespace Nova
                             const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
                             if (loadedTexture)
                             {
-                                Ref<Texture> texture = LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
+                                Ref<Texture> texture = TextureUtils::LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
                                 assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), loadedTexture->mFilename.C_Str()));
                                 if (!texture) return;
                                 m_MaterialInfos[i].textures.Add(texture);
@@ -192,7 +192,7 @@ namespace Nova
                                 Array fileContent = FileUtils::ReadToBuffer({path.data, path.length});
                                 if (fileContent.IsEmpty())
                                     return;
-                                Ref<Texture> texture = LoadTexture(device, fileContent.Data(), fileContent.Size());
+                                Ref<Texture> texture = TextureUtils::LoadTexture(device, fileContent.Data(), fileContent.Size());
                                 assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), path.C_Str()));
                                 if (!texture) return;
                                 m_MaterialInfos[i].textures.Add(texture);

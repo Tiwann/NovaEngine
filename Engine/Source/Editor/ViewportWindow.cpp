@@ -39,7 +39,7 @@ namespace Nova
             Application& application = Application::GetCurrentApplication();
             Ref<ImGuiRenderer>& imguiRenderer = application.GetImGuiRenderer();
             Ref<RenderDevice> device = application.GetRenderDevice();
-            imguiRenderer->DrawTexture(*m_RenderTarget->GetColorTexture(), m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight());
+            imguiRenderer->DrawTexture(*m_RenderTarget->GetColorTextureView(), m_RenderTarget->GetWidth(), m_RenderTarget->GetHeight());
             ImGui::End();
         }
     }

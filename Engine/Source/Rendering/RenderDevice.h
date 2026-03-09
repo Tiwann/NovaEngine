@@ -10,6 +10,7 @@
 #include "TextureUsage.h"
 #include "Runtime/Format.h"
 #include "Runtime/LogCategory.h"
+#include "Sampler.h"
 
 #include <cstdint>
 
@@ -20,11 +21,8 @@ namespace Nova
     class Window;
     class Surface;
     struct SurfaceCreateInfo;
-    class RenderTarget;
     class Texture;
     struct TextureCreateInfo;
-    class Sampler;
-    struct SamplerCreateInfo;
     class Buffer;
     struct BufferCreateInfo;
     class GraphicsPipeline;
@@ -43,7 +41,7 @@ namespace Nova
     class CommandBuffer;
     class TextureView;
     struct TextureViewCreateInfo;
-
+    class Queue;
 
     struct DeviceCreateInfo
     {
@@ -71,9 +69,12 @@ namespace Nova
 
         virtual Nova::Surface* GetSurface() { return nullptr; }
         virtual Nova::Swapchain* GetSwapchain() { return nullptr; }
+        virtual Nova::Queue* GetGraphicsQueue() { return nullptr; }
+        virtual Nova::Queue* GetComputeQueue() { return nullptr; }
+        virtual Nova::Queue* GetTransferQueue() { return nullptr; }
         virtual RenderDeviceType GetDeviceType() = 0;
 
-        virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
         virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
         virtual Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) = 0;
@@ -86,15 +87,18 @@ namespace Nova
         virtual Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
         virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr; }
 
-        Ref<Fence> CreateFence();
-        Ref<Buffer> CreateBuffer(BufferUsage usage, size_t size);
-        Ref<Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
-        Ref<Material> CreateMaterial(Ref<Shader> material);
-        Ref<ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
-        Ref<Sampler> CreateSampler();
-        Ref<Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo);
+        Ref<Nova::Fence> CreateFence();
+        Ref<Nova::Buffer> CreateBuffer(BufferUsage usage, size_t size);
+        Ref<Nova::Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
+        Ref<Nova::Material> CreateMaterial(Ref<Shader> material);
+        Ref<Nova::ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
+        Ref<Nova::Sampler> CreateSampler();
+        Ref<Nova::Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo);
+
+        virtual Ref<Nova::CommandBuffer> CreateCommandBuffer() = 0;
 
         virtual uint32_t GetImageCount() const = 0;
+        virtual uint32_t GetCurrentFrameIndex() const = 0;
 
         StringView GetDeviceVendor() const;
         bool HasVSync() const;
@@ -102,7 +106,7 @@ namespace Nova
         String m_DeviceVendor;
         bool m_VSync = false;
     private:
-        Map<SamplerCreateInfo, Ref<Sampler>> m_Samplers;
+        Map<SamplerCreateInfo, Ref<Nova::Sampler>> m_Samplers;
     };
 
     Ref<RenderDevice> CreateRenderDevice(RenderDeviceType type, const DeviceCreateInfo& createInfo);

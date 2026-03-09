@@ -4,6 +4,8 @@
 #include "ShaderBindingSetLayout.h"
 #include <cstdint>
 
+#include "TextureView.h"
+
 
 namespace Nova
 {
@@ -30,11 +32,11 @@ namespace Nova
         virtual bool Initialize(const ShaderBindingSetCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        virtual bool BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType) = 0;
-        virtual bool BindTexture(uint32_t binding, const Nova::Texture& texture, BindingType bindingType) = 0;
+        virtual bool BindTextures(uint32_t binding, const Nova::TextureView* const* textures, size_t textureCount, BindingType bindingType) = 0;
+        virtual bool BindTexture(uint32_t binding, const Nova::TextureView& texture, BindingType bindingType) = 0;
         virtual bool BindSampler(uint32_t binding, const Nova::Sampler& sampler) = 0;
-        virtual bool BindCombinedSamplerTexture(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture) = 0;
-        virtual bool BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture* const* textures, size_t textureCount) = 0;
+        virtual bool BindCombinedSamplerTexture(uint32_t binding, const Nova::Sampler& sampler, const Nova::TextureView& texture) = 0;
+        virtual bool BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::TextureView* const* textures, size_t textureCount) = 0;
         virtual bool BindBuffer(uint32_t binding, const Nova::Buffer& buffer, size_t offset, size_t size) = 0;
 
         const ShaderBindingSetLayout* GetBindingSetLayout() const { return m_BindingSetLayout; }

@@ -1,7 +1,9 @@
 ﻿#pragma once
+#include "TextureView.h"
 #include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
 #include "Containers/StringView.h"
+#include "Runtime/Application.h"
 
 namespace Nova
 {
@@ -32,8 +34,8 @@ namespace Nova
         AssetType GetAssetType() const final { return AssetType::Material; }
 
         virtual void SetSampler(StringView name, Ref<Nova::Sampler> sampler) = 0;
-        virtual void SetTexture(StringView name, Ref<Nova::Texture> texture) = 0;
-        virtual void SetSamplerAndTexture(StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::Texture> texture) = 0;
+        virtual void SetTexture(StringView name, Ref<Nova::TextureView> textureView) = 0;
+        virtual void SetSamplerAndTexture(StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::TextureView> textureView) = 0;
         virtual void SetBuffer(StringView name, Ref<Nova::Buffer> buffer, size_t offset, size_t size) = 0;
 
         const Ref<ShaderBindingSet>& GetBindingSet() const { return m_BindingSet; }

@@ -1,6 +1,7 @@
 ﻿#include "ShaderBindingSet.h"
 #include "DescriptorPool.h"
 #include "Texture.h"
+#include "TextureView.h"
 #include "RenderDevice.h"
 #include "Buffer.h"
 #include "Sampler.h"
@@ -49,7 +50,7 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType)
+    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::TextureView* const* textures, size_t textureCount, BindingType bindingType)
     {
         if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
             return false;
@@ -57,10 +58,11 @@ namespace Nova::Vulkan
         Array<VkDescriptorImageInfo> imageInfos;
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
         {
-            const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
+            const TextureView* textureView = static_cast<const TextureView*>(textures[textureIndex]);
+            const Texture* tex = static_cast<const Texture*>(textureView->GetTexture());
             VkDescriptorImageInfo imageInfo;
-            imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
-            imageInfo.imageView = texture->GetImageView();
+            imageInfo.imageLayout = Convert<VkImageLayout>(tex->GetState());
+            imageInfo.imageView = textureView->GetHandle();
             imageInfos.Add(imageInfo);
         }
 
@@ -75,15 +77,16 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::Texture& texture, BindingType bindingType)
+    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::TextureView& texture, BindingType bindingType)
     {
         if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
             return false;
 
-        const Texture& tex = dynamic_cast<const Texture&>(texture);
+        const TextureView& textureView = static_cast<const TextureView&>(texture);
+        const Texture& tex = static_cast<const Texture&>(*textureView.GetTexture());
         VkDescriptorImageInfo imageInfo;
         imageInfo.imageLayout = Convert<VkImageLayout>(tex.GetState());
-        imageInfo.imageView = tex.GetImageView();
+        imageInfo.imageView = textureView.GetHandle();
 
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
         write.descriptorType = Convert<VkDescriptorType>(bindingType);
@@ -112,11 +115,13 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture)
+    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::TextureView& texture)
     {
+        const TextureView& view = static_cast<const TextureView&>(texture);
+        const Texture& tex = static_cast<const Texture&>(*view.GetTexture());
         VkDescriptorImageInfo imageInfo;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = static_cast<const Texture&>(texture).GetImageView();
+        imageInfo.imageLayout = Convert<VkImageLayout>(tex.GetState());
+        imageInfo.imageView = view.GetHandle();
         imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
 
         VkWriteDescriptorSet write = { VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET };
@@ -130,16 +135,17 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture* const* textures, size_t textureCount)
+    bool ShaderBindingSet::BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::TextureView* const* textures, size_t textureCount)
     {
         Array<VkDescriptorImageInfo> imageInfos;
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
         {
-            const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
+            const TextureView* textureView = static_cast<const TextureView*>(textures[textureIndex]);
+            const Texture* tex = static_cast<const Texture*>(textureView->GetTexture());
             VkDescriptorImageInfo imageInfo;
             imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
-            imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
-            imageInfo.imageView = texture->GetImageView();
+            imageInfo.imageLayout = Convert<VkImageLayout>(tex->GetState());
+            imageInfo.imageView = textureView->GetHandle();
             imageInfos.Add(imageInfo);
         }
 

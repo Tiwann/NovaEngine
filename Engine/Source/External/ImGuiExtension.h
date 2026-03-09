@@ -3,6 +3,8 @@
 #include "Containers/StringView.h"
 #include <imgui.h>
 
+#include "Rendering/TextureView.h"
+
 
 namespace Nova
 {
@@ -30,5 +32,5 @@ namespace ImGui
     void IMGUI_API AddComponent(Entity* entity);
     void IMGUI_API ConvertColorToLinear(ImVec4& color);
     void IMGUI_API NovaStyle(ImGuiStyle* style = nullptr);
-    void IMGUI_API Image(const Texture& texture, uint32_t width, uint32_t height);
+    void IMGUI_API Image(const Nova::TextureView& textureView, uint32_t width, uint32_t height);
 }

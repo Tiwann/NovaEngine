@@ -10,7 +10,7 @@
 
 namespace Nova
 {
-    class Texture;
+    class TextureView;
 
     enum class RenderPassAttachmentType
     {
@@ -32,8 +32,8 @@ namespace Nova
         LoadOperation loadOp = LoadOperation::DontCare;
         StoreOperation storeOp = StoreOperation::DontCare;
         ResolveMode resolveMode = ResolveMode::None;
-        const Texture* texture = nullptr;
-        const Texture* resolveTexture = nullptr;
+        const TextureView* textureView = nullptr;
+        const TextureView* resolveTextureView = nullptr;
     };
 
     struct RenderPassBeginInfo

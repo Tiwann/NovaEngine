@@ -10,10 +10,12 @@
 #include "VulkanUtils.h"
 #include "Material.h"
 #include "Shader.h"
+#include "TextureView.h"
 #include "Rendering/ResourceBarrier.h"
 #include "Utils/VulkanUtils.h"
 
 #include <vulkan/vulkan.h>
+
 
 namespace Nova::Vulkan
 {
@@ -281,6 +283,36 @@ namespace Nova::Vulkan
         vkCmdCopyBuffer2(m_Handle, &copyInfo);
     }
 
+    void CommandBuffer::BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, const size_t srcOffset, const size_t srcSize, const uint32_t arrayLayer, const uint32_t mipLevel)
+    {
+        const Buffer& source = static_cast<const Buffer&>(src);
+        const Texture& destination = static_cast<const Texture&>(dest);
+
+        const uint32_t mipWidth = Math::Max(1u, destination.GetWidth() >> mipLevel);
+        const uint32_t mipHeight = Math::Max(1u, destination.GetHeight() >> mipLevel);
+        const uint32_t mipDepth = Math::Max(1u, destination.GetDepth() >> mipLevel);
+
+        VkBufferImageCopy2 region = { VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2 };
+        region.bufferOffset = srcOffset;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; // ASSUMING COPYING ONLY COLOR TEXTURES
+        region.imageSubresource.mipLevel = mipLevel;
+        region.imageSubresource.baseArrayLayer = arrayLayer;
+        region.imageSubresource.layerCount = 1;
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { mipWidth, mipHeight, mipDepth };
+
+        VkCopyBufferToImageInfo2 copyInfo = { VK_STRUCTURE_TYPE_COPY_BUFFER_TO_IMAGE_INFO_2 };
+        copyInfo.srcBuffer = source.GetHandle();
+        copyInfo.dstImage = destination.GetImage();
+        copyInfo.dstImageLayout = Convert<VkImageLayout>(destination.GetState());
+        copyInfo.regionCount = 1;
+        copyInfo.pRegions = &region;
+
+        vkCmdCopyBufferToImage2(m_Handle, &copyInfo);
+    }
+
     void CommandBuffer::Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, const Filter filter)
     {
         const Texture& source = static_cast<const Texture&>(src);
@@ -396,14 +428,14 @@ namespace Nova::Vulkan
 
     static VkRenderingAttachmentInfo GetRenderingAttachmentInfo(const RenderPassAttachmentInfo& attachmentInfo)
     {
-        const Texture* texture = static_cast<const Texture*>(attachmentInfo.texture);
-        const Texture* resolveTexture = static_cast<const Texture*>(attachmentInfo.resolveTexture);
+        const TextureView* texture = static_cast<const TextureView*>(attachmentInfo.textureView);
+        const TextureView* resolveTexture = static_cast<const TextureView*>(attachmentInfo.resolveTextureView);
 
         VkRenderingAttachmentInfo renderingInfo { VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO };
         renderingInfo.loadOp = Convert<VkAttachmentLoadOp>(attachmentInfo.loadOp);
         renderingInfo.storeOp = Convert<VkAttachmentStoreOp>(attachmentInfo.storeOp);
         renderingInfo.imageLayout = Convert<VkImageLayout>(attachmentInfo.type);
-        renderingInfo.imageView = texture->GetImageView();
+        renderingInfo.imageView = texture->GetHandle();
 
         switch (attachmentInfo.type)
         {
@@ -425,7 +457,7 @@ namespace Nova::Vulkan
         {
             renderingInfo.resolveMode = Convert<VkResolveModeFlagBits>(attachmentInfo.resolveMode);
             renderingInfo.resolveImageLayout = Convert<VkImageLayout>(attachmentInfo.type);
-            renderingInfo.resolveImageView = resolveTexture->GetImageView();
+            renderingInfo.resolveImageView = resolveTexture->GetHandle();
         }
 
         return renderingInfo;

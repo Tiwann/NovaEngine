@@ -89,7 +89,7 @@ namespace Nova
         InputAssemblyState inputAssemblyState;
         VertexInputState vertexInputState;
         RasterizationState rasterizationState;
-        ColorBlendState colorBlendState;
+        Array<ColorBlendState> colorBlendStates;
         DepthStencilState depthStencilState;
         MultisampleState multisampleState;
         ViewportState viewportState;
@@ -104,7 +104,7 @@ namespace Nova
 
         GraphicsPipelineCreateInfo& SetInputAssemblyInfo(const InputAssemblyState& inputAssembly) { inputAssemblyState = inputAssembly; return *this; }
         GraphicsPipelineCreateInfo& SetRasterizationInfo(const RasterizationState& rasterization) { rasterizationState = rasterization; return *this; }
-        GraphicsPipelineCreateInfo& SetColorBlendInfo(const ColorBlendState& colorBlend) { colorBlendState = colorBlend; return *this; }
+        GraphicsPipelineCreateInfo& SetColorBlendInfo(const ColorBlendState& colorBlend) { this->colorBlendStates.Add(colorBlend); return *this; }
         GraphicsPipelineCreateInfo& SetDepthStencilInfo(const DepthStencilState& depthStencil) { depthStencilState = depthStencil; return *this; }
         GraphicsPipelineCreateInfo& SetMultisampleInfo(const MultisampleState& multisample) { multisampleState = multisample; return *this; }
         GraphicsPipelineCreateInfo& SetViewportInfo(const ViewportState& viewport) { viewportState = viewport; return *this; }

@@ -73,24 +73,30 @@ namespace Nova::Vulkan
         rasterizationState.depthBiasSlopeFactor = createInfo.rasterizationState.depthBiasSlopeFactor;
         rasterizationState.lineWidth = createInfo.rasterizationState.lineWidth;
 
-        VkPipelineColorBlendAttachmentState colorBlendAttachmentState;
-        colorBlendAttachmentState.blendEnable = createInfo.colorBlendState.colorBlendEnable;
-        colorBlendAttachmentState.colorWriteMask = createInfo.colorBlendState.colorWriteMask;
-        if (createInfo.colorBlendState.colorBlendEnable)
+        Array<VkPipelineColorBlendAttachmentState> colorBlendStates;
+        for (const auto& [colorBlendEnable, blendFunction, colorWriteMask] : createInfo.colorBlendStates)
         {
-            colorBlendAttachmentState.alphaBlendOp = Convert<VkBlendOp>(createInfo.colorBlendState.blendFunction.alphaOp);
-            colorBlendAttachmentState.colorBlendOp = Convert<VkBlendOp>(createInfo.colorBlendState.blendFunction.colorOp);
-            colorBlendAttachmentState.dstAlphaBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendState.blendFunction.alphaDest);
-            colorBlendAttachmentState.dstColorBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendState.blendFunction.colorDest);
-            colorBlendAttachmentState.srcAlphaBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendState.blendFunction.alphaSource);
-            colorBlendAttachmentState.srcColorBlendFactor = Convert<VkBlendFactor>(createInfo.colorBlendState.blendFunction.colorSource);
+            VkPipelineColorBlendAttachmentState state;
+            state.blendEnable = colorBlendEnable;
+            state.colorWriteMask = colorWriteMask;
+            if (colorBlendEnable)
+            {
+                state.alphaBlendOp = Convert<VkBlendOp>(blendFunction.alphaOp);
+                state.colorBlendOp = Convert<VkBlendOp>(blendFunction.colorOp);
+                state.dstAlphaBlendFactor = Convert<VkBlendFactor>(blendFunction.alphaDest);
+                state.dstColorBlendFactor = Convert<VkBlendFactor>(blendFunction.colorDest);
+                state.srcAlphaBlendFactor = Convert<VkBlendFactor>(blendFunction.alphaSource);
+                state.srcColorBlendFactor = Convert<VkBlendFactor>(blendFunction.colorSource);
+            }
+
+            colorBlendStates.Add(state);
         }
 
 
-        VkPipelineColorBlendStateCreateInfo colorBlendState { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
-        colorBlendState.pAttachments = &colorBlendAttachmentState;
-        colorBlendState.attachmentCount = 1;
 
+        VkPipelineColorBlendStateCreateInfo colorBlendState { VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO };
+        colorBlendState.pAttachments = colorBlendStates.Data();
+        colorBlendState.attachmentCount = colorBlendStates.Count();
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState { VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO };
         depthStencilState.depthTestEnable = createInfo.depthStencilState.depthTestEnable;

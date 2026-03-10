@@ -18,7 +18,7 @@ struct GBuffer
 	float4 albedo : SV_TARGET0;
 	float4 position : SV_TARGET1;
 	float4 normal : SV_TARGET2;
-	float4 specGloss : SV_TARGET3;
+	float4 metallicGlossiness : SV_TARGET3;
 }
 
 struct VertexOutput
@@ -32,10 +32,10 @@ struct VertexOutput
     float3 worldPos;
 };
 
-[[vk::binding(0, 1)]] Sampler2D diffuseTex;
-[[vk::binding(0, 2)]] Sampler2D normalTex;
-[[vk::binding(0, 3)]] Sampler2D specularTex;
-[[vk::binding(0, 4)]] Sampler2D glossinessTex;
+[[vk::binding(0, 0)]] Sampler2D albedoTex;
+[[vk::binding(1, 0)]] Sampler2D normalTex;
+[[vk::binding(2, 0)]] Sampler2D metallicTex;
+[[vk::binding(3, 0)]] Sampler2D glossinessTex;
 
 [shader("vertex")]
 VertexOutput vert(VertexInput input)
@@ -55,7 +55,7 @@ VertexOutput vert(VertexInput input)
 GBuffer frag(VertexOutput input)
 {
     GBuffer gBuffer;
-    gBuffer.albedo = diffuseTex.Sample(input.texCoord) * input.color;
+    gBuffer.albedo = albedoTex.Sample(input.texCoord) * input.color;
     gBuffer.position = float4(input.worldPos, 1.0);
 
     float3 normal = normalize(input.normal);
@@ -66,11 +66,11 @@ GBuffer frag(VertexOutput input)
     float3 sampledNormal = normalTex.Sample(input.texCoord).xyz * 2.0 - 1.0;
     gBuffer.normal = float4(normalize(TBN * sampledNormal), 0.0);
 
-	float4 specularMap = specularTex.Sample(input.texCoord);
+	float4 metallicMap = metallicTex.Sample(input.texCoord);
 	float4 glossinessMap = glossinessTex.Sample(input.texCoord);
-	gBuffer.specGloss.r = specularMap.r;
-	gBuffer.specGloss.g = glossinessMap.r;
-	gBuffer.specGloss.b = 0.0;
-	gBuffer.specGloss.a = 1.0;
+	gBuffer.metallicGlossiness.r = metallicMap.r;
+	gBuffer.metallicGlossiness.g = glossinessMap.r;
+	gBuffer.metallicGlossiness.b = 0.0;
+	gBuffer.metallicGlossiness.a = 1.0;
 	return gBuffer;
 }

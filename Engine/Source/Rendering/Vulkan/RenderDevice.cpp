@@ -628,7 +628,7 @@ namespace Nova::Vulkan
             delete pipeline;
             return nullptr;
         }
-        return Ref<GraphicsPipeline>(pipeline);
+        return Ref(pipeline);
     }
 
     Ref<Nova::ComputePipeline> RenderDevice::CreateComputePipeline(const ComputePipelineCreateInfo& createInfo)

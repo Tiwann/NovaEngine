@@ -33,29 +33,40 @@ namespace Nova
         }
 
         template <typename U>
-        Ref(const Ref<U>& other) : m_Pointer((PointerType)other.m_Pointer)
+        Ref(const Ref<U>& other) : m_Pointer(static_cast<PointerType>(other.m_Pointer))
         {
             AddRef(other.m_Pointer);
         }
 
         ~Ref()
         {
-            RelRef(m_Pointer);
+            if (m_Pointer)
+                RelRef(m_Pointer);
         }
 
-        void operator=(const Ref& other)
+        Ref& operator=(const Ref& other)
         {
+            if (this == &other)
+                return *this;
+
             PointerType old = m_Pointer;
             AddRef(other.m_Pointer);
             m_Pointer = other.m_Pointer;
             RelRef(old);
+            return *this;
         }
 
         void operator=(Ref&& other) noexcept
         {
-            PointerType old = m_Pointer;
+            if (this == &other)
+                return *this;
+
+            RelRef(m_Pointer);
+
             m_Pointer = other.m_Pointer;
-            other.m_Pointer = old;
+            other.m_Pointer = nullptr;
+
+            return *this;
         }
 
         template <typename U>
@@ -63,7 +74,7 @@ namespace Nova
         {
             PointerType old = m_Pointer;
             AddRef(other.m_Pointer);
-            m_Pointer = (PointerType)other.m_Pointer;
+            m_Pointer = static_cast<PointerType>(other.m_Pointer);
             RelRef(old);
         }
 
@@ -106,9 +117,9 @@ namespace Nova
 
         void Attach(PointerType newPointer)
         {
-            PointerType old = m_Pointer;
+            AddRef(newPointer);
+            RelRef(m_Pointer);
             m_Pointer = newPointer;
-            RelRef(old);
         }
 
         PointerType Detach()
@@ -123,12 +134,6 @@ namespace Nova
             PointerType otherPointer = other.m_Pointer;
             other.m_Pointer = m_Pointer;
             m_Pointer = otherPointer;
-        }
-
-        void Release()
-        {
-            KillRef(m_Pointer);
-            m_Pointer = nullptr;
         }
     private:
         PointerType m_Pointer = nullptr;

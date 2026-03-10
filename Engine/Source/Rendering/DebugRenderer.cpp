@@ -53,17 +53,16 @@ namespace Nova
         pipelineInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
 
         pipelineInfo.rasterizationState.cullMode = CullMode::FrontAndBackFaces;
-        pipelineInfo.rasterizationState.discardEnable = false;
         pipelineInfo.rasterizationState.frontFace = FrontFace::CounterClockwise;
         pipelineInfo.rasterizationState.lineWidth = 3.0f;
         pipelineInfo.rasterizationState.polygonMode = PolygonMode::Line;
 
         pipelineInfo.inputAssemblyState.topology = PrimitiveTopology::LineList;
 
-        pipelineInfo.depthStencilState.depthTestEnable = false;
-        pipelineInfo.depthStencilState.depthWriteEnable = false;
-        pipelineInfo.depthStencilState.depthCompareOp = CompareOperation::Less;
-
+        ColorBlendState colorBlendState;
+        colorBlendState.colorBlendEnable = false;
+        colorBlendState.colorWriteMask = ColorChannelFlags::All();
+        pipelineInfo.colorBlendStates.Add(colorBlendState);
         pipelineInfo.multisampleState.sampleCount = 8;
 
         s_Pipeline = s_Device->CreateGraphicsPipeline(pipelineInfo);

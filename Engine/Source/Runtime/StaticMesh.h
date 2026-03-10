@@ -29,7 +29,6 @@ namespace Nova
     {
         String slotName;
         uint32_t slot = 0;
-        Array<Ref<Texture>> textures;
         Ref<Material> material = nullptr;
         Array<SubMeshInfo> subMeshes;
         MaterialType materialType;

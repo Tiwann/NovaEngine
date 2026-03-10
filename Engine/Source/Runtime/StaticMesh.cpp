@@ -10,15 +10,10 @@
 #include "Utils/TextureUtils.h"
 #include "Rendering/Shader.h"
 #include "Rendering/Material.h"
-#include "Math/Matrix4.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/GltfMaterial.h>
-
-#include "FileUtils.h"
-#include "Path.h"
-#include "Containers/StringFormat.h"
 
 
 namespace Nova
@@ -47,11 +42,55 @@ namespace Nova
         OBJ,
         DAE
     };
+
+    static Array<uint32_t> GetIndicesFromFaces(const BufferView<aiFace>& faces)
+    {
+        Array<uint32_t> result;
+        for (uint32_t faceIndex = 0; faceIndex < faces.Count(); ++faceIndex)
+        {
+            const aiFace& face = faces[faceIndex];
+            result.AddRange(face.mIndices, face.mNumIndices);
+        }
+        return result;
+    }
+
+    static Array<Vertex> GetVerticesFromMesh(const aiMesh& mesh)
+    {
+        Array<Vertex> result;
+
+        const auto toVector3 = [](const aiVector3D& in) { return Vector3(in.x, in.y, in.z); };
+        const auto toVector2 = [](const aiVector3D& in) { return Vector2(in.x, in.y); };
+        const auto toVector4 = [](const aiColor4D& in) { return Vector4(in.r, in.g, in.b, in.a); };
+
+        for (uint32_t vertexIndex = 0; vertexIndex < mesh.mNumVertices; ++vertexIndex)
+        {
+            const aiVector3D& position = mesh.HasPositions() ? mesh.mVertices[vertexIndex] : aiVector3D(0, 0, 0);
+            const aiVector3D& texCoord = mesh.HasTextureCoords(0) ? mesh.mTextureCoords[0][vertexIndex] : aiVector3D(0, 0, 0);
+            const aiVector3D& normal = mesh.HasNormals() ? mesh.mNormals[vertexIndex] : aiVector3D(0, 0, 0);
+            const aiVector3D& tangent = mesh.HasTangentsAndBitangents() ? mesh.mTangents[vertexIndex] : aiVector3D(0, 0, 0);
+            const aiColor4D& color = mesh.HasVertexColors(0) ? mesh.mColors[0][vertexIndex] : aiColor4D(0, 0, 0, 0);
+
+            const Vertex vertex
+            {
+                .position = toVector3(position),
+                .texCoords = toVector2(texCoord),
+                .normal = toVector3(normal),
+                .tangent = toVector3(tangent),
+                .color = toVector4(color)
+            };
+
+            result.Add(vertex);
+        }
+
+        return result;
+    }
     
     bool StaticMesh::LoadFromFile(const StringView filepath, bool loadResources)
     {
         Assimp::Importer importer;
-        constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_PreTransformVertices;
+        constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals
+        | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_PreTransformVertices;
+
         const aiScene* loadedScene = importer.ReadFile(*filepath, flags);
         if (!loadedScene) return false;
         if (!loadedScene->HasMeshes()) return false;
@@ -66,61 +105,12 @@ namespace Nova
         for (size_t meshIndex = 0; meshIndex < loadedScene->mNumMeshes; meshIndex++)
         {
             const aiMesh* loadedMesh = loadedScene->mMeshes[meshIndex];
-            uint32_t materialIndex = loadedMesh->mMaterialIndex;
+            const uint32_t materialIndex = loadedMesh->mMaterialIndex;
             const aiString materialSlotName = loadedScene->mMaterials[materialIndex]->GetName();
             MaterialInfo& materialInfo = MaterialSlotExists(materialIndex) ? m_MaterialInfos[materialIndex] : CreateMaterialSlot(String{materialSlotName.C_Str()}, materialIndex);
 
-            Array<uint32_t> indices;
-            for (uint32_t faceIndex = 0; faceIndex < loadedMesh->mNumFaces; ++faceIndex)
-            {
-                const aiFace& face = loadedMesh->mFaces[faceIndex];
-                for (uint32_t i = 0; i < face.mNumIndices; ++i)
-                    indices.Add(face.mIndices[i]);
-            }
-
-
-            const auto toVector3 = [](const aiVector3D& in) { return Vector3(in.x, in.y, in.z); };
-            const auto toVector2 = [](const aiVector3D& in) { return Vector2(in.x, in.y); };
-            const auto toVector4 = [](const aiColor4D& in) { return Vector4(in.r, in.g, in.b, in.a); };
-
-            Array<Vertex> vertices;
-            for (uint32_t vertexIndex = 0; vertexIndex < loadedMesh->mNumVertices; ++vertexIndex)
-            {
-                const aiVector3D& position = loadedMesh->HasPositions() ? loadedMesh->mVertices[vertexIndex] : aiVector3D(0, 0, 0);
-                const aiVector3D& texCoord = loadedMesh->HasTextureCoords(0) ? loadedMesh->mTextureCoords[0][vertexIndex] : aiVector3D(0, 0, 0);
-                const aiVector3D& normal = loadedMesh->HasNormals() ? loadedMesh->mNormals[vertexIndex] : aiVector3D(0, 0, 0);
-                const aiVector3D& tangent = loadedMesh->HasTangentsAndBitangents() ? loadedMesh->mTangents[vertexIndex] : aiVector3D(0, 0, 0);
-                const aiColor4D& color = loadedMesh->HasVertexColors(0) ? loadedMesh->mColors[0][vertexIndex] : aiColor4D(0, 0, 0, 0);
-
-                String path{filepath};
-                if (path.Find(".fbx") == -1)
-                {
-                    const Vertex vertex
-                    {
-                        .position = toVector3(position),
-                        .texCoords = toVector2(texCoord),
-                        .normal = toVector3(normal),
-                        .tangent = toVector3(tangent),
-                        .color = toVector4(color)
-                    };
-
-                    vertices.Add(vertex);
-                }
-                else
-                {
-                    const Vertex vertex
-                    {
-                        .position = Math::Scale(Matrix4::Identity, Vector3::One * 0.01f) * toVector3(position),
-                        .texCoords = toVector2(texCoord),
-                        .normal = toVector3(normal),
-                        .tangent = toVector3(tangent),
-                        .color = toVector4(color)
-                    };
-
-                    vertices.Add(vertex);
-                }
-
-            }
+            Array<uint32_t> indices = GetIndicesFromFaces(BufferView(loadedMesh->mFaces, loadedMesh->mNumFaces));
+            Array<Vertex> vertices = GetVerticesFromMesh(*loadedMesh);
 
             allVertices.AddRange(vertices);
             allIndices.AddRange(indices);
@@ -136,81 +126,6 @@ namespace Nova
             indexOffset += subMeshInfo.indexBufferSize;
         }
 
-        if (loadResources && !m_MaterialInfos.IsEmpty())
-        {
-            AssetDatabase& assetDatabase = Application::GetCurrentApplication().GetAssetDatabase();
-            const Ref<Shader> pbrShader = assetDatabase.Get<Shader>("PBRShadingShader");
-
-            for (uint32_t i = 0; i < m_MaterialInfos.Count(); ++i)
-            {
-                const aiMaterial* loadedMaterial = loadedScene->mMaterials[i];
-                aiString alphaMode;
-                Ref<Material> material = nullptr;
-                if (loadedMaterial->Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) != AI_SUCCESS)
-                    continue;
-
-                if (alphaMode == aiString("OPAQUE"))
-                {
-                    material = device->CreateMaterial({device, pbrShader});
-                    if (!material) continue;
-                    m_MaterialInfos[i].material = material;
-                    m_MaterialInfos[i].materialType = MaterialType::Opaque;
-                }
-                else if (alphaMode == aiString("MASK"))
-                {
-                    material = device->CreateMaterial({device, pbrShader});
-                    if (!material) continue;
-                    m_MaterialInfos[i].material = material;
-                    m_MaterialInfos[i].materialType = MaterialType::Cutout;
-                }
-                else if (alphaMode == aiString("BLEND"))
-                {
-                    material = device->CreateMaterial({device, pbrShader});
-                    if (!material) continue;
-                    m_MaterialInfos[i].material = material;
-                    m_MaterialInfos[i].materialType = MaterialType::Transparent;
-                }
-
-                const auto FindAndAssignTexture = [&](aiTextureType textureType, StringView variableName, const String& placeholderTextureName)
-                {
-                    if (loadedMaterial->GetTextureCount(textureType) > 0)
-                    {
-                        aiString materialName = loadedMaterial->GetName();
-                        aiString path;
-                        if (loadedMaterial->GetTexture(textureType, 0, &path) == AI_SUCCESS)
-                        {
-                            const aiTexture* loadedTexture = loadedScene->GetEmbeddedTexture(path.data);
-                            if (loadedTexture)
-                            {
-                                Ref<Texture> texture = TextureUtils::LoadTexture(device, loadedTexture->pcData, loadedTexture->mWidth);
-                                assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), loadedTexture->mFilename.C_Str()));
-                                if (!texture) return;
-                                m_MaterialInfos[i].textures.Add(texture);
-                                material->SetTexture(variableName, texture);
-                            } else
-                            {
-                                Array fileContent = FileUtils::ReadToBuffer({path.data, path.length});
-                                if (fileContent.IsEmpty())
-                                    return;
-                                Ref<Texture> texture = TextureUtils::LoadTexture(device, fileContent.Data(), fileContent.Size());
-                                assetDatabase.AddAsset(texture, StringFormat("RuntimeLoadedMaterial_{}_Texture_{}", materialName.C_Str(), path.C_Str()));
-                                if (!texture) return;
-                                m_MaterialInfos[i].textures.Add(texture);
-                                material->SetTexture(variableName, texture);
-                            }
-
-                        }
-                    } else
-                    {
-                        material->SetTexture(variableName, assetDatabase.Get<Texture>(placeholderTextureName));
-                    }
-                };
-
-                FindAndAssignTexture(aiTextureType_BASE_COLOR, "albedoTex", "CheckerTexPlaceholder");
-                FindAndAssignTexture(aiTextureType_GLTF_METALLIC_ROUGHNESS, "metallnessRoughnessTex", "BlackTexPlaceholder");
-                FindAndAssignTexture(aiTextureType_NORMALS, "normalTex", "NormalTexPlaceholder");
-            }
-        }
 
         if (m_VertexBuffer) m_VertexBuffer->Destroy();
         m_VertexBuffer = CreateVertexBuffer(device, allVertices.Data(), allVertices.Size());

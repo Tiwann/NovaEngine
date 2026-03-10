@@ -20,6 +20,7 @@ namespace Nova
         for (uint32_t i = 0; i < imageCount; i++)
         {
             TextureCreateInfo colorCreateInfo;
+            colorCreateInfo.device = device;
             colorCreateInfo.format = createInfo.colorFormat;
             colorCreateInfo.usageFlags = TextureUsageFlagBits::ColorAttachment;
             colorCreateInfo.width = createInfo.width;
@@ -39,6 +40,7 @@ namespace Nova
 
 
             TextureCreateInfo depthCreateInfo;
+            depthCreateInfo.device = device;
             depthCreateInfo.format = createInfo.depthFormat;
             depthCreateInfo.usageFlags = TextureUsageFlagBits::DepthStencilAttachment;
             depthCreateInfo.width = createInfo.width;
@@ -56,6 +58,7 @@ namespace Nova
             if (!success) return false;
 
             TextureViewCreateInfo colorViewCreateInfo;
+            colorViewCreateInfo.device = device;
             colorViewCreateInfo.texture = m_ColorTextures[i];
             colorViewCreateInfo.format = createInfo.colorFormat;
             colorViewCreateInfo.width = createInfo.width;
@@ -73,6 +76,7 @@ namespace Nova
             if (!success) return false;
 
             TextureViewCreateInfo depthViewCreateInfo;
+            depthViewCreateInfo.device = device;
             depthViewCreateInfo.texture = m_DepthTextures[i];
             depthViewCreateInfo.format = createInfo.depthFormat;
             depthViewCreateInfo.width = createInfo.width;

@@ -7,7 +7,6 @@
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
-
 namespace Nova::Vulkan
 {
     bool Texture::Initialize(const TextureCreateInfo& createInfo)
@@ -74,15 +73,24 @@ namespace Nova::Vulkan
         m_Dimension = dimension;
 
         // DECIDED TO EXPLICITLY TRANSITION TO LAYOUT GENERAL BY DEFAULT
-        const bool isColorAttachment = createInfo.usageFlags.Contains(TextureUsageFlagBits::ColorAttachment);
-        const bool isDepthAttachment = createInfo.usageFlags.Contains(TextureUsageFlagBits::DepthStencilAttachment);
+        const auto& usageFlags = createInfo.usageFlags;
+        const bool isColorAttachment = usageFlags.Contains(TextureUsageFlagBits::ColorAttachment);
+        const bool isDepthAttachment = usageFlags.Contains(TextureUsageFlagBits::DepthStencilAttachment);
         const bool isSampled = createInfo.usageFlags.Contains(TextureUsageFlagBits::Sampled);
+
+        const AccessFlagBits destAccess = isColorAttachment ? AccessFlagBits::ColorAttachmentWrite :
+        isDepthAttachment ? AccessFlagBits::DepthStencilAttachmentWrite :
+        isSampled ? AccessFlagBits::ShaderRead : AccessFlagBits::None;
+
+        const ResourceState destState = isColorAttachment ? ResourceState::ColorAttachment :
+        isDepthAttachment ? ResourceState::DepthStencilAttachment :
+        isSampled ? ResourceState::ShaderRead : ResourceState::General;
 
         TextureBarrier barrier;
         barrier.texture = this;
         barrier.sourceAccess = AccessFlagBits::None;
-        barrier.destAccess = isColorAttachment ? AccessFlagBits::ColorAttachmentWrite : isDepthAttachment ? AccessFlagBits::DepthStencilAttachmentWrite : isSampled ? AccessFlagBits::ShaderRead : AccessFlagBits::None;
-        barrier.destState = isColorAttachment ? ResourceState::ColorAttachment : isDepthAttachment ? ResourceState::DepthStencilAttachment : isSampled ? ResourceState::ShaderRead : ResourceState::General;
+        barrier.destAccess = destAccess;
+        barrier.destState = destState;
         barrier.destQueue = nullptr;
         barrier.destQueue = nullptr;
 

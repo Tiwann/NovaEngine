@@ -47,7 +47,7 @@ namespace Nova::OpenGL
     };
 #endif
 
-    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const RenderDeviceCreateInfo& createInfo)
     {
         if (!createInfo.window)
         {

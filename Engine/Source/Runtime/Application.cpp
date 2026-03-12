@@ -12,10 +12,9 @@
 #include "Rendering/CommandBuffer.h"
 #include "Rendering/Swapchain.h"
 #include "Utils/TextureUtils.h"
-
+#include "Rendering/RenderPass.h"
 #include <imgui.h>
 #include <slang/slang.h>
-
 
 namespace Nova
 {
@@ -50,16 +49,16 @@ namespace Nova
     }
 
 
-    static Ref<Texture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
+    static Ref<ITexture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
     {
-        Ref<Texture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
+        Ref<ITexture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
         database.AddAsset(texture, assetName);
         return texture;
     };
 
     void Application::Run()
     {
-        ApplicationConfiguration configuration = GetConfiguration();
+        const ApplicationConfiguration configuration = GetConfiguration();
         const RenderDeviceType deviceType = GetRenderDeviceType();
 
         // Creating window
@@ -79,7 +78,7 @@ namespace Nova
         m_Window->CloseEvent.BindMember(this, &Application::Exit);
 
         // Creating render device;
-        DeviceCreateInfo rdCreateInfo;
+        RenderDeviceCreateInfo rdCreateInfo;
         rdCreateInfo.appName = configuration.applicationName;
         rdCreateInfo.window = m_Window;
         rdCreateInfo.buffering = SwapchainBuffering::DoubleBuffering;
@@ -106,6 +105,10 @@ namespace Nova
             Destroy();
             return;
         }
+        if (Swapchain* swapchain = m_Device->GetSwapchain())
+        {
+            swapchain->ResizedEvent.BindMember(m_RenderTarget.Get(), &RenderTarget::Resize);
+        }
 
         // Creating imgui renderer
         m_ImGuiRenderer = CreateImGuiRenderer(m_Window, m_Device, configuration.msaaSamples);
@@ -117,16 +120,14 @@ namespace Nova
 
         m_Window->MaximizeEvent.Bind([this]
         {
-            if (Nova::Swapchain* swapchain = m_Device->GetSwapchain())
+            if (Swapchain* swapchain = m_Device->GetSwapchain())
                 swapchain->Invalidate();
         });
 
-        m_Window->ResizeEvent.Bind([this](const int32_t newWidth, const int32_t newHeight)
+        m_Window->ResizeEvent.Bind([this](const int32_t, const int32_t)
         {
-            if (Nova::Swapchain* swapchain = m_Device->GetSwapchain())
+            if (Swapchain* swapchain = m_Device->GetSwapchain())
                 swapchain->Invalidate();
-
-            m_RenderTarget->Resize(newWidth, newHeight);
         });
 
         if (SLANG_FAILED(slang::createGlobalSession(&m_SlangSession)))
@@ -147,23 +148,21 @@ namespace Nova
         }
 
         // Load engine shaders
-        AssetDatabase& database = GetAssetDatabase();
-        Ref<RenderDevice> device = GetRenderDevice();
-        LoadShaderBasic(database, device, "Sprite", "Shaders/Sprite.slang");
-        //LoadShaderBasic(database, device, "BlinnPhongOpaque", "Shaders/BlinnPhong.slang");
-        //LoadShaderBasic(database, device, "BlinnPhongTransparent", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
-        //LoadShaderBasic(database, device, "BlinnPhongCutout", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
-        LoadShaderBasic(database, device, "PBRShading", "Shaders/PBRShading.slang");
-        LoadShaderBasic(database, device, "PBRShadingTransparent", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
-        LoadShaderBasic(database, device, "PBRShadingCutout", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
-        LoadShaderBasic(database, device, "Fullscreen", "Shaders/Fullscreen.slang");
-        Ref<Shader> debugShader = LoadShaderBasic(database, device, "Debug", "Shaders/Debug.slang");
+        LoadShaderBasic(m_AssetDatabase, m_Device, "Sprite", "Shaders/Sprite.slang");
+        //LoadShaderBasic(m_AssetDatabase, m_Device, "BlinnPhongOpaque", "Shaders/BlinnPhong.slang");
+        //LoadShaderBasic(m_AssetDatabase, m_Device, "BlinnPhongTransparent", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
+        //LoadShaderBasic(m_AssetDatabase, m_Device, "BlinnPhongCutout", "Shaders/BlinnPhong.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
+        LoadShaderBasic(m_AssetDatabase, m_Device, "PBRShading", "Shaders/PBRShading.slang");
+        LoadShaderBasic(m_AssetDatabase, m_Device, "PBRShadingTransparent", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_TRANSPARENT"}});
+        LoadShaderBasic(m_AssetDatabase, m_Device, "PBRShadingCutout", "Shaders/PBRShading.slang", {}, {{"NOVA_MATERIAL_CUTOUT"}});
+        LoadShaderBasic(m_AssetDatabase, m_Device, "Fullscreen", "Shaders/Fullscreen.slang");
+        Ref<Shader> debugShader = LoadShaderBasic(m_AssetDatabase, m_Device, "Debug", "Shaders/Debug.slang");
 
-        LoadTextureBasic(database, device, "Textures/BlackTexPlaceholder.png", "BlackTexPlaceholder");
-        LoadTextureBasic(database, device, "Textures/WhiteTexPlaceholder.png", "WhiteTexPlaceholder");
-        LoadTextureBasic(database, device, "Textures/GreyTexPlaceholder.png", "GreyTexPlaceholder");
-        LoadTextureBasic(database, device, "Textures/CheckerTexPlaceholder.png", "CheckerTexPlaceholder");
-        LoadTextureBasic(database, device, "Textures/NormalTexPlaceholder.png", "NormalTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/BlackTexPlaceholder.png", "BlackTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/WhiteTexPlaceholder.png", "WhiteTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/GreyTexPlaceholder.png", "GreyTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/CheckerTexPlaceholder.png", "CheckerTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/NormalTexPlaceholder.png", "NormalTexPlaceholder");
 
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;

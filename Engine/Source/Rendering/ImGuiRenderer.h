@@ -39,5 +39,5 @@ namespace Nova
         ImGuiContext* m_Context = nullptr;
     };
 
-    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, RenderDevice* device, uint32_t sampleCount);
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Ref<Window> window, Ref<RenderDevice> device, uint32_t sampleCount);
 }

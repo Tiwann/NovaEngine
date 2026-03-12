@@ -12,7 +12,7 @@ namespace Nova
     class RenderDevice;
     class CommandBuffer;
     class TextureView;
-    class Texture;
+    class ITexture;
 
     struct RenderTargetCreateInfo
     {
@@ -32,10 +32,10 @@ namespace Nova
 
         bool Initialize(const RenderTargetCreateInfo& createInfo);
         void Destroy();
-        bool Resize(uint32_t newWidth, uint32_t newHeight);
+        void Resize(uint32_t newWidth, uint32_t newHeight);
 
-        Ref<Texture> GetColorTexture();
-        Ref<Texture> GetDepthTexture();
+        Ref<ITexture> GetColorTexture();
+        Ref<ITexture> GetDepthTexture();
         Ref<TextureView> GetColorTextureView();
         Ref<TextureView> GetDepthTextureView();
 
@@ -45,6 +45,8 @@ namespace Nova
         Format GetDepthFormat() const;
         uint32_t GetSampleCount() const;
         uint32_t GetImageCount() const;
+
+        bool IsValid() const { return m_IsValid; }
     protected:
         RenderDevice* m_Device = nullptr;
         uint32_t m_Width = 0;
@@ -53,9 +55,10 @@ namespace Nova
         Format m_DepthFormat = Format::None;
         uint32_t m_SampleCount = 0;
         uint32_t m_ImageCount = 0;
+        bool m_IsValid = false;
 
-        Ref<Texture> m_ColorTextures[3] = { nullptr, nullptr, nullptr };
-        Ref<Texture> m_DepthTextures[3] = { nullptr, nullptr, nullptr };
+        Ref<ITexture> m_ColorTextures[3] = { nullptr, nullptr, nullptr };
+        Ref<ITexture> m_DepthTextures[3] = { nullptr, nullptr, nullptr };
         Ref<TextureView> m_ColorTextureViews[3] = { nullptr, nullptr, nullptr };
         Ref<TextureView> m_DepthTextureViews[3] = { nullptr, nullptr, nullptr };
     };

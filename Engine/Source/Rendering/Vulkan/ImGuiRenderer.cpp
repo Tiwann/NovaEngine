@@ -32,7 +32,7 @@ namespace Nova::Vulkan
         ImGui_ImplVulkan_InitInfo initInfo;
         Memory::Memzero(initInfo);
 
-        initInfo.Instance = device->GetInstance();
+        initInfo.Instance = device->GetVulkanInstance();
         initInfo.Device = device->GetHandle();
         initInfo.PhysicalDevice = device->GetPhysicalDevice();
         initInfo.Queue = graphicsQueue->GetHandle();

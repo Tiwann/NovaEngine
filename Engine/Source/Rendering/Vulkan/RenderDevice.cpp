@@ -30,86 +30,93 @@
 
 namespace Nova::Vulkan
 {
-    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const RenderDeviceCreateInfo& createInfo)
     {
         if (!createInfo.window)
             return false;
 
-        VkApplicationInfo applicationInfo = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
-        applicationInfo.apiVersion = VK_API_VERSION_1_4;
-        applicationInfo.pEngineName = "Nova Engine";
-        applicationInfo.engineVersion = NOVA_VERSION;
-        applicationInfo.pApplicationName = *createInfo.appName;
-        applicationInfo.applicationVersion = 0;
+        if (!s_Instance)
+        {
+            VkApplicationInfo applicationInfo = { VK_STRUCTURE_TYPE_APPLICATION_INFO };
+            applicationInfo.apiVersion = VK_API_VERSION_1_4;
+            applicationInfo.pEngineName = "Nova Engine";
+            applicationInfo.engineVersion = NOVA_VERSION;
+            applicationInfo.pApplicationName = *createInfo.appName;
+            applicationInfo.applicationVersion = 0;
 
-        Array<const char*> layers;
-        layers.Add(VK_LAYER_KHRONOS_VALIDATION_NAME);
+            Array<const char*> layers;
+            layers.Add(VK_LAYER_KHRONOS_VALIDATION_NAME);
 
-        Array<const char*> extensions;
-        extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
+            Array<const char*> extensions;
+            extensions.Add(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);
 
-        extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+            extensions.Add(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
 
 #endif
 
-        if (dynamic_cast<DesktopWindow*>(createInfo.window))
-        {
-            uint32_t glfwExtensionsCount;
-            const char** lfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
-            extensions.AddRange(lfwExtensions, glfwExtensionsCount);
-        }
+            if (dynamic_cast<DesktopWindow*>(createInfo.window))
+            {
+                uint32_t glfwExtensionsCount;
+                const char** lfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
+                extensions.AddRange(lfwExtensions, glfwExtensionsCount);
+            }
 
-        VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
-        instanceCreateInfo.pApplicationInfo = &applicationInfo;
-        instanceCreateInfo.ppEnabledLayerNames = layers.Data();
-        instanceCreateInfo.enabledLayerCount = layers.Count();
-        instanceCreateInfo.ppEnabledExtensionNames = extensions.Data();
-        instanceCreateInfo.enabledExtensionCount = extensions.Count();
+            VkInstanceCreateInfo instanceCreateInfo = { VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO };
+            instanceCreateInfo.pApplicationInfo = &applicationInfo;
+            instanceCreateInfo.ppEnabledLayerNames = layers.Data();
+            instanceCreateInfo.enabledLayerCount = layers.Count();
+            instanceCreateInfo.ppEnabledExtensionNames = extensions.Data();
+            instanceCreateInfo.enabledExtensionCount = extensions.Count();
 
-        if (vkCreateInstance(&instanceCreateInfo, nullptr, &m_Instance) != VK_SUCCESS)
-        {
-            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create instance!");
-            return false;
-        }
+            if (vkCreateInstance(&instanceCreateInfo, nullptr, &s_Instance) != VK_SUCCESS)
+            {
+                NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create instance!");
+                return false;
+            }
 
-        if (!LoadVulkanFunctions(m_Instance))
-            return false;
+            if (!LoadVulkanFunctions(s_Instance))
+                return false;
+
+
 
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        static const decltype(VkDebugUtilsMessengerCreateInfoEXT::pfnUserCallback) messageCallback =
-            [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-            const VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-            void* pUserData) -> VkBool32
-        {
-            if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+            if (!s_DebugMessenger)
             {
-                NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN ERROR] {}", pCallbackData->pMessage);
-                return true;
-            }
+                static const decltype(VkDebugUtilsMessengerCreateInfoEXT::pfnUserCallback) messageCallback =
+                    [](VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                    const VkDebugUtilsMessageTypeFlagsEXT messageTypes,
+                    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                    void* pUserData) -> VkBool32
+                    {
+                        if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+                        {
+                            NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN ERROR] {}", pCallbackData->pMessage);
+                            return true;
+                        }
 
-            if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
-            {
-                NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN WARNING] {}", pCallbackData->pMessage);
-                return true;
+                        if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+                        {
+                            NOVA_LOG(RenderDevice, Verbosity::Error,"[VULKAN WARNING] {}", pCallbackData->pMessage);
+                            return true;
+                        }
+                        return false;
+                    };
+                VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo = { VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
+                debugMessengerCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+                VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+                debugMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+                debugMessengerCreateInfo.pfnUserCallback = messageCallback;
+                if (vkCreateDebugUtilsMessenger(s_Instance, &debugMessengerCreateInfo, nullptr, &s_DebugMessenger) != VK_SUCCESS)
+                    return false;
             }
-            return false;
-        };
-        VkDebugUtilsMessengerCreateInfoEXT debugMessengerCreateInfo = { VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT };
-        debugMessengerCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugMessengerCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
-        debugMessengerCreateInfo.pfnUserCallback = messageCallback;
-        if (vkCreateDebugUtilsMessenger(m_Instance, &debugMessengerCreateInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS)
-            return false;
 #endif
-
+        }
         VkPhysicalDevice availablePhysicalDevices[32];
         uint32_t availablePhysicalDeviceCount = 0;
-        vkEnumeratePhysicalDevices(m_Instance, &availablePhysicalDeviceCount, nullptr);
-        vkEnumeratePhysicalDevices(m_Instance, &availablePhysicalDeviceCount, availablePhysicalDevices);
+        vkEnumeratePhysicalDevices(s_Instance, &availablePhysicalDeviceCount, nullptr);
+        vkEnumeratePhysicalDevices(s_Instance, &availablePhysicalDeviceCount, availablePhysicalDevices);
 
         if (availablePhysicalDeviceCount == 1)
         {
@@ -227,7 +234,6 @@ namespace Nova::Vulkan
         deviceExtensions.Add(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
         deviceExtensions.Add(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
-
         VkPhysicalDeviceShaderDrawParametersFeatures shaderDrawParametersFeatures = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES };
         shaderDrawParametersFeatures.shaderDrawParameters = true;
 
@@ -311,7 +317,7 @@ namespace Nova::Vulkan
 
         VmaAllocatorCreateInfo allocatorCreateInfo = { 0 };
         allocatorCreateInfo.device = m_Handle;
-        allocatorCreateInfo.instance = m_Instance;
+        allocatorCreateInfo.instance = s_Instance;
         allocatorCreateInfo.physicalDevice = m_PhysicalDevice;
         allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
         if (vmaCreateAllocator(&allocatorCreateInfo, &m_Allocator) != VK_SUCCESS)
@@ -438,10 +444,10 @@ namespace Nova::Vulkan
         vmaDestroyAllocator(m_Allocator);
         m_Surface.Destroy();
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-        vkDestroyDebugUtilsMessenger(m_Instance, m_DebugMessenger, nullptr);
+        vkDestroyDebugUtilsMessenger(s_Instance, s_DebugMessenger, nullptr);
 #endif
         vkDestroyDevice(m_Handle, nullptr);
-        vkDestroyInstance(m_Instance, nullptr);
+        vkDestroyInstance(s_Instance, nullptr);
     }
 
 
@@ -459,7 +465,7 @@ namespace Nova::Vulkan
         }
 
         Fence& fence = m_Frames[m_LastFrameIndex].fence;
-        fence.Wait(FENCE_WAIT_INFINITE);
+        fence.Wait(FENCE_WAIT_INFINITE_NS);
         fence.Reset();
 
         const Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;
@@ -538,7 +544,8 @@ namespace Nova::Vulkan
     void RenderDevice::Present()
     {
         const Semaphore& submitSemaphore = GetCurrentSubmitSemaphore();
-        (void)m_GraphicsQueue.Present(m_Swapchain, &submitSemaphore, m_CurrentFrameIndex);
+        if (!m_GraphicsQueue.Present(m_Swapchain, &submitSemaphore, m_CurrentFrameIndex))
+            m_Swapchain.Invalidate();
         m_LastFrameIndex = m_CurrentFrameIndex;
     }
 
@@ -564,7 +571,7 @@ namespace Nova::Vulkan
 
     }
 
-    Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<Nova::ITexture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
         TextureCreateInfo textureCreateInfo(createInfo);
@@ -577,7 +584,7 @@ namespace Nova::Vulkan
         return Ref(texture);
     }
 
-    Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
+    Ref<Nova::ITexture> RenderDevice::CreateTextureUnitialized()
     {
         return MakeRef<Texture>();
     }
@@ -691,9 +698,9 @@ namespace Nova::Vulkan
         return Ref(commandBuffer);
     }
 
-    VkInstance RenderDevice::GetInstance() const
+    VkInstance RenderDevice::GetVulkanInstance()
     {
-        return m_Instance;
+        return s_Instance;
     }
 
     VkDevice RenderDevice::GetHandle() const

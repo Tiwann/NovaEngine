@@ -49,14 +49,14 @@ namespace Nova
 #define NOVA_RETURN_IMPL(className) \
 { \
     renderer = new (className)(); \
-    if (!renderer->Initialize({window, device, sampleCount})) \
+    if (!renderer->Initialize({window.Get(), device.Get(), sampleCount})) \
     { \
         delete renderer; \
         return nullptr; \
     } \
 } break;
 
-    Ref<ImGuiRenderer> CreateImGuiRenderer(Window* window, RenderDevice* device, const uint32_t sampleCount)
+    Ref<ImGuiRenderer> CreateImGuiRenderer(Ref<Window> window, Ref<RenderDevice> device, const uint32_t sampleCount)
     {
         if (!window) return nullptr;
         if (!device) return nullptr;

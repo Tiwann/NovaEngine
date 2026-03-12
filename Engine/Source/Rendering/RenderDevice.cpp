@@ -30,7 +30,12 @@ namespace Nova
         return m_VSync;
     }
 
-    Ref<RenderDevice> CreateRenderDevice(const RenderDeviceType type, const DeviceCreateInfo& createInfo)
+    Ref<RenderDevice> RenderDevice::GetInstance()
+    {
+        return Ref(s_Instance);
+    }
+
+    Ref<RenderDevice> CreateRenderDevice(const RenderDeviceType type, const RenderDeviceCreateInfo& createInfo)
     {
         RenderDevice* device = nullptr;
         switch (type)
@@ -77,10 +82,6 @@ namespace Nova
         return Ref(device);
     }
 
-    RenderDevice::RenderDevice() : Object("Render Device")
-    {
-    }
-
     void RenderDevice::Destroy()
     {
         for (auto& [_, sampler] : m_Samplers)
@@ -111,7 +112,7 @@ namespace Nova
         return CreateBuffer(bufferCreateInfo);
     }
 
-    Ref<Texture> RenderDevice::CreateTexture(const TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
+    Ref<ITexture> RenderDevice::CreateTexture(const TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
     {
         TextureCreateInfo createInfo;
         createInfo.width = width;
@@ -120,7 +121,7 @@ namespace Nova
         createInfo.format = format;
         createInfo.usageFlags = usage;
         createInfo.sampleCount = 1;
-        createInfo.mips = 1;
+        createInfo.mipCount = 1;
         return CreateTexture(createInfo);
     }
 
@@ -154,5 +155,32 @@ namespace Nova
         }
 
         return m_Samplers[createInfo];
+    }
+
+    void RenderDevice::ImmediateTextureBarrier(const TextureBarrier& barrier)
+    {
+        Ref<RenderDevice> device = GetInstance();
+        if (!device) return;
+
+        Ref<CommandBuffer> cmdBuffer = device->CreateCommandBuffer();
+        if (!cmdBuffer) return;
+
+        Ref<Fence> fence = device->CreateFence();
+        if (!fence) return;
+        fence->Initialize({device, FenceCreateFlags::None()});
+
+        if (cmdBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
+        {
+            cmdBuffer->TextureBarrier(barrier);
+            cmdBuffer->End();
+
+            const Queue* graphicsQueue = device->GetGraphicsQueue();
+            graphicsQueue->Submit(cmdBuffer, nullptr, nullptr, fence);
+
+            fence->Wait(FENCE_WAIT_INFINITE_NS);
+        }
+
+        cmdBuffer->Free();
+        fence->Destroy();
     }
 }

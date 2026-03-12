@@ -6,7 +6,7 @@ namespace Nova::Null
     class RenderDevice final : public Nova::RenderDevice
     {
     public:
-        bool Initialize(const DeviceCreateInfo& createInfo) override;
+        bool Initialize(const RenderDeviceCreateInfo& createInfo) override;
         void Destroy() override;
         bool BeginFrame() override;
         void EndFrame() override;
@@ -14,8 +14,8 @@ namespace Nova::Null
         void WaitIdle() const override;
         void SetName(StringView name) override;
         RenderDeviceType GetDeviceType() override;
-        Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
-        Ref<Texture> CreateTextureUnitialized() override;
+        Ref<ITexture> CreateTexture(const TextureCreateInfo& createInfo) override;
+        Ref<ITexture> CreateTextureUnitialized() override;
         Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
@@ -26,5 +26,7 @@ namespace Nova::Null
         Ref<Fence> CreateFence(const FenceCreateInfo& createInfo) override;
         uint32_t GetImageCount() const override;
         Ref<RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
+        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        uint32_t GetCurrentFrameIndex() const override;
     };
 }

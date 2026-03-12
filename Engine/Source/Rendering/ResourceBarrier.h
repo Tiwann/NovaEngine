@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    class Texture;
+    class ITexture;
     class Buffer;
     class Queue;
 
@@ -27,7 +27,7 @@ namespace Nova
 
     struct TextureBarrier
     {
-        Texture* texture = nullptr;
+        ITexture* texture = nullptr;
         ResourceState destState = ResourceState::Undefined;
         AccessFlags sourceAccess = AccessFlagBits::None;
         AccessFlags destAccess = AccessFlagBits::None;
@@ -77,8 +77,8 @@ namespace Nova
         case ResourceState::Undefined: return AccessFlagBits::None;
         case ResourceState::ColorAttachment: return AccessFlagBits::ColorAttachmentRead;
         case ResourceState::DepthStencilAttachment: return AccessFlagBits::DepthStencilAttachmentRead;
-        case ResourceState::TransferSource: return AccessFlagBits::TransferWrite;
-        case ResourceState::TransferDest: return AccessFlagBits::TransferRead;
+        case ResourceState::TransferSource: return AccessFlagBits::TransferRead;
+        case ResourceState::TransferDest: return AccessFlagBits::TransferWrite;
         case ResourceState::ShaderRead: return AccessFlagBits::ShaderRead;
         case ResourceState::ShaderWrite: return AccessFlagBits::ShaderWrite;
         case ResourceState::General: return AccessFlagBits::None;

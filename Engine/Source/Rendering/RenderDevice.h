@@ -2,14 +2,14 @@
 #include "Containers/String.h"
 #include "Containers/StringView.h"
 #include "Containers/Map.h"
-#include "SwpchainBuffering.h"
 #include "Runtime/Ref.h"
 #include "Runtime/Object.h"
+#include "Runtime/Format.h"
+#include "Runtime/LogCategory.h"
+#include "SwpchainBuffering.h"
 #include "RenderDeviceType.h"
 #include "BufferUsage.h"
 #include "TextureUsage.h"
-#include "Runtime/Format.h"
-#include "Runtime/LogCategory.h"
 #include "Sampler.h"
 
 #include <cstdint>
@@ -21,7 +21,7 @@ namespace Nova
     class Window;
     class Surface;
     struct SurfaceCreateInfo;
-    class Texture;
+    class ITexture;
     struct TextureCreateInfo;
     class Buffer;
     struct BufferCreateInfo;
@@ -42,8 +42,9 @@ namespace Nova
     class TextureView;
     struct TextureViewCreateInfo;
     class Queue;
+    struct TextureBarrier;
 
-    struct DeviceCreateInfo
+    struct RenderDeviceCreateInfo
     {
         String appName;
         Window* window = nullptr;
@@ -54,11 +55,14 @@ namespace Nova
     class RenderDevice : public Object
     {
     public:
-        RenderDevice();
+        RenderDevice() : Object("RenderDevice")
+        {
+            if (!s_Instance) s_Instance = this;
+        }
 
-        ~RenderDevice() override = default;
+        ~RenderDevice() override { s_Instance = nullptr; }
 
-        virtual bool Initialize(const DeviceCreateInfo& createInfo) = 0;
+        virtual bool Initialize(const RenderDeviceCreateInfo& createInfo) = 0;
         virtual void Destroy();
 
         virtual bool BeginFrame() = 0;
@@ -75,8 +79,8 @@ namespace Nova
         virtual RenderDeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
-        virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
-        virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
+        virtual Ref<Nova::ITexture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::ITexture> CreateTextureUnitialized() = 0;
         virtual Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
@@ -89,7 +93,7 @@ namespace Nova
 
         Ref<Nova::Fence> CreateFence();
         Ref<Nova::Buffer> CreateBuffer(BufferUsage usage, size_t size);
-        Ref<Nova::Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
+        Ref<Nova::ITexture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
         Ref<Nova::Material> CreateMaterial(Ref<Shader> material);
         Ref<Nova::ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
         Ref<Nova::Sampler> CreateSampler();
@@ -102,12 +106,17 @@ namespace Nova
 
         StringView GetDeviceVendor() const;
         bool HasVSync() const;
+
+        static Ref<RenderDevice> GetInstance();
+
+        static void ImmediateTextureBarrier(const TextureBarrier& barrier);
     protected:
         String m_DeviceVendor;
         bool m_VSync = false;
     private:
         Map<SamplerCreateInfo, Ref<Nova::Sampler>> m_Samplers;
+        static inline RenderDevice* s_Instance = nullptr;
     };
 
-    Ref<RenderDevice> CreateRenderDevice(RenderDeviceType type, const DeviceCreateInfo& createInfo);
+    Ref<RenderDevice> CreateRenderDevice(RenderDeviceType type, const RenderDeviceCreateInfo& createInfo);
 }

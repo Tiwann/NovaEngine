@@ -1,6 +1,6 @@
 ﻿#include "RenderDevice.h"
 #include "RenderTarget.h"
-#include "Texture.h"
+#include "ITexture.h"
 #include "TextureView.h"
 
 namespace Nova
@@ -15,7 +15,35 @@ namespace Nova
 
         RenderDevice* device = createInfo.device;
         const uint32_t imageCount = device->GetImageCount();
-        if (imageCount > 3) return false;
+        NOVA_ASSERT(imageCount <= 3, "Image count should be less or equal to 3!");
+
+        const auto initializeTexture = [&device](Ref<ITexture>& texture, const TextureCreateInfo& createInfo) -> bool
+        {
+            if (texture) {
+                if (!texture->Initialize(createInfo))
+                    return false;
+            } else {
+                texture = device->CreateTexture(createInfo);
+                if (!texture) return false;
+            }
+
+            return true;
+        };
+
+        const auto initializeTextureView = [&device](Ref<TextureView>& textureView, const TextureViewCreateInfo& createInfo) -> bool
+        {
+            if (textureView)
+            {
+                if (!textureView->Initialize(createInfo))
+                    return false;
+            } else
+            {
+                textureView = device->CreateTextureView(createInfo);
+                if (!textureView) return false;
+            }
+
+            return true;
+        };
 
         for (uint32_t i = 0; i < imageCount; i++)
         {
@@ -26,18 +54,10 @@ namespace Nova
             colorCreateInfo.width = createInfo.width;
             colorCreateInfo.height = createInfo.height;
             colorCreateInfo.depth = 1;
-            colorCreateInfo.mips = 1;
+            colorCreateInfo.mipCount = 1;
             colorCreateInfo.sampleCount = createInfo.sampleCount;
-
-            bool success = false;
-            if (!m_ColorTextures[i]) {
-                m_ColorTextures[i] = device->CreateTexture(colorCreateInfo);
-                success = m_ColorTextures[i];
-            } else {
-                success = m_ColorTextures[i]->Initialize(colorCreateInfo);
-            }
-            if (!success) return false;
-
+            if (!initializeTexture(m_ColorTextures[i], colorCreateInfo))
+                return false;
 
             TextureCreateInfo depthCreateInfo;
             depthCreateInfo.device = device;
@@ -46,16 +66,10 @@ namespace Nova
             depthCreateInfo.width = createInfo.width;
             depthCreateInfo.height = createInfo.height;
             depthCreateInfo.depth = 1;
-            depthCreateInfo.mips = 1;
+            depthCreateInfo.mipCount = 1;
             depthCreateInfo.sampleCount = createInfo.sampleCount;
-
-            if (!m_DepthTextures[i]) {
-                m_DepthTextures[i] = device->CreateTexture(depthCreateInfo);
-                success = m_DepthTextures[i] != nullptr;
-            } else {
-                success = m_DepthTextures[i]->Initialize(depthCreateInfo);
-            }
-            if (!success) return false;
+            if (!initializeTexture(m_DepthTextures[i], depthCreateInfo))
+                return false;
 
             TextureViewCreateInfo colorViewCreateInfo;
             colorViewCreateInfo.device = device;
@@ -67,13 +81,8 @@ namespace Nova
             colorViewCreateInfo.aspectFlags = TextureAspectFlagBits::Color;
             colorViewCreateInfo.baseMipLevel = 0;
             colorViewCreateInfo.mipCount = 1;
-            if (!m_ColorTextureViews[i]) {
-                m_ColorTextureViews[i] = device->CreateTextureView(colorViewCreateInfo);
-                success = m_ColorTextureViews[i] != nullptr;
-            } else {
-                success = m_ColorTextureViews[i]->Initialize(colorViewCreateInfo);
-            }
-            if (!success) return false;
+            if (!initializeTextureView(m_ColorTextureViews[i], colorViewCreateInfo))
+                return false;
 
             TextureViewCreateInfo depthViewCreateInfo;
             depthViewCreateInfo.device = device;
@@ -85,13 +94,8 @@ namespace Nova
             depthViewCreateInfo.aspectFlags = TextureAspectFlagBits::Depth | TextureAspectFlagBits::Stencil;
             depthViewCreateInfo.baseMipLevel = 0;
             depthViewCreateInfo.mipCount = 1;
-            if (!m_DepthTextureViews[i]) {
-                m_DepthTextureViews[i] = device->CreateTextureView(depthViewCreateInfo);
-                success = m_DepthTextureViews[i] != nullptr;
-            } else {
-                success = m_DepthTextureViews[i]->Initialize(depthViewCreateInfo);
-            }
-            if (!success) return false;
+            if (!initializeTextureView(m_DepthTextureViews[i], depthViewCreateInfo))
+                return false;
         }
 
 
@@ -116,7 +120,7 @@ namespace Nova
         }
     }
 
-    bool RenderTarget::Resize(const uint32_t newWidth, const uint32_t newHeight)
+    void RenderTarget::Resize(const uint32_t newWidth, const uint32_t newHeight)
     {
         RenderTargetCreateInfo createInfo;
         createInfo.device = m_Device;
@@ -126,16 +130,16 @@ namespace Nova
         createInfo.colorFormat = m_ColorFormat;
         createInfo.depthFormat = m_DepthFormat;
         createInfo.sampleCount = m_SampleCount;
-        return Initialize(createInfo);
+        Initialize(createInfo);
     }
 
-    Ref<Texture> RenderTarget::GetColorTexture()
+    Ref<ITexture> RenderTarget::GetColorTexture()
     {
         const uint32_t index = m_Device->GetCurrentFrameIndex();
         return m_ColorTextures[index];
     }
 
-    Ref<Texture> RenderTarget::GetDepthTexture()
+    Ref<ITexture> RenderTarget::GetDepthTexture()
     {
         const uint32_t index = m_Device->GetCurrentFrameIndex();
         return m_DepthTextures[index];

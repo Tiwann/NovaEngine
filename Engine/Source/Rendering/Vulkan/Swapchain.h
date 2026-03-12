@@ -1,9 +1,9 @@
 ﻿#pragma once
 #include "Fence.h"
-#include "Texture.h"
+#include "ITexture.h"
+#include "TextureView.h"
 #include "Containers/Lazy.h"
 #include "Rendering/Swapchain.h"
-#include "Runtime/Ref.h"
 
 typedef struct VkSwapchainKHR_T* VkSwapchainKHR;
 typedef struct VkImage_T* VkImage;
@@ -26,8 +26,8 @@ namespace Nova::Vulkan
 
         bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const;
 
-        Ref<Nova::Texture> GetTexture() override;
-        Ref<Nova::TextureView> GetTextureView() override;
+        const Nova::ITexture* GetTexture() override;
+        const Nova::TextureView* GetTextureView() override;
 
         VkSwapchainKHR GetHandle() const;
         const VkSwapchainKHR* GetHandlePtr() const;
@@ -37,5 +37,7 @@ namespace Nova::Vulkan
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };
+        Lazy<Texture> m_Textures[3];
+        Lazy<TextureView> m_TextureViews[3];
     };
 }

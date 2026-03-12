@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "Containers/String.h"
 #include "Rendering/RenderDevice.h"
-#include "Rendering/RenderPass.h"
 #include "Rendering/RenderTarget.h"
 #include "Rendering/ImGuiRenderer.h"
 #include "SceneManager.h"
@@ -12,10 +11,7 @@
 
 #include <cstdint>
 
-namespace slang
-{
-    struct IGlobalSession;
-}
+namespace slang{ struct IGlobalSession; }
 
 namespace Nova
 {

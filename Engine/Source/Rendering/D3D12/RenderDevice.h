@@ -32,7 +32,7 @@ namespace Nova::D3D12
     class RenderDevice final : public Nova::RenderDevice
     {
     public:
-        bool Initialize(const Nova::DeviceCreateInfo& createInfo) override;
+        bool Initialize(const Nova::RenderDeviceCreateInfo& createInfo) override;
         void Destroy() override;
         bool BeginFrame() override;
         void EndFrame() override;

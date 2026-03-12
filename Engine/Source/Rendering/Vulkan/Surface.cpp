@@ -15,7 +15,7 @@ namespace Nova::Vulkan
         m_Device = createInfo.device;
         m_Window = createInfo.window;
         const RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
-        const VkInstance instance = device->GetInstance();
+        const VkInstance instance = device->GetVulkanInstance();
 
         if (DesktopWindow* window = dynamic_cast<DesktopWindow*>(createInfo.window))
         {
@@ -31,7 +31,7 @@ namespace Nova::Vulkan
     void Surface::Destroy()
     {
         const RenderDevice* device = static_cast<RenderDevice*>(m_Device);
-        const VkInstance instance = device->GetInstance();
+        const VkInstance instance = device->GetVulkanInstance();
         vkDestroySurfaceKHR(instance, m_Handle, nullptr);
     }
 

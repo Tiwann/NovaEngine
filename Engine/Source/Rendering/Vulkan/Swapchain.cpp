@@ -5,10 +5,8 @@
 #include "CommandBuffer.h"
 #include "VulkanExtensions.h"
 #include "Rendering/Scoped.h"
-#include "Sampler.h"
 #include "Utils/VulkanUtils.h"
 #include "TextureView.h"
-
 #include <vulkan/vulkan.h>
 
 
@@ -93,6 +91,7 @@ namespace Nova::Vulkan
             vkCreateImageView(deviceHandle, &ImageViewCreateInfo, nullptr, &m_ImageViews[i]);
 
             m_Textures[i].SetDirty();
+            m_TextureViews[i].SetDirty();
 
             VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
             barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -158,7 +157,15 @@ namespace Nova::Vulkan
         createInfo.buffering = m_Buffering;
         createInfo.presentMode = m_ImagePresentMode;
         createInfo.recycle = true;
-        return Initialize(createInfo);
+
+        const bool shouldBroadcast = m_ImageWidth != surface->GetWidth() || m_ImageHeight != surface->GetHeight();
+        if (Initialize(createInfo))
+        {
+            if (shouldBroadcast)
+                ResizedEvent.Broadcast(surface->GetWidth(), surface->GetHeight());
+            return true;
+        }
+        return false;
     }
 
     void Swapchain::SetName(StringView name)
@@ -180,12 +187,11 @@ namespace Nova::Vulkan
         return true;
     }
 
-    Ref<Nova::Texture> Swapchain::GetTexture()
+    const Nova::ITexture* Swapchain::GetTexture()
     {
         const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t index = device->GetCurrentFrameIndex();
-
-        const auto createTexture = [this, &index]() -> Ref<Texture>
+        const auto createTexture = [this, &index]() -> Texture
         {
             Texture texture;
             texture.m_Device = (RenderDevice*)m_Device;
@@ -200,32 +206,35 @@ namespace Nova::Vulkan
             texture.m_Mips = 1;
             texture.m_State = ResourceState::ColorAttachment;
             texture.m_Format = m_ImageFormat;
-            return MakeRef<Texture>(texture);
+            return texture;
         };
 
-        return m_Textures[index].Get(createTexture);
+        const Texture& texture = m_Textures[index].Get(createTexture);
+        return &texture;
     }
 
-    Ref<Nova::TextureView> Swapchain::GetTextureView()
+    const Nova::TextureView* Swapchain::GetTextureView()
     {
         const size_t index = m_Device->GetCurrentFrameIndex();
-        const auto createTextureView = [this, &index]() -> Ref<TextureView>
+        const auto createTextureView = [this, &index]() -> TextureView
         {
             TextureView textureView;
+            textureView.m_Texture = GetTexture();
             textureView.m_Device = (RenderDevice*)m_Device;
             textureView.m_Handle = m_ImageViews[index];
             textureView.m_Width = m_ImageWidth;
             textureView.m_Height = m_ImageHeight;
             textureView.m_Depth = 1;
-            textureView.m_Name = StringFormat("Swapchain Texture {}", index);
+            textureView.m_Name = StringFormat("Swapchain Texture View {}", index);
             textureView.m_BaseMipLevel = 0;
             textureView.m_MipCount = 1;
             textureView.m_AspectFlags = TextureAspectFlagBits::Color;
             textureView.m_Format = m_ImageFormat;
-            return MakeRef<TextureView>(textureView);
+            return textureView;
         };
 
-        return m_Textures[index].Get(createTextureView);
+        const TextureView& textureView = m_TextureViews[index].Get(createTextureView);
+        return &textureView;
     }
 
     VkSwapchainKHR Swapchain::GetHandle() const

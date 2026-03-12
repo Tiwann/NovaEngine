@@ -28,7 +28,7 @@ namespace Nova::D3D12
     }
 #endif
 
-    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const RenderDeviceCreateInfo& createInfo)
     {
         if (DX_FAILED(CreateDXGIFactory2(0, IID_PPV_ARGS(&m_Factory))))
             return false;

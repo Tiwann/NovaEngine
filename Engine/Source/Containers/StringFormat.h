@@ -25,7 +25,7 @@ namespace Nova
     }
 
     template<Character T, typename... Args>
-    uint32_t StringScanf(const StringView string, const StringViewBase<T> format, Args*... args)
+    uint32_t StringScanf(const StringViewBase<T> string, const StringViewBase<T> format, Args*... args)
     {
         if constexpr (typeid(T) == typeid(char))
         {

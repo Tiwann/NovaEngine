@@ -3,7 +3,7 @@
 #include "StaticMesh.h"
 #include "Audio/AudioClip.h"
 #include "Rendering/Shader.h"
-#include "Rendering/Texture.h"
+#include "Rendering/ITexture.h"
 
 namespace Nova
 {
@@ -34,7 +34,7 @@ namespace Nova
         {
             if (!asset) continue;
             if (asset->GetAssetType() == AssetType::Texture)
-                asset.As<Texture>()->Destroy();
+                asset.As<ITexture>()->Destroy();
             if (asset->GetAssetType() == AssetType::Shader)
                 asset.As<Shader>()->Destroy();
             if (asset->GetAssetType() == AssetType::AudioClip)

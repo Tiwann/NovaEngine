@@ -8,6 +8,7 @@
 #include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
+#include "Rendering/ResourceBarrier.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
@@ -28,7 +29,7 @@ namespace Nova::Vulkan
     class RenderDevice final : public Nova::RenderDevice
     {
     public:
-        bool Initialize(const DeviceCreateInfo& createInfo) override;
+        bool Initialize(const RenderDeviceCreateInfo& createInfo) override;
         void Destroy() override;
 
         bool BeginFrame() override;
@@ -39,8 +40,8 @@ namespace Nova::Vulkan
         RenderDeviceType GetDeviceType() override;
         uint32_t GetImageCount() const override;
 
-        Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
-        Ref<Nova::Texture> CreateTextureUnitialized() override;
+        Ref<Nova::ITexture> CreateTexture(const TextureCreateInfo& createInfo) override;
+        Ref<Nova::ITexture> CreateTextureUnitialized() override;
         Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
@@ -52,7 +53,7 @@ namespace Nova::Vulkan
 
         Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
 
-        VkInstance GetInstance() const;
+        static VkInstance GetVulkanInstance();
         VkDevice GetHandle() const;
         VmaAllocator GetAllocator() const;
         VkPhysicalDevice GetPhysicalDevice() const;
@@ -74,7 +75,7 @@ namespace Nova::Vulkan
 
         uint32_t GetCurrentFrameIndex() const override;
     private:
-        VkInstance m_Instance = nullptr;
+        static inline VkInstance s_Instance = nullptr;
         VkPhysicalDevice m_PhysicalDevice = nullptr;
         VkDevice m_Handle = nullptr;
         VmaAllocator m_Allocator = nullptr;
@@ -94,7 +95,7 @@ namespace Nova::Vulkan
         uint32_t m_LastFrameIndex = 0;
 
 #if defined(NOVA_DEV) || defined(NOVA_DEBUG)
-        VkDebugUtilsMessengerEXT m_DebugMessenger = nullptr;
+        static inline VkDebugUtilsMessengerEXT s_DebugMessenger = nullptr;
 #endif
     };
 }

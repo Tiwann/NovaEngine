@@ -29,7 +29,7 @@ namespace Nova
                 sprite.y = row * spriteSheet.spriteSize;
                 sprite.width = spriteSheet.spriteSize;
                 sprite.height = spriteSheet.spriteSize;
-                sprite.textureView = spriteSheet.texture;
+                sprite.texture = spriteSheet.texture;
                 m_Sprites.Add(sprite);
                 processed++;
             }

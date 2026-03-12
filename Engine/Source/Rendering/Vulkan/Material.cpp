@@ -3,7 +3,6 @@
 #include "Shader.h"
 #include "Rendering/GraphicsPipeline.h"
 #include "Rendering/ShaderBindingSet.h"
-#include "Runtime/Application.h"
 
 namespace Nova::Vulkan
 {
@@ -47,7 +46,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetTexture(const StringView name, Ref<Nova::TextureView> textureView)
+    void Material::SetTexture(const StringView name, Ref<Nova::ITexture> texture)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[MATERIAL_DESCRIPTOR_SET_INDEX];
@@ -59,13 +58,13 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindTexture(binding.key, *textureView, BindingType::SampledTexture);
+                m_BindingSet->BindTexture(binding.key, *texture, BindingType::SampledTexture);
                 return;
             }
         }
     }
 
-    void Material::SetSamplerAndTexture(const StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::TextureView> textureView)
+    void Material::SetSamplerAndTexture(const StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::ITexture> texture)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[MATERIAL_DESCRIPTOR_SET_INDEX];
@@ -77,7 +76,7 @@ namespace Nova::Vulkan
 
             if (name == binding.value.name)
             {
-                m_BindingSet->BindCombinedSamplerTexture(binding.key, *sampler, *textureView);
+                m_BindingSet->BindCombinedSamplerTexture(binding.key, *sampler, *texture);
                 return;
             }
         }

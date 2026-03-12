@@ -2,7 +2,7 @@
 
 namespace Nova::Null
 {
-    bool RenderDevice::Initialize(const DeviceCreateInfo& createInfo)
+    bool RenderDevice::Initialize(const RenderDeviceCreateInfo& createInfo)
     {
         return true;
     }
@@ -38,13 +38,13 @@ namespace Nova::Null
         return RenderDeviceType::Null;
     }
 
-    Ref<Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<ITexture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         (void)createInfo;
         return nullptr;
     }
 
-    Ref<Texture> RenderDevice::CreateTextureUnitialized()
+    Ref<ITexture> RenderDevice::CreateTextureUnitialized()
     {
         return nullptr;
     }
@@ -105,5 +105,15 @@ namespace Nova::Null
     {
         (void)createInfo;
         return nullptr;
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateCommandBuffer()
+    {
+        return nullptr;
+    }
+
+    uint32_t RenderDevice::GetCurrentFrameIndex() const
+    {
+        return 0;
     }
 }

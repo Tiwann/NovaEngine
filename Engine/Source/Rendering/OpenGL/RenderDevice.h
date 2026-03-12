@@ -10,7 +10,7 @@ namespace Nova::OpenGL
     class RenderDevice final : public Nova::RenderDevice
     {
     public:
-        bool Initialize(const DeviceCreateInfo& createInfo) override;
+        bool Initialize(const RenderDeviceCreateInfo& createInfo) override;
         void Destroy() override;
         bool BeginFrame() override;
         void EndFrame() override;

@@ -1,48 +1,45 @@
-﻿#include "Texture.h"
+﻿#include "ITexture.h"
+#include "TextureView.h"
 #include "RenderDevice.h"
 #include "Conversions.h"
 #include "Buffer.h"
 #include "Runtime/Log.h"
-
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
 namespace Nova::Vulkan
 {
+    static TextureDimension GetTextureDimension(const uint32_t width, const uint32_t height, const uint32_t depth)
+    {
+        TextureDimension result = TextureDimension::None;
+        if (width > 1) result = TextureDimension::Dim1D;
+        if (height > 1) result = TextureDimension::Dim2D;
+        if (depth > 1) result = TextureDimension::Dim3D;
+        return result;
+    }
     bool Texture::Initialize(const TextureCreateInfo& createInfo)
     {
         if (createInfo.format == Format::None) return false;
         if (createInfo.sampleCount <= 0) return false;
-        if (createInfo.mips <= 0) return false;
-        if (createInfo.width == 0 || createInfo.height == 0) return false;
+        if (createInfo.mipCount <= 0) return false;
+        if (createInfo.width <= 0 || createInfo.height <= 0) return false;
+        if (createInfo.arrayCount <= 0) return false;
+        if (createInfo.depth == 0) return false;
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
 
-        VkImageType imageType = VK_IMAGE_TYPE_1D;
-        TextureDimension dimension = TextureDimension::Dim1D;
-
-        if (createInfo.height > 1)
-        {
-            imageType = VK_IMAGE_TYPE_2D;
-            dimension = TextureDimension::Dim2D;
-        }
-
-        if (createInfo.depth > 1)
-        {
-            imageType = VK_IMAGE_TYPE_3D;
-            dimension = TextureDimension::Dim3D;
-        }
+        const TextureDimension dimension = GetTextureDimension(createInfo.width, createInfo.height, createInfo.depth);
 
         VkImageCreateInfo imageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
-        imageCreateInfo.imageType = imageType;
+        imageCreateInfo.imageType = Convert<VkImageType>(dimension);
         imageCreateInfo.format = Convert<VkFormat>(createInfo.format);
         imageCreateInfo.extent.width = createInfo.width;
         imageCreateInfo.extent.height = createInfo.height;
         imageCreateInfo.extent.depth = createInfo.depth;
-        imageCreateInfo.mipLevels = createInfo.mips;
-        imageCreateInfo.arrayLayers = 1;
+        imageCreateInfo.mipLevels = createInfo.mipCount;
+        imageCreateInfo.arrayLayers = createInfo.arrayCount;
         imageCreateInfo.samples = (VkSampleCountFlagBits)createInfo.sampleCount;
         imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
         imageCreateInfo.usage = Convert<VkImageUsageFlags>(createInfo.usageFlags);
@@ -51,7 +48,7 @@ namespace Nova::Vulkan
 
         VmaAllocationCreateInfo allocationCreateInfo = { };
         allocationCreateInfo.priority = 1.0f;
-        allocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+        allocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
 
         const VkResult result = vmaCreateImage(allocatorHandle,
            &imageCreateInfo,
@@ -62,22 +59,53 @@ namespace Nova::Vulkan
         if (result != VK_SUCCESS)
             return false;
 
+        const auto& usageFlags = createInfo.usageFlags;
+        const bool isColorAttachment = usageFlags & TextureUsageFlagBits::ColorAttachment;
+        const bool isDepthAttachment = usageFlags & TextureUsageFlagBits::DepthStencilAttachment;
+        const bool isSampled = usageFlags & TextureUsageFlagBits::Sampled;
+
+        TextureAspectFlags aspectFlags = TextureAspectFlags::None();
+        if (isColorAttachment || isSampled) aspectFlags |= TextureAspectFlagBits::Color;
+        if (isDepthAttachment)
+        {
+            aspectFlags |= TextureAspectFlagBits::Depth;
+            aspectFlags |= TextureAspectFlagBits::Stencil;
+        }
+
         m_Device = device;
         m_Format = createInfo.format;
         m_Width = createInfo.width;
         m_Height = createInfo.height;
         m_Depth = createInfo.depth;
-        m_Mips = createInfo.mips;
+        m_Mips = createInfo.mipCount;
+        m_ArrayCount = createInfo.arrayCount;
         m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;
         m_Dimension = dimension;
 
-        // DECIDED TO EXPLICITLY TRANSITION TO LAYOUT GENERAL BY DEFAULT
-        const auto& usageFlags = createInfo.usageFlags;
-        const bool isColorAttachment = usageFlags.Contains(TextureUsageFlagBits::ColorAttachment);
-        const bool isDepthAttachment = usageFlags.Contains(TextureUsageFlagBits::DepthStencilAttachment);
-        const bool isSampled = createInfo.usageFlags.Contains(TextureUsageFlagBits::Sampled);
+        TextureViewCreateInfo tvCreateInfo;
+        tvCreateInfo.device = device;
+        tvCreateInfo.texture = this;
+        tvCreateInfo.width = createInfo.width;
+        tvCreateInfo.height = createInfo.height;
+        tvCreateInfo.depth = createInfo.depth;
+        tvCreateInfo.format = createInfo.format;
+        tvCreateInfo.baseMipLevel = 0;
+        tvCreateInfo.mipCount = createInfo.mipCount;
+        tvCreateInfo.baseArray = 0;
+        tvCreateInfo.arrayCount = createInfo.arrayCount;
+        tvCreateInfo.aspectFlags = aspectFlags;
+        if (m_View)
+        {
+            if (!m_View->Initialize(tvCreateInfo))
+                return false;
+        } else
+        {
+            m_View = device->CreateTextureView(tvCreateInfo);
+            if (!m_View) return false;
+        }
 
+        // DECIDED TO EXPLICITLY TRANSITION TO LAYOUT GENERAL BY DEFAULT
         const AccessFlagBits destAccess = isColorAttachment ? AccessFlagBits::ColorAttachmentWrite :
         isDepthAttachment ? AccessFlagBits::DepthStencilAttachmentWrite :
         isSampled ? AccessFlagBits::ShaderRead : AccessFlagBits::None;
@@ -93,33 +121,14 @@ namespace Nova::Vulkan
         barrier.destState = destState;
         barrier.destQueue = nullptr;
         barrier.destQueue = nullptr;
+        RenderDevice::ImmediateTextureBarrier(barrier);
 
-        CommandPool* commandPool = device->GetCommandPool();
-        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
-        Fence fence;
-        fence.Initialize({device, 0});
-
-        if (commandBuffer.Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
-        {
-            commandBuffer.TextureBarrier(barrier);
-            commandBuffer.End();
-
-            Queue* graphicsQueue = device->GetGraphicsQueue();
-            graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-
-            fence.Wait(FENCE_WAIT_INFINITE);
-        } else
-        {
-            NOVA_LOG(RenderDevice, Verbosity::Error, "Couldn't transition texture to layout general. Command buffer failed to begin!");
-        }
-
-        commandBuffer.Free();
-        fence.Destroy();
         return true;
     }
 
     void Texture::Destroy()
     {
+        if (m_View) m_View->Destroy();
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
         m_Device = nullptr;

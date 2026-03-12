@@ -13,7 +13,7 @@
 #include "Rendering/ShaderBindingSet.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/CommandBuffer.h"
-#include "Rendering/Texture.h"
+#include "Rendering/ITexture.h"
 #include <imgui.h>
 
 namespace Nova
@@ -133,7 +133,7 @@ namespace Nova
         ? (Vector2)GetTransform()->GetScale()
         : m_Tiling;
 
-        const Matrix2 spriteScale = m_Sprite.textureView
+        const Matrix2 spriteScale = m_Sprite.texture
         ? Math::Scale(Matrix2::Identity, Vector2(m_Sprite.width, m_Sprite.height) / (float)m_PixelsPerUnit)
         : Matrix2::Identity;
 
@@ -154,7 +154,7 @@ namespace Nova
 
     void SpriteRenderer::OnRender(CommandBuffer& cmdBuffer)
     {
-        if(!m_Sprite.textureView) return;
+        if(!m_Sprite.texture) return;
 
         Application* application = GetApplication();
         const auto window = application->GetWindow();
@@ -162,7 +162,7 @@ namespace Nova
 
 
 
-        m_BindingSet->BindTexture(1, *m_Sprite.textureView, BindingType::SampledTexture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
         cmdBuffer.BindGraphicsPipeline(*m_Pipeline);
         cmdBuffer.BindShaderBindingSet(*m_Shader, *m_BindingSet);
         cmdBuffer.BindVertexBuffer(*m_VertexBuffer, 0);
@@ -221,22 +221,21 @@ namespace Nova
 
     void SpriteRenderer::SetSprite(const Sprite& sprite)
     {
-        if (!sprite.textureView) return;
+        if (!sprite.texture) return;
         if (sprite == m_Sprite) return;
 
-        const Application* application = GetApplication();
-        const Ref<RenderDevice>& device = application->GetRenderDevice();
-        device->WaitIdle();
+        Ref<RenderDevice> renderDevice = RenderDevice::GetInstance();
+        renderDevice->WaitIdle();
 
         m_Sprite = sprite;
         m_SpriteAnimation = nullptr;
 
         m_SpriteIndex = 0;
         m_Time = 0.0f;
-        m_BindingSet->BindTexture(1, *m_Sprite.textureView, BindingType::SampledTexture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
     }
 
-    void SpriteRenderer::SetSprite(Ref<Texture> texture)
+    void SpriteRenderer::SetSprite(Ref<ITexture> texture)
     {
         SetSprite({0, 0, texture->GetWidth(), texture->GetHeight(), texture});
     }
@@ -251,7 +250,7 @@ namespace Nova
         m_SpriteIndex = 0;
         m_Time = 0.0f;
         m_Sprite = spriteAnimation->GetSprite(m_SpriteIndex);
-        m_BindingSet->BindTexture(1, *m_Sprite.textureView, BindingType::SampledTexture);
+        m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
     }
 
     SpriteAnimation* SpriteRenderer::GetSpriteAnimation() const

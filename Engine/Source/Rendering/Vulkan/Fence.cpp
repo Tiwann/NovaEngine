@@ -22,6 +22,7 @@ namespace Nova::Vulkan
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
         vkDestroyFence(deviceHandle, m_Handle, nullptr);
+        m_Handle = nullptr;
     }
 
     void Fence::Wait(const uint64_t timeoutNs)

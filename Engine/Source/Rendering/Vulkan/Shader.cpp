@@ -248,7 +248,7 @@ namespace Nova::Vulkan
                 setLayout->Build();
         }
 
-        const auto compareFunc = [](const Ref<ShaderBindingSet>& lhs, const Ref<ShaderBindingSet>& rhs) {
+        const auto compareFunc = [](const Ref<ShaderBindingSetLayout>& lhs, const Ref<ShaderBindingSetLayout>& rhs) {
             return lhs->GetSetIndex() < rhs->GetSetIndex();
         };
         m_BindingSetLayouts.Sort(compareFunc);

@@ -4,12 +4,13 @@
 #include "TextureDimension.h"
 #include "ResourceState.h"
 #include "Runtime/Asset.h"
+#include "Runtime/Ref.h"
 #include <cstdint>
-
 
 namespace Nova
 {
     class RenderDevice;
+    class TextureView;
 
     struct TextureCreateInfo
     {
@@ -19,10 +20,11 @@ namespace Nova
         uint32_t width = 0;
         uint32_t height = 0;
         uint32_t depth = 1;
-        uint32_t mips = 1;
+        uint32_t mipCount = 1;
         uint32_t sampleCount = 1;
+        uint32_t arrayCount = 1;
 
-        static TextureCreateInfo Texture1D(const uint32_t width, const Format format, const uint32_t mips, const uint32_t sampleCount)
+        static TextureCreateInfo Texture1D(const uint32_t width, const Format format, const uint32_t mipCount = 1, const uint32_t sampleCount = 1)
         {
             TextureCreateInfo createInfo;
             createInfo.usageFlags = TextureUsageFlagBits::Default;
@@ -30,12 +32,13 @@ namespace Nova
             createInfo.width = width;
             createInfo.height = 1;
             createInfo.depth = 1;
-            createInfo.mips = mips;
+            createInfo.mipCount = mipCount;
             createInfo.sampleCount = sampleCount;
+            createInfo.arrayCount = 1;
             return createInfo;
         }
 
-        static TextureCreateInfo Texture2D(const uint32_t width, const uint32_t height, const Format format, const uint32_t mips, const uint32_t sampleCount)
+        static TextureCreateInfo Texture2D(const uint32_t width, const uint32_t height, const Format format, const uint32_t mipCount = 1, const uint32_t sampleCount = 1)
         {
             TextureCreateInfo createInfo;
             createInfo.usageFlags = TextureUsageFlagBits::Default;
@@ -43,12 +46,13 @@ namespace Nova
             createInfo.width = width;
             createInfo.height = height;
             createInfo.depth = 1;
-            createInfo.mips = mips;
+            createInfo.mipCount = mipCount;
             createInfo.sampleCount = sampleCount;
+            createInfo.arrayCount = 1;
             return createInfo;
         }
 
-        static TextureCreateInfo Texture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const Format format, const uint32_t mips, const uint32_t sampleCount)
+        static TextureCreateInfo Texture3D(const uint32_t width, const uint32_t height, const uint32_t depth, const Format format, const uint32_t mipCount = 1, const uint32_t sampleCount = 1)
         {
             TextureCreateInfo createInfo;
             createInfo.usageFlags = TextureUsageFlagBits::Default;
@@ -56,18 +60,19 @@ namespace Nova
             createInfo.width = width;
             createInfo.height = height;
             createInfo.depth = depth;
-            createInfo.mips = mips;
+            createInfo.mipCount = mipCount;
             createInfo.sampleCount = sampleCount;
+            createInfo.arrayCount = 1;
             return createInfo;
         }
 
     };
 
-    class Texture : public Asset
+    class ITexture : public Asset
     {
     public:
-        Texture() : Asset("Texture") {}
-        ~Texture() override = default;
+        ITexture() : Asset("Texture") {}
+        ~ITexture() override = default;
 
         virtual bool Initialize(const TextureCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
@@ -86,6 +91,8 @@ namespace Nova
         void SetState(const ResourceState state) { m_State = state; }
         TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
         TextureDimension GetDimension() const { return m_Dimension; }
+
+        const TextureView* GetView() const { return m_View;}
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;
@@ -93,8 +100,10 @@ namespace Nova
         uint32_t m_Depth = 0;
         uint32_t m_Mips = 0;
         uint32_t m_SampleCount = 0;
+        uint32_t m_ArrayCount = 0;
         ResourceState m_State = ResourceState::Undefined;
         TextureUsageFlags m_UsageFlags = TextureUsageFlagBits::None;
         TextureDimension m_Dimension = TextureDimension::None;
+        Ref<TextureView> m_View = nullptr;
     };
 }

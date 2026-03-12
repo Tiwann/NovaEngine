@@ -3,17 +3,16 @@
 #include "PresentMode.h"
 #include "SwpchainBuffering.h"
 #include "Containers/StringView.h"
-#include "Containers/Lazy.h"
-#include "Runtime/Ref.h"
-
 #include <cstdint>
+
+#include "Containers/MulticastDelegate.h"
 
 
 namespace Nova
 {
     class RenderDevice;
     class Surface;
-    class Texture;
+    class ITexture;
     class TextureView;
 
     struct SwapchainCreateInfo
@@ -31,6 +30,7 @@ namespace Nova
     class Swapchain
     {
     public:
+        using SwapchainResizedDelegate = MulticastDelegate<void(uint32_t, uint32_t)>;
         Swapchain() = default;
         virtual ~Swapchain() = default;
 
@@ -38,7 +38,6 @@ namespace Nova
         virtual void Destroy() = 0;
         virtual bool Recreate() = 0;
         virtual void SetName(StringView name) = 0;
-
 
         int32_t GetWidth() const;
         int32_t GetHeight() const;
@@ -50,11 +49,13 @@ namespace Nova
         Surface* GetSurface() const;
 
         void Invalidate();
-        bool IsValid() const;
+        virtual bool IsValid() const;
         bool HasVSync() const;
 
-        virtual Ref<Nova::Texture> GetTexture() { return nullptr; }
-        virtual Ref<Nova::TextureView> GetTextureView() { return nullptr; }
+        virtual const Nova::ITexture* GetTexture() { return nullptr; }
+        virtual const Nova::TextureView* GetTextureView() { return nullptr; }
+
+        SwapchainResizedDelegate ResizedEvent;
     protected:
         RenderDevice* m_Device = nullptr;
         Surface* m_Surface = nullptr;
@@ -64,7 +65,5 @@ namespace Nova
         uint32_t m_ImageWidth = 0, m_ImageHeight = 0;
         bool m_HasVSync = false;
         bool m_Valid = true;
-        Lazy<Ref<Nova::Texture>> m_Textures[3] = { {nullptr}, {nullptr}, {nullptr} };
-        Lazy<Ref<Nova::TextureView>> m_TextureView[3] = { {nullptr}, {nullptr}, {nullptr} };
     };
 }

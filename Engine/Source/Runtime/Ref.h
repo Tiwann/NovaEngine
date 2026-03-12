@@ -56,7 +56,7 @@ namespace Nova
             return *this;
         }
 
-        void operator=(Ref&& other) noexcept
+        Ref& operator=(Ref&& other) noexcept
         {
             if (this == &other)
                 return *this;
@@ -69,13 +69,28 @@ namespace Nova
             return *this;
         }
 
-        template <typename U>
-        void operator=(const Ref<U>& other)
+        template <typename U> requires (!std::is_same_v<T, U>)
+        Ref& operator=(const Ref<U>& other)
         {
             PointerType old = m_Pointer;
             AddRef(other.m_Pointer);
-            m_Pointer = static_cast<PointerType>(other.m_Pointer);
+            m_Pointer = other.m_Pointer;
             RelRef(old);
+            return *this;
+        }
+
+        template <typename U> requires (!std::is_same_v<T, U>)
+        Ref& operator=(Ref<U>&& other)
+        {
+            if (this == &other)
+                return *this;
+
+            RelRef(m_Pointer);
+
+            m_Pointer = other.m_Pointer;
+            other.m_Pointer = nullptr;
+
+            return *this;
         }
 
         void operator=(decltype(nullptr))
@@ -107,6 +122,7 @@ namespace Nova
 
         operator PointerType() { return m_Pointer; }
         operator ConstPointerType() const { return m_Pointer; }
+        explicit operator bool() const { return m_Pointer; }
 
         //template <typename U>
         //operator const U*() const { return (U*)m_Pointer; }
@@ -136,7 +152,14 @@ namespace Nova
             m_Pointer = otherPointer;
         }
     private:
-        PointerType m_Pointer = nullptr;
+        friend class AssetDatabase;
+
+        void Release()
+        {
+            KillRef(m_Pointer);
+            m_Pointer = nullptr;
+        }
+        mutable PointerType m_Pointer = nullptr;
 
         template <typename U>
         friend class Ref;
@@ -147,51 +170,4 @@ namespace Nova
     {
         return Ref<T>(new T(std::forward<Args>(args)...));
     }
-
-
-    template<typename T> requires std::is_base_of_v<RefObject, T>
-    class WeakRef
-    {
-    public:
-        using RefType = Ref<T>;
-        using PointerType = RefType::PointerType;
-        using ConstPointerType = RefType::ConstPointerType;
-        using ReferenceType = RefType::ReferenceType;
-        using ConstReferenceType = RefType::ConstReferenceType;
-
-        explicit WeakRef(const RefType& ref) : m_Pointer(ref.Get()){}
-
-        template<typename U> requires std::is_base_of_v<RefObject, U>
-        explicit WeakRef(Ref<U>& ref) : m_Pointer(PointerType(ref.Get())){}
-
-        WeakRef(decltype(nullptr)) : m_Pointer(nullptr) {}
-
-        void operator=(decltype(nullptr)){ m_Pointer = nullptr; }
-
-        bool operator==(const PointerType ptr) const { return m_Pointer == ptr; }
-        bool operator!=(const PointerType ptr) const { return m_Pointer != ptr; }
-        bool operator==(const WeakRef& ptr) const { return m_Pointer == ptr.m_Pointer; }
-        bool operator!=(const WeakRef& ptr) const { return m_Pointer != ptr.m_Pointer; }
-
-        template <typename U>
-        WeakRef<U> As() const
-        {
-            return WeakRef<U>(dynamic_cast<U*>(m_Pointer));
-        }
-
-
-        ReferenceType operator*() { return *m_Pointer; }
-        ConstReferenceType operator*() const { return *m_Pointer; }
-
-        PointerType operator->() { return m_Pointer; }
-        ConstPointerType operator->() const { return m_Pointer; }
-
-        PointerType Get() { return m_Pointer; }
-        ConstPointerType Get() const { return m_Pointer; }
-
-        operator PointerType() { return m_Pointer; }
-        operator ConstPointerType() const { return m_Pointer; }
-    private:
-        PointerType m_Pointer = nullptr;
-    };
 }

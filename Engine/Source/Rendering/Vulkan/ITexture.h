@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Rendering/Texture.h"
+#include "Rendering/ITexture.h"
 
 typedef struct VkImage_T* VkImage;
 typedef struct VkImageView_T* VkImageView;
@@ -11,7 +11,7 @@ namespace Nova::Vulkan
     class Swapchain;
     class RenderTarget;
 
-    class Texture final : public Nova::Texture
+    class Texture final : public Nova::ITexture
     {
     public:
         Texture() = default;

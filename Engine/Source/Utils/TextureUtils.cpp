@@ -2,13 +2,14 @@
 #include "External/stb_image.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/CommandBuffer.h"
+#include "Rendering/Fence.h"
 #include "Rendering/Queue.h"
 #include "Rendering/RenderDevice.h"
 #include "Rendering/ResourceBarrier.h"
 
 namespace Nova::TextureUtils
 {
-    bool UploadTextureData(Ref<RenderDevice>& device, Ref<Texture>& texture, const uint32_t arrayLayer, const uint32_t mipLevel, const void* data, const size_t dataSize)
+    bool UploadTextureData(Ref<RenderDevice>& device, Ref<ITexture>& texture, const uint32_t arrayLayer, const uint32_t mipLevel, const void* data, const size_t dataSize)
     {
         BufferCreateInfo stagingBufferCreateInfo;
         stagingBufferCreateInfo.size = dataSize;
@@ -27,13 +28,13 @@ namespace Nova::TextureUtils
         TextureBarrier toTransferBarrier;
         toTransferBarrier.texture = texture;
         toTransferBarrier.sourceAccess = GetSourceAccessFlags(initialState);
-        toTransferBarrier.destAccess = GetDestAccessFlags(initialState);
+        toTransferBarrier.destAccess = GetDestAccessFlags(ResourceState::TransferDest);
         toTransferBarrier.destState = ResourceState::TransferDest;
 
         TextureBarrier toInitialState;
         toInitialState.texture = texture;
         toInitialState.sourceAccess = GetSourceAccessFlags(ResourceState::TransferDest);
-        toInitialState.destAccess = GetDestAccessFlags(ResourceState::TransferDest);
+        toInitialState.destAccess = GetDestAccessFlags(initialState);
         toInitialState.destState = initialState;
 
         Ref<CommandBuffer> cmdBuffer = device->CreateCommandBuffer();
@@ -47,6 +48,7 @@ namespace Nova::TextureUtils
         {
             stagingBuffer->Destroy();
             cmdBuffer->Free();
+            return false;
         }
 
         cmdBuffer->TextureBarrier(toTransferBarrier);
@@ -56,12 +58,13 @@ namespace Nova::TextureUtils
         cmdBuffer->End();
 
         const Queue* queue = device->GetGraphicsQueue();
-        queue->Submit(cmdBuffer, nullptr, nullptr, nullptr);
+        queue->Submit(cmdBuffer, nullptr, nullptr);
         stagingBuffer->Destroy();
+        cmdBuffer->Free();
         return true;
     }
 
-    Ref<Texture> LoadTexture(Ref<RenderDevice>& device, const StringView filepath)
+    Ref<ITexture> LoadTexture(Ref<RenderDevice>& device, const StringView filepath)
     {
         stbi_set_flip_vertically_on_load(true);
         int32_t width = 0, height = 0;
@@ -70,7 +73,7 @@ namespace Nova::TextureUtils
         if (!pixels) return nullptr;
 
         const TextureCreateInfo createInfo = TextureCreateInfo::Texture2D(width, height, Format::R8G8B8A8_SRGB, 1, 1);
-        Ref<Texture> texture = device->CreateTexture(createInfo);
+        Ref<ITexture> texture = device->CreateTexture(createInfo);
         if (!texture)
         {
             stbi_image_free(pixels);
@@ -88,7 +91,7 @@ namespace Nova::TextureUtils
         return texture;
     }
 
-    Ref<Texture> LoadTexture(Ref<RenderDevice>& device, const void* data, const size_t dataSize)
+    Ref<ITexture> LoadTexture(Ref<RenderDevice>& device, const void* data, const size_t dataSize)
     {
         stbi_set_flip_vertically_on_load(true);
         int32_t width = 0, height = 0;
@@ -97,7 +100,7 @@ namespace Nova::TextureUtils
         if (!pixels) return nullptr;
 
         const TextureCreateInfo createInfo = TextureCreateInfo::Texture2D(width, height, Format::R8G8B8A8_SRGB, 1, 1);
-        Ref<Texture> texture = device->CreateTexture(createInfo);
+        Ref<ITexture> texture = device->CreateTexture(createInfo);
         if (!texture)
         {
             stbi_image_free(pixels);

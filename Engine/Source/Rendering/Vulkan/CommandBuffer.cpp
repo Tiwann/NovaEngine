@@ -283,7 +283,7 @@ namespace Nova::Vulkan
         vkCmdCopyBuffer2(m_Handle, &copyInfo);
     }
 
-    void CommandBuffer::BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, const size_t srcOffset, const size_t srcSize, const uint32_t arrayLayer, const uint32_t mipLevel)
+    void CommandBuffer::BufferToTextureCopy(const Nova::Buffer& src, const Nova::ITexture& dest, const size_t srcOffset, const size_t srcSize, const uint32_t arrayLayer, const uint32_t mipLevel)
     {
         const Buffer& source = static_cast<const Buffer&>(src);
         const Texture& destination = static_cast<const Texture&>(dest);
@@ -313,7 +313,7 @@ namespace Nova::Vulkan
         vkCmdCopyBufferToImage2(m_Handle, &copyInfo);
     }
 
-    void CommandBuffer::Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, const Filter filter)
+    void CommandBuffer::Blit(const Nova::ITexture& src, const BlitRegion& srcRegion, const Nova::ITexture& dest, const BlitRegion& destRegion, const Filter filter)
     {
         const Texture& source = static_cast<const Texture&>(src);
         const Texture& destination = static_cast<const Texture&>(dest);
@@ -419,7 +419,7 @@ namespace Nova::Vulkan
         vkCmdPipelineBarrier2(m_Handle, &outDependency);
     }
 
-    void CommandBuffer::Blit(const Nova::Texture& src, const Nova::Texture& dest, const Filter filter)
+    void CommandBuffer::Blit(const Nova::ITexture& src, const Nova::ITexture& dest, const Filter filter)
     {
         const BlitRegion srcRegion = { 0, 0, src.GetWidth(), src.GetHeight(), 0 };
         const BlitRegion destRegion = { 0, 0, dest.GetWidth(), dest.GetHeight(), 0 };

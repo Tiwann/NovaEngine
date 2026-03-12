@@ -20,6 +20,7 @@ namespace Nova
         constexpr Flags(uint32_t value) : m_Value((Enum)value) {}
 
         static constexpr Flags All() {  return 0xFFFFFFFF; }
+        static constexpr Flags None() { return 0; }
 
         constexpr operator uint32_t() const { return (uint32_t)m_Value; }
 

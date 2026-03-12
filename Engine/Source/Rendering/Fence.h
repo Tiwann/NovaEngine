@@ -23,7 +23,9 @@ namespace Nova
         FenceCreateInfo& WithFlags(const FenceCreateFlags inFlags) { flags = inFlags; return *this; }
     };
 
-    static constexpr uint64_t FENCE_WAIT_INFINITE = ~0ull;
+    static constexpr uint64_t FENCE_WAIT_INFINITE_NS = 1'000'000'000;
+    static constexpr uint64_t FENCE_WAIT_INFINITE_MS = FENCE_WAIT_INFINITE_NS / 1'000'000;
+
     class Fence
     {
     public:

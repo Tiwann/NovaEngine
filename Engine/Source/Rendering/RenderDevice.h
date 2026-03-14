@@ -21,7 +21,7 @@ namespace Nova
     class Window;
     class Surface;
     struct SurfaceCreateInfo;
-    class ITexture;
+    class Texture;
     struct TextureCreateInfo;
     class Buffer;
     struct BufferCreateInfo;
@@ -79,8 +79,8 @@ namespace Nova
         virtual RenderDeviceType GetDeviceType() = 0;
 
         virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
-        virtual Ref<Nova::ITexture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
-        virtual Ref<Nova::ITexture> CreateTextureUnitialized() = 0;
+        virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
+        virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
         virtual Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) = 0;
@@ -93,13 +93,14 @@ namespace Nova
 
         Ref<Nova::Fence> CreateFence();
         Ref<Nova::Buffer> CreateBuffer(BufferUsage usage, size_t size);
-        Ref<Nova::ITexture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
+        Ref<Nova::Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
         Ref<Nova::Material> CreateMaterial(Ref<Shader> material);
         Ref<Nova::ComputePipeline> CreateComputePipeline(Ref<Shader> shader);
         Ref<Nova::Sampler> CreateSampler();
         Ref<Nova::Sampler> GetOrCreateSampler(const SamplerCreateInfo& createInfo);
 
         virtual Ref<Nova::CommandBuffer> CreateCommandBuffer() = 0;
+        virtual Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() = 0;
 
         virtual uint32_t GetImageCount() const = 0;
         virtual uint32_t GetCurrentFrameIndex() const = 0;

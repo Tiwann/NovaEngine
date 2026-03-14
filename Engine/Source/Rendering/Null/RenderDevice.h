@@ -14,8 +14,8 @@ namespace Nova::Null
         void WaitIdle() const override;
         void SetName(StringView name) override;
         RenderDeviceType GetDeviceType() override;
-        Ref<ITexture> CreateTexture(const TextureCreateInfo& createInfo) override;
-        Ref<ITexture> CreateTextureUnitialized() override;
+        Ref<Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
+        Ref<Texture> CreateTextureUnitialized() override;
         Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
@@ -27,6 +27,7 @@ namespace Nova::Null
         uint32_t GetImageCount() const override;
         Ref<RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
         Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
         uint32_t GetCurrentFrameIndex() const override;
     };
 }

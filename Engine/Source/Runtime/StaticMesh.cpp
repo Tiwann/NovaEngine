@@ -15,6 +15,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/GltfMaterial.h>
 
+#include "Common.h"
+
 
 namespace Nova
 {
@@ -88,6 +90,7 @@ namespace Nova
     bool StaticMesh::LoadFromFile(const StringView filepath, bool loadResources)
     {
         Assimp::Importer importer;
+        NOVA_DEFER(importer, &Assimp::Importer::FreeScene);
         constexpr auto flags = aiProcess_Triangulate | aiProcess_GenSmoothNormals
         | aiProcess_JoinIdenticalVertices | aiProcess_EmbedTextures | aiProcess_PreTransformVertices;
 
@@ -128,10 +131,9 @@ namespace Nova
 
 
         if (m_VertexBuffer) m_VertexBuffer->Destroy();
-        m_VertexBuffer = CreateVertexBuffer(device, allVertices.Data(), allVertices.Size());
+        m_VertexBuffer = BufferUtils::CreateVertexBuffer(device, allVertices.Data(), allVertices.Size());
         if (m_IndexBuffer) m_IndexBuffer->Destroy();
-        m_IndexBuffer = CreateIndexBuffer(device, allIndices.Data(), allIndices.Size());
-        importer.FreeScene();
+        m_IndexBuffer = BufferUtils::CreateIndexBuffer(device, allIndices.Data(), allIndices.Size());
         return true;
     }
 

@@ -1,6 +1,6 @@
 ﻿#include "ShaderBindingSet.h"
 #include "DescriptorPool.h"
-#include "ITexture.h"
+#include "Texture.h"
 #include "TextureView.h"
 #include "RenderDevice.h"
 #include "Buffer.h"
@@ -50,7 +50,7 @@ namespace Nova::Vulkan
         return &m_Handle;
     }
 
-    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::ITexture* const* textures, size_t textureCount, BindingType bindingType)
+    bool ShaderBindingSet::BindTextures(uint32_t binding, const Nova::Texture* const* textures, size_t textureCount, BindingType bindingType)
     {
         if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
             return false;
@@ -77,7 +77,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::ITexture& texture, BindingType bindingType)
+    bool ShaderBindingSet::BindTexture(const uint32_t binding, const Nova::Texture& texture, BindingType bindingType)
     {
         if (!(bindingType == BindingType::SampledTexture || bindingType == BindingType::StorageTexture))
             return false;
@@ -115,7 +115,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::ITexture& texture)
+    bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture)
     {
         const Texture& vulkanTexture = static_cast<const Texture&>(texture);
         const TextureView* textureView = static_cast<const TextureView*>(vulkanTexture.GetView());
@@ -135,7 +135,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    bool ShaderBindingSet::BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::ITexture* const* textures, size_t textureCount)
+    bool ShaderBindingSet::BindCombinedSamplerTextures(uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture* const* textures, size_t textureCount)
     {
         Array<VkDescriptorImageInfo> imageInfos;
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)

@@ -13,7 +13,7 @@ namespace slang { class IGlobalSession; }
 namespace Nova
 {
     class RenderDevice;
-    class ITexture;
+    class Texture;
     class Sampler;
     class Buffer;
     class ShaderBindingSet;

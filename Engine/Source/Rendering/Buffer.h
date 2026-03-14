@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "Resource.h"
 #include "BufferUsage.h"
 
 namespace Nova
@@ -17,29 +17,20 @@ namespace Nova
         BufferCreateInfo& WithSize(const size_t inSize) { size = inSize; return *this; }
     };
 
-    class Buffer : public Object
+    class Buffer : public Resource
     {
     public:
-        Buffer() : Object("Buffer") {}
+        Buffer() : Resource() {}
         ~Buffer() override = default;
 
         virtual bool Initialize(const BufferCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        virtual bool Resize(size_t newSize, bool keepData = true) = 0;
-        virtual bool WriteData(const void* src, size_t offset, size_t size) = 0;
-        virtual bool CopyDataTo(size_t offset, size_t size, void* outBuffer) = 0;
-        virtual bool CopyDataTo(Buffer& other, size_t srcOffset, size_t destOffset, size_t size) = 0;
+        virtual void* Map() = 0;
+        virtual void Unmap(const void* ptr) = 0;
 
-        template<typename T>
-        bool WriteData(BufferView<T> buffer, size_t offset)
-        {
-            return WriteData(buffer.Data(), offset, Math::Min(buffer.Size(), m_Size));
-        }
-
-        virtual void Memset(size_t value, size_t size) = 0;
+        ResourceType GetResourceType() final { return ResourceType::Buffer;}
         BufferUsage GetUsage() const { return m_Usage; }
-        BufferUsage GetUsage() { return m_Usage; }
         size_t GetSize() const { return m_Size; }
     protected:
         size_t m_Size = 0;

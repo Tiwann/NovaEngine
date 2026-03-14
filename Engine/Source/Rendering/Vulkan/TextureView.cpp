@@ -1,5 +1,5 @@
 ﻿#include "TextureView.h"
-#include "ITexture.h"
+#include "Texture.h"
 #include "Conversions.h"
 #include "RenderDevice.h"
 

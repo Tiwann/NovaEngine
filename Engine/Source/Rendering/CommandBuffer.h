@@ -14,7 +14,7 @@ namespace Nova
     class Buffer;
     class GraphicsPipeline;
     class ComputePipeline;
-    class ITexture;
+    class Texture;
     struct BlitRegion;
     class ShaderBindingSetLayout;
     class ShaderBindingSet;
@@ -115,9 +115,9 @@ namespace Nova
 
         // Transfer Commands
         virtual void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) = 0;
-        virtual void BufferToTextureCopy(const Nova::Buffer& src, const Nova::ITexture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayLayer, uint32_t mipLevel) = 0;
-        virtual void Blit(const Nova::ITexture& src, const BlitRegion& srcRegion, const Nova::ITexture& dest, const BlitRegion& destRegion, Filter filter = Filter::Linear) = 0;
-        virtual void Blit(const Nova::ITexture& src, const Nova::ITexture& dest, Filter filter = Filter::Linear) = 0;
+        virtual void BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayLayer, uint32_t mipLevel) = 0;
+        virtual void Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter = Filter::Linear) = 0;
+        virtual void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter = Filter::Linear) = 0;
 
         virtual void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) = 0;
 

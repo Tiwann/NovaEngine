@@ -12,7 +12,7 @@ namespace Nova
 {
     class RenderDevice;
     class Surface;
-    class ITexture;
+    class Texture;
     class TextureView;
 
     struct SwapchainCreateInfo
@@ -52,7 +52,7 @@ namespace Nova
         virtual bool IsValid() const;
         bool HasVSync() const;
 
-        virtual const Nova::ITexture* GetTexture() { return nullptr; }
+        virtual const Nova::Texture* GetTexture() { return nullptr; }
         virtual const Nova::TextureView* GetTextureView() { return nullptr; }
 
         SwapchainResizedDelegate ResizedEvent;

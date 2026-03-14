@@ -12,7 +12,7 @@ namespace Nova
     class RenderDevice;
     class CommandBuffer;
     class TextureView;
-    class ITexture;
+    class Texture;
 
     struct RenderTargetCreateInfo
     {
@@ -34,8 +34,8 @@ namespace Nova
         void Destroy();
         void Resize(uint32_t newWidth, uint32_t newHeight);
 
-        Ref<ITexture> GetColorTexture();
-        Ref<ITexture> GetDepthTexture();
+        Ref<Texture> GetColorTexture();
+        Ref<Texture> GetDepthTexture();
         Ref<TextureView> GetColorTextureView();
         Ref<TextureView> GetDepthTextureView();
 
@@ -57,8 +57,8 @@ namespace Nova
         uint32_t m_ImageCount = 0;
         bool m_IsValid = false;
 
-        Ref<ITexture> m_ColorTextures[3] = { nullptr, nullptr, nullptr };
-        Ref<ITexture> m_DepthTextures[3] = { nullptr, nullptr, nullptr };
+        Ref<Texture> m_ColorTextures[3] = { nullptr, nullptr, nullptr };
+        Ref<Texture> m_DepthTextures[3] = { nullptr, nullptr, nullptr };
         Ref<TextureView> m_ColorTextureViews[3] = { nullptr, nullptr, nullptr };
         Ref<TextureView> m_DepthTextureViews[3] = { nullptr, nullptr, nullptr };
     };

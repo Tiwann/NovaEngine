@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    class ITexture;
+    class Texture;
     class Buffer;
     class Queue;
 
@@ -27,7 +27,7 @@ namespace Nova
 
     struct TextureBarrier
     {
-        ITexture* texture = nullptr;
+        Texture* texture = nullptr;
         ResourceState destState = ResourceState::Undefined;
         AccessFlags sourceAccess = AccessFlagBits::None;
         AccessFlags destAccess = AccessFlagBits::None;

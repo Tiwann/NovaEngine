@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Resource.h"
 #include "Runtime/Format.h"
 #include "TextureUsage.h"
 #include "TextureDimension.h"
@@ -68,19 +69,18 @@ namespace Nova
 
     };
 
-    class ITexture : public Asset
+    class Texture : public Resource
     {
     public:
-        ITexture() : Asset("Texture") {}
-        ~ITexture() override = default;
+        Texture() : Resource(){}
+        ~Texture() override = default;
 
         virtual bool Initialize(const TextureCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
         virtual bool IsValid() = 0;
         virtual Array<uint8_t> GetPixels() = 0;
 
-        AssetType GetAssetType() const final { return AssetType::Texture; }
-
+        ResourceType GetResourceType() final { return ResourceType::Texture; }
         Format GetFormat() const { return m_Format; }
         uint32_t GetWidth() const { return m_Width; }
         uint32_t GetHeight() const { return m_Height; }
@@ -92,7 +92,7 @@ namespace Nova
         TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
         TextureDimension GetDimension() const { return m_Dimension; }
 
-        const TextureView* GetView() const { return m_View;}
+        const Ref<TextureView>& GetView() const { return m_View; }
     protected:
         Format m_Format = Format::None;
         uint32_t m_Width = 0;

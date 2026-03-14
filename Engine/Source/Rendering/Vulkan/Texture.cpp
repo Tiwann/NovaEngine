@@ -1,4 +1,4 @@
-﻿#include "ITexture.h"
+﻿#include "Texture.h"
 #include "TextureView.h"
 #include "RenderDevice.h"
 #include "Conversions.h"

@@ -13,7 +13,7 @@
 #include "Rendering/ShaderBindingSet.h"
 #include "Rendering/Buffer.h"
 #include "Rendering/CommandBuffer.h"
-#include "Rendering/ITexture.h"
+#include "Rendering/Texture.h"
 #include <imgui.h>
 
 namespace Nova
@@ -51,7 +51,7 @@ namespace Nova
         const Rect2D<uint32_t> viewport = window->GetBounds();
 
         const uint32_t indices[] = { 0, 2, 1, 0, 3, 2 };
-        m_IndexBuffer = CreateIndexBuffer(device, indices, sizeof(indices));
+        m_IndexBuffer = BufferUtils::CreateIndexBuffer(device, indices);
 
         const SpriteVertex vertices[]
         {
@@ -60,7 +60,7 @@ namespace Nova
             { {+0.5f, -0.5f }, {1.0f, 0.0f} },
             { {-0.5f, -0.5f }, {0.0f, 0.0f} },
         };
-        m_VertexBuffer = CreateVertexBuffer(device, vertices, sizeof(vertices));
+        m_VertexBuffer = BufferUtils::CreateVertexBuffer(device, vertices);
 
         m_UniformBuffer = device->CreateBuffer({ device, BufferUsage::UniformBuffer, sizeof(Uniforms) });
         m_StagingBuffer = device->CreateBuffer({ device, BufferUsage::StagingBuffer, 4 * sizeof(SpriteVertex) });
@@ -235,7 +235,7 @@ namespace Nova
         m_BindingSet->BindTexture(1, *m_Sprite.texture, BindingType::SampledTexture);
     }
 
-    void SpriteRenderer::SetSprite(Ref<ITexture> texture)
+    void SpriteRenderer::SetSprite(Ref<Texture> texture)
     {
         SetSprite({0, 0, texture->GetWidth(), texture->GetHeight(), texture});
     }

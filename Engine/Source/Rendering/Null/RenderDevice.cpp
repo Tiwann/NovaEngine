@@ -38,13 +38,13 @@ namespace Nova::Null
         return RenderDeviceType::Null;
     }
 
-    Ref<ITexture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         (void)createInfo;
         return nullptr;
     }
 
-    Ref<ITexture> RenderDevice::CreateTextureUnitialized()
+    Ref<Texture> RenderDevice::CreateTextureUnitialized()
     {
         return nullptr;
     }
@@ -108,6 +108,11 @@ namespace Nova::Null
     }
 
     Ref<Nova::CommandBuffer> RenderDevice::CreateCommandBuffer()
+    {
+        return nullptr;
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateTransferCommandBuffer()
     {
         return nullptr;
     }

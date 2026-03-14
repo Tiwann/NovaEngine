@@ -8,7 +8,6 @@
 #include "DescriptorPool.h"
 #include "Fence.h"
 #include "Semaphore.h"
-#include "Rendering/ResourceBarrier.h"
 
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
@@ -40,8 +39,8 @@ namespace Nova::Vulkan
         RenderDeviceType GetDeviceType() override;
         uint32_t GetImageCount() const override;
 
-        Ref<Nova::ITexture> CreateTexture(const TextureCreateInfo& createInfo) override;
-        Ref<Nova::ITexture> CreateTextureUnitialized() override;
+        Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) override;
+        Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Nova::Sampler> CreateSampler(const SamplerCreateInfo& createInfo) override;
         Ref<Nova::Buffer> CreateBuffer(const BufferCreateInfo& createInfo) override;
@@ -52,6 +51,7 @@ namespace Nova::Vulkan
         Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) override;
 
         Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
 
         static VkInstance GetVulkanInstance();
         VkDevice GetHandle() const;

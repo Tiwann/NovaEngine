@@ -1,7 +1,5 @@
 ﻿#include "Buffer.h"
 #include "RenderDevice.h"
-#include "Rendering/Scoped.h"
-
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
@@ -22,43 +20,6 @@ namespace Nova::Vulkan
         }
     }
 
-    Buffer::Buffer(Buffer&& other) noexcept
-    {
-        if (this == &other)
-            return;
-
-        m_Handle = other.m_Handle;
-        m_Allocation = other.m_Allocation;
-        m_Device = other.m_Device;
-        m_Size = other.m_Size;
-        m_Usage = other.m_Usage;
-
-        other.m_Handle = nullptr;
-        other.m_Allocation = nullptr;
-        other.m_Device = nullptr;
-        other.m_Size = 0;
-        other.m_Usage = BufferUsage::None;
-    }
-
-    Buffer& Buffer::operator=(Buffer&& other) noexcept
-    {
-        if (this == &other)
-            return *this;
-
-        m_Handle = other.m_Handle;
-        m_Allocation = other.m_Allocation;
-        m_Device = other.m_Device;
-        m_Size = other.m_Size;
-        m_Usage = other.m_Usage;
-
-        other.m_Handle = nullptr;
-        other.m_Allocation = nullptr;
-        other.m_Device = nullptr;
-        other.m_Size = 0;
-        other.m_Usage = BufferUsage::None;
-        return *this;
-    }
-
     bool Buffer::Initialize(const BufferCreateInfo& createInfo)
     {
         VkBufferCreateInfo bufferCreateInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
@@ -67,36 +28,29 @@ namespace Nova::Vulkan
 
         VmaAllocationCreateInfo bufferAllocationCreateInfo = {};
 
-        if (createInfo.usage == BufferUsage::StagingBuffer)
+        switch (createInfo.usage)
         {
-            bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-            bufferAllocationCreateInfo.priority = 0.5f;
-            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        case BufferUsage::None:
+            return false;
+        case BufferUsage::VertexBuffer:
+        case BufferUsage::IndexBuffer:
+        case BufferUsage::UniformBuffer:
+        case BufferUsage::StorageBuffer:
+        case BufferUsage::IndirectBuffer:
+            {
+                bufferAllocationCreateInfo.priority = 1.0f;
+                bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+                bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            }
+            break;
+        case BufferUsage::StagingBuffer:
+            {
+                bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+                bufferAllocationCreateInfo.priority = 0.5f;
+                bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+                bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+            }
         }
-
-        if (createInfo.usage == BufferUsage::VertexBuffer || createInfo.usage == BufferUsage::IndexBuffer)
-        {
-            bufferAllocationCreateInfo.priority = 1.0f;
-            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        }
-
-        if (createInfo.usage == BufferUsage::UniformBuffer)
-        {
-            bufferAllocationCreateInfo.priority = 1.0f;
-            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        }
-
-
-        if (createInfo.usage == BufferUsage::StorageBuffer)
-        {
-            bufferAllocationCreateInfo.priority = 1.0f;
-            bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-            bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        }
-
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
@@ -118,75 +72,17 @@ namespace Nova::Vulkan
         vmaDestroyBuffer(allocatorHandle, m_Handle, m_Allocation);
     }
 
-    bool Buffer::Resize(const size_t newSize, bool keepData)
-    {
-        BufferCreateInfo bufferCreateInfo;
-        bufferCreateInfo.size = newSize;
-        bufferCreateInfo.device = m_Device;
-        bufferCreateInfo.usage = m_Usage;
-
-        Buffer newBuffer;
-        newBuffer.Initialize(bufferCreateInfo);
-
-        if (!CopyDataTo(newBuffer, 0, 0, newSize))
-            return false;
-
-        Destroy();
-
-        *this = std::move(newBuffer);
-        return false;
-    }
-
-    bool Buffer::WriteData(const void* src, const size_t offset, const size_t size)
-    {
-        if (!src) return false;
-        if (!size) return false;
-
-        const VmaAllocator allocatorHandle = m_Device->GetAllocator();
-        const VkResult result = vmaCopyMemoryToAllocation(allocatorHandle, src, m_Allocation, offset, size);
-        if (result != VK_SUCCESS)
-            return false;
-        return true;
-    }
-
-    bool Buffer::CopyDataTo(const size_t offset, const size_t size, void* outBuffer)
+    void* Buffer::Map()
     {
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
-        const VkResult result = vmaCopyAllocationToMemory(allocatorHandle, m_Allocation, offset, outBuffer, size);
-        if (result != VK_SUCCESS)
-            return false;
-        return true;
+        void* mappedMemory = nullptr;
+        vmaMapMemory(allocatorHandle, m_Allocation, &mappedMemory);
+        return mappedMemory;
     }
 
-    bool Buffer::CopyDataTo(Nova::Buffer& other, const size_t srcOffset, const size_t destOffset, const size_t size)
-    {
-        CommandPool* commandPool = m_Device->GetTransferCommandPool();
-        CommandBuffer commandBuffer = commandPool->AllocateCommandBuffer(CommandBufferLevel::Primary);
-
-        if (!commandBuffer.Begin({ CommandBufferUsageFlagBits::OneTimeSubmit }))
-            return false;
-
-        commandBuffer.BufferCopy(*this, other, srcOffset, destOffset, size);
-        commandBuffer.End();
-
-        Scoped<Fence> fence = FenceCreateInfo(m_Device);
-
-        const Queue* transferQueue = m_Device->GetTransferQueue();
-        transferQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-
-        fence->Wait(~0);
-
-        commandBuffer.Free();
-
-        return true;
-    }
-
-    void Buffer::Memset(const size_t value, const size_t size)
+    void Buffer::Unmap(const void* ptr)
     {
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
-        void* data = nullptr;
-        vmaMapMemory(allocatorHandle, m_Allocation, &data);
-        std::memset(data, value, size);
         vmaUnmapMemory(allocatorHandle, m_Allocation);
     }
 

@@ -571,7 +571,7 @@ namespace Nova::Vulkan
 
     }
 
-    Ref<Nova::ITexture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
+    Ref<Nova::Texture> RenderDevice::CreateTexture(const TextureCreateInfo& createInfo)
     {
         Texture* texture = new Texture();
         TextureCreateInfo textureCreateInfo(createInfo);
@@ -584,7 +584,7 @@ namespace Nova::Vulkan
         return Ref(texture);
     }
 
-    Ref<Nova::ITexture> RenderDevice::CreateTextureUnitialized()
+    Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
     {
         return MakeRef<Texture>();
     }
@@ -690,6 +690,18 @@ namespace Nova::Vulkan
     {
         CommandBuffer* commandBuffer = new CommandBuffer();
         CommandPool* commandPool = GetCommandPool();
+        if (!commandBuffer->Allocate({this, commandPool, CommandBufferLevel::Primary}))
+        {
+            delete commandBuffer;
+            return nullptr;
+        }
+        return Ref(commandBuffer);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateTransferCommandBuffer()
+    {
+        CommandBuffer* commandBuffer = new CommandBuffer();
+        CommandPool* commandPool = GetTransferCommandPool();
         if (!commandBuffer->Allocate({this, commandPool, CommandBufferLevel::Primary}))
         {
             delete commandBuffer;

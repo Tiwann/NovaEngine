@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Fence.h"
-#include "ITexture.h"
+#include "Texture.h"
 #include "TextureView.h"
 #include "Containers/Lazy.h"
 #include "Rendering/Swapchain.h"
@@ -26,7 +26,7 @@ namespace Nova::Vulkan
 
         bool AcquireNextImage(const Semaphore* semaphore, const Fence* fence, uint32_t& frameIndex) const;
 
-        const Nova::ITexture* GetTexture() override;
+        const Nova::Texture* GetTexture() override;
         const Nova::TextureView* GetTextureView() override;
 
         VkSwapchainKHR GetHandle() const;

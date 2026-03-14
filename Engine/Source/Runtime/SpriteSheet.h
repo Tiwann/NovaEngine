@@ -4,7 +4,7 @@
 
 namespace Nova
 {
-    class ITexture;
+    class Texture;
 
     struct SpriteSheet
     {
@@ -12,6 +12,6 @@ namespace Nova
         uint32_t columns;
         uint32_t spriteCount;
         uint32_t spriteSize;
-        Ref<ITexture> texture = nullptr;
+        Ref<Texture> texture = nullptr;
     };
 }

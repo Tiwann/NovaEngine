@@ -10,7 +10,7 @@
 #include "Runtime/UUID.h"
 #include "Rendering/RenderDevice.h"
 #include "Rendering/Vulkan/Sampler.h"
-#include "Rendering/Vulkan/ITexture.h"
+#include "Rendering/Vulkan/Texture.h"
 
 #include <imgui_impl_vulkan.h>
 #include <cstdint>

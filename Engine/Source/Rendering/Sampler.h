@@ -2,7 +2,7 @@
 #include "CompareOperation.h"
 #include "Filter.h"
 #include "SamplerAddressMode.h"
-#include "Runtime/Object.h"
+#include "Resource.h"
 
 
 namespace Nova
@@ -48,16 +48,15 @@ namespace Nova
         }
     };
 
-    class Sampler : public Object
+    class Sampler : public Resource
     {
     public:
-        Sampler() : Object("Sampler") {}
+        Sampler() : Resource() { }
         ~Sampler() override = default;
 
         virtual bool Initialize(const SamplerCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
-
-
+        ResourceType GetResourceType() final { return ResourceType::Sampler;  }
     protected:
         SamplerAddressMode m_AddressModeU = SamplerAddressMode::Repeat;
         SamplerAddressMode m_AddressModeV = SamplerAddressMode::Repeat;

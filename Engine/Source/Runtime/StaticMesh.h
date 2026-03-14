@@ -2,7 +2,7 @@
 #include "Asset.h"
 #include "Containers/Array.h"
 #include "Containers/StringView.h"
-#include "Rendering/ITexture.h"
+#include "Rendering/Texture.h"
 #include "Runtime/Ref.h"
 
 namespace Nova

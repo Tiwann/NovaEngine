@@ -187,7 +187,7 @@ namespace Nova::Vulkan
         return true;
     }
 
-    const Nova::ITexture* Swapchain::GetTexture()
+    const Nova::Texture* Swapchain::GetTexture()
     {
         const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t index = device->GetCurrentFrameIndex();

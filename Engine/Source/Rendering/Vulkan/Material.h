@@ -10,8 +10,8 @@ namespace Nova::Vulkan
         void Destroy() override;
 
         void SetSampler(StringView name, Ref<Nova::Sampler> sampler) override;
-        void SetTexture(StringView name, Ref<Nova::ITexture> texture) override;
-        void SetSamplerAndTexture(StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::ITexture> texture) override;
+        void SetTexture(StringView name, Ref<Nova::Texture> texture) override;
+        void SetSamplerAndTexture(StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::Texture> texture) override;
         void SetBuffer(StringView name, Ref<Nova::Buffer> buffer, size_t offset, size_t size) override;
     };
 }

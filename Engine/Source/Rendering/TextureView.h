@@ -7,12 +7,12 @@
 namespace Nova
 {
     class RenderDevice;
-    class ITexture;
+    class Texture;
 
     struct TextureViewCreateInfo
     {
         RenderDevice* device = nullptr;
-        const ITexture* texture = nullptr;
+        const Texture* texture = nullptr;
         Format format = Format::None;
         TextureAspectFlags aspectFlags = TextureAspectFlagBits::None;
         uint32_t width = 0;
@@ -32,7 +32,7 @@ namespace Nova
         virtual bool Initialize(const TextureViewCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
 
-        const ITexture* GetTexture() const { return m_Texture; }
+        const Texture* GetTexture() const { return m_Texture; }
         Format GetFormat() const { return m_Format; }
         TextureAspectFlags GetAspectFlags() const { return m_AspectFlags; }
         uint32_t GetWidth() const { return m_Width; }
@@ -42,7 +42,7 @@ namespace Nova
         uint32_t GetMipCount() const { return m_MipCount; }
     protected:
         RenderDevice* m_Device = nullptr;
-        const ITexture* m_Texture = nullptr;
+        const Texture* m_Texture = nullptr;
         Format m_Format = Format::None;
         TextureAspectFlags m_AspectFlags = TextureAspectFlagBits::None;
         uint32_t m_Width = 0;

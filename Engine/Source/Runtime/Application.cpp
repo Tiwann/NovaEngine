@@ -49,9 +49,9 @@ namespace Nova
     }
 
 
-    static Ref<ITexture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
+    static Ref<Texture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
     {
-        Ref<ITexture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
+        Ref<Texture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
         database.AddAsset(texture, assetName);
         return texture;
     };

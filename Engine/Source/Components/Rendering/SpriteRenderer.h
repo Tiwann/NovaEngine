@@ -32,7 +32,7 @@ namespace Nova
 
         Sprite& GetSprite();
         void SetSprite(const Sprite& sprite);
-        void SetSprite(Ref<ITexture> texture);
+        void SetSprite(Ref<Texture> texture);
 
         void SetSpriteAnimation(SpriteAnimation* spriteAnimation);
         SpriteAnimation* GetSpriteAnimation() const;

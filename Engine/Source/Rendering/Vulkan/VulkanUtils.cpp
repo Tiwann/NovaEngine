@@ -1,6 +1,6 @@
 ﻿#include "VulkanUtils.h"
 #include "Conversions.h"
-#include "ITexture.h"
+#include "Texture.h"
 #include "Queue.h"
 #include "Buffer.h"
 #include "Rendering/ResourceBarrier.h"

@@ -46,7 +46,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetTexture(const StringView name, Ref<Nova::ITexture> texture)
+    void Material::SetTexture(const StringView name, Ref<Nova::Texture> texture)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[MATERIAL_DESCRIPTOR_SET_INDEX];
@@ -64,7 +64,7 @@ namespace Nova::Vulkan
         }
     }
 
-    void Material::SetSamplerAndTexture(const StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::ITexture> texture)
+    void Material::SetSamplerAndTexture(const StringView name, Ref<Nova::Sampler> sampler, Ref<Nova::Texture> texture)
     {
         const Array<Ref<ShaderBindingSetLayout>>& setLayouts = m_Shader.As<Shader>()->GetBindingSetLayouts();
         const Ref<ShaderBindingSetLayout>& setLayout = setLayouts[MATERIAL_DESCRIPTOR_SET_INDEX];

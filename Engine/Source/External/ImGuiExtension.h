@@ -11,7 +11,7 @@ namespace Nova
     class UUID;
     class Component;
     class Entity;
-    class ITexture;
+    class Texture;
     class Sampler;
 }
 
@@ -19,7 +19,7 @@ using Nova::Ref;
 using Nova::StringView;
 using Nova::Entity;
 using Nova::Ref;
-using Nova::ITexture;
+using Nova::Texture;
 using Nova::Sampler;
 using Nova::UUID;
 using Nova::Component;

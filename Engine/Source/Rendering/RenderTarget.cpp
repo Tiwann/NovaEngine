@@ -1,6 +1,6 @@
 ﻿#include "RenderDevice.h"
 #include "RenderTarget.h"
-#include "ITexture.h"
+#include "Texture.h"
 #include "TextureView.h"
 
 namespace Nova
@@ -17,7 +17,7 @@ namespace Nova
         const uint32_t imageCount = device->GetImageCount();
         NOVA_ASSERT(imageCount <= 3, "Image count should be less or equal to 3!");
 
-        const auto initializeTexture = [&device](Ref<ITexture>& texture, const TextureCreateInfo& createInfo) -> bool
+        const auto initializeTexture = [&device](Ref<Texture>& texture, const TextureCreateInfo& createInfo) -> bool
         {
             if (texture) {
                 if (!texture->Initialize(createInfo))
@@ -133,13 +133,13 @@ namespace Nova
         Initialize(createInfo);
     }
 
-    Ref<ITexture> RenderTarget::GetColorTexture()
+    Ref<Texture> RenderTarget::GetColorTexture()
     {
         const uint32_t index = m_Device->GetCurrentFrameIndex();
         return m_ColorTextures[index];
     }
 
-    Ref<ITexture> RenderTarget::GetDepthTexture()
+    Ref<Texture> RenderTarget::GetDepthTexture()
     {
         const uint32_t index = m_Device->GetCurrentFrameIndex();
         return m_DepthTextures[index];

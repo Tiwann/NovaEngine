@@ -112,7 +112,7 @@ namespace Nova
         return CreateBuffer(bufferCreateInfo);
     }
 
-    Ref<ITexture> RenderDevice::CreateTexture(const TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
+    Ref<Texture> RenderDevice::CreateTexture(const TextureUsageFlags usage, const uint32_t width, const uint32_t height, const Format format)
     {
         TextureCreateInfo createInfo;
         createInfo.width = width;

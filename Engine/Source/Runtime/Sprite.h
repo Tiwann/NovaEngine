@@ -3,7 +3,7 @@
 #include <cstdint>
 namespace Nova
 {
-    class ITexture;
+    class Texture;
     
     struct Sprite
     {
@@ -11,7 +11,7 @@ namespace Nova
         uint32_t y = 0;
         uint32_t width = 0;
         uint32_t height = 0;
-        Ref<ITexture> texture = nullptr;
+        Ref<Texture> texture = nullptr;
 
         bool operator==(const Sprite& other) const
         {

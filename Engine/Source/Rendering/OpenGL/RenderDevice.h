@@ -34,13 +34,20 @@ namespace Nova::OpenGL
 
         Nova::Swapchain* GetSwapchain() override;
         Nova::CommandBuffer* GetCurrentCommandBuffer() override;
-        Queue* GetGraphicsQueue() { return &m_GraphicsQueue; }
-        Queue* GetComputeQueue() { return &m_ComputeQueue; }
+        Queue* GetGraphicsQueue() override { return &m_GraphicsQueue; }
+        Queue* GetComputeQueue() override { return &m_ComputeQueue; }
+        Queue* GetTransferQueue() override { return &m_TransferQueue; }
+
+        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
+        uint32_t GetCurrentFrameIndex() const override;
+
     private:
         Surface m_Surface;
         Swapchain m_Swapchain;
         CommandBuffer m_CommandBuffers[3];
         Queue m_GraphicsQueue{QueueType::Graphics};
+        Queue m_TransferQueue{QueueType::Transfer};
         Queue m_ComputeQueue{QueueType::Compute};
         uint32_t m_CurrentFrameIndex = 0;
     };

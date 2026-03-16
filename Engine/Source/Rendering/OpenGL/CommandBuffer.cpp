@@ -245,6 +245,7 @@ namespace Nova::OpenGL
 
     void CommandBuffer::Blit(const Nova::Texture& src, const Nova::Texture& dest, const Filter filter)
     {
+        COMMAND_BUFFER_CHECK();
         BlitRegion srcRegion;
         srcRegion.x = 0;
         srcRegion.y = 0;
@@ -261,12 +262,25 @@ namespace Nova::OpenGL
         Blit(src, srcRegion, dest, destRegion, filter);
     }
 
-    void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
+    void CommandBuffer::ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers)
     {
         COMMAND_BUFFER_CHECK();
         Command command{CommandType::ExecuteCommandBuffers};
         command.data.executeCommandBuffers.commandBuffers = commandBuffers.Data();
         command.data.executeCommandBuffers.commandBufferCount = static_cast<uint32_t>(commandBuffers.Size());
+        m_Commands.Enqueue(command);
+    }
+
+    void CommandBuffer::CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayIndex, uint32_t mipLevel)
+    {
+        COMMAND_BUFFER_CHECK();
+        Command command{CommandType::CopyBufferToTexture};
+        command.data.copyBufferToTexture.srcBuffer = static_cast<const Buffer*>(&src);
+        command.data.copyBufferToTexture.dstTexture = static_cast<const Texture*>(&dest);
+        command.data.copyBufferToTexture.srcOffset = srcOffset;
+        command.data.copyBufferToTexture.srcSize = srcSize;
+        command.data.copyBufferToTexture.arrayIndex = arrayIndex;
+        command.data.copyBufferToTexture.mipLevel = mipLevel;
         m_Commands.Enqueue(command);
     }
 }

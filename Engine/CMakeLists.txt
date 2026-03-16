@@ -269,7 +269,7 @@ set(NOVA_ENGINE_SOURCES
         Source/Runtime/Random.cpp
         Source/Runtime/Random.h
         Source/Runtime/Ref.h
-        Source/Runtime/RefObject.h
+        Source/Runtime/RefCounted.h
         Source/Runtime/Scene.cpp
         Source/Runtime/Scene.h
         Source/Runtime/SceneManager.cpp

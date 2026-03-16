@@ -8,20 +8,14 @@ namespace Nova::OpenGL
     class Buffer final : public Nova::Buffer
     {
     public:
-        Buffer() : Nova::Buffer() {}
-        Buffer(Buffer&& other) noexcept;
-        Buffer& operator=(Buffer&& other) noexcept;
+        Buffer() = default;
 
         bool Initialize(const BufferCreateInfo& createInfo) override;
         void Destroy() override;
-        bool Resize(size_t newSize, bool keepData) override;
-        bool WriteData(const void* src, size_t offset, size_t size) override;
-        bool CopyDataTo(size_t offset, size_t size, void* outBuffer) override;
-        bool CopyDataTo(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
-
-        void Memset(size_t value, size_t size) override;
-
         uint32_t GetHandle() const { return m_Handle; }
+
+        void* Map() override;
+        void Unmap(const void* ptr) override;
     private:
         RenderDevice* m_Device = nullptr;
         uint32_t m_Handle = 0xFFFFFFFF;

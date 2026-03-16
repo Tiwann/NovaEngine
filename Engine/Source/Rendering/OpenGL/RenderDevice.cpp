@@ -5,7 +5,6 @@
 #include "Sampler.h"
 #include "Buffer.h"
 #include "Texture.h"
-#include "RenderTarget.h"
 #include "GraphicsPipeline.h"
 #include "Rendering/Surface.h"
 
@@ -267,5 +266,10 @@ namespace Nova::OpenGL
     Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()
     {
         return &m_CommandBuffers[m_CurrentFrameIndex];
+    }
+
+    uint32_t RenderDevice::GetCurrentFrameIndex() const
+    {
+        return m_CurrentFrameIndex;
     }
 }

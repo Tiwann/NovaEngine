@@ -194,10 +194,43 @@ namespace Nova::OpenGL
                 {
                     const ExecuteCommandBuffersCommand& cmd = data.executeCommandBuffers;
                     BufferView commandBuffers(cmd.commandBuffers, cmd.commandBufferCount);
-                    for (CommandBuffer* execCmdBuffer : commandBuffers)
+                    for (const CommandBuffer* execCmdBuffer : commandBuffers)
                         Submit(execCmdBuffer, waitSemaphore, signalSemaphore, fence, waitStagesMask);
                     break;
                 }
+            case CommandType::CopyBufferToTexture:
+                {
+                    const CopyBufferToTextureCommand& cmd = data.copyBufferToTexture;
+                    const Buffer* srcBuffer = cmd.srcBuffer;
+                    const Texture* dstTexture = cmd.dstTexture;
+                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, cmd.srcBuffer->GetHandle());
+                    dstTexture->Bind();
+                    switch (dstTexture->GetDimension())
+                    {
+                    case TextureDimension::None:
+                        break;
+                    case TextureDimension::Dim1D:
+                        glTextureSubImage1D(dstTexture->GetHandle(), cmd.mipLevel, )
+                        break;
+                    case TextureDimension::Dim2D:
+                        break;
+                    case TextureDimension::Dim3D:
+                        break;
+                    }
+
+                    glTexSubImage2D(
+                        GL_TEXTURE_2D,
+                        0,              // mip level
+                        0, 0,           // x,y offset
+                        width, height,
+                        GL_RGBA,
+                        GL_UNSIGNED_BYTE,
+                        (void*)0        // offset inside the buffer
+                    );
+
+                    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+                }
+                break;
             }
         }
 

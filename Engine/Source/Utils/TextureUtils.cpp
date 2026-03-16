@@ -51,6 +51,15 @@ namespace Nova::TextureUtils
         return true;
     }
 
+    TextureDimension GetTextureDimension(const uint32_t width, const uint32_t height, const uint32_t depth)
+    {
+        TextureDimension result = TextureDimension::None;
+        if (width > 1) result = TextureDimension::Dim1D;
+        if (height > 1) result = TextureDimension::Dim2D;
+        if (depth > 1) result = TextureDimension::Dim3D;
+        return result;
+    }
+
     Ref<Texture> LoadTexture(Ref<RenderDevice>& device, const StringView filepath)
     {
         stbi_set_flip_vertically_on_load(true);

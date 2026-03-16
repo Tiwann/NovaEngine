@@ -4,20 +4,13 @@
 #include "Conversions.h"
 #include "Buffer.h"
 #include "Runtime/Log.h"
+#include "Utils/TextureUtils.h"
 #include <vulkan/vulkan.h>
 #include <vma/vk_mem_alloc.h>
 
+
 namespace Nova::Vulkan
 {
-    static TextureDimension GetTextureDimension(const uint32_t width, const uint32_t height, const uint32_t depth)
-    {
-        TextureDimension result = TextureDimension::None;
-        if (width > 1) result = TextureDimension::Dim1D;
-        if (height > 1) result = TextureDimension::Dim2D;
-        if (depth > 1) result = TextureDimension::Dim3D;
-        return result;
-    }
-
     bool Texture::Initialize(const TextureCreateInfo& createInfo)
     {
         if (createInfo.format == Format::None) return false;
@@ -31,7 +24,7 @@ namespace Nova::Vulkan
         const VmaAllocator allocatorHandle = device->GetAllocator();
         vmaDestroyImage(allocatorHandle, m_Image, m_Allocation);
 
-        const TextureDimension dimension = GetTextureDimension(createInfo.width, createInfo.height, createInfo.depth);
+        const TextureDimension dimension = TextureUtils::GetTextureDimension(createInfo.width, createInfo.height, createInfo.depth);
 
         VkImageCreateInfo imageCreateInfo = { VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO };
         imageCreateInfo.imageType = Convert<VkImageType>(dimension);

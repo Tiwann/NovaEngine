@@ -12,7 +12,7 @@ namespace Nova::OpenGL
         void BeginFrame() override;
         void EndFrame() override;
         void Render(Nova::CommandBuffer& commandBuffer) override;
-        void DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height) override;
+        void DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height) override;
     private:
         RenderDevice* m_Device = nullptr;
     };

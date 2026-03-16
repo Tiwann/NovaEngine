@@ -14,12 +14,12 @@ namespace Nova::OpenGL
         bool Initialize(const TextureCreateInfo& createInfo) override;
         void Destroy() override;
         bool IsValid() override;
+        void Bind() const;
 
         uint32_t GetHandle() const;
-        Array<uint8_t> GetPixels() override;
-
     private:
         RenderDevice* m_Device = nullptr;
         uint32_t m_Handle = 0xFFFFFFFF;
+        uint32_t m_TextureType = 0xFFFFFFFF;
     };
 }

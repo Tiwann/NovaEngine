@@ -59,7 +59,7 @@ namespace Nova::OpenGL
         ImGui_ImplOpenGL3_RenderDrawData(drawData);
     }
 
-    void ImGuiRenderer::DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height)
+    void ImGuiRenderer::DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height)
     {
 
     }

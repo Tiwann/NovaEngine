@@ -3,29 +3,27 @@
 #include <glad/glad.h>
 
 #include "Conversions.h"
+#include "Utils/TextureUtils.h"
 
 namespace Nova::OpenGL
 {
     bool Texture::Initialize(const TextureCreateInfo& createInfo)
     {
-        using namespace Nova;
-
         if (createInfo.width == 0 || createInfo.height == 0)
             return false;
 
         if (createInfo.usageFlags == TextureUsageFlagBits::None)
             return false;
 
-        /*if (createInfo.data == nullptr && createInfo.dataSize == 0 && !createInfo.usageFlags.Contains(TextureUsageFlagBits::Storage))
-            return false;*/
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         if (!device) return false;
 
+
+        const TextureDimension dimension = TextureUtils::GetTextureDimension(createInfo.width, createInfo.height, createInfo.depth);
         GLenum textureType = GL_TEXTURE_1D;
         if (createInfo.height > 1) textureType = GL_TEXTURE_2D;
         if (createInfo.depth > 1) textureType = GL_TEXTURE_3D;
-
         if (createInfo.sampleCount > 1 && textureType == GL_TEXTURE_2D)
             textureType = GL_TEXTURE_2D_MULTISAMPLE;
 
@@ -37,38 +35,18 @@ namespace Nova::OpenGL
         switch (textureType)
         {
         case GL_TEXTURE_1D:
-            glTextureStorage1D(m_Handle, createInfo.mips, format.internalFormat, createInfo.width);
+            glTextureStorage1D(m_Handle, createInfo.mipCount, format.internalFormat, createInfo.width);
             break;
         case GL_TEXTURE_2D:
-            glTextureStorage2D(m_Handle, createInfo.mips, format.internalFormat, createInfo.width, createInfo.height);
+            glTextureStorage2D(m_Handle, createInfo.mipCount, format.internalFormat, createInfo.width, createInfo.height);
             break;
         case GL_TEXTURE_2D_MULTISAMPLE:
             glTextureStorage2DMultisample(m_Handle, createInfo.sampleCount, format.internalFormat, createInfo.width, createInfo.height, true);
             break;
         case GL_TEXTURE_3D:
-            glTextureStorage3D(m_Handle, createInfo.mips, format.internalFormat, createInfo.width, createInfo.height, createInfo.depth);
+            glTextureStorage3D(m_Handle, createInfo.mipCount, format.internalFormat, createInfo.width, createInfo.height, createInfo.depth);
             break;
         default: break;
-        }
-
-        if (createInfo.data && createInfo.dataSize > 0)
-        {
-            switch (textureType)
-            {
-            case GL_TEXTURE_1D:
-                glTextureSubImage1D(m_Handle, 0, 0, createInfo.width, format.format, GL_UNSIGNED_BYTE, createInfo.data);
-                break;
-            case GL_TEXTURE_2D:
-                glTextureSubImage2D(m_Handle, 0, 0, 0, createInfo.width, createInfo.height, format.format, GL_UNSIGNED_BYTE, createInfo.data);
-                break;
-            case GL_TEXTURE_2D_MULTISAMPLE:
-                glTextureSubImage2D(m_Handle, 0, 0, 0, createInfo.width, createInfo.height, format.format, GL_UNSIGNED_BYTE, createInfo.data);
-                break;
-            case GL_TEXTURE_3D:
-                glTextureSubImage3D(m_Handle, 0, 0, 0, 0, createInfo.width, createInfo.height, createInfo.depth, format.format, GL_UNSIGNED_BYTE, createInfo.data);
-                break;
-            default: break;
-            }
         }
 
         m_Device = device;
@@ -76,9 +54,11 @@ namespace Nova::OpenGL
         m_Width = createInfo.width;
         m_Height = createInfo.height;
         m_Depth = createInfo.depth;
-        m_Mips = createInfo.mips;
+        m_Mips = createInfo.mipCount;
         m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;
+        m_Dimension = dimension;
+        m_TextureType = textureType;
         return true;
     }
 
@@ -90,16 +70,16 @@ namespace Nova::OpenGL
 
     bool Texture::IsValid()
     {
-        return m_Device && m_Handle != 0xFFFFFFFF;
+        return m_Device && m_Handle != INVALID_HANDLE<uint32_t>;
+    }
+
+    void Texture::Bind() const
+    {
+        glBindTexture(m_TextureType, m_Handle);
     }
 
     uint32_t Texture::GetHandle() const
     {
         return m_Handle;
-    }
-
-    Array<uint8_t> Texture::GetPixels()
-    {
-        return {};
     }
 }

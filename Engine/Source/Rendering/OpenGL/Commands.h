@@ -31,6 +31,7 @@ namespace Nova::OpenGL
         BufferBarrier,
         MemoryBarrier,
         BufferCopy,
+        CopyBufferToTexture,
         Blit,
         RenderPassBegin,
         RenderPassEnd,
@@ -161,6 +162,16 @@ namespace Nova::OpenGL
         size_t size = 0;
     };
 
+    struct CopyBufferToTextureCommand
+    {
+        const Buffer* srcBuffer = nullptr;
+        const Texture* dstTexture = nullptr;
+        size_t srcOffset = 0;
+        size_t srcSize = 0;
+        uint32_t arrayIndex = 0;
+        uint32_t mipLevel = 0;
+    };
+
     struct BlitCommand
     {
         const Texture* srcTexture = nullptr;
@@ -182,7 +193,7 @@ namespace Nova::OpenGL
 
     struct ExecuteCommandBuffersCommand
     {
-        class CommandBuffer* const * commandBuffers = nullptr;
+        const class CommandBuffer* const * commandBuffers = nullptr;
         uint32_t commandBufferCount = 0;
     };
 
@@ -206,6 +217,7 @@ namespace Nova::OpenGL
         BufferBarrierCommand bufferBarrier;
         MemoryBarrierCommand memoryBarrier;
         BufferCopyCommand bufferCopy;
+        CopyBufferToTextureCommand copyBufferToTexture;
         BlitCommand blit;
         RenderPassBeginCommand renderPassBegin;
         RenderPassBeginCommand renderPassEnd;

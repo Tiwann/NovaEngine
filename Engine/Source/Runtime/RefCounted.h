@@ -3,14 +3,14 @@
 
 namespace Nova
 {
-    class RefObject
+    class RefCounted
     {
     public:
-        RefObject() = default;
-        RefObject(const RefObject&) { }
-        virtual ~RefObject() = default;
+        RefCounted() = default;
+        RefCounted(const RefCounted&) { }
+        virtual ~RefCounted() = default;
 
-        RefObject& operator=(const RefObject&) { return *this; }
+        RefCounted& operator=(const RefCounted&) { return *this; }
 
         uint32_t AddReference()
         {
@@ -53,7 +53,7 @@ namespace Nova
     void AddRef(T* ptr)
     {
         if (!ptr) return;
-        RefObject* ref = (RefObject*)ptr;
+        RefCounted* ref = (RefCounted*)ptr;
         ref->AddReference();
     }
 
@@ -61,7 +61,7 @@ namespace Nova
     void RelRef(T* ptr)
     {
         if (!ptr) return;
-        RefObject* ref = (RefObject*)ptr;
+        RefCounted* ref = (RefCounted*)ptr;
         ref->ReleaseReference();
     }
 
@@ -69,7 +69,7 @@ namespace Nova
     void KillRef(T* ptr)
     {
         if (!ptr) return;
-        RefObject* ref = (RefObject*)ptr;
+        RefCounted* ref = (RefCounted*)ptr;
         ref->Kill();
     }
 }

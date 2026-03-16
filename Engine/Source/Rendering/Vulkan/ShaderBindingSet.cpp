@@ -59,7 +59,7 @@ namespace Nova::Vulkan
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
         {
             const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
-            const TextureView* textureView = static_cast<const TextureView*>(texture->GetView());
+            const TextureView* textureView = static_cast<const TextureView*>(texture->GetView().Get());
             VkDescriptorImageInfo imageInfo;
             imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());
             imageInfo.imageView = textureView->GetHandle();
@@ -83,7 +83,7 @@ namespace Nova::Vulkan
             return false;
 
         const Texture& vulkanTexture = static_cast<const Texture&>(texture);
-        const TextureView* textureView = static_cast<const TextureView*>(vulkanTexture.GetView());
+        const TextureView* textureView = static_cast<const TextureView*>(vulkanTexture.GetView().Get());
         VkDescriptorImageInfo imageInfo;
         imageInfo.imageLayout = Convert<VkImageLayout>(texture.GetState());
         imageInfo.imageView = textureView->GetHandle();
@@ -118,7 +118,7 @@ namespace Nova::Vulkan
     bool ShaderBindingSet::BindCombinedSamplerTexture(const uint32_t binding, const Nova::Sampler& sampler, const Nova::Texture& texture)
     {
         const Texture& vulkanTexture = static_cast<const Texture&>(texture);
-        const TextureView* textureView = static_cast<const TextureView*>(vulkanTexture.GetView());
+        const TextureView* textureView = static_cast<const TextureView*>(vulkanTexture.GetView().Get());
         VkDescriptorImageInfo imageInfo;
         imageInfo.imageLayout = Convert<VkImageLayout>(texture.GetState());
         imageInfo.imageView = textureView->GetHandle();
@@ -141,7 +141,7 @@ namespace Nova::Vulkan
         for (size_t textureIndex = 0; textureIndex < textureCount; ++textureIndex)
         {
             const Texture* texture = static_cast<const Texture*>(textures[textureIndex]);
-            const TextureView* textureView = static_cast<const TextureView*>(texture->GetView());
+            const TextureView* textureView = static_cast<const TextureView*>(texture->GetView().Get());
             VkDescriptorImageInfo imageInfo;
             imageInfo.sampler = static_cast<const Sampler&>(sampler).GetHandle();
             imageInfo.imageLayout = Convert<VkImageLayout>(texture->GetState());

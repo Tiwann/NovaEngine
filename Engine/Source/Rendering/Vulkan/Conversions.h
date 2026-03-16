@@ -417,31 +417,31 @@ namespace Nova::Vulkan
     }
 
     template<>
-    inline VkAccessFlags Convert(const AccessFlags& value)
+    inline VkAccessFlags Convert(const ResourceAccessFlags& value)
     {
         VkAccessFlags result = VK_ACCESS_NONE;
-        if (value == AccessFlagBits::None)
+        if (value == ResourceAccessFlagBits::None)
             return VK_ACCESS_NONE;
 
-        if (value & AccessFlagBits::ShaderRead)
+        if (value & ResourceAccessFlagBits::ShaderRead)
             result |= VK_ACCESS_SHADER_READ_BIT;
-        if (value & AccessFlagBits::ShaderWrite)
+        if (value & ResourceAccessFlagBits::ShaderWrite)
             result |= VK_ACCESS_SHADER_WRITE_BIT;
-        if (value & AccessFlagBits::ColorAttachmentRead)
+        if (value & ResourceAccessFlagBits::ColorAttachmentRead)
             result |= VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-        if (value & AccessFlagBits::ColorAttachmentWrite)
+        if (value & ResourceAccessFlagBits::ColorAttachmentWrite)
             result |= VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-        if (value & AccessFlagBits::DepthStencilAttachmentRead)
+        if (value & ResourceAccessFlagBits::DepthStencilAttachmentRead)
             result |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT;
-        if (value & AccessFlagBits::DepthStencilAttachmentWrite)
+        if (value & ResourceAccessFlagBits::DepthStencilAttachmentWrite)
             result |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
-        if (value & AccessFlagBits::TransferRead)
+        if (value & ResourceAccessFlagBits::TransferRead)
             result |= VK_ACCESS_TRANSFER_READ_BIT;
-        if (value & AccessFlagBits::TransferWrite)
+        if (value & ResourceAccessFlagBits::TransferWrite)
             result |= VK_ACCESS_TRANSFER_WRITE_BIT;
-        if (value & AccessFlagBits::HostRead)
+        if (value & ResourceAccessFlagBits::HostRead)
             result |= VK_ACCESS_HOST_READ_BIT;
-        if (value & AccessFlagBits::HostWrite)
+        if (value & ResourceAccessFlagBits::HostWrite)
             result |= VK_ACCESS_HOST_WRITE_BIT;
 
         return result;

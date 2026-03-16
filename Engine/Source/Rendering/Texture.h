@@ -4,9 +4,11 @@
 #include "TextureUsage.h"
 #include "TextureDimension.h"
 #include "ResourceState.h"
-#include "Runtime/Asset.h"
 #include "Runtime/Ref.h"
 #include <cstdint>
+
+#include "Math/Functions.h"
+#include "Math/Rect.h"
 
 namespace Nova
 {
@@ -78,20 +80,28 @@ namespace Nova
         virtual bool Initialize(const TextureCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;
         virtual bool IsValid() = 0;
-        virtual Array<uint8_t> GetPixels() = 0;
 
         ResourceType GetResourceType() final { return ResourceType::Texture; }
         Format GetFormat() const { return m_Format; }
         uint32_t GetWidth() const { return m_Width; }
         uint32_t GetHeight() const { return m_Height; }
         uint32_t GetDepth() const { return m_Depth; }
-        uint32_t GetMips() const { return m_Mips; }
+        uint32_t GetMipCount() const { return m_Mips; }
         uint32_t GetSampleCount() const { return m_SampleCount; }
         ResourceState GetState() const { return m_State; }
+        uint32_t GetArrayCount() const { return m_ArrayCount; }
         void SetState(const ResourceState state) { m_State = state; }
         TextureUsageFlags GetUsageFlags() const { return m_UsageFlags; }
         TextureDimension GetDimension() const { return m_Dimension; }
-
+        void GetMipDimensions(const uint32_t mipLevel, uint32_t* width, uint32_t* height, uint32_t* depth)
+        {
+            if (width)
+                *width = Math::Max(1u, m_Width >> mipLevel);
+            if (height)
+                *height = Math::Max(1u, m_Height >> mipLevel);
+            if (depth)
+                *depth = Math::Max(1u, m_Depth >> mipLevel);
+        }
         const Ref<TextureView>& GetView() const { return m_View; }
     protected:
         Format m_Format = Format::None;
@@ -106,4 +116,8 @@ namespace Nova
         TextureDimension m_Dimension = TextureDimension::None;
         Ref<TextureView> m_View = nullptr;
     };
+
+    using TextureHandle = Ref<Texture>;
+
+
 }

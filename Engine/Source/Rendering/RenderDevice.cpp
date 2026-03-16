@@ -4,7 +4,9 @@
 #include "Buffer.h"
 #include "Material.h"
 #include "RenderTarget.h"
+#include "ResourceBarrier.h"
 #include "Shader.h"
+#include "Runtime/Common.h"
 
 #ifdef NOVA_HAS_VULKAN
 #include "Vulkan/RenderDevice.h"
@@ -101,7 +103,10 @@ namespace Nova
 
     Ref<Fence> RenderDevice::CreateFence()
     {
-        return CreateFence({this, FenceCreateFlagBits::None});
+        FenceCreateInfo createInfo;
+        createInfo.device = this;
+        createInfo.flags = FenceCreateFlagBits::None;
+        return CreateFence(createInfo);
     }
 
     Ref<Buffer> RenderDevice::CreateBuffer(const BufferUsage usage, const size_t size)
@@ -157,30 +162,25 @@ namespace Nova
         return m_Samplers[createInfo];
     }
 
-    void RenderDevice::ImmediateTextureBarrier(const TextureBarrier& barrier)
+    void RenderDevice::ImmediateTextureBarrier(RenderDevice* device, const TextureBarrier& barrier)
     {
-        Ref<RenderDevice> device = GetInstance();
         if (!device) return;
 
         Ref<CommandBuffer> cmdBuffer = device->CreateCommandBuffer();
         if (!cmdBuffer) return;
+        NOVA_DEFER(cmdBuffer, &CommandBuffer::Free);
 
         Ref<Fence> fence = device->CreateFence();
         if (!fence) return;
-        fence->Initialize({device, FenceCreateFlags::None()});
+        NOVA_DEFER(fence, &Fence::Destroy);
 
-        if (cmdBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit}))
-        {
-            cmdBuffer->TextureBarrier(barrier);
-            cmdBuffer->End();
+        cmdBuffer->Begin({CommandBufferUsageFlagBits::OneTimeSubmit});
+        cmdBuffer->TextureBarrier(barrier);
+        cmdBuffer->End();
 
-            const Queue* graphicsQueue = device->GetGraphicsQueue();
-            graphicsQueue->Submit(cmdBuffer, nullptr, nullptr, fence);
-
-            fence->Wait(FENCE_WAIT_INFINITE_NS);
-        }
-
-        cmdBuffer->Free();
-        fence->Destroy();
+        const Queue* queue = device->GetGraphicsQueue();
+        if (!queue) return;
+        queue->Submit(cmdBuffer, nullptr, nullptr, fence);
+        fence->Wait(FENCE_WAIT_INFINITE);
     }
 }

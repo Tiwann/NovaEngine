@@ -12,9 +12,8 @@ namespace Nova
 
 namespace Nova::Vulkan
 {
-    VkAccessFlags2 GetSourceAccessFlags(VkImageLayout layout);
-    VkAccessFlags2 GetDestAccessFlags(VkImageLayout layout);
-    VkPipelineStageFlags GetPipelineStageFlags(AccessFlags accessFlags);
-    VkImageMemoryBarrier MakeTextureBarrier(const Nova::TextureBarrier& barrier);
-    VkBufferMemoryBarrier MakeBufferBarrier(const Nova::BufferBarrier& barrier);
+    VkPipelineStageFlags GetSourcePipelineStageFlags(ResourceAccessFlags accessFlags);
+    VkPipelineStageFlags GetDestPipelineStageFlags(ResourceAccessFlags accessFlags);
+    VkImageMemoryBarrier MakeTextureBarrier(const TextureBarrier& barrier);
+    VkBufferMemoryBarrier MakeBufferBarrier(const BufferBarrier& barrier);
 }

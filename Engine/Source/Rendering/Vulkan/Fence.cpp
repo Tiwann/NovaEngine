@@ -6,12 +6,14 @@ namespace Nova::Vulkan
 {
     bool Fence::Initialize(const FenceCreateInfo& createInfo)
     {
-        RenderDevice* device = (RenderDevice*)createInfo.device;
+        RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VkDevice deviceHandle = device->GetHandle();
 
         VkFenceCreateInfo fenceCreateInfo = { VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
         fenceCreateInfo.flags = createInfo.flags;
-        if (vkCreateFence(deviceHandle, &fenceCreateInfo, nullptr, &m_Handle) != VK_SUCCESS)
+        vkDestroyFence(deviceHandle, m_Handle, nullptr);
+        const VkResult result = vkCreateFence(deviceHandle, &fenceCreateInfo, nullptr, &m_Handle);
+        if (result != VK_SUCCESS)
             return false;
 
         m_Device = device;
@@ -22,7 +24,6 @@ namespace Nova::Vulkan
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
         vkDestroyFence(deviceHandle, m_Handle, nullptr);
-        m_Handle = nullptr;
     }
 
     void Fence::Wait(const uint64_t timeoutNs)

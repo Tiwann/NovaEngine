@@ -5,7 +5,7 @@
 #include "Runtime/Format.h"
 #include "ShaderStage.h"
 #include "Containers/StringView.h"
-#include "Runtime/Object.h"
+#include "Runtime/RefCounted.h"
 
 namespace Nova
 {
@@ -73,10 +73,10 @@ namespace Nova
         CommandBufferUsageFlags flags;
     };
 
-    class CommandBuffer : public Object
+    class CommandBuffer : public RefCounted
     {
     public:
-        CommandBuffer() : Object("CommandBuffer") {}
+        CommandBuffer() = default;
         ~CommandBuffer() override = default;
 
         virtual bool Allocate(const CommandBufferAllocateInfo& allocateInfo) = 0;
@@ -115,11 +115,11 @@ namespace Nova
 
         // Transfer Commands
         virtual void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) = 0;
-        virtual void BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayLayer, uint32_t mipLevel) = 0;
+        virtual void CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize, uint32_t arrayIndex, uint32_t mipLevel) = 0;
         virtual void Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter = Filter::Linear) = 0;
         virtual void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter = Filter::Linear) = 0;
 
-        virtual void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) = 0;
+        virtual void ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers) = 0;
 
         CommandPool* GetCommandPool() const { return m_CommandPool; }
         CommandBufferLevel GetLevel() const { return m_Level; }

@@ -3,6 +3,7 @@
 #include "Filter.h"
 #include "SamplerAddressMode.h"
 #include "Resource.h"
+#include "Runtime/Ref.h"
 
 
 namespace Nova
@@ -71,4 +72,6 @@ namespace Nova
         float m_MaxLod = 1.0f;
         Filter m_MipmapFilter = Filter::Nearest;
     };
+
+    using SamplerHandle = Ref<Sampler>;
 }

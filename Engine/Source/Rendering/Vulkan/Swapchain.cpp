@@ -90,9 +90,6 @@ namespace Nova::Vulkan
             ImageViewCreateInfo.subresourceRange.baseMipLevel = 0;
             vkCreateImageView(deviceHandle, &ImageViewCreateInfo, nullptr, &m_ImageViews[i]);
 
-            m_Textures[i].SetDirty();
-            m_TextureViews[i].SetDirty();
-
             VkImageMemoryBarrier2 barrier { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
             barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
@@ -126,7 +123,7 @@ namespace Nova::Vulkan
 
         Scoped<Fence> fence = FenceCreateInfo(m_Device);
         graphicsQueue->Submit(&commandBuffer, nullptr, nullptr, &fence);
-        fence->Wait(~0);
+        fence->Wait(FENCE_WAIT_INFINITE);
 
         commandBuffer.Free();
         SetName("Main Swapchain");
@@ -191,49 +188,36 @@ namespace Nova::Vulkan
     {
         const RenderDevice* device = (RenderDevice*)m_Device;
         const size_t index = device->GetCurrentFrameIndex();
-        const auto createTexture = [this, &index]() -> Texture
-        {
-            Texture texture;
-            texture.m_Device = (RenderDevice*)m_Device;
-            texture.m_Image = m_Images[index];
-            texture.m_Width = m_ImageWidth;
-            texture.m_Height = m_ImageHeight;
-            texture.m_Depth = 1;
-            texture.m_UsageFlags = TextureUsageFlagBits::None;
-            texture.m_Name = StringFormat("Swapchain Texture {}", index);
-            texture.m_Allocation = nullptr;
-            texture.m_SampleCount = 1;
-            texture.m_Mips = 1;
-            texture.m_State = ResourceState::ColorAttachment;
-            texture.m_Format = m_ImageFormat;
-            return texture;
-        };
-
-        const Texture& texture = m_Textures[index].Get(createTexture);
+        Texture& texture = m_Textures[index];
+        texture.m_Device = (RenderDevice*)m_Device;
+        texture.m_Image = m_Images[index];
+        texture.m_Width = m_ImageWidth;
+        texture.m_Height = m_ImageHeight;
+        texture.m_Depth = 1;
+        texture.m_UsageFlags = TextureUsageFlagBits::ColorAttachment;
+        texture.m_Allocation = nullptr;
+        texture.m_SampleCount = 1;
+        texture.m_Mips = 1;
+        texture.m_State = ResourceState::ColorAttachment;
+        texture.m_Format = m_ImageFormat;
         return &texture;
     }
 
     const Nova::TextureView* Swapchain::GetTextureView()
     {
         const size_t index = m_Device->GetCurrentFrameIndex();
-        const auto createTextureView = [this, &index]() -> TextureView
-        {
-            TextureView textureView;
-            textureView.m_Texture = GetTexture();
-            textureView.m_Device = (RenderDevice*)m_Device;
-            textureView.m_Handle = m_ImageViews[index];
-            textureView.m_Width = m_ImageWidth;
-            textureView.m_Height = m_ImageHeight;
-            textureView.m_Depth = 1;
-            textureView.m_Name = StringFormat("Swapchain Texture View {}", index);
-            textureView.m_BaseMipLevel = 0;
-            textureView.m_MipCount = 1;
-            textureView.m_AspectFlags = TextureAspectFlagBits::Color;
-            textureView.m_Format = m_ImageFormat;
-            return textureView;
-        };
-
-        const TextureView& textureView = m_TextureViews[index].Get(createTextureView);
+        TextureView& textureView = m_TextureViews[index];
+        textureView.m_Texture = GetTexture();
+        textureView.m_Device = (RenderDevice*)m_Device;
+        textureView.m_Handle = m_ImageViews[index];
+        textureView.m_Width = m_ImageWidth;
+        textureView.m_Height = m_ImageHeight;
+        textureView.m_Depth = 1;
+        textureView.m_Name = StringFormat("Swapchain Texture View {}", index);
+        textureView.m_BaseMipLevel = 0;
+        textureView.m_MipCount = 1;
+        textureView.m_AspectFlags = TextureAspectFlagBits::Color;
+        textureView.m_Format = m_ImageFormat;
         return &textureView;
     }
 

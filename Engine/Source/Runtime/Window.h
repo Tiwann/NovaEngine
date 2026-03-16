@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Object.h"
+#include "Runtime/RefCounted.h"
 #include "Containers/String.h"
 #include "Containers/MulticastDelegate.h"
 #include "Rendering/RenderDeviceType.h"
@@ -34,7 +34,7 @@ namespace Nova
         RenderDeviceType deviceType;
     };
 
-    class Window : public Object
+    class Window : public RefCounted
     {
     protected:
         using CloseDelegate = MulticastDelegate<void()>;

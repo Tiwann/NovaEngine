@@ -1,6 +1,8 @@
 ﻿#pragma once
 #include "Resource.h"
 #include "BufferUsage.h"
+#include "ResourceState.h"
+#include "Runtime/Ref.h"
 
 namespace Nova
 {
@@ -29,11 +31,16 @@ namespace Nova
         virtual void* Map() = 0;
         virtual void Unmap(const void* ptr) = 0;
 
-        ResourceType GetResourceType() final { return ResourceType::Buffer;}
+        ResourceType GetResourceType() final { return ResourceType::Buffer; }
+        ResourceState GetState() const { return m_State; }
+        void SetState(const ResourceState state) { m_State = state; }
         BufferUsage GetUsage() const { return m_Usage; }
         size_t GetSize() const { return m_Size; }
     protected:
         size_t m_Size = 0;
         BufferUsage m_Usage = BufferUsage::None;
+        ResourceState m_State = ResourceState::Undefined;
     };
+
+    using BufferHandle = Ref<Buffer>;
 }

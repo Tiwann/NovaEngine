@@ -287,6 +287,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Runtime/Timer.cpp
         Source/Runtime/Timer.h
         Source/Runtime/TypeTraits.h
+        Source/Runtime/TextureAsset.h
+        Source/Runtime/TextureAsset.cpp
         Source/Runtime/Uuid.cpp
         Source/Runtime/Uuid.h
         Source/Runtime/Version.h

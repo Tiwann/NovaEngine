@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "RefObject.h"
+#include "RefCounted.h"
 #include <type_traits>
 
 namespace Nova
@@ -124,12 +124,6 @@ namespace Nova
         operator ConstPointerType() const { return m_Pointer; }
         explicit operator bool() const { return m_Pointer; }
 
-        //template <typename U>
-        //operator const U*() const { return (U*)m_Pointer; }
-
-        //template <typename U>
-        //operator U*() { return (U*)m_Pointer; }
-
 
         void Attach(PointerType newPointer)
         {
@@ -163,11 +157,50 @@ namespace Nova
 
         template <typename U>
         friend class Ref;
+
+        template <typename U>
+        friend class WeakRef;
     };
 
-    template <typename T, typename... Args> requires std::is_base_of_v<RefObject, T>
+    template<typename T>
+    class WeakRef
+    {
+    public:
+        using PointerType = Ref<T>::PointerType;
+        using ConstPointerType = Ref<T>::ConstPointerType;
+        using ReferenceType = Ref<T>::ReferenceType;
+        using ConstReferenceType = Ref<T>::ConstReferenceType;
+
+        WeakRef(const Ref<T>& ref) : m_Pointer(ref.m_Pointer) {}
+        WeakRef(const WeakRef&) = default;
+        WeakRef(WeakRef&&) = default;
+        WeakRef& operator=(const WeakRef&) = default;
+        WeakRef& operator=(WeakRef&&) = default;
+        ~WeakRef() = default;
+
+        operator PointerType() { return m_Pointer; }
+        operator ConstPointerType() const { return m_Pointer; }
+
+        ReferenceType operator*() { return *m_Pointer; }
+        ConstReferenceType operator*() const { return *m_Pointer; }
+
+        PointerType operator->() { return m_Pointer; }
+        ConstPointerType operator->() const { return m_Pointer; }
+
+        PointerType Get() { return m_Pointer; }
+        ConstPointerType Get() const { return m_Pointer; }
+
+        explicit operator bool() const { return m_Pointer; }
+    private:
+        PointerType m_Pointer = nullptr;
+    };
+
+    template <typename T, typename... Args> requires std::is_base_of_v<RefCounted, T>
     Ref<T> MakeRef(Args&&... args)
     {
         return Ref<T>(new T(std::forward<Args>(args)...));
     }
+
+    template<typename T>
+    WeakRef<T> MakeWeak(const Ref<T>& ref) { return WeakRef<T>(ref); }
 }

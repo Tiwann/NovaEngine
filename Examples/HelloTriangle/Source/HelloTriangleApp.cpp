@@ -86,6 +86,7 @@ void HelloTriangleApp::SetupPipeline()
     pipelineCreateInfo.depthStencilState.depthWriteEnable = false;
     pipelineCreateInfo.vertexInputState = CreateInputStateFromVertexLayout(vertexLayout);
     pipelineCreateInfo.SetMultisampleInfo({8});
+    pipelineCreateInfo.colorBlendStates.Add(ColorBlendState{false});
     m_GraphicsPipeline = renderDevice->CreateGraphicsPipeline(pipelineCreateInfo);
     if (!m_GraphicsPipeline)
     {

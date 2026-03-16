@@ -110,7 +110,7 @@ namespace Nova
 
         static Ref<RenderDevice> GetInstance();
 
-        static void ImmediateTextureBarrier(const TextureBarrier& barrier);
+        static void ImmediateTextureBarrier(RenderDevice* device, const TextureBarrier& barrier);
     protected:
         String m_DeviceVendor;
         bool m_VSync = false;

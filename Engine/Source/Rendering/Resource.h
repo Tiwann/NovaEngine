@@ -1,9 +1,8 @@
 ﻿#pragma once
-#include "Runtime/RefObject.h"
+#include "Runtime/RefCounted.h"
 
 #define NOVA_CONCAT_IMPL(a,b) a##b
-#define NOVA_CONCAT(a, b) NOVA_CONCAT_IMPL(a,b)
-#define NOVA_DEFER_REF(x, memberFunc) Nova::Defer NOVA_CONCAT(defer_, __LINE__)(x.Get(), memberFunc)
+#define NOVA_CONCAT(a, b) NOVA_CONCAT_IMPL(a, b)
 #define NOVA_DEFER(x, memberFunc) Nova::Defer NOVA_CONCAT(defer_, __LINE__)(x, memberFunc)
 #define NOVA_DEFER_FUNC(x) Nova::Defer NOVA_CONCAT(defer_, __LINE__)(x)
 
@@ -16,7 +15,7 @@ namespace Nova
         Buffer,
     };
 
-    class Resource : public RefObject
+    class Resource : public RefCounted
     {
     public:
         Resource() = default;

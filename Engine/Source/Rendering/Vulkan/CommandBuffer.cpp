@@ -85,15 +85,13 @@ namespace Nova::Vulkan
         vkEndCommandBuffer(m_Handle);
     }
 
-    void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
+    void CommandBuffer::ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers)
     {
-        const auto toHandles = [](const Nova::CommandBuffer* commandBuffer) -> VkCommandBuffer
+        const auto toHandles = [](const Nova::CommandBuffer* cmdBuffer) -> VkCommandBuffer
         {
-            return ((const CommandBuffer*)commandBuffer)->GetHandle();
+            return static_cast<const CommandBuffer*>(cmdBuffer)->GetHandle();
         };
-
         Array<VkCommandBuffer> cmdBuffs = commandBuffers.Transform<VkCommandBuffer>(toHandles);
-
         vkCmdExecuteCommands(m_Handle, cmdBuffs.Count(), cmdBuffs.Data());
     }
 
@@ -152,14 +150,15 @@ namespace Nova::Vulkan
 
     void CommandBuffer::BindShaderBindingSet(const Nova::Shader& shader, const Nova::ShaderBindingSet& bindingSet)
     {
-        const Shader& sh = (const Shader&)shader;
+        const Shader& vulkanShader = static_cast<const Shader&>(shader);
+        const ShaderBindingSet& vulkanBindingSet = static_cast<const ShaderBindingSet&>(bindingSet);
 
         VkBindDescriptorSetsInfo info = { VK_STRUCTURE_TYPE_BIND_DESCRIPTOR_SETS_INFO };
-        info.layout = sh.GetPipelineLayout();
+        info.layout = vulkanShader.GetPipelineLayout();
         info.firstSet = bindingSet.GetSetIndex();
         info.descriptorSetCount = 1;
-        info.pDescriptorSets = ((const ShaderBindingSet&)bindingSet).GetHandlePtr();
-        info.stageFlags = Convert<VkShaderStageFlags>(sh.GetShaderStageFlags());
+        info.pDescriptorSets = vulkanBindingSet.GetHandlePtr();
+        info.stageFlags = Convert<VkShaderStageFlags>(vulkanShader.GetShaderStageFlags());
         info.dynamicOffsetCount = 0;
         info.pDynamicOffsets = nullptr;
         vkCmdBindDescriptorSets2(m_Handle, &info);
@@ -234,28 +233,35 @@ namespace Nova::Vulkan
 
     void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)
     {
-        Texture* texture = dynamic_cast<Texture*>(barrier.texture);
+        Texture* texture = static_cast<Texture*>(barrier.texture);
         if (!texture) return;
 
         const VkImageMemoryBarrier vkBarrier = MakeTextureBarrier(barrier);
-        const VkPipelineStageFlags srcStageFlags = GetPipelineStageFlags(barrier.sourceAccess);
-        const VkPipelineStageFlags dstStageFlags = GetPipelineStageFlags(barrier.destAccess);
+        const VkPipelineStageFlags srcStageFlags = GetSourcePipelineStageFlags(barrier.sourceAccess);
+        const VkPipelineStageFlags dstStageFlags = GetDestPipelineStageFlags(barrier.destAccess);
         vkCmdPipelineBarrier(m_Handle, srcStageFlags, dstStageFlags, 0, 0, nullptr, 0, nullptr, 1, &vkBarrier);
         texture->SetState(barrier.destState);
     }
 
     void CommandBuffer::BufferBarrier(const Nova::BufferBarrier& barrier)
     {
+        Buffer* buffer = static_cast<Buffer*>(barrier.buffer);
+        if (!buffer) return;
+
         const VkBufferMemoryBarrier vkBarrier = MakeBufferBarrier(barrier);
-        vkCmdPipelineBarrier(m_Handle, 0, 0, 0, 0, nullptr, 1, &vkBarrier, 0, nullptr);
+        const VkPipelineStageFlags srcStageFlags = GetSourcePipelineStageFlags(barrier.sourceAccess);
+        const VkPipelineStageFlags dstStageFlags = GetSourcePipelineStageFlags(barrier.destAccess);
+        vkCmdPipelineBarrier(m_Handle, srcStageFlags, dstStageFlags, 0, 0, nullptr, 1, &vkBarrier, 0, nullptr);
+        buffer->SetState(barrier.destState);
     }
 
     void CommandBuffer::MemoryBarrier(const Nova::MemoryBarrier& memoryBarrier)
     {
+
         Array<VkImageMemoryBarrier> textureBarriers;
         for (uint32_t i = 0; i < memoryBarrier.textureBarrierCount; i++)
         {
-            Nova::TextureBarrier& barrier = memoryBarrier.textureBarriers[i];
+            const Nova::TextureBarrier& barrier = memoryBarrier.textureBarriers[i];
             Texture* texture = static_cast<Texture*>(barrier.texture);
             textureBarriers.Add(MakeTextureBarrier(barrier));
             texture->SetState(barrier.destState);
@@ -283,7 +289,7 @@ namespace Nova::Vulkan
         vkCmdCopyBuffer2(m_Handle, &copyInfo);
     }
 
-    void CommandBuffer::BufferToTextureCopy(const Nova::Buffer& src, const Nova::Texture& dest, const size_t srcOffset, const size_t srcSize, const uint32_t arrayLayer, const uint32_t mipLevel)
+    void CommandBuffer::CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, const size_t srcOffset, const size_t srcSize, const uint32_t arrayIndex, const uint32_t mipLevel)
     {
         const Buffer& source = static_cast<const Buffer&>(src);
         const Texture& destination = static_cast<const Texture&>(dest);
@@ -298,7 +304,7 @@ namespace Nova::Vulkan
         region.bufferImageHeight = 0;
         region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT; // ASSUMING COPYING ONLY COLOR TEXTURES
         region.imageSubresource.mipLevel = mipLevel;
-        region.imageSubresource.baseArrayLayer = arrayLayer;
+        region.imageSubresource.baseArrayLayer = arrayIndex;
         region.imageSubresource.layerCount = 1;
         region.imageOffset = { 0, 0, 0 };
         region.imageExtent = { mipWidth, mipHeight, mipDepth };
@@ -319,14 +325,14 @@ namespace Nova::Vulkan
         const Texture& destination = static_cast<const Texture&>(dest);
         //NOVA_ASSERT(source.GetFormat() != destination.GetFormat(), "Source and destination textures must have the same format");
 
-        const VkImageLayout sourceInitialLayout = Convert<VkImageLayout>(source.GetState());
-        const VkImageLayout destInitialLayout = Convert<VkImageLayout>(destination.GetState());
+        const ResourceState sourceInitialState = source.GetState();
+        const ResourceState destInitialState = destination.GetState();
 
         VkImageMemoryBarrier2 inBarriers[2] = {  };
         inBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-        inBarriers[0].oldLayout = sourceInitialLayout;
+        inBarriers[0].oldLayout = Convert<VkImageLayout>(sourceInitialState);
         inBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        inBarriers[0].srcAccessMask = GetSourceAccessFlags(sourceInitialLayout);
+        inBarriers[0].srcAccessMask = GetSourceAccessFlags(sourceInitialState);
         inBarriers[0].dstAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
         inBarriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         inBarriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -338,9 +344,9 @@ namespace Nova::Vulkan
         inBarriers[0].subresourceRange.layerCount = 1;
 
         inBarriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
-        inBarriers[1].oldLayout = destInitialLayout;
+        inBarriers[1].oldLayout = Convert<VkImageLayout>(destInitialState);
         inBarriers[1].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        inBarriers[1].srcAccessMask = GetDestAccessFlags(destInitialLayout);
+        inBarriers[1].srcAccessMask = GetDestAccessFlags(destInitialState);
         inBarriers[1].dstAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         inBarriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         inBarriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -386,9 +392,9 @@ namespace Nova::Vulkan
         VkImageMemoryBarrier2 outBarriers[2] = {  };
         outBarriers[0].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
         outBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-        outBarriers[0].newLayout = sourceInitialLayout;
+        outBarriers[0].newLayout = Convert<VkImageLayout>(sourceInitialState);
         outBarriers[0].srcAccessMask = VK_ACCESS_2_TRANSFER_READ_BIT;
-        outBarriers[0].dstAccessMask = GetDestAccessFlags(sourceInitialLayout);
+        outBarriers[0].dstAccessMask = GetDestAccessFlags(sourceInitialState);
         outBarriers[0].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         outBarriers[0].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         outBarriers[0].image = source.GetImage();
@@ -398,11 +404,12 @@ namespace Nova::Vulkan
         outBarriers[0].subresourceRange.baseArrayLayer = 0;
         outBarriers[0].subresourceRange.layerCount = 1;
 
+        const auto newState = destInitialState == ResourceState::Undefined ? ResourceState::General : destInitialState;
         outBarriers[1].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
         outBarriers[1].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        outBarriers[1].newLayout = destInitialLayout == VK_IMAGE_LAYOUT_UNDEFINED ? VK_IMAGE_LAYOUT_GENERAL : destInitialLayout;
+        outBarriers[1].newLayout = Convert<VkImageLayout>(newState);
         outBarriers[1].srcAccessMask = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        outBarriers[1].dstAccessMask = GetDestAccessFlags(destInitialLayout);
+        outBarriers[1].dstAccessMask = GetDestAccessFlags(destInitialState);
         outBarriers[1].srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         outBarriers[1].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         outBarriers[1].image = destination.GetImage();
@@ -513,6 +520,4 @@ namespace Nova::Vulkan
     {
         return &m_Handle;
     }
-
-
 }

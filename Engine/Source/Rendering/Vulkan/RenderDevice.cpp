@@ -167,16 +167,19 @@ namespace Nova::Vulkan
             if (queueFamilyProperties[i].queueFamilyProperties.queueFlags & (VK_QUEUE_GRAPHICS_BIT))
             {
                 m_GraphicsQueue.SetIndex(i);
+                m_GraphicsQueue.SetQueueType(QueueType::Graphics);
             }
 
             if (queueFamilyProperties[i].queueFamilyProperties.queueFlags & (VK_QUEUE_COMPUTE_BIT))
             {
                 m_ComputeQueue.SetIndex(i);
+                m_ComputeQueue.SetQueueType(QueueType::Compute);
             }
 
             if (queueFamilyProperties[i].queueFamilyProperties.queueFlags & (VK_QUEUE_TRANSFER_BIT))
             {
                 m_TransferQueue.SetIndex(i);
+                m_TransferQueue.SetQueueType(QueueType::Transfer);
             }
         }
 
@@ -187,6 +190,7 @@ namespace Nova::Vulkan
             if (supportsSurface)
             {
                 m_PresentQueue.SetIndex(i);
+                m_PresentQueue.SetQueueType(QueueType::Graphics);
                 break;
             }
         }
@@ -465,7 +469,7 @@ namespace Nova::Vulkan
         }
 
         Fence& fence = m_Frames[m_LastFrameIndex].fence;
-        fence.Wait(FENCE_WAIT_INFINITE_NS);
+        fence.Wait(FENCE_WAIT_INFINITE);
         fence.Reset();
 
         const Semaphore& presentSemaphore = m_Frames[m_LastFrameIndex].presentSemaphore;

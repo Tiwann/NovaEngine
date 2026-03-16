@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "Containers/String.h"
-#include "RefObject.h"
+#include "RefCounted.h"
 
 namespace Nova
 {
-    class Object : public RefObject
+    class Object : public RefCounted
     {
     public:
         Object();

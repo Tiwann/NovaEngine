@@ -11,10 +11,11 @@
 #include "Rendering/Shader.h"
 #include "Rendering/CommandBuffer.h"
 #include "Rendering/Swapchain.h"
-#include "Utils/TextureUtils.h"
+#include "TextureAsset.h"
 #include "Rendering/RenderPass.h"
 #include <imgui.h>
 #include <slang/slang.h>
+
 
 namespace Nova
 {
@@ -49,10 +50,14 @@ namespace Nova
     }
 
 
-    static Ref<Texture> LoadTextureBasic(AssetDatabase& database, Ref<RenderDevice> device, StringView filepath, const String& assetName)
+    static Ref<TextureAsset> LoadTextureBasic(AssetDatabase& database, StringView filepath, const String& assetName)
     {
-        Ref<Texture> texture = TextureUtils::LoadTexture(device, Path::GetEngineAssetPath(filepath));
-        database.AddAsset(texture, assetName);
+        Ref<TextureAsset> texture = database.CreateAsset<TextureAsset>(assetName);
+        if (!texture->LoadFromFile(Path::GetEngineAssetPath(filepath)))
+        {
+            database.UnloadAsset(texture);
+            return nullptr;
+        }
         return texture;
     };
 
@@ -89,7 +94,6 @@ namespace Nova
             Destroy();
             return;
         }
-
 
         // Creating render target
         RenderTargetCreateInfo rtCreateInfo;
@@ -158,11 +162,11 @@ namespace Nova
         LoadShaderBasic(m_AssetDatabase, m_Device, "Fullscreen", "Shaders/Fullscreen.slang");
         Ref<Shader> debugShader = LoadShaderBasic(m_AssetDatabase, m_Device, "Debug", "Shaders/Debug.slang");
 
-        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/BlackTexPlaceholder.png", "BlackTexPlaceholder");
-        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/WhiteTexPlaceholder.png", "WhiteTexPlaceholder");
-        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/GreyTexPlaceholder.png", "GreyTexPlaceholder");
-        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/CheckerTexPlaceholder.png", "CheckerTexPlaceholder");
-        LoadTextureBasic(m_AssetDatabase, m_Device, "Textures/NormalTexPlaceholder.png", "NormalTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, "Textures/BlackTexPlaceholder.png", "BlackTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, "Textures/WhiteTexPlaceholder.png", "WhiteTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, "Textures/GreyTexPlaceholder.png", "GreyTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, "Textures/CheckerTexPlaceholder.png", "CheckerTexPlaceholder");
+        LoadTextureBasic(m_AssetDatabase, "Textures/NormalTexPlaceholder.png", "NormalTexPlaceholder");
 
         DebugRendererCreateInfo debugRendererCreateInfo;
         debugRendererCreateInfo.device = m_Device;

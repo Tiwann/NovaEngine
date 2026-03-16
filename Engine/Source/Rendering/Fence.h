@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Flags.h"
+#include "Runtime/RefCounted.h"
 
 namespace Nova
 {
@@ -23,14 +24,13 @@ namespace Nova
         FenceCreateInfo& WithFlags(const FenceCreateFlags inFlags) { flags = inFlags; return *this; }
     };
 
-    static constexpr uint64_t FENCE_WAIT_INFINITE_NS = 1'000'000'000;
-    static constexpr uint64_t FENCE_WAIT_INFINITE_MS = FENCE_WAIT_INFINITE_NS / 1'000'000;
+    static constexpr uint64_t FENCE_WAIT_INFINITE = 1'000'000'000;
 
-    class Fence
+    class Fence : public RefCounted
     {
     public:
         Fence() = default;
-        virtual ~Fence() = default;
+        ~Fence() override = default;
 
         virtual bool Initialize(const FenceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

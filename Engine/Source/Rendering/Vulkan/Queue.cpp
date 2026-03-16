@@ -24,7 +24,8 @@ namespace Nova::Vulkan
         submitInfo.pSignalSemaphores = vkSignalSem ? vkSignalSem->GetHandlePtr() : nullptr;
         submitInfo.pWaitDstStageMask = &waitStagesMask;
 
-        vkQueueSubmit(m_Handle, 1, &submitInfo, vkFence ? vkFence->GetHandle() : nullptr);
+        VkResult result = vkQueueSubmit(m_Handle, 1, &submitInfo, vkFence ? vkFence->GetHandle() : nullptr);
+        NOVA_ASSERT(result == VK_SUCCESS, "An error occured!!");
     }
 
     void Queue::Submit(const Array<Nova::CommandBuffer*>& commandBuffers, const Array<Nova::Semaphore*>& waitSemaphores, const Array<Nova::Semaphore*>& signalSemaphores, Nova::Fence* fence, const uint32_t waitStagesMask) const

@@ -1,9 +1,9 @@
 ﻿#include "AssetDatabase.h"
 #include "Asset.h"
 #include "StaticMesh.h"
+#include "TextureAsset.h"
 #include "Audio/AudioClip.h"
 #include "Rendering/Shader.h"
-#include "Rendering/Texture.h"
 
 namespace Nova
 {
@@ -33,8 +33,6 @@ namespace Nova
         for (auto& [name, asset] : m_Data)
         {
             if (!asset) continue;
-            if (asset->GetAssetType() == AssetType::Texture)
-                asset.As<Texture>()->Destroy();
             if (asset->GetAssetType() == AssetType::Shader)
                 asset.As<Shader>()->Destroy();
             if (asset->GetAssetType() == AssetType::AudioClip)

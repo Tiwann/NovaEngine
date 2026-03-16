@@ -37,7 +37,7 @@ namespace Nova::Vulkan
         VkSwapchainKHR m_Handle = nullptr;
         VkImage m_Images[3] = { nullptr, nullptr, nullptr };
         VkImageView m_ImageViews[3] = { nullptr, nullptr, nullptr };
-        Lazy<Texture> m_Textures[3];
-        Lazy<TextureView> m_TextureViews[3];
+        Texture m_Textures[3];
+        TextureView m_TextureViews[3];
     };
 }

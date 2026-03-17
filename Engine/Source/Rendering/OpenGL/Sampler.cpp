@@ -61,4 +61,9 @@ namespace Nova::OpenGL
             m_Handle = INVALID_HANDLE<uint32_t>;
         }
     }
+
+    void Sampler::Bind(uint32_t unit) const
+    {
+        glBindSampler(unit, m_Handle);
+    }
 }

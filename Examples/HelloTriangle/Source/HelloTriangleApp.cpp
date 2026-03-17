@@ -52,7 +52,7 @@ void HelloTriangleApp::OnRender(Nova::CommandBuffer& cmdBuffer)
 
 Nova::RenderDeviceType HelloTriangleApp::GetRenderDeviceType() const
 {
-    return RenderDeviceType::Vulkan;
+    return RenderDeviceType::D3D12;
 }
 
 void HelloTriangleApp::SetupPipeline()

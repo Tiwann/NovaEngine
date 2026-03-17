@@ -40,7 +40,7 @@ namespace Nova::D3D12
         resourceDesc.Height = createInfo.height;
         resourceDesc.DepthOrArraySize = createInfo.depth;
         resourceDesc.Format = Convert<DXGI_FORMAT>(createInfo.format);
-        resourceDesc.MipLevels = createInfo.mips;
+        resourceDesc.MipLevels = createInfo.mipCount;
         resourceDesc.SampleDesc.Count = createInfo.sampleCount;
 
         if (DX_FAILED(allocator->CreateResource(&allocDesc,
@@ -57,7 +57,7 @@ namespace Nova::D3D12
         m_Width = createInfo.width;
         m_Height = createInfo.height;
         m_Depth = createInfo.depth;
-        m_Mips = createInfo.mips;
+        m_Mips = createInfo.mipCount;
         m_SampleCount = createInfo.sampleCount;
         m_UsageFlags = createInfo.usageFlags;
         return true;
@@ -74,17 +74,7 @@ namespace Nova::D3D12
         return m_Device && m_Image && m_ImageView && m_Allocation;
     }
 
-    const ID3D12Image* Texture::GetImage() const
-    {
-        return m_Image;
-    }
-
-    Array<uint8_t> Texture::GetPixels()
-    {
-        return {};
-    }
-
-    ID3D12Image* Texture::GetImage()
+    ID3D12Image* Texture::GetImage() const
     {
         return m_Image;
     }

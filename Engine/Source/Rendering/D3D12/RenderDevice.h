@@ -17,6 +17,7 @@ struct IDXGIAdapter4;
 struct IDXGISwapChain4;
 struct ID3D12CommandQueue;
 struct ID3D12DescriptorHeap;
+struct ID3D12CommandSignature;
 
 namespace D3D12MA { class Allocator; }
 typedef D3D12MA::Allocator ID3D12Allocator;
@@ -61,6 +62,9 @@ namespace Nova::D3D12
 
         IDXGIAdapter4* GetAdapter() { return m_Adapter; }
         const IDXGIAdapter4* GetAdapter() const { return m_Adapter; }
+        ID3D12CommandSignature* GetDrawIndirectSignature() const;
+        ID3D12CommandSignature* GetDrawIndexedIndirectSignature() const;
+        ID3D12CommandSignature* GetDispatchIndirectSignature() const;
 
         Queue* GetGraphicsQueue() override { return &m_GraphicsQueue; }
         Queue* GetComputeQueue() override { return &m_ComputeQueue; }
@@ -86,6 +90,9 @@ namespace Nova::D3D12
         IDXGIFactory7* m_Factory = nullptr;
         IDXGIAdapter4* m_Adapter = nullptr;
         ID3D12Allocator* m_Allocator = nullptr;
+        ID3D12CommandSignature* m_DrawIndirectSignature = nullptr;
+        ID3D12CommandSignature* m_DrawIndexedIndirectSignature = nullptr;
+        ID3D12CommandSignature* m_DispatchIndirectSignature = nullptr;
 
         Surface m_Surface;
         Swapchain m_Swapchain;

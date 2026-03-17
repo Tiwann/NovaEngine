@@ -2,6 +2,7 @@
 #include "Runtime/Format.h"
 #include "Rendering/PresentMode.h"
 #include "Rendering/ResourceState.h"
+#include "Rendering/QueueType.h"
 #include <dxgi1_6.h>
 #include <directx/d3dx12.h>
 
@@ -178,4 +179,5 @@ namespace Nova::D3D12
         default: return QueueType::None;
         }
     }
+
 }

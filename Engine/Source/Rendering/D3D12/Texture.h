@@ -23,8 +23,7 @@ namespace Nova::D3D12
         void Destroy() override;
         bool IsValid() override;
 
-        const ID3D12Image* GetImage() const;
-        ID3D12Image* GetImage();
+        ID3D12Image* GetImage() const;
         ID3D12ImageView* GetImageView() const;
     private:
         friend Swapchain;

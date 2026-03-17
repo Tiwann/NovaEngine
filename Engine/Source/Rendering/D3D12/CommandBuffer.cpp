@@ -122,34 +122,87 @@ namespace Nova::D3D12
 
     void CommandBuffer::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
     {
+        m_Handle->DrawIndexedInstanced(indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount)
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount)
     {
+        const Buffer& d3d12Buffer = static_cast<const Buffer&>(buffer);
+        m_Handle->ExecuteIndirect(m_Device->GetDrawIndirectSignature(), drawCount, d3d12Buffer.GetHandle(), offset, nullptr, 0);
     }
 
     void CommandBuffer::DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount)
     {
+        const Buffer& d3d12Buffer = static_cast<const Buffer&>(buffer);
+        m_Handle->ExecuteIndirect(m_Device->GetDrawIndexedIndirectSignature(), drawCount, d3d12Buffer.GetHandle(), offset, nullptr, 0);
     }
 
     void CommandBuffer::ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers)
     {
     }
 
-    void CommandBuffer::CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset,
-        size_t srcSize, uint32_t arrayIndex, uint32_t mipLevel)
+    void CommandBuffer::CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset,size_t srcSize, uint32_t arrayIndex, uint32_t mipLevel)
     {
+        const Buffer& d3dSrc = static_cast<const Buffer&>(src);
+        const Texture& d3dDest = static_cast<const Texture&>(dest);
+
+        ID3D12Resource* srcResource = d3dSrc.GetHandle();
+        ID3D12Resource* dstResource = d3dDest.GetImage();
+
+        if (!srcResource || !dstResource)
+            return;
+
+        // ---- 1. Transition resources if needed (engine should track states)
+
+        // ---- 2. Describe copy location
+        D3D12_TEXTURE_COPY_LOCATION dstLocation = {};
+        dstLocation.pResource = dstResource;
+        dstLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        dstLocation.SubresourceIndex =
+            D3D12CalcSubresource(
+                mipLevel,
+                arrayIndex,
+                0,
+                d3dDest.GetMipCount(),
+                d3dDest.GetArrayCount()
+            );
+
+        D3D12_TEXTURE_COPY_LOCATION srcLocation = {};
+        srcLocation.pResource = srcResource;
+        srcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+
+        // IMPORTANT: You must compute footprint correctly
+        D3D12_RESOURCE_DESC desc = dstResource->GetDesc();
+
+        UINT64 totalSize = 0;
+        D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint = {};
+        UINT numRows = 0;
+        UINT64 rowSize = 0;
+
+        ID3D12Device* device = nullptr;
+        dstResource->GetDevice(IID_PPV_ARGS(&device));
+
+        device->GetCopyableFootprints(
+            &desc,
+            dstLocation.SubresourceIndex,
+            1,
+            srcOffset,
+            &footprint,
+            &numRows,
+            &rowSize,
+            &totalSize
+        );
+
+        srcLocation.PlacedFootprint = footprint;
+
+        m_Handle->CopyTextureRegion(
+            &dstLocation,
+            0, 0, 0,
+            &srcLocation,
+            nullptr
+        );
     }
 
-    void CommandBuffer::DrawIndexed(size_t count, size_t offset)
-    {
-        m_Handle->DrawIndexedInstanced(count, 1, 0, offset, 0);
-    }
-
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount, size_t stride)
-    {
-
-    }
 
     void CommandBuffer::BeginRenderPass(const RenderPassBeginInfo& beginInfo)
     {
@@ -173,9 +226,10 @@ namespace Nova::D3D12
         m_Handle->Dispatch(groupCountX, groupCountY, groupCountZ);
     }
 
-    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, size_t offset)
+    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, uint64_t offset)
     {
-
+        const Buffer& d3d12Buffer = static_cast<const Buffer&>(buffer);
+        m_Handle->ExecuteIndirect(m_Device->GetDrawIndirectSignature(), 1, d3d12Buffer.GetHandle(), offset, nullptr, 0);
     }
 
     void CommandBuffer::BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size)
@@ -190,11 +244,6 @@ namespace Nova::D3D12
     {
     }
 
-    void CommandBuffer::ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers)
-    {
-
-    }
-
     void CommandBuffer::TextureBarrier(const Nova::TextureBarrier& barrier)
     {
         const Texture* texture = static_cast<const Texture*>(barrier.texture);
@@ -202,7 +251,7 @@ namespace Nova::D3D12
         if (currentState != barrier.destState)
         {
             const auto dxBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
-                const_cast<ID3D12Image*>(texture->GetImage()),
+                texture->GetImage(),
                 Convert<D3D12_RESOURCE_STATES>(currentState),
                 Convert<D3D12_RESOURCE_STATES>(barrier.destState));
             m_Handle->ResourceBarrier(1, &dxBarrier);

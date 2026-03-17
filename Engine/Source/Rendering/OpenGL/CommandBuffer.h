@@ -43,7 +43,7 @@ namespace Nova::OpenGL
         void BufferBarrier(const Nova::BufferBarrier& barrier) override;
         void MemoryBarrier(const Nova::MemoryBarrier& barrier) override;
         void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
-        void DispatchIndirect(const Nova::Buffer& buffer, size_t offset) override;
+        void DispatchIndirect(const Nova::Buffer& buffer, uint64_t offset) override;
         void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset, size_t size) override;
         void Blit(const Nova::Texture& src, const BlitRegion& srcRegion, const Nova::Texture& dest, const BlitRegion& destRegion, Filter filter) override;
         void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;

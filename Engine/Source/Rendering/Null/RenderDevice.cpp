@@ -101,18 +101,17 @@ namespace Nova::Null
         return 0;
     }
 
-    Ref<RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
-    {
-        (void)createInfo;
-        return nullptr;
-    }
-
     Ref<Nova::CommandBuffer> RenderDevice::CreateCommandBuffer()
     {
         return nullptr;
     }
 
     Ref<Nova::CommandBuffer> RenderDevice::CreateTransferCommandBuffer()
+    {
+        return nullptr;
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateComputeCommandBuffer()
     {
         return nullptr;
     }

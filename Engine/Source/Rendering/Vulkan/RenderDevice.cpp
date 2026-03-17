@@ -341,9 +341,16 @@ namespace Nova::Vulkan
         }
 
         commandPoolCreateInfo.queue = &m_TransferQueue;
-        if (!m_TransferCommandPool.Initialize(commandPoolCreateInfo))
+        if (!m_TransferPool.Initialize(commandPoolCreateInfo))
         {
             NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create transfer command pool!");
+            return false;
+        }
+
+        commandPoolCreateInfo.queue = &m_ComputeQueue;
+        if (!m_ComputePool.Initialize(commandPoolCreateInfo))
+        {
+            NOVA_LOG(RenderDevice, Verbosity::Error,"Failed to create compute command pool!");
             return false;
         }
 
@@ -442,7 +449,7 @@ namespace Nova::Vulkan
         }
 
         m_CommandPool.Destroy();
-        m_TransferCommandPool.Destroy();
+        m_TransferPool.Destroy();
         m_DescriptorPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);
@@ -705,7 +712,19 @@ namespace Nova::Vulkan
     Ref<Nova::CommandBuffer> RenderDevice::CreateTransferCommandBuffer()
     {
         CommandBuffer* commandBuffer = new CommandBuffer();
-        CommandPool* commandPool = GetTransferCommandPool();
+        CommandPool* commandPool = GetTransferPool();
+        if (!commandBuffer->Allocate({this, commandPool, CommandBufferLevel::Primary}))
+        {
+            delete commandBuffer;
+            return nullptr;
+        }
+        return Ref(commandBuffer);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateComputeCommandBuffer()
+    {
+        CommandBuffer* commandBuffer = new CommandBuffer();
+        CommandPool* commandPool = GetComputePool();
         if (!commandBuffer->Allocate({this, commandPool, CommandBufferLevel::Primary}))
         {
             delete commandBuffer;
@@ -745,9 +764,14 @@ namespace Nova::Vulkan
         return &m_CommandPool;
     }
 
-    CommandPool* RenderDevice::GetTransferCommandPool()
+    CommandPool* RenderDevice::GetTransferPool()
     {
-        return &m_TransferCommandPool;
+        return &m_TransferPool;
+    }
+
+    CommandPool* RenderDevice::GetComputePool()
+    {
+        return &m_ComputePool;
     }
 
     Queue* RenderDevice::GetGraphicsQueue()

@@ -72,8 +72,6 @@ namespace Nova::D3D12
 
             m_ImageViews[imageIndex] = reinterpret_cast<void*>(m_DescriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr + imageIndex * descriptorSize);
             deviceHandle->CreateRenderTargetView(m_Images[imageIndex], nullptr, {reinterpret_cast<SIZE_T>(m_ImageViews[imageIndex])});
-
-            m_Textures[imageIndex].SetDirty();
         }
 
         m_Device = createInfo.device;
@@ -112,33 +110,6 @@ namespace Nova::D3D12
     {
     }
 
-    Ref<Nova::Texture> Swapchain::GetTexture(const uint32_t index)
-    {
-        const auto createTexture = [this, &index]() -> Ref<Texture>
-        {
-            Ref<Texture> texture = new Texture();
-            texture->m_Device = (RenderDevice*)m_Device;
-            texture->m_Image = m_Images[index];
-            texture->m_ImageView = m_ImageViews[index];
-            texture->m_Width = m_ImageWidth;
-            texture->m_Height = m_ImageHeight;
-            texture->m_Allocation = nullptr;
-            texture->m_SampleCount = 1;
-            texture->m_Mips = 1;
-            texture->m_Format = m_ImageFormat;
-            return texture;
-        };
-
-        return m_Textures[index].Get(createTexture);
-    }
-
-    Ref<Nova::Texture> Swapchain::GetCurrentTexture()
-    {
-        const RenderDevice* device = (RenderDevice*)m_Device;
-        const size_t imageIndex = device->GetCurrentFrameIndex();
-        return GetTexture(imageIndex);
-    }
-
     IDXGISwapChain4* Swapchain::GetHandle()
     {
         return m_Handle;
@@ -159,7 +130,48 @@ namespace Nova::D3D12
         return m_ImageViews[index];
     }
 
-    uint32_t Swapchain::AcquireNextFrame()
+    const Nova::Texture* Swapchain::GetTexture()
+    {
+        RenderDevice* device = static_cast<RenderDevice*>(m_Device);
+        const uint32_t imageIndex = device->GetCurrentFrameIndex();
+        Texture& texture = m_Textures[imageIndex];
+        texture.m_Device = device;
+        texture.m_Image = m_Images[imageIndex];
+        texture.m_ImageView = m_ImageViews[imageIndex];
+        texture.m_Width = m_ImageWidth;
+        texture.m_Height = m_ImageHeight;
+        texture.m_Allocation = nullptr;
+        texture.m_SampleCount = 1;
+        texture.m_Mips = 1;
+        texture.m_Format = m_ImageFormat;
+        texture.m_ArrayCount = 1;
+        texture.m_UsageFlags = TextureUsageFlagBits::ColorAttachment;
+        texture.m_Depth = 1;
+        return &texture;
+    }
+
+    const Nova::TextureView* Swapchain::GetTextureView()
+    {
+        /*RenderDevice* device = static_cast<RenderDevice*>(m_Device);
+        const uint32_t imageIndex = device->GetCurrentFrameIndex();
+        TextureView& texture = m_Textures[imageIndex];
+        texture.m_Device = device;
+        texture.m_Image = m_Images[imageIndex];
+        texture.m_ImageView = m_ImageViews[imageIndex];
+        texture.m_Width = m_ImageWidth;
+        texture.m_Height = m_ImageHeight;
+        texture.m_Allocation = nullptr;
+        texture.m_SampleCount = 1;
+        texture.m_Mips = 1;
+        texture.m_Format = m_ImageFormat;
+        texture.m_ArrayCount = 1;
+        texture.m_UsageFlags = TextureUsageFlagBits::ColorAttachment;
+        texture.m_Depth = 1;
+        return &texture;*/
+        return nullptr;
+    }
+
+    uint32_t Swapchain::AcquireNextFrame() const
     {
         return m_Handle->GetCurrentBackBufferIndex();
     }

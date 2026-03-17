@@ -14,11 +14,9 @@ namespace Nova::D3D12
     public:
         bool Initialize(const BufferCreateInfo& createInfo) override;
         void Destroy() override;
-        bool Resize(size_t newSize, bool keepData) override;
-        bool WriteData(const void* src, size_t offset, size_t size) override;
-        bool CPUCopy(size_t offset, size_t size, void* outBuffer) override;
-        bool GPUCopy(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size) override;
-        void Memset(size_t value, size_t size) override;
+        void* Map() override;
+        void Unmap(const void* ptr) override;
+        ID3D12Resource* GetHandle() const;
     private:
         RenderDevice* m_Device = nullptr;
         ID3D12Allocation* m_Allocation = nullptr;

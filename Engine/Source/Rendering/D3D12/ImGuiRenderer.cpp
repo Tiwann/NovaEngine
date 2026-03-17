@@ -74,7 +74,8 @@ namespace Nova::D3D12
         ImGui_ImplDX12_RenderDrawData(drawData, cmdBufferHandle);
     }
 
-    void ImGuiRenderer::DrawTexture(const Nova::Texture& texture, uint32_t width, uint32_t height)
+    void ImGuiRenderer::DrawTexture(const Nova::TextureView& texture, uint32_t width, uint32_t height)
     {
+
     }
 }

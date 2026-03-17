@@ -52,6 +52,7 @@ namespace Nova::Vulkan
 
         Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
         Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateComputeCommandBuffer() override;
 
         static VkInstance GetVulkanInstance();
         VkDevice GetHandle() const;
@@ -60,7 +61,8 @@ namespace Nova::Vulkan
         Nova::Surface* GetSurface() override;
         Nova::Swapchain* GetSwapchain() override;
         CommandPool* GetCommandPool();
-        CommandPool* GetTransferCommandPool();
+        CommandPool* GetTransferPool();
+        CommandPool* GetComputePool();
         Queue* GetGraphicsQueue() override;
         Queue* GetPresentQueue();
         Queue* GetComputeQueue() override;
@@ -82,7 +84,8 @@ namespace Nova::Vulkan
         Surface m_Surface;
         Swapchain m_Swapchain;
         CommandPool m_CommandPool;
-        CommandPool m_TransferCommandPool;
+        CommandPool m_TransferPool;
+        CommandPool m_ComputePool;
         DescriptorPool m_DescriptorPool;
 
         Queue m_GraphicsQueue;

@@ -201,7 +201,7 @@ namespace Nova::Vulkan
         vkCmdDrawIndexed(m_Handle, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
     }
 
-    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, const size_t offset, const uint32_t drawCount)
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, uint64_t offset, const uint32_t drawCount)
     {
         vkCmdDrawIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset, drawCount, sizeof(DrawIndirectParameters));
     }
@@ -216,7 +216,7 @@ namespace Nova::Vulkan
         vkCmdDispatch(m_Handle, groupCountX, groupCountY, groupCountZ);
     }
 
-    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, const size_t offset)
+    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, uint64_t offset)
     {
         vkCmdDispatchIndirect(m_Handle, static_cast<const Buffer&>(buffer).GetHandle(), offset);
     }

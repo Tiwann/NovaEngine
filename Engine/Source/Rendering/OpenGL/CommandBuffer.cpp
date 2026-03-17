@@ -218,7 +218,7 @@ namespace Nova::OpenGL
         m_Commands.Enqueue(command);
     }
 
-    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, size_t offset)
+    void CommandBuffer::DispatchIndirect(const Nova::Buffer& buffer, uint64_t offset)
     {
         COMMAND_BUFFER_CHECK();
         Command command{CommandType::DispatchIndirect};

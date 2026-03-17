@@ -344,6 +344,8 @@ set(NOVA_ENGINE_D3D12_SOURCES
         Source/Rendering/D3D12/Swapchain.h
         Source/Rendering/D3D12/Texture.cpp
         Source/Rendering/D3D12/Texture.h
+        Source/Rendering/D3D12/TextureView.cpp
+        Source/Rendering/D3D12/TextureView.h
 )
 
 set(NOVA_ENGINE_VULKAN_SOURCES
@@ -453,7 +455,7 @@ endif ()
 if(NOVA_ENGINE_BUILD_D3D12)
     target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_D3D12_SOURCES})
     target_compile_definitions(NovaEngine PUBLIC NOVA_HAS_D3D12)
-    target_link_libraries(NovaEngine PRIVATE Microsoft::DirectX-Headers d3d12 dxgi PUBLIC D3D12MemoryAllocator)
+    target_link_libraries(NovaEngine PRIVATE Microsoft::DirectX-Headers d3d12 dxgi D3D12MemoryAllocator)
 endif ()
 
 if(NOVA_ENGINE_BUILD_VULKAN)

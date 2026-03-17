@@ -161,12 +161,62 @@ namespace Nova::D3D12
         allocatorDesc.Flags = ALLOCATOR_FLAG_SINGLETHREADED;
         if (DX_FAILED(CreateAllocator(&allocatorDesc, &m_Allocator)))
             return false;
-        
+
+
+        {
+            D3D12_INDIRECT_ARGUMENT_DESC argDesc = {};
+            argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+
+            D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
+            sigDesc.pArgumentDescs = &argDesc;
+            sigDesc.NumArgumentDescs = 1;
+            sigDesc.ByteStride = sizeof(D3D12_DRAW_ARGUMENTS);
+            if (DX_FAILED(m_Handle->CreateCommandSignature(
+                &sigDesc,
+                nullptr,
+                IID_PPV_ARGS(&m_DrawIndirectSignature)
+            ))) return false;
+        }
+
+        {
+            D3D12_INDIRECT_ARGUMENT_DESC argDesc = {};
+            argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+            D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
+            sigDesc.pArgumentDescs = &argDesc;
+            sigDesc.NumArgumentDescs = 1;
+            sigDesc.ByteStride = sizeof(D3D12_DRAW_INDEXED_ARGUMENTS);
+            if (DX_FAILED(m_Handle->CreateCommandSignature(
+                &sigDesc,
+                nullptr,
+                IID_PPV_ARGS(&m_DrawIndexedIndirectSignature)
+            ))) return false;
+        }
+
+        {
+            D3D12_INDIRECT_ARGUMENT_DESC argDesc = {};
+            argDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+
+            D3D12_COMMAND_SIGNATURE_DESC sigDesc = {};
+            sigDesc.pArgumentDescs = &argDesc;
+            sigDesc.NumArgumentDescs = 1;
+            sigDesc.ByteStride = sizeof(D3D12_DISPATCH_ARGUMENTS);
+            if (DX_FAILED(m_Handle->CreateCommandSignature(
+                &sigDesc,
+                nullptr,
+                IID_PPV_ARGS(&m_DispatchIndirectSignature)
+            ))) return false;
+        }
+
         return true;
     }
 
     void RenderDevice::Destroy()
     {
+        m_DrawIndirectSignature->Release();
+        m_DrawIndexedIndirectSignature->Release();
+        m_DispatchIndirectSignature->Release();
+
         m_Allocator->Release();
         for (uint32_t frameIndex = 0; frameIndex < m_Swapchain.GetImageCount(); ++frameIndex)
         {
@@ -292,7 +342,22 @@ namespace Nova::D3D12
 
     uint32_t RenderDevice::GetImageCount() const
     {
-        return 0;
+        return m_Swapchain.GetImageCount();
+    }
+
+    ID3D12CommandSignature* RenderDevice::GetDrawIndirectSignature() const
+    {
+        return m_DrawIndirectSignature;
+    }
+
+    ID3D12CommandSignature* RenderDevice::GetDrawIndexedIndirectSignature() const
+    {
+        return m_DrawIndexedIndirectSignature;
+    }
+
+    ID3D12CommandSignature* RenderDevice::GetDispatchIndirectSignature() const
+    {
+        return m_DispatchIndirectSignature;
     }
 
     Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()

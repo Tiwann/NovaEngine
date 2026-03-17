@@ -37,10 +37,15 @@ namespace Nova::D3D12
         ID3D12Resource* buffer = nullptr;
         ID3D12Allocation* allocation = nullptr;
 
+        D3D12_RESOURCE_STATES initialState =
+            (heapType == D3D12_HEAP_TYPE_UPLOAD)
+                ? D3D12_RESOURCE_STATE_GENERIC_READ
+                : D3D12_RESOURCE_STATE_COMMON;
+
         if (DX_FAILED(allocator->CreateResource(
             &allocDesc,
             &resourceDesc,
-            D3D12_RESOURCE_STATE_COMMON,
+            initialState,
             nullptr,
             &allocation,
             IID_PPV_ARGS(&buffer))))
@@ -51,55 +56,44 @@ namespace Nova::D3D12
         m_Allocation = allocation;
         m_Handle = buffer;
         m_Device = device;
+        m_Size = createInfo.size;
+        m_State = initialState == D3D12_RESOURCE_STATE_GENERIC_READ ? ResourceState::TransferSource : ResourceState::General;
         return true;
     }
 
     void Buffer::Destroy()
     {
-        if (m_Handle) m_Handle->Release();
-        if (m_Allocation) m_Allocation->Release();
+        if (m_Handle)
+        {
+            m_Handle->Release();
+            m_Handle = nullptr;
+        }
+
+        if (m_Allocation)
+        {
+            m_Allocation->Release();
+            m_Allocation = nullptr;
+        }
     }
 
-    bool Buffer::Resize(size_t newSize, bool keepData)
+    void* Buffer::Map()
     {
-        return false;
+        void* mapped = nullptr;
+        const D3D12_RANGE& range = D3D12_RANGE(0, 0);
+        if (DX_FAILED(m_Handle->Map(0, &range, &mapped)))
+            return nullptr;
+        return mapped;
     }
 
-    bool Buffer::WriteData(const void* src, size_t offset, size_t size)
+    void Buffer::Unmap(const void* ptr)
     {
-        if (!m_Handle) return false;
-
-        uint8_t* mapped = nullptr;
-        if (DX_FAILED(m_Handle->Map(0, nullptr, (void**)&mapped)))
-            return false;
-        Memory::Memcpy(mapped + offset, src, size);
-        m_Handle->Unmap(0, nullptr);
-        return true;
+        (void)ptr;
+        const D3D12_RANGE& range = D3D12_RANGE(0, m_Size);
+        m_Handle->Unmap(0, &range);
     }
 
-    bool Buffer::CPUCopy(size_t offset, size_t size, void* outBuffer)
+    ID3D12Resource* Buffer::GetHandle() const
     {
-        if (!m_Handle) return false;
-        uint8_t* mapped = nullptr;
-        if (DX_FAILED(m_Handle->Map(0, nullptr, (void**)&mapped)))
-            return false;
-        Memory::Memcpy((uint8_t*)outBuffer + offset, mapped, size);
-        m_Handle->Unmap(0, nullptr);
-        return true;
-    }
-
-    bool Buffer::GPUCopy(Nova::Buffer& other, size_t srcOffset, size_t destOffset, size_t size)
-    {
-        return false;
-    }
-
-    void Buffer::Memset(size_t value, size_t size)
-    {
-        if (!m_Handle) return;
-        uint8_t* mapped = nullptr;
-        if (DX_FAILED(m_Handle->Map(0, nullptr, (void**)&mapped)))
-            return;
-        Memory::Memset(mapped, 0, size);
-        m_Handle->Unmap(0, nullptr);
+        return m_Handle;
     }
 }

@@ -78,7 +78,7 @@ namespace Nova
         virtual Nova::Queue* GetTransferQueue() { return nullptr; }
         virtual RenderDeviceType GetDeviceType() = 0;
 
-        virtual Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
+
         virtual Ref<Nova::Texture> CreateTexture(const TextureCreateInfo& createInfo) = 0;
         virtual Ref<Nova::Texture> CreateTextureUnitialized() = 0;
         virtual Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) = 0;
@@ -91,6 +91,7 @@ namespace Nova
         virtual Ref<Nova::Fence> CreateFence(const FenceCreateInfo& createInfo) = 0;
         virtual Nova::CommandBuffer* GetCurrentCommandBuffer() { return nullptr; }
 
+        Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo);
         Ref<Nova::Fence> CreateFence();
         Ref<Nova::Buffer> CreateBuffer(BufferUsage usage, size_t size);
         Ref<Nova::Texture> CreateTexture(TextureUsageFlags usage, uint32_t width, uint32_t height, Format format);
@@ -101,6 +102,7 @@ namespace Nova
 
         virtual Ref<Nova::CommandBuffer> CreateCommandBuffer() = 0;
         virtual Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() = 0;
+        virtual Ref<Nova::CommandBuffer> CreateComputeCommandBuffer() = 0;
 
         virtual uint32_t GetImageCount() const = 0;
         virtual uint32_t GetCurrentFrameIndex() const = 0;

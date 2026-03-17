@@ -1,6 +1,5 @@
 ﻿#include "RenderDevice.h"
 #include "Containers/StringFormat.h"
-#include "RenderTarget.h"
 #include <directx/d3dx12.h>
 #include <dxgi1_6.h>
 #include <D3D12MemAlloc.h>
@@ -72,7 +71,7 @@ namespace Nova::D3D12
             return false;
 #endif
 
-        const auto GetPresentMode = [this](bool vSync)
+        const auto GetPresentMode = [this](const bool vSync)
         {
             DXGI_SWAP_EFFECT result;
 
@@ -111,11 +110,10 @@ namespace Nova::D3D12
         swapchainCreateInfo.surface = &m_Surface;
         swapchainCreateInfo.recycle = false;
         swapchainCreateInfo.buffering = createInfo.buffering;
-        swapchainCreateInfo.format = Format::R8G8B8A8_UNORM;
+        swapchainCreateInfo.format = Format::R8G8B8A8_UNORM; //NO SRGB SWAPCHAIN IN D3D12
         swapchainCreateInfo.width = m_Surface.GetWidth();
         swapchainCreateInfo.height = m_Surface.GetHeight();
         swapchainCreateInfo.presentMode = GetPresentMode(createInfo.vSync);
-
         if (!m_Swapchain.Initialize(swapchainCreateInfo))
         {
             std::println(std::cerr, "Failed to create swapchain!");
@@ -127,6 +125,20 @@ namespace Nova::D3D12
         cmdPoolCreateInfo.flags = CommandPoolCreateFlagBits::None;
         cmdPoolCreateInfo.queue = &m_GraphicsQueue;
         if (!m_CommandPool.Initialize(cmdPoolCreateInfo))
+            return false;
+
+        CommandPoolCreateInfo transferPoolCreateInfo;
+        transferPoolCreateInfo.device = this;
+        transferPoolCreateInfo.flags = CommandPoolCreateFlagBits::None;
+        transferPoolCreateInfo.queue = &m_TransferQueue;
+        if (!m_TransferPool.Initialize(transferPoolCreateInfo))
+            return false;
+
+        CommandPoolCreateInfo computePoolCreateInfo;
+        computePoolCreateInfo.device = this;
+        computePoolCreateInfo.flags = CommandPoolCreateFlagBits::None;
+        computePoolCreateInfo.queue = &m_ComputeQueue;
+        if (!m_ComputePool.Initialize(computePoolCreateInfo))
             return false;
 
         for (uint32_t frameIndex = 0; frameIndex < m_Swapchain.GetImageCount(); ++frameIndex)
@@ -220,6 +232,7 @@ namespace Nova::D3D12
 
     void RenderDevice::WaitIdle() const
     {
+
     }
 
     void RenderDevice::SetName(Nova::StringView name)
@@ -231,21 +244,6 @@ namespace Nova::D3D12
         return Nova::RenderDeviceType::D3D12;
     }
 
-    Ref<Nova::RenderTarget> RenderDevice::CreateRenderTarget(const RenderTargetCreateInfo& createInfo)
-    {
-        Nova::RenderTarget* renderTarget = new RenderTarget;
-        if (!renderTarget->Initialize(createInfo))
-        {
-            delete renderTarget;
-            return nullptr;
-        }
-        return Ref(renderTarget);
-    }
-
-    Ref<Nova::Surface> RenderDevice::CreateSurface(const Nova::SurfaceCreateInfo& createInfo)
-    {
-        return nullptr;
-    }
 
     Ref<Nova::Texture> RenderDevice::CreateTexture(const Nova::TextureCreateInfo& createInfo)
     {
@@ -320,5 +318,41 @@ namespace Nova::D3D12
     uint32_t RenderDevice::GetCurrentFrameIndex() const
     {
         return m_CurrentFrameIndex;
+    }
+
+    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    {
+    }
+
+    static Ref<Nova::CommandBuffer> CreateCommandBufferEx(RenderDevice* device, CommandPool* pool, CommandBufferLevel level)
+    {
+        CommandBufferAllocateInfo allocateInfo;
+        allocateInfo.device = device;
+        allocateInfo.commandPool = pool;
+        allocateInfo.level = level;
+
+        CommandBuffer* commandBuffer = new CommandBuffer();
+        if (!commandBuffer->Allocate(allocateInfo))
+        {
+            delete commandBuffer;
+            return nullptr;
+        }
+
+        return Ref(commandBuffer);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateCommandBuffer()
+    {
+        return CreateCommandBufferEx(this, &m_CommandPool, CommandBufferLevel::Primary);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateTransferCommandBuffer()
+    {
+        return CreateCommandBufferEx(this, &m_TransferPool, CommandBufferLevel::Primary);
+    }
+
+    Ref<Nova::CommandBuffer> RenderDevice::CreateComputeCommandBuffer()
+    {
+        return CreateCommandBufferEx(this, &m_ComputePool, CommandBufferLevel::Primary);
     }
 }

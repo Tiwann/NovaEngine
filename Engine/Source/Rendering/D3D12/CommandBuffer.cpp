@@ -27,8 +27,10 @@ namespace Nova::D3D12
         ID3D12Device13* deviceHandle = device->GetHandle();
         ID3D12CommandAllocator* commandAllocator = commandPool->GetHandle();
 
+        const D3D12_COMMAND_LIST_TYPE cmdListType = Convert<D3D12_COMMAND_LIST_TYPE>(commandPool->GetQueueType());
+
         ID3D12CommandList* commandBuffer = nullptr;
-        if (DX_FAILED(deviceHandle->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandBuffer))))
+        if (DX_FAILED(deviceHandle->CreateCommandList(0, cmdListType, commandAllocator, nullptr, IID_PPV_ARGS(&commandBuffer))))
             return false;
 
         if (m_Handle) m_Handle->Release();
@@ -115,8 +117,28 @@ namespace Nova::D3D12
 
     void CommandBuffer::Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstIndex, uint32_t firstInstance)
     {
-        m_Handle->IASetIndexBuffer(nullptr);
         m_Handle->DrawInstanced(vertexCount, instanceCount, firstIndex, firstInstance);
+    }
+
+    void CommandBuffer::DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance)
+    {
+    }
+
+    void CommandBuffer::DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount)
+    {
+    }
+
+    void CommandBuffer::DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount)
+    {
+    }
+
+    void CommandBuffer::ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers)
+    {
+    }
+
+    void CommandBuffer::CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset,
+        size_t srcSize, uint32_t arrayIndex, uint32_t mipLevel)
+    {
     }
 
     void CommandBuffer::DrawIndexed(size_t count, size_t offset)

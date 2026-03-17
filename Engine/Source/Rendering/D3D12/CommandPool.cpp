@@ -2,6 +2,8 @@
 #include "RenderDevice.h"
 #include <directx/d3d12.h>
 
+#include "Conversions.h"
+
 
 namespace Nova::D3D12
 {
@@ -13,19 +15,10 @@ namespace Nova::D3D12
         RenderDevice* device = (RenderDevice*)createInfo.device;
         Queue* queue = (Queue*)createInfo.queue;
 
-        D3D12_COMMAND_LIST_TYPE type;
-        switch (queue->GetQueueType())
-        {
-        case QueueType::None: return false;
-        case QueueType::Graphics: type = D3D12_COMMAND_LIST_TYPE_DIRECT; break;
-        case QueueType::Compute: type = D3D12_COMMAND_LIST_TYPE_COMPUTE; break;
-        case QueueType::Transfer: type = D3D12_COMMAND_LIST_TYPE_COPY; break;
-        default: return false;
-        }
-
+        const D3D12_COMMAND_LIST_TYPE listType = Convert<D3D12_COMMAND_LIST_TYPE>(queue->GetQueueType());
         ID3D12Device13* deviceHandle = device->GetHandle();
         ID3D12CommandAllocator* commandAllocator = nullptr;
-        if (DX_FAILED(deviceHandle->CreateCommandAllocator(type, IID_PPV_ARGS(&commandAllocator))))
+        if (DX_FAILED(deviceHandle->CreateCommandAllocator(listType, IID_PPV_ARGS(&commandAllocator))))
             return false;
 
         if (m_Handle) m_Handle->Reset();
@@ -46,6 +39,11 @@ namespace Nova::D3D12
     void CommandPool::Reset()
     {
         m_Handle->Reset();
+    }
+
+    QueueType CommandPool::GetQueueType() const
+    {
+        return m_Queue->GetQueueType();
     }
 
     CommandBuffer CommandPool::AllocateCommandBuffer(CommandBufferLevel level)

@@ -12,7 +12,7 @@ namespace Nova::D3D12
     OutType Convert(const InType& value);
 
     template <>
-    inline DXGI_FORMAT Convert<DXGI_FORMAT, Format>(const Format& value)
+    inline DXGI_FORMAT Convert(const Format& value)
     {
         switch (value)
         {
@@ -117,7 +117,7 @@ namespace Nova::D3D12
     }
 
     template <>
-    inline DXGI_SWAP_EFFECT Convert<DXGI_SWAP_EFFECT, PresentMode>(const PresentMode& value)
+    inline DXGI_SWAP_EFFECT Convert(const PresentMode& value)
     {
         switch (value)
         {
@@ -130,7 +130,7 @@ namespace Nova::D3D12
     }
 
     template<>
-    inline D3D12_RESOURCE_STATES Convert<D3D12_RESOURCE_STATES, ResourceState>(const ResourceState& resourceState)
+    inline D3D12_RESOURCE_STATES Convert(const ResourceState& resourceState)
     {
         switch (resourceState)
         {
@@ -146,9 +146,36 @@ namespace Nova::D3D12
         default: return D3D12_RESOURCE_STATE_COMMON;
         }
     }
+
     template<>
-    inline ResourceState Convert<ResourceState, D3D12_RESOURCE_STATES>(const D3D12_RESOURCE_STATES& resourceState)
+    inline ResourceState Convert(const D3D12_RESOURCE_STATES& resourceState)
     {
         return ResourceState::Undefined;
+    }
+
+    template<>
+    inline D3D12_COMMAND_LIST_TYPE Convert(const QueueType& queueType)
+    {
+        switch (queueType)
+        {
+        case QueueType::None: return D3D12_COMMAND_LIST_TYPE_NONE;
+        case QueueType::Graphics: return D3D12_COMMAND_LIST_TYPE_DIRECT;
+        case QueueType::Compute: return D3D12_COMMAND_LIST_TYPE_COMPUTE;
+        case QueueType::Transfer: return D3D12_COMMAND_LIST_TYPE_COPY;
+        default: return D3D12_COMMAND_LIST_TYPE_NONE;
+        }
+    }
+
+    template<>
+    inline QueueType Convert(const D3D12_COMMAND_LIST_TYPE& listType)
+    {
+        switch (listType)
+        {
+        case D3D12_COMMAND_LIST_TYPE_NONE: return QueueType::None;
+        case D3D12_COMMAND_LIST_TYPE_DIRECT: return QueueType::Graphics;
+        case D3D12_COMMAND_LIST_TYPE_COMPUTE: return QueueType::Compute;
+        case D3D12_COMMAND_LIST_TYPE_COPY: return QueueType::Transfer;
+        default: return QueueType::None;
+        }
     }
 }

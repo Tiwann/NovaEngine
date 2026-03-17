@@ -22,7 +22,6 @@ namespace Nova::D3D12
         bool Initialize(const TextureCreateInfo& createInfo) override;
         void Destroy() override;
         bool IsValid() override;
-        Array<uint8_t> GetPixels() override;
 
         const ID3D12Image* GetImage() const;
         ID3D12Image* GetImage();

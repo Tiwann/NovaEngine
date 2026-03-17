@@ -42,8 +42,6 @@ namespace Nova::D3D12
 
         Nova::RenderDeviceType GetDeviceType() override;
 
-        Ref<Nova::RenderTarget> CreateRenderTarget(const RenderTargetCreateInfo& createInfo) override;
-        Ref<Nova::Surface> CreateSurface(const Nova::SurfaceCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTexture(const Nova::TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
         Ref<Nova::Sampler> CreateSampler(const Nova::SamplerCreateInfo& createInfo) override;
@@ -64,18 +62,20 @@ namespace Nova::D3D12
         IDXGIAdapter4* GetAdapter() { return m_Adapter; }
         const IDXGIAdapter4* GetAdapter() const { return m_Adapter; }
 
-        Queue* GetGraphicsQueue() { return &m_GraphicsQueue; }
-        const Queue* GetGraphicsQueue() const { return &m_GraphicsQueue; }
-        Queue* GetComputeQueue() { return &m_ComputeQueue; }
-        const Queue* GetComputeQueue() const { return &m_ComputeQueue; }
-        Queue* GetTransferQueue() { return &m_TransferQueue; }
-        const Queue* GetTransferQueue() const { return &m_TransferQueue; }
+        Queue* GetGraphicsQueue() override { return &m_GraphicsQueue; }
+        Queue* GetComputeQueue() override { return &m_ComputeQueue; }
+        Queue* GetTransferQueue() override { return &m_TransferQueue; }
 
         Nova::CommandBuffer* GetCurrentCommandBuffer() override;
         CommandPool& GetCommandPool();
         ID3D12Allocator* GetAllocator();
         Nova::Swapchain* GetSwapchain() override;
-        uint32_t GetCurrentFrameIndex() const;
+        uint32_t GetCurrentFrameIndex() const override;
+
+        Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
+        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateComputeCommandBuffer() override;
 
     private:
         uint32_t m_ImageCount = 0;
@@ -93,6 +93,8 @@ namespace Nova::D3D12
         Queue m_ComputeQueue;
         Queue m_TransferQueue;
         CommandPool m_CommandPool;
+        CommandPool m_TransferPool;
+        CommandPool m_ComputePool;
         Frame m_Frames[3];
 
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)

@@ -26,8 +26,9 @@ namespace Nova::D3D12
         void SetViewport(float x, float y, float width, float height, float minDepth, float maxDepth) override;
         void SetScissor(int32_t x, int32_t y, int32_t width, int32_t height) override;
         void Draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
-        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount) override;
+        void DrawIndexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
         void DrawIndirect(const Nova::Buffer& buffer, size_t offset, uint32_t drawCount) override;
+        void DrawIndexedIndirect(const Nova::Buffer& buffer, uint64_t offset, uint32_t drawCount) override;
         void BeginRenderPass(const RenderPassBeginInfo& beginInfo) override;
         void EndRenderPass() override;
         void PushConstants(const Nova::Shader& shader, ShaderStageFlags stageFlags, size_t offset, size_t size,const void* values) override;
@@ -37,13 +38,17 @@ namespace Nova::D3D12
         void BufferCopy(const Nova::Buffer& src, const Nova::Buffer& dest, size_t srcOffset, size_t destOffset,size_t size) override;
         void Blit(const Nova::Texture& src, const Nova::BlitRegion& srcRegion, const Nova::Texture& dest, const Nova::BlitRegion& destRegion, Filter filter) override;
         void Blit(const Nova::Texture& src, const Nova::Texture& dest, Filter filter) override;
-        void ExecuteCommandBuffers(const Array<Nova::CommandBuffer*>& commandBuffers) override;
+        void ExecuteCommandBuffers(const Array<const Nova::CommandBuffer*>& commandBuffers) override;
         void TextureBarrier(const Nova::TextureBarrier& barrier) override;
         void BufferBarrier(const Nova::BufferBarrier& barrier) override;
         void MemoryBarrier(const Nova::MemoryBarrier& barrier) override;
 
         ID3D12GraphicsCommandList10* GetHandle() { return m_Handle; }
         const ID3D12GraphicsCommandList10* GetHandle() const { return m_Handle; }
+
+
+        void CopyBufferToTexture(const Nova::Buffer& src, const Nova::Texture& dest, size_t srcOffset, size_t srcSize,
+            uint32_t arrayIndex, uint32_t mipLevel) override;
 
     private:
         RenderDevice* m_Device = nullptr;

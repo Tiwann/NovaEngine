@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "CommandBuffer.h"
 #include "Rendering/CommandPool.h"
+#include "Rendering/QueueType.h"
 
 struct ID3D12CommandAllocator;
 
@@ -18,6 +19,9 @@ namespace Nova::D3D12
 
         ID3D12CommandAllocator* GetHandle() { return m_Handle; }
         const ID3D12CommandAllocator* GetHandle() const { return m_Handle; }
+
+
+        QueueType GetQueueType() const;
 
         Queue* GetQueue() { return m_Queue; }
         const Queue* GetQueue() const { return m_Queue; }

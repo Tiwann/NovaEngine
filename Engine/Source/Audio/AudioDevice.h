@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "AudioFormat.h"
-#include "Runtime/Object.h"
+#include "Runtime/RefCounted.h"
 #include "Runtime/Ref.h"
 #include "Containers/StringView.h"
 #include <cstdint>
@@ -13,18 +13,18 @@ namespace Nova
     class AudioNode;
     struct AudioNodeCreateInfo;
 
-    struct AudioSystemCreateInfo
+    struct AudioDeviceCreateInfo
     {
         uint32_t channels = 2;
         uint32_t sampleRate = 44100;
         uint32_t listenerCount = 1;
     };
 
-    class AudioSystem final : public Object
+    class AudioDevice final : public RefCounted
     {
     public:
-        AudioSystem();
-        bool Initialize(const AudioSystemCreateInfo& createInfo);
+        AudioDevice();
+        bool Initialize(const AudioDeviceCreateInfo& createInfo);
         void Destroy();
 
         void PlayAudioClip(AudioClip* clip);
@@ -33,7 +33,7 @@ namespace Nova
         const ma_engine* GetHandle() const { return &m_Engine; }
         ma_engine* GetHandle() { return &m_Engine; }
 
-        static AudioSystem* GetInstance();
+        static AudioDevice* GetInstance();
         static ma_engine* GetInstanceHandle();
 
         uint32_t GetOutputChannelCount() const;
@@ -42,13 +42,21 @@ namespace Nova
 
         bool AttachAudioNodeToOutputBus(Ref<AudioNode> audioNode);
         void DetachAudioNodeFromOutputBus(const Ref<AudioNode>& audioNode);
+
+    protected:
+        static void* OnMalloc( size_t size, void* userData);
+        static void* OnRealloc(void* where, size_t size, void* userData);
+        static void OnFree(void* ptr, void* userData);
+        static void AudioDataProc(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
+        static void OnNotification(const ma_device_notification* notification);
+        static void OnProcess(void* userData, float* framesOut, ma_uint64 frameCount);
     private:
         ma_engine m_Engine;
-        static AudioSystem* s_Instance;
+        static AudioDevice* s_Instance;
         uint32_t m_Channels = 0;
         uint32_t m_SampleRate = 0;
         Array<Ref<AudioNode>> m_AudioNodes;
     };
 
-    Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo);
+    Ref<AudioDevice> CreateAudioDevice(const AudioDeviceCreateInfo& createInfo);
 }

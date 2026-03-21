@@ -48,8 +48,6 @@ namespace Nova
         AssetType GetAssetType() const final { return AssetType::Shader; }
 
         virtual bool Initialize(const ShaderCreateInfo& createInfo) = 0;
-        virtual void Destroy() = 0;
-
         virtual Ref<ShaderBindingSet> CreateBindingSet(size_t setIndex = 0) const = 0;
         virtual Array<Ref<ShaderBindingSet>> CreateBindingSets() const = 0;
     };

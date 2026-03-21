@@ -27,7 +27,8 @@ namespace Nova::Vulkan
     void ShaderModule::Destroy()
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
-        vkDestroyShaderModule(deviceHandle, m_Handle, nullptr);
+        if (m_Handle) vkDestroyShaderModule(deviceHandle, m_Handle, nullptr);
+        m_Handle = nullptr;
     }
 
     VkShaderModule ShaderModule::GetHandle() const

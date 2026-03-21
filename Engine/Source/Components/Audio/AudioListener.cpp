@@ -1,5 +1,5 @@
 #include "AudioListener.h"
-#include "Audio/AudioSystem.h"
+#include "Audio/AudioDevice.h"
 #include "Components/Transform.h"
 #include <miniaudio.h>
 #include <imgui.h>
@@ -30,7 +30,7 @@ namespace Nova
     {
         Component::OnUpdate(deltaTime);
 
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
 
         const Transform* transform = GetTransform();
         const Vector3& position = transform->GetPosition();
@@ -47,14 +47,14 @@ namespace Nova
     void AudioListener::OnEnable()
     {
         Component::OnEnable();
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         ma_engine_listener_set_enabled(audioSystem->GetHandle(), m_Index, true);
     }
 
     void AudioListener::OnDisable()
     {
         Component::OnDisable();
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         ma_engine_listener_set_enabled(audioSystem->GetHandle(), m_Index, false);
     }
 

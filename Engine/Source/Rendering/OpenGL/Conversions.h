@@ -193,7 +193,7 @@ namespace Nova::OpenGL
         case BlendFactor::DestAlpha: return GL_DST_ALPHA;
         case BlendFactor::OneMinusDestAlpha: return GL_ONE_MINUS_DST_ALPHA;
         case BlendFactor::ConstantColor: return GL_CONSTANT_COLOR;
-        case BlendFactor::OnMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
+        case BlendFactor::OneMinusConstantColor: return GL_ONE_MINUS_CONSTANT_COLOR;
         case BlendFactor::ConstantAlpha: return GL_CONSTANT_ALPHA;
         case BlendFactor::OneMinusConstantAlpha: return GL_ONE_MINUS_CONSTANT_ALPHA;
         case BlendFactor::SourceAlphaSaturated: return GL_SRC_ALPHA_SATURATE;

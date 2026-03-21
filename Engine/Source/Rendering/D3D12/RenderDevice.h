@@ -6,6 +6,7 @@
 #include "Fence.h"
 #include "CommandBuffer.h"
 #include "CommandPool.h"
+#include "DescriptorHeap.h"
 
 #define DX_FAILED(result) ((result) < 0)
 
@@ -45,6 +46,7 @@ namespace Nova::D3D12
 
         Ref<Nova::Texture> CreateTexture(const Nova::TextureCreateInfo& createInfo) override;
         Ref<Nova::Texture> CreateTextureUnitialized() override;
+        Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
         Ref<Nova::Sampler> CreateSampler(const Nova::SamplerCreateInfo& createInfo) override;
         Ref<Nova::Buffer> CreateBuffer(const Nova::BufferCreateInfo& createInfo) override;
         Ref<Nova::Shader> CreateShader(const Nova::ShaderCreateInfo& createInfo) override;
@@ -52,35 +54,31 @@ namespace Nova::D3D12
         Ref<Nova::ComputePipeline> CreateComputePipeline(const Nova::ComputePipelineCreateInfo& createInfo) override;
         Ref<Nova::Material> CreateMaterial(const Nova::MaterialCreateInfo& createInfo) override;
         Ref<Nova::Fence> CreateFence(const Nova::FenceCreateInfo& createInfo) override;
+        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
+        Ref<Nova::CommandBuffer> CreateComputeCommandBuffer() override;
+
         uint32_t GetImageCount() const override;
+        uint32_t GetCurrentFrameIndex() const override;
 
-        ID3D12Device13* GetHandle() { return m_Handle; }
-        const ID3D12Device13* GetHandle() const { return m_Handle; }
-
-        IDXGIFactory7* GetFactory() { return m_Factory; }
-        const IDXGIFactory7* GetFactory() const { return m_Factory; }
-
-        IDXGIAdapter4* GetAdapter() { return m_Adapter; }
-        const IDXGIAdapter4* GetAdapter() const { return m_Adapter; }
+        ID3D12Device13* GetHandle() const;
+        IDXGIFactory7* GetFactory() const;
+        IDXGIAdapter4* GetAdapter() const;
         ID3D12CommandSignature* GetDrawIndirectSignature() const;
         ID3D12CommandSignature* GetDrawIndexedIndirectSignature() const;
         ID3D12CommandSignature* GetDispatchIndirectSignature() const;
+        ID3D12Allocator* GetAllocator();
 
         Queue* GetGraphicsQueue() override { return &m_GraphicsQueue; }
         Queue* GetComputeQueue() override { return &m_ComputeQueue; }
         Queue* GetTransferQueue() override { return &m_TransferQueue; }
 
         Nova::CommandBuffer* GetCurrentCommandBuffer() override;
-        CommandPool& GetCommandPool();
-        ID3D12Allocator* GetAllocator();
         Nova::Swapchain* GetSwapchain() override;
-        uint32_t GetCurrentFrameIndex() const override;
 
-        Ref<Nova::TextureView> CreateTextureView(const TextureViewCreateInfo& createInfo) override;
-        Ref<Nova::CommandBuffer> CreateCommandBuffer() override;
-        Ref<Nova::CommandBuffer> CreateTransferCommandBuffer() override;
-        Ref<Nova::CommandBuffer> CreateComputeCommandBuffer() override;
 
+        DescriptorHeap* GetDescriptorHeap();
+        DescriptorHeap* GetSamplerHeap();
     private:
         uint32_t m_ImageCount = 0;
         uint32_t m_CurrentFrameIndex = 0;
@@ -103,7 +101,8 @@ namespace Nova::D3D12
         CommandPool m_TransferPool;
         CommandPool m_ComputePool;
         Frame m_Frames[3];
-
+        DescriptorHeap m_SamplerHeap;
+        DescriptorHeap m_DescriptorHeap;
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
         ID3D12Debug6* m_Debug = nullptr;
         ID3D12InfoQueue1* m_InfoQueue = nullptr;

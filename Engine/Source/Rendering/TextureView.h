@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "TextureAspect.h"
 #include "Runtime/Format.h"
-#include "Runtime/Object.h"
+#include "Runtime/RefCounted.h"
 #include <cstdint>
 
 namespace Nova
@@ -24,7 +24,7 @@ namespace Nova
         uint32_t arrayCount = 0;
     };
 
-    class TextureView : public Object
+    class TextureView : public RefCounted
     {
     public:
         TextureView() = default;

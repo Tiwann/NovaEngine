@@ -7,8 +7,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Audio/AudioLoader.h
         Source/Audio/AudioNode.cpp
         Source/Audio/AudioNode.h
-        Source/Audio/AudioSystem.cpp
-        Source/Audio/AudioSystem.h
+        Source/Audio/AudioDevice.cpp
+        Source/Audio/AudioDevice.h
         Source/Audio/FFTAudioNode.cpp
         Source/Audio/FFTAudioNode.h
 
@@ -346,6 +346,14 @@ set(NOVA_ENGINE_D3D12_SOURCES
         Source/Rendering/D3D12/Texture.h
         Source/Rendering/D3D12/TextureView.cpp
         Source/Rendering/D3D12/TextureView.h
+        Source/Rendering/D3D12/GraphicsPipeline.h
+        Source/Rendering/D3D12/GraphicsPipeline.cpp
+        Source/Rendering/D3D12/Shader.h
+        Source/Rendering/D3D12/Shader.cpp
+        Source/Rendering/D3D12/Sampler.h
+        Source/Rendering/D3D12/Sampler.cpp
+        Source/Rendering/D3D12/DescriptorHeap.cpp
+        Source/Rendering/D3D12/DescriptorHeap.h
 )
 
 set(NOVA_ENGINE_VULKAN_SOURCES

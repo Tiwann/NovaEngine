@@ -6,6 +6,14 @@
 #include <dxgi1_6.h>
 #include <directx/d3dx12.h>
 
+#include "Rendering/SamplerAddressMode.h"
+#include "Rendering/CompareOperation.h"
+#include "Rendering/BlendFactor.h"
+#include "Rendering/BlendOperation.h"
+#include "Rendering/PolygonMode.h"
+#include "Rendering/PrimitiveTopology.h"
+#include "Rendering/VertexInputRate.h"
+
 
 namespace Nova::D3D12
 {
@@ -180,4 +188,102 @@ namespace Nova::D3D12
         }
     }
 
+    template<>
+    inline D3D12_INPUT_CLASSIFICATION Convert(const VertexInputRate& rate)
+    {
+        switch (rate)
+        {
+        case VertexInputRate::Vertex: return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        case VertexInputRate::Instance: return D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
+        default: return D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+        }
+    }
+
+    template<>
+    inline D3D12_PRIMITIVE_TOPOLOGY_TYPE Convert(const PrimitiveTopology& value)
+    {
+        switch (value)
+        {
+        case PrimitiveTopology::PointList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+        case PrimitiveTopology::LineList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+        case PrimitiveTopology::LineStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+        case PrimitiveTopology::TriangleList: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        case PrimitiveTopology::TriangleStrip: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        case PrimitiveTopology::TriangleFan: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        default: return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+        }
+    }
+
+    template <>
+    inline D3D12_BLEND Convert(const BlendFactor& factor)
+    {
+        switch (factor)
+        {
+        case BlendFactor::Zero: return D3D12_BLEND_ZERO;
+        case BlendFactor::One: return D3D12_BLEND_ONE;
+        case BlendFactor::SourceColor: return D3D12_BLEND_SRC_COLOR;
+        case BlendFactor::OneMinusSourceColor: return D3D12_BLEND_INV_SRC_COLOR;
+        case BlendFactor::DestColor: return D3D12_BLEND_DEST_COLOR;
+        case BlendFactor::OneMinusDestColor: return D3D12_BLEND_INV_DEST_COLOR;
+        case BlendFactor::SourceAlpha: return D3D12_BLEND_SRC_ALPHA;
+        case BlendFactor::OneMinusSourceAlpha: return D3D12_BLEND_INV_SRC_ALPHA;
+        case BlendFactor::DestAlpha: return D3D12_BLEND_DEST_ALPHA;
+        case BlendFactor::OneMinusDestAlpha: return D3D12_BLEND_INV_DEST_ALPHA;
+        case BlendFactor::ConstantColor: return D3D12_BLEND_BLEND_FACTOR;
+        case BlendFactor::OneMinusConstantColor: return D3D12_BLEND_INV_BLEND_FACTOR;
+        case BlendFactor::ConstantAlpha: return D3D12_BLEND_BLEND_FACTOR;
+        case BlendFactor::OneMinusConstantAlpha: return D3D12_BLEND_INV_BLEND_FACTOR;
+        case BlendFactor::SourceAlphaSaturated: return D3D12_BLEND_SRC_ALPHA_SAT;
+        case BlendFactor::Source1Color: return D3D12_BLEND_SRC1_COLOR;
+        case BlendFactor::OneMinusSource1Color: return D3D12_BLEND_INV_SRC1_COLOR;
+        case BlendFactor::Source1Alpha: return D3D12_BLEND_SRC1_ALPHA;
+        case BlendFactor::OneMinusSource1Alpha: return D3D12_BLEND_INV_SRC1_ALPHA;
+        default: return D3D12_BLEND_ZERO;
+        }
+    }
+
+    template <>
+    inline D3D12_BLEND_OP Convert(const BlendOperation& op)
+    {
+        switch (op)
+        {
+        case BlendOperation::Add: return D3D12_BLEND_OP_ADD;
+        case BlendOperation::Min: return D3D12_BLEND_OP_MIN;
+        case BlendOperation::Max: return D3D12_BLEND_OP_MAX;
+        case BlendOperation::Subtract: return D3D12_BLEND_OP_SUBTRACT;
+        case BlendOperation::ReverseSubtract: return D3D12_BLEND_OP_REV_SUBTRACT;
+        default: return D3D12_BLEND_OP_ADD;
+        }
+    }
+
+    template <>
+    inline D3D12_COMPARISON_FUNC Convert(const CompareOperation& op)
+    {
+        switch (op)
+        {
+        case CompareOperation::Always: return D3D12_COMPARISON_FUNC_ALWAYS;
+        case CompareOperation::Never: return D3D12_COMPARISON_FUNC_NEVER;
+        case CompareOperation::Less: return D3D12_COMPARISON_FUNC_LESS;
+        case CompareOperation::LessOrEqual: return D3D12_COMPARISON_FUNC_LESS_EQUAL;
+        case CompareOperation::Equal: return D3D12_COMPARISON_FUNC_EQUAL;
+        case CompareOperation::NotEqual: return D3D12_COMPARISON_FUNC_NOT_EQUAL;
+        case CompareOperation::Greater: return D3D12_COMPARISON_FUNC_GREATER;
+        case CompareOperation::GreaterOrEqual: return D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+        default: return D3D12_COMPARISON_FUNC_ALWAYS;
+        }
+    }
+
+    template <>
+    inline D3D12_TEXTURE_ADDRESS_MODE Convert(const SamplerAddressMode& mode)
+    {
+        switch (mode)
+        {
+        case SamplerAddressMode::Repeat: return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        case SamplerAddressMode::MirroredRepeat: return D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
+        case SamplerAddressMode::ClampToEdge: return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+        case SamplerAddressMode::ClampToBorder:return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+        case SamplerAddressMode::MirrorClampToEdge:return D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE;
+        default: return D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+        }
+    }
 }

@@ -67,7 +67,7 @@ namespace Nova
         return GetFFTWindow(window)(n, fftSize);
     }
 
-    bool FFTAudioNode::Initialize(AudioSystem* system)
+    bool FFTAudioNode::Initialize(AudioDevice* system)
     {
         if (!AudioNode::Initialize(system)) return false;
         std::free(m_Config);

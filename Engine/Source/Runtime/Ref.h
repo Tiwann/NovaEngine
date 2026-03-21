@@ -12,6 +12,9 @@ namespace Nova
         using ConstPointerType = const T*;
         using ReferenceType = T&;
         using ConstReferenceType = const T&;
+        using PointerToConst = T* const;
+        using ConstPointerToConst = const T* const;
+        using ValueType = T;
 
         Ref() = default;
 
@@ -33,7 +36,7 @@ namespace Nova
         }
 
         template <typename U>
-        Ref(const Ref<U>& other) : m_Pointer(static_cast<PointerType>(other.m_Pointer))
+        Ref(const Ref<U>& other) : m_Pointer(reinterpret_cast<PointerType>(other.m_Pointer))
         {
             AddRef(other.m_Pointer);
         }
@@ -145,15 +148,14 @@ namespace Nova
             other.m_Pointer = m_Pointer;
             m_Pointer = otherPointer;
         }
-    private:
-        friend class AssetDatabase;
 
         void Release()
         {
             KillRef(m_Pointer);
             m_Pointer = nullptr;
         }
-        mutable PointerType m_Pointer = nullptr;
+    private:
+        PointerType m_Pointer = nullptr;
 
         template <typename U>
         friend class Ref;

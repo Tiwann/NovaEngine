@@ -20,10 +20,10 @@ namespace Nova
         const ShaderBindingSetLayout* layout = nullptr;
     };
 
-    class ShaderBindingSet : public Object
+    class ShaderBindingSet : public RefCounted
     {
     public:
-        ShaderBindingSet() : Object("Shader Binding Set") {}
+        ShaderBindingSet() {}
         ~ShaderBindingSet() override = default;
 
         virtual bool Initialize(const ShaderBindingSetCreateInfo& createInfo) = 0;

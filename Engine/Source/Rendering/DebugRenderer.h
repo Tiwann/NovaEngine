@@ -23,11 +23,11 @@ namespace Nova
         uint32_t maxVertices = 0;
     };
 
-    class DebugRenderer final : public Object
+    class DebugRenderer final
     {
     public:
-        DebugRenderer() : Object("Debug Renderer") {}
-        ~DebugRenderer() override = default;
+        DebugRenderer() = default;
+        ~DebugRenderer() = default;
 
         static bool Initialize(const DebugRendererCreateInfo& createInfo);
         static void Destroy();

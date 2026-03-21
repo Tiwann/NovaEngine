@@ -6,12 +6,12 @@
 
 namespace Nova
 {
-    class AudioSystem;
+    class AudioDevice;
 
     class AudioNode : public Object
     {
     public:
-        virtual bool Initialize(AudioSystem* system);
+        virtual bool Initialize(AudioDevice* system);
         virtual void Destroy();
 
         virtual uint32_t GetNodeFlags() const { return 0;}

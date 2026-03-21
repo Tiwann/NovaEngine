@@ -5,6 +5,7 @@ class HelloTriangleApp final : public Nova::Application
 {
 public:
     HelloTriangleApp(const int32_t argc, char** argv): Application(argc, argv){}
+    ~HelloTriangleApp() override = default;
 
     Nova::ApplicationConfiguration GetConfiguration() const override;
     void OnInit() override;

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Runtime/Format.h"
-#include "Runtime/Object.h"
+#include "Runtime/RefCounted.h"
 #include "Runtime/Ref.h"
 #include <cstdint>
 
@@ -24,10 +24,10 @@ namespace Nova
         uint32_t sampleCount = 0;
     };
 
-    class RenderTarget final : public Object
+    class RenderTarget final : public RefCounted
     {
     public:
-        RenderTarget() : Object("Render Target") {}
+        RenderTarget() = default;
         ~RenderTarget() override = default;
 
         bool Initialize(const RenderTargetCreateInfo& createInfo);

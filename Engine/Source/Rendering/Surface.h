@@ -16,11 +16,11 @@ namespace Nova
         SurfaceCreateInfo& withWindow(Window* inWindow) { window = inWindow; return *this; };
     };
 
-    class Surface : public Object
+    class Surface
     {
     public:
-        Surface() : Object("Surface") {}
-        ~Surface() override = default;
+        Surface() = default;
+        virtual ~Surface() = default;
 
         virtual bool Initialize(const SurfaceCreateInfo& createInfo) = 0;
         virtual void Destroy() = 0;

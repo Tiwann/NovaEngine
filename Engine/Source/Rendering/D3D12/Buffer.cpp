@@ -96,4 +96,9 @@ namespace Nova::D3D12
     {
         return m_Handle;
     }
+
+    ID3D12Allocation* Buffer::GetAllocation() const
+    {
+        return m_Allocation;
+    }
 }

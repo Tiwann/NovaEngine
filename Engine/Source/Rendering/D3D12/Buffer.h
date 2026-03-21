@@ -17,6 +17,7 @@ namespace Nova::D3D12
         void* Map() override;
         void Unmap(const void* ptr) override;
         ID3D12Resource* GetHandle() const;
+        ID3D12Allocation* GetAllocation() const;
     private:
         RenderDevice* m_Device = nullptr;
         ID3D12Allocation* m_Allocation = nullptr;

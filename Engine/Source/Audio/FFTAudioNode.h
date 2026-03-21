@@ -32,7 +32,7 @@ namespace Nova
     {
     public:
         static constexpr uint32_t MaxFFTSize = 2048;
-        bool Initialize(AudioSystem* system) override;
+        bool Initialize(AudioDevice* system) override;
         void Destroy() override;
         void OnProcess(const float** inFrames, uint32_t inFrameCount, float** outFrames,uint32_t outFrameCount) override;
         uint32_t GetFFTSize() const;

@@ -11,6 +11,7 @@ namespace Nova
         explicit Object(String name);
         ~Object() override = default;
 
+        virtual void Destroy() {}
         const String& GetObjectName() const;
         void SetObjectName(const String& newName);
     protected:

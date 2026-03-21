@@ -16,7 +16,7 @@ namespace slang{ struct IGlobalSession; }
 namespace Nova
 {
     class Window;
-    class AudioSystem;
+    class AudioDevice;
     class EditorWindow;
     class Event;
 
@@ -94,7 +94,7 @@ namespace Nova
         CmdLineArgs m_Args;
         Ref<Window> m_Window = nullptr;
         Ref<RenderDevice> m_Device = nullptr;
-        Ref<AudioSystem> m_AudioSystem = nullptr;
+        Ref<AudioDevice> m_AudioDevice = nullptr;
         slang::IGlobalSession* m_SlangSession = nullptr;
 
         Ref<RenderTarget> m_RenderTarget = nullptr;

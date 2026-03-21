@@ -16,6 +16,8 @@ namespace Nova::Vulkan
     class Shader final : public Nova::Shader
     {
     public:
+        Shader() = default;
+        ~Shader() override = default;
         bool Initialize(const ShaderCreateInfo& createInfo) override;
         void Destroy() override;
 

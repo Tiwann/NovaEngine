@@ -297,7 +297,8 @@ namespace Nova::Vulkan
             shaderModule.Destroy();
 
         if (!m_Device) return;
-        vkDestroyPipelineLayout(m_Device->GetHandle(), m_PipelineLayout, nullptr);
+        if (m_PipelineLayout) vkDestroyPipelineLayout(m_Device->GetHandle(), m_PipelineLayout, nullptr);
+        m_PipelineLayout = nullptr;
     }
 
     Ref<Nova::ShaderBindingSet> Shader::CreateBindingSet(const size_t setIndex) const

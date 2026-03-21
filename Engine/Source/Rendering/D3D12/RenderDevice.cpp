@@ -11,7 +11,8 @@ using namespace D3D12MA;
 namespace Nova::D3D12
 {
 #if defined(NOVA_DEBUG) || defined(NOVA_DEV)
-    static void DebugCallback(D3D12_MESSAGE_CATEGORY category, const D3D12_MESSAGE_SEVERITY severity, D3D12_MESSAGE_ID id, const LPCSTR desc, void* pContext)
+    static void DebugCallback(D3D12_MESSAGE_CATEGORY category, const D3D12_MESSAGE_SEVERITY severity,
+                              D3D12_MESSAGE_ID id, const LPCSTR desc, void* pContext)
     {
         switch (severity)
         {
@@ -67,7 +68,9 @@ namespace Nova::D3D12
         (void)m_InfoQueue->PushStorageFilter(&filter);*/
 
         DWORD callbackCookie = 0;
-        if (DX_FAILED(m_InfoQueue->RegisterMessageCallback(DebugCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &callbackCookie)))
+        if (DX_FAILED(
+            m_InfoQueue->RegisterMessageCallback(DebugCallback, D3D12_MESSAGE_CALLBACK_FLAG_NONE, nullptr, &
+                callbackCookie)))
             return false;
 #endif
 
@@ -79,19 +82,21 @@ namespace Nova::D3D12
             {
                 result = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
                 BOOL mailboxSupported = false;
-                (void)m_Factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &mailboxSupported, sizeof(mailboxSupported));
+                (void)m_Factory->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &mailboxSupported,
+                                                     sizeof(mailboxSupported));
                 if (mailboxSupported)
                     result = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-            } else
+            }
+            else
             {
                 result = DXGI_SWAP_EFFECT_FLIP_DISCARD;
             }
 
             switch (result)
             {
-                case DXGI_SWAP_EFFECT_DISCARD: return PresentMode::Immediate;
-                case DXGI_SWAP_EFFECT_FLIP_DISCARD: return PresentMode::Fifo;
-                default: return PresentMode::Unknown;
+            case DXGI_SWAP_EFFECT_DISCARD: return PresentMode::Immediate;
+            case DXGI_SWAP_EFFECT_FLIP_DISCARD: return PresentMode::Fifo;
+            default: return PresentMode::Unknown;
             }
         };
 
@@ -175,7 +180,8 @@ namespace Nova::D3D12
                 &sigDesc,
                 nullptr,
                 IID_PPV_ARGS(&m_DrawIndirectSignature)
-            ))) return false;
+            )))
+                return false;
         }
 
         {
@@ -190,7 +196,8 @@ namespace Nova::D3D12
                 &sigDesc,
                 nullptr,
                 IID_PPV_ARGS(&m_DrawIndexedIndirectSignature)
-            ))) return false;
+            )))
+                return false;
         }
 
         {
@@ -205,14 +212,34 @@ namespace Nova::D3D12
                 &sigDesc,
                 nullptr,
                 IID_PPV_ARGS(&m_DispatchIndirectSignature)
-            ))) return false;
+            )))
+                return false;
         }
+
+        DescriptorHeapCreateInfo descriptorHeapCreateInfo;
+        descriptorHeapCreateInfo.device = this;
+        descriptorHeapCreateInfo.heapType = DescriptorHeapType::SRV_CBV_UAV;
+        descriptorHeapCreateInfo.numDescriptors = 1024;
+        descriptorHeapCreateInfo.shaderVisible = true;
+        if (!m_DescriptorHeap.Initialize(descriptorHeapCreateInfo))
+            return false;
+
+
+        DescriptorHeapCreateInfo samplerHeapCreateInfo;
+        samplerHeapCreateInfo.device = this;
+        samplerHeapCreateInfo.heapType = DescriptorHeapType::SamplerState;
+        samplerHeapCreateInfo.numDescriptors = 32;
+        samplerHeapCreateInfo.shaderVisible = true;
+        if (!m_SamplerHeap.Initialize(samplerHeapCreateInfo))
+            return false;
 
         return true;
     }
 
     void RenderDevice::Destroy()
     {
+        m_SamplerHeap.Destroy();
+        m_DescriptorHeap.Destroy();
         m_DrawIndirectSignature->Release();
         m_DrawIndexedIndirectSignature->Release();
         m_DispatchIndirectSignature->Release();
@@ -252,11 +279,12 @@ namespace Nova::D3D12
         if (!cmdBuffer.Begin({CommandBufferUsageFlagBits::None}))
             return false;
 
-        const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchainImage, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+        const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            swapchainImage, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
         cmdBufferHandle->ResourceBarrier(1, &barrier);
 
         // This needs to be render passes
-        const D3D12_CPU_DESCRIPTOR_HANDLE renderTargets[] { D3D12_TO_HANDLE(swapchainImageView) };
+        const D3D12_CPU_DESCRIPTOR_HANDLE renderTargets[]{D3D12_TO_HANDLE(swapchainImageView)};
         cmdBufferHandle->OMSetRenderTargets(1, renderTargets, false, nullptr);
         return false;
     }
@@ -268,7 +296,8 @@ namespace Nova::D3D12
         ID3D12GraphicsCommandList10* cmdBufferHandle = cmdBuffer.GetHandle();
         ID3D12Image* swapchainImage = m_Swapchain.GetImage(m_CurrentFrameIndex);
 
-        const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchainImage, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+        const D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            swapchainImage, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
         cmdBufferHandle->ResourceBarrier(1, &barrier);
         cmdBuffer.End();
 
@@ -282,7 +311,6 @@ namespace Nova::D3D12
 
     void RenderDevice::WaitIdle() const
     {
-
     }
 
     void RenderDevice::SetName(Nova::StringView name)
@@ -297,7 +325,13 @@ namespace Nova::D3D12
 
     Ref<Nova::Texture> RenderDevice::CreateTexture(const Nova::TextureCreateInfo& createInfo)
     {
-        return nullptr;
+        Texture* texture = new Texture();
+        if (!texture->Initialize(createInfo))
+        {
+            delete texture;
+            return nullptr;
+        }
+        return Ref(texture);
     }
 
     Ref<Nova::Texture> RenderDevice::CreateTextureUnitialized()
@@ -360,14 +394,19 @@ namespace Nova::D3D12
         return m_DispatchIndirectSignature;
     }
 
+    DescriptorHeap* RenderDevice::GetDescriptorHeap()
+    {
+        return &m_DescriptorHeap;
+    }
+
+    DescriptorHeap* RenderDevice::GetSamplerHeap()
+    {
+        return &m_SamplerHeap;
+    }
+
     Nova::CommandBuffer* RenderDevice::GetCurrentCommandBuffer()
     {
         return &m_Frames[m_CurrentFrameIndex].commandBuffer;
-    }
-
-    CommandPool& RenderDevice::GetCommandPool()
-    {
-        return m_CommandPool;
     }
 
     D3D12MA::Allocator* RenderDevice::GetAllocator()
@@ -385,11 +424,28 @@ namespace Nova::D3D12
         return m_CurrentFrameIndex;
     }
 
-    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    ID3D12Device13* RenderDevice::GetHandle() const
     {
+        return m_Handle;
     }
 
-    static Ref<Nova::CommandBuffer> CreateCommandBufferEx(RenderDevice* device, CommandPool* pool, CommandBufferLevel level)
+    IDXGIFactory7* RenderDevice::GetFactory() const
+    {
+        return m_Factory;
+    }
+
+    IDXGIAdapter4* RenderDevice::GetAdapter() const
+    {
+        return m_Adapter;
+    }
+
+    Ref<Nova::TextureView> RenderDevice::CreateTextureView(const TextureViewCreateInfo& createInfo)
+    {
+        return nullptr;
+    }
+
+    static Ref<Nova::CommandBuffer> CreateCommandBufferEx(RenderDevice* device, CommandPool* pool,
+                                                          CommandBufferLevel level)
     {
         CommandBufferAllocateInfo allocateInfo;
         allocateInfo.device = device;

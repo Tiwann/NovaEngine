@@ -53,7 +53,7 @@ namespace Nova
     void AddRef(T* ptr)
     {
         if (!ptr) return;
-        RefCounted* ref = (RefCounted*)ptr;
+        RefCounted* ref = reinterpret_cast<RefCounted*>(ptr);
         ref->AddReference();
     }
 
@@ -61,7 +61,7 @@ namespace Nova
     void RelRef(T* ptr)
     {
         if (!ptr) return;
-        RefCounted* ref = (RefCounted*)ptr;
+        RefCounted* ref = reinterpret_cast<RefCounted*>(ptr);
         ref->ReleaseReference();
     }
 
@@ -69,7 +69,7 @@ namespace Nova
     void KillRef(T* ptr)
     {
         if (!ptr) return;
-        RefCounted* ref = (RefCounted*)ptr;
+        RefCounted* ref = reinterpret_cast<RefCounted*>(ptr);
         ref->Kill();
     }
 }

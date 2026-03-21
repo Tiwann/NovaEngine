@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Runtime/Object.h"
+#include "Runtime/RefCounted.h"
 #include "Runtime/Ref.h"
 #include <cstdint>
 
@@ -21,10 +21,10 @@ namespace Nova
         uint32_t sampleCount = 0;
     };
 
-    class ImGuiRenderer : public Object
+    class ImGuiRenderer : public RefCounted
     {
     public:
-        ImGuiRenderer() : Object("ImGui Renderer"){}
+        ImGuiRenderer() = default;
         ~ImGuiRenderer() override = default;
 
         virtual bool Initialize(const ImGuiRendererCreateInfo& createInfo);

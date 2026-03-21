@@ -34,7 +34,7 @@ namespace Nova
         ~AudioClip() override = default;
         bool LoadFromFile(StringView filepath, AudioPlaybackFlags flags);
         bool LoadFromMemory(const void* data, size_t size, AudioPlaybackFlags flags);
-        void Destroy();
+        void Destroy() override;
 
         AssetType GetAssetType() const override;
         float GetDurationSeconds() const;

@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "Time.h"
 #include "Window.h"
-#include "Audio/AudioSystem.h"
+#include "Audio/AudioDevice.h"
 #include "Components/Camera.h"
 #include "Editor/HierarchyWindow.h"
 #include "Editor/InspectorWindow.h"
@@ -19,8 +19,6 @@
 
 namespace Nova
 {
-    extern Application* g_Application;
-
     static Ref<Shader> LoadShaderBasic(AssetDatabase& database,
         Ref<RenderDevice> device,
         const String& moduleName,
@@ -140,12 +138,12 @@ namespace Nova
             return;
         }
 
-        AudioSystemCreateInfo audioSystemCreateInfo;
+        AudioDeviceCreateInfo audioSystemCreateInfo;
         audioSystemCreateInfo.channels = 2;
         audioSystemCreateInfo.sampleRate = 44100;
         audioSystemCreateInfo.listenerCount = 1;
-        m_AudioSystem = CreateAudioSystem(audioSystemCreateInfo);
-        if (!m_AudioSystem)
+        m_AudioDevice = CreateAudioDevice(audioSystemCreateInfo);
+        if (!m_AudioDevice)
         {
             Destroy();
             return;
@@ -194,6 +192,7 @@ namespace Nova
 
     Application& Application::GetCurrentApplication()
     {
+        extern Application* g_Application;
         return *g_Application;
     }
 
@@ -308,8 +307,8 @@ namespace Nova
 
     void Application::Destroy()
     {
-        m_SceneManager.Destroy();
         if (m_Device) m_Device->WaitIdle();
+        m_SceneManager.Destroy();
         OnDestroy();
         DebugRenderer::Destroy();
         m_AssetDatabase.UnloadAll();

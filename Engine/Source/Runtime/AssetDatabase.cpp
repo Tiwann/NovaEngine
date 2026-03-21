@@ -33,10 +33,7 @@ namespace Nova
         for (auto& [name, asset] : m_Data)
         {
             if (!asset) continue;
-            if (asset->GetAssetType() == AssetType::Shader)
-                asset.As<Shader>()->Destroy();
-            if (asset->GetAssetType() == AssetType::AudioClip)
-                asset.As<AudioClip>()->Destroy();
+            asset->Destroy();
             asset.Release();
         }
         m_Data.Clear();

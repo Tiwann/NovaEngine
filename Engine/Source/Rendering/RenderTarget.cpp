@@ -91,7 +91,7 @@ namespace Nova
             depthViewCreateInfo.width = createInfo.width;
             depthViewCreateInfo.height = createInfo.height;
             depthViewCreateInfo.depth = 1;
-            depthViewCreateInfo.aspectFlags = TextureAspectFlagBits::Depth | TextureAspectFlagBits::Stencil;
+            depthViewCreateInfo.aspectFlags = TextureAspectFlags(TextureAspectFlagBits::Depth | TextureAspectFlagBits::Stencil);
             depthViewCreateInfo.baseMipLevel = 0;
             depthViewCreateInfo.mipCount = 1;
             if (!initializeTextureView(m_DepthTextureViews[i], depthViewCreateInfo))

@@ -450,6 +450,7 @@ namespace Nova::Vulkan
 
         m_CommandPool.Destroy();
         m_TransferPool.Destroy();
+        m_ComputePool.Destroy();
         m_DescriptorPool.Destroy();
         m_Swapchain.Destroy();
         vmaDestroyAllocator(m_Allocator);

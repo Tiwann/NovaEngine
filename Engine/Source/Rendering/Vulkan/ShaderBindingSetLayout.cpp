@@ -63,7 +63,8 @@ namespace Nova::Vulkan
     void ShaderBindingSetLayout::Destroy()
     {
         const VkDevice deviceHandle = m_Device->GetHandle();
-        vkDestroyDescriptorSetLayout(deviceHandle, m_Handle, nullptr);
+        if (m_Handle) vkDestroyDescriptorSetLayout(deviceHandle, m_Handle, nullptr);
+        m_Handle = nullptr;
     }
 
     const VkDescriptorSetLayout& ShaderBindingSetLayout::GetHandle() const

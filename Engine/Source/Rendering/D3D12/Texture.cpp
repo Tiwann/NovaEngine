@@ -22,7 +22,6 @@ namespace Nova::D3D12
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         ID3D12Allocator* allocator = device->GetAllocator();
-        ID3D12Device13* deviceHandle = device->GetHandle();
 
         ALLOCATION_DESC allocDesc = {};
         allocDesc.HeapType = D3D12_HEAP_TYPE_DEFAULT;
@@ -74,7 +73,7 @@ namespace Nova::D3D12
         return m_Device && m_Image && m_ImageView && m_Allocation;
     }
 
-    ID3D12Image* Texture::GetImage() const
+    ID3D12Image* Texture::GetHandle() const
     {
         return m_Image;
     }

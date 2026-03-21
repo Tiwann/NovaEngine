@@ -1,5 +1,5 @@
 ﻿#include "AudioClip.h"
-#include "AudioSystem.h"
+#include "AudioDevice.h"
 #include "AudioNode.h"
 
 #define STB_VORBIS_HEADER_ONLY
@@ -35,7 +35,7 @@ namespace Nova
 
     bool AudioClip::LoadFromFile(const StringView filepath, const AudioPlaybackFlags flags)
     {
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
 
         if (!audioSystem) return false;
 
@@ -76,7 +76,7 @@ namespace Nova
 
     bool AudioClip::LoadFromMemory(const void* data, const size_t size, const AudioPlaybackFlags flags)
     {
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         if (!audioSystem)
             return false;
 

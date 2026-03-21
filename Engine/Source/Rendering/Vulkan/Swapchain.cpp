@@ -213,7 +213,6 @@ namespace Nova::Vulkan
         textureView.m_Width = m_ImageWidth;
         textureView.m_Height = m_ImageHeight;
         textureView.m_Depth = 1;
-        textureView.m_Name = StringFormat("Swapchain Texture View {}", index);
         textureView.m_BaseMipLevel = 0;
         textureView.m_MipCount = 1;
         textureView.m_AspectFlags = TextureAspectFlagBits::Color;

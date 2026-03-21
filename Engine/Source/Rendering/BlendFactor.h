@@ -15,7 +15,7 @@ namespace Nova
         DestAlpha,
         OneMinusDestAlpha,
         ConstantColor,
-        OnMinusConstantColor,
+        OneMinusConstantColor,
         ConstantAlpha,
         OneMinusConstantAlpha,
         SourceAlphaSaturated,

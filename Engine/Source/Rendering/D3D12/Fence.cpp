@@ -35,10 +35,10 @@ namespace Nova::D3D12
 
     void Fence::Wait(uint64_t timeout)
     {
-        if (m_Handle->GetCompletedValue() < m_Value)
+        while (m_Handle->GetCompletedValue() < m_Value)
         {
             m_Handle->SetEventOnCompletion(m_Value, m_Event);
-            WaitForSingleObject(m_Handle, timeout);
+            WaitForSingleObject(m_Handle, timeout * 1'000'000);
         }
     }
 

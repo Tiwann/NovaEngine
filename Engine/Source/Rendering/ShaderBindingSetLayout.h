@@ -28,7 +28,7 @@ namespace Nova
         }
     };
 
-    class ShaderBindingSetLayout : public Object, public Iterable<Pair<uint32_t, ShaderBinding>>
+    class ShaderBindingSetLayout : public RefCounted, public Iterable<Pair<uint32_t, ShaderBinding>>
     {
     public:
         using BindingMap = Map<uint32_t, ShaderBinding>;

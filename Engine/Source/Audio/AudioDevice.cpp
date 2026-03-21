@@ -1,7 +1,6 @@
-﻿#include "AudioSystem.h"
+﻿#include "AudioDevice.h"
 #include "AudioClip.h"
 #include "Runtime/Memory.h"
-#include <cstdlib>
 #include <cstring>
 #include <print>
 
@@ -11,63 +10,29 @@
 #define MA_RETURN_ON_FAIL(result) if(MA_FAILED((result))) return false
 #define MA_RETURN_ON_FAIL_DATA(result, data) if(MA_FAILED((result))) return (data)
 
-struct AudioSystemCallbacks
+struct AudioDeviceCallbacks
 {
-    static void* OnMalloc(const size_t size, void* userData)
-    {
-        (void)userData;
-        return Nova::Memory::Malloc<uint8_t>(size);
-    }
 
-    static void* OnRealloc(void* where, const size_t size, void* userData)
-    {
-        (void)userData;
-        return Nova::Memory::Realloc<uint8_t>((uint8_t*)where, size);
-    }
-
-    static void OnFree(void* ptr, void* userData)
-    {
-        Nova::Memory::Free(ptr);
-        (void)userData;
-    }
-
-    static void AudioDataProc(ma_device* device, void* output, const void* input, ma_uint32 frameCount)
-    {
-        ma_engine* engine = (ma_engine*)device->pUserData;
-        ma_engine_read_pcm_frames(engine, output, frameCount, nullptr);
-    }
-
-    static void OnNotification(const ma_device_notification* notification)
-    {
-
-    }
-
-    static void OnProcess(void* userData, float* framesOut, ma_uint64 frameCount)
-    {
-
-    }
 };
-
-
 
 
 namespace Nova
 {
-    AudioSystem* AudioSystem::s_Instance = nullptr;
+    AudioDevice* AudioDevice::s_Instance = nullptr;
 
-    AudioSystem::AudioSystem() : Object("AudioSystem")
+    AudioDevice::AudioDevice()
     {
         memset(&m_Engine, 0, sizeof(ma_engine));
     }
 
-    bool AudioSystem::Initialize(const AudioSystemCreateInfo& createInfo)
+    bool AudioDevice::Initialize(const AudioDeviceCreateInfo& createInfo)
     {
         const ma_allocation_callbacks allocationCallbacks
         {
             this,
-            AudioSystemCallbacks::OnMalloc,
-            AudioSystemCallbacks::OnRealloc,
-            AudioSystemCallbacks::OnFree
+            AudioDevice::OnMalloc,
+            AudioDevice::OnRealloc,
+            AudioDevice::OnFree
         };
 
         ma_engine_config config = ma_engine_config_init();
@@ -75,13 +40,14 @@ namespace Nova
         config.sampleRate = createInfo.sampleRate;
         config.listenerCount = createInfo.listenerCount;
         config.allocationCallbacks = allocationCallbacks;
-        config.dataCallback = AudioSystemCallbacks::AudioDataProc;
-        config.notificationCallback = AudioSystemCallbacks::OnNotification;
-        config.onProcess = AudioSystemCallbacks::OnProcess;
+        config.dataCallback = AudioDevice::AudioDataProc;
+        config.notificationCallback = AudioDevice::OnNotification;
+        config.onProcess = AudioDevice::OnProcess;
         config.pProcessUserData = this;
         config.noAutoStart = true;
 
-        Destroy();
+        ma_engine_stop(&m_Engine);
+        ma_engine_uninit(&m_Engine);
         ma_result result = ma_engine_init(&config, &m_Engine);
         MA_RETURN_ON_FAIL(result);
 
@@ -94,46 +60,46 @@ namespace Nova
         return true;
     }
 
-    void AudioSystem::Destroy()
+    void AudioDevice::Destroy()
     {
         ma_engine_stop(&m_Engine);
         ma_engine_uninit(&m_Engine);
     }
 
 
-    void AudioSystem::PlayAudioClip(AudioClip* clip)
+    void AudioDevice::PlayAudioClip(AudioClip* clip)
     {
         if (!clip) return;
         ma_sound_start(clip->GetHandle());
     }
 
-    void AudioSystem::StopAudioClip(AudioClip* clip)
+    void AudioDevice::StopAudioClip(AudioClip* clip)
     {
         if (!clip) return;
         ma_sound_stop(clip->GetHandle());
     }
 
-    AudioSystem* AudioSystem::GetInstance()
+    AudioDevice* AudioDevice::GetInstance()
     {
         return s_Instance;
     }
 
-    ma_engine* AudioSystem::GetInstanceHandle()
+    ma_engine* AudioDevice::GetInstanceHandle()
     {
         return s_Instance->GetHandle();
     }
 
-    uint32_t AudioSystem::GetOutputChannelCount() const
+    uint32_t AudioDevice::GetOutputChannelCount() const
     {
         return m_Channels;
     }
 
-    uint32_t AudioSystem::GetOutputSampleRate() const
+    uint32_t AudioDevice::GetOutputSampleRate() const
     {
         return m_SampleRate;
     }
 
-    AudioFormat AudioSystem::GetOutputFormat() const
+    AudioFormat AudioDevice::GetOutputFormat() const
     {
         static auto GeBytesPerSample = [](const ma_format format) -> uint32_t
         {
@@ -155,20 +121,54 @@ namespace Nova
         return {m_Channels, m_SampleRate, GeBytesPerSample(device->playback.format), SampleInterleaving::Interleaved};
     }
 
-    bool AudioSystem::AttachAudioNodeToOutputBus(Ref<AudioNode> audioNode)
+    bool AudioDevice::AttachAudioNodeToOutputBus(Ref<AudioNode> audioNode)
     {
         const ma_result result = ma_node_attach_output_bus(audioNode->GetHandle(), 0, ma_engine_get_endpoint(&m_Engine), 0);
         return result == MA_SUCCESS;
     }
 
-    void AudioSystem::DetachAudioNodeFromOutputBus(const Ref<AudioNode>& audioNode)
+    void AudioDevice::DetachAudioNodeFromOutputBus(const Ref<AudioNode>& audioNode)
     {
         //ma_node_detach_output_bus(audioNode.Get(), 0, ma_engine_get_endpoint(&m_Engine), 0);
     }
 
-    Ref<AudioSystem> CreateAudioSystem(const AudioSystemCreateInfo& createInfo)
+    void* AudioDevice::OnMalloc(const size_t size, void* userData)
     {
-        AudioSystem* audioSystem = new AudioSystem();
+        (void)userData;
+        return Memory::Malloc<uint8_t>(size);
+    }
+
+    void* AudioDevice::OnRealloc(void* where, const size_t size, void* userData)
+    {
+        (void)userData;
+        return Memory::Realloc<uint8_t>((uint8_t*)where, size);
+    }
+
+    void AudioDevice::OnFree(void* ptr, void* userData)
+    {
+        Memory::Free(ptr);
+        (void)userData;
+    }
+
+    void AudioDevice::AudioDataProc(ma_device* device, void* output, const void* input, ma_uint32 frameCount)
+    {
+        ma_engine* engine = (ma_engine*)device->pUserData;
+        ma_engine_read_pcm_frames(engine, output, frameCount, nullptr);
+    }
+
+    void AudioDevice::OnNotification(const ma_device_notification* notification)
+    {
+
+    }
+
+    void AudioDevice::OnProcess(void* userData, float* framesOut, ma_uint64 frameCount)
+    {
+
+    }
+
+    Ref<AudioDevice> CreateAudioDevice(const AudioDeviceCreateInfo& createInfo)
+    {
+        AudioDevice* audioSystem = new AudioDevice();
         if (!audioSystem->Initialize(createInfo))
         {
             delete audioSystem;

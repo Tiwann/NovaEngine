@@ -23,6 +23,7 @@ namespace Nova
         static constexpr Flags None() { return 0; }
 
         constexpr operator uint32_t() const { return (uint32_t)m_Value; }
+        constexpr explicit operator Enum() const { return (Enum)m_Value; }
 
         constexpr bool operator==(const Flags& other) const { return m_Value == other.m_Value; }
         constexpr bool operator==(const Enum& other) const { return m_Value == other; }

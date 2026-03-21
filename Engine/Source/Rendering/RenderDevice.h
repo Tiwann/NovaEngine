@@ -52,10 +52,10 @@ namespace Nova
         bool vSync = false;
     };
 
-    class RenderDevice : public Object
+    class RenderDevice : public RefCounted
     {
     public:
-        RenderDevice() : Object("RenderDevice")
+        RenderDevice()
         {
             if (!s_Instance) s_Instance = this;
         }

@@ -1,9 +1,9 @@
 ﻿#include "AudioNode.h"
-#include "AudioSystem.h"
+#include "AudioDevice.h"
 
 namespace Nova
 {
-    bool AudioNode::Initialize(AudioSystem* system)
+    bool AudioNode::Initialize(AudioDevice* system)
     {
         if (!system) return false;
 

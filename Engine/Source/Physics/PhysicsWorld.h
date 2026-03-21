@@ -27,7 +27,7 @@ namespace Nova
         ~PhysicsWorld() override = default;
         virtual bool Initialize(const PhysicsWorldCreateInfo& createInfo) = 0;
         virtual void Step() = 0;
-        virtual void Destroy() = 0;
+        void Destroy() override = 0;
         
         virtual PhysicsBody* CreateBody(const PhysicsBodyDefinition& definition) = 0;
         virtual void DestroyBody(PhysicsBody* body) = 0;
@@ -35,7 +35,7 @@ namespace Nova
         virtual void SetGravity(const Vector3& gravity) = 0;
         virtual Vector3 GetGravity() const = 0;
 
-        Scene* GetOwner() { return m_Owner;}
+        Scene* GetOwner() { return m_Owner; }
         Application* GetApplication() { return m_Owner->GetOwner(); }
 
         const Array<PhysicsBody*>& GetBodies() const { return m_Bodies; }

@@ -5,10 +5,9 @@
 #include "TextureDimension.h"
 #include "ResourceState.h"
 #include "Runtime/Ref.h"
+#include "Math/Functions.h"
 #include <cstdint>
 
-#include "Math/Functions.h"
-#include "Math/Rect.h"
 
 namespace Nova
 {

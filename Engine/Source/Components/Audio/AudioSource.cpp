@@ -1,7 +1,7 @@
 #include "AudioSource.h"
 #include "Audio/AudioClip.h"
 #include "Components/Transform.h"
-#include "Audio/AudioSystem.h"
+#include "Audio/AudioDevice.h"
 #include "Containers/String.h"
 #include "Containers/StringFormat.h"
 #include <imgui.h>
@@ -101,15 +101,13 @@ namespace Nova
         ImGui::DragFloat("Pan", &m_Pan, 0.01f, -1.0f, 1.0f, "%.2f");
         ImGui::Checkbox("Looping", &m_Looping);
         ImGui::Checkbox("Spatialized", &m_Spatialized);
-
-
     }
 
 
 
     void AudioSource::Play()
     {
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         audioSystem->PlayAudioClip(m_Clip);
         OnStartedEvent.Broadcast(m_Clip, false);
     }
@@ -117,7 +115,7 @@ namespace Nova
     void AudioSource::Stop()
     {
         if (!m_Clip) return;
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
         ma_sound_set_start_time_in_pcm_frames(m_Clip->GetHandle(), 0);
         OnStoppedEvent.Broadcast(m_Clip, false);
@@ -125,7 +123,7 @@ namespace Nova
 
     void AudioSource::Pause()
     {
-        AudioSystem* audioSystem = AudioSystem::GetInstance();
+        AudioDevice* audioSystem = AudioDevice::GetInstance();
         audioSystem->StopAudioClip(m_Clip);
         OnStoppedEvent.Broadcast(m_Clip, true);
         m_Paused = true;
@@ -135,7 +133,7 @@ namespace Nova
     {
         if (m_Paused)
         {
-            AudioSystem* audioSystem = AudioSystem::GetInstance();
+            AudioDevice* audioSystem = AudioDevice::GetInstance();
             audioSystem->PlayAudioClip(m_Clip);
             OnStartedEvent.Broadcast(m_Clip, false);
             m_Paused = false;

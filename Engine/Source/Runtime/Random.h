@@ -13,7 +13,7 @@ namespace Nova
         static Color Color();
         static float Float(float min, float max);
 
-        template<typename T> requires std::is_integral<T>::value
+        template<typename T> requires std::is_integral_v<T>
         static T Integer(T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
         {
             std::uniform_int_distribution<T> distribution(min, max);

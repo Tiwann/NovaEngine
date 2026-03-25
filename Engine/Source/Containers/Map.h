@@ -21,11 +21,11 @@ namespace Nova
         Map(Map&&) noexcept = default;
         Map& operator=(const Map&) = default;
         Map& operator=(Map&&) = default;
-        
+
         ValueType& operator[](const KeyType& key)
         {
             SizeType index = FindKey(key);
-            if(index == ~0)
+            if(index == ~0ull)
             {
                 const PairType pair{ .key = key };
                 m_Data.Add(pair);

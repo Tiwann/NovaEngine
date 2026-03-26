@@ -228,6 +228,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Rendering/SlangCommon.cpp
         Source/Rendering/GraphicsPipeline.cpp
         Source/Rendering/TextureView.h
+        Source/Rendering/Renderer2D.cpp
+        Source/Rendering/Renderer2D.h
 
         Source/Runtime/Application.cpp
         Source/Runtime/Application.h
@@ -301,6 +303,8 @@ set(NOVA_ENGINE_SOURCES
         Source/Runtime/Logger.cpp
         Source/Runtime/Logger.h
         Source/Runtime/Logger.h
+        Source/Runtime/RTTI.cpp
+        Source/Runtime/RTTI.h
 
         Source/Utils/BufferUtils.cpp
         Source/Utils/BufferUtils.h
@@ -452,7 +456,7 @@ set_target_properties(NovaEngine PROPERTIES CXX_STANDARD 23)
 target_sources(NovaEngine PRIVATE ${NOVA_ENGINE_SOURCES})
 target_link_options(NovaEngine PRIVATE /NATVIS:NovaEngine.natvis)
 target_include_directories(NovaEngine PUBLIC Source PRIVATE Source/External)
-target_link_libraries(NovaEngine PUBLIC miniaudio imgui Vulkan::slang vorbisfile vorbis vorbisenc PRIVATE  box2d glfw assimp::assimp spirv-reflect-static kissfft::kissfft)
+target_link_libraries(NovaEngine PUBLIC EnTT::EnTT miniaudio imgui Vulkan::slang vorbisfile vorbis vorbisenc PRIVATE  box2d glfw assimp::assimp spirv-reflect-static kissfft::kissfft)
 target_compile_definitions(NovaEngine PRIVATE NOVA_CORE INTERFACE NOVA_CLIENT PUBLIC NOVA_ENGINE_ROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 
 if(WIN32)

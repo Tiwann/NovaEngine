@@ -92,7 +92,7 @@ namespace Nova
         return scaleMatrix * mat;
     }
 
-    Matrix3 Math::Scale(const Matrix3& mat, float scale)
+    Matrix3 Math::Scale(const Matrix3& mat, const float scale)
     {
         const Matrix3 scaleMatrix
         {
@@ -146,7 +146,7 @@ namespace Nova
         return scaleMatrix * mat;
     }
 
-    Matrix4 Math::Scale(const Matrix4& mat, float scale)
+    Matrix4 Math::Scale(const Matrix4& mat, const float scale)
     {
         const Matrix4 scaleMatrix =
         {
@@ -193,17 +193,30 @@ namespace Nova
         };
     }
 
-    Matrix4 Math::Orthographic(const float width, const float height, const float scale, const float near, const float far)
+    Matrix4 Math::OrthographicCentered(const float width, const float height, const float scale, const float near, const float far)
     {
         const Matrix4 projection
         {
             Vector4(scale * 2.0f / width, 0.0f, 0.0f, 0.0f),
             Vector4(0.0f, scale * 2.0f / height, 0.0f, 0.0f),
             Vector4(0.0f, 0.0f, -1.0f / (far - near), 0.0f),
-            Vector4(-0.0f, -0.0f, -near / (far - near), 1.0f)
+            Vector4(0.0f, 0.0f, -near / (far - near), 1.0f)
         };
         return projection;
     }
+
+    Matrix4 Math::OrthographicTopLeft(const float width, const float height, const float scale, const float near, const float far)
+    {
+        const Matrix4 projection
+        {
+            Vector4(scale * 2.0f / width, 0.0f, 0.0f, 0.0f),
+            Vector4(0.0f, scale * 2.0f / height, 0.0f, 0.0f),
+            Vector4(0.0f, 0.0f, -1.0f / (far - near), 0.0f),
+            Vector4(-1.0f, -1.0f, -near / (far - near), 1.0f)
+        };
+        return projection;
+    }
+
 
     Vector3 Math::ForwardFromRotation(const Quaternion& rotation)
     {

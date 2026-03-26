@@ -9,22 +9,32 @@ namespace Nova
         StringView name;
         ShaderStageFlagBits stage;
 
-        static const ShaderEntryPoint& DefaultVertex()
+        static constexpr const ShaderEntryPoint& DefaultVertex()
         {
-            static ShaderEntryPoint entryPoint { "vert", ShaderStageFlagBits::Vertex };
+            static const ShaderEntryPoint entryPoint { "vert", ShaderStageFlagBits::Vertex };
             return entryPoint;
         }
 
-        static const ShaderEntryPoint& DefaultFragment()
+        static constexpr const ShaderEntryPoint& DefaultFragment()
         {
-            static ShaderEntryPoint entryPoint { "frag", ShaderStageFlagBits::Fragment };
+            static const ShaderEntryPoint entryPoint { "frag", ShaderStageFlagBits::Fragment };
             return entryPoint;
         }
 
-        static const ShaderEntryPoint& DefaultCompute()
+        static constexpr const ShaderEntryPoint& DefaultCompute()
         {
-            static ShaderEntryPoint entryPoint { "compute", ShaderStageFlagBits::Compute };
+            static const ShaderEntryPoint entryPoint { "compute", ShaderStageFlagBits::Compute };
             return entryPoint;
+        }
+
+        static constexpr const ShaderEntryPoint* Default()
+        {
+            static const ShaderEntryPoint entryPoints[]
+            {
+                DefaultVertex(),
+                DefaultFragment(),
+            };
+            return entryPoints;
         }
     };
 }

@@ -32,6 +32,6 @@ namespace Nova
         }
 
     protected:
-        bool m_Show = true;
+        bool m_Show = false;
     };
 }

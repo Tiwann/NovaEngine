@@ -11,7 +11,7 @@ namespace Nova
 {
     InspectorWindow::InspectorWindow(): EditorWindow("Inspector Window")
     {
-        m_Show = true;
+
     }
 
     void InspectorWindow::OnGui()

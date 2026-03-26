@@ -15,7 +15,7 @@ namespace Nova
 
         constexpr static BlendFunction AlphaBlend()
         {
-            return {
+            static BlendFunction alphaBlend = {
                 BlendFactor::SourceAlpha,
                 BlendFactor::OneMinusSourceAlpha,
                 BlendOperation::Add,
@@ -23,11 +23,12 @@ namespace Nova
                 BlendFactor::Zero,
                 BlendOperation::Add
             };
+            return alphaBlend;
         }
 
         constexpr static BlendFunction AdditiveBlend()
         {
-            return {
+            static BlendFunction additiveBlend = {
                 BlendFactor::SourceAlpha,
                 BlendFactor::OneMinusSourceAlpha,
                 BlendOperation::Add,
@@ -35,6 +36,7 @@ namespace Nova
                 BlendFactor::Zero,
                 BlendOperation::Add
             };
+            return additiveBlend;
         }
     };
 

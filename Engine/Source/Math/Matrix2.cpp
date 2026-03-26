@@ -5,8 +5,8 @@
 
 namespace Nova
 {
-    Matrix2 Matrix2::Identity = Matrix2();
-    Matrix2 Matrix2::One = { Vector2::One, Vector2::One };
+    const Matrix2 Matrix2::Identity = Matrix2();
+    const Matrix2 Matrix2::One = { Vector2::One, Vector2::One };
     
     Matrix2::Matrix2(): m00(1.0f), m10(0.0f), m01(0.0f), m11(1.0f)
     {

@@ -28,5 +28,6 @@ namespace Nova::Vulkan
         RenderDevice* m_Device = nullptr;
         VkBuffer m_Handle = nullptr;
         VmaAllocation m_Allocation = nullptr;
+
     };
 }

@@ -13,6 +13,7 @@ namespace Nova
         RenderDevice* device;
         BufferUsage usage = BufferUsage::None;
         size_t size = 0;
+        bool mapped = false;
 
         BufferCreateInfo& WithDevice(RenderDevice* inDevice) { device = inDevice; return *this; }
         BufferCreateInfo& WithUsage(const BufferUsage inUsage) { usage = inUsage; return *this; }
@@ -40,6 +41,8 @@ namespace Nova
         size_t m_Size = 0;
         BufferUsage m_Usage = BufferUsage::None;
         ResourceState m_State = ResourceState::Undefined;
+        bool m_Mapped = false;
+        void* m_MappedData = nullptr;
     };
 
     using BufferHandle = Ref<Buffer>;

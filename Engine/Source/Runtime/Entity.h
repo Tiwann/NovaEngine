@@ -147,6 +147,4 @@ namespace Nova
         Scene* m_Owner = nullptr;
         EntityHideFlags m_HideFlags = EntityHideFlagBits::None;
     };
-
-    
 }

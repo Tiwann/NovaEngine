@@ -55,15 +55,15 @@ namespace Nova
         case ShaderDataType::Float4: return Format::Float4;
         case ShaderDataType::Mat2:
         case ShaderDataType::Mat3:
-        case ShaderDataType::Mat4:
-        case ShaderDataType::Int:
-        case ShaderDataType::Int2:
-        case ShaderDataType::Int3:
-        case ShaderDataType::Int4:
-        case ShaderDataType::UInt:
-        case ShaderDataType::UInt2:
-        case ShaderDataType::UInt3:
-        case ShaderDataType::UInt4: return Format::None;
+        case ShaderDataType::Mat4: return Format::None;
+        case ShaderDataType::Int: return Format::R32_SINT;
+        case ShaderDataType::Int2: return Format::R32G32_SINT;
+        case ShaderDataType::Int3: return Format::R32G32B32_SINT;
+        case ShaderDataType::Int4: return Format::R32G32B32A32_SINT;
+        case ShaderDataType::UInt: return Format::R32_UINT;
+        case ShaderDataType::UInt2: return Format::R32G32_UINT;
+        case ShaderDataType::UInt3: return Format::R32G32B32_UINT;
+        case ShaderDataType::UInt4: return Format::R32G32B32A32_UINT;
         default: return Format::None;
         }
     }

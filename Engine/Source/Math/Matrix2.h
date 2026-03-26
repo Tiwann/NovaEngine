@@ -31,8 +31,8 @@ namespace Nova
         void Scale(float Scalar);
         void Scale(const Vector2& Scale);
         
-        static Matrix2 Identity;
-        static Matrix2 One;
+        static const Matrix2 Identity;
+        static const Matrix2 One;
     private:
         union
         {

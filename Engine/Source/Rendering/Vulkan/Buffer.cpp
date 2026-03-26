@@ -16,6 +16,7 @@ namespace Nova::Vulkan
         case BufferUsage::UniformBuffer: return VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         case BufferUsage::StorageBuffer: return VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
         case BufferUsage::StagingBuffer: return VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        case BufferUsage::IndirectBuffer: return VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         default: return 0;
         }
     }
@@ -39,29 +40,43 @@ namespace Nova::Vulkan
         case BufferUsage::IndirectBuffer:
             {
                 bufferAllocationCreateInfo.priority = 1.0f;
-                bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-                bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+                bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+                if (createInfo.mapped)
+                {
+                    bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+                    bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT
+                        | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+                }
+
             }
             break;
         case BufferUsage::StagingBuffer:
             {
-                bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
                 bufferAllocationCreateInfo.priority = 0.5f;
+                bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
                 bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
-                bufferAllocationCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+                if (createInfo.mapped)
+                {
+                    bufferAllocationCreateInfo.usage = VMA_MEMORY_USAGE_AUTO;
+                    bufferAllocationCreateInfo.flags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+                }
             }
+            break;
         }
 
         RenderDevice* device = static_cast<RenderDevice*>(createInfo.device);
         const VmaAllocator allocatorHandle = device->GetAllocator();
         vmaDestroyBuffer(allocatorHandle, m_Handle, m_Allocation);
-        const VkResult result = vmaCreateBuffer(allocatorHandle, &bufferCreateInfo, &bufferAllocationCreateInfo, &m_Handle, &m_Allocation, nullptr);
+        VmaAllocationInfo allocationInfo;
+        const VkResult result = vmaCreateBuffer(allocatorHandle, &bufferCreateInfo, &bufferAllocationCreateInfo, &m_Handle, &m_Allocation, &allocationInfo);
         if (result != VK_SUCCESS)
             return false;
 
         m_Device = device;
         m_Size = createInfo.size;
         m_Usage = createInfo.usage;
+        m_Mapped = createInfo.mapped;
+        m_MappedData = m_Mapped ? allocationInfo.pMappedData : nullptr;
         return true;
     }
 
@@ -74,6 +89,7 @@ namespace Nova::Vulkan
 
     void* Buffer::Map()
     {
+        if (m_Mapped) return m_MappedData;
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         void* mappedMemory = nullptr;
         vmaMapMemory(allocatorHandle, m_Allocation, &mappedMemory);
@@ -82,6 +98,7 @@ namespace Nova::Vulkan
 
     void Buffer::Unmap(const void* ptr)
     {
+        if (m_Mapped) return;
         const VmaAllocator allocatorHandle = m_Device->GetAllocator();
         vmaUnmapMemory(allocatorHandle, m_Allocation);
     }

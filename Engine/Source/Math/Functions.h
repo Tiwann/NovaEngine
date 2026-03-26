@@ -92,6 +92,11 @@ namespace Nova
         static Vector2 Wrap(const Vector2& value, float min, float max);
         static Vector3 Wrap(const Vector3& value, float min, float max);
 
+        template<std::integral T>
+        static constexpr bool IsOdd(T value) { return value & 1; }
+
+        template<std::integral T>
+        static constexpr bool IsEven(T value) { return !IsOdd(value); }
 
         template<typename VectorType> requires IsVectorValue<VectorType>
         static float Dot(const VectorType& lhs, const VectorType& rhs)
@@ -176,7 +181,8 @@ namespace Nova
         static float Distance(const Vector3& a, const Vector3& b);
         
         static Matrix4 Perspective(float fov, float aspectRatio, float near, float far);
-        static Matrix4 Orthographic(float width, float height, float scale, float near, float far);
+        static Matrix4 OrthographicCentered(float width, float height, float scale, float near, float far);
+        static Matrix4 OrthographicTopLeft(float width, float height, float scale, float near, float far);
         static Matrix4 Translate(const Matrix4& mat, const Vector3& translation);
 
 

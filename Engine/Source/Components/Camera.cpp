@@ -123,7 +123,7 @@ namespace Nova
                 m_Near,
                 m_Far)
 
-            : Math::Orthographic(
+            : Math::OrthographicCentered(
                 m_Width,
                 m_Height,
                 m_OrthoSize,

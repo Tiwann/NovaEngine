@@ -10,10 +10,12 @@
 namespace Nova
 {
 
-    template<typename CharacterType> requires IsCharacterValue<CharacterType>
-    static size_t StringLength(const CharacterType* data)
+    template<Character T>
+    static constexpr size_t StringLength(const T* data)
     {
-        CharacterType* ptr = const_cast<CharacterType*>(data);
+        if (!data) return 0;
+
+        const T* ptr = data;
         size_t count = 0;
         while (*ptr != 0)
         {

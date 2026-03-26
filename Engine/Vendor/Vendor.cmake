@@ -72,8 +72,8 @@ set(SPIRV_REFLECT_INSTALL OFF)
 set(SPIRV_REFLECT_STATIC_LIB ON)
 add_subdirectory(Vendor/SPIRV-Reflect)
 
+include(FetchContent)
 if(NOVA_ENGINE_BUILD_D3D12)
-    include(FetchContent)
     FetchContent_Declare(
         directx-headers
         GIT_REPOSITORY git@github.com:microsoft/DirectX-Headers.git
@@ -81,3 +81,9 @@ if(NOVA_ENGINE_BUILD_D3D12)
     FetchContent_MakeAvailable(directx-headers)
     add_subdirectory(Vendor/D3D12MemoryAllocator)
 endif ()
+
+FetchContent_Declare(
+        entt
+        GIT_REPOSITORY git@github.com:skypjack/entt.git
+        GIT_TAG main)
+FetchContent_MakeAvailable(entt)

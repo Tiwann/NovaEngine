@@ -30,11 +30,11 @@ namespace Nova
             }
 
             m_Data[name] = new AssetType();
-            return Ref(m_Data[name]);
+            return m_Data[name];
         }
 
         template<typename AssetType> requires std::is_base_of_v<Asset, AssetType>
-        void AddAsset(const Ref<AssetType>& asset, const String& name)
+        void AddAsset(Ref<AssetType> asset, const String& name)
         {
             m_Data[name] = asset;
         }

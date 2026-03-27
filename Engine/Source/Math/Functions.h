@@ -6,9 +6,17 @@
 #include <limits>
 #include <numbers>
 
+#include "Runtime/Ease.h"
+
 
 namespace Nova
 {
+    template<typename T>
+    concept Interpolable = requires(T& a, T& b, T t)
+    {
+        { a + t * (b - a) } -> std::convertible_to<T>;
+    };
+
     struct Math
     {
         Math() = delete;
@@ -189,5 +197,12 @@ namespace Nova
         static Vector3 ForwardFromRotation(const Quaternion& rotation);
         static Vector3 UpFromRotation(const Quaternion& rotation);
         static Vector3 RightFromRotation(const Quaternion& rotation);
+
+        template<EaseType E, Interpolable T>
+        static constexpr T Interpolate(const T& a, const T& b, const float t)
+        {
+            constexpr auto ease = GetEaseFunction(E);
+            return a + (b - a) * ease(t);
+        }
     };
 }

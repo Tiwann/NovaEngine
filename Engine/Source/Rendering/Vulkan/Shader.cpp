@@ -289,9 +289,42 @@ namespace Nova::Vulkan
 
     void Shader::Destroy()
     {
-        for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
-            setLayout->Destroy();
+        if (m_LinkedProgram)
+        {
+            m_LinkedProgram->release();
+            m_LinkedProgram = nullptr;
+        }
+        if (m_Program)
+        {
+            m_Program->release();
+            m_Program = nullptr;
+        }
 
+        for (auto& entryPoint :  m_EntryPoints)
+        {
+            if (entryPoint)
+            {
+                entryPoint->release();
+                entryPoint = nullptr;
+            }
+        }
+        m_EntryPoints.Clear();
+
+        if (m_Module)
+        {
+            m_Module->release();
+            m_Module = nullptr;
+        }
+
+        for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
+        {
+            if (setLayout)
+            {
+                setLayout->Destroy();
+                setLayout = nullptr;
+            }
+        }
+        m_BindingSetLayouts.Clear();
 
         for (auto& shaderModule : m_ShaderModules)
             shaderModule.Destroy();

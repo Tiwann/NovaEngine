@@ -316,6 +316,13 @@ namespace Nova::Vulkan
             m_Module = nullptr;
         }
 
+        if (m_Session)
+        {
+            m_Session->release();
+            m_Session = nullptr;
+        }
+
+
         for (Ref<ShaderBindingSetLayout>& setLayout : m_BindingSetLayouts)
         {
             if (setLayout)
@@ -328,6 +335,7 @@ namespace Nova::Vulkan
 
         for (auto& shaderModule : m_ShaderModules)
             shaderModule.Destroy();
+        m_ShaderModules.Clear();
 
         if (!m_Device) return;
         if (m_PipelineLayout) vkDestroyPipelineLayout(m_Device->GetHandle(), m_PipelineLayout, nullptr);

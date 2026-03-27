@@ -11,8 +11,8 @@ namespace Nova
         union{ float y = 0.0f, g; };
 
         constexpr Vector2() = default;
-        Vector2(float x, float y);
-        explicit Vector2(float value);
+        constexpr Vector2(float x, float y) : x(x), y(y){}
+        explicit Vector2(float value) : x(value), y(value){}
         explicit Vector2(const Vector3& vector);
 
         float Magnitude() const;

@@ -11,15 +11,6 @@ namespace Nova
     const Vector2 Vector2::Up      = { 0.0f, 1.0f };
     const Vector2 Vector2::Left    = { -1.0f, 0.0f };
     const Vector2 Vector2::Down    = { 0.0f, -1.0f };
-    
-
-    Vector2::Vector2(const float x, const float y): x(x), y(y)
-    {
-    }
-
-    Vector2::Vector2(const float value): x(value), y(value)
-    {
-    }
 
     Vector2::Vector2(const Vector3& vector) : x(vector.x), y(vector.y)
     {

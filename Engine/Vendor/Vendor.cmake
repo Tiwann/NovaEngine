@@ -2,10 +2,10 @@
 add_subdirectory(Vendor/vorbis)
 add_subdirectory(Vendor/miniaudio)
 
-set(KISSFFT_PKGCONFIG OFF)
-set(KISSFFT_STATIC ON)
-set(KISSFFT_TEST OFF)
-set(KISSFFT_TOOLS OFF)
+option(KISSFFT_PKGCONFIG OFF)
+option(KISSFFT_STATIC ON)
+option(KISSFFT_TEST OFF)
+option(KISSFFT_TOOLS OFF)
 add_subdirectory(Vendor/kissfft)
 
 add_subdirectory(Vendor/box2d)

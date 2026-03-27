@@ -192,8 +192,7 @@ namespace Nova
 
     Application& Application::GetCurrentApplication()
     {
-        extern Application* g_Application;
-        return *g_Application;
+        return *s_Instance;
     }
 
     void Application::Update()

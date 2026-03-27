@@ -32,11 +32,15 @@ namespace Nova
     class Application
     {
     public:
-        explicit Application(const int32_t argc, char** argv) : m_Args(argc, argv){};
+        explicit Application(const int32_t argc, char** argv) : m_Args(argc, argv)
+        {
+            if (!s_Instance) s_Instance = this;
+        };
         virtual ~Application() = default;
 
         void Run();
         void Exit();
+
 
         static Application& GetCurrentApplication();
 
@@ -91,6 +95,7 @@ namespace Nova
         void Destroy();
 
     private:
+        static inline Application* s_Instance = nullptr;
         CmdLineArgs m_Args;
         Ref<Window> m_Window = nullptr;
         Ref<RenderDevice> m_Device = nullptr;

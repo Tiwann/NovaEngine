@@ -4,13 +4,11 @@
 #include "Runtime/Application.h"
 namespace Nova
 {
-    Application* g_Application = nullptr;
-
     int GuardedMain(const int argc, char** argv)
     {
-        g_Application = CreateApplication(argc, argv);
-        g_Application->Run();
-        delete g_Application;
+        Application* app = CreateApplication(argc, argv);
+        app->Run();
+        delete app;
         return 0;
     }
 }

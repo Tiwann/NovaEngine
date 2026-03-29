@@ -8,6 +8,8 @@
 #include <initializer_list>
 #include <algorithm>
 
+#include "BufferView.h"
+
 namespace Nova
 {
     template<typename T>
@@ -349,6 +351,8 @@ namespace Nova
                     return true;
             return false;
         }
+
+        BufferView<T> GetView() const { return BufferView<T>{ m_Data, m_Count }; }
 
         SizeType Find(ConstReferenceType element) const
         {

@@ -206,4 +206,9 @@ namespace Nova
     {
         DrawEllipse(position, {radius, radius}, 0.0f, color);
     }
+
+    void Renderer2D::DrawText(StringView text, const Vector2& position, float rotation, const Color& color)
+    {
+
+    }
 }

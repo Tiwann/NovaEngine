@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Containers/StringView.h"
 #include "Math/Rect.h"
 #include "Runtime/Ref.h"
 
@@ -51,11 +52,19 @@ namespace Nova
         /// @param color Color to fill the ellipse with
         void DrawEllipse(const Rect2D<float>& rect, float rotation, const Color& color);
 
-        ///
+        /// Draw a colored ellipse
         /// @param position Position of the top left corner of the circumscribed square of the circle
         /// @param radius Radius of the circle
         /// @param color Color to fill the circle with
         void DrawCircle(const Vector2& position, float radius, const Color& color);
+
+
+        /// Draw a colored text
+        /// @param text Text to draw
+        /// @param position Position of the text in screen space
+        /// @param rotation Rotation of the text
+        /// @param color Color of the text
+        void DrawText(StringView text, const Vector2& position, float rotation, const Color& color);
     private:
         Ref<RenderDevice> m_RenderDevice = nullptr;
         Ref<Shader> m_Shader = nullptr;

@@ -14,24 +14,25 @@ namespace Nova
             Array<String> extensions;
             bool operator==(const Filter& other) const;
         };
-        static Filter All;
-        static Filter WAV;
-        static Filter OGG;
-        static Filter MP3;
-        static Filter FLAC;
-        static Filter PNG;
-        static Filter WEBP;
-        static Filter JPEG;
-        static Filter TARGA;
-        static Filter DDS;
-        static Filter ASTC;
-        static Filter BMP;
-        static Filter FBX;
-        static Filter GLTF;
-        static Filter GLB;
-        static Filter OBJ;
-        static Filter DAE;
-
+        static const Filter All;
+        static const Filter WAV;
+        static const Filter OGG;
+        static const Filter MP3;
+        static const Filter FLAC;
+        static const Filter PNG;
+        static const Filter WEBP;
+        static const Filter JPEG;
+        static const Filter TARGA;
+        static const Filter DDS;
+        static const Filter ASTC;
+        static const Filter BMP;
+        static const Filter FBX;
+        static const Filter GLTF;
+        static const Filter GLB;
+        static const Filter OBJ;
+        static const Filter DAE;
+        static const Filter TTF;
+        static const Filter OTF;
     public:
         DialogFilters();
         DialogFilters(const String& name, const Array<String>& extensions);
@@ -54,10 +55,10 @@ namespace Nova
         
         String GetFilterString() const;
         
-        static DialogFilters AudioFilters;
-        static DialogFilters ModelFilters;
-        static DialogFilters ImageFilters;
-
+        static const DialogFilters AudioFilters;
+        static const DialogFilters ModelFilters;
+        static const DialogFilters ImageFilters;
+        static const DialogFilters FontFilters;
     private:
         Array<Filter> m_Filters;
     };

@@ -46,22 +46,24 @@ namespace Nova
         m_Filters.Add(filter);
     }
 
-    DialogFilters::Filter DialogFilters::All = {"All Files", {"*"}};
-    DialogFilters::Filter DialogFilters::WAV = {"Waveform Audio", {"wav"}};
-    DialogFilters::Filter DialogFilters::OGG = {"Vorbis", {"ogg"}};
-    DialogFilters::Filter DialogFilters::MP3 = {"MPEG Audio Layer III", {"mp3"}};
-    DialogFilters::Filter DialogFilters::FLAC = {"Free Lossless Audio Codec", {"flac"}};
-    DialogFilters::Filter DialogFilters::PNG = {"Portable Network Graphics", {"png"}};
-    DialogFilters::Filter DialogFilters::WEBP = {"Google Webp", {"webp"}};
-    DialogFilters::Filter DialogFilters::JPEG = {"Joint Photographic Experts Group", {"jpg", "jpeg"}};
-    DialogFilters::Filter DialogFilters::TARGA = {"Truevision Targa", {"tga"}};
-    DialogFilters::Filter DialogFilters::DDS = {"DirectDraw Surface", {"dds"}};
-    DialogFilters::Filter DialogFilters::ASTC = {"Adaptive Scalable Texture", {"astc"}};
-    DialogFilters::Filter DialogFilters::BMP = {"Windows Bitmap", {"bmp"}};
-    DialogFilters::Filter DialogFilters::FBX = {"Autodesk Filmbox", {"fbx"}};
-    DialogFilters::Filter DialogFilters::GLTF = {"GL Transmission Format", {"gltf", "glb"}};
-    DialogFilters::Filter DialogFilters::OBJ = {"Wavefront OBJ", {"obj"}};
-    DialogFilters::Filter DialogFilters::DAE = {"Collada", {"dae"}};
+    const DialogFilters::Filter DialogFilters::All = {"All Files", {"*"}};
+    const DialogFilters::Filter DialogFilters::WAV = {"Waveform Audio", {"wav"}};
+    const DialogFilters::Filter DialogFilters::OGG = {"Vorbis", {"ogg"}};
+    const DialogFilters::Filter DialogFilters::MP3 = {"MPEG Audio Layer III", {"mp3"}};
+    const DialogFilters::Filter DialogFilters::FLAC = {"Free Lossless Audio Codec", {"flac"}};
+    const DialogFilters::Filter DialogFilters::PNG = {"Portable Network Graphics", {"png"}};
+    const DialogFilters::Filter DialogFilters::WEBP = {"Google Webp", {"webp"}};
+    const DialogFilters::Filter DialogFilters::JPEG = {"Joint Photographic Experts Group", {"jpg", "jpeg"}};
+    const DialogFilters::Filter DialogFilters::TARGA = {"Truevision Targa", {"tga"}};
+    const DialogFilters::Filter DialogFilters::DDS = {"DirectDraw Surface", {"dds"}};
+    const DialogFilters::Filter DialogFilters::ASTC = {"Adaptive Scalable Texture", {"astc"}};
+    const DialogFilters::Filter DialogFilters::BMP = {"Windows Bitmap", {"bmp"}};
+    const DialogFilters::Filter DialogFilters::FBX = {"Autodesk Filmbox", {"fbx"}};
+    const DialogFilters::Filter DialogFilters::GLTF = {"GL Transmission Format", {"gltf", "glb"}};
+    const DialogFilters::Filter DialogFilters::OBJ = {"Wavefront OBJ", {"obj"}};
+    const DialogFilters::Filter DialogFilters::DAE = {"Collada", {"dae"}};
+    const DialogFilters::Filter DialogFilters::TTF = {"TrueType Font", {"ttf", "dfont"}};
+    const DialogFilters::Filter DialogFilters::OTF = {"OpenType Font", {"otf", "otc", "ttf", "ttc"}};
 
     bool DialogFilters::Filter::operator==(const Filter& other) const
     {
@@ -73,19 +75,24 @@ namespace Nova
         m_Filters = Filters;
     }
 
-    DialogFilters DialogFilters::ImageFilters = Array {
+    const DialogFilters DialogFilters::ImageFilters = Array {
         {"All Image Formats", {"png", "jpg", "jpeg", "bmp", "tga", "dds", "astc"}},
         PNG, JPEG, BMP, TARGA, DDS, ASTC, All
     };
 
-    DialogFilters DialogFilters::AudioFilters = Array {
+    const DialogFilters DialogFilters::AudioFilters = Array {
         Filter{ .name = "All Audio Formats", .extensions = { "wav", "mp3", "ogg", "flac" }},
         WAV, MP3, OGG, FLAC, All
     };
 
-    DialogFilters DialogFilters::ModelFilters = Array {
+    const DialogFilters DialogFilters::ModelFilters = Array {
         Filter{ .name = "All Model Formats", .extensions = { "fbx", "gltf", "glb", "obj", "dae" }},
         FBX, GLTF, OBJ, DAE, All
+    };
+
+    const DialogFilters DialogFilters::FontFilters = Array {
+        Filter{ .name = "All Font Formats", .extensions = { "ttf", "ttc", "otf", "otc", "dfont" }},
+        TTF, OTF
     };
 
     String DialogFilters::GetFilterString() const

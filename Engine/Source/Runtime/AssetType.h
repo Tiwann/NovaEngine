@@ -11,9 +11,10 @@ namespace Nova
         Shader,
         SpriteAnimation,
         StaticMesh,
+        Font,
 
 
-        Custom01 = 16,
+        Custom01 = 33,
         Custom02,
         Custom03,
         Custom04,

@@ -33,3 +33,9 @@ branch = master
 [submodule "Engine/Vendor/D3D12MemoryAllocator"]
 	path = Engine/Vendor/D3D12MemoryAllocator
 	url = git@github.com:GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator.git
+[submodule "Engine/Vendor/freetype"]
+	path = Engine/Vendor/freetype
+	url = git@github.com:freetype/freetype.git
+[submodule "Engine/Vendor/msdf-atlas-gen"]
+	path = Engine/Vendor/msdf-atlas-gen
+	url = git@github.com:Chlumsky/msdf-atlas-gen.git

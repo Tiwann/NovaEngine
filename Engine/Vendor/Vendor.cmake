@@ -82,8 +82,20 @@ if(NOVA_ENGINE_BUILD_D3D12)
     add_subdirectory(Vendor/D3D12MemoryAllocator)
 endif ()
 
-FetchContent_Declare(
-        entt
-        GIT_REPOSITORY git@github.com:skypjack/entt.git
-        GIT_TAG main)
-FetchContent_MakeAvailable(entt)
+add_subdirectory(Vendor/freetype)
+if(NOT Freetype::Freetype)
+    add_library(Freetype::Freetype ALIAS freetype)
+endif()
+set(MSDFGEN_DISABLE_PNG ON)
+set(MSDF_ATLAS_BUILD_STANDALONE OFF)
+set(MSDF_ATLAS_USE_VCPKG OFF)
+set(MSDF_ATLAS_USE_SKIA OFF)
+set(MSDF_ATLAS_DYNAMIC_RUNTIME ON)
+set(FREETYPE_LIBRARY Freetype::Freetype)
+set(FREETYPE_INCLUDE_DIRS ${freetype_SOURCE_DIR}/include)
+add_subdirectory(Vendor/msdf-atlas-gen)
+
+
+
+
+
